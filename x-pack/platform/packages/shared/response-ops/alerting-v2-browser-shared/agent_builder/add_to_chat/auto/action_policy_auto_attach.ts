@@ -30,7 +30,6 @@ const toAttachmentData = (policy: ActionPolicyResponse): ActionPolicyAttachmentD
   destinations: policy.destinations,
   matcher: policy.matcher ?? undefined,
   group_by: policy.group_by ?? undefined,
-  tags: policy.tags ?? undefined,
   grouping_mode: policy.grouping_mode ?? undefined,
   throttle: policy.throttle ?? undefined,
   enabled: policy.enabled,

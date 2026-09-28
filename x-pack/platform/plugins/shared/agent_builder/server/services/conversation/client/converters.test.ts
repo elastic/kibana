@@ -1470,9 +1470,13 @@ describe('conversation model converters', () => {
 
     // --- Single promoter to events-native -----------------------------------
     // `createRequestToEs` is the only place that stamps `schema_version`; new
-    // conversations are always events-native from round 1. It also *derives*
-    // `events` from the caller's rounds rather than trusting an array off the
-    // request, so each field has exactly one writer.
+    // conversations are always events-native from round 1. It derives `events`
+    // from the caller's rounds when no `events` array is supplied; when the
+    // caller provides `events`, it is serialized verbatim and the round-derived
+    // projection is NOT re-composed on top — matching the update converter's
+    // contract. Callers that need both a round and additive events (e.g.
+    // attachment events at round-complete time) are responsible for composing
+    // the full events array themselves.
 
     it('stamps schema_version at CONVERSATION_SCHEMA_VERSION on every create', () => {
       const conversation = {
@@ -1558,6 +1562,63 @@ describe('conversation model converters', () => {
 
       // Caller-supplied events win over the empty round-derived projection.
       expect(serialized.events?.map((event) => event.id)).toEqual(['round-1::user_message']);
+    });
+
+    it('serializes caller-supplied events verbatim when both events and rounds are provided (caller composes)', () => {
+      // Contract: when both are supplied, `events` is the full stored projection; the round is
+      // only serialized to `conversation_rounds`. Callers needing composition (e.g.
+      // `createConversation$` at round-complete time) must pre-compose the events array.
+      const attachmentAddedEvent: TimelineEvent = {
+        id: 'att-evt-1',
+        type: TimelineEventType.attachmentAdded,
+        created_at: '2025-01-01T00:00:11.000Z',
+        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
+        execution_id: 'round-seed::execution',
+        data: {
+          attachment_id: 'att-1',
+          attachment_type: 'text',
+          current_version: 1,
+          render_inline: false,
+          source: 'chat_input',
+        },
+      } as TimelineEvent;
+
+      const conversation: Parameters<typeof createRequestToEs>[0]['conversation'] = {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        rounds: [
+          {
+            id: 'round-seed',
+            status: ConversationRoundStatus.completed,
+            input: { message: 'hello' },
+            response: { message: 'hi' },
+            steps: [],
+            started_at: roundCreationDate,
+            time_to_first_token: 10,
+            time_to_last_token: 50,
+            model_usage: {
+              connector_id: 'unknown',
+              llm_calls: 1,
+              input_tokens: 3,
+              output_tokens: 4,
+            },
+          },
+        ],
+        events: [attachmentAddedEvent],
+      };
+
+      const serialized = createRequestToEs({
+        conversation,
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      // Events written verbatim — the round's derived events are NOT re-composed here.
+      expect(serialized.events?.map((event) => event.id)).toEqual(['att-evt-1']);
+      // The round is still serialized to `conversation_rounds`, so read-through-rounds is intact.
+      expect(serialized.conversation_rounds).toHaveLength(1);
+      expect(serialized.conversation_rounds[0].id).toBe('round-seed');
     });
   });
 
@@ -1912,6 +1973,85 @@ describe('conversation model converters', () => {
       ]);
     });
 
+    describe('interrupted round blocks on a rounds-path write', () => {
+      const failedBlock = (conversation: Conversation): TimelineEvent[] => [
+        {
+          id: 'round-2::user_message',
+          type: TimelineEventType.userMessage,
+          created_at: '2025-08-04T07:42:30.000Z',
+          actor: { type: EventActorType.user, id: conversation.user.id },
+          data: { message: 'second' },
+        } as TimelineEvent,
+        {
+          id: 'round-2::execution_started',
+          type: TimelineEventType.executionStarted,
+          created_at: '2025-08-04T07:42:30.000Z',
+          actor: { type: EventActorType.agent, id: 'agent_id' },
+          execution_id: 'round-2::execution',
+          trigger_event_id: 'round-2::user_message',
+          data: { trigger_type: 'user_message' },
+        } as TimelineEvent,
+        {
+          id: 'round-2::execution_failed',
+          type: TimelineEventType.executionFailed,
+          created_at: '2025-08-04T07:42:31.000Z',
+          actor: { type: EventActorType.agent, id: 'agent_id' },
+          execution_id: 'round-2::execution',
+          trigger_event_id: 'round-2::user_message',
+          data: {
+            time_to_last_token: 0,
+            error: { code: AgentBuilderErrorCode.internalError, message: 'boom' },
+          },
+        } as TimelineEvent,
+      ];
+
+      it('keeps an interrupted block the stored rounds never materialised (stale rounds)', () => {
+        const conversation = eventsNativeStored();
+        // Document written before interrupted executions folded into rounds: `rounds` only
+        // knows round-1, the failed round-2 exists only as events.
+        conversation.events = [...conversation.events!, ...failedBlock(conversation)];
+
+        const updated = updateConversation({
+          conversation,
+          update: { id: conversation.id, rounds: [conversation.rounds[0]] },
+          space: 'space',
+          updateDate: new Date(updateDate),
+        });
+
+        expect(updated.events?.map((event) => event.id)).toEqual([
+          'round-1::user_message',
+          'round-1::execution_started',
+          'round-1::execution_terminated',
+          'round-2::user_message',
+          'round-2::execution_started',
+          'round-2::execution_failed',
+        ]);
+      });
+
+      it('drops a materialised interrupted round the caller removed', () => {
+        const conversation = eventsNativeStored();
+        conversation.events = [...conversation.events!, ...failedBlock(conversation)];
+        // Current document: the failed round-2 is materialised in the stored rounds.
+        conversation.rounds = eventsToRounds(conversation.events);
+        expect(conversation.rounds.map((round) => round.id)).toEqual(['round-1', 'round-2']);
+        expect(conversation.rounds[1].interruption?.type).toBe('failed');
+
+        const updated = updateConversation({
+          conversation,
+          update: { id: conversation.id, rounds: [conversation.rounds[0]] },
+          space: 'space',
+          updateDate: new Date(updateDate),
+        });
+
+        expect(updated.events?.map((event) => event.id)).toEqual([
+          'round-1::user_message',
+          'round-1::execution_started',
+          'round-1::execution_terminated',
+        ]);
+        expect(updated.rounds.map((round) => round.id)).toEqual(['round-1']);
+      });
+    });
+
     it('preserves additive events (reconcile/additive-survival)', () => {
       // This is the core new invariant. Step 2 will wire error production; the
       // machinery has to be ready to preserve additive events (ids without a
@@ -1929,6 +2069,7 @@ describe('conversation model converters', () => {
         execution_id: 'round-1::execution',
         trigger_event_id: 'round-1::user_message',
         data: {
+          time_to_last_token: 0,
           error: {
             code: AgentBuilderErrorCode.internalError,
             message: 'boom',
@@ -1963,6 +2104,7 @@ describe('conversation model converters', () => {
         execution_id: 'round-1::execution',
         trigger_event_id: 'round-1::user_message',
         data: {
+          time_to_last_token: 0,
           error: {
             code: AgentBuilderErrorCode.internalError,
             message: 'boom',
@@ -2022,6 +2164,7 @@ describe('conversation model converters', () => {
         execution_id: 'round-1::execution',
         trigger_event_id: 'round-1::user_message',
         data: {
+          time_to_last_token: 0,
           error: { code: AgentBuilderErrorCode.internalError, message: 'boom' },
         },
       };

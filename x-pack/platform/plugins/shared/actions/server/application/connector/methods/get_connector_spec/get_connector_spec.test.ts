@@ -31,6 +31,20 @@ jest.mock('@kbn/connector-specs', () => {
         actions: {},
         test: { handler: async () => ({}), enabled: false },
       },
+      StubExperimentalEars: {
+        metadata: {
+          id: '.stub-experimental-ears',
+          displayName: 'Stub (experimental EARS)',
+          minimumLicense: 'basic',
+          supportedFeatureIds: [],
+        },
+        auth: {
+          types: [{ type: 'ears', isExperimental: true, defaults: {} }],
+        },
+        schema: null,
+        actions: {},
+        test: { handler: async () => ({}), enabled: true },
+      },
     },
   };
 });
@@ -171,7 +185,7 @@ describe('getConnectorSpecAsJsonSchema', () => {
 
     const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),
-      id: '.google_calendar',
+      id: '.stub-experimental-ears',
       configurationUtilities: earsEnabledUtils,
     });
 
@@ -197,7 +211,7 @@ describe('getConnectorSpecAsJsonSchema', () => {
 
     const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),
-      id: '.microsoft-teams',
+      id: '.google_calendar',
       configurationUtilities: earsEnabledUtils,
     });
 
@@ -223,7 +237,7 @@ describe('getConnectorSpecAsJsonSchema', () => {
 
     const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),
-      id: '.google_calendar',
+      id: '.stub-experimental-ears',
       configurationUtilities: earsEnabledUtils,
     });
 

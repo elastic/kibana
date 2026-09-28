@@ -13,6 +13,7 @@ const API_KEYS_DISABLED_ERROR = new Error('API keys are disabled');
 const REJECT_WHEN_API_KEYS_DISABLED = () => Promise.reject(API_KEYS_DISABLED_ERROR);
 
 const SERVICE_ACCOUNTS_DISABLED_ERROR = new Error('Service accounts are disabled');
+const REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED = () => Promise.reject(SERVICE_ACCOUNTS_DISABLED_ERROR);
 
 export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract => {
   return {
@@ -44,7 +45,11 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
     },
     serviceAccounts: {
       isEnabled: () => false,
-      create: () => Promise.reject(SERVICE_ACCOUNTS_DISABLED_ERROR),
+      create: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
+      bindWorkload: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
+      unbindWorkload: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
+      getWorkloadBinding: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
+      withScopedRequestForWorkload: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
     },
     // No security delegate registered, so there are no user profiles to bind.
     fakeRequestEnricher: () => undefined,

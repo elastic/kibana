@@ -15,6 +15,8 @@ import type { BrowserApiToolDefinition } from './tools/browser_api_tool';
 import type {
   AgentsServiceStartContract,
   AttachmentServiceStartContract,
+  ConversationsServiceStartContract,
+  ConversationEventsServiceStartContract,
   RendererServiceStartContract,
   EventsServiceStartContract,
   ToolServiceStartContract,
@@ -217,6 +219,12 @@ export interface AgentBuilderPluginStart {
    * Events service contract, can be used to listen to chat events.
    */
   events: EventsServiceStartContract;
+  /** Browser-side UI registry for custom conversation events. */
+  conversationEvents: ConversationEventsServiceStartContract;
+  /**
+   * Conversations service contract, can be used to append events to conversations.
+   */
+  conversations: ConversationsServiceStartContract;
   /**
    * Resolves Agent Builder access (enterprise license, LLM connector). Callers must
    * also require `application.capabilities.agentBuilder.show === true` before
@@ -314,5 +322,9 @@ export interface AgentBuilderPluginStart {
   EmbeddableConversationInput: ComponentType<
     PublicEmbeddableConversationInputProps & RefAttributes<EmbeddableConversationInputRef>
   >;
+  /**
+   * Opens the conversation details flyout. Flyouts opened from its content stack on top of it with
+   * a Back button when opened with `session: 'start'` and `CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY`.
+   */
   openConversationDetails: (options: OpenConversationDetailsOptions) => Promise<() => void>;
 }

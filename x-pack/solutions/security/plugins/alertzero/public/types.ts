@@ -6,23 +6,29 @@
  */
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { WorkflowsPublicPluginStart } from '@kbn/workflows-management-plugin/public';
 
 export interface AlertZeroClientConfig {
   enabled: boolean;
-  ui: {
-    useMockData: boolean;
-  };
 }
 
 export type AlertZeroSetupDependencies = Record<string, never>;
 
 export interface AlertZeroStartDependencies {
-  agentBuilder?: AgentBuilderPluginStart;
+  /** Required plugin, see `requiredPlugins` in kibana.jsonc. */
+  agentBuilder: AgentBuilderPluginStart;
   spaces?: SpacesPluginStart;
+  share?: SharePluginStart;
   workflowsManagement?: WorkflowsPublicPluginStart;
 }
 
-export type AlertZeroPublicSetup = Record<string, never>;
+/**
+ * Soft-enable contract. Always returned from `setup()` so optional consumers
+ * can gate on `enabled` without reading `xpack.alertzero` config themselves.
+ */
+export interface AlertZeroPublicSetup {
+  enabled: boolean;
+}
 export type AlertZeroPublicStart = Record<string, never>;

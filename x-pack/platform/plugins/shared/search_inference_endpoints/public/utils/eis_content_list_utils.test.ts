@@ -10,8 +10,11 @@ import {
   createEisFieldDefinitions,
   createEisFindItems,
   EIS_CATEGORY_FILTER_ID,
+  EIS_END_OF_LIFE_SORT_FIELD,
   EIS_NAME_SORT_FIELD,
   EIS_PROVIDER_FILTER_ID,
+  EIS_RELEASED_SORT_FIELD,
+  EIS_TYPE_SORT_FIELD,
   getItemModelId,
   toGroupedModel,
 } from './eis_content_list_utils';
@@ -41,7 +44,11 @@ const model = (
 });
 
 const models = [
-  model('Claude Sonnet', 'Anthropic'),
+  model('Claude Sonnet', 'Anthropic', {
+    modelMetadata: {
+      heuristics: { release_date: '2025-05-01', end_of_life_date: '2026-06-01' },
+    },
+  }),
   model('Jina Reranker v2', 'Jina AI', {
     taskTypes: ['rerank'],
     categories: ['Rerank'],
@@ -49,6 +56,7 @@ const models = [
   model('Alpha Embedder', 'Elastic', {
     taskTypes: ['text_embedding'],
     categories: ['Embedding'],
+    modelMetadata: { heuristics: { release_date: '2024-01-01' } },
   }),
 ];
 
@@ -74,6 +82,21 @@ describe('createEisFindItems', () => {
     ]);
   });
 
+  it('returns one page and keeps the full total', async () => {
+    const { items, total } = await findItems(findParams({ page: { index: 1, size: 1 } }));
+
+    expect(total).toBe(3);
+    expect(items.map(({ title }) => title)).toEqual(['Claude Sonnet']);
+  });
+
+  it('returns every model when paging is off', async () => {
+    const findAll = createEisFindItems(models, undefined, false);
+    const { items, total } = await findAll(findParams({ page: { index: 0, size: 1 } }));
+
+    expect(total).toBe(3);
+    expect(items).toHaveLength(3);
+  });
+
   it('reverses the order for a descending name sort', async () => {
     const { items } = await findItems(
       findParams({ sort: { field: EIS_NAME_SORT_FIELD, direction: 'desc' } })
@@ -83,6 +106,54 @@ describe('createEisFindItems', () => {
       'Jina Reranker v2',
       'Claude Sonnet',
       'Alpha Embedder',
+    ]);
+  });
+
+  it('sorts by type', async () => {
+    const { items } = await findItems(
+      findParams({ sort: { field: EIS_TYPE_SORT_FIELD, direction: 'asc' } })
+    );
+
+    expect(items.map((item) => toGroupedModel(item).categories.join(', '))).toEqual([
+      'Embedding',
+      'LLM',
+      'Rerank',
+    ]);
+  });
+
+  it('sorts type in descending order', async () => {
+    const { items } = await findItems(
+      findParams({ sort: { field: EIS_TYPE_SORT_FIELD, direction: 'desc' } })
+    );
+
+    expect(items.map((item) => toGroupedModel(item).categories.join(', '))).toEqual([
+      'Rerank',
+      'LLM',
+      'Embedding',
+    ]);
+  });
+
+  it('sorts by release date and keeps models without a date last', async () => {
+    const { items } = await findItems(
+      findParams({ sort: { field: EIS_RELEASED_SORT_FIELD, direction: 'asc' } })
+    );
+
+    expect(items.map(({ title }) => title)).toEqual([
+      'Alpha Embedder',
+      'Claude Sonnet',
+      'Jina Reranker v2',
+    ]);
+  });
+
+  it('sorts by end of life and keeps models without a date last', async () => {
+    const { items } = await findItems(
+      findParams({ sort: { field: EIS_END_OF_LIFE_SORT_FIELD, direction: 'desc' } })
+    );
+
+    expect(items.map(({ title }) => title)).toEqual([
+      'Claude Sonnet',
+      'Alpha Embedder',
+      'Jina Reranker v2',
     ]);
   });
 
@@ -155,6 +226,57 @@ describe('createEisFindItems', () => {
     expect(getItemModelId(claude)).toBe('Claude Sonnet-id');
     expect(getItemModelId(noId)).toBeUndefined();
     expect(noId.id).toBe('elastic::No Model Id');
+  });
+
+  it('hides preview, end-of-life, and region-blocked models by default', async () => {
+    const catalog = [
+      models[0],
+      model('Preview Model', 'Elastic', { modelStatus: EisModelStatus.Preview }),
+      model('Deprecated Model', 'Elastic', { modelStatus: EisModelStatus.Deprecated }),
+      model('EOL Model', 'Elastic', { modelStatus: EisModelStatus.DeprecatedEOL }),
+      model('Blocked Model', 'Elastic', {
+        endpoints: [
+          {
+            inference_id: 'blocked-endpoint',
+            task_type: 'chat_completion',
+            service: 'elastic',
+            service_settings: { model_id: 'blocked-id' },
+            metadata: { denied_by_region_policy: true },
+          },
+        ],
+      }),
+    ];
+    const { items } = await createEisFindItems(catalog)(findParams());
+
+    expect(items.map(({ title }) => title)).toEqual(['Claude Sonnet', 'Deprecated Model']);
+  });
+
+  it('returns hidden models when the matching display option is shown', async () => {
+    const catalog = [
+      models[0],
+      model('Preview Model', 'Elastic', { modelStatus: EisModelStatus.Preview }),
+    ];
+    const { items } = await createEisFindItems(catalog, {
+      showOutsideRegionPreferences: false,
+      showEndOfLifeModels: false,
+      showPreviewModels: true,
+    })(findParams());
+
+    expect(items.map(({ title }) => title)).toEqual(['Claude Sonnet', 'Preview Model']);
+  });
+
+  it('applies search together with display options', async () => {
+    const catalog = [
+      models[0],
+      model('Preview Model', 'Elastic', { modelStatus: EisModelStatus.Preview }),
+    ];
+    const { items } = await createEisFindItems(catalog, {
+      showOutsideRegionPreferences: false,
+      showEndOfLifeModels: false,
+      showPreviewModels: true,
+    })(findParams({ searchQuery: 'preview' }));
+
+    expect(items.map(({ title }) => title)).toEqual(['Preview Model']);
   });
 });
 

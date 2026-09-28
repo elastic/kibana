@@ -393,7 +393,7 @@ describe('connectorSmlType', () => {
       });
 
       const result = await connectorSmlType.toAttachment!(
-        { attributes: { origin: { uri: 'connector://conn-1' } } } as never,
+        { references: [{ uri: 'connector://conn-1', relation: 'derived_from' }] } as never,
         createAttachmentContext() as never
       );
 
@@ -411,7 +411,7 @@ describe('connectorSmlType', () => {
       mockSavedObjectsClient.get.mockRejectedValue(new Error('Not found'));
 
       const result = await connectorSmlType.toAttachment!(
-        { attributes: { origin: { uri: 'connector://missing-conn' } } } as never,
+        { references: [{ uri: 'connector://missing-conn', relation: 'derived_from' }] } as never,
         createAttachmentContext() as never
       );
 
@@ -430,7 +430,7 @@ describe('connectorSmlType', () => {
       });
 
       const result = await connectorSmlType.toAttachment!(
-        { attributes: { origin: { uri: 'connector://conn-1' } } } as never,
+        { references: [{ uri: 'connector://conn-1', relation: 'derived_from' }] } as never,
         createAttachmentContext() as never
       );
 

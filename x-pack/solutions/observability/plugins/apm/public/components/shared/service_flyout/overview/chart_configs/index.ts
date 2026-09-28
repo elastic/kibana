@@ -46,6 +46,7 @@ export function getEsqlKeyMetricCharts({
   serviceName,
   environment,
   transactionType,
+  transactionName,
   latencyAggregationType,
   latencyTitleAction,
   projectRouting,
@@ -55,14 +56,21 @@ export function getEsqlKeyMetricCharts({
   serviceName: string;
   environment: string;
   transactionType: string;
+  /** When set, scopes RED charts to this transaction / entry span. */
+  transactionName?: string;
   latencyAggregationType: LatencyAggregationType;
   latencyTitleAction?: ReactNode;
   projectRouting?: string;
 }): FlyoutLensChartConfigDefinition[] {
   const transactionIndexes = indices?.transaction;
   const otelIndexes = [indices?.transaction, indices?.span].filter(Boolean).join(',') || undefined;
-  const ecsScope: EcsServiceScope = { serviceName, environment, transactionType };
-  const otelScope: ServiceScope = { serviceName, environment };
+  const ecsScope: EcsServiceScope = {
+    serviceName,
+    environment,
+    transactionType,
+    transactionName,
+  };
+  const otelScope: ServiceScope = { serviceName, environment, transactionName };
   const isOtel = schema === 'otel';
   const chartIndices = isOtel ? otelIndexes : transactionIndexes;
 

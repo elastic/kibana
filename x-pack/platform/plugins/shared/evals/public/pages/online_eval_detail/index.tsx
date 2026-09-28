@@ -11,7 +11,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCallOut,
   EuiComboBox,
   EuiConfirmModal,
   EuiEmptyPrompt,
@@ -33,9 +32,9 @@ import {
   EuiTitle,
   EuiSwitch,
   EuiToolTip,
-  useEuiTheme,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
+import { KbnDangerCallout, KbnSuccessCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/css';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -242,7 +241,6 @@ const buildScoreCountByLabelLensConfig = ({
 export const OnlineEvalDetailPage: React.FC = () => {
   const history = useHistory();
   const { workflowId } = useParams<{ workflowId: string }>();
-  const { euiTheme } = useEuiTheme();
   const { services } = useKibana<{
     http: HttpStart;
     dataViews: DataViewsPublicPluginStart;
@@ -508,7 +506,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
 
   if (isWorkflowLoading) {
     return (
-      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiPageSection paddingSize="none">
         <EuiText>
           <p>
             {i18n.translate('xpack.evals.onlineEvaluations.detail.loadingWorkflow', {
@@ -522,7 +520,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
 
   if (workflowError || !workflow) {
     return (
-      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiPageSection paddingSize="none">
         <EuiEmptyPrompt
           color="danger"
           iconType="warning"
@@ -555,7 +553,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
 
   return (
     <>
-      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiPageSection paddingSize="none">
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem>
             <EuiTitle size="m">
@@ -612,7 +610,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
         <EuiSpacer size="m" />
         {!canManage ? (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount={false}
               title={i18n.translate(
                 'xpack.evals.onlineEvaluations.detail.permissionsCallout.title',
@@ -620,8 +618,6 @@ export const OnlineEvalDetailPage: React.FC = () => {
                   defaultMessage: 'You need additional privileges to manage online evaluations',
                 }
               )}
-              iconType="lock"
-              color="warning"
               data-test-subj="onlineEvalDetailNoPermissionCallout"
             />
             <EuiSpacer size="m" />
@@ -629,10 +625,8 @@ export const OnlineEvalDetailPage: React.FC = () => {
         ) : null}
         {workflow.enabled && draftState.saved ? (
           <>
-            <EuiCallOut
+            <KbnSuccessCallout
               announceOnMount={false}
-              color="success"
-              iconType="check"
               title={i18n.translate('xpack.evals.onlineEvaluations.detail.activeCalloutTitle', {
                 defaultMessage: 'This online evaluation is active - runs every {interval}',
                 values: { interval: draftState.saved.every },
@@ -644,7 +638,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
         ) : null}
         {editorErrorMessage ? (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
               title={i18n.translate(
                 'xpack.evals.onlineEvaluations.detail.editorErrorCalloutTitle',
@@ -652,12 +646,9 @@ export const OnlineEvalDetailPage: React.FC = () => {
                   defaultMessage: 'Unable to update settings',
                 }
               )}
-              iconType="warning"
-              color="danger"
               data-test-subj="onlineEvalDetailEditorErrorCallout"
-            >
-              <p>{editorErrorMessage}</p>
-            </EuiCallOut>
+              text={<p>{editorErrorMessage}</p>}
+            />
             <EuiSpacer size="m" />
           </>
         ) : null}

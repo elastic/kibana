@@ -339,8 +339,32 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
         'batches_failed',
         'batches_succeeded',
         'batches_total',
+        'discoveries_generated',
         'execution_uuids',
       ]);
+    });
+
+    // The pre-persist count the runner's telemetry reads.
+    //
+    // `attack_discoveries` is the read-back of what survived de-duplication, so this
+    // is the only value that can disagree with it — and the AD Worker runner reports
+    // the two as separate numbers.
+    it('sums the generated count across batches rather than taking one batch', () => {
+      expect(step('aggregate').with?.discoveries_generated).toContain(
+        'for result in steps.generate_batches.output.results'
+      );
+    });
+
+    it('sums the run step discovery_count, which survives include_attack_discoveries: false', () => {
+      expect(step('aggregate').with?.discoveries_generated).toContain(
+        'result.output.discovery_count'
+      );
+    });
+
+    it('coerces the counted string back to a number', () => {
+      expect(step('emit_result').with?.discoveries_generated).toBe(
+        '${{ steps.aggregate.output.discoveries_generated | plus: 0 }}'
+      );
     });
 
     // A legacy array-typed output is validated as an array of scalars
