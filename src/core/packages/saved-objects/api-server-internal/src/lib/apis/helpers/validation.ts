@@ -11,10 +11,11 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { Logger } from '@kbn/logging';
 import type {
   ISavedObjectTypeRegistry,
-  SavedObjectsValidationSpec,
+  ModelVersionIdentifier,
 } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsTypeValidator,
+  getLatestModelVersion,
   modelVersionToVirtualVersion,
 } from '@kbn/core-saved-objects-base-server-internal';
 import {
@@ -105,7 +106,7 @@ export class ValidationHelper {
     }
   }
 
-  /** Validate a merged, migrated doc against the type's model version `update` schemas, if any. */
+  /** Validate a merged, migrated doc against the latest model version's `update` schema, if any. */
   public validateObjectForUpdate(type: string, doc: SavedObjectSanitizedDoc) {
     const validator = this.getUpdateValidator(type);
     if (!validator) {
@@ -125,21 +126,15 @@ export class ValidationHelper {
         typeof savedObjectType?.modelVersions === 'function'
           ? savedObjectType.modelVersions()
           : savedObjectType?.modelVersions ?? {};
+      const latestModelVersion = savedObjectType ? getLatestModelVersion(savedObjectType) : 0;
+      const updateSchema =
+        modelVersions[String(latestModelVersion) as ModelVersionIdentifier]?.schemas?.update;
 
-      const updateSchemas = Object.entries(modelVersions).reduce<
-        Record<string, SavedObjectsValidationSpec>
-      >((map, [key, modelVersion]) => {
-        if (modelVersion.schemas?.update) {
-          map[modelVersionToVirtualVersion(key)] = modelVersion.schemas.update;
-        }
-        return map;
-      }, {});
-
-      this.updateValidatorMap[type] = Object.keys(updateSchemas).length
+      this.updateValidatorMap[type] = updateSchema
         ? new SavedObjectsTypeValidator({
             logger: this.logger.get('type-validator'),
             type,
-            validationMap: updateSchemas,
+            validationMap: { [modelVersionToVirtualVersion(latestModelVersion)]: updateSchema },
             defaultVersion: this.kibanaVersion,
           })
         : null;

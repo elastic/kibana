@@ -164,5 +164,52 @@ describe('Saved Objects type validation helper', () => {
         /\[attributes.count\]/
       );
     });
+
+    describe('when an older model version defines an update schema', () => {
+      const olderUpdateType = 'type-with-older-update';
+      const v1Schema = schema.object({ title: schema.string(), owner: schema.string() });
+      const v2Schema = schema.object({ title: schema.string() });
+      const v2Doc = (attributes: Record<string, unknown>) =>
+        createMockObject(olderUpdateType, { typeMigrationVersion: '10.2.0', attributes });
+
+      it('does not validate when the latest model version has no update schema', () => {
+        registerType(olderUpdateType, {
+          modelVersions: {
+            1: { changes: [], schemas: { create: v1Schema, update: v1Schema } },
+            2: { changes: [], schemas: { create: v2Schema } },
+          },
+        });
+        helper = new ValidationHelper({
+          logger,
+          registry: typeRegistry,
+          kibanaVersion: defaultVersion,
+        });
+
+        expect(() =>
+          helper.validateObjectForUpdate(olderUpdateType, v2Doc({ title: 'Ops' }))
+        ).not.toThrow();
+      });
+
+      it('validates against the latest model version update schema only', () => {
+        registerType(olderUpdateType, {
+          modelVersions: {
+            1: { changes: [], schemas: { create: v1Schema, update: v1Schema } },
+            2: { changes: [], schemas: { create: v2Schema, update: v2Schema } },
+          },
+        });
+        helper = new ValidationHelper({
+          logger,
+          registry: typeRegistry,
+          kibanaVersion: defaultVersion,
+        });
+
+        expect(() =>
+          helper.validateObjectForUpdate(olderUpdateType, v2Doc({ title: 'Ops' }))
+        ).not.toThrow();
+        expect(() =>
+          helper.validateObjectForUpdate(olderUpdateType, v2Doc({ title: 1 }))
+        ).toThrowError(/\[attributes.title\]: expected value of type \[string\]/);
+      });
+    });
   });
 });
