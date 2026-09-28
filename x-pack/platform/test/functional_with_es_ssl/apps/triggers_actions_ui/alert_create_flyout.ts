@@ -597,8 +597,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.waitForWithTimeout(
         'ES|QL KEEP warning footer button to appear',
         testSubjects.TRY_TIME,
-        async () =>
-          await testSubjects.exists('ESQLEditor-footerPopoverButton-warning', { timeout: 1000 })
+        async () => await testSubjects.exists('ESQLEditor-footerPopoverButton-warning')
       );
 
       await testSubjects.click('ESQLEditor-footerPopoverButton-warning');

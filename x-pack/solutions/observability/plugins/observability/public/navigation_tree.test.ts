@@ -13,7 +13,8 @@ import { STACK_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { createDefinition } from './navigation_tree';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
-const getAlertsAndInsightsLinks = async (
+const getStackManagementSectionLinks = async (
+  sectionId: string,
   alertingV2Enabled = false
 ): Promise<Array<string | undefined>> => {
   const coreStart = coreMock.createStart();
@@ -29,16 +30,16 @@ const getAlertsAndInsightsLinks = async (
 
   const { footer } = (await firstValueFrom(definition.navigationTree$)) as NavigationTreeDefinition;
   const stackManagement = footer?.find((item) => item.id === STACK_MANAGEMENT_NAV_ID);
-  const alertsSection = stackManagement?.children?.find(
-    (item) => item.id === 'alerts_and_insights'
-  ) as NodeDefinition | undefined;
+  const section = stackManagement?.children?.find((item) => item.id === sectionId) as
+    | NodeDefinition
+    | undefined;
 
-  return alertsSection?.children?.map((item) => item.link) ?? [];
+  return section?.children?.map((item) => item.link) ?? [];
 };
 
 describe('Observability solution navigation tree', () => {
   it('keeps Stack Rules and hides Stack Alerts while alerting v2 is disabled', async () => {
-    const alertsLinks = await getAlertsAndInsightsLinks(false);
+    const alertsLinks = await getStackManagementSectionLinks('alerts_and_insights', false);
 
     expect(alertsLinks).not.toContain('management:triggersActionsAlerts');
     expect(alertsLinks).toEqual(
@@ -51,7 +52,7 @@ describe('Observability solution navigation tree', () => {
   });
 
   it('hides Stack Alerts and Stack Rules when alerting v2 is enabled', async () => {
-    const alertsLinks = await getAlertsAndInsightsLinks(true);
+    const alertsLinks = await getStackManagementSectionLinks('alerts_and_insights', true);
 
     expect(alertsLinks).not.toContain('management:triggersActionsAlerts');
     expect(alertsLinks).not.toContain('management:triggersActions');
@@ -61,5 +62,11 @@ describe('Observability solution navigation tree', () => {
         'management:maintenanceWindows',
       ])
     );
+  });
+
+  it('includes service accounts in Stack Management > Security', async () => {
+    const securityLinks = await getStackManagementSectionLinks('security');
+
+    expect(securityLinks).toContain('management:service_accounts');
   });
 });

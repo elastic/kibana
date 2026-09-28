@@ -46,7 +46,7 @@ export const createNavigationTree = async (
         link: 'inbox' as AppDeepLinkId,
         icon: 'mail',
       },
-      // AlertZero body (nodes omitted when xpack.alertzero.enabled is false)
+      // AlertZero body (nodes omitted when securitySolution:enableAlertZero is off)
       ...defaultNavigationTree.alertZero(),
       {
         link: 'discover',

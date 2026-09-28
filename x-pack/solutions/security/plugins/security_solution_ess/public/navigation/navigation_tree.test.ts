@@ -7,7 +7,7 @@
 
 import { of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import { STACK_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 import { mockServices } from '../common/__mocks__/services.mock';
@@ -92,6 +92,26 @@ describe('createNavigationTree', () => {
 
     expect(alertsSection?.children).toContainEqual(
       expect.objectContaining({ id: 'stackRules', link: 'management:triggersActions' })
+    );
+  });
+
+  it('includes service accounts in Stack Management > Security', () => {
+    const { footer = [] } = createNavigationTree(
+      createServices(),
+      AIChatExperience.Classic
+    ) as NavigationTreeDefinition;
+
+    const findSecuritySection = (nodes: NodeDefinition[]): NodeDefinition | undefined =>
+      nodes
+        .map((node) =>
+          node.children?.some(({ link }) => link === 'management:role_mappings')
+            ? node
+            : findSecuritySection(node.children ?? [])
+        )
+        .find(Boolean);
+
+    expect(findSecuritySection(footer)?.children).toContainEqual(
+      expect.objectContaining({ link: 'management:service_accounts' })
     );
   });
 });

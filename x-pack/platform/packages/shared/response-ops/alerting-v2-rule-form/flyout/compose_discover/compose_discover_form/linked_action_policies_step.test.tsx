@@ -54,6 +54,7 @@ describe('LinkedActionPoliciesStep', () => {
   it('renders the title and the matching subtext when policies are present', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [
         {
@@ -78,6 +79,7 @@ describe('LinkedActionPoliciesStep', () => {
   it('shows a loading spinner while fetching', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: true,
+      isPreviousData: false,
       error: null,
       items: [],
       evaluatedCount: 0,
@@ -92,6 +94,7 @@ describe('LinkedActionPoliciesStep', () => {
   it('shows an empty state when no policies match', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [],
       evaluatedCount: 0,
@@ -107,6 +110,7 @@ describe('LinkedActionPoliciesStep', () => {
   it('renders a catch-all badge for a global policy', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [
         {
@@ -130,6 +134,7 @@ describe('LinkedActionPoliciesStep', () => {
     mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod', 'other'] });
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [
         {
@@ -159,6 +164,7 @@ describe('LinkedActionPoliciesStep', () => {
     mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod'] });
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [
         {
@@ -186,6 +192,7 @@ describe('LinkedActionPoliciesStep', () => {
 
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [
         {
@@ -217,6 +224,7 @@ describe('LinkedActionPoliciesStep', () => {
   it('renders connector icons for a policy from the batched connector-types hook', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [
         {
@@ -248,6 +256,7 @@ describe('LinkedActionPoliciesStep', () => {
   it('does not render a connector-icons row when the policy has no connector types', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [
         {
@@ -272,6 +281,7 @@ describe('LinkedActionPoliciesStep', () => {
   it('shows an error callout when the fetch fails', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: new Error('Network error'),
       items: [],
       evaluatedCount: 0,
@@ -287,6 +297,7 @@ describe('LinkedActionPoliciesStep', () => {
     mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod'] });
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [],
       evaluatedCount: 0,
