@@ -53,10 +53,11 @@ export const createActionHandler = async (
 ) => {
   const [coreStartServices] = await osqueryContext.getStartServices();
   const esClientInternal = coreStartServices.elasticsearch.client.asInternalUser;
+  const actionSpaceId = options.space?.id ?? DEFAULT_SPACE_ID;
 
   const spaceScopedInternalSavedObjectsClient = getInternalSavedObjectsClientForSpaceId(
     coreStartServices,
-    options.space?.id ?? DEFAULT_SPACE_ID
+    actionSpaceId
   );
 
   const { metadata, alertData, error } = options;
@@ -76,7 +77,7 @@ export const createActionHandler = async (
       allAgentsSelected: !!agentAll,
       platformsSelected: agentPlatforms,
       policiesSelected: agentPolicyIds,
-      spaceId: options.space?.id ?? DEFAULT_SPACE_ID,
+      spaceId: actionSpaceId,
     }
   );
 
@@ -116,7 +117,7 @@ export const createActionHandler = async (
       ? some(packSO?.references, ['type', 'osquery-pack-asset'])
       : undefined,
     tags: [],
-    space_id: options.space?.id ?? DEFAULT_SPACE_ID,
+    space_id: actionSpaceId,
     queries: packSO
       ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
           const replacedQuery = replacedQueries(packQuery.query, alertData);
@@ -142,7 +143,7 @@ export const createActionHandler = async (
           agents: selectedAgents,
           osqueryContext,
           error,
-          spaceId: options.space?.id ?? DEFAULT_SPACE_ID,
+          spaceId: actionSpaceId,
           spaceScopedClient: spaceScopedInternalSavedObjectsClient,
         }),
   };
@@ -159,9 +160,18 @@ export const createActionHandler = async (
           input_type: 'osquery',
           agents: query.agents as string[],
           user_id: metadata?.currentUser,
-          space_id: options.space?.id ?? DEFAULT_SPACE_ID,
+          space_id: actionSpaceId,
           ...(query.timeout !== QUERY_TIMEOUT.DEFAULT ? { timeout: query.timeout } : {}),
-          data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']) as {
+          data: {
+            ...pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
+            // The top-level space_id above never reaches the agent: Fleet Server's
+            // action model has no such field, and its checkin conversion copies a
+            // fixed whitelist. `data` is an opaque passthrough, and osquerybeat
+            // copies it verbatim onto result and action-response documents as
+            // `action_data` — so this is what makes the originating space visible
+            // in named spaces. Read back via `matchActionDataSpaceId`.
+            space_id: actionSpaceId,
+          } as {
             [k: string]: unknown;
           },
         })
