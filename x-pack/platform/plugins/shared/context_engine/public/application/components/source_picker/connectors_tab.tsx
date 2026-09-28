@@ -133,19 +133,19 @@ const ConnectorsTabContent = ({
           paddingSize="none"
           iconType="plugs"
           dataTestSubj="contextConnectorsEmpty"
-            title={
-              canCreateConnector ? (
-                <FormattedMessage
-                  id="xpack.contextEngine.sourcePicker.connectors.emptyBody"
-                  defaultMessage="No connectors yet. Create one to use it as a source."
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.contextEngine.sourcePicker.connectors.emptyBodyNoAccess"
-                  defaultMessage="No connectors yet. Ask your administrator to create one."
-                />
-              )
-            }
+          title={
+            canCreateConnector ? (
+              <FormattedMessage
+                id="xpack.contextEngine.sourcePicker.connectors.emptyBody"
+                defaultMessage="No connectors yet. Create one to use it as a source."
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.contextEngine.sourcePicker.connectors.emptyBodyNoAccess"
+                defaultMessage="No connectors yet. Ask your administrator to create one."
+              />
+            )
+          }
         />
       )}
     </div>
