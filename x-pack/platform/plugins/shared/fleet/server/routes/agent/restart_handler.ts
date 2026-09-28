@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import { isAgentRestartSupported } from '../../../common/services';
 import type { PostAgentRestartResponse } from '../../../common/types';
-import type { PostAgentRestartRequestSchema, PostBulkAgentRestartRequestSchema } from '../../types';
+import type {
+  FleetRequestHandler,
+  PostAgentRestartRequestSchema,
+  PostBulkAgentRestartRequestSchema,
+} from '../../types';
 import { getAgentById } from '../../services/agents';
 import * as AgentService from '../../services/agents';
-import { defaultIngestErrorHandler } from '../../errors';
 
-export const restartAgentHandler: RequestHandler<
+export const restartAgentHandler: FleetRequestHandler<
   TypeOf<typeof PostAgentRestartRequestSchema.params>,
   undefined,
   undefined
@@ -23,25 +25,23 @@ export const restartAgentHandler: RequestHandler<
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
-  try {
-    const agent = await getAgentById(esClient, soClient, request.params.agentId);
-    if (!isAgentRestartSupported(agent)) {
-      return response.customError({
-        statusCode: 400,
-        body: {
-          message: `Agent ${request.params.agentId} does not support the restart action.`,
-        },
-      });
-    }
-    const result = await AgentService.restartAgent(esClient, soClient, request.params.agentId);
-    const body: PostAgentRestartResponse = { actionId: result.actionId };
-    return response.ok({ body });
-  } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+
+  const agent = await getAgentById(esClient, soClient, request.params.agentId);
+  if (!isAgentRestartSupported(agent)) {
+    return response.customError({
+      statusCode: 400,
+      body: {
+        message: `Agent ${request.params.agentId} does not support the restart action.`,
+      },
+    });
   }
+
+  const result = await AgentService.restartAgent(esClient, soClient, request.params.agentId);
+  const body: PostAgentRestartResponse = { actionId: result.actionId };
+  return response.ok({ body });
 };
 
-export const bulkRestartAgentsHandler: RequestHandler<
+export const bulkRestartAgentsHandler: FleetRequestHandler<
   undefined,
   undefined,
   TypeOf<typeof PostBulkAgentRestartRequestSchema.body>
@@ -54,14 +54,10 @@ export const bulkRestartAgentsHandler: RequestHandler<
     ? { agentIds: agents }
     : { kuery: agents, showInactive: includeInactive };
 
-  try {
-    const result = await AgentService.bulkRestartAgents(esClient, soClient, {
-      ...agentOptions,
-      batchSize,
-      includeInactive,
-    });
-    return response.ok({ body: { actionId: result.actionId } });
-  } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
-  }
+  const result = await AgentService.bulkRestartAgents(esClient, soClient, {
+    ...agentOptions,
+    batchSize,
+    includeInactive,
+  });
+  return response.ok({ body: { actionId: result.actionId } });
 };

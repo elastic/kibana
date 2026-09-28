@@ -34,13 +34,6 @@ jest.mock('../../../common/services', () => ({
   isAgentRestartSupported: jest.fn(),
 }));
 
-jest.mock('../../errors', () => ({
-  ...jest.requireActual('../../errors'),
-  defaultIngestErrorHandler: jest.fn(({ error, response }) =>
-    response.customError({ statusCode: 500, body: error.message })
-  ),
-}));
-
 describe('restart handlers', () => {
   let esClientMock: jest.Mocked<ElasticsearchClient>;
   let soClientMock: jest.Mocked<SavedObjectsClientContract>;
@@ -80,17 +73,15 @@ describe('restart handlers', () => {
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: { actionId: 'action-abc' } });
     });
 
-    it('delegates errors to defaultIngestErrorHandler', async () => {
+    it('propagates service errors to the fleet router error handler', async () => {
       (getAgentById as jest.Mock).mockResolvedValue({ id: 'agent-1' });
       (AgentService.restartAgent as jest.Mock).mockRejectedValue(
         new HostedAgentPolicyRestrictionRelatedError('hosted')
       );
 
-      await restartAgentHandler(
-        mockContext,
-        { params: { agentId: 'agent-1' } } as any,
-        mockResponse
-      );
+      await expect(
+        restartAgentHandler(mockContext, { params: { agentId: 'agent-1' } } as any, mockResponse)
+      ).rejects.toThrow(HostedAgentPolicyRestrictionRelatedError);
 
       expect(mockResponse.ok).not.toHaveBeenCalled();
     });
