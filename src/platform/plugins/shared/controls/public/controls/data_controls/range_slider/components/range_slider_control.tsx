@@ -32,7 +32,7 @@ export interface Props {
   fieldFormatter?: (value: string) => string;
   onChange: (value: RangeSliderValue | undefined) => void;
   isEdit: boolean;
-  previewMode: boolean;
+  previewMode?: boolean;
   isPinned: boolean;
   label?: string;
 }
@@ -51,7 +51,7 @@ export const RangeSliderControl: FC<Props> = ({
   fieldFormatter,
   onChange,
   isEdit,
-  previewMode,
+  previewMode = false,
   isPinned,
   label,
 }: Props) => {

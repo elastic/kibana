@@ -35,7 +35,13 @@ describe('external link component', () => {
   });
 
   test('by default opens in new tab and renders external icon', async () => {
-    render(<ExternalLinkComponent link={defaultLinkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
+    render(
+      <ExternalLinkComponent
+        link={defaultLinkInfo}
+        layout={LINKS_VERTICAL_LAYOUT}
+        viewMode="view"
+      />
+    );
 
     const link = await screen.findByTestId('externalLink--https://example.com');
     expect(link).toBeInTheDocument();
@@ -50,7 +56,9 @@ describe('external link component', () => {
       ...defaultLinkInfo,
       options: { ...DEFAULT_EXTERNAL_LINK_OPTIONS, open_in_new_tab: false },
     };
-    render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
+    render(
+      <ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} viewMode="view" />
+    );
     const link = await screen.findByTestId('externalLink--https://example.com');
     const externalIcon = link.querySelector('[data-euiicon-type="external"]');
     expect(externalIcon).toBeInTheDocument();
@@ -61,7 +69,9 @@ describe('external link component', () => {
       ...defaultLinkInfo,
       options: { ...DEFAULT_EXTERNAL_LINK_OPTIONS, open_in_new_tab: false },
     };
-    render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
+    render(
+      <ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} viewMode="view" />
+    );
 
     const link = await screen.findByTestId('externalLink--https://example.com');
     expect(link).toHaveTextContent('https://example.com');
@@ -76,7 +86,9 @@ describe('external link component', () => {
       ...defaultLinkInfo,
       options: { ...DEFAULT_EXTERNAL_LINK_OPTIONS, open_in_new_tab: false },
     };
-    render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
+    render(
+      <ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} viewMode="view" />
+    );
 
     const link = await screen.findByTestId('externalLink--https://example.com');
     await userEvent.click(link);
@@ -90,7 +102,9 @@ describe('external link component', () => {
       destination: 'file://buzz',
       error: new Error('URL not supported'),
     };
-    render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
+    render(
+      <ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} viewMode="view" />
+    );
 
     const link = screen.getByTestId('externalLink--https://example.com--error');
     expect(link).toBeDisabled();

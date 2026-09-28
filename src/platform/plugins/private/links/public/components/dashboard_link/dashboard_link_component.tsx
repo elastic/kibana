@@ -9,7 +9,6 @@
 
 import classNames from 'classnames';
 import React, { useMemo } from 'react';
-import { BehaviorSubject } from 'rxjs';
 
 import { EuiListGroupItem, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -19,11 +18,7 @@ import type { DashboardNavigationOptions } from '@kbn/dashboard-navigation-optio
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { Query } from '@kbn/es-query';
 import { isFilterPinned } from '@kbn/es-query';
-import {
-  getViewModeSubject,
-  useBatchedPublishingSubjects,
-  type ViewMode,
-} from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects, type ViewMode } from '@kbn/presentation-publishing';
 
 import { DASHBOARD_LINK_TYPE, LINKS_VERTICAL_LAYOUT } from '../../../common/constants';
 import type { LinksLayoutType } from '../../../common/types';
@@ -35,10 +30,16 @@ import { DashboardLinkStrings } from './dashboard_link_strings';
 export interface DashboardLinkProps {
   link: ResolvedLink;
   layout: LinksLayoutType;
+  viewMode: ViewMode;
   parentApi: LinksParentApi;
 }
 
-export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLinkProps) => {
+export const DashboardLinkComponent = ({
+  link,
+  layout,
+  viewMode,
+  parentApi,
+}: DashboardLinkProps) => {
   const [
     parentDashboardId,
     parentDashboardTitle,
@@ -46,15 +47,13 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
     timeRange,
     filters,
     query,
-    viewMode,
   ] = useBatchedPublishingSubjects(
     parentApi.savedObjectId$,
     parentApi.title$,
     parentApi.description$,
     parentApi.timeRange$,
     parentApi.filters$,
-    parentApi.query$,
-    getViewModeSubject(parentApi) ?? new BehaviorSubject<ViewMode>('view')
+    parentApi.query$
   );
 
   /**

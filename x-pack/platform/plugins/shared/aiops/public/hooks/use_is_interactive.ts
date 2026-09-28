@@ -8,8 +8,10 @@
 import { BehaviorSubject } from 'rxjs';
 import { apiHasDisableTriggers, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
-export function useIsInteractive(parentApi: unknown): boolean {
+export function useIsInteractive(parentApi?: unknown): boolean {
   return !useStateFromPublishingSubject(
-    apiHasDisableTriggers(parentApi) ? parentApi.disableTriggers$ : new BehaviorSubject(false)
+    parentApi && apiHasDisableTriggers(parentApi)
+      ? parentApi.disableTriggers$
+      : new BehaviorSubject(false)
   );
 }

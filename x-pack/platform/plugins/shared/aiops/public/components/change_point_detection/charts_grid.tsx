@@ -31,7 +31,7 @@ const CHARTS_PER_PAGE = 6;
 
 interface ChartsGridProps {
   changePoints: Record<number, SelectedChangePoint[]>;
-  parentApi: unknown;
+  parentApi?: unknown;
 }
 
 /**

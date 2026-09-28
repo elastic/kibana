@@ -27,7 +27,7 @@ import {
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
   cascadedDocumentsContext?: CascadedDocumentsContext;
-  previewMode: boolean;
+  previewMode?: boolean;
 }
 
 /**

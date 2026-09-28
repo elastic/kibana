@@ -1968,9 +1968,9 @@ class TimeseriesChartIntl extends Component {
       const anomalyMarker = chartElement.selectAll(
         '.focus-chart-markers .anomaly-marker.highlighted'
       );
-      // if (anomalyMarker.length) {
-      //   showFocusChartTooltip(markerToSelect, anomalyMarker[0][0]);
-      // }
+      if (anomalyMarker.length) {
+        showFocusChartTooltip(markerToSelect, anomalyMarker[0][0]);
+      }
     }
   }
 

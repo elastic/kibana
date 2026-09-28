@@ -64,7 +64,6 @@ interface SavedSearchEmbeddableComponentProps {
     fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
     viewMode$: PublishingSubject<ViewMode>;
-    abortSignal$: BehaviorSubject<AbortSignal | undefined>;
   };
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
@@ -118,7 +117,6 @@ export function SearchEmbeddableGridComponent({
     savedSearchTitle,
     savedSearchDescription,
     esqlVariables,
-    abortSignal,
   ] = useBatchedPublishingSubjects(
     api.viewMode$,
     api.dataLoading$,
@@ -136,8 +134,7 @@ export function SearchEmbeddableGridComponent({
     api.description$,
     api.defaultTitle$,
     api.defaultDescription$,
-    esqlVariables$ ?? emptyEsqlVariables$,
-    api.abortSignal$
+    esqlVariables$ ?? emptyEsqlVariables$
   );
 
   // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
@@ -347,18 +344,8 @@ export function SearchEmbeddableGridComponent({
       projectRouting: fetchContext?.projectRouting,
       isApproximate: fetchContext?.isApproximate,
       requestId: getGridRequestId(rows),
-      abortSignal,
     };
-  }, [
-    abortSignal,
-    columnsMeta,
-    esqlVariables,
-    fetchContext,
-    isEsql,
-    rows,
-    savedSearchQuery,
-    timeRange,
-  ]);
+  }, [columnsMeta, esqlVariables, fetchContext, isEsql, rows, savedSearchQuery, timeRange]);
 
   return (
     <DiscoverGridEmbeddableMemoized

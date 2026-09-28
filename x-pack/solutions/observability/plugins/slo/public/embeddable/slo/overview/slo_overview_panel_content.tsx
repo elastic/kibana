@@ -32,14 +32,14 @@ export interface GroupOverviewPanelProps {
   groupFilters: GroupFilters;
   dashboardFilters?: Filter[];
   reloadSubject: Subject<boolean>;
-  previewMode: boolean;
+  previewMode?: boolean;
 }
 
 export function GroupOverviewPanel({
   groupFilters,
   dashboardFilters = [],
   reloadSubject,
-  previewMode,
+  previewMode = false,
 }: GroupOverviewPanelProps) {
   return (
     <div
@@ -79,7 +79,7 @@ export function SingleOverviewCardList({
   previewMode,
 }: {
   sloId: string;
-  previewMode: boolean;
+  previewMode?: boolean;
 }) {
   return (
     <div data-test-subj="sloSingleOverviewPanel" style={{ width: '100%' }}>
@@ -100,7 +100,7 @@ export interface SloOverviewPanelContentProps {
   dashboardFilters?: Filter[];
   remoteName: string | undefined;
   reloadSubject: Subject<boolean>;
-  previewMode: boolean;
+  previewMode?: boolean;
 }
 
 export function SloOverviewPanelContent({

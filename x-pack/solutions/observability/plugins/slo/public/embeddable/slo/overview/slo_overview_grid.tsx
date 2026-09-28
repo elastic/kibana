@@ -70,7 +70,13 @@ const getSloChartData = ({
 const ROW_HEIGHT = 220;
 const ITEMS_PER_ROW = 4;
 
-export function SloCardChartList({ sloId, previewMode }: { sloId: string; previewMode: boolean }) {
+export function SloCardChartList({
+  sloId,
+  previewMode = false,
+}: {
+  sloId: string;
+  previewMode?: boolean;
+}) {
   const {
     http: { basePath },
     uiSettings,

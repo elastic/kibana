@@ -55,7 +55,7 @@ export interface ServiceMapEmbeddableProps {
   environment?: Environment;
   kuery?: string;
   serviceName?: string;
-  viewMode: ViewMode;
+  viewMode?: ViewMode;
   /**
    * Multi-service context highlight from panel state (`highlighted_service_names`).
    * When unset, falls back to highlighting `serviceName` alone.
@@ -155,7 +155,7 @@ function EmbeddableContainer({
 }
 
 export function ServiceMapEmbeddable({
-  viewMode,
+  viewMode = 'view',
   rangeFrom,
   rangeTo,
   environment = ENVIRONMENT_ALL.value,

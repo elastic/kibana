@@ -33,7 +33,6 @@ import { ExpandedRow } from './expanded_row';
 import { FormattedPatternExamples, FormattedTokens } from '../format_category';
 import { useIsInteractive } from '../../../hooks/use_is_interactive';
 
-
 interface Props {
   categories: Category[];
   eventRate: EventRate;
@@ -50,7 +49,7 @@ interface Props {
   displayExamples?: boolean;
   selectable?: boolean;
   onRenderComplete?: () => void;
-  parentApi: unknown;
+  parentApi?: unknown;
 }
 
 export const CategoryTable: FC<Props> = ({

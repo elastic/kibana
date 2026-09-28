@@ -62,6 +62,7 @@ describe('Dashboard link component', () => {
           link={resolvedLink}
           layout={LINKS_VERTICAL_LAYOUT}
           parentApi={parentApi}
+          viewMode="view"
           {...overrides}
         />
       </EuiThemeProvider>
@@ -76,6 +77,7 @@ describe('Dashboard link component', () => {
               link={resolvedLink}
               layout={LINKS_VERTICAL_LAYOUT}
               parentApi={parentApi}
+              viewMode="view"
               {...overrides}
               {...newOverrides}
             />

@@ -25,7 +25,7 @@ interface Props {
   sloInstanceId: string | undefined;
   remoteName?: string;
   reloadSubject?: Subject<boolean>;
-  previewMode: boolean;
+  previewMode?: boolean;
 }
 
 export function SloOverview({
@@ -33,7 +33,7 @@ export function SloOverview({
   sloInstanceId,
   remoteName,
   reloadSubject,
-  previewMode,
+  previewMode = false,
 }: Props) {
   const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
 

@@ -20,7 +20,7 @@ interface Props {
   sort?: SortField;
   filters?: Filter[];
   reloadSubject: Subject<boolean>;
-  previewMode: boolean;
+  previewMode?: boolean;
 }
 
 export function GroupSloView({
@@ -30,7 +30,7 @@ export function GroupSloView({
   kqlQuery = '',
   filters = [],
   reloadSubject,
-  previewMode,
+  previewMode = false,
 }: Props) {
   const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
   const combinedKqlQuery = buildCombinedKqlQuery({ groups, groupBy, kqlQuery });

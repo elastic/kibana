@@ -9,13 +9,8 @@
 
 import { EuiListGroupItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import {
-  getViewModeSubject,
-  useStateFromPublishingSubject,
-  type ViewMode,
-} from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import React, { useMemo } from 'react';
-import { BehaviorSubject } from 'rxjs';
 
 import {
   DEFAULT_EXTERNAL_LINK_OPTIONS,
@@ -25,21 +20,17 @@ import {
 import type { LinksLayoutType } from '../../../common/types';
 import type { ExternalLinkOptions } from '../../../server';
 import { coreServices, trackUiMetric } from '../../services/kibana_services';
-import type { LinksParentApi, ResolvedLink } from '../../types';
+import type { ResolvedLink } from '../../types';
 
 export const ExternalLinkComponent = ({
   link,
   layout,
-  parentApi,
+  viewMode,
 }: {
   link: ResolvedLink;
   layout: LinksLayoutType;
-  parentApi: LinksParentApi;
+  viewMode: ViewMode;
 }) => {
-  const viewMode = useStateFromPublishingSubject(
-    getViewModeSubject(parentApi) ?? new BehaviorSubject<ViewMode>('view')
-  );
-
   const linkOptions = useMemo(() => {
     return {
       ...DEFAULT_EXTERNAL_LINK_OPTIONS,

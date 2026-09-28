@@ -43,7 +43,7 @@ export interface VisLegendProps {
   hasCompatibleActions: IInterpreterRenderHandlers['hasCompatibleActions'];
   addLegend: BasicVislibParams['addLegend'];
   position: 'top' | 'bottom' | 'left' | 'right';
-  isInteractive: boolean;
+  isInteractive?: boolean;
 }
 
 export interface VisLegendState {

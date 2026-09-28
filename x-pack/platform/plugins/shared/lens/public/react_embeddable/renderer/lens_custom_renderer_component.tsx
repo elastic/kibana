@@ -177,7 +177,7 @@ export function LensRenderer({
       maybeId={id}
       getParentApi={() =>
         ({
-          ...parentApi,
+          ...(typeof parentApi === 'object' ? parentApi : {}),
           // forward the Lens components to the embeddable
           ...props,
           // forward the unified search context

@@ -489,6 +489,7 @@ export const getSearchEmbeddableFactory = ({
                       api={{
                         ...api,
                         fetchContext$,
+                        viewMode$,
                       }}
                       dataView={dataView!}
                       onAddFilter={
@@ -503,7 +504,7 @@ export const getSearchEmbeddableFactory = ({
                       }
                     >
                       <SearchEmbeddableGridComponent
-                        api={{ ...api, fetchWarnings$, fetchContext$, abortSignal$, viewMode$ }}
+                        api={{ ...api, fetchWarnings$, fetchContext$, viewMode$ }}
                         dataView={dataView!}
                         onAddFilter={enableFilters ? addFilter : undefined}
                         enableDocumentViewer={enableDocumentViewer}

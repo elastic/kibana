@@ -21,7 +21,7 @@ export interface ChartComponentProps {
   onLoading?: (isLoading: boolean) => void;
   onRenderComplete?: () => void;
 
-  parentApi: unknown;
+  parentApi?: unknown;
 }
 
 export interface ChartComponentPropsAll {

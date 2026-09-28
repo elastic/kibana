@@ -373,7 +373,7 @@ export function getEuiGridColumns({
   dataView,
   isSummaryOnlyColumn,
   isSortEnabled,
-  isResizable,
+  isResizable = true,
   disableCellActions = false,
   disableColumnActions = false,
   isPlainRecord,
@@ -401,7 +401,7 @@ export function getEuiGridColumns({
   dataView: DataView;
   isSummaryOnlyColumn: boolean;
   isSortEnabled: boolean;
-  isResizable: boolean;
+  isResizable?: boolean;
   isPlainRecord?: boolean;
   disableCellActions?: boolean;
   disableColumnActions?: boolean;
