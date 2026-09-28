@@ -92,7 +92,7 @@ export const createAttachmentPublicClient = ({
     // profile id (some API-key callers), pass `undefined` as the conversation to
     // `userMessageActor` so its owner fallback does NOT fire — we would rather stamp the honest
     // `id: 'unknown'` than lie by attributing the mutation to the conversation owner.
-    const author = await conversationsService.getConversationRoundAuthor({ request });
+    const author = conversationClient.getAuthor();
     const actor = userMessageActor(author ? conversation : undefined, { author });
     const events =
       changes.length > 0

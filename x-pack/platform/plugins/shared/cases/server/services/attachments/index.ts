@@ -488,8 +488,8 @@ export class AttachmentService {
         const injectedAttachment = injectAttachmentSOAttributesFromRefs(
           unifiedAttachment as unknown as SavedObject<AttachmentPersistedAttributes>
         );
-        // v2 union accepts both unified- and legacy-shape attributes (some
-        // unmigrated types still pass through legacy-shaped).
+        // v2 union accepts leftover legacy-shaped attributes (unknown
+        // persistable-state subtype ids that toUnifiedAttributes does not fold).
         const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
           injectedAttachment.attributes
         );
