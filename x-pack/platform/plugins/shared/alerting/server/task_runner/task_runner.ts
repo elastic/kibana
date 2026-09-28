@@ -582,7 +582,11 @@ export class TaskRunner<
     let alertStatusChangedBatch:
       | { events: AlertStatusChangedV1Payload[]; request: typeof fakeRequest }
       | undefined;
-    if (this.ruleType.autoRecoverAlerts && this.context.alertingEventBus) {
+    if (
+      this.ruleType.autoRecoverAlerts &&
+      this.context.alertingEventBus &&
+      this.shouldLogAndScheduleActionsForAlerts()
+    ) {
       const newAlerts = alertsClient.getProcessedAlerts('new');
       const recoveredAlerts = alertsClient.getProcessedAlerts('recovered');
       const newEntries = Object.entries(newAlerts);
