@@ -29,6 +29,7 @@ import {
   generatingLabel,
   stopLabel,
   aiModeLabel,
+  aiModeTooltip,
   kqlModeLabel,
   visorModeLegend,
   enterHintFilterLabel,
@@ -190,19 +191,23 @@ export function QuickSearchVisor({
                         />
                       </EuiToolTip>
                     </span>
-                    <AiButton
-                      iconType={SparklesIcon as unknown as 'sparkles'}
-                      size="xs"
-                      iconSize="m"
-                      variant="outlined"
-                      aria-pressed={!isKqlMode}
-                      isSelected={!isKqlMode}
-                      onClick={() => onVisorModeChange(VisorMode.NaturalLanguage)}
-                      data-test-subj="esqlVisorAskAiButton"
-                      css={[styles.aiButtonSparkleHover, !isKqlMode && styles.aiButtonSelected]}
-                    >
-                      {aiModeLabel}
-                    </AiButton>
+                    <EuiToolTip content={aiModeTooltip} disableScreenReaderOutput>
+                      <span css={styles.aiButtonTooltipAnchor}>
+                        <AiButton
+                          iconType={SparklesIcon as unknown as 'sparkles'}
+                          size="xs"
+                          iconSize="m"
+                          variant="outlined"
+                          aria-pressed={!isKqlMode}
+                          isSelected={!isKqlMode}
+                          onClick={() => onVisorModeChange(VisorMode.NaturalLanguage)}
+                          data-test-subj="esqlVisorAskAiButton"
+                          css={[styles.aiButtonSparkleHover, !isKqlMode && styles.aiButtonSelected]}
+                        >
+                          {aiModeLabel}
+                        </AiButton>
+                      </span>
+                    </EuiToolTip>
                   </div>
                 </EuiFlexItem>
               )}

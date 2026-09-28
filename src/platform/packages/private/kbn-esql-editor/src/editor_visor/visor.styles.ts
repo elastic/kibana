@@ -93,7 +93,7 @@ export const visorStyles = (
         content: '';
         position: absolute;
         inset: 0;
-        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+        border: ${euiTheme.border.width.thin} solid ${euiTheme.components.forms.border};
         border-radius: inherit;
         pointer-events: none;
       }
@@ -108,6 +108,9 @@ export const visorStyles = (
     `,
     kqlModeButtonActive: css`
       background-color: ${euiTheme.colors.backgroundLightText};
+    `,
+    aiButtonTooltipAnchor: css`
+      display: inline-flex;
     `,
     aiButtonSparkleHover: css`
       overflow: visible;
