@@ -43,7 +43,7 @@ Run of 2026-09-23, Elasticsearch and Kibana 9.6.0 snapshots, ratio is lookup ove
 
 **Writes on the request path are bound by the refresh wait, on both storages.** A list create and an item create take one second on either storage because the API waits for the next refresh, and the index refresh interval is one second. The lookup storage adds an index creation to a list create and a document write to an item create, and neither is visible under that wait. The p95 of an empty list delete is the one place the lookup storage shows extra cost (1.67 s against 1.07 s), from deleting an index rather than a document.
 
-**Reads are as fast or faster on the lookup storage.** Get by value and find pages are about half the legacy time, because a lookup list is a small single shard index that holds only that list, while the legacy read filters one list out of a shared stream.
+**Reads are as fast or faster on the lookup storage.** Get by value and find pages are about half the legacy time, because a lookup list is a small single shard index that holds only that list, while the legacy read filters one list out of the current `.items-<space>` stream, which holds every list of the space.
 
 **Range writes look faster than they are.** The `ip_range` item create p50 of 80 ms against a p95 of 1.04 s is not a cheaper write. The background task refreshes the index each time it writes, and a refresh in flight ends the request's `wait_for` early. When the task is idle, the write waits the full second, which is the p95.
 

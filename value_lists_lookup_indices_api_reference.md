@@ -35,7 +35,7 @@ Request body:
 
 The checks run cheapest first:
 
-1. The referencing rule scan. An exception rule whose API key cannot read the alias blocks. An indicator match rule that reads the list through `.items-<space>` and names it in its threat query blocks. A failed scan blocks. An indicator match rule that reads `.items-<space>` without naming the list is a warning. A plain call that is blocked here answers 409 before reading a single item.
+1. The referencing rule scan. An exception rule whose API key cannot read the alias blocks. An indicator match rule that reads the list through `.items-<space>` and selects it with a `list_id` clause in its threat query blocks. A failed scan blocks. An indicator match rule that reads `.items-<space>` without naming the list is a warning. A plain call that is blocked here answers 409 before reading a single item.
 2. The value scan. The legacy items are streamed and each value is checked against the lookup grammar for the list type. The scan counts the rejected values and keeps the first 100 as a sample. Any rejected value blocks a plain call.
 3. With `dryRun`, the report is returned here, with a `restriction` preflight when `restrict` is set.
 4. The copy. The concrete index and alias are created. An index left by an interrupted migration, which no list owns, is removed first. Items are copied in batches through the alias. With `force`, rejected values are dropped and counted in `migration.dropped`. Then the storage descriptor is written on the container document. A failure anywhere in this step deletes the new index and leaves the list legacy.
