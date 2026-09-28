@@ -34,24 +34,23 @@ test.describe(
       await uiSettings.set({ defaultIndex: DEFAULT_INDEX_ID });
     });
 
-    /*test.afterAll(async ({ kbnClient, uiSettings }) => {
+    test.afterAll(async ({ kbnClient, uiSettings }) => {
       await kbnClient.savedObjects.cleanStandardList();
       if (prevDefaultIndex !== undefined) {
         await uiSettings.set({ defaultIndex: prevDefaultIndex });
       } else {
         await uiSettings.unset('defaultIndex');
       }
-    });*/
+    });
 
-    test.describe.only('initial location', () => {
+    test.describe('initial location', () => {
       test.beforeEach(async ({ browserAuth, pageObjects }) => {
         await browserAuth.loginAsPrivilegedUser();
         await pageObjects.maps.openMapWithId(AUTO_FIT_INITIAL_LOCATION_MAP_ID);
       });
 
       test('should automatically fit to bounds on initial map load', async ({ pageObjects }) => {
-        const hits = await pageObjects.maps.getHits();
-        expect(hits).toBe('6');
+        await expect.poll(() => pageObjects.maps.getHits(), { timeout: 20_000 }).toBe('6');
 
         const { lat, lon } = await pageObjects.maps.getView();
         expect(Math.round(lat)).toBeGreaterThanOrEqual(41);
