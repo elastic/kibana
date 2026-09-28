@@ -519,6 +519,7 @@ export const createNavigationTree = ({
             children: [
               { link: 'management:api_keys' },
               { link: 'management:application_connections' },
+              { link: 'management:service_accounts' },
               { link: 'management:roles' },
             ],
           },

@@ -134,23 +134,28 @@ export const generateEsqlTool = ({
             message: esqlResponse.error,
           },
         });
-      } else {
-        if (esqlResponse.query) {
-          toolResults.push({
-            type: ToolResultType.query,
-            data: {
-              esql: esqlResponse.query,
-            },
-          });
-        }
-        if (esqlResponse.answer) {
-          toolResults.push({
-            type: ToolResultType.other,
-            data: {
-              answer: esqlResponse.answer,
-            },
-          });
-        }
+      } else if (esqlResponse.query) {
+        toolResults.push({
+          type: ToolResultType.query,
+          data: {
+            esql: esqlResponse.query,
+          },
+        });
+      }
+
+      // Returned on failure as well as success. `error` can be as unhelpful as "No query was
+      // generated", while the model's own response explains what actually went wrong — for
+      // instance that the question needs data the target index does not hold. Without it the
+      // caller cannot tell a transient failure from an impossible request. A query that failed is
+      // still not offered as a `query` result, so the caller has nothing it can hand to
+      // `execute_esql` (the prose may quote it, but not as a usable output).
+      if (esqlResponse.answer) {
+        toolResults.push({
+          type: ToolResultType.other,
+          data: {
+            answer: esqlResponse.answer,
+          },
+        });
       }
 
       return {

@@ -16,6 +16,12 @@ interface Props {
   isLoading?: boolean;
   onChangeSearchQuery: (value: string) => void;
   techPreview?: boolean;
+  /**
+   * Override the data-test-subj on the search input. Defaults to 'tableSearchInput'.
+   * Pass a different value when two instances of TableSearchBar appear on the same
+   * page to avoid Playwright strict-mode violations on the shared default subject.
+   */
+  dataTestSubj?: string;
 }
 
 export function TableSearchBar({
@@ -24,6 +30,7 @@ export function TableSearchBar({
   onChangeSearchQuery,
   isLoading,
   techPreview = false,
+  dataTestSubj,
 }: Props) {
   const debouncedSearchQuery = useMemo(
     () => debounce(onChangeSearchQuery, 500),
@@ -44,7 +51,7 @@ export function TableSearchBar({
       ) : null}
       <EuiFlexItem>
         <EuiFieldSearch
-          data-test-subj="tableSearchInput"
+          data-test-subj={dataTestSubj ?? 'tableSearchInput'}
           placeholder={placeholder}
           fullWidth={true}
           defaultValue={searchQuery}

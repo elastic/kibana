@@ -343,3 +343,31 @@ export const ASSIGNEE_PANEL_MODAL_ARIA_LABEL = (totalEpisodes: number) =>
     defaultMessage: 'Edit assignee of {totalEpisodes, plural, =1 {# episode} other {# episodes}}',
     values: { totalEpisodes },
   });
+
+export const ASSIGNEE_ADD_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.addButtonAriaLabel',
+  {
+    defaultMessage: 'Add assignee',
+  }
+);
+
+export const ASSIGNEE_ADD_BUTTON_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.addButtonTooltip',
+  {
+    defaultMessage: 'Assign this alert',
+  }
+);
+
+export const ASSIGNEE_CHANGE_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.changeButtonAriaLabel',
+  {
+    defaultMessage: 'Change assignee',
+  }
+);
+
+export const ASSIGNEE_CHANGE_BUTTON_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.changeButtonTooltip',
+  {
+    defaultMessage: 'Change or remove the assignee',
+  }
+);
