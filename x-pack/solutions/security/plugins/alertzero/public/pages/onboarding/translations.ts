@@ -20,13 +20,21 @@ export const ONBOARDING_TITLE = i18n.translate('xpack.alertzero.onboarding.title
 
 export const ONBOARDING_SUBTITLE = i18n.translate('xpack.alertzero.onboarding.subtitle', {
   defaultMessage:
-    'Choose the workers you need — each covers a job. Every worker starts at the lowest autonomy — it investigates and proposes; nothing runs without your approval.',
+    'Choose the workers you need — each covers a job. New workers default to the lowest autonomy; previously configured workers keep their saved settings.',
 });
 
 export const ONBOARDING_WORKERS_FOOTNOTE = i18n.translate(
   'xpack.alertzero.onboarding.workersFootnote',
   {
     defaultMessage: 'Enable acts on the checked set; at least one must stay checked.',
+  }
+);
+
+export const ONBOARDING_NO_WORKERS_AVAILABLE = i18n.translate(
+  'xpack.alertzero.onboarding.noWorkersAvailable',
+  {
+    defaultMessage:
+      'No workers are available for your current subscription. Contact your administrator to enable additional features.',
   }
 );
 

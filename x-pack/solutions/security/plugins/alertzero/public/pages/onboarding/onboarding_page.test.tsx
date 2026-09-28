@@ -21,6 +21,7 @@ import {
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
 } from '@kbn/alertzero-common';
+import { SECURITY_APP_ID } from '@kbn/deeplinks-security';
 import { queryKeys } from '../../query_keys';
 import { OnboardingPage } from './onboarding_page';
 
@@ -77,7 +78,7 @@ const renderPage = ({
     </I18nProvider>
   );
 
-  return { history };
+  return { history, application: core.application };
 };
 
 describe('OnboardingPage', () => {
@@ -168,6 +169,16 @@ describe('OnboardingPage', () => {
       expect(screen.getByText(/Not now/)).toBeInTheDocument();
     });
 
+    it('navigates to Security and does not send PATCHes when Not now is clicked', () => {
+      const httpPatch = jest.fn();
+      const { application } = renderPage({ canWrite: true, httpPatch });
+
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingNotNowLink'));
+
+      expect(application.navigateToApp).toHaveBeenCalledWith(SECURITY_APP_ID);
+      expect(httpPatch).not.toHaveBeenCalled();
+    });
+
     it('disables a toggle when it is the last enabled worker', () => {
       renderPage({ canWrite: true });
 
@@ -248,10 +259,12 @@ describe('OnboardingPage', () => {
       );
     });
 
-    it('disables the Enable button when no workers are available from the server', () => {
+    it('shows an empty state and disables the Enable button when no workers are available from the server', () => {
       // Server returns no onboarding workers at all — everything is skill-gated.
       renderPage({ canWrite: true, serverWorkers: { workers: [] } });
 
+      expect(screen.getByTestId('alertZeroOnboardingNoWorkersAvailable')).toBeInTheDocument();
+      expect(screen.queryByRole('switch')).not.toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Enable and continue' })).toBeDisabled();
     });
 

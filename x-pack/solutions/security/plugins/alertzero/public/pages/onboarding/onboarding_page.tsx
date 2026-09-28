@@ -143,58 +143,73 @@ export const OnboardingPage: React.FC = () => {
       <EuiSpacer size="l" />
 
       <EuiPanel hasBorder hasShadow={false} paddingSize="none">
-        {onboardingWorkers.map(({ id, name }, index) => {
-          const wid = id as OnboardingWorkerId;
-          const description = i18n.onboardingWorkerDescription(id);
-          const checked = workerEnabled[wid];
-          const isLastEnabled = checked && enabledCount <= 1;
+        {onboardingWorkers.length === 0 ? (
+          <div
+            css={css`
+              padding: 16px;
+            `}
+            data-test-subj="alertZeroOnboardingNoWorkersAvailable"
+          >
+            <EuiText size="s" color="subdued">
+              <p>{i18n.ONBOARDING_NO_WORKERS_AVAILABLE}</p>
+            </EuiText>
+          </div>
+        ) : (
+          <>
+            {onboardingWorkers.map(({ id, name }, index) => {
+              const wid = id as OnboardingWorkerId;
+              const description = i18n.onboardingWorkerDescription(id);
+              const checked = workerEnabled[wid];
+              const isLastEnabled = checked && enabledCount <= 1;
 
-          return (
-            <React.Fragment key={id}>
-              {index > 0 && <EuiHorizontalRule margin="none" />}
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="m"
-                responsive={false}
-                css={css`
-                  padding: 12px 16px;
-                `}
-              >
-                <EuiFlexItem>
-                  <EuiText size="s">
-                    <strong>{workerName(id, name)}</strong>
-                    {description ? (
-                      <>
-                        {' — '}
-                        {description}
-                      </>
-                    ) : null}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiSwitch
-                    label={workerName(id, name)}
-                    showLabel={false}
-                    checked={checked}
-                    disabled={isLastEnabled || isSaving}
-                    onChange={(e) => handleToggle(wid, e.target.checked)}
-                    data-test-subj={`alertZeroOnboardingWorkerToggle-${id}`}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </React.Fragment>
-          );
-        })}
-        <EuiHorizontalRule margin="none" />
-        <div
-          css={css`
-            padding: 8px 16px;
-          `}
-        >
-          <EuiText size="xs" color="subdued">
-            <p>{i18n.ONBOARDING_WORKERS_FOOTNOTE}</p>
-          </EuiText>
-        </div>
+              return (
+                <React.Fragment key={id}>
+                  {index > 0 && <EuiHorizontalRule margin="none" />}
+                  <EuiFlexGroup
+                    alignItems="center"
+                    gutterSize="m"
+                    responsive={false}
+                    css={css`
+                      padding: 12px 16px;
+                    `}
+                  >
+                    <EuiFlexItem>
+                      <EuiText size="s">
+                        <strong>{workerName(id, name)}</strong>
+                        {description ? (
+                          <>
+                            {' — '}
+                            {description}
+                          </>
+                        ) : null}
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiSwitch
+                        label={workerName(id, name)}
+                        showLabel={false}
+                        checked={checked}
+                        disabled={isLastEnabled || isSaving}
+                        onChange={(e) => handleToggle(wid, e.target.checked)}
+                        data-test-subj={`alertZeroOnboardingWorkerToggle-${id}`}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </React.Fragment>
+              );
+            })}
+            <EuiHorizontalRule margin="none" />
+            <div
+              css={css`
+                padding: 8px 16px;
+              `}
+            >
+              <EuiText size="xs" color="subdued">
+                <p>{i18n.ONBOARDING_WORKERS_FOOTNOTE}</p>
+              </EuiText>
+            </div>
+          </>
+        )}
       </EuiPanel>
 
       <EuiSpacer size="m" />
