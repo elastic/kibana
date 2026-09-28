@@ -1804,31 +1804,57 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     expect(evaluateExpression(engine, gate.condition, { inputs: {} })).toBe(false);
   });
 
-  it('links the Investigation from both alert notes, and omits it on the standalone path', () => {
-    const verdictNote = findStepByName(workflow.steps, 'add_verdict_note_to_alert') as {
-      with: { body: { note: { note: string } } };
-    };
+  it('links the Investigation from the no-verdict note, and omits it on the standalone path', () => {
     const errorNote = findStepByName(workflow.steps, 'add_no_data_note_to_alert') as {
       with: { body: { note: { note: string } } };
     };
+    const note = errorNote.with.body.note.note;
 
-    for (const note of [verdictNote.with.body.note.note, errorNote.with.body.note.note]) {
-      const withInvestigation = engine.parseAndRenderSync(note, {
-        workflow: { spaceId: 'default' },
-        variables: { investigation_conversation_id: 'conv-1' },
-      });
-      expect(withInvestigation).toContain(
-        '- Investigation: [conv-1](/s/default/app/agent_builder/conversations/conv-1)'
-      );
+    const withInvestigation = engine.parseAndRenderSync(note, {
+      workflow: { spaceId: 'default' },
+      variables: { investigation_conversation_id: 'conv-1' },
+    });
+    expect(withInvestigation).toContain(
+      '- Investigation: [conv-1](/s/default/app/agent_builder/conversations/conv-1)'
+    );
 
-      // Standalone runs have no Investigation, so the line must not render as a dead link.
-      const standalone = engine.parseAndRenderSync(note, {
-        workflow: { spaceId: 'default' },
-        variables: { investigation_conversation_id: '' },
-      });
-      expect(standalone).not.toContain('Investigation:');
-      expect(standalone).not.toContain('agent_builder/conversations');
-    }
+    // Standalone runs have no Investigation, so the line must not render as a dead link.
+    const standalone = engine.parseAndRenderSync(note, {
+      workflow: { spaceId: 'default' },
+      variables: { investigation_conversation_id: '' },
+    });
+    expect(standalone).not.toContain('Investigation:');
+    expect(standalone).not.toContain('agent_builder/conversations');
+  });
+
+  // A Worker caller applies only its own static AlertZero tags.
+  it('writes the alert-analysis tags only on the standalone path', () => {
+    const gate = findStepByName(workflow.steps, 'write_standalone_tags') as {
+      condition: string;
+      steps: Array<{ name: string }>;
+    };
+    expect(gate.steps.map(({ name }) => name)).toEqual([
+      'set_tags',
+      'has_tags_to_remove',
+      'add_result_tags',
+    ]);
+    expect(evaluateExpression(engine, gate.condition, { inputs: { calledByWorker: true } })).toBe(
+      false
+    );
+    expect(evaluateExpression(engine, gate.condition, { inputs: {} })).toBe(true);
+  });
+
+  // The Worker writes its own verdict note; writing this one too would give each alert two.
+  it('writes the verdict note only on the standalone path', () => {
+    const gate = findStepByName(workflow.steps, 'write_standalone_verdict_note') as {
+      condition: string;
+      steps: Array<{ name: string }>;
+    };
+    expect(gate.steps.map(({ name }) => name)).toEqual(['add_verdict_note_to_alert']);
+    expect(evaluateExpression(engine, gate.condition, { inputs: { calledByWorker: true } })).toBe(
+      false
+    );
+    expect(evaluateExpression(engine, gate.condition, { inputs: {} })).toBe(true);
   });
 
   it('drops verdicts whose id belongs to another batch', () => {

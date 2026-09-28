@@ -1850,66 +1850,66 @@ steps:
               # -------------------------------------------------------------------
               # Write the verdict note to the alert timeline
               # -------------------------------------------------------------------
-              # The Investigation line is what lets another worker reading this alert pick up
-              # the conversation that produced the verdict. Empty on the standalone path,
-              # where no Investigation exists.
-              - name: add_verdict_note_to_alert
-                type: kibana.request
-                on-failure:
-                  retry:
-                    max-attempts: 3
-                    delay: 5s
-                with:
-                  method: PATCH
-                  path: "/s/{{ workflow.spaceId }}/api/note"
-                  body:
-                    note:
-                      eventId: '{{ foreach.item._id }}'
-                      note: |
-                        ✅ [{{workflow.name}}:{{execution.id}}]({{execution.url}})
+              # Standalone path only. A Worker caller writes its own verdict note (with the
+              # Investigation reference), so writing one here would give each alert two.
+              - name: write_standalone_verdict_note
+                type: if
+                condition: "${{ inputs.calledByWorker != true }}"
+                steps:
+                  - name: add_verdict_note_to_alert
+                    type: kibana.request
+                    on-failure:
+                      retry:
+                        max-attempts: 3
+                        delay: 5s
+                    with:
+                      method: PATCH
+                      path: "/s/{{ workflow.spaceId }}/api/note"
+                      body:
+                        note:
+                          eventId: '{{ foreach.item._id }}'
+                          note: |
+                            ✅ [{{workflow.name}}:{{execution.id}}]({{execution.url}})
 
-                        ---
-                        ## Automated Alert Analysis
-                        ### Classification
-                        **{{ variables.alert_verdict.classification }}**
+                            ---
+                            ## Automated Alert Analysis
+                            ### Classification
+                            **{{ variables.alert_verdict.classification }}**
 
-                        ### Confidence Score
-                        {{ variables.alert_verdict.confidence_score }}
+                            ### Confidence Score
+                            {{ variables.alert_verdict.confidence_score }}
 
-                        ### Rationale
-                        {{ variables.alert_verdict.rationale }}
+                            ### Rationale
+                            {{ variables.alert_verdict.rationale }}
 
-                        ### Contributing Factors
-                        {% for factor in variables.alert_verdict.contributing_factors %}
-                        - {{ factor }}
-                        {%- endfor %}
+                            ### Contributing Factors
+                            {% for factor in variables.alert_verdict.contributing_factors %}
+                            - {{ factor }}
+                            {%- endfor %}
 
-                        ### Analysis Details
-                        {% if variables.investigation_conversation_id != '' -%}
-                        - Investigation: [{{ variables.investigation_conversation_id }}](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ variables.investigation_conversation_id }})
-                        {% endif -%}
-                        - Workflow version: {{ variables.normalized_version }}
-                        - Tag prefix: {{ variables.tag_prefix }}
-                        - Connector: {{ variables.resolved_connector_id | default: variables.connector_id }}
-                        - Analyzed in a batch of up to {{ consts.batch_size }} alerts
-                        {% if variables.auto_close_enabled -%}
-                        - Auto-close confidence range: {{ variables.auto_close_confidence_score_min_threshold }} to {{ variables.auto_close_confidence_score_max_threshold }}
-                        {%- endif %}
+                            ### Analysis Details
+                            - Workflow version: {{ variables.normalized_version }}
+                            - Tag prefix: {{ variables.tag_prefix }}
+                            - Connector: {{ variables.resolved_connector_id | default: variables.connector_id }}
+                            - Analyzed in a batch of up to {{ consts.batch_size }} alerts
+                            {% if variables.auto_close_enabled -%}
+                            - Auto-close confidence range: {{ variables.auto_close_confidence_score_min_threshold }} to {{ variables.auto_close_confidence_score_max_threshold }}
+                            {%- endif %}
 
-                        ### Token Usage
-                        Shared across the {{ variables.pending_alert_count }} alerts of this execution,
-                        classified in {{ variables.batch_llm_calls }} model call(s):
-                        - Input tokens: {{ variables.batch_input_tokens }}
-                        - Output tokens: {{ variables.batch_output_tokens }}
-                        - Total tokens: {{ variables.batch_input_tokens | plus: variables.batch_output_tokens }}
+                            ### Token Usage
+                            Shared across the {{ variables.pending_alert_count }} alerts of this execution,
+                            classified in {{ variables.batch_llm_calls }} model call(s):
+                            - Input tokens: {{ variables.batch_input_tokens }}
+                            - Output tokens: {{ variables.batch_output_tokens }}
+                            - Total tokens: {{ variables.batch_input_tokens | plus: variables.batch_output_tokens }}
 
-                        ### Timestamp
-                        {{ execution.startedAt | date: '%B %d, %Y at %H:%M:%S UTC' }}
+                            ### Timestamp
+                            {{ execution.startedAt | date: '%B %d, %Y at %H:%M:%S UTC' }}
 
-                      timelineId: ''
-                  headers:
-                    kbn-xsrf: string
-                    Content-Type: application/json
+                          timelineId: ''
+                      headers:
+                        kbn-xsrf: string
+                        Content-Type: application/json
 
               # -------------------------------------------------------------------
               # Apply workflow tags to the alert
@@ -1919,43 +1919,50 @@ steps:
               #   <prefix>.version.<ver>            - tracks the workflow version
               #   <prefix>.classification.<cls>     - records the verdict
               #   <prefix>.confidence.<score>       - records the confidence score
-              - name: set_tags
-                type: data.set
-                with:
-                  tags_to_add:
-                    - "{{ variables.tag_prefix }}"
-                    - "{{ variables.tag_prefix }}.version.{{ variables.normalized_version }}"
-                    - "{{ variables.tag_prefix }}.classification.{{ variables.alert_verdict.classification | downcase }}"
-                    - "{{ variables.tag_prefix }}.confidence.{{ variables.alert_verdict.confidence_score }}"
-                  tags_to_remove: "${{ foreach.item.kibana.alert.workflow_tags | where_exp: 'tag', variables.tags_filter_expr }}"
-
-              # Remove stale tags first (if any) to avoid conflicts with the add.
-              - name: has_tags_to_remove
+              #
+              # Standalone path only. A Worker caller writes its own static AlertZero tags, and
+              # bypass_dedup_for_worker means this path never reads these tags back.
+              - name: write_standalone_tags
                 type: if
-                condition: "${{ variables.tags_to_remove | has_exp: 'item', 'true' }}"
+                condition: "${{ inputs.calledByWorker != true }}"
                 steps:
-                  - name: remove_stale_tags
+                  - name: set_tags
+                    type: data.set
+                    with:
+                      tags_to_add:
+                        - "{{ variables.tag_prefix }}"
+                        - "{{ variables.tag_prefix }}.version.{{ variables.normalized_version }}"
+                        - "{{ variables.tag_prefix }}.classification.{{ variables.alert_verdict.classification | downcase }}"
+                        - "{{ variables.tag_prefix }}.confidence.{{ variables.alert_verdict.confidence_score }}"
+                      tags_to_remove: "${{ foreach.item.kibana.alert.workflow_tags | where_exp: 'tag', variables.tags_filter_expr }}"
+
+                  # Remove stale tags first (if any) to avoid conflicts with the add.
+                  - name: has_tags_to_remove
+                    type: if
+                    condition: "${{ variables.tags_to_remove | has_exp: 'item', 'true' }}"
+                    steps:
+                      - name: remove_stale_tags
+                        type: kibana.SetAlertTags
+                        with:
+                          ids:
+                            - '{{ foreach.item._id }}'
+                          tags:
+                            tags_to_remove: "${{ variables.tags_to_remove }}"
+                            tags_to_add: []
+
+                  # Add the new tags for this execution.
+                  - name: add_result_tags
                     type: kibana.SetAlertTags
+                    on-failure:
+                      retry:
+                        max-attempts: 3
+                        delay: 5s
                     with:
                       ids:
                         - '{{ foreach.item._id }}'
                       tags:
-                        tags_to_remove: "${{ variables.tags_to_remove }}"
-                        tags_to_add: []
-
-              # Add the new tags for this execution.
-              - name: add_result_tags
-                type: kibana.SetAlertTags
-                on-failure:
-                  retry:
-                    max-attempts: 3
-                    delay: 5s
-                with:
-                  ids:
-                    - '{{ foreach.item._id }}'
-                  tags:
-                    tags_to_remove: []
-                    tags_to_add: "${{ variables.tags_to_add }}"
+                        tags_to_remove: []
+                        tags_to_add: "${{ variables.tags_to_add }}"
 
               # Accumulate the real alert id (foreach.item._id) — never the model's echo — for
               # the bulk auto-close call below. Using the actual alert id means a fabricated id
