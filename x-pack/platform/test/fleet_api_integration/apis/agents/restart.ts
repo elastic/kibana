@@ -6,7 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { AGENTS_INDEX, AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import {
+  AGENTS_INDEX,
+  AGENT_ACTIONS_INDEX,
+  AGENT_ACTIONS_RESULTS_INDEX,
+} from '@kbn/fleet-plugin/common';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
