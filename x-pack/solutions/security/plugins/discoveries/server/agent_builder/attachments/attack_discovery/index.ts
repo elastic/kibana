@@ -58,7 +58,9 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
  * the attachment's view and the agent both insert the original values from it, one source.
  */
 export const attackDiscoveryAttachmentDataSchema = z.object({
-  alert_ids: z.array(z.string().max(512)).max(1000),
+  // `format` lists each id on its own line, so an id may not contain whitespace, which would
+  // let it add lines of its own to what the agent reads.
+  alert_ids: z.array(z.string().max(512).regex(/^\S+$/)).max(1000),
   details_markdown: z.string().max(MAX_DETAILS_LENGTH),
   entity_summary_markdown: z.string().max(MAX_ENTITY_SUMMARY_LENGTH).optional(),
   id: z.string().max(512),
@@ -105,6 +107,8 @@ const formatAttackDiscovery = (data: AttackDiscoveryAttachmentData): string => {
     '',
     `Attack Discovery id: ${data.id}`,
     `Correlated detection alerts: ${data.alert_ids.length}`,
+    // Every id, so the agent can fetch the alerts with the `security.alerts` tool.
+    ...data.alert_ids.map((alertId) => `- ${alertId}`),
     ...(entitySummary.length > 0 ? ['', '## Entity Summary', entitySummary] : []),
     '',
     '## Summary',
@@ -144,11 +148,11 @@ export const createAttackDiscoveryAttachmentType = ({
   // The review workflow's add step and "Add to chat" are not gated by it.
   isReadonly: true,
 
-  // `format` above can emit a 1024-character title, 8k of entity summary, 8k of summary,
-  // 50k of details, and up to 64 tactics, and the framework default is 10k, so without
-  // this the details a reader needs most would silently truncate. Sized to this type's
-  // own schema rather than to `security.alerts`'s 50k.
-  maxContentLength: 90_000,
+  // `format` above can emit a 1024-character title, up to 1000 alert ids, 8k of entity
+  // summary, 8k of summary, 50k of details, and up to 64 tactics, and the framework default
+  // is 10k, so without this the details a reader needs most would silently truncate. Sized
+  // to this type's own schema rather than to `security.alerts`'s 50k.
+  maxContentLength: 600_000,
 
   validate: (input) => {
     const result = attackDiscoveryAttachmentDataSchema.safeParse(input);

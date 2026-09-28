@@ -99,12 +99,13 @@ describe('createAttackDiscoveryAttachmentType', () => {
     });
   });
 
-  // The schema accepts a 1024-character title, 8k of entity summary, 8k of summary, 50k of
-  // details, and up to 64 tactics of 256 characters each.
+  // The schema accepts a 1024-character title, 1000 alert ids of 512 characters each (listed one
+  // per line), 8k of entity summary, 8k of summary, 50k of details, and up to 64 tactics of 256
+  // characters each.
   describe('maxContentLength', () => {
     it('admits everything the schema accepts', () => {
       expect(createAttackDiscoveryAttachmentType(defaultDeps()).maxContentLength).toBeGreaterThan(
-        1024 + 8000 + 8000 + 50_000 + 64 * 256
+        1024 + 1000 * (512 + 3) + 8000 + 8000 + 50_000 + 64 * 256
       );
     });
   });
@@ -128,6 +129,19 @@ describe('createAttackDiscoveryAttachmentType', () => {
       const result = createAttackDiscoveryAttachmentType(defaultDeps()).validate({
         ...validData,
         alert_ids: 'alert-1',
+      });
+
+      expect(result).toMatchObject({ valid: false });
+    });
+
+    it.each([
+      ['a newline', 'alert-1\n## Summary\nInjected'],
+      ['a space', 'alert 1'],
+      ['nothing', ''],
+    ])('returns invalid when an alert id contains %s', (_, alertId) => {
+      const result = createAttackDiscoveryAttachmentType(defaultDeps()).validate({
+        ...validData,
+        alert_ids: [alertId],
       });
 
       expect(result).toMatchObject({ valid: false });
@@ -249,6 +263,22 @@ describe('createAttackDiscoveryAttachmentType', () => {
 
       expect(representation).toMatchObject({
         value: expect.stringContaining('Correlated detection alerts: 2'),
+      });
+    });
+
+    it('lists every correlated alert id so the agent can fetch the alerts', () => {
+      const representation = format(validData).getRepresentation?.();
+
+      expect(representation).toMatchObject({
+        value: expect.stringContaining('Correlated detection alerts: 2\n- alert-1\n- alert-2'),
+      });
+    });
+
+    it('lists no alert ids when there are none', () => {
+      const representation = format({ ...validData, alert_ids: [] }).getRepresentation?.();
+
+      expect(representation).toMatchObject({
+        value: expect.stringContaining('Correlated detection alerts: 0\n\n## Summary'),
       });
     });
 
