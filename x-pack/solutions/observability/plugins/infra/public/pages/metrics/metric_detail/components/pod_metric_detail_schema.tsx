@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { escapeQuotes } from '@kbn/es-query';
 import { K8S_POD_UID, KUBERNETES_POD_UID } from '@kbn/metrics-data-access-plugin/common';
 import {
   TimeRangeMetadataProvider,
@@ -18,9 +19,6 @@ import { MetricDetailPage } from '../metric_detail_page';
 import { useMetricsTimeContext } from '../hooks/use_metrics_time';
 import { DetailSchemaProvider } from '../lib/detail_schema_context';
 import { resolveDetailSchema } from '../lib/resolve_detail_schema';
-
-const escapeKueryValue = (value: string): string =>
-  value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
 /**
  * Resolves the pod schema and holds metadata/metric requests until detection
@@ -59,7 +57,7 @@ export const PodMetricDetailSchema = ({ nodeId }: { nodeId: string }) => {
   const { parsedTimeRange } = useMetricsTimeContext();
 
   const { start, end, kuery } = useMemo(() => {
-    const escapedId = escapeKueryValue(nodeId);
+    const escapedId = escapeQuotes(nodeId);
     return {
       start: new Date(parsedTimeRange.from).toISOString(),
       end: new Date(parsedTimeRange.to).toISOString(),
