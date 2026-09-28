@@ -12,6 +12,7 @@ import type { Logger } from '@kbn/core/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import type {
   IWorkflowEventLogger,
+  IWorkflowEventLoggerWithFlush,
   WorkflowEventFlushOptions,
   WorkflowEventLoggerContext,
   WorkflowEventLoggerOptions,
@@ -19,7 +20,7 @@ import type {
 import type { LogsRepository, WorkflowLogEvent } from '../repositories/logs_repository';
 import { isWorkflowTaskManagerAbortSignal } from '../workflow_task_shutdown';
 
-export class WorkflowEventLogger implements IWorkflowEventLogger {
+export class WorkflowEventLogger implements IWorkflowEventLoggerWithFlush {
   private eventQueue: WorkflowLogEvent[] = [];
   private timings: Map<string, Date> = new Map();
 

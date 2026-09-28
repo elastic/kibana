@@ -102,5 +102,8 @@ export interface IWorkflowEventLogger {
     stepName?: string,
     stepType?: string
   ): IWorkflowEventLogger;
+}
+
+export interface IWorkflowEventLoggerWithFlush extends IWorkflowEventLogger {
   flushEvents(options?: WorkflowEventFlushOptions): Promise<void>;
 }
