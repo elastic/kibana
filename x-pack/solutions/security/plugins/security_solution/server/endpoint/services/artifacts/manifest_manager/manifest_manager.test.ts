@@ -1396,6 +1396,115 @@ describe('ManifestManager', () => {
       });
     });
 
+    test('builds policy-specific custom YARA signature artifacts and omits them from other policies', async () => {
+      const globalYaraRuleText = 'rule GlobalExample { condition: true }';
+      const policy2YaraRuleText = 'rule Policy2Example { condition: true }';
+      const globalYaraListItem = getExceptionListItemSchemaMock({
+        id: 'yara-global',
+        item_id: 'yara-global',
+        name: 'Global YARA rule',
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: globalYaraRuleText,
+          },
+        ],
+      });
+      const policy2YaraListItem = getExceptionListItemSchemaMock({
+        id: 'yara-policy-2',
+        item_id: 'yara-policy-2',
+        name: 'Policy 2 YARA rule',
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        os_types: ['windows'],
+        tags: [buildPerPolicyTag(TEST_POLICY_ID_2)],
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: policy2YaraRuleText,
+          },
+        ],
+      });
+
+      const context = buildManifestManagerContextMock({
+        experimentalFeatures: ['customYaraSignaturesEnabled'],
+      });
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id]: {
+          windows: [globalYaraListItem, policy2YaraListItem],
+        },
+      });
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+        TEST_POLICY_ID_2,
+      ]);
+
+      const manifest = await manifestManager.buildNewManifest();
+      const windowsYaraArtifacts = manifest
+        .getAllArtifacts()
+        .filter((artifact) => artifact.identifier === ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_WINDOWS);
+
+      expect(windowsYaraArtifacts.length).toBe(2);
+
+      const defaultWindowsYaraArtifact = windowsYaraArtifacts.find((artifact) =>
+        manifest.isDefaultArtifact(artifact)
+      );
+      const policy2WindowsYaraArtifact = windowsYaraArtifacts.find(
+        (artifact) => !manifest.isDefaultArtifact(artifact)
+      );
+
+      expect(defaultWindowsYaraArtifact).toBeDefined();
+      expect(policy2WindowsYaraArtifact).toBeDefined();
+
+      // Default artifact: global rule only — policy-scoped rule must not leak here
+      expect(getArtifactObject(defaultWindowsYaraArtifact!)).toStrictEqual({
+        entries: [
+          {
+            yara_rule_data: globalYaraRuleText,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: globalYaraListItem.id,
+            entry_name: globalYaraListItem.name,
+          },
+        ],
+      });
+      // Policy 1 has no policy-specific YARA rules, so it uses the default artifact
+      expect(manifest.getArtifactTargetPolicies(defaultWindowsYaraArtifact!)).toStrictEqual(
+        new Set([TEST_POLICY_ID_1])
+      );
+
+      // Policy 2 artifact: global + policy-2 rule
+      expect(getArtifactObject(policy2WindowsYaraArtifact!)).toStrictEqual({
+        entries: [
+          {
+            yara_rule_data: globalYaraRuleText,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: globalYaraListItem.id,
+            entry_name: globalYaraListItem.name,
+          },
+          {
+            yara_rule_data: policy2YaraRuleText,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: policy2YaraListItem.id,
+            entry_name: policy2YaraListItem.name,
+          },
+        ],
+      });
+      expect(manifest.getArtifactTargetPolicies(policy2WindowsYaraArtifact!)).toStrictEqual(
+        new Set([TEST_POLICY_ID_2])
+      );
+    });
+
     test('retries per-item libyara validation after a transient engine failure', async () => {
       const yaraRuleText = 'rule Example { condition: true }';
       const yaraListItem = getExceptionListItemSchemaMock({
