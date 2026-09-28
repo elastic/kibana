@@ -62,6 +62,40 @@ import {
 import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table';
 
 const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
+const ESQL_HISTOGRAM_TOP_BREAKDOWN_VALUES = 9;
+const ESQL_HISTOGRAM_RESULT_LIMIT = 10000;
+
+const buildEsqlHistogramQuery = ({
+  userQuery,
+  timeFieldName,
+  interval,
+  breakdownFieldName,
+}: {
+  userQuery: string;
+  timeFieldName: string | undefined;
+  interval: string;
+  breakdownFieldName?: string;
+}): string => {
+  const timeBuckets = `${TIMESTAMP_COLUMN} = BUCKET(${timeFieldName}, ${interval})`;
+
+  if (!breakdownFieldName) {
+    return appendToESQLQuery(
+      userQuery,
+      `| STATS results = COUNT(*) BY ${timeBuckets}
+| LIMIT ${ESQL_HISTOGRAM_RESULT_LIMIT}`
+    );
+  }
+
+  const field = `\`${breakdownFieldName}\``;
+  const topValuesQuery = `${userQuery} | STATS c = COUNT(*) BY ${field} | SORT c DESC | LIMIT ${ESQL_HISTOGRAM_TOP_BREAKDOWN_VALUES} | KEEP ${field}`;
+
+  return appendToESQLQuery(
+    userQuery,
+    `| FORK (WHERE ${field} NOT IN (${topValuesQuery}) | EVAL ${field} = "Other"::keyword) (WHERE ${field} IN (${topValuesQuery}) | EVAL ${field} = ${field}::keyword)
+| STATS results = COUNT(*) BY ${field}, ${timeBuckets}
+| LIMIT ${ESQL_HISTOGRAM_RESULT_LIMIT}`
+  );
+};
 
 interface Services {
   data: DataPublicPluginStart;
@@ -640,16 +674,13 @@ export class LensVisService {
     const language = getAggregateQueryMode(query);
     const safeQuery = removeDropCommandsFromESQLQuery(query[language]);
     const normalizedQuery = convertTimeseriesCommandToFrom(safeQuery);
-    const breakdown = breakdownColumn ? `\`${breakdownColumn.name}\`, ` : '';
-    const topPerBucket = breakdownColumn
-      ? ` | SORT results DESC | LIMIT 5 BY ${TIMESTAMP_COLUMN}`
-      : '';
 
-    const timeBuckets = `${TIMESTAMP_COLUMN} = BUCKET(${dataView.timeFieldName}, ${queryInterval})`;
-    return appendToESQLQuery(
-      normalizedQuery,
-      `| STATS results = COUNT(*) BY ${breakdown}${timeBuckets}${topPerBucket}`
-    );
+    return buildEsqlHistogramQuery({
+      userQuery: normalizedQuery,
+      timeFieldName: dataView.timeFieldName,
+      interval: queryInterval,
+      breakdownFieldName: breakdownColumn?.name,
+    });
   };
 
   private getAllSuggestions = ({

@@ -10,7 +10,10 @@
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, tags } from '../fixtures';
 
-const BREAKDOWN_LEGEND_LABELS = ['css', 'gif', 'jpg', 'php', 'png'];
+const EXTENSION_BREAKDOWN_VALUES = ['css', 'gif', 'jpg', 'php', 'png'];
+
+const getNamedBreakdownLegendLabels = (labels: string[]): string[] =>
+  labels.filter((label) => label !== 'Other').sort();
 
 spaceTest.describe('Discover ES|QL histogram breakdown', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
@@ -36,8 +39,8 @@ spaceTest.describe('Discover ES|QL histogram breakdown', { tag: tags.deploymentA
     await discover.chooseBreakdownField('extension');
     await discover.waitUntilTabIsLoaded();
     await expect
-      .poll(() => discover.getHistogramLegendLabels())
-      .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
+      .poll(async () => getNamedBreakdownLegendLabels(await discover.getHistogramLegendLabels()))
+      .toStrictEqual(EXTENSION_BREAKDOWN_VALUES);
   });
 
   spaceTest(
@@ -70,8 +73,8 @@ spaceTest.describe('Discover ES|QL histogram breakdown', { tag: tags.deploymentA
       await discover.loadSavedSearch(savedSearchTitle);
       await discover.waitUntilTabIsLoaded();
       await expect
-        .poll(() => discover.getHistogramLegendLabels())
-        .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
+        .poll(async () => getNamedBreakdownLegendLabels(await discover.getHistogramLegendLabels()))
+        .toStrictEqual(EXTENSION_BREAKDOWN_VALUES);
     }
   );
 
@@ -80,7 +83,7 @@ spaceTest.describe('Discover ES|QL histogram breakdown', { tag: tags.deploymentA
     await unifiedFieldList.clickFieldListAddBreakdownField('extension');
     await discover.waitUntilTabIsLoaded();
     await expect
-      .poll(() => discover.getHistogramLegendLabels())
-      .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
+      .poll(async () => getNamedBreakdownLegendLabels(await discover.getHistogramLegendLabels()))
+      .toStrictEqual(EXTENSION_BREAKDOWN_VALUES);
   });
 });
