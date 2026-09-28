@@ -21,6 +21,7 @@ import {
   NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW,
   NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
 } from '.';
+import { createWorkflowLiquidEngine } from '../../../../common/utils';
 
 const workflow = parse(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.yaml) as {
   name: string;
@@ -45,6 +46,31 @@ const workflow = parse(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.yaml) a
 };
 
 describe('nightshift sandbox materialize workspace workflow', () => {
+  it.each([
+    [0, true],
+    [1, false],
+    [2, false],
+  ])('evaluates sandbox materialization on execution index %i to %s', (index, expected) => {
+    const condition = workflow.steps[0].if;
+    if (!condition) throw new Error('Missing materialization condition');
+    const rendered = createWorkflowLiquidEngine().evalValueSync(condition.slice(3, -2), {
+      inputs: { round_execution_index: index, conversation_id: 'conv-1' },
+    });
+    expect(rendered).toBe(expected);
+  });
+
+  it('skips materialization and context output when no sandbox was obtained', () => {
+    const engine = createWorkflowLiquidEngine();
+    for (const step of workflow.steps.slice(1)) {
+      if (!step.if) throw new Error(`Missing condition for ${step.name}`);
+      expect(
+        engine.evalValueSync(step.if.slice(3, -2), {
+          steps: { obtain_sandbox: { output: {} } },
+        })
+      ).toBe(false);
+    }
+  });
+
   it('obtains one sandbox then materializes cortex and memory in parallel with that id', () => {
     expect(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.id).toBe(
       NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID

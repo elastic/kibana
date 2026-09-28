@@ -12,6 +12,7 @@ import {
   NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW,
   NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID,
 } from '.';
+import { createWorkflowLiquidEngine } from '../../../../common/utils';
 
 const workflow = parse(NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW.yaml) as {
   name: string;
@@ -33,6 +34,19 @@ describe('decision tree hydrate workflow', () => {
         type: 'nightshift.decisionTreeHydrate',
       }),
     ]);
+  });
+
+  it.each([
+    [0, true],
+    [1, false],
+    [2, false],
+  ])('evaluates hydration on execution index %i to %s', (index, expected) => {
+    const condition = workflow.steps[0].if;
+    if (!condition) throw new Error('Missing hydration condition');
+    const rendered = createWorkflowLiquidEngine().evalValueSync(condition.slice(3, -2), {
+      inputs: { round_execution_index: index, conversation_id: 'conv-1' },
+    });
+    expect(rendered).toBe(expected);
   });
 
   it('hydrates only on the first execution of a conversation round', () => {
