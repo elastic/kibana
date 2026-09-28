@@ -44,7 +44,7 @@ globalSetupHook('Enable feature flags', async ({ apiServices, log }) => {
   log.info('[setup] Enabling my-feature-flag...');
   await apiServices.core.settings({
     'feature_flags.overrides': {
-      'my-plugin.my-feature-flag': 'true',
+      'my-plugin.my-feature-flag': true,
     },
   });
 });
