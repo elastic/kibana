@@ -86,7 +86,7 @@ const AlertingEngineTabs: React.FunctionComponent<{
       >
         <FormattedMessage
           id="xpack.fleet.epm.assets.kibanaEsqlRulesTabLabel"
-          defaultMessage="Kibana ES|QL Rules"
+          defaultMessage="ES|QL Rules"
         />
       </EuiTab>
       <EuiTab
