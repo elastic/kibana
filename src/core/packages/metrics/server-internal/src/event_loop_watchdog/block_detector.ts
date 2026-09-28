@@ -18,6 +18,7 @@ export const REPORT_BURST = 5;
 export const MIN_REPORT_REFILL_MS = 60_000;
 
 export type DetectorEvent =
+  /** `profile` means the cooldown allows a capture; call `onCaptureStarted` if one starts. */
   | { type: 'block-start'; startedAt: number; detectedAt: number; profile: boolean }
   | { type: 'live-notice'; startedAt: number; elapsedMs: number; count: number }
   | { type: 'profile-deadline' }
@@ -81,10 +82,6 @@ export class BlockDetector {
         lastLiveNoticeAt: lastHeartbeat,
         profileDeadlineEmitted: false,
       };
-      if (profile) {
-        this.lastProfileStartedAt = now;
-        this.block.profileStartedAt = now;
-      }
       return [{ type: 'block-start', startedAt: lastHeartbeat, detectedAt: now, profile }];
     }
 
@@ -133,6 +130,16 @@ export class BlockDetector {
       events.push({ type: 'profile-deadline' });
     }
     return events;
+  }
+
+  /**
+   * Records that a capture actually started for the current block. Only then is the cooldown
+   * consumed and the profile deadline armed, so skipped captures do not delay later ones.
+   */
+  public onCaptureStarted(now: number): void {
+    if (!this.block || this.block.profileStartedAt !== undefined) return;
+    this.lastProfileStartedAt = now;
+    this.block.profileStartedAt = now;
   }
 
   private takeReportToken(now: number): boolean {

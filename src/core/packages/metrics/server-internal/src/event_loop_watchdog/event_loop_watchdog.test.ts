@@ -89,6 +89,23 @@ describe('EventLoopWatchdog', () => {
     expect(MockWorker.instances).toHaveLength(2);
   });
 
+  it('lets concurrent stop callers wait for the same termination', async () => {
+    watchdog.start();
+    const worker = lastWorker();
+    let terminated = false;
+    worker.terminate.mockImplementationOnce(async () => {
+      await Promise.resolve();
+      terminated = true;
+      return 1;
+    });
+    const first = watchdog.stop();
+    const second = watchdog.stop();
+    expect(second).toBe(first);
+    await second;
+    expect(terminated).toBe(true);
+    expect(worker.terminate).toHaveBeenCalledTimes(1);
+  });
+
   it('restarts crashed workers with exponential backoff, bounded by MAX_RESTARTS', () => {
     watchdog.start();
     for (let restart = 0; restart < MAX_RESTARTS; restart++) {

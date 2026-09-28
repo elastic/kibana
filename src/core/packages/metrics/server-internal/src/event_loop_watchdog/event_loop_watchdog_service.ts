@@ -57,7 +57,11 @@ export const toWatchdogOptions = ({
   return {
     thresholdMs: Math.max(config.threshold.asMilliseconds(), heartbeatIntervalMs * 2),
     heartbeatIntervalMs,
-    pollIntervalMs: Math.max(5, Math.floor(heartbeatIntervalMs / 2)),
+    // the poll loop also enforces the profile deadline, so it must not be coarser than it
+    pollIntervalMs: Math.max(
+      5,
+      Math.floor(Math.min(heartbeatIntervalMs, config.maxProfileDuration.asMilliseconds()) / 2)
+    ),
     liveNoticeIntervalMs: config.liveNoticeInterval.asMilliseconds(),
     maxLiveNoticesPerBlock: config.maxLiveNoticesPerBlock,
     maxProfileDurationMs: config.maxProfileDuration.asMilliseconds(),

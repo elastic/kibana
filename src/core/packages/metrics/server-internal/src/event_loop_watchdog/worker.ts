@@ -181,6 +181,7 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
     } else {
       captureInFlight = true;
       current.capture = startCapture();
+      detector.onCaptureStarted(event.detectedAt);
     }
   };
 

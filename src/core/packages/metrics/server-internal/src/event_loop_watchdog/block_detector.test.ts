@@ -31,6 +31,7 @@ describe('BlockDetector', () => {
     expect(detector.poll(1_500, heartbeat)).toEqual([
       { type: 'block-start', startedAt: 1_000, detectedAt: 1_500, profile: true },
     ]);
+    detector.onCaptureStarted(1_500);
     expect(detector.poll(1_900, heartbeat)).toEqual([]);
     expect(detector.poll(2_000, heartbeat)).toEqual([
       { type: 'live-notice', startedAt: 1_000, elapsedMs: 1_000, count: 1 },
@@ -59,10 +60,19 @@ describe('BlockDetector', () => {
   it('applies the profile cooldown to subsequent blocks', () => {
     const detector = new BlockDetector(options);
     expect(detector.poll(1_500, 1_000)).toEqual([expect.objectContaining({ profile: true })]);
+    detector.onCaptureStarted(1_500);
     detector.poll(1_600, 1_550);
     expect(detector.poll(3_000, 2_000)).toEqual([expect.objectContaining({ profile: false })]);
     detector.poll(3_100, 3_050);
     expect(detector.poll(70_000, 65_000)).toEqual([expect.objectContaining({ profile: true })]);
+  });
+
+  it('does not consume the cooldown or arm the deadline when no capture starts', () => {
+    const detector = new BlockDetector(options);
+    expect(detector.poll(1_500, 1_000)).toEqual([expect.objectContaining({ profile: true })]);
+    expect(detector.poll(5_000, 1_000)).not.toContainEqual({ type: 'profile-deadline' });
+    detector.poll(5_100, 5_050);
+    expect(detector.poll(6_000, 5_400)).toEqual([expect.objectContaining({ profile: true })]);
   });
 
   it('rate limits reports and counts suppressed blocks', () => {

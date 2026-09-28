@@ -58,6 +58,7 @@ export class EventLoopWatchdog {
   private restartTimer?: NodeJS.Timeout;
   private restarts = 0;
   private running = false;
+  private stopping?: Promise<void>;
 
   constructor(private readonly params: EventLoopWatchdogParams) {
     this.logger = params.logger;
@@ -88,9 +89,17 @@ export class EventLoopWatchdog {
     this.trySpawnWorker(buffer);
   }
 
-  /** Stops the heartbeat and terminates the worker. Idempotent. */
-  public async stop(): Promise<void> {
-    if (!this.running) return;
+  /** Stops the heartbeat and terminates the worker. Concurrent callers await the same cleanup. */
+  public stop(): Promise<void> {
+    if (this.stopping) return this.stopping;
+    if (!this.running) return Promise.resolve();
+    this.stopping = this.doStop().finally(() => {
+      this.stopping = undefined;
+    });
+    return this.stopping;
+  }
+
+  private async doStop(): Promise<void> {
     this.running = false;
     clearInterval(this.heartbeatTimer);
     clearTimeout(this.restartTimer);
