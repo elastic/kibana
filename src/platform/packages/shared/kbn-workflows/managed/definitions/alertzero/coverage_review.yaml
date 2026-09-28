@@ -189,18 +189,17 @@ steps:
       continue: true
 
   # Only a 404 says the rule is not there. Any other failure (a 5xx, a 403, a
-  # timeout) says nothing about the rule, yet on covered_disabled it would route to
-  # the manual report, and acknowledging that report marks the indicator processed:
-  # the enable recommendation would be lost for good. So it fails the review before
-  # an investigation is opened, the indicator stays pending, and the next sweep
-  # retries the lookup. On covered_enabled a failed lookup only drops the rule link
-  # from the card, so that route carries on. kibana.request reports a non-2xx
+  # timeout) says nothing about the rule, yet it would route to the manual report,
+  # and acknowledging that report marks the indicator processed: the enable
+  # recommendation, or the check that the rule is really on, would be lost for good.
+  # So it fails the review before an investigation is opened, the indicator stays
+  # pending, and the next sweep retries the lookup. kibana.request reports a non-2xx
   # response as an error whose message starts with `HTTP <status>:`.
   - name: resolve_rule_outcome
     type: data.set
     with:
       failed: >-
-        ${{ steps.coverage_check.output.structured_output.verdict == 'covered_disabled'
+        ${{ steps.rule_lookup.output.installed == true
           and steps.resolve_rule.error != null
           and not (steps.resolve_rule.error.message contains 'HTTP 404:') }}
 
@@ -271,7 +270,7 @@ steps:
         {% endif %}
       check_line: "**Coverage check:** [agent conversation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.coverage_check.output.conversation_id }})"
 
-  # Body shared by the three report proposals below: what the check found, where
+  # Body shared by the four report proposals below: what the check found, where
   # to look, and that approving applies nothing.
   - name: compose_report
     type: data.set
@@ -442,6 +441,7 @@ steps:
           # With no action to inherit a category from, the queue bucket is named here.
           - name: propose_confirm
             type: workflow.execute
+            if: "${{ steps.resolve_rule.output.enabled == true }}"
             with:
               workflow-id: system-create-proposal
               inputs:
@@ -467,6 +467,24 @@ steps:
                 category: configure
                 impact: low
                 confidence: medium
+
+          # The lookup did not find the rule enabled; the analyst has to check it by hand.
+          - name: report_unconfirmed_rule
+            type: workflow.execute
+            if: "${{ steps.resolve_rule.output.enabled != true }}"
+            with:
+              workflow-id: system-create-proposal
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                comment: |-
+                  **Coverage check needs a manual follow-up**
+
+                  The check matched an enabled rule, but the rule was not found or is disabled, so coverage was not confirmed.
+
+                  {{ steps.compose_report.output.body }}
+                category: configure
+                impact: low
+                confidence: low
 
     default:
       # Unknown verdicts only. A check that produced no verdict asked nobody; the
@@ -512,6 +530,7 @@ steps:
           or steps.propose_install.output.decision == 'approved'
           or steps.propose_confirm.output.decision == 'approved'
           or steps.report_unresolved_rule.output.decision == 'approved'
+          or steps.report_unconfirmed_rule.output.decision == 'approved'
           or steps.report_missing_version.output.decision == 'approved'
           or steps.report_unknown_verdict.output.decision == 'approved'
           or steps.run_rule_creation.output.decision == 'approved' }}
@@ -520,6 +539,7 @@ steps:
           or steps.propose_install.output.decision == 'dismissed'
           or steps.propose_confirm.output.decision == 'dismissed'
           or steps.report_unresolved_rule.output.decision == 'dismissed'
+          or steps.report_unconfirmed_rule.output.decision == 'dismissed'
           or steps.report_missing_version.output.decision == 'dismissed'
           or steps.report_unknown_verdict.output.decision == 'dismissed'
           or steps.run_rule_creation.output.decision == 'dismissed' }}
@@ -630,7 +650,7 @@ steps:
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               updates:
                 status: closed
-                close_reason: resolved
+                close_reason: "{% if steps.report_unresolved_rule.output.decision == 'approved' or steps.report_unconfirmed_rule.output.decision == 'approved' or steps.report_missing_version.output.decision == 'approved' or steps.report_unknown_verdict.output.decision == 'approved' %}other{% else %}resolved{% endif %}"
                 verdict: "{% if steps.propose_enable.output.status == 'succeeded' %}Analyst approved enabling the existing rule.{% elsif steps.propose_install.output.status == 'succeeded' %}Analyst approved installing the prebuilt rule.{% elsif steps.propose_confirm.output.decision == 'approved' %}Analyst confirmed the enabled rule covers the gap.{% elsif steps.run_rule_creation.output.created == true %}Analyst approved creating a new rule for the gap.{% else %}Analyst acknowledged the coverage check report.{% endif %}"
             on-failure:
               continue: true

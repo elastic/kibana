@@ -37,7 +37,7 @@ const CASE_STEPS = {
   no_coverage: ['run_rule_creation'],
   covered_disabled: ['propose_enable', 'report_unresolved_rule'],
   prebuilt_available: ['install_target', 'propose_install', 'report_missing_version'],
-  covered_enabled: ['propose_confirm'],
+  covered_enabled: ['propose_confirm', 'report_unconfirmed_rule'],
 } as const;
 
 /** Every step that runs the proposal gate, in switch order. */
@@ -47,6 +47,7 @@ const PROPOSAL_STEPS = [
   'propose_install',
   'report_missing_version',
   'propose_confirm',
+  'report_unconfirmed_rule',
   'report_unknown_verdict',
 ];
 
@@ -208,9 +209,21 @@ describe('Detection Coverage review', () => {
       expect(routeOf('report_unresolved_rule')).toContain('steps.resolve_rule.output.id == null');
     });
 
-    // Only a 404 means the rule is missing. Any other lookup failure on
-    // covered_disabled would otherwise reach the manual report, which an analyst can
-    // acknowledge away together with the enable recommendation.
+    // Approving a confirmation drops the gap from future sweeps, so it needs a rule the
+    // lookup actually found enabled, not only the model's word for it.
+    it.each([
+      ['enabled', { id: 'r1', enabled: true }, true],
+      ['disabled', { id: 'r1', enabled: false }, false],
+      ['not found', undefined, false],
+    ])('on covered_enabled with a rule %s, offers the confirmation: %s', (_s, rule, expected) => {
+      const context = { steps: { resolve_rule: { output: rule } } };
+      expect(evaluateExpression(routeOf('propose_confirm'), context)).toBe(expected);
+      expect(evaluateExpression(routeOf('report_unconfirmed_rule'), context)).toBe(!expected);
+    });
+
+    // Only a 404 means the rule is missing. Any other lookup failure would otherwise
+    // reach the manual report, which an analyst can acknowledge away together with the
+    // enable recommendation or the check that the rule is on.
     it.each([
       [
         'covered_disabled',
@@ -220,12 +233,19 @@ describe('Detection Coverage review', () => {
       ['covered_disabled', { message: 'HTTP 500: Internal Server Error' }, true],
       ['covered_disabled', { message: 'HTTP 403: Forbidden' }, true],
       ['covered_disabled', null, false],
-      ['covered_enabled', { message: 'HTTP 500: Internal Server Error' }, false],
+      ['covered_enabled', { message: 'HTTP 404: {"message":"rule_id: \\"x\\" not found"}' }, false],
+      ['covered_enabled', { message: 'HTTP 500: Internal Server Error' }, true],
+      ['covered_enabled', null, false],
     ])('on %s after lookup error %j, fails the review: %s', (verdict, error, expected) => {
+      const coverageCheck = { output: { structured_output: { verdict } } };
+      const installed = evaluateExpression(String(withOf('rule_lookup')?.installed), {
+        steps: { coverage_check: coverageCheck },
+      });
       expect(
         evaluateExpression(String(withOf('resolve_rule_outcome')?.failed), {
           steps: {
-            coverage_check: { output: { structured_output: { verdict } } },
+            coverage_check: coverageCheck,
+            rule_lookup: { output: { installed } },
             resolve_rule: { error },
           },
         })
@@ -340,6 +360,26 @@ describe('Detection Coverage review', () => {
       expect(dismissed).not.toHaveProperty('if');
       expect((resolved?.with?.updates as Record<string, string>).status).toBe('closed');
       expect((dismissed?.with?.updates as Record<string, string>).status).toBe('closed');
+    });
+
+    // An approved report applied nothing and confirmed nothing, so the gap is not
+    // resolved.
+    it.each([
+      ...REPORT_STEPS.map((name) => [name, 'other']),
+      ['propose_enable', 'resolved'],
+      ['propose_install', 'resolved'],
+      ['propose_confirm', 'resolved'],
+      ['run_rule_creation', 'resolved'],
+    ])('closes an approved %s as %s', (name, expected) => {
+      const updates = stepByName('close_investigation_resolved')?.with?.updates as Record<
+        string,
+        string
+      >;
+      expect(
+        createWorkflowLiquidEngine().parseAndRenderSync(updates.close_reason, {
+          steps: { [name]: { output: { decision: 'approved' } } },
+        })
+      ).toBe(expected);
     });
 
     // An approval whose change did not land leaves the indicator pending, so the
