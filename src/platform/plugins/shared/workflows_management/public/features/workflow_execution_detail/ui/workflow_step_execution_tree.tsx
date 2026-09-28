@@ -59,7 +59,6 @@ import {
   type IterationPinKind,
   planIterationCollapse,
 } from '../lib/iteration_pins';
-import { mergeDefinitionStepsIntoTree } from '../lib/merge_definition_steps_into_tree';
 import { normalizeStepAi, stepAiToTokenUsage } from '../lib/normalize_step_ai';
 import { rollupTokenUsage, type TokenRollupNode, tokenRollupToUsage } from '../lib/token_rollup';
 import { useErrorPanelDiagnoseAvailability } from '../lib/use_error_panel_diagnose_availability';
@@ -1273,7 +1272,6 @@ export const WorkflowStepExecutionTree = ({
       execution.status,
       execution.triggeredBy
     );
-    stepExecutionsTree = mergeDefinitionStepsIntoTree(stepExecutionsTree, definition);
 
     const { tree: treeWithChildren, childStepExecutions } = injectChildWorkflowSteps(
       stepExecutionsTree,
@@ -1364,23 +1362,6 @@ export const WorkflowStepExecutionTree = ({
     [defaultExpandedIds]
   );
 
-  if (!execution) {
-    return (
-      <EuiEmptyPrompt
-        {...emptyPromptCommonProps}
-        icon={<EuiLoadingSpinner size="l" />}
-        title={
-          <h2>
-            <FormattedMessage
-              id="workflows.WorkflowStepExecutionTree.loadingStepExecutions"
-              defaultMessage="Loading step executions..."
-            />
-          </h2>
-        }
-      />
-    );
-  }
-
   if (error) {
     return (
       <EuiEmptyPrompt
@@ -1395,6 +1376,23 @@ export const WorkflowStepExecutionTree = ({
           </h2>
         }
         body={<EuiText>{error.message}</EuiText>}
+      />
+    );
+  }
+
+  if (!execution) {
+    return (
+      <EuiEmptyPrompt
+        {...emptyPromptCommonProps}
+        icon={<EuiLoadingSpinner size="l" />}
+        title={
+          <h2>
+            <FormattedMessage
+              id="workflows.WorkflowStepExecutionTree.loadingStepExecutions"
+              defaultMessage="Loading step executions..."
+            />
+          </h2>
+        }
       />
     );
   }

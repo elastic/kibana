@@ -2226,6 +2226,57 @@ describe('TemplatesMigrationTaskManager', () => {
         expect.objectContaining({ counterName: 'configureMigrationSuccess' })
       );
     });
+
+    it('increments migrationCompleted when the migration finishes with real backfill work', async () => {
+      const { usageCollection, counter } = createUsageCollectionMock();
+      // Space has Phase-1 done but case backfill pending → hadRealBackfillWork is true.
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
+      repo.find.mockImplementation((opts: { type: string }) => {
+        if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: [configSO], total: 1 });
+        }
+        if (opts.type === CASE_FIELD_DEFINITION_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: [], total: 0 });
+        }
+        // Cases find returns empty → backfill completes in one pass.
+        return Promise.resolve({ saved_objects: [], total: 0 });
+      });
+
+      await getTaskRunner(
+        await buildAndSchedule(usageCollection as unknown as UsageCollectionSetup)
+      ).run();
+
+      expect(counter.incrementCounter).toHaveBeenCalledWith(
+        expect.objectContaining({ counterName: 'migrationCompleted', incrementBy: 1 })
+      );
+    });
+
+    it('does not increment migrationCompleted when all spaces were already fully migrated', async () => {
+      const { usageCollection, counter } = createUsageCollectionMock();
+      // All three flags set → no pending backfill → hadRealBackfillWork is false.
+      repo.find.mockResolvedValueOnce({
+        saved_objects: [
+          buildConfigureSO({
+            legacyTemplatesMigrated: true,
+            legacyCustomFieldsMigrated: true,
+            legacyCasesMigrated: true,
+          }),
+        ],
+        total: 1,
+      });
+
+      await getTaskRunner(
+        await buildAndSchedule(usageCollection as unknown as UsageCollectionSetup)
+      ).run();
+
+      expect(counter.incrementCounter).not.toHaveBeenCalledWith(
+        expect.objectContaining({ counterName: 'migrationCompleted' })
+      );
+    });
   });
 
   // The onCaseBackfillComplete hook is how the templates migration tells cases-analytics v2 to run a

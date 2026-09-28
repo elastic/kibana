@@ -83,11 +83,14 @@ export interface ConversationPublicClient {
   create(request: ConversationCreatePublicRequest): Promise<ConversationWithPermissions>;
   /**
    * Validate updates against the conversation's template and merge them into its metadata.
-   * Requires the caller to be the conversation owner. The conversation must have a template applied.
+   * Defaults to owner-only access. Pass `{ access: 'converse' }` to allow collaborators or
+   * any authenticated user (for public conversations) to write metadata.
+   * The conversation must have a template applied.
    */
   patchMetadata(
     conversationId: string,
-    updates: Record<string, MetadataFieldValue>
+    updates: Record<string, MetadataFieldValue>,
+    options?: { access?: 'owner' | 'converse' }
   ): Promise<{ conversation: Conversation; changedFields: string[] }>;
   /**
    * Update the conversation's title. Requires the caller to be the conversation owner.

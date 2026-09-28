@@ -34,7 +34,39 @@ export const getCaseSettings = (owner: string): OwnerCaseSettings => {
 
   return {
     syncAlerts: features.alerts.sync,
-    extractObservables: features.observables.autoExtract,
+    extractObservables: features.observables.autoExtractDefault,
     observablesEnabled: features.observables.enabled,
   };
+};
+
+/**
+ * Returns true when observable extraction must be blocked regardless of the space configuration.
+ * Only known owners with observables explicitly disabled are blocked. Unknown owners (e.g. test
+ * fixture owners not in OWNER_INFO) are not blocked so their space configuration is respected.
+ */
+export const isObservablesExtractionBlocked = (owner: string): boolean =>
+  Object.hasOwn(OWNER_INFO, owner) && !OWNER_INFO[owner as Owner].features.observables.enabled;
+
+/**
+ * Resolves the effective `extractObservables` value for a new case, applying the full precedence
+ * chain when the caller omitted the field:
+ *   blocked by owner → false
+ *   space config present → space config value
+ *   no space config → owner autoExtractDefault
+ *   owner unknown → false
+ *
+ * Pass `spaceExtractObservables` as `undefined` when no configuration exists for the owner.
+ */
+export const resolveExtractObservables = (
+  owner: string,
+  spaceExtractObservables: boolean | undefined
+): boolean => {
+  if (isObservablesExtractionBlocked(owner)) {
+    return false;
+  }
+  return (
+    spaceExtractObservables ??
+    OWNER_INFO[owner as Owner]?.features.observables.autoExtractDefault ??
+    false
+  );
 };
