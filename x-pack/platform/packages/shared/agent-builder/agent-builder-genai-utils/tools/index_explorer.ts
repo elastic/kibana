@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pLimit from 'p-limit';
 import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import { EsResourceType } from '@kbn/agent-builder-common';
@@ -163,6 +164,8 @@ const createDatastreamSummaries = async ({
  * columns via `FROM <name> | LIMIT 0` (datasets have no mappings or field caps).
  */
 const VIEW_QUERY_SUMMARY_LIMIT = 500;
+/** Matches the field-fetch cap in getIndexFields. Stored view queries can be expensive. */
+const VIEW_INTROSPECTION_CONCURRENCY = 5;
 
 const summarizeViewQuery = (query: string): string => {
   const singleLine = query.replace(/\s+/g, ' ').trim();
@@ -184,21 +187,24 @@ const createViewSummaries = async ({
   views: ViewSearchSource[];
   esClient: ElasticsearchClient;
 }): Promise<ResourceDescriptor[]> => {
+  const limit = pLimit(VIEW_INTROSPECTION_CONCURRENCY);
   return Promise.all(
-    views.map(async ({ name, query, description }) => {
-      const definition = `ES|QL view. Query with "FROM ${name}". Defined as: ${summarizeViewQuery(
-        query
-      )}`;
-      // A view whose stored query no longer runs (for example its backing index was removed)
-      // must not fail selection of the other sources.
-      const fields = await getViewFields({ name, esClient }).catch(() => []);
-      return {
-        type: EsResourceType.view,
-        name,
-        description: description ? `${description} ${definition}` : definition,
-        fields: fields.map((f) => ({ path: f.path, type: f.type })),
-      };
-    })
+    views.map(({ name, query, description }) =>
+      limit(async () => {
+        const definition = `ES|QL view. Query with "FROM ${name}". Defined as: ${summarizeViewQuery(
+          query
+        )}`;
+        // A view whose stored query no longer runs (for example its backing index was removed)
+        // must not fail selection of the other sources.
+        const fields = await getViewFields({ name, esClient }).catch(() => []);
+        return {
+          type: EsResourceType.view,
+          name,
+          description: description ? `${description} ${definition}` : definition,
+          fields: fields.map((f) => ({ path: f.path, type: f.type })),
+        };
+      })
+    )
   );
 };
 
