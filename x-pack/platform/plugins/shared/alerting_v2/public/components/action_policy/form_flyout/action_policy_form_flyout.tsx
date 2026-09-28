@@ -21,6 +21,8 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { FormProvider } from 'react-hook-form';
+import { useIsActionPoliciesLicenseValid } from '../../../hooks/use_is_action_policies_license_valid';
+import { ActionPoliciesLicenseCallout } from '../action_policies_license_callout';
 import { ActionPolicyForm } from '../form/action_policy_form';
 import type { ActionPolicyFormState } from '../form/types';
 import { useActionPolicyForm } from '../form/use_action_policy_form';
@@ -48,6 +50,7 @@ export const ActionPolicyFormFlyout = ({
   initialValues,
 }: ActionPolicyFormFlyoutProps) => {
   const application = useService(CoreStart('application'));
+  const isLicenseValid = useIsActionPoliciesLicenseValid();
   const { methods, isEditMode, isSubmitEnabled, handleSubmit } = useActionPolicyForm({
     initialValues,
     onSubmitCreate: onSave ?? noop,
@@ -93,6 +96,7 @@ export const ActionPolicyFormFlyout = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        <ActionPoliciesLicenseCallout />
         <FormProvider {...methods}>
           <ActionPolicyForm
             config={{
@@ -131,7 +135,7 @@ export const ActionPolicyFormFlyout = ({
               fill
               onClick={handleSubmit}
               isLoading={isLoading}
-              disabled={!isSubmitEnabled}
+              disabled={!isSubmitEnabled || !isLicenseValid}
               data-test-subj="submitButton"
             >
               {isEditMode ? (

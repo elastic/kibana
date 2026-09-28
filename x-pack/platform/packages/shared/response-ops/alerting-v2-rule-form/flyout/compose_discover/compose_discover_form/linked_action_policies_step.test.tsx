@@ -151,6 +151,26 @@ describe('LinkedActionPoliciesStep', () => {
     expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['matchedActionPolicies'] });
   });
 
+  it('disables action policy creation when the license does not allow it', () => {
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      error: null,
+      items: [],
+      total: 0,
+      evaluatedCount: 0,
+      isTruncated: false,
+    });
+
+    const CreateActionPolicyFormFlyout = () => (
+      <div data-test-subj="actionPolicyFormFlyout" />
+    );
+
+    renderComponent({ canCreateActionPolicy: false, CreateActionPolicyFormFlyout });
+
+    expect(screen.getByRole('button', { name: 'Create action policy' })).toBeDisabled();
+    expect(screen.queryByTestId('actionPolicyFormFlyout')).not.toBeInTheDocument();
+  });
+
   it('renders a catch-all badge for a global policy', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,

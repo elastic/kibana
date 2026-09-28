@@ -96,6 +96,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
     render: (props) => (
       <LinkedActionPoliciesStep
         http={props.services.http}
+        canCreateActionPolicy={props.services.canCreateActionPolicy}
         CreateActionPolicyFormFlyout={props.services.createActionPolicyFormFlyout}
       />
     ),

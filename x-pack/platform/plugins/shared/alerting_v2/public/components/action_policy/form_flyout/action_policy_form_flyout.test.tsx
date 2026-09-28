@@ -15,11 +15,17 @@ import { ActionPolicyFormFlyout } from './action_policy_form_flyout';
 const mockGetUrlForApp = jest.fn(
   (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
 );
+let mockIsLicenseValid = true;
+
+jest.mock('../../../hooks/use_is_action_policies_license_valid', () => ({
+  useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+}));
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'application') {
       return {
+        capabilities: {},
         getUrlForApp: mockGetUrlForApp,
       };
     }
@@ -152,6 +158,10 @@ const renderFlyout = ({
 };
 
 describe('ActionPolicyFormFlyout', () => {
+  beforeEach(() => {
+    mockIsLicenseValid = true;
+  });
+
   it('renders create mode and closes on cancel', async () => {
     const user = userEvent.setup({ delay: null });
     const onClose = jest.fn();
@@ -176,6 +186,15 @@ describe('ActionPolicyFormFlyout', () => {
     fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
 
     expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('shows the license warning and disables submission when the license is invalid', () => {
+    mockIsLicenseValid = false;
+
+    renderFlyout({ onClose: jest.fn(), onSave: jest.fn() });
+
+    expect(screen.getByTestId('actionPoliciesLicenseCallout')).toBeInTheDocument();
+    expect(screen.getByTestId(TEST_SUBJ.submitButton)).toBeDisabled();
   });
 
   it('renders the inline simple workflow builder alongside the existing-workflow selector', () => {

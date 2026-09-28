@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
@@ -54,6 +55,11 @@ const errorTitle = i18n.translate(
   { defaultMessage: 'Failed to load linked action policies' }
 );
 
+const createPolicyLicenseTooltip = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.createLicenseTooltip',
+  { defaultMessage: 'An active Enterprise license is required to create action policies.' }
+);
+
 // TODO: replace with paths.actionPolicyEdit from alerting_v2/public/constants.ts
 //       once exported from the plugin or moved to a shared package.
 const ACTION_POLICY_EDIT_BASE = '/app/management/alertingV2/action_policies/edit';
@@ -66,13 +72,18 @@ const getEditLabel = (name: string) =>
 
 interface Props {
   http: HttpStart;
+  canCreateActionPolicy?: boolean;
   CreateActionPolicyFormFlyout?: React.ComponentType<{
     onClose: () => void;
     onSuccess: () => void;
   }>;
 }
 
-export const LinkedActionPoliciesStep = ({ http, CreateActionPolicyFormFlyout }: Props) => {
+export const LinkedActionPoliciesStep = ({
+  http,
+  canCreateActionPolicy = true,
+  CreateActionPolicyFormFlyout,
+}: Props) => {
   const metadata = useWatch<FormValues, 'metadata'>({ name: 'metadata' });
   const tags = metadata?.tags;
   const queryClient = useQueryClient();
@@ -172,16 +183,22 @@ export const LinkedActionPoliciesStep = ({ http, CreateActionPolicyFormFlyout }:
       {CreateActionPolicyFormFlyout && (
         <>
           <EuiSpacer size="m" />
-          <EuiButton
-            iconType="plus"
-            onClick={() => setIsCreateFlyoutOpen(true)}
-            data-test-subj="createActionPolicyButton"
+          <EuiToolTip
+            content={canCreateActionPolicy ? undefined : createPolicyLicenseTooltip}
+            position="top"
           >
-            {i18n.translate(
-              'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.createButton',
-              { defaultMessage: 'Create action policy' }
-            )}
-          </EuiButton>
+            <EuiButton
+              iconType="plus"
+              onClick={() => setIsCreateFlyoutOpen(true)}
+              disabled={!canCreateActionPolicy}
+              data-test-subj="createActionPolicyButton"
+            >
+              {i18n.translate(
+                'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.createButton',
+                { defaultMessage: 'Create action policy' }
+              )}
+            </EuiButton>
+          </EuiToolTip>
         </>
       )}
 

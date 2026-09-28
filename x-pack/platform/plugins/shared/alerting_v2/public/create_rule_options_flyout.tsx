@@ -27,6 +27,7 @@ import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from './
 import { RuleCreateOptionsFlyout } from './components/rule_create_options/rule_create_options_flyout';
 import { RulesApi } from './services/rules_api';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from './constants';
+import { useIsActionPoliciesLicenseValid } from './hooks/use_is_action_policies_license_valid';
 
 export interface CreateRuleOptionsFlyoutLegacyItem {
   id: string;
@@ -63,6 +64,23 @@ interface LoadedModules {
   services: AlertingV2KibanaServices;
   ComposeDiscoverFlyout: React.ComponentType<ComposeDiscoverFlyoutProps>;
 }
+
+const LicenseAwareComposeDiscoverFlyout = ({
+  services,
+  ComposeDiscoverFlyout,
+  ...props
+}: Omit<ComposeDiscoverFlyoutProps, 'services'> & {
+  services: AlertingV2KibanaServices;
+  ComposeDiscoverFlyout: React.ComponentType<ComposeDiscoverFlyoutProps>;
+}) => {
+  const canCreateActionPolicy = useIsActionPoliciesLicenseValid();
+  const licenseAwareServices = useMemo(
+    () => ({ ...services, canCreateActionPolicy }),
+    [services, canCreateActionPolicy]
+  );
+
+  return <ComposeDiscoverFlyout {...props} services={licenseAwareServices} />;
+};
 
 const noopSubscribe = () => () => {};
 
@@ -247,7 +265,8 @@ const CreateRuleOptionsFlyoutInner = ({
   if (step.type === 'esql') {
     return (
       <Context.Provider value={services.container}>
-        <ComposeDiscoverFlyout
+        <LicenseAwareComposeDiscoverFlyout
+          ComposeDiscoverFlyout={ComposeDiscoverFlyout}
           historyKey={historyKey}
           mode="create"
           onClose={onClose}
@@ -264,7 +283,8 @@ const CreateRuleOptionsFlyoutInner = ({
   if (step.type === 'threshold') {
     return (
       <Context.Provider value={services.container}>
-        <ComposeDiscoverFlyout
+        <LicenseAwareComposeDiscoverFlyout
+          ComposeDiscoverFlyout={ComposeDiscoverFlyout}
           historyKey={historyKey}
           mode="create"
           onClose={onClose}
