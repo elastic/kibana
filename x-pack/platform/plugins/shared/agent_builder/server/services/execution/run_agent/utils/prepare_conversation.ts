@@ -117,6 +117,7 @@ export const prepareConversation = async ({
       ...round.userMessage,
       data: processedInput,
     };
+    // A round carries its user message and its run; a standalone message only itself.
     const events = isTimelineRound(round) ? round.events : [round.userMessage];
 
     for (const event of events) {

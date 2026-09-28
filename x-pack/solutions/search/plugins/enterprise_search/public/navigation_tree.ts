@@ -80,7 +80,7 @@ export const getNavigationTreeDefinition = ({
               link: 'agent_builder',
             },
             {
-              icon: 'sparkles',
+              icon: 'tableSparkles',
               link: 'context_engine',
             },
             {
@@ -175,6 +175,7 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     { link: 'management:index_management' },
                     { link: 'management:data_federation' },
+                    { link: 'management:esql_views' },
                     { link: 'management:index_lifecycle_management' },
                     { link: 'management:snapshot_restore' },
                     { link: 'management:transform' },

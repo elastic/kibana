@@ -16,7 +16,7 @@ import type { StepInfo } from '@kbn/workflows-yaml';
  *
  * Mirrors the fingerprint pattern used for YAML validation results
  * (`validationResultFingerprint` in
- * `../../../features/validate_workflow_yaml/model/types.ts`): a cheap, order-sensitive
+ * `@kbn/workflows-yaml`): a cheap, order-sensitive
  * string built from the fields that matter, used to gate expensive derived state behind
  * a reference-stability check rather than recomputing on every render.
  */

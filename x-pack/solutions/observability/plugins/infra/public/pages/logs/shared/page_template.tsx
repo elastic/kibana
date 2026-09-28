@@ -5,21 +5,34 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import { EuiPageSection } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
+import { NoDataPage } from '@kbn/shared-ux-page-no-data';
+import React, { useEffect } from 'react';
+import { filledPageSectionContentCss } from '../../../components/empty_states/layout';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+
+const headerPageBodyCss = css`
+  padding-top: 0;
+`;
 
 export interface LogsPageTemplateProps extends LazyObservabilityPageTemplateProps {
   hasData?: boolean;
+  header?: React.ReactNode;
   isDataLoading?: boolean;
 }
 
 export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
   hasData = true,
+  header,
   isDataLoading = false,
+  isEmptyState,
+  pageSectionProps,
+  children,
   'data-test-subj': _dataTestSubj,
   ...pageTemplateProps
 }) => {
@@ -86,12 +99,74 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
         },
       };
 
+  const hasHeader = Boolean(header);
+  // Template noDataConfig replaces children. When AppHeader is mounted, render the
+  // onboarding card as body instead so Alerts and Add data stay available.
+  const showOnboarding = hasHeader && !hasData && !isDataLoading && Boolean(noDataConfig);
+
   return (
     <PageTemplate
       data-test-subj={hasData ? _dataTestSubj : 'noDataPage'}
-      noDataConfig={noDataConfig}
+      noDataConfig={hasHeader ? undefined : noDataConfig}
       isPageDataLoaded={isDataLoading === false}
+      isEmptyState={hasHeader ? undefined : isEmptyState}
+      pageSectionProps={
+        hasHeader
+          ? {
+              paddingSize: 'none',
+              contentProps: {
+                css: filledPageSectionContentCss,
+              },
+              ...pageSectionProps,
+            }
+          : pageSectionProps
+      }
       {...pageTemplateProps}
-    />
+    >
+      {header}
+      {renderHeaderAwareBody({
+        children,
+        hasHeader,
+        isEmptyState,
+        noDataConfig,
+        showOnboarding,
+      })}
+    </PageTemplate>
+  );
+};
+
+const renderHeaderAwareBody = ({
+  children,
+  hasHeader,
+  isEmptyState,
+  noDataConfig,
+  showOnboarding,
+}: {
+  children: React.ReactNode;
+  hasHeader: boolean;
+  isEmptyState?: boolean;
+  noDataConfig?: NoDataConfig;
+  showOnboarding: boolean;
+}): React.ReactNode => {
+  if (!hasHeader) {
+    return children;
+  }
+
+  if (showOnboarding && noDataConfig) {
+    return <NoDataPage {...noDataConfig} />;
+  }
+
+  if (isEmptyState) {
+    return (
+      <EuiPageSection alignment="center" grow>
+        {children}
+      </EuiPageSection>
+    );
+  }
+
+  return (
+    <EuiPageSection paddingSize="l" restrictWidth={false} contentProps={{ css: headerPageBodyCss }}>
+      {children}
+    </EuiPageSection>
   );
 };

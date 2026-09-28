@@ -6,9 +6,17 @@
  */
 
 import React from 'react';
-import { render } from '../../../../../utils/testing/rtl_helpers';
+import { fireEvent, render as testLibRender, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { MetricItemExtra } from './metric_item_extra';
-import { fireEvent, waitFor } from '@testing-library/dom';
+
+const render = (ui: React.ReactElement) =>
+  testLibRender(
+    <I18nProvider>
+      <EuiThemeProvider>{ui}</EuiThemeProvider>
+    </I18nProvider>
+  );
 
 describe('<MetricItemExtra />', () => {
   it('renders the tooltip when there is content', async () => {

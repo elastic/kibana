@@ -15,13 +15,16 @@ import {
   EuiTabs,
   EuiTitle,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
+import { createIndexEsqlQuery, hasSelectedEsqlQuery } from '../../utils/sources';
 import { getSourceDisplay } from '../source_display';
 import { SourceRow } from '../source_row';
 import { ConnectorsTab } from './connectors_tab';
-import { EsqlTab } from './esql_tab';
+import { ElasticsearchSourcesTab } from './elasticsearch_sources_tab';
 import type { SelectedSource } from './types';
 
 type TabId = 'esql' | 'connectors';
@@ -61,10 +64,14 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
   );
 
   const addEsqlSource = (query: string) => {
-    if (selectedSources.some((current) => current.type === 'esql' && current.id === query)) {
+    if (hasSelectedEsqlQuery(selectedSources, query)) {
       return;
     }
     onChange([...selectedSources, { type: 'esql', id: query, label: query, value: query }]);
+  };
+
+  const addIndexSource = (indexName: string) => {
+    addEsqlSource(createIndexEsqlQuery(indexName));
   };
 
   const toggleConnectorSource = ({
@@ -96,17 +103,21 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
         <EuiTab
           isSelected={selectedTab === 'esql'}
           onClick={() => setSelectedTab('esql')}
-          prepend={<EuiIcon type="commandLine" aria-hidden={true} />}
+          prepend={<EuiIcon type="tablePlus" aria-hidden={true} />}
           append={
             selectedEsqlCount > 0 ? (
               <EuiNotificationBadge>{selectedEsqlCount}</EuiNotificationBadge>
             ) : undefined
           }
           data-test-subj="contextSourcePickerTab-esql"
+          {...getEbtProps({
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
+            action: CONTEXT_ENGINE_UI_EBT.action.sources.TAB_ESQL,
+          })}
         >
           <FormattedMessage
-            id="xpack.contextEngine.sourcePicker.tabs.esql"
-            defaultMessage="ES|QL"
+            id="xpack.contextEngine.sourcePicker.tabs.elasticsearch"
+            defaultMessage="Elasticsearch data"
           />
         </EuiTab>
         <EuiTab
@@ -119,6 +130,10 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
             ) : undefined
           }
           data-test-subj="contextSourcePickerTab-connectors"
+          {...getEbtProps({
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
+            action: CONTEXT_ENGINE_UI_EBT.action.sources.TAB_CONNECTORS,
+          })}
         >
           <FormattedMessage
             id="xpack.contextEngine.sourcePicker.tabs.connectors"
@@ -129,7 +144,13 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
 
       <EuiSpacer size="m" />
 
-      {selectedTab === 'esql' && <EsqlTab onAdd={addEsqlSource} />}
+      {selectedTab === 'esql' && (
+        <ElasticsearchSourcesTab
+          selectedSources={selectedSources}
+          onAddIndex={addIndexSource}
+          onAddEsql={addEsqlSource}
+        />
+      )}
       {selectedTab === 'connectors' && (
         <ConnectorsTab
           connectors={connectors}
@@ -169,6 +190,7 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
                     label={label}
                     typeLabel={typeLabel}
                     icon={icon}
+                    sourceType={source.type}
                     onRemove={() => removeSource(source)}
                     data-test-subj={`contextSelectedSource-${source.type}-${index}`}
                   >

@@ -225,7 +225,7 @@ const DEV_PATTERNS = [
   'x-pack/performance/**/*',
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
-  'src/platform/packages/shared/kbn-esql-language/scripts/**/*',
+  'src/platform/packages/shared/esql/kbn-esql-language/scripts/**/*',
   'src/platform/kbn-ui/_tooling/**/*',
 ];
 
@@ -1284,7 +1284,7 @@ module.exports = {
         'x-pack/solutions/observability/plugins/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/solutions/observability/packages/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/platform/plugins/shared/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/platform/plugins/shared/significant_events_app/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/solutions/observability/plugins/significant_events_app/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/platform/plugins/shared/streams_app/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/platform/packages/shared/kbn-unified-chart-section-viewer/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
@@ -2806,6 +2806,15 @@ module.exports = {
       files: [
         // TODO @kibana/operations
         'scripts/create_observability_rules.js', // is importing "@kbn/observability-alerting-test-data" (observability/private)
+        'scripts/capture_sigevents_env_snapshot.js',
+        'scripts/capture_sigevents_otel_demo_snapshots.js',
+        'scripts/probe_sigevents_eval_snapshot.js',
+        'scripts/replay_sigevents_eval_snapshot.js',
+        'scripts/restore_sigevents_env_snapshot.js',
+        'scripts/seed_sigevents_env.js',
+        'x-pack/platform/test/api_integration_deployment_agnostic/apis/significant_events/**',
+        'x-pack/platform/test/api_integration_deployment_agnostic/configs/**/oblt.significant_events.feature_flag.*',
+        'x-pack/platform/test/api_integration_deployment_agnostic/configs/**/platform.significant_events.feature_flag.*',
         'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
         'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)*',
 
@@ -2841,7 +2850,7 @@ module.exports = {
       // loads them natively via createRequire (see rspack_runtime.ts).
       files: [
         'packages/kbn-rspack-optimizer/**/*.{ts,tsx}',
-        'packages/kbn-plugin-helpers/src/tasks/optimize_rspack.ts',
+        'packages/kbn-plugin-helpers/src/tasks/optimize.ts',
       ],
       rules: {
         '@typescript-eslint/no-restricted-imports': [
@@ -3072,6 +3081,30 @@ module.exports = {
         '@kbn/eslint/scout_require_api_client_in_api_test': [
           'error',
           { alternativeFixtures: ['esClient'] },
+        ],
+      },
+    },
+    {
+      // Security Solution API tests may call endpoints through the generated Scout API clients
+      // exposed by `@kbn/security-solution-test-api-clients/scout`
+      files: ['x-pack/solutions/security/plugins/**/test/{scout,scout_*}/**/api/**/*.ts'],
+      rules: {
+        '@kbn/eslint/scout_require_api_client_in_api_test': [
+          'error',
+          {
+            alternativeFixtures: [
+              'esClient',
+              'detectionsApi',
+              'discoveriesApi',
+              'endpointExceptionsApi',
+              'endpointManagementApi',
+              'entityAnalyticsApi',
+              'exceptionsApi',
+              'listsApi',
+              'osqueryApi',
+              'timelinesApi',
+            ],
+          },
         ],
       },
     },

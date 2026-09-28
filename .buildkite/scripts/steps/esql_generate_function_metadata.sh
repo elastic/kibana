@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VALIDATION_PACKAGE_DIR="src/platform/packages/shared/kbn-esql-language"
+VALIDATION_PACKAGE_DIR="src/platform/packages/shared/esql/kbn-esql-language"
 EDITOR_PACKAGE_DIR="src/platform/packages/private/kbn-language-documentation"
 SCRIPTS_PACKAGE_DIR="src/platform/packages/private/kbn-esql-scripts"
 GIT_SCOPE="$VALIDATION_PACKAGE_DIR/**/* $EDITOR_PACKAGE_DIR/**/*"
@@ -49,11 +49,11 @@ main () {
 
   report_main_step "Generate function definitions"
 
-  yarn make:defs
+  pnpm make:defs
 
   report_main_step "Generate inline function docs"
 
-  yarn make:docs
+  pnpm make:docs
 
   report_main_step "Run i18n check"
 

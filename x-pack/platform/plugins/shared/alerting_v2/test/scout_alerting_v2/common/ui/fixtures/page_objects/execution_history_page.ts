@@ -22,7 +22,7 @@ export class ExecutionHistoryPage {
     this.rulesTab = this.page.testSubj.locator('executionHistoryRulesTab');
     this.actionPoliciesTab = this.page.testSubj.locator('executionHistoryPoliciesTab');
     this.searchBar = this.page.testSubj.locator('executionHistorySearchBar');
-    this.policiesTable = this.page.testSubj.locator('actionPolicyExecutionHistoryTable');
+    this.policiesTable = this.page.testSubj.locator('policyExecutionHistoryTable');
     this.policyDetailsFlyout = this.page.testSubj.locator('actionPolicyDetailsFlyout');
   }
 

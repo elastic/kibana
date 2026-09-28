@@ -39,7 +39,7 @@ Pass the Saved Object's `updated_at` field (assigned by Elasticsearch at write t
 
 **Query history** with `getHistory(spaceId, objectType, objectId, opts?)`:
 
-- Returns change documents for the given object `type` and `id` in the specified Kibana space, sorted by `sequence` (if available), then `@timestamp`, then `event.id` as a tie-breaker. Supports pagination and custom sort/filters via `opts`.
+- Returns change documents for the given object `type` and `id` in the specified Kibana space, sorted by `sequence` (if available), then `@timestamp`, then `event.id` as a tie-breaker. Supports pagination and custom sort/filters via `opts`. Results can be incomplete if an admin has applied retention — see [Retention](#retention).
 
 **Facet distinct field values** with `getHistoryByFields(spaceId, objectType, objectId, fields, opts?)` — terms buckets on mapped keyword fields (`user.name`, `event.action`, etc.).
 
@@ -181,11 +181,13 @@ If a future consumer needs to filter or sort on any of these, add them back to t
 
 ### Retention
 
-`.kibana_change_history` is enrolled in data stream lifecycle with `enabled: true` and no `data_retention`. Change history documents are kept indefinitely by default.
+`.kibana_change_history` is enrolled in data stream lifecycle with `enabled: true` and no `data_retention`. Change history documents are kept indefinitely **by default**.
 
-This stream must be registered as an Elasticsearch **system** data stream (`system: true`), not only as a Kibana hidden stream. Kibana `registerDataStream` / `@kbn/data-streams` cannot set that flag — it comes from the ES [`SystemDataStreamDescriptor`](https://github.com/elastic/elasticsearch/pull/154113) ([security-team#18291](https://github.com/elastic/security-team/issues/18291)). See [`@kbn/data-streams` README — System data streams](../../../../../src/platform/packages/private/kbn-data-streams/README.md#system-data-streams). Verify with `GET _data_stream/.kibana_change_history`.
+> [!IMPORTANT]  
+> **Do not assume that change history documents live here forever.**
+> Cluster admins can add a retention period via **Stack Management → Index Management → Data Streams** on both stateful and serverless deployments. Features built on this package must tolerate missing or truncated histories: `getHistory` can return fewer events than were originally logged, with gaps, and no guaranteed first snapshot.
 
-Cluster admins can add retention later via **Stack Management → Index Management → Data Streams** on both stateful and serverless deployments.
+This stream is registered as an Elasticsearch **system** data stream (`system: true`), not only as a Kibana hidden stream. Kibana `registerDataStream` / `@kbn/data-streams` cannot set that flag — it comes from the ES [`SystemDataStreamDescriptor`](https://github.com/elastic/elasticsearch/pull/154113) ([security-team#18291](https://github.com/elastic/security-team/issues/18291)). See [`@kbn/data-streams` README — System data streams](../../../../../src/platform/packages/private/kbn-data-streams/README.md#system-data-streams). Verify with `GET _data_stream/.kibana_change_history`.
 
 ### Dependencies
 
@@ -380,11 +382,11 @@ Run the following from the Kibana repository root.
 **Unit tests** (Jest, no Elasticsearch):
 
 ```bash
-yarn test:jest --config=x-pack/platform/packages/shared/kbn-change-history/jest.config.js
+pnpm test:jest --config=x-pack/platform/packages/shared/kbn-change-history/jest.config.js
 ```
 
 **Integration tests** (Jest with a real Elasticsearch node; slower):
 
 ```bash
-yarn test:jest_integration --config=x-pack/platform/packages/shared/kbn-change-history/jest.integration.config.js
+pnpm test:jest_integration --config=x-pack/platform/packages/shared/kbn-change-history/jest.integration.config.js
 ```

@@ -45,6 +45,8 @@ export const ENTITY_STORE_ROUTES = {
     STATUS: `${PUBLIC_BASE}/status`,
     START: `${PUBLIC_BASE}/start`,
     STOP: `${PUBLIC_BASE}/stop`,
+    ENABLE_HISTORY_SNAPSHOT: `${PUBLIC_BASE}/history_snapshot/enable`,
+    DISABLE_HISTORY_SNAPSHOT: `${PUBLIC_BASE}/history_snapshot/disable`,
     UNINSTALL: `${PUBLIC_BASE}/uninstall`,
     CRUD_CREATE: (entityType: string) => `${PUBLIC_BASE}/entities/${entityType}`,
     CRUD_UPDATE: (entityType: string) => `${PUBLIC_BASE}/entities/${entityType}`,

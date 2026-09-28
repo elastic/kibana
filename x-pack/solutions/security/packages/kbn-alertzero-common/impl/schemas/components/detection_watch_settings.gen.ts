@@ -23,12 +23,26 @@ export const AnalysisWindowDays = lazySchema(() => z.number().int().min(1).max(3
 export type AnalysisWindowDays = z.infer<typeof AnalysisWindowDays>;
 
 /**
+ * Minimum number of FP-closed alerts required to trigger analysis on a rule. Matches the tuning sweep's min_fp_count input.
+ */
+export const FpCountThreshold = lazySchema(() => z.number().int().min(2).max(100));
+export type FpCountThreshold = z.infer<typeof FpCountThreshold>;
+
+/**
+ * Minimum FP rate (as % of total alerts) required to trigger analysis. Matches the tuning sweep's min_fp_rate_pct input.
+ */
+export const FpRateThresholdPct = lazySchema(() => z.number().int().min(0).max(100));
+export type FpRateThresholdPct = z.infer<typeof FpRateThresholdPct>;
+
+/**
  * Complete Worker-specific settings for the Rule Tuning Worker, owned by Detection Watch. Sent whole on write; a replacement missing a field is rejected.
  */
 export const RuleTuningWorkerExtras = lazySchema(() =>
   z
     .object({
       analysisWindowDays: AnalysisWindowDays,
+      fpCountThreshold: FpCountThreshold,
+      fpRateThresholdPct: FpRateThresholdPct,
     })
     .strict()
 );

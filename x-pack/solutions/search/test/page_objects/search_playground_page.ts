@@ -28,7 +28,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
     await testSubjects.existOrFail('addDataSourcesButton');
     await testSubjects.click('addDataSourcesButton');
     await testSubjects.existOrFail('selectIndicesFlyout');
-    await findService.clickByCssSelector(`li[title="${indexName}"]`);
+    await findService.clickByCssSelector(`li span[title="${indexName}"]`);
     await testSubjects.clickWhenNotDisabled('saveButton');
   };
 

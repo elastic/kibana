@@ -8,6 +8,7 @@ xpack.infra.enabled: true
 xpack.slo.enabled: true
 xpack.uptime.enabled: true
 xpack.significantEvents.enabled: true
+xpack.nightshiftSources.enabled: true
 
 xpack.features.overrides:
   infrastructure.name: 'Infrastructure'
