@@ -32,22 +32,57 @@ export interface EventLoopWatchdogStartDeps {
   featureFlags: FeatureFlagsStart;
 }
 
-interface LoggingConfigSubset {
-  appenders?: Map<string, { type?: string; layout?: { type?: string } }>;
-  root?: { appenders?: string[] };
+interface LoggerConfigSubset {
+  name?: string;
+  appenders?: string[];
+  level?: string;
 }
 
-/** Uses JSON when any root appender is a console appender with a JSON layout. */
-export const resolveLiveNoticeFormat = ({
-  appenders,
-  root,
-}: LoggingConfigSubset): LiveNoticeFormat => {
-  const rootAppenders = root?.appenders ?? [];
-  const usesJson = rootAppenders.some((name) => {
+interface LoggingConfigSubset {
+  appenders?: Map<string, { type?: string; layout?: { type?: string } }>;
+  loggers?: LoggerConfigSubset[];
+  root?: LoggerConfigSubset;
+}
+
+const ROOT_LOGGER = 'root';
+const BUILT_IN_CONSOLE_APPENDERS = new Set(['default', 'console']);
+const LEVELS_WITHOUT_WARN = new Set(['off', 'fatal', 'error']);
+
+/**
+ * Resolves the format of worker-written live notices from the effective configuration of the
+ * watchdog logger (nearest configured ancestor, as in core logging). Returns `undefined`, i.e.
+ * live notices are disabled, unless that logger emits `warn` to a console appender: notices are
+ * written to stdout and must not leak to a sink the logger is not routed to.
+ */
+export const resolveLiveNoticeFormat = (
+  { appenders, loggers = [], root }: LoggingConfigSubset,
+  loggerName: string
+): LiveNoticeFormat | undefined => {
+  const byName = new Map<string, LoggerConfigSubset>([
+    [ROOT_LOGGER, { appenders: ['default'], level: 'info', ...root }],
+    ...loggers.map((logger): [string, LoggerConfigSubset] => [logger.name ?? '', logger]),
+  ]);
+  const chain = loggerName
+    .split('.')
+    .map((_, index, parts) => parts.slice(0, parts.length - index).join('.'))
+    .concat(ROOT_LOGGER)
+    .flatMap((name) => {
+      const config = byName.get(name);
+      return config ? [config] : [];
+    });
+
+  const level = chain.find((config) => config.level)?.level ?? 'info';
+  if (LEVELS_WITHOUT_WARN.has(level)) return undefined;
+
+  const effectiveAppenders =
+    chain.find((config) => (config.appenders ?? []).length > 0)?.appenders ?? [];
+  const consoleLayouts = effectiveAppenders.flatMap((name) => {
     const appender = appenders?.get(name);
-    return appender?.type === 'console' && appender.layout?.type === 'json';
+    if (appender) return appender.type === 'console' ? [appender.layout?.type] : [];
+    return BUILT_IN_CONSOLE_APPENDERS.has(name) ? ['pattern'] : [];
   });
-  return usesJson ? 'json' : 'text';
+  if (consoleLayouts.length === 0) return undefined;
+  return consoleLayouts.includes('json') ? 'json' : 'text';
 };
 
 export const toWatchdogOptions = ({
@@ -103,7 +138,7 @@ export class EventLoopWatchdogService {
       loggerName: LOGGER_CONTEXT.join('.'),
       options: toWatchdogOptions(opsConfig),
       registry: this.registry,
-      liveNoticeFormat: resolveLiveNoticeFormat(loggingConfig),
+      liveNoticeFormat: resolveLiveNoticeFormat(loggingConfig, LOGGER_CONTEXT.join('.')),
       sanitizeRoot: REPO_ROOT,
     });
     this.watchdog = watchdog;

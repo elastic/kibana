@@ -67,6 +67,14 @@ describe('BlockDetector', () => {
     expect(detector.poll(70_000, 65_000)).toEqual([expect.objectContaining({ profile: true })]);
   });
 
+  it('consumes the cooldown when the profiler start is acknowledged, even after the block', () => {
+    const detector = new BlockDetector(options);
+    detector.poll(1_500, 1_000);
+    detector.poll(1_600, 1_550); // block ends before the acknowledgement
+    detector.onCaptureStarted(1_700);
+    expect(detector.poll(2_300, 1_800)).toEqual([expect.objectContaining({ profile: false })]);
+  });
+
   it('does not consume the cooldown or arm the deadline when no capture starts', () => {
     const detector = new BlockDetector(options);
     expect(detector.poll(1_500, 1_000)).toEqual([expect.objectContaining({ profile: true })]);

@@ -29,7 +29,8 @@ export type LiveNoticeFormat = 'json' | 'text';
 export interface WatchdogWorkerData {
   heartbeat: SharedArrayBuffer;
   options: WatchdogOptions;
-  liveNoticeFormat: LiveNoticeFormat;
+  /** Live notices are disabled when undefined (no console appender for the watchdog logger). */
+  liveNoticeFormat?: LiveNoticeFormat;
   /** Absolute path prefix stripped from profile frame URLs. */
   sanitizeRoot: string;
   /** Logger context used in worker-written lines. */

@@ -84,6 +84,7 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
     );
 
   const writeLine = (message: string, meta: Record<string, object>) => {
+    if (!liveNoticeFormat) return;
     try {
       writeSync(outputFd, formatLogLine(liveNoticeFormat, loggerName, message, meta));
     } catch {
@@ -113,6 +114,7 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
     capture.done = inspect('Profiler.start')
       .then(() => {
         capture.startAckUs = hrUs();
+        detector.onCaptureStarted(capture.startAckUs / 1000);
       })
       .catch((error) => {
         capture.error = `Profiler.start failed: ${error.message}`;
@@ -181,7 +183,6 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
     } else {
       captureInFlight = true;
       current.capture = startCapture();
-      detector.onCaptureStarted(event.detectedAt);
     }
   };
 

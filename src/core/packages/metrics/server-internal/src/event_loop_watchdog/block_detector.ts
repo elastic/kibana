@@ -133,13 +133,15 @@ export class BlockDetector {
   }
 
   /**
-   * Records that a capture actually started for the current block. Only then is the cooldown
-   * consumed and the profile deadline armed, so skipped captures do not delay later ones.
+   * Records that the profiler actually started (acknowledged) at `now`. Only then is the cooldown
+   * consumed, so skipped or long-pending captures do not skew it. The profile deadline is armed
+   * only if the block is still ongoing.
    */
   public onCaptureStarted(now: number): void {
-    if (!this.block || this.block.profileStartedAt !== undefined) return;
     this.lastProfileStartedAt = now;
-    this.block.profileStartedAt = now;
+    if (this.block && this.block.profileStartedAt === undefined) {
+      this.block.profileStartedAt = now;
+    }
   }
 
   private takeReportToken(now: number): boolean {

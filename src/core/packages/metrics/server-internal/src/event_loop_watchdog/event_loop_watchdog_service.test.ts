@@ -84,14 +84,47 @@ describe('EventLoopWatchdogService', () => {
 });
 
 describe('resolveLiveNoticeFormat', () => {
-  it('uses json when a root appender is a console appender with a json layout', () => {
-    const appenders = new Map([
-      ['console', { type: 'console', layout: { type: 'json' } }],
-      ['file', { type: 'file', layout: { type: 'pattern' } }],
-    ]);
-    expect(resolveLiveNoticeFormat({ appenders, root: { appenders: ['console'] } })).toBe('json');
-    expect(resolveLiveNoticeFormat({ appenders, root: { appenders: ['file'] } })).toBe('text');
-    expect(resolveLiveNoticeFormat({ root: { appenders: ['default'] } })).toBe('text');
+  const name = 'metrics.event_loop_watchdog';
+  const appenders = new Map([
+    ['json', { type: 'console', layout: { type: 'json' } }],
+    ['file', { type: 'file', layout: { type: 'json' } }],
+  ]);
+
+  it('defaults to text on the built-in console appender', () => {
+    expect(resolveLiveNoticeFormat({}, name)).toBe('text');
+  });
+
+  it('follows the root appenders when no logger is configured', () => {
+    expect(resolveLiveNoticeFormat({ appenders, root: { appenders: ['json'] } }, name)).toBe(
+      'json'
+    );
+    expect(resolveLiveNoticeFormat({ appenders, root: { appenders: ['file'] } }, name)).toBe(
+      undefined
+    );
+  });
+
+  it('uses the nearest configured ancestor logger', () => {
+    const root = { appenders: ['json'] };
+    expect(
+      resolveLiveNoticeFormat({ appenders, root, loggers: [{ name, appenders: ['file'] }] }, name)
+    ).toBeUndefined();
+    expect(
+      resolveLiveNoticeFormat(
+        { appenders, root, loggers: [{ name: 'metrics', appenders: ['console'] }] },
+        name
+      )
+    ).toBe('text');
+    // a logger without appenders inherits them from its ancestors
+    expect(
+      resolveLiveNoticeFormat({ appenders, root, loggers: [{ name, level: 'debug' }] }, name)
+    ).toBe('json');
+  });
+
+  it('is disabled when the logger does not emit warnings', () => {
+    expect(
+      resolveLiveNoticeFormat({ loggers: [{ name: 'metrics', level: 'error' }] }, name)
+    ).toBeUndefined();
+    expect(resolveLiveNoticeFormat({ root: { level: 'off' } }, name)).toBeUndefined();
   });
 });
 

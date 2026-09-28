@@ -37,7 +37,8 @@ export interface EventLoopWatchdogParams {
   loggerName: string;
   options: WatchdogOptions;
   registry: ActivityRegistry;
-  liveNoticeFormat: LiveNoticeFormat;
+  /** Format of worker-written live notices; `undefined` disables them. */
+  liveNoticeFormat: LiveNoticeFormat | undefined;
   sanitizeRoot: string;
   /** Worker entry module; overridable for tests. */
   workerEntry?: string;
