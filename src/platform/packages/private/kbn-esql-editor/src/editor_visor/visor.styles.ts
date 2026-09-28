@@ -14,7 +14,6 @@ import { css } from '@emotion/react';
 // offset by 100px to leave room for the editor chrome above and below.
 // Matches the max-height used by the KQL QueryStringInput textarea.
 export const NL_TEXTAREA_MAX_HEIGHT = 'calc(35vh - 100px)';
-const VISOR_INNER_PADDING = '2px';
 
 export const visorStyles = (
   euiThemeContext: UseEuiTheme,
@@ -31,13 +30,13 @@ export const visorStyles = (
       width: 100%;
       ${isInline
         ? `
-          height: ${isVisible ? `calc(${euiTheme.size.xl} + ${VISOR_INNER_PADDING})` : '0'};
+          height: ${isVisible ? euiTheme.size.xl : '0'};
           opacity: ${isVisible ? 1 : 0};
           pointer-events: ${isVisible ? 'auto' : 'none'};
           overflow: hidden;
           transition: height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
         `
-        : `min-height: calc(${euiTheme.size.xl} + ${VISOR_INNER_PADDING});`}
+        : `min-height: ${euiTheme.size.xl};`}
     `,
     visorWrapper: css`
       width: 100%;
@@ -78,32 +77,46 @@ export const visorStyles = (
       align-items: center;
     `,
     modeToggle: css`
-      display: flex;
+      position: relative;
+      display: inline-flex;
       align-items: center;
-      gap: 0;
-      border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
-      border-radius: ${borderRadius};
-      padding: ${euiTheme.size.xxs};
+      box-sizing: border-box;
+      gap: ${euiTheme.size.xs};
+      block-size: ${euiTheme.size.xl};
+      max-block-size: ${euiTheme.size.xl};
+      padding: ${euiTheme.size.xs};
+      border-radius: ${euiTheme.border.radius.small};
+
+      &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+        border-radius: inherit;
+        pointer-events: none;
+      }
     `,
     kqlModeButton: css`
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-inline-size: ${euiTheme.size.xl};
-      min-block-size: ${euiTheme.size.xl};
+      inline-size: ${euiTheme.size.l};
+      block-size: ${euiTheme.size.l};
       border-radius: ${euiTheme.border.radius.small};
     `,
     kqlModeButtonActive: css`
-      background-color: ${euiTheme.colors.backgroundFilledText};
-
-      .euiButtonIcon,
-      .euiButtonIcon svg {
-        color: ${euiTheme.colors.textInverse};
-        fill: currentColor;
-      }
+      background-color: ${euiTheme.colors.backgroundLightText};
     `,
     aiButtonSparkleHover: css`
       overflow: visible;
+      box-sizing: border-box;
+      block-size: ${euiTheme.size.l};
+      max-block-size: ${euiTheme.size.l};
+
+      /* The group already draws the border. Keep the outlined gradient on the icon and label. */
+      &::after {
+        content: none;
+      }
 
       @keyframes esqlVisorSparkleTwinkle {
         0%,
@@ -137,12 +150,31 @@ export const visorStyles = (
         }
       }
     `,
+    aiButtonSelected: css`
+      /* Same gradient AiButton outlined uses on hover, so the selected fill stays visible at size xs. */
+      background: linear-gradient(
+          180deg,
+          ${euiTheme.components.buttons.backgroundPrimaryHover} 18%,
+          ${euiTheme.components.buttons.backgroundAssistanceHover} 83%
+        )
+        !important;
+    `,
     nlInputWrapper: css`
       justify-content: center;
       min-width: 0;
     `,
     nlInput: css`
-      font-size: ${fontSize};
+      .euiTextArea {
+        box-sizing: border-box;
+        height: ${euiTheme.size.xl};
+        min-height: ${euiTheme.size.xl};
+        padding-block-start: ${euiTheme.size.xxs};
+        padding-block-end: 0;
+        padding-inline: ${euiTheme.size.s};
+        font-size: ${fontSize};
+        line-height: calc(${euiTheme.size.xl} - (${euiTheme.border.width.thin} * 2));
+        overflow: hidden;
+      }
     `,
   };
 };

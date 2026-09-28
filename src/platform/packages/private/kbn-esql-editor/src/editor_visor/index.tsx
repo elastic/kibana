@@ -163,7 +163,8 @@ export function QuickSearchVisor({
                       <EuiToolTip content={kqlModeLabel} disableScreenReaderOutput>
                         <EuiButtonIcon
                           iconType="query"
-                          size="s"
+                          size="xs"
+                          iconSize="m"
                           color="text"
                           display="empty"
                           aria-label={kqlModeLabel}
@@ -176,13 +177,14 @@ export function QuickSearchVisor({
                     </span>
                     <AiButton
                       iconType={SparklesIcon as unknown as 'sparkles'}
-                      size="s"
-                      variant={isKqlMode ? 'outlined' : 'accent'}
+                      size="xs"
+                      iconSize="m"
+                      variant="outlined"
                       aria-pressed={!isKqlMode}
                       isSelected={!isKqlMode}
                       onClick={() => onVisorModeChange(VisorMode.NaturalLanguage)}
                       data-test-subj="esqlVisorAskAiButton"
-                      css={isKqlMode ? styles.aiButtonSparkleHover : undefined}
+                      css={[styles.aiButtonSparkleHover, !isKqlMode && styles.aiButtonSelected]}
                     >
                       {aiModeLabel}
                     </AiButton>
