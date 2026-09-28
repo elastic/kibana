@@ -10,6 +10,7 @@ export {
   ESCALATION_ASSIGN_URL,
   ESCALATION_BY_ID_URL,
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
+  ESCALATION_LINKED_INVESTIGATIONS_URL,
   ESCALATION_STATUS_FIELD,
   ESCALATION_TEMPLATE_ID,
   ESCALATIONS_INTERNAL_URL,
@@ -37,7 +38,9 @@ export type {
   EscalationConversationSummary,
   EscalationStatus,
   EscalationVisibility,
+  LinkedInvestigationSummary,
   ListEscalationsQuery,
   ListEscalationsResponse,
+  ListLinkedInvestigationsResponse,
   UpdateEscalationRequest,
 } from './escalation';

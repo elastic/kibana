@@ -165,6 +165,7 @@ describe('status report task — usage, resolution state & metadata telemetry', 
   let esqlQuery: jest.Mock;
   let getStatus: jest.Mock;
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let withContextSpy: jest.Mock;
 
   // Drives the task the way task-manager does: register, grab the definition,
   // build the runner and run it once.
@@ -176,6 +177,7 @@ describe('status report task — usage, resolution state & metadata telemetry', 
       analytics: { reportEvent },
       getStartServices: jest.fn().mockResolvedValue([
         {
+          executionContext: { withContext: withContextSpy },
           savedObjects: {
             createInternalRepository: jest.fn().mockReturnValue({
               find: jest.fn().mockResolvedValue({ saved_objects: [{ id: 'engine' }], total: 1 }),
@@ -202,6 +204,7 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     jest.clearAllMocks();
     logger = loggerMock.create();
     reportEvent = jest.fn();
+    withContextSpy = jest.fn(<T>(_ctx: unknown, fn: () => T) => fn());
     getStatus = jest.fn().mockResolvedValue({ status: ENTITY_STORE_STATUS.NOT_INSTALLED });
     // Store-usage counts carry a `query`; the metadata-datastream count does not.
     count = jest.fn(async (params: { query?: unknown }) =>
@@ -413,5 +416,18 @@ describe('status report task — usage, resolution state & metadata telemetry', 
       .filter(([eventType]) => eventType === ENTITY_STORE_USAGE_EVENT.eventType)
       .map(([, payload]) => payload.entityType);
     expect(new Set(usageTypes)).toEqual(new Set(ALL_ENTITY_TYPES));
+  });
+
+  it('runs the registered runner inside the status-report execution context', async () => {
+    await runStatusReportTask();
+
+    expect(withContextSpy).toHaveBeenCalledWith(
+      {
+        type: 'security_solution',
+        name: 'entity_analytics-entity_store_status_report_task',
+        id: `status:${NAMESPACE}`,
+      },
+      expect.any(Function)
+    );
   });
 });

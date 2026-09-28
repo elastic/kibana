@@ -19,7 +19,7 @@ import {
   conversationToInvestigation,
   conversationToEscalationHeader,
 } from './conversation_to_investigation';
-import type { RenderAssignees } from './types';
+import type { RenderAssignees, RenderLinkedInvestigations } from './types';
 
 /**
  * The investigation flyout's slot contents, kept in one module so `register` can pull them in a
@@ -39,13 +39,23 @@ export interface OverviewSlotProps extends InvestigationSlotProps {
    * attachment registry cannot be reached from ambient context.
    */
   attachmentsService: AttachmentServiceStartContract;
+  /**
+   * Renders the "Proposed actions" section's content. Called with the conversation's own id so a
+   * host can fetch its proposals; omitted entirely (see `OverviewTab`) when the caller has none.
+   */
+  renderProposedActions?: (props: { conversationId: string }) => React.ReactNode;
 }
 
-export const OverviewSlot = ({ conversation, attachmentsService }: OverviewSlotProps) => (
+export const OverviewSlot = ({
+  conversation,
+  attachmentsService,
+  renderProposedActions,
+}: OverviewSlotProps) => (
   <OverviewTab
     investigation={conversationToInvestigation(conversation)}
     attachments={conversation.attachments}
     attachmentsService={attachmentsService}
+    proposedActionsContent={renderProposedActions?.({ conversationId: conversation.id })}
   />
 );
 
@@ -121,5 +131,40 @@ export const EscalationHeaderSlot = ({
       assigneeUids={assigneeUids}
       assigneesNode={assigneesNode}
     />
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Escalation overview slot (body tab)
+// ---------------------------------------------------------------------------
+
+export interface EscalationOverviewSlotProps {
+  conversation: Conversation;
+  renderLinkedInvestigations?: RenderLinkedInvestigations;
+  onOpenInvestigation: (args: { conversationId: string; agentId: string }) => void;
+}
+
+/**
+ * The body tab for the escalation details flyout. Renders the linked investigations list via
+ * `renderLinkedInvestigations` (supplied by the consuming plugin so it can use HTTP hooks).
+ * Returns `null` when no render prop is provided.
+ */
+export const EscalationOverviewSlot = ({
+  conversation,
+  renderLinkedInvestigations,
+  onOpenInvestigation,
+}: EscalationOverviewSlotProps) => {
+  if (!renderLinkedInvestigations) return null;
+
+  const { linkedInvestigationIds } = conversationToEscalationHeader(conversation);
+
+  return (
+    <>
+      {renderLinkedInvestigations({
+        escalationId: conversation.id,
+        linkedInvestigationIds,
+        onOpenInvestigation,
+      })}
+    </>
   );
 };

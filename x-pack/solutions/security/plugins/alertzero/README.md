@@ -280,3 +280,58 @@ Measure with:
 node scripts/build_kibana_platform_plugins.js --dist --no-cache
 # inspect target/public/bundles/metrics.json → "page load bundle size" for alertzero
 ```
+
+
+## Revising proposals with Elastic AI
+
+When AlertZero is enabled, the built-in `alertzero-proposal-management` skill is
+registered alongside the revision and action-list tools. Agents with Elastic
+capabilities enabled can discover the skill; loading it exposes
+`security.alertzero.proposals.revise` and `security.alertzero.actions.list`
+without manually adding either tool. Custom agents can explicitly select the
+skill instead. Skill availability checks the current request's proposal-management
+privilege without caching across users. The revision tool also enforces that
+privilege when invoked; skill visibility does not replace authorization.
+
+Proposal attachments expose a live, explicit JSON view of their identity,
+revision links, status, complete Markdown comment, action input, action metadata,
+and decision details. Internal storage and gate-execution fields are excluded.
+Reading the attachment still requires proposal read privileges.
+
+The revision tool accepts a complete replacement comment and shallow-merges
+action input. The skill instructs the agent to preserve the full narrative and
+all unchanged parameters, update prose and input together, and render the new
+pending revision. Superseding does not dismiss, approve, or execute a proposal.
+Because the chat displays the revision history, comment edits must stay localized:
+copy unaffected text and Markdown verbatim, preserving title styling and layout.
+Do not add sections or rewrite existing passages unless explicitly requested.
+
+### Model evaluation: preserve a complete proposal
+
+Run against a local stack with AlertZero enabled and a configured model, using
+the default Elastic AI agent without manually assigned AlertZero tools:
+
+1. Use `scripts/seed_proposal_attachments.sh` to create proposal conversations.
+   Pick a pending rule proposal containing rationale, a warning that the rule is
+   created disabled, an Index table row with `logs-*`, and matching
+   `actionInput.index: ["logs-*"]`. Save its complete comment and action input.
+2. Ask: “Change the index pattern in this proposal from logs-* to logs*.”
+3. Inspect the tool trace: the agent should load
+   `alertzero-proposal-management`, read the current attachment, and call
+   `security.alertzero.proposals.revise` once. It must not approve or execute.
+4. Compare documents: the successor is pending and undecided, retains
+   `rootProposalId`, increments `revision`, and points back via `supersedes`.
+   The predecessor is superseded and points forward via `supersededBy`.
+5. The successor's complete comment retains the title, rationale, disabled-rule
+   warning, and all unchanged table rows. Only the requested index changes.
+   Compare the raw Markdown: apart from the index replacements, it must be
+   identical, with no larger title, new headings, or added rationale/safety sections.
+   The complete action input retains name, description, query, severity,
+   risk_score, and any other original fields, with index changed to `["logs*"]`.
+6. The response renders the successor using its attachment ID and explains that
+   it awaits a human decision. Repeat by referencing the older card: the agent
+   should read the current revision and preserve the first edit in its next one.
+
+Also exercise a comment-only edit, a superseded chain, and a decided/expired
+proposal. The latter must not produce a new revision. This live-model evaluation
+is distinct from unit tests of the schema, formatter, registration, and service.

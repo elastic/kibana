@@ -156,7 +156,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       const { client, eventLogService } = createMocks();
       const request = httpServerMock.createKibanaRequest();
 
-      await client.listExecutionHistory({ request, sort: 'dispatched_at', sortOrder: 'asc' });
+      await client.listExecutionHistory({ request, sortField: 'dispatched_at', sortOrder: 'asc' });
 
       expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
         expect.objectContaining({ sortOrder: 'asc' })
@@ -275,26 +275,26 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       await expect(client.listExecutionHistory({ request })).rejects.toThrow('boom');
     });
 
-    describe('outcome filter', () => {
-      it('passes the explicit outcome array through to the event log service', async () => {
+    describe('outcomes filter', () => {
+      it('resolves the outcomes to the event actions they select', async () => {
         const { client, eventLogService } = createMocks();
         const request = httpServerMock.createKibanaRequest();
 
-        await client.listExecutionHistory({ request, outcome: ['throttled'] });
+        await client.listExecutionHistory({ request, outcomes: ['throttled', 'failure'] });
 
         expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-          expect.objectContaining({ outcomes: ['throttled'] })
+          expect.objectContaining({ actions: ['throttled', 'dispatch_failed'] })
         );
       });
 
-      it('passes undefined outcomes to the service (no narrowing) when not provided', async () => {
+      it('leaves the action filter unset (no narrowing) when no outcome is provided', async () => {
         const { client, eventLogService } = createMocks();
         const request = httpServerMock.createKibanaRequest();
 
         await client.listExecutionHistory({ request });
 
         expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-          expect.objectContaining({ outcomes: undefined })
+          expect.objectContaining({ actions: undefined })
         );
       });
     });
@@ -348,6 +348,19 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         );
 
         jest.useRealTimers();
+      });
+    });
+
+    describe('to', () => {
+      it('forwards endDate as undefined when `to` is not provided', async () => {
+        const { client, eventLogService } = createMocks();
+        const request = httpServerMock.createKibanaRequest();
+
+        await client.listExecutionHistory({ request });
+
+        expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
+          expect.objectContaining({ endDate: undefined })
+        );
       });
     });
 

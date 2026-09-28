@@ -36,6 +36,7 @@ import {
   buildExecutionHistoryItem,
   type NameMaps,
 } from './build_execution_history_item';
+import { toEventActions } from './outcome';
 
 // Default lower bound on the event timestamp when the caller does not pass an
 // explicit `from`.
@@ -55,7 +56,7 @@ export interface ListExecutionHistoryArgs {
   perPage?: number;
   search?: string;
   ruleIds?: string[];
-  outcome?: PolicyExecutionOutcomeFilter;
+  outcomes?: PolicyExecutionOutcomeFilter;
   episodeIds?: string[];
   /**
    * Inclusive ISO timestamp lower bound for `@timestamp`. When provided it
@@ -69,7 +70,7 @@ export interface ListExecutionHistoryArgs {
    * `@timestamp`, which the event log query always sorts on; only `sortOrder`
    * is forwarded.
    */
-  sort?: ListPolicyExecutionHistoryRequest['sort'];
+  sortField?: ListPolicyExecutionHistoryRequest['sort_field'];
   /** Sort direction. Defaults to `desc` (newest first). */
   sortOrder?: 'asc' | 'desc';
 }
@@ -105,7 +106,7 @@ export class ActionPolicyExecutionHistoryClient {
     perPage = EXECUTION_HISTORY_DEFAULT_PER_PAGE,
     search,
     ruleIds,
-    outcome,
+    outcomes,
     episodeIds,
     from,
     to,
@@ -135,7 +136,7 @@ export class ActionPolicyExecutionHistoryClient {
       sortOrder,
       page,
       perPage,
-      outcomes: outcome,
+      actions: toEventActions(outcomes),
       policyIds: matchingSearchIds.policyIds,
       ruleIds: matchingSearchIds.ruleIds,
       mandatoryRuleIds: ruleIds,

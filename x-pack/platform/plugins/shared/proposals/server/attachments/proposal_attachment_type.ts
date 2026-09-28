@@ -46,10 +46,7 @@ const describeOutcome = (proposal: ProposalWithMetadata, isExpired: boolean): st
   }`;
 };
 
-/**
- * Format a proposal for the LLM.  Keep it terse: the human decision is the
- * only action the agent can request — it cannot run the action itself.
- */
+/** Formats the complete revision content and state the agent needs to read and revise it. */
 const formatProposalForAgent = (proposal: ProposalWithMetadata): string => {
   // Deliberately NOT `PROPOSAL_WITHOUT_ACTION_LABEL`: this string is LLM prompt input
   // and must stay untranslated and carry the analyst-directive clause. The UI badge
@@ -66,23 +63,43 @@ const formatProposalForAgent = (proposal: ProposalWithMetadata): string => {
 
   const lines: string[] = [
     `## Proposal: ${label}`,
+    `Proposal ID: ${proposal.id}`,
     `Status: ${proposal.status}`,
     // Not "the deadline has passed": the gate can settle a proposal as expired
     // before its deadline, and `Decision deadline` below would then print a
     // future date directly under a banner claiming it was behind us.
     isExpired ? 'EXPIRED: this proposal can no longer be decided.' : '',
-    '',
-    proposal.comment,
-    '',
-    `Impact: ${proposal.impact} | Confidence: ${proposal.confidence} | Category: ${
-      proposal.action?.category ?? proposal.category ?? 'unknown'
-    }`,
-    proposal.action?.reversible !== undefined
-      ? `Reversible: ${proposal.action.reversible ? 'yes' : 'no'}`
-      : '',
-    proposal.expiresAt ? `Decision deadline: ${proposal.expiresAt}` : '',
-    '',
     describeOutcome(proposal, isExpired),
+    'Proposal data (comment and actionInput describe this complete revision):',
+    JSON.stringify(
+      {
+        id: proposal.id,
+        rootProposalId: proposal.rootProposalId,
+        revision: proposal.revision,
+        supersedes: proposal.supersedes,
+        supersededBy: proposal.supersededBy,
+        status: proposal.status,
+        decision: proposal.decision,
+        expired: isExpired,
+        comment: proposal.comment,
+        actionWorkflowId: proposal.actionWorkflowId,
+        actionInput: proposal.actionInput,
+        action: proposal.action,
+        impact: proposal.impact,
+        confidence: proposal.confidence,
+        category: proposal.category,
+        origin: proposal.origin,
+        createdAt: proposal.createdAt,
+        expiresAt: proposal.expiresAt,
+        decidedAt: proposal.decidedAt,
+        decidedBy: proposal.decidedBy,
+        dismissReason: proposal.dismissReason,
+        rationale: proposal.rationale,
+        executionError: proposal.executionError,
+      },
+      null,
+      2
+    ),
   ];
 
   return lines.filter((l) => l !== '').join('\n');
@@ -144,7 +161,9 @@ export const createProposalAttachmentType = ({
     'A proposal is a structured recommendation from an agent that requires a human decision ' +
     'before any action is taken.\n\n' +
     'Rules:\n' +
-    "- Never approve, dismiss, or re-create a proposal yourself — that is exclusively the analyst's decision.\n" +
+    '- Use the Proposal ID from the attachment content when calling proposal tools. The attachment ID is a separate identifier used to render the card.\n' +
+    "- Never approve, dismiss, or execute a proposal yourself — that is exclusively the analyst's decision.\n" +
+    '- When the analyst requests changes, use a revision tool: create a new pending proposal in the same rootProposalId chain, increment revision, and link supersedes/supersededBy. The predecessor becomes superseded, not dismissed. Preserve the full comment and actionInput, applying only the requested edits.\n' +
     '- Whenever you mention or summarise a proposal in your response, render it inline with ' +
     '`<render_attachment id="ATTACHMENT_ID" />` (replace ATTACHMENT_ID with the actual id) so ' +
     'the analyst can act on it directly in the chat.\n' +

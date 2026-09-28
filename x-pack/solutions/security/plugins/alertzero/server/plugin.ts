@@ -41,6 +41,7 @@ import { ActionsService } from './services/actions/actions_service';
 import { listActionsTool } from './agent_builder_tools/list_actions_tool';
 import { reviseProposalTool } from './agent_builder_tools/revise_proposal_tool';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
+import { createProposalManagementSkill } from './agent_builder/skills/proposal_management';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 
 export class AlertZeroPlugin
@@ -102,6 +103,12 @@ export class AlertZeroPlugin
     agentBuilder.tools.register({
       ...reviseProposalTool(() => this.requireProposals()),
     });
+
+    agentBuilder.skills.register(
+      createProposalManagementSkill((request) =>
+        this.requireProposals().getProposalPrivileges().canManage(request)
+      )
+    );
 
     features.registerKibanaFeature({
       id: ALERTZERO_FEATURE_ID,

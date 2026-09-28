@@ -44,12 +44,20 @@ export interface InvestigationActionModalsProps<
    * handler stays referentially stable across renders. Falls back to closing the modal, so a
    * host that opens one with no mutation to call cannot leave it stuck open.
    */
-  onConfirmApproval?: (proposal: TProposal) => void;
+  onConfirmApproval?: (proposal: TProposal) => Promise<void>;
   /**
    * Records a dismissal from the approval modal. Omitted by hosts that cannot capture one,
    * which also hides the Dismiss button rather than leaving it inert.
    */
   onDismissApproval?: (proposal: TProposal) => void;
+  /**
+   * Whether `approvalProposal`'s approve/decline is currently in flight. Sourced from the host's
+   * own mutation cache (e.g. `useIsMutating`), so this modal agrees with anything else showing the
+   * same proposal and survives being closed and reopened mid-submission.
+   */
+  isSubmitting?: 'applying' | 'declining';
+  /** Who's approving, for the modal's "Applying"/"Declining" caption. */
+  currentActorName?: string;
   /**
    * Replaces the default rationale-only dismiss modal. Supplied when a solution's
    * dismissal captures more than a rationale — a structured reason, say — which changes
@@ -82,16 +90,24 @@ export const InvestigationActionModals = <TProposal extends ApprovalProposal = A
   onDismissApproval,
   renderDismissModal,
   renderEscalationModal,
+  isSubmitting,
+  currentActorName,
 }: InvestigationActionModalsProps<TProposal>) => (
   <>
     {approvalProposal ? (
       <ApprovalModal
         proposal={approvalProposal}
-        onConfirm={() =>
-          onConfirmApproval ? onConfirmApproval(approvalProposal) : onCloseApproval()
-        }
+        onConfirm={async () => {
+          if (onConfirmApproval) {
+            await onConfirmApproval(approvalProposal);
+          } else {
+            onCloseApproval();
+          }
+        }}
         onClose={onCloseApproval}
         onDismiss={onDismissApproval ? () => onDismissApproval(approvalProposal) : undefined}
+        isSubmitting={isSubmitting}
+        currentActorName={currentActorName}
       />
     ) : null}
 

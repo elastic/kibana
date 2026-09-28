@@ -41,12 +41,15 @@ export function createSignificantEventsClients({
   esClient,
   space,
   triggerEmitter,
+  useRuleEventsRead,
 }: {
   services: SignificantEventsServices;
   dataStreams: DataStreamsStart;
   esClient: ElasticsearchClient;
   space: string;
   triggerEmitter?: TriggerEmitter;
+  /** Gated by `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ` (`@kbn/nightshift-shared`). */
+  useRuleEventsRead?: boolean;
 }): SignificantEventsClients {
   return {
     getDetectionClient: async () =>
@@ -58,14 +61,32 @@ export function createSignificantEventsClients({
         esClient,
         space,
       }),
-    getEventClient: async () =>
-      services.event.getClient({
+    getEventClient: async () => {
+      // `EventService.getClient()` returns `EventClient | RuleEventsClient`, but every current
+      // caller of `getEventClient()` (routes, agent-builder tools, workflow triggers) still uses
+      // the full `EventClient` surface (`bulkCreate`, `findByEventUuid`, `findLatestActive`,
+      // `emitTrigger`, …), which `RuleEventsClient` intentionally does not implement (#1517).
+      // `useRuleEventsRead` is gated behind those sibling reader PRs migrating each call site —
+      // unlike `EventService.getClient()`'s own `false` default (a code-level fallback),
+      // `useRuleEventsRead` here is sourced from a *live* feature flag (see `plugin.ts`), so it can
+      // flip without a deploy. Guard loudly instead of silently casting: a `TypeError` on the first
+      // `.bulkCreate()`/`.emitTrigger()`/etc. call would be much harder to trace back to this flag.
+      if (useRuleEventsRead) {
+        throw new Error(
+          'SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ is not yet safe for getEventClient() callers: ' +
+            'RuleEventsClient does not implement bulkCreate, emitTrigger, findByEventUuid, or ' +
+            'findLatestActive. Do not enable this flag before nightshift-program#1516/#1517 land.'
+        );
+      }
+      return services.event.getClient({
         dataStreamClient: await dataStreams.initializeClient<typeof eventsMappings, StoredEvent>(
           eventsDataStream.name
         ),
         esClient,
         space,
         triggerEmitter,
-      }),
+        useRuleEventsRead,
+      }) as EventClient;
+    },
   };
 }

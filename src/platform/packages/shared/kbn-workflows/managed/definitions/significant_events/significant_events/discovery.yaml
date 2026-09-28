@@ -205,6 +205,8 @@ steps:
     connector-id-by-feature: 'significant_events_discovery'
     plugin-id: 'significant_events_discovery'
     aggregate-by: 'significant_events'
+    product-solution: 'observability'
+    product-feature: 'nightshift'
     create-conversation: true
     public-conversation: true
     with:

@@ -252,6 +252,8 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'alert-analysis',
   'alert-triage',
   'detection-rule-edit',
+  // Registered only when xpack.alertzero.enabled is true.
+  'alertzero-proposal-management',
   'recommend-prebuilt-rules',
   'threat-hunting',
   'find-security-rules',
