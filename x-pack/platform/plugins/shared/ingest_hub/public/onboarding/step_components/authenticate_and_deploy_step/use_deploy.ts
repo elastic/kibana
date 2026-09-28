@@ -253,6 +253,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     policyIdsByInstance: detectAndReviewStep.policyIdsByInstance,
     pendingCleanupPolicyIds: detectAndReviewStep.pendingCleanupPolicyIds,
     isDirty: detectAndReviewStep.isDirty ?? false,
+    isAuthDirty: detectAndReviewStep.isAuthDirty ?? false,
   });
 
   return {

@@ -69,6 +69,13 @@ export interface DetectAndReviewStepState {
    * Set at Deploy step mount after a drift check; cleared after a successful redeploy.
    */
   isDirty?: boolean;
+  /**
+   * True when the auth method or connector specifically differs from the last-deployed SO state.
+   * Subset of isDirty; used to gate overrideCloudConnector on MI policy updates so that a
+   * service-var-only redeploy does not silently re-attach the wizard's connector over one
+   * reassigned by an operator.
+   */
+  isAuthDirty?: boolean;
 }
 
 // Only non-sensitive fields are persisted — password values are never written to session storage.
@@ -341,6 +348,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
               ? rest.pendingCleanupPolicyIds
               : prev?.pendingCleanupPolicyIds,
           isDirty: rest.isDirty !== undefined ? rest.isDirty : prev?.isDirty,
+          isAuthDirty: rest.isAuthDirty !== undefined ? rest.isAuthDirty : prev?.isAuthDirty,
         });
       }
     },
@@ -370,6 +378,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         ecfStacks: prev?.ecfStacks,
         pendingCleanupPolicyIds: nextPendingCleanup,
         isDirty: prev?.isDirty,
+        isAuthDirty: prev?.isAuthDirty,
       });
     },
     [setDetectAndReviewStep]
@@ -407,6 +416,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         ecfStacks: prev?.ecfStacks,
         pendingCleanupPolicyIds: nextPendingCleanup,
         isDirty: prev?.isDirty,
+        isAuthDirty: prev?.isAuthDirty,
       });
     },
     [removeDeployInstance, setDetectAndReviewStep]

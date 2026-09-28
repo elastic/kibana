@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -175,6 +175,8 @@ export function ManagedIntegrationsSection({
         onReplaceFormDirtyChange?.(true);
       } else if (replaceFormEverReady.current) {
         // Form was previously ready — user cleared the fields, treat as cancellation.
+        // Clear staged credentials so a bypass-eligible dirty redeploy cannot use the cancelled keys.
+        setStaticKeys(undefined);
         onReplaceFormDirtyChange?.(false);
       }
       // If form was never ready, its false is a mount-time event, not a cancellation —

@@ -160,7 +160,14 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         if (!item) return;
         // policyIdsByInstance is captured from the closure: it is hydrated at mount from the SO
         // (same as serviceVars) and does not change during the component's lifetime at Step 3.
-        const deployedInstanceIds = new Set(Object.keys(policyIdsByInstance ?? {}));
+        // Filter against currently selected instances: policyIdsByInstance may include stale entries
+        // for deselected services that are cleanup targets, not drift subjects.
+        const selectedInstanceIdSet = new Set(
+          serviceSettings?.instances?.map((i) => i.instanceId) ?? []
+        );
+        const deployedInstanceIds = new Set(
+          Object.keys(policyIdsByInstance ?? {}).filter((id) => selectedInstanceIdSet.has(id))
+        );
         const dirtyVarIds = detectServiceVarsDrift(
           serviceSettings?.serviceVars ?? {},
           (item.serviceVars ?? {}) as Record<string, Record<string, unknown>>,
@@ -177,7 +184,10 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         // still clears isDirty when the replace form has not been touched. Previously this write
         // was suppressed in static-key mode entirely, leaving isDirty=true even after the user
         // reverted their service-var changes and came back to Step 3.
-        updateDetectAndReviewStep({ isDirty: dirty || replaceFormDirtyRef.current });
+        updateDetectAndReviewStep({
+          isDirty: dirty || replaceFormDirtyRef.current,
+          isAuthDirty: authDirty,
+        });
         // Settle only after a successful compare. A failed or empty fetch leaves driftSettled=false
         // so Next stays blocked rather than enabling with a stale (default false) isDirty value.
         setDriftSettled(true);
