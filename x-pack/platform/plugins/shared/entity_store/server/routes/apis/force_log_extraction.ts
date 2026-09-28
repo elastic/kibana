@@ -12,7 +12,8 @@ import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import { EntityType } from '../../../common/domain/definitions/entity_schema';
+import { EntityType, ExtractionMode } from '../../../common/domain/definitions/entity_schema';
+import { resolveExtractionMode } from '../../../common/domain/definitions/registry';
 
 const paramsSchema = z.object({
   entityType: EntityType,
@@ -21,6 +22,8 @@ const paramsSchema = z.object({
 const bodySchema = z.object({
   fromDateISO: z.string().datetime(),
   toDateISO: z.string().datetime(),
+  /** Which extraction process to run as. Defaults to the one this deployment actually runs. */
+  process: ExtractionMode.optional(),
 });
 
 export function registerForceLogExtraction(router: EntityStorePluginRouter) {
@@ -48,15 +51,25 @@ export function registerForceLogExtraction(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger: baseLogger, logsExtractionClient } = entityStoreCtx;
+        const { logger: baseLogger, logsExtractionClient, isDualProcessEnabled } = entityStoreCtx;
         const { entityType } = req.params;
+        const { fromDateISO, toDateISO, process } = req.body;
 
         const logger = baseLogger.get('forceLogExtraction').get(entityType);
-        logger.debug(`Force log extraction API called for entity type: ${entityType}`);
 
-        const summary = await logsExtractionClient.extractLogs(entityType, {
-          specificWindow: req.body,
-        });
+        // Without an explicit process, run as whichever mode this deployment actually uses:
+        // `single` with the dual-process flag off, `priority` with it on.
+        const extractionMode =
+          process ?? resolveExtractionMode(await isDualProcessEnabled(), entityType);
+        logger.debug(
+          `Force log extraction API called for entity type ${entityType} as ${extractionMode}`
+        );
+
+        const summary = await logsExtractionClient
+          .withExtractionMode(extractionMode)
+          .extractLogs(entityType, {
+            specificWindow: { fromDateISO, toDateISO },
+          });
 
         return res.ok({
           body: summary,
