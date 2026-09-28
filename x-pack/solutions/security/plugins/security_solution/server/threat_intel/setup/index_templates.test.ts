@@ -499,6 +499,36 @@ describe('index_templates — mapping coverage guard', () => {
     expect(callIdx).toBeGreaterThan(installIdx);
   });
 
+  it('backfillKevRankScore is wired into installIndexTemplates', () => {
+    expect(src).toContain('const backfillKevRankScore');
+
+    const installIdx = src.indexOf('export const installIndexTemplates');
+    const callIdx = src.indexOf('await backfillKevRankScore', installIdx);
+    expect(callIdx).toBeGreaterThan(installIdx);
+  });
+
+  it('backfills rank_score only onto KEV reports that still lack it', async () => {
+    // The migrations helper mocks a live report index; the template-only helper has none.
+    const { esClient } = await runMigrations({ reportMappings: fullyMigratedReportMappings() });
+
+    const kevBackfill = esClient.updateByQuery.mock.calls
+      .map(([arg]) => arg)
+      .find((arg) => JSON.stringify(arg.query).includes('"lineage.extraction_method":"kev"'));
+    expect(kevBackfill).toBeDefined();
+    expect(kevBackfill?.index).toBe(REPORT_INDEX);
+    expect(kevBackfill?.conflicts).toBe('proceed');
+    expect(kevBackfill?.query).toEqual({
+      bool: {
+        filter: [{ term: { 'lineage.extraction_method': 'kev' } }],
+        must_not: [{ exists: { field: 'rank_score' } }],
+      },
+    });
+    // The enrich workflow's own formula: severity.score * relevance, at the neutral 0.5.
+    expect(kevBackfill?.script).toEqual(
+      expect.objectContaining({ source: expect.stringContaining('score * relevance') })
+    );
+  });
+
   it('reports template declares evidence as a space-keyed nested array (v30)', async () => {
     const { byIndex } = await runInstall();
 

@@ -1285,6 +1285,57 @@ const migrateExistingVulnerabilityMappings = async (
   }
 };
 
+/**
+ * KEV reports written before the adapter stamped `rank_score` (and
+ * `extracted.relevance`) sort behind every enriched report in the hunt candidates
+ * query (`rank_score` desc, `missing: 0`), and ingest dedup skips an unchanged KEV
+ * entry for 90 days, so they never pick the field up on their own. Backfill the
+ * adapter's neutral baseline (`severity.score * 0.5`) onto KEV documents that lack
+ * it. Idempotent: the query only matches documents still missing `rank_score`.
+ */
+const backfillKevRankScore = async (
+  esClient: ElasticsearchClient,
+  reportIndices: readonly string[],
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('kev-rank-score-backfill');
+
+  for (const indexName of reportIndices) {
+    try {
+      const result = await esClient.updateByQuery({
+        index: indexName,
+        conflicts: 'proceed',
+        refresh: true,
+        query: {
+          bool: {
+            filter: [{ term: { 'lineage.extraction_method': 'kev' } }],
+            must_not: [{ exists: { field: 'rank_score' } }],
+          },
+        },
+        script: {
+          lang: 'painless',
+          source: [
+            'double relevance = 0.5;',
+            'if (ctx._source.extracted == null) { ctx._source.extracted = new HashMap(); }',
+            'ctx._source.extracted.relevance = relevance;',
+            'double score = ctx._source.severity != null && ctx._source.severity.score != null ? ctx._source.severity.score : 70;',
+            'ctx._source.rank_score = score * relevance;',
+          ].join(' '),
+        },
+      });
+      if ((result?.updated ?? 0) > 0) {
+        log.info(`Backfilled rank_score on ${result.updated} KEV report(s) in ${indexName}`);
+      }
+    } catch (err) {
+      log.error(
+        `Failed to backfill rank_score on KEV reports in ${indexName}: ${
+          (err as Error).message
+        }. Those reports keep sorting last in the hunt candidates query until re-ingested.`
+      );
+    }
+  }
+};
+
 const ensureCompanionIndex = async (
   esClient: ElasticsearchClient,
   indexName: string,
@@ -1544,6 +1595,7 @@ export const installIndexTemplates = async ({
   await migrateExistingIndicatorKeywordBounds(esClient, log);
   await migrateExistingReportKeywordBounds(esClient, reportIndices, log);
   await migrateExistingVulnerabilityMappings(esClient, reportIndices, log);
+  await backfillKevRankScore(esClient, reportIndices, log);
   await migrateExistingContentScrubbedMapping(esClient, reportIndices, log);
   await migrateExistingIndicesToHidden(esClient, reportIndices, log);
 
