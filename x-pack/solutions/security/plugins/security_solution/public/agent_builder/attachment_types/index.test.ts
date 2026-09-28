@@ -7,7 +7,12 @@
 
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
-import { registerAttachmentUiDefinitions, registerImpactAttachment } from '.';
+import {
+  registerAttachmentUiDefinitions,
+  registerImpactAttachment,
+  registerInvestigationIocsAttachment,
+  registerInvestigationTimelineAttachment,
+} from '.';
 
 describe('registerAttachmentUiDefinitions', () => {
   const mockAddAttachmentType = jest.fn();
@@ -89,6 +94,38 @@ describe('registerAttachmentUiDefinitions', () => {
     );
     expect(alertsCall).toBeDefined();
     expect(alertsCall![1].renderConversationDetailsContent).toBeDefined();
+  });
+});
+
+describe('registerInvestigationTimelineAttachment', () => {
+  it('registers the timeline summary synchronously', () => {
+    const addAttachmentType = jest.fn();
+    const attachments = { addAttachmentType } as unknown as AttachmentServiceStartContract;
+
+    registerInvestigationTimelineAttachment({ attachments });
+
+    expect(addAttachmentType).toHaveBeenCalledWith(
+      SecurityAgentBuilderAttachments.investigationTimeline,
+      expect.objectContaining({
+        renderConversationDetailsContent: expect.any(Function),
+      })
+    );
+  });
+});
+
+describe('registerInvestigationIocsAttachment', () => {
+  it('registers the indicator summary synchronously', () => {
+    const addAttachmentType = jest.fn();
+    const attachments = { addAttachmentType } as unknown as AttachmentServiceStartContract;
+
+    registerInvestigationIocsAttachment({ attachments });
+
+    expect(addAttachmentType).toHaveBeenCalledWith(
+      SecurityAgentBuilderAttachments.investigationIocs,
+      expect.objectContaining({
+        renderConversationDetailsContent: expect.any(Function),
+      })
+    );
   });
 });
 

@@ -12,6 +12,7 @@ import type {
   AttachmentUIDefinition,
   AttachmentRenderProps,
 } from '@kbn/agent-builder-browser/attachments';
+import { renderInvestigationIocsSummary } from './summary_rows';
 import type { InvestigationIocsAttachment } from './types';
 
 const DEFAULT_LABEL = i18n.translate(
@@ -34,4 +35,6 @@ export const createInvestigationIocsAttachmentDefinition =
         <LazyInvestigationIocsInlineContent {...props} />
       </React.Suspense>
     ),
+    renderConversationDetailsContent: ({ attachment }) =>
+      renderInvestigationIocsSummary(attachment),
   });

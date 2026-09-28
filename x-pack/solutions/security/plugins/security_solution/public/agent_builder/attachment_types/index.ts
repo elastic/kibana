@@ -29,6 +29,8 @@ import {
   createAlertSummaryRows,
   createAlertsSummaryRows,
 } from './attachment_summary_drilldown/create_details_drilldown';
+import { createInvestigationIocsAttachmentDefinition } from './investigation_iocs';
+import { createInvestigationTimelineAttachmentDefinition } from './investigation_timeline';
 
 /**
  * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property
@@ -117,42 +119,34 @@ export const registerAttachmentUiDefinitions = ({
 
 /**
  * Registers the `security.investigation.timeline` attachment renderer
- * (chronological event table for forensic artifacts).
+ * (chronological event table for forensic artifacts). Registered synchronously so the
+ * investigation flyout can list it on first paint; the event table stays behind React.lazy.
  */
 export const registerInvestigationTimelineAttachment = ({
   attachments,
 }: {
   attachments: AttachmentServiceStartContract;
 }): void => {
-  void import(
-    /* webpackChunkName: "security_investigation_timeline_attachment" */
-    './investigation_timeline'
-  ).then(({ createInvestigationTimelineAttachmentDefinition }) => {
-    attachments.addAttachmentType(
-      SecurityAgentBuilderAttachments.investigationTimeline,
-      createInvestigationTimelineAttachmentDefinition()
-    );
-  });
+  attachments.addAttachmentType(
+    SecurityAgentBuilderAttachments.investigationTimeline,
+    createInvestigationTimelineAttachmentDefinition()
+  );
 };
 
 /**
  * Registers the `security.investigation.iocs` attachment renderer
- * (category table of indicator badges for forensic artifacts).
+ * (category table of indicator badges for forensic artifacts). Registered synchronously so the
+ * investigation flyout can list it on first paint; the category table stays behind React.lazy.
  */
 export const registerInvestigationIocsAttachment = ({
   attachments,
 }: {
   attachments: AttachmentServiceStartContract;
 }): void => {
-  void import(
-    /* webpackChunkName: "security_investigation_iocs_attachment" */
-    './investigation_iocs'
-  ).then(({ createInvestigationIocsAttachmentDefinition }) => {
-    attachments.addAttachmentType(
-      SecurityAgentBuilderAttachments.investigationIocs,
-      createInvestigationIocsAttachmentDefinition()
-    );
-  });
+  attachments.addAttachmentType(
+    SecurityAgentBuilderAttachments.investigationIocs,
+    createInvestigationIocsAttachmentDefinition()
+  );
 };
 
 /**

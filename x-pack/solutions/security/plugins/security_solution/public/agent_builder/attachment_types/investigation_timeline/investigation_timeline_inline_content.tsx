@@ -12,7 +12,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import { parseTimelineEvents } from './parse_timeline_events';
 import type { InvestigationTimelineEvent } from './types';
+
+export { parseTimelineEvents };
 
 export const INVESTIGATION_TIMELINE_ATTACHMENT_TEST_ID =
   'securitySolutionAgentBuilderInvestigationTimelineAttachment';
@@ -33,27 +36,6 @@ const COMMENT_COLUMN = i18n.translate(
   'xpack.securitySolution.agentBuilder.investigationTimeline.commentColumn',
   { defaultMessage: 'Comment' }
 );
-
-const isTimelineEvent = (value: unknown): value is InvestigationTimelineEvent => {
-  if (typeof value !== 'object' || value === null) {
-    return false;
-  }
-  const event = value as { timestamp?: unknown; host?: unknown; description?: unknown };
-  return (
-    typeof event.timestamp === 'string' &&
-    event.timestamp !== '' &&
-    typeof event.host === 'string' &&
-    event.host !== '' &&
-    typeof event.description === 'string' &&
-    event.description !== ''
-  );
-};
-
-export const parseTimelineEvents = (data: unknown): InvestigationTimelineEvent[] => {
-  if (typeof data !== 'object' || data === null) return [];
-  const { events } = data as { events?: unknown };
-  return Array.isArray(events) ? events.filter(isTimelineEvent) : [];
-};
 
 const wrappingCellCss = css`
   overflow-wrap: anywhere;

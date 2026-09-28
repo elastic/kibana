@@ -12,6 +12,7 @@ import type {
   AttachmentUIDefinition,
   AttachmentRenderProps,
 } from '@kbn/agent-builder-browser/attachments';
+import { renderInvestigationTimelineSummary } from './summary_rows';
 import type { InvestigationTimelineAttachment } from './types';
 
 const DEFAULT_LABEL = i18n.translate(
@@ -34,4 +35,6 @@ export const createInvestigationTimelineAttachmentDefinition =
         <LazyInvestigationTimelineInlineContent {...props} />
       </React.Suspense>
     ),
+    renderConversationDetailsContent: ({ attachment }) =>
+      renderInvestigationTimelineSummary(attachment),
   });

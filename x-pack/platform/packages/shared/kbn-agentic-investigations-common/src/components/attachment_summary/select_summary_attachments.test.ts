@@ -7,14 +7,7 @@
 
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { selectSummaryAttachments } from './select_summary_attachments';
-import type { SummaryAttachmentType } from './summary_attachment_types';
-
-const SUMMARY_TYPES: readonly SummaryAttachmentType[] = [
-  { types: ['security.alert', 'security.alerts'] },
-  { types: ['security.attack_discovery'] },
-  { types: ['security.entity'] },
-  { types: ['security.rule'] },
-];
+import { SUMMARY_ATTACHMENT_TYPES } from './summary_attachment_types';
 
 interface AttachmentOverrides {
   id: string;
@@ -60,7 +53,7 @@ describe('selectSummaryAttachments', () => {
       versionTimes: ['2026-09-01T12:00:00.000Z'],
     });
 
-    expect(idsOf(selectSummaryAttachments([entity, attack], SUMMARY_TYPES))).toEqual([
+    expect(idsOf(selectSummaryAttachments([entity, attack], SUMMARY_ATTACHMENT_TYPES))).toEqual([
       'attack',
       'entity',
     ]);
@@ -78,7 +71,7 @@ describe('selectSummaryAttachments', () => {
       versionTimes: ['2026-09-01T11:00:00.000Z'],
     });
 
-    expect(idsOf(selectSummaryAttachments([second, first], SUMMARY_TYPES))).toEqual([
+    expect(idsOf(selectSummaryAttachments([second, first], SUMMARY_ATTACHMENT_TYPES))).toEqual([
       'first',
       'second',
     ]);
@@ -96,10 +89,37 @@ describe('selectSummaryAttachments', () => {
       versionTimes: ['2026-09-01T10:00:00.000Z'],
     });
 
-    expect(idsOf(selectSummaryAttachments([single, batch], SUMMARY_TYPES))).toEqual([
+    expect(idsOf(selectSummaryAttachments([single, batch], SUMMARY_ATTACHMENT_TYPES))).toEqual([
       'batch',
       'single',
     ]);
+  });
+
+  it('lists timeline and indicator attachments after the earlier groups', () => {
+    const iocs = makeAttachment({
+      id: 'iocs',
+      type: 'security.investigation.iocs',
+      versionTimes: ['2026-09-01T08:00:00.000Z'],
+    });
+    const rule = makeAttachment({
+      id: 'rule',
+      type: 'security.rule',
+      versionTimes: ['2026-09-01T09:00:00.000Z'],
+    });
+    const timeline = makeAttachment({
+      id: 'timeline',
+      type: 'security.investigation.timeline',
+      versionTimes: ['2026-09-01T07:00:00.000Z'],
+    });
+    const alert = makeAttachment({
+      id: 'alert',
+      type: 'security.alert',
+      versionTimes: ['2026-09-01T12:00:00.000Z'],
+    });
+
+    expect(
+      idsOf(selectSummaryAttachments([iocs, rule, timeline, alert], SUMMARY_ATTACHMENT_TYPES))
+    ).toEqual(['alert', 'rule', 'timeline', 'iocs']);
   });
 
   it('compares instants rather than strings, so mixed UTC offsets still order correctly', () => {
@@ -114,7 +134,7 @@ describe('selectSummaryAttachments', () => {
       versionTimes: ['2026-09-01T08:00:00.000Z'],
     });
 
-    expect(idsOf(selectSummaryAttachments([utc, offset], SUMMARY_TYPES))).toEqual([
+    expect(idsOf(selectSummaryAttachments([utc, offset], SUMMARY_ATTACHMENT_TYPES))).toEqual([
       'offset',
       'utc',
     ]);
@@ -124,8 +144,6 @@ describe('selectSummaryAttachments', () => {
     ['security.attack_discovery.verdict'],
     ['security.rule.preview'],
     ['security.exception'],
-    ['security.investigation.timeline'],
-    ['security.investigation.iocs'],
     ['security.entity_graph'],
     ['security.entity_risk_score_history'],
     ['security.entity_analytics_dashboard'],
@@ -136,7 +154,9 @@ describe('selectSummaryAttachments', () => {
       makeAttachment({ id: 'dropped', type }),
     ];
 
-    expect(idsOf(selectSummaryAttachments(attachments, SUMMARY_TYPES))).toEqual(['kept']);
+    expect(idsOf(selectSummaryAttachments(attachments, SUMMARY_ATTACHMENT_TYPES))).toEqual([
+      'kept',
+    ]);
   });
 
   it('excludes hidden and soft-deleted attachments, and keeps ones with no active flag', () => {
@@ -147,7 +167,7 @@ describe('selectSummaryAttachments', () => {
       makeAttachment({ id: 'explicitlyActive', type: 'security.alert', active: true }),
     ];
 
-    expect(idsOf(selectSummaryAttachments(attachments, SUMMARY_TYPES)).sort()).toEqual([
+    expect(idsOf(selectSummaryAttachments(attachments, SUMMARY_ATTACHMENT_TYPES)).sort()).toEqual([
       'explicitlyActive',
       'kept',
     ]);
@@ -169,7 +189,7 @@ describe('selectSummaryAttachments', () => {
       versionTimes: ['2026-09-01T10:00:00.000Z'],
     });
 
-    expect(idsOf(selectSummaryAttachments([later, pruned], SUMMARY_TYPES))).toEqual([
+    expect(idsOf(selectSummaryAttachments([later, pruned], SUMMARY_ATTACHMENT_TYPES))).toEqual([
       'pruned',
       'later',
     ]);
@@ -185,21 +205,17 @@ describe('selectSummaryAttachments', () => {
     const alsoUndated: VersionedAttachment = { ...undated, id: 'alsoUndated' };
     const dated = makeAttachment({ id: 'dated', type: 'security.alert' });
 
-    expect(idsOf(selectSummaryAttachments([undated, alsoUndated, dated], SUMMARY_TYPES))).toEqual([
-      'dated',
-      'alsoUndated',
-      'undated',
-    ]);
-    expect(idsOf(selectSummaryAttachments([dated, alsoUndated, undated], SUMMARY_TYPES))).toEqual([
-      'dated',
-      'alsoUndated',
-      'undated',
-    ]);
+    expect(
+      idsOf(selectSummaryAttachments([undated, alsoUndated, dated], SUMMARY_ATTACHMENT_TYPES))
+    ).toEqual(['dated', 'alsoUndated', 'undated']);
+    expect(
+      idsOf(selectSummaryAttachments([dated, alsoUndated, undated], SUMMARY_ATTACHMENT_TYPES))
+    ).toEqual(['dated', 'alsoUndated', 'undated']);
   });
 
   it.each([
-    ['no attachments', undefined, SUMMARY_TYPES],
-    ['an empty attachment list', [], SUMMARY_TYPES],
+    ['no attachments', undefined, SUMMARY_ATTACHMENT_TYPES],
+    ['an empty attachment list', [], SUMMARY_ATTACHMENT_TYPES],
     ['no configured kinds', [makeAttachment({ id: 'a', type: 'security.alert' })], []],
   ])('returns nothing for %s', (_name, attachments, types) => {
     expect(selectSummaryAttachments(attachments, types)).toEqual([]);

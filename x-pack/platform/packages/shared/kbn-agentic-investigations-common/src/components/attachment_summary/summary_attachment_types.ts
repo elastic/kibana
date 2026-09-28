@@ -20,4 +20,6 @@ export const SUMMARY_ATTACHMENT_TYPES: readonly SummaryAttachmentType[] = [
   { types: ['security.attack_discovery'] },
   { types: ['security.entity'] },
   { types: ['security.rule'] },
+  { types: ['security.investigation.timeline'] },
+  { types: ['security.investigation.iocs'] },
 ];

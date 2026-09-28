@@ -35,4 +35,8 @@ describe('createInvestigationIocsAttachmentDefinition', () => {
   it('registers an inline renderer', () => {
     expect(typeof definition.renderInlineContent).toBe('function');
   });
+
+  it('registers a conversation details renderer', () => {
+    expect(typeof definition.renderConversationDetailsContent).toBe('function');
+  });
 });
