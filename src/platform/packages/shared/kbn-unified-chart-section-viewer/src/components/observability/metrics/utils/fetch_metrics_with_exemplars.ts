@@ -12,7 +12,11 @@ import type { TimeRange } from '@kbn/es-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { EXEMPLARS_INDEX_PREFIX, EXEMPLARS_METRIC_NAME_FIELD } from '../../../../common/constants';
+import {
+  EXEMPLARS_INDEX_PREFIX,
+  EXEMPLARS_METRIC_NAME_FIELD,
+  EXEMPLARS_OTEL_DATASET_MARKER,
+} from '../../../../common/constants';
 import { executeEsqlQuery } from './execute_esql_query';
 import { MetricsExecutionContextName } from './execution_context_enums';
 
@@ -21,6 +25,8 @@ const NAMESPACE_FIELD = 'data_stream.namespace';
 // One row per metric per stream. Without an explicit limit ES|QL silently caps at 1000 rows;
 // 10000 is the engine's maximum (`esql.query.result_truncation_max_size`).
 const MAX_PROBE_ROWS = 10000;
+// Every OTel exemplars data stream, the only ones with a backing template.
+const EXEMPLARS_OTEL_STREAMS = `${EXEMPLARS_INDEX_PREFIX}*${EXEMPLARS_OTEL_DATASET_MARKER}-*`;
 
 /**
  * Querying an exemplars stream that does not exist results in an HTTP 400, not an empty
@@ -28,7 +34,7 @@ const MAX_PROBE_ROWS = 10000;
  * metric name lets a chart check its own derived stream rather than the whole cluster. It is
  * a workaround until `TS_EXEMPLARS` is available (elasticsearch#154786).
  */
-export const EXEMPLARS_PROBE_QUERY = `FROM exemplars-*.otel-* | STATS BY ${EXEMPLARS_METRIC_NAME_FIELD}, ${DATASET_FIELD}, ${NAMESPACE_FIELD} | LIMIT ${MAX_PROBE_ROWS}`;
+export const EXEMPLARS_PROBE_QUERY = `FROM ${EXEMPLARS_OTEL_STREAMS} | STATS BY ${EXEMPLARS_METRIC_NAME_FIELD}, ${DATASET_FIELD}, ${NAMESPACE_FIELD} | LIMIT ${MAX_PROBE_ROWS}`;
 
 /** `metrics.`-prefixed metric names that have exemplars, keyed by exemplars data stream. */
 export type MetricsWithExemplars = ReadonlyMap<string, ReadonlySet<string>>;
@@ -92,9 +98,12 @@ const groupMetricNamesByStream = ({
     }
 
     const stream = `${EXEMPLARS_INDEX_PREFIX}${dataset}-${namespace}`;
-    const names = byStream.get(stream) ?? new Set<string>();
+    let names = byStream.get(stream);
+    if (!names) {
+      names = new Set<string>();
+      byStream.set(stream, names);
+    }
     names.add(`metrics.${metricName}`);
-    byStream.set(stream, names);
   }
 
   return byStream;

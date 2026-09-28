@@ -46,6 +46,12 @@ describe('fetchMetricsWithExemplars', () => {
     jest.clearAllMocks();
   });
 
+  it('probes every OTel exemplars stream, grouped by metric and data stream, at the engine row cap', () => {
+    expect(EXEMPLARS_PROBE_QUERY).toBe(
+      'FROM exemplars-*.otel-* | STATS BY metric_name, data_stream.dataset, data_stream.namespace | LIMIT 10000'
+    );
+  });
+
   it('sends the probe query under the exemplars execution context, bounded to the time range, without filters or signal', async () => {
     mockExecuteEsqlQuery.mockResolvedValue(probeResponse([]));
 
