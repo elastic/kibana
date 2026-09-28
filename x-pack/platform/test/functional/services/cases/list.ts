@@ -147,9 +147,22 @@ export function CasesTableServiceProvider(
       do {
         await header.waitUntilLoadingHasFinished();
         await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
-        rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
+        rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"]', 100);
         if (rows.length > 0) {
+          const deletedRowIds = await Promise.all(
+            rows.map((row) => row.getAttribute('data-test-subj'))
+          );
           await this.bulkDeleteAllCases();
+          await retry.waitFor('bulk deleted cases to leave the table', async () => {
+            const remainingRows = await find.allByCssSelector(
+              '[data-test-subj*="cases-table-row-"]',
+              0
+            );
+            const remainingIds = await Promise.all(
+              remainingRows.map((row) => row.getAttribute('data-test-subj'))
+            );
+            return remainingIds.every((id) => !deletedRowIds.includes(id));
+          });
         }
       } while (rows.length > 0);
     },

@@ -1750,20 +1750,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
       await header.waitUntilLoadingHasFinished();
       let previousCount: number | undefined;
-      let stablePolls = 0;
-      const requiredStablePolls = 3;
+      let stableSince = Date.now();
 
       await retry.waitFor('rendering count to stabilize', async () => {
         const currentCount = await getRenderingCount();
 
-        if (currentCount === previousCount) {
-          stablePolls++;
-        } else {
+        if (currentCount !== previousCount) {
           previousCount = currentCount;
-          stablePolls = 0;
+          stableSince = Date.now();
         }
 
-        return stablePolls >= requiredStablePolls;
+        // A few fast polls can finish before a debounced render starts. Preserve the previous
+        // one-second stability window while still checking for a new render during that window.
+        return Date.now() - stableSince >= 1000;
       });
     },
 
