@@ -113,6 +113,7 @@ jest.mock('../../../hooks/use_fetch_workflows', () => ({
       size: 100,
     },
     isLoading: false,
+    refetch: jest.fn(),
   }),
 }));
 
