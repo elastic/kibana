@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { agentPolicyService, appContextService } from '../../services';
 import { listFleetProxies } from '../../services/fleet_proxies';
@@ -303,7 +304,9 @@ describe('Agent policy API handlers', () => {
       });
 
       it('returns 404 when policy is not found in the current Space', async () => {
-        agentPolicyServiceMock.get.mockResolvedValue(null);
+        agentPolicyServiceMock.get.mockRejectedValue(
+          SavedObjectsErrorHelpers.createGenericNotFoundError('ingest-agent-policies', 'policy-id')
+        );
 
         const request = httpServerMock.createKibanaRequest({
           params: { agentPolicyId: 'space-b-policy-id' },
@@ -319,7 +322,9 @@ describe('Agent policy API handlers', () => {
       });
 
       it('returns 404 on download when policy is not found in the current Space', async () => {
-        agentPolicyServiceMock.get.mockResolvedValue(null);
+        agentPolicyServiceMock.get.mockRejectedValue(
+          SavedObjectsErrorHelpers.createGenericNotFoundError('ingest-agent-policies', 'policy-id')
+        );
 
         const request = httpServerMock.createKibanaRequest({
           params: { agentPolicyId: 'space-b-policy-id' },
@@ -375,7 +380,9 @@ describe('Agent policy API handlers', () => {
       });
 
       it('returns 404 for policy#version ID when base policy is not found in the current Space', async () => {
-        agentPolicyServiceMock.get.mockResolvedValue(null);
+        agentPolicyServiceMock.get.mockRejectedValue(
+          SavedObjectsErrorHelpers.createGenericNotFoundError('ingest-agent-policies', 'policy-id')
+        );
 
         const request = httpServerMock.createKibanaRequest({
           params: { agentPolicyId: 'policy-1#9.2' },
@@ -409,7 +416,9 @@ describe('Agent policy API handlers', () => {
       });
 
       it('returns 404 on download for policy#version ID when base policy is not found in the current Space', async () => {
-        agentPolicyServiceMock.get.mockResolvedValue(null);
+        agentPolicyServiceMock.get.mockRejectedValue(
+          SavedObjectsErrorHelpers.createGenericNotFoundError('ingest-agent-policies', 'policy-id')
+        );
 
         const request = httpServerMock.createKibanaRequest({
           params: { agentPolicyId: 'policy-1#9.2' },

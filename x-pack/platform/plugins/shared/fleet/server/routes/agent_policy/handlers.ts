@@ -7,6 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import { isEmpty, uniq } from 'lodash';
@@ -779,12 +780,16 @@ export const getFullAgentPolicy: FleetRequestHandler<
     // exists in the caller's Space first so the soClient enforces Space scoping.
     // Strip any version suffix (e.g. policy-1#9.2 → policy-1) since SO objects are keyed by base ID.
     const basePolicyId = removeVersionSuffixFromPolicyId(agentPolicyId);
-    const policyInSpace = await agentPolicyService.get(soClient, basePolicyId, false);
-    if (!policyInSpace) {
-      return response.customError({
-        statusCode: 404,
-        body: { message: 'Agent policy not found' },
-      });
+    try {
+      await agentPolicyService.get(soClient, basePolicyId, false);
+    } catch (err) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        return response.customError({
+          statusCode: 404,
+          body: { message: 'Agent policy not found' },
+        });
+      }
+      throw err;
     }
     const fleetServerPolicy = await agentPolicyService.getFleetServerPolicy(
       esClient,
@@ -879,12 +884,16 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
     // exists in the caller's Space first so the soClient enforces Space scoping.
     // Strip any version suffix (e.g. policy-1#9.2 → policy-1) since SO objects are keyed by base ID.
     const basePolicyId = removeVersionSuffixFromPolicyId(agentPolicyId);
-    const policyInSpace = await agentPolicyService.get(soClient, basePolicyId, false);
-    if (!policyInSpace) {
-      return response.customError({
-        statusCode: 404,
-        body: { message: 'Agent policy not found' },
-      });
+    try {
+      await agentPolicyService.get(soClient, basePolicyId, false);
+    } catch (err) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        return response.customError({
+          statusCode: 404,
+          body: { message: 'Agent policy not found' },
+        });
+      }
+      throw err;
     }
     const fleetServerPolicy = await agentPolicyService.getFleetServerPolicy(
       esClient,
