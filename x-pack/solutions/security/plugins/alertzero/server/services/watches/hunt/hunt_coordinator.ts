@@ -30,7 +30,19 @@ export type HuntCoordinatorTier2SkipReason =
   | 'configured_never'
   | 'no_inference'
   | 'no_environment_hits'
+  /**
+   * The scope was every discovered dataset (`discovered:broad`) and Tier 1 confirmed no
+   * hit, so there is no matched index set for Tier 2 to generate against. Deterministic
+   * for this run; not counted as lost coverage.
+   */
+  | 'no_matched_scope'
   | 'no_report_text'
+  /**
+   * Tier 1 mapped no searchable term and, under `on_hits`, the run had nothing for Tier 2
+   * either: no report text and no vendor or product from the report. A run that has any of
+   * those is not gated here, because `on_hits` gates on Tier 1 having run clean and Tier 1
+   * never ran; it proceeds to Tier 2 as an `always` run would.
+   */
   | 'no_searchable_input'
   | 'report_not_found'
   | 'scope_blocked'
@@ -307,13 +319,41 @@ const blockedScopeGuidance = ({
   };
 };
 
-const decideTier2Skip = (
-  tier2When: 'on_hits' | 'always' | 'never',
-  tier1: HuntForThreatResult
-): HuntCoordinatorTier2SkipReason | null => {
+/**
+ * Whether Tier 2 sits this run out, and why. Checked in order:
+ *
+ * 1. `never` always wins: `configured_never`.
+ * 2. A `discovered:broad` scope with no confirmed Tier 1 hit: `no_matched_scope`, whatever
+ *    `tier2_when` says (`always` included). The scope was every discovered dataset, so
+ *    generating ES|QL against all of it is meaningless; Tier 2 needs the index set Tier 1
+ *    actually hit, and there is none.
+ * 3. Tier 1 mapped nothing to search (`no_searchable_terms`): `always` runs Tier 2;
+ *    `on_hits` runs it too when the run has Tier 2 input (report text, or a vendor or
+ *    product from the report), because `on_hits` means "skip Tier 2 when Tier 1 ran
+ *    clean" and Tier 1 never ran, so there is nothing to gate on. A real KEV report
+ *    carries no IOCs and no techniques, only a vulnerability and text; without this rule
+ *    it retired after a run that issued no query. Only a run with nothing for Tier 2
+ *    either returns `no_searchable_input`.
+ * 4. `on_hits` with no confirmed hit: `no_environment_hits`.
+ */
+const decideTier2Skip = ({
+  tier2When,
+  tier1,
+  hasTier2Input,
+  resolution,
+}: {
+  tier2When: 'on_hits' | 'always' | 'never';
+  tier1: HuntForThreatResult;
+  /** True when the run has report text, or a vendor or product from the report context. */
+  hasTier2Input: boolean;
+  resolution: HuntScopeResolution;
+}): HuntCoordinatorTier2SkipReason | null => {
   if (tier2When === 'never') return 'configured_never';
+  if (resolution === 'discovered:broad' && !tier1.has_confirmed_hit) {
+    return 'no_matched_scope';
+  }
   if (tier1.status === 'no_searchable_terms') {
-    if (tier2When === 'always') return null;
+    if (tier2When === 'always' || hasTier2Input) return null;
     return 'no_searchable_input';
   }
   // Gate on the confirmed hit bar, not merely `environment_hits_found`: optional-only
@@ -561,6 +601,10 @@ export const huntCoordinator = async (
       technologies: [],
       index_patterns: [],
       tier1: emptyTier1,
+      // Not the `on_hits` gate: with no scope there is no required-index allowlist for
+      // Tier 2 to generate and execute against, so Tier 2 cannot run even when the run
+      // has report text. The run fails as retryable below, so the report stays eligible
+      // and is not retired without a query.
       tier2_skipped_reason: 'no_searchable_input',
       message: `Scope resolution failed: ${(err as Error).message}`,
       next_step: 'Verify the technology index patterns are configured correctly.',
@@ -682,13 +726,24 @@ export const huntCoordinator = async (
     };
   };
 
-  const skipReason = decideTier2Skip(tier2When, tier1Raw);
+  // Report text, or the vendor or product the report names, is what Tier 2 can work
+  // from when Tier 1 had nothing to search; a run with any of them is not gated on a
+  // Tier 1 that never ran.
+  const hasTier2Input = Boolean(text || reportContext?.vendor || reportContext?.product);
+  const skipReason = decideTier2Skip({
+    tier2When,
+    tier1: tier1Raw,
+    hasTier2Input,
+    resolution: scope.resolution,
+  });
   if (skipReason) {
     return tier1Only({
       reason: skipReason,
       message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (${skipReason}).`,
       nextStep:
-        tier1Raw.status === 'environment_hits_found'
+        skipReason === 'no_matched_scope'
+          ? "The scope was every discovered dataset and Tier 1 matched none of them, so Tier 2 had no index set to generate against. Install an integration for the report's vendor, or pin a technology, to hunt its behaviors."
+          : tier1Raw.status === 'environment_hits_found'
           ? 'Tier 1 matched. Re-run with tier2_when: "always" for behavioral rule proposals.'
           : 'No environment matches. Consider widening time_range.',
     });
