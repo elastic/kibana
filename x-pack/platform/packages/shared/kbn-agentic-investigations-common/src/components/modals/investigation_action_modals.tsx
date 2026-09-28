@@ -83,7 +83,7 @@ export interface InvestigationActionModalsProps<
    */
   renderCloseModal?: (props: CloseInvestigationModalRenderProps) => React.ReactNode;
   /**
-   * Renders the escalation modal when a 'createEscalation' or 'addToEscalation' action is
+   * Renders the escalation modal when a 'createEscalation' or 'attachToEscalation' action is
    * triggered. Provided by the caller so the modal can use Kibana HTTP hooks that are not
    * available in this package.
    */
@@ -151,7 +151,7 @@ export const InvestigationActionModals = <TProposal extends ApprovalProposal = A
         : null
       : null}
 
-    {(action === 'createEscalation' || action === 'addToEscalation') && investigation
+    {(action === 'createEscalation' || action === 'attachToEscalation') && investigation
       ? renderEscalationModal?.({
           mode: action === 'createEscalation' ? 'create' : 'addToExisting',
           investigation,

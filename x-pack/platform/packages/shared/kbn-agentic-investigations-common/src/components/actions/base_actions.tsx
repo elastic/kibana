@@ -66,7 +66,7 @@ const useContextMenuItems = (
   );
 };
 
-export type CardActionType = 'createEscalation' | 'addToEscalation' | 'close';
+export type CardActionType = 'createEscalation' | 'attachToEscalation' | 'close';
 
 /**
  * Returns true when at least one action will appear in the menu for this investigation.
@@ -159,10 +159,10 @@ export const BaseActions = memo<BaseActionsProps>(
                 onClick: () => onClickAction('createEscalation', investigation.recordId),
               },
               {
-                key: 'addToEscalation',
-                icon: 'link' as IconType,
-                name: ACTIONS_TRANSLATIONS.buttons.addToEscalation,
-                onClick: () => onClickAction('addToEscalation', investigation.recordId),
+                key: 'attachToEscalation',
+                icon: 'branch' as IconType,
+                name: ACTIONS_TRANSLATIONS.buttons.attachToEscalation,
+                onClick: () => onClickAction('attachToEscalation', investigation.recordId),
               },
             ]
           : []),
