@@ -129,14 +129,13 @@ export class DirectorService {
       const statusTransitions: AlertStatusTransition[] = [];
       const processed = alertEvents.map((currentAlertEvent) => {
         const previousAlertEvent = alertStateByGroupHash.get(currentAlertEvent.group_hash);
-        const { alertEvent, isNewEpisode, statusTransition } =
-          this.getAlertEventWithNextEpisode({
-            rule,
-            currentAlertEvent,
-            previousAlertEvent,
-            strategy,
-            logger,
-          });
+        const { alertEvent, isNewEpisode, statusTransition } = this.getAlertEventWithNextEpisode({
+          rule,
+          currentAlertEvent,
+          previousAlertEvent,
+          strategy,
+          logger,
+        });
 
         if (isNewEpisode && alertEvent.episode) {
           newEpisodeIds.push(alertEvent.episode.id);

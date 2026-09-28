@@ -78,17 +78,12 @@ export const alertStatusChangedEventSchema = z.object({
             'Alert status after this transition: "pending", "active", "recovering", or "inactive".',
         })
       ),
-      previousStatus: alertEpisodeStatusSchema
-        .nullable()
-        .describe(
-          i18n.translate(
-            'xpack.alertingV2.triggers.alertStatusChanged.schema.alert.previousStatus',
-            {
-              defaultMessage:
-                'Alert status before this transition. Null when the alert is firing for the first time (no prior episode state in this run).',
-            }
-          )
-        ),
+      previousStatus: alertEpisodeStatusSchema.nullable().describe(
+        i18n.translate('xpack.alertingV2.triggers.alertStatusChanged.schema.alert.previousStatus', {
+          defaultMessage:
+            'Alert status before this transition. Null when the alert is firing for the first time (no prior episode state in this run).',
+        })
+      ),
     })
     .describe(
       i18n.translate('xpack.alertingV2.triggers.alertStatusChanged.schema.alert', {
@@ -97,12 +92,14 @@ export const alertStatusChangedEventSchema = z.object({
     ),
   execution: z
     .object({
-      executionId: z.string().describe(
-        i18n.translate(
-          'xpack.alertingV2.triggers.alertStatusChanged.schema.execution.executionId',
-          { defaultMessage: 'Execution ID for this rule run.' }
-        )
-      ),
+      executionId: z
+        .string()
+        .describe(
+          i18n.translate(
+            'xpack.alertingV2.triggers.alertStatusChanged.schema.execution.executionId',
+            { defaultMessage: 'Execution ID for this rule run.' }
+          )
+        ),
       scheduledAt: z.string().describe(
         i18n.translate(
           'xpack.alertingV2.triggers.alertStatusChanged.schema.execution.scheduledAt',
@@ -131,14 +128,11 @@ export const alertStatusChangedCommonDefinition: CommonTriggerDefinition<
   title: i18n.translate('xpack.alertingV2.workflowTriggers.alertStatusChanged.title', {
     defaultMessage: 'Alert status changed',
   }),
-  description: i18n.translate(
-    'xpack.alertingV2.workflowTriggers.alertStatusChanged.description',
-    {
-      defaultMessage:
-        'Fires once per alert episode when its status changes during a rule execution. ' +
-        'Use alert.previousStatus to distinguish new activations from flaps.',
-    }
-  ),
+  description: i18n.translate('xpack.alertingV2.workflowTriggers.alertStatusChanged.description', {
+    defaultMessage:
+      'Fires once per alert episode when its status changes during a rule execution. ' +
+      'Use alert.previousStatus to distinguish new activations from flaps.',
+  }),
   documentation: {
     details: i18n.translate(
       'xpack.alertingV2.workflowTriggers.alertStatusChanged.documentation.details',
