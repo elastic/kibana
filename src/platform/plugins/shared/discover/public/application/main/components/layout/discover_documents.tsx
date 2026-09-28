@@ -529,6 +529,10 @@ function DiscoverDocumentsComponent({
       cascadedColumnsMeta,
       esqlQuery: query,
       esqlVariables,
+      documentsFetchStatus: documentState.fetchStatus,
+      documentsQuery: isOfAggregateQueryType(documentState.query)
+        ? documentState.query.esql
+        : undefined,
       timeRange: requestParams.timeRangeAbsolute,
       esqlApproximation,
       renderViewModeToggle,
@@ -553,6 +557,8 @@ function DiscoverDocumentsComponent({
     cascadedDocumentsFetcher,
     cascadedColumnsMeta,
     dispatch,
+    documentState.fetchStatus,
+    documentState.query,
     esqlVariables,
     expandedDoc$,
     expandedDocOwner$,

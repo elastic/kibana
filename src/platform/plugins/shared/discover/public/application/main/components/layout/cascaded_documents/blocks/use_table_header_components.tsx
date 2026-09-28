@@ -18,6 +18,7 @@ import {
   EuiDataGridToolbarControl,
   EuiToolTip,
   EuiBadge,
+  EuiText,
 } from '@elastic/eui';
 import type { DataCascadeProps } from '@kbn/shared-ux-document-data-cascade';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -31,7 +32,34 @@ import type { ESQLDataGroupNode } from './types';
 interface UseTableHeaderProps {
   renderViewModeToggle: CascadedDocumentsContext['renderViewModeToggle'];
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
+  patternComparison?: 'hint' | 'approximate';
 }
+
+export const PatternComparisonMessage = ({
+  patternComparison,
+}: {
+  patternComparison: 'hint' | 'approximate';
+}) => {
+  if (patternComparison === 'approximate') {
+    return (
+      <EuiText size="s" color="subdued" data-test-subj="patternHistogramApproximate">
+        <FormattedMessage
+          id="discover.dataCascade.header.patternComparisonApproximate"
+          defaultMessage="Pattern comparison is approximate."
+        />
+      </EuiText>
+    );
+  }
+
+  return (
+    <EuiText size="s" color="subdued" data-test-subj="patternHistogramComparisonHint">
+      <FormattedMessage
+        id="discover.dataCascade.header.patternComparisonHint"
+        defaultMessage="Expand a pattern to compare its volume with total document volume."
+      />
+    </EuiText>
+  );
+};
 
 interface GroupBySelectorRendererProps {
   width?: number;
@@ -181,6 +209,7 @@ export function useGetGroupBySelectorRenderer({
 export function useEsqlDataCascadeHeaderComponent({
   renderViewModeToggle,
   cascadeGroupingChangeHandler,
+  patternComparison,
 }: UseTableHeaderProps) {
   const groupBySelectorRenderer = useGetGroupBySelectorRenderer({
     cascadeGroupingChangeHandler,
@@ -199,12 +228,17 @@ export function useEsqlDataCascadeHeaderComponent({
           {renderViewModeToggle && (
             <EuiFlexItem>{renderViewModeToggle({ hitsCounterVariant: 'groups' })}</EuiFlexItem>
           )}
+          {patternComparison && (
+            <EuiFlexItem>
+              <PatternComparisonMessage patternComparison={patternComparison} />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             {groupBySelectorRenderer(availableColumns, currentSelectedColumns)}
           </EuiFlexItem>
         </EuiFlexGroup>
       );
     },
-    [groupBySelectorRenderer, renderViewModeToggle]
+    [groupBySelectorRenderer, patternComparison, renderViewModeToggle]
   );
 }
