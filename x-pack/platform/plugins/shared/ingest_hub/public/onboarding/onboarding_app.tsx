@@ -90,6 +90,9 @@ export async function hydrateOnboardingSession(
     );
     const isAgentBased = item.mechanisms?.includes('agent_based') ?? false;
     const policyIds = item.agentPolicyIds ?? [];
+    // CodeQL[js/clear-text-storage-of-sensitive-data] false positive: only UI selector enums are
+    // stored ('static_keys', 'assume_role', 'identity_federation', etc.). Actual credentials
+    // (access keys, ARNs, tokens) are never written to sessionStorage.
     sessionStorage.setItem(
       getOnboardingSessionKey(integrationId, 'authenticateAndDeployStep'),
       isAgentBased
@@ -102,8 +105,7 @@ export async function hydrateOnboardingSession(
             // agentPolicyId is intentionally NOT seeded here: useAgentPolicySummary falls back to
             // selectedAgentPolicyIds[0] for enrollment-token/count queries, and seeding it would
             // cause useAgentBasedDeploy to narrow a multi-policy deployment to only the first id.
-            // Secrets are never persisted; restoring the method puts the right form in front of the user.
-            agentCredentialMethod: fromSOAuthMethod(item.authMethod ?? undefined), // CodeQL[js/clear-text-storage-of-sensitive-data] false positive: authMethod is a UI selector enum ('static_keys', 'assume_role', etc.), not a credential
+            agentCredentialMethod: fromSOAuthMethod(item.authMethod ?? undefined),
           })
         : item.connectorId
         ? JSON.stringify({ connectorId: item.connectorId, authMethod: 'identity_federation' })
