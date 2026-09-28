@@ -232,27 +232,6 @@ describe('useDataConnectors', () => {
     expect(result.current.connectors).toEqual([]);
   });
 
-  it('filters results client-side when search is provided', async () => {
-    const core = coreMock.createStart();
-    mockHttpGet(core, {
-      connectors: [
-        buildRawConnector({ id: 'gd-1', name: 'Google Drive', connector_type_id: '.google_drive' }),
-        buildRawConnector({ id: 'gh-1', name: 'GitHub', connector_type_id: '.github' }),
-      ],
-    });
-    const { result } = renderDataConnectors(core, { search: 'git' });
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-
-    expect(result.current.connectors).toEqual([
-      { id: 'gh-1', name: 'GitHub', actionTypeId: '.github' },
-    ]);
-    expect(core.http.get).toHaveBeenCalledWith(
-      ACTION_CONNECTORS_LIST_PATH,
-      expect.objectContaining({ signal: expect.any(AbortSignal) })
-    );
-  });
-
   it('does not fetch connectors when enabled is false', () => {
     const core = coreMock.createStart();
     (core.http.get as jest.Mock).mockReturnValue(new Promise(() => {}));

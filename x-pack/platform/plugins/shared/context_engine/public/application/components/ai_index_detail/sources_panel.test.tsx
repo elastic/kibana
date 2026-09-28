@@ -247,6 +247,26 @@ describe('SourcesPanel', () => {
     expect(saveButton()).toBeDisabled();
   });
 
+  it('closes the inline editor and restores the empty state when Cancel is clicked', async () => {
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{ ...baseAiIndex, sources: [] }}
+        onSaved={jest.fn()}
+        isManaged={false}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('contextAddSourcesButton'));
+    expect(await screen.findByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('contextEditSourcesCancelButton'));
+
+    expect(screen.queryByTestId('contextEditSourcesInlineEditor')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAddSourcesButton')).toBeInTheDocument();
+  });
+
   it('enables Save after adding a source and disables it again when the selection is reverted', async () => {
     renderWithProviders(
       <SourcesPanel

@@ -24,6 +24,7 @@ import { useQueryClient } from '@kbn/react-query';
 import { noop } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
+import { contextEngineQueryKeys } from '../../hooks/query_keys';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
 import { useKibana } from '../../hooks/use_kibana';
 interface ConnectorsTabProps {
@@ -231,7 +232,7 @@ export const ConnectorsTab = ({ selectedConnectorIds, onToggle }: ConnectorsTabP
   );
 
   const invalidateConnectorQueries = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['context_engine', 'connectors', 'list'] });
+    queryClient.invalidateQueries({ queryKey: contextEngineQueryKeys.connectors.list() });
   }, [queryClient]);
 
   const handleConnectorCreated = useCallback(
