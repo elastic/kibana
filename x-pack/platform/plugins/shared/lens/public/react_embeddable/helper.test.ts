@@ -12,6 +12,7 @@ import {
   saveUpdatedLinkedAnnotationsToLibrary,
 } from './helper';
 import { makeEmbeddableServices } from './mocks';
+import { setLensBuilder } from '../lazy_builder';
 import expect from 'expect';
 import type {
   FormBasedPersistedState,
@@ -92,6 +93,27 @@ describe('Embeddable helpers', () => {
       } as unknown as typeof defaultDoc;
       const runtimeState = await deserializeState(services, { attributes: doc });
       expect(runtimeState.attributes.state.query).toEqual(kqlQuery);
+    });
+
+    it('should convert a flat API config to Lens attributes when lens.apiFormat is off', async () => {
+      // Plugin setup always initializes the builder, whatever the flag value.
+      await setLensBuilder(false);
+      const services = getServices();
+      const flatApiConfig = {
+        type: 'metric',
+        title: 'Total requests',
+        data_source: { type: 'esql', query: 'FROM logs | STATS count = COUNT(*)' },
+        metrics: [{ type: 'primary', column: 'count' }],
+        sampling: 1,
+        ignore_global_filters: false,
+      } as unknown as Parameters<typeof deserializeState>[1];
+
+      const runtimeState = await deserializeState(services, flatApiConfig);
+
+      expect(runtimeState.title).toBe('Total requests');
+      expect(runtimeState.attributes.visualizationType).toBe('lnsMetric');
+      expect(runtimeState).not.toHaveProperty('data_source');
+      expect(runtimeState).not.toHaveProperty('metrics');
     });
 
     it('should fallback to an empty Lens doc if the saved object is not found', async () => {
