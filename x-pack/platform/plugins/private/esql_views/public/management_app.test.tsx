@@ -35,9 +35,11 @@ const createDiscoverLocator = () => sharePluginMock.createLocator<DiscoverEsqlLo
 const renderApp = (
   client: EsqlViewsClient,
   {
+    isDiscoverAvailable = true,
     discoverLocator,
     toasts = notificationServiceMock.createStartContract().toasts,
   }: {
+    isDiscoverAvailable?: boolean;
     discoverLocator?: ReturnType<typeof createDiscoverLocator>;
     toasts?: ReturnType<typeof notificationServiceMock.createStartContract>['toasts'];
   } = {}
@@ -47,6 +49,7 @@ const renderApp = (
       <MockAppHeaderProvider>
         <ManagementApp
           client={client}
+          isDiscoverAvailable={isDiscoverAvailable}
           discoverLocator={discoverLocator}
           documentationUrl={documentationUrl}
           toasts={toasts}
@@ -353,6 +356,35 @@ describe('ManagementApp', () => {
       expect(discoverLocator.navigateSync).toHaveBeenCalledWith({
         query: { esql: 'FROM logs-view' },
       });
+    });
+
+    it('quotes view names that ES|QL cannot parse unquoted', async () => {
+      const client = createClient();
+      client.getViews.mockResolvedValue({ views: [{ name: 'test=1', query: 'FROM logs-*' }] });
+      const discoverLocator = createDiscoverLocator();
+
+      renderApp(client, { discoverLocator });
+      await screen.findByText('test=1');
+
+      fireEvent.click(within(getRow('test=1')).getByTestId('esqlViewsOpenInDiscoverAction'));
+
+      expect(discoverLocator.navigateSync).toHaveBeenCalledWith({
+        query: { esql: 'FROM "test=1"' },
+      });
+    });
+
+    it('disables the action when the user cannot access Discover', async () => {
+      const client = createClient();
+      client.getViews.mockResolvedValue(twoViews);
+      const discoverLocator = createDiscoverLocator();
+
+      renderApp(client, { discoverLocator, isDiscoverAvailable: false });
+      await screen.findByText('logs-view');
+
+      const action = within(getRow('logs-view')).getByTestId('esqlViewsOpenInDiscoverAction');
+      expect(action).toHaveAttribute('aria-disabled', 'true');
+      fireEvent.click(action);
+      expect(discoverLocator.navigateSync).not.toHaveBeenCalled();
     });
 
     it('disables the action when the Discover locator is unavailable', async () => {

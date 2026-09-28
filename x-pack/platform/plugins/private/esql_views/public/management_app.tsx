@@ -15,6 +15,7 @@ import type { EsqlViewsClient } from '@kbn/esql-utils';
 import { PLUGIN_NAME } from '../common';
 import { DeleteViewsModal } from './delete_views_modal';
 import { EsqlViewsTable } from './esql_views_table';
+import { getViewEsqlQuery } from './get_view_esql_query';
 import { translations } from './translations';
 import type { DiscoverEsqlLocator } from './types';
 import { useDeleteEsqlViews } from './use_delete_esql_views';
@@ -22,6 +23,7 @@ import { useEsqlViews } from './use_esql_views';
 
 interface ManagementAppProps {
   client: EsqlViewsClient;
+  isDiscoverAvailable: boolean;
   discoverLocator?: DiscoverEsqlLocator;
   documentationUrl: string;
   toasts: IToasts;
@@ -29,6 +31,7 @@ interface ManagementAppProps {
 
 export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
   client,
+  isDiscoverAvailable,
   discoverLocator,
   documentationUrl,
   toasts,
@@ -46,7 +49,7 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
 
   const openInDiscover = useCallback(
     (view: EsqlView) => {
-      discoverLocator?.navigateSync({ query: { esql: `FROM ${view.name}` } });
+      discoverLocator?.navigateSync({ query: { esql: getViewEsqlQuery(view.name) } });
     },
     [discoverLocator]
   );
@@ -101,7 +104,7 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
         views={views}
         error={error}
         isLoading={isLoading}
-        isDiscoverAvailable={discoverLocator !== undefined}
+        isDiscoverAvailable={isDiscoverAvailable && discoverLocator !== undefined}
         selectedViews={selectedViews}
         onSelectionChange={setSelectedViews}
         onReload={reload}

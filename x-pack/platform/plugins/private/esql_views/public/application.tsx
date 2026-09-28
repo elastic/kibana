@@ -27,11 +27,13 @@ export const mountManagementSection = (
 
   const client = createEsqlViewsManagementClient(coreStart.http);
   const discoverLocator = share.url.locators.get<DiscoverEsqlLocatorParams>(DISCOVER_APP_LOCATOR);
+  const isDiscoverAvailable = Boolean(coreStart.application.capabilities.discover_v2?.show);
   const root = createRoot(element);
   root.render(
     coreStart.rendering.addContext(
       <ManagementApp
         client={client}
+        isDiscoverAvailable={isDiscoverAvailable}
         discoverLocator={discoverLocator}
         documentationUrl={coreStart.docLinks.links.query.queryESQLViews}
         toasts={coreStart.notifications.toasts}

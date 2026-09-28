@@ -13,6 +13,7 @@
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/deeplinks-analytics",
+    "@kbn/esql-language",
     "@kbn/esql-types",
     "@kbn/esql-utils",
     "@kbn/features-plugin",
