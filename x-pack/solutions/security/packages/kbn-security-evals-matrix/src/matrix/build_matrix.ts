@@ -185,7 +185,12 @@ const computeColumnMean = (
   modelScores: AggregatedModelScores,
   column: MatrixColumnConfig,
   excludeEvaluators: readonly string[],
-  includeEvaluator?: (evaluator: AggregatedEvaluatorScore) => boolean
+  includeEvaluator?: (evaluator: AggregatedEvaluatorScore) => boolean,
+  // Applied even when `column.evaluators` allowlists this evaluator: unlike
+  // `excludeEvaluators`, an explicit allowlist does not defeat this list. Used to keep a
+  // saturated evaluator out of the Overall aggregate even when a column allowlists it
+  // for its own (unaffected) base cell.
+  forceExcludeEvaluators: readonly string[] = []
 ): number | undefined => {
   const evaluatorSet = column.evaluators ? new Set(column.evaluators) : undefined;
 
@@ -195,9 +200,11 @@ const computeColumnMean = (
   for (const evaluator of columnEvaluators(modelScores, column)) {
     if (!includeEvaluator || includeEvaluator(evaluator)) {
       // Without an allowlist, the exclusion list drops raw-magnitude evaluators that would break the 0-10 scale.
-      const skip = evaluatorSet
-        ? !evaluatorSet.has(evaluator.evaluatorName)
-        : isExcludedEvaluator(evaluator.evaluatorName, excludeEvaluators);
+      const skip =
+        (evaluatorSet
+          ? !evaluatorSet.has(evaluator.evaluatorName)
+          : isExcludedEvaluator(evaluator.evaluatorName, excludeEvaluators)) ||
+        isExcludedEvaluator(evaluator.evaluatorName, forceExcludeEvaluators);
       if (!skip) {
         const weight = weightOf(evaluator);
         weightedSum += evaluator.mean * weight;
@@ -606,7 +613,11 @@ const buildMatrixRow = (
   modelScores: AggregatedModelScores,
   config: MatrixConfig,
   excludeEvaluators: readonly string[],
-  overallExcludeEvaluators: readonly string[]
+  overallExcludeEvaluators: readonly string[],
+  // Saturated evaluator names alone (a subset of `overallExcludeEvaluators`). Unlike the
+  // rest of `overallExcludeEvaluators`, these must defeat an allowlisting column's own
+  // `column.evaluators`: an allowlisted saturated evaluator must still drop out of Overall.
+  saturatedEvaluators: readonly string[] = []
 ): MatrixRow => {
   const cells: Record<string, MatrixCell> = {};
   // Base-column cells use config.excludeEvaluators only; the saturation-aware
@@ -623,13 +634,25 @@ const buildMatrixRow = (
       ? new Set(column.datasetIds)
       : undefined;
     const columnSuitesAll = modelScores.suites.filter((suite) => columnSuites.has(suite.suiteId));
-    const perDataset = (pick: (dataset: AggregatedSuiteScores['datasets'][number]) => number) =>
+    const perDataset = (
+      pick: (entry: { excludedSelfJudged?: number; excludedNonEis?: number }) => number
+    ) =>
       columnSuitesAll.reduce(
         (total, suite) =>
           total +
-          suite.datasets
-            .filter((dataset) => !columnDatasetIds || columnDatasetIds.has(dataset.datasetId))
-            .reduce((sum, dataset) => sum + (pick(dataset) || 0), 0),
+          (suite.datasets.length === 0
+            ? // A suite rejected entirely during experiment selection (the `!latest`
+              // all-self-judged path) pushes `datasets: []` with the withholding recorded
+              // only at the suite level. A prefix/datasetIds column fed by that suite has
+              // no per-dataset record to read, but the suite's fate IS this column's fate
+              // (nothing else could have produced a dataset), so fall back to the suite-level
+              // count instead of silently reading zero and rendering `missing`. A suite that
+              // DID produce datasets keeps the per-dataset-only read below, so one rejected
+              // sibling prefix cannot leak its count onto another.
+              pick(suite) || 0
+            : suite.datasets
+                .filter((dataset) => !columnDatasetIds || columnDatasetIds.has(dataset.datasetId))
+                .reduce((sum, dataset) => sum + (pick(dataset) || 0), 0)),
         0
       );
     const cellExtras = {
@@ -657,7 +680,13 @@ const buildMatrixRow = (
     );
     if (overallExcludeEvaluators !== excludeEvaluators) {
       overallCells[column.id] = buildCell(
-        computeColumnMean(modelScores, column, overallExcludeEvaluators),
+        computeColumnMean(
+          modelScores,
+          column,
+          overallExcludeEvaluators,
+          undefined,
+          saturatedEvaluators
+        ),
         column,
         config,
         cellExtras
@@ -835,7 +864,8 @@ export const buildMatrix = (
         modelScores,
         config,
         excludeEvaluators,
-        overallExcludeEvaluators
+        overallExcludeEvaluators,
+        [...saturatedNames]
       );
       (modelConfig.openSource ? openSource : proprietary).push(row);
     }

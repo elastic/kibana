@@ -623,6 +623,18 @@ export const queryMatrixScores = async (
               .filter((entry): entry is ExperimentStats => Boolean(entry))
               .map((entry) => experimentStatsToDatasets(entry))
           );
+          // Stats-path datasets carry no per-dataset judge info of their own (unlike prefix
+          // datasets, which set `selfJudged` from the admitted docs). A `datasetIds`-scoped
+          // column reads `dataset.selfJudged` directly (see `columnSelfJudged`), so without
+          // this a self-judged suite's stats-backed columns publish an undisclosed self-judged
+          // cell. Fold in the same suite-wide judge provenance used for suites with no
+          // `datasetIds` restriction (`columnSelfJudged`'s `suite.selfJudged` branch).
+          const statsSelfJudged = deriveRowJudgeInfo(shards, modelId).selfJudged === true;
+          if (statsSelfJudged) {
+            for (const dataset of datasets) {
+              dataset.selfJudged = true;
+            }
+          }
           const examplePrefixes = prefixesBySuite[suiteId] ?? [];
           // Hoisted out of the try block below: this suite's own exclusion counts,
           // read after the try/catch to size `excludedSelfJudged` on the pushed row —
@@ -757,16 +769,30 @@ export const queryMatrixScores = async (
             examplePrefixes.length > 0 && noPrefixDatasetSurvived === false
               ? judgeInfoFromIds(admittedJudgeIds, modelId)
               : deriveRowJudgeInfo(shards, modelId);
+          // Provenance (experimentId/timestamp/commitSha) must describe the sweep that
+          // actually produced `datasets` above. `pickShardExperiments` can return a complete
+          // sweep that does not contain `latest` (partial-newest-sweep fallback); using
+          // `latest`'s fields here would then publish the wrong run's timestamp/commit,
+          // corrupting expiry warnings, commit auditing, and alias-merge "newest" comparisons.
+          // Mirrors `pickShardExperiments`' own "as recent as its LAST finishing shard" rule.
+          const provenanceExperiment =
+            shardMembers.length > 0
+              ? shards.reduce((newest, candidate) =>
+                  Date.parse(candidate.timestamp) > Date.parse(newest.timestamp)
+                    ? candidate
+                    : newest
+                )
+              : latest;
           model.suites.push({
             suiteId,
-            experimentId: latest.experiment_id,
+            experimentId: provenanceExperiment.experiment_id,
             executions: shards.map((s) => ({
               experimentId: s.experiment_id,
               executionId: s.execution_id ?? s.experiment_id,
             })),
             executionIds: shards.map((s) => s.execution_id ?? s.experiment_id),
-            timestamp: latest.timestamp,
-            commitSha: latest.git_commit_sha ?? undefined,
+            timestamp: provenanceExperiment.timestamp,
+            commitSha: provenanceExperiment.git_commit_sha ?? undefined,
             ...rowJudgeInfo,
             excludedSelfJudged:
               (examplePrefixes.length > 0 ? noPrefixDatasetSurvived : datasets.length === 0) &&

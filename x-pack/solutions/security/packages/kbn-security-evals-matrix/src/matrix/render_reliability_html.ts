@@ -211,7 +211,9 @@ export const renderReliabilityHtml = (
           }
           if (
             column.examplePrefixes &&
-            column.examplePrefixes.some((prefix) => exampleId.startsWith(prefix))
+            column.examplePrefixes.some(
+              (prefix) => exampleId === prefix || exampleId.startsWith(`${prefix}-`)
+            )
           ) {
             return true;
           }
@@ -235,7 +237,7 @@ export const renderReliabilityHtml = (
       )
     : traces;
   const scopedVerdicts = config
-    ? judgeVerdicts.filter((v) => isColumnScoped(v.suiteId, undefined, v.example))
+    ? judgeVerdicts.filter((v) => isColumnScoped(v.suiteId, v.datasetId, v.example))
     : judgeVerdicts;
 
   const cells = reliabilityCellsFromTraces(scopedTraces);

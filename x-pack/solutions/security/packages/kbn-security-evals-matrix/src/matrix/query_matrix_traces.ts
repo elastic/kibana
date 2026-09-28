@@ -40,6 +40,7 @@ const verdictFromScoreDoc = (
     modelId,
     judgeId,
     suiteId,
+    datasetId: score.example?.dataset?.id,
     example,
     repetition: score.task?.repetition_index ?? 0,
     evaluator,

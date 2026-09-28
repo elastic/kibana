@@ -692,6 +692,35 @@ describe('queryMatrixScores', () => {
     expect(suite!.excludedSelfJudged).toBe(4794);
   });
 
+  it('propagates suite-level selfJudged onto stats-path datasets (Libra round-53896)', async () => {
+    // `experimentStatsToDatasets`/`mergeShardDatasets` never set `dataset.selfJudged`, so a
+    // `datasetIds`-scoped column (which reads `dataset.selfJudged` directly, see
+    // `columnSelfJudged` in build_matrix) silently lost the self-judged disclosure for every
+    // stats-backed dataset, even though the row itself is marked self-judged.
+    const selfJudgedExp = experiment({
+      experiment_id: 'exp-self',
+      modelId: 'm1',
+      timestamp: '2026-06-10T00:00:00.000Z',
+    }) as EvaluationExperimentSummary & { evaluator_model?: { id: string } };
+    selfJudgedExp.evaluator_model = { id: 'm1' };
+
+    const { client, getExperimentStats } = createClient({ m1: [selfJudgedExp] });
+    getExperimentStats.mockResolvedValue(stats);
+
+    // No `excludeSelfJudged` policy configured, so the self-judged experiment is admitted
+    // (not withheld) and its judge provenance is still derived and marked self-judged.
+    const result = await queryMatrixScores(client, log, {
+      suiteIds: ['suite-a'],
+      modelIds: ['m1'],
+    });
+
+    const suite = result[0].suites[0];
+    expect(suite.selfJudged).toBe(true);
+    expect(suite.datasets).toHaveLength(1);
+    // Pre-fix this dataset carried no `selfJudged` at all.
+    expect(suite.datasets[0].selfJudged).toBe(true);
+  });
+
   it('reads a suite from its branch override instead of the global branch', async () => {
     const { client, listExperiments } = createClient({
       m1: [experiment({ experiment_id: 'exp-m1', modelId: 'm1' })],
@@ -797,6 +826,56 @@ describe('queryMatrixScores', () => {
     );
     expect(fetchedExecutions).toEqual(['sweep-new-s1of2::suite-a::m1']);
     expect(result).toHaveLength(1);
+  });
+
+  it('records provenance from the selected complete sweep, not from `latest` (Libra round-53896)', async () => {
+    // `latest` (newest single experiment by timestamp) can belong to a PARTIAL sweep while
+    // `pickShardExperiments` falls back to an older COMPLETE sweep to actually source scores.
+    // The pushed suite's experimentId/timestamp/commitSha must describe that complete sweep,
+    // not `latest` — otherwise expiry warnings, commit auditing, and alias "newest" merges
+    // all read the wrong run.
+    const partialNewest = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
+    const completeOlder = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
+    const { client, getExperimentStats } = createClient({
+      m1: [
+        // Newest sweep: only shard 1 of 2 landed (partial, so it cannot be used).
+        experiment({
+          experiment_id: 'partial-s1',
+          execution_id: 'sweep-newest-s1of2::suite-a::m1',
+          modelId: 'm1',
+          timestamp: partialNewest,
+          git_commit_sha: 'newest-sha',
+        }),
+        // Older sweep: both shards present (complete), so it is the one actually used.
+        experiment({
+          experiment_id: 'complete-s1',
+          execution_id: 'sweep-older-s1of2::suite-a::m1',
+          modelId: 'm1',
+          timestamp: completeOlder,
+          git_commit_sha: 'older-sha',
+        }),
+        experiment({
+          experiment_id: 'complete-s2',
+          execution_id: 'sweep-older-s2of2::suite-a::m1',
+          modelId: 'm1',
+          timestamp: completeOlder,
+          git_commit_sha: 'older-sha',
+        }),
+      ],
+    });
+    getExperimentStats.mockResolvedValue(stats);
+
+    const result = await queryMatrixScores(client, log, {
+      suiteIds: ['suite-a'],
+      modelIds: ['m1'],
+    });
+
+    const suite = result[0].suites[0];
+    // Pre-fix this read 'partial-s1' / partialNewest / 'newest-sha' (from `latest`), even
+    // though the scores actually fetched came from the complete older sweep.
+    expect(suite.experimentId).toBe('complete-s1');
+    expect(suite.timestamp).toBe(completeOlder);
+    expect(suite.commitSha).toBe('older-sha');
   });
 });
 

@@ -718,6 +718,54 @@ describe('buildMatrix saturated-evaluator exclusion', () => {
       overallOf(buildMatrix(scores, configWith(false)))
     );
   });
+
+  it('still drops a saturated evaluator from Overall when a column allowlists it', () => {
+    // An explicit allowlist (`column.evaluators`) must not defeat saturation exclusion for
+    // Overall: only the base cell (which the allowlist legitimately controls) may keep it.
+    const scores = buildScores();
+    const allowlistConfig = (excludeSaturatedEvaluators: boolean): MatrixConfig =>
+      parseMatrixConfig({
+        minCoverage: 1,
+        overall: { excludeSaturatedEvaluators },
+        columns: [
+          {
+            id: 'triage',
+            label: 'Triage',
+            suites: ['suite-a'],
+            weight: 1,
+            evaluators: ['discriminating', 'ceiling'],
+          },
+        ],
+        models: [
+          { id: 'model-a', label: 'A' },
+          { id: 'model-b', label: 'B' },
+          { id: 'model-c', label: 'C' },
+          { id: 'model-d', label: 'D' },
+          { id: 'model-e', label: 'E' },
+          { id: 'model-f', label: 'F' },
+          { id: 'model-g', label: 'G' },
+          { id: 'model-h', label: 'H' },
+          { id: 'model-i', label: 'I' },
+          { id: 'model-j', label: 'J' },
+        ],
+      });
+
+    const before = overallOf(buildMatrix(scores, allowlistConfig(false)));
+    const after = overallOf(buildMatrix(scores, allowlistConfig(true)));
+    const spread = (values: Array<number | undefined>) =>
+      Math.max(...(values as number[])) - Math.min(...(values as number[]));
+
+    // The base cell (which the allowlist controls) is untouched either way.
+    const cellsOf = (matrix: ReturnType<typeof buildMatrix>) =>
+      matrix.proprietary.map((row) => row.cells.triage);
+    expect(cellsOf(buildMatrix(scores, allowlistConfig(true)))).toEqual(
+      cellsOf(buildMatrix(scores, allowlistConfig(false)))
+    );
+    // Overall must still widen once the saturated 'ceiling' evaluator (allowlisted into the
+    // column) is excluded from the aggregate — pre-fix this spread stayed at 4 (unchanged).
+    expect(spread(before)).toBeCloseTo(4, 3);
+    expect(spread(after)).toBeCloseTo(8, 3);
+  });
 });
 
 describe('buildMatrix sparse-column warning', () => {
@@ -1662,5 +1710,30 @@ describe('round 8 regression: per-column self-judged and exclusion scoping', () 
     }
     // hunt never ran and has no rejection of its own: missing, not excluded.
     expect(huntCell.kind).toBe('missing');
+  });
+
+  it('renders a fully self-judged prefix run as excluded, not missing (R-libra-3)', () => {
+    // The `!latest` all-self-judged rejection path (see query_matrix_scores) pushes
+    // `datasets: []` with the withholding recorded only at the suite level. An
+    // `examplePrefixes` column reading only per-dataset counts must still see it.
+    const rejected: AggregatedModelScores[] = [
+      {
+        modelId: 'model-x',
+        suites: [
+          {
+            suiteId: 'suite-a',
+            experimentId: 'run-8',
+            excludedSelfJudged: 7,
+            datasets: [],
+          },
+        ],
+      },
+    ];
+    const matrix = buildMatrix(rejected, cfg);
+    const alertCell = matrix.proprietary[0].cells.alert;
+    const huntCell = matrix.proprietary[0].cells.hunt;
+    // Pre-fix both columns read `missing` because the per-dataset filter found nothing.
+    expect(alertCell).toEqual({ kind: 'excluded', reason: 'self-judged', docs: 7 });
+    expect(huntCell).toEqual({ kind: 'excluded', reason: 'self-judged', docs: 7 });
   });
 });

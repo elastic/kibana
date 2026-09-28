@@ -328,5 +328,132 @@ describe('renderReliabilityHtml', () => {
       );
       expect(html).toContain('<strong>100%</strong>');
     });
+
+    it('rejects a same-prefix sibling example the score query would also reject (Libra round-53896)', () => {
+      // The score query buckets by `exampleId === prefix || exampleId.startsWith(prefix + '-')`
+      // (see scoresByPrefixToDatasets). A loose `startsWith(prefix)` check here let
+      // `alertx-1` (no dash boundary) pass as in-scope even though it never contributed to
+      // the published matrix score — inflating reliability with data the score never used.
+      const v = (
+        judgeId: string,
+        example: string,
+        score: number
+      ): {
+        modelId: string;
+        judgeId: string;
+        suiteId: string;
+        example: string;
+        repetition: number;
+        evaluator: string;
+        score: number;
+      } => ({
+        modelId: 'measured',
+        judgeId,
+        suiteId: 'suite-a',
+        example,
+        repetition: 0,
+        evaluator: 'Relevance',
+        score,
+      });
+      const html = renderReliabilityHtml(
+        matrix,
+        {
+          // In-scope trace: exact prefix match.
+          'measured:direct:suite-a:alert': { repTrails: [['a'], ['a']] },
+          // Out of scope: 'alertx' shares the 'alert' prefix by startsWith() but is a
+          // different, non-dash-delimited example id the score query would reject.
+          'measured:direct:suite-a:alertx': { repTrails: [['a'], ['b']] },
+        },
+        {},
+        [
+          v('gemini', 'alert', 1),
+          v('sonnet', 'alert', 1),
+          v('gemini', 'alertx', 1),
+          v('sonnet', 'alertx', 0),
+        ],
+        scopedConfig
+      );
+      // Only the exact-prefix trace/verdict pair counts; the 'alertx' sibling must not
+      // drag either rate down from 100%.
+      expect(html).toContain('<strong>100%</strong>');
+      expect(html).not.toContain('<strong>50%</strong>');
+      expect(html).toContain('100.0%');
+      expect(html).not.toContain('50.0%');
+    });
+  });
+
+  describe('datasetIds-scoped judge verdicts (Libra round-53896)', () => {
+    // A `datasetIds` column (no examplePrefixes) can only be matched by a verdict's own
+    // dataset id — there is no prefix fallback for this shape.
+    const datasetScopedConfig = {
+      columns: [
+        {
+          id: 'persona',
+          label: 'Persona',
+          suites: ['suite-a'],
+          datasetIds: ['ds-selected'],
+          weight: 1,
+        },
+      ],
+    } as never;
+
+    const v = (
+      judgeId: string,
+      datasetId: string | undefined,
+      example: string,
+      score: number
+    ): {
+      modelId: string;
+      judgeId: string;
+      suiteId: string;
+      datasetId?: string;
+      example: string;
+      repetition: number;
+      evaluator: string;
+      score: number;
+    } => ({
+      modelId: 'measured',
+      judgeId,
+      suiteId: 'suite-a',
+      ...(datasetId !== undefined ? { datasetId } : {}),
+      example,
+      repetition: 0,
+      evaluator: 'Relevance',
+      score,
+    });
+
+    it('measures agreement when the verdict carries the selected dataset id', () => {
+      const html = renderReliabilityHtml(
+        matrix,
+        {},
+        {},
+        [v('gemini', 'ds-selected', 'ex-1', 1), v('sonnet', 'ds-selected', 'ex-1', 1)],
+        datasetScopedConfig
+      );
+      // Pre-fix, `isColumnScoped(v.suiteId, undefined, v.example)` was called with a
+      // hardcoded `undefined` dataset id regardless of what the verdict carried, so a
+      // `datasetIds` column's allowlist check could never be satisfied and this always
+      // read 'no verdicts'/unmeasured even though both judges scored a selected dataset.
+      expect(html).toContain('100.0%');
+      expect(html).toContain('1 paired verdicts');
+    });
+
+    it('still excludes a verdict from an unselected dataset', () => {
+      const html = renderReliabilityHtml(
+        matrix,
+        {},
+        {},
+        [
+          v('gemini', 'ds-selected', 'ex-1', 1),
+          v('sonnet', 'ds-selected', 'ex-1', 1),
+          v('gemini', 'ds-other', 'ex-2', 1),
+          v('sonnet', 'ds-other', 'ex-2', 0),
+        ],
+        datasetScopedConfig
+      );
+      // The unselected-dataset pair disagrees; if it leaked in, agreement would drop to 50%.
+      expect(html).toContain('100.0%');
+      expect(html).not.toContain('50.0%');
+    });
   });
 });

@@ -17,6 +17,9 @@ export interface JudgeVerdict {
   judgeId: string;
   /** Suite that produced the verdict; keeps example ids reused across suites from pairing. */
   suiteId?: string;
+  /** Dataset the verdict's example belongs to, when the score doc carries one; lets
+   *  `datasetIds`-scoped columns scope reliability reporting like they scope matrix scores. */
+  datasetId?: string;
   example: string;
   repetition: number;
   evaluator: string;
