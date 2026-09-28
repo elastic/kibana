@@ -112,10 +112,10 @@ export function QuickSearchVisor({
     (id: string) => {
       setVisorMode(id as VisorMode);
       if (id === VisorMode.KQL) {
-        setNlValue('');
+        onStopGeneration();
       }
     },
-    [setNlValue]
+    [onStopGeneration]
   );
 
   useEffect(() => {
