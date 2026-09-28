@@ -266,6 +266,22 @@ describe('callKibanaApi', () => {
     ).rejects.toThrow('Invalid Kibana API path');
   });
 
+  it('allows encoded slashes in the query string and still rejects them in the path', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      { method: 'GET', path: '/api/search?filter=foo%2Fbar' }
+    );
+    expect(mockSelfFetch.mock.calls[0][0]).toBe('/api/search?filter=foo%2Fbar');
+
+    await expect(
+      callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'GET', path: '/api/%2fsecret?ok=1' }
+      )
+    ).rejects.toThrow('Invalid Kibana API path');
+  });
+
   it('prefixes the path with /s/{spaceId} for a non-default space', async () => {
     mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
 

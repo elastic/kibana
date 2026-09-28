@@ -232,15 +232,17 @@ const stringifyErrorBodyForMessage = (body: unknown): string => {
 };
 
 const validateSpaceRelativePath = (path: string): void => {
+  // Query and fragment are not path segments. `foo%2Fbar` in a query is a value, not traversal.
+  const pathname = path.split(/[?#]/, 1)[0];
   if (
-    !path.startsWith('/') ||
-    path.startsWith('//') ||
+    !pathname.startsWith('/') ||
+    pathname.startsWith('//') ||
     path.includes('\\') ||
     /[\u0000-\u001F\u007F]/.test(path)
   ) {
     throw new Error(`Invalid Kibana API path "${path}".`);
   }
-  for (const segment of path.split('/')) {
+  for (const segment of pathname.split('/')) {
     let decodedSegment: string;
     try {
       decodedSegment = decodeURIComponent(segment);
