@@ -21,13 +21,12 @@
  *   api_key: <key>
  *   ssl:                               # PEM file paths
  *     certificate_authorities: <path>  # optional CA for server cert verification
- *     certificate: <path>              # client cert (mTLS), default /mnt/elastic-internal/http-certs/tls.crt
- *     key: <path>                      # client key  (mTLS), default /mnt/elastic-internal/http-certs/tls.key
+ *     certificate: <path>              # optional client cert (mTLS), requires key
+ *     key: <path>                      # optional client key  (mTLS), requires certificate
  * ```
  *
- * The client certificate and key default to where serverless mounts Kibana's
- * Cloud-issued certificate. If neither is set and that mount does not exist,
- * Kibana connects without a client certificate and relies on `api_key` alone.
+ * `certificate` and `key` must be set together. Without them, Kibana connects
+ * without a client certificate and relies on `api_key` alone.
  * When `enabled` is `true`, Kibana fails to start if a configured file cannot
  * be read.
  *
