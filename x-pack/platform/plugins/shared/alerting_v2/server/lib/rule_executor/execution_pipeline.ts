@@ -167,7 +167,7 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
 
     const rulePayload = {
       ruleId: rawInput.ruleId,
-      name: rule.name,
+      name: rule.metadata.name,
       spaceId: rawInput.spaceId,
       tags: rule.metadata.tags ?? [],
     };
