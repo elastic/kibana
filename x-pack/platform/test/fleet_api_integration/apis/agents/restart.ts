@@ -1,0 +1,183 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
+import { AGENTS_INDEX, AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { skipIfNoDockerRegistry } from '../../helpers';
+
+const SUPPORTED_VERSION = '9.6.0';
+const UNSUPPORTED_VERSION = '9.5.0';
+
+export default function (providerContext: FtrProviderContext) {
+  const { getService } = providerContext;
+  const esArchiver = getService('esArchiver');
+  const supertest = getService('supertest');
+  const es = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
+  let policy1: any;
+
+  async function createAgent(agentId: string, version: string, policyId?: string) {
+    const now = new Date().toISOString();
+    await es.index({
+      refresh: 'wait_for',
+      index: AGENTS_INDEX,
+      id: agentId,
+      document: {
+        id: agentId,
+        type: 'PERMANENT',
+        active: true,
+        enrolled_at: now,
+        last_checkin: now,
+        policy_id: policyId ?? policy1.id,
+        policy_revision: 1,
+        policy_revision_idx: 1,
+        namespaces: ['default'],
+        agent: { id: agentId, version },
+        local_metadata: {
+          host: { hostname: `host-${agentId}` },
+          elastic: { agent: { version } },
+        },
+      },
+    });
+  }
+
+  async function getActionResultsForAction(actionId: string) {
+    const res = await es.search({
+      index: AGENT_ACTIONS_RESULTS_INDEX,
+      query: { term: { action_id: actionId } },
+    });
+    return res.hits.hits.map((h: any) => h._source);
+  }
+
+  async function getLatestAction() {
+    const res = await es.search({
+      index: AGENT_ACTIONS_INDEX,
+      sort: [{ '@timestamp': { order: 'desc' } }],
+      size: 1,
+    });
+    return res.hits.hits[0]?._source as any;
+  }
+
+  describe('fleet_agents_restart', () => {
+    skipIfNoDockerRegistry(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+      const policyRes = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xx')
+        .send({ name: 'Restart test policy', namespace: 'default' })
+        .expect(200);
+      policy1 = policyRes.body.item;
+    });
+
+    beforeEach(async () => {
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/agents');
+    });
+
+    afterEach(async () => {
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/agents');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
+    });
+
+    describe('single agent restart', () => {
+      it('returns 400 for agent below minimum version', async () => {
+        await createAgent('restart-old', UNSUPPORTED_VERSION);
+
+        await supertest
+          .post(`/api/fleet/agents/restart-old/restart`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(400);
+      });
+
+      it('creates RESTART action for supported agent', async () => {
+        await createAgent('restart-new', SUPPORTED_VERSION);
+
+        const { body } = await supertest
+          .post(`/api/fleet/agents/restart-new/restart`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        expect(body.actionId).to.be.a('string');
+
+        const action = await getLatestAction();
+        expect(action.type).to.eql('RESTART');
+        expect(action.agents).to.contain('restart-new');
+      });
+    });
+
+    describe('bulk restart — mixed supported/unsupported agents', () => {
+      it('creates action only for supported agents and writes error results for unsupported', async () => {
+        await createAgent('bulk-supported-1', SUPPORTED_VERSION);
+        await createAgent('bulk-supported-2', SUPPORTED_VERSION);
+        await createAgent('bulk-old-1', UNSUPPORTED_VERSION);
+
+        const { body } = await supertest
+          .post(`/api/fleet/agents/bulk_restart`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ agents: ['bulk-supported-1', 'bulk-supported-2', 'bulk-old-1'] })
+          .expect(200);
+
+        expect(body.actionId).to.be.a('string');
+        const actionId = body.actionId;
+
+        // Action document should only list supported agents
+        const action = await getLatestAction();
+        expect(action.type).to.eql('RESTART');
+        expect(action.agents).to.contain('bulk-supported-1');
+        expect(action.agents).to.contain('bulk-supported-2');
+        expect(action.agents).not.to.contain('bulk-old-1');
+
+        // Error result should exist for the unsupported agent
+        const errorResults = await getActionResultsForAction(actionId);
+        const errorForOld = errorResults.find((r: any) => r.agent_id === 'bulk-old-1');
+        expect(errorForOld).to.be.ok();
+        expect(errorForOld.error).to.match(/does not support the restart action/i);
+      });
+
+      it('returns actionId when all agents are unsupported — action created with empty agent list', async () => {
+        await createAgent('all-old-1', UNSUPPORTED_VERSION);
+        await createAgent('all-old-2', UNSUPPORTED_VERSION);
+
+        const { body } = await supertest
+          .post(`/api/fleet/agents/bulk_restart`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ agents: ['all-old-1', 'all-old-2'] })
+          .expect(200);
+
+        expect(body.actionId).to.be.a('string');
+
+        const errorResults = await getActionResultsForAction(body.actionId);
+        expect(errorResults).to.have.length(2);
+        const agentIds = errorResults.map((r: any) => r.agent_id);
+        expect(agentIds).to.contain('all-old-1');
+        expect(agentIds).to.contain('all-old-2');
+      });
+
+      it('action status API shows RESTART type for created action', async () => {
+        await createAgent('status-agent', SUPPORTED_VERSION);
+
+        const { body } = await supertest
+          .post(`/api/fleet/agents/bulk_restart`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ agents: ['status-agent'] })
+          .expect(200);
+
+        const { body: statusBody } = await supertest
+          .get(`/api/fleet/agents/action_status`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        const actionStatus = statusBody.items.find((a: any) => a.actionId === body.actionId);
+        expect(actionStatus).to.be.ok();
+        expect(actionStatus.type).to.eql('RESTART');
+      });
+    });
+  });
+}
