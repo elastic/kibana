@@ -21,6 +21,7 @@ export const CharLimitExceededMessage = () => {
           />
         </h2>
       </EuiTitle>
+      <EuiText>
         <p>
           <FormattedMessage
             id="xpack.globalSearchBar.searchBar.searchCharLimitExceeded"
