@@ -191,7 +191,7 @@ export function useFetcher<TReturn>(
               notifications.toasts.add({
                 color: 'danger',
                 iconType: 'error',
-                toastLifeTimeMs: uiSettings.get('notifications:lifetime:warning'),
+                toastLifeTimeMs: uiSettings?.get('notifications:lifetime:warning') ?? 10000,
                 ...toast,
               });
             } else {
