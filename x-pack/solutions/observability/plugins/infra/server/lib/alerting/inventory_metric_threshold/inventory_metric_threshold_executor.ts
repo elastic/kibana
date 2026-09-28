@@ -200,7 +200,6 @@ export const createInventoryMetricThresholdExecutor =
           nodeType,
           source,
           schema,
-          isPodSchemaSelectorEnabled,
         })
       )
     );
