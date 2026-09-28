@@ -225,7 +225,7 @@ describe('createSignificantSecurityEventAttachmentType', () => {
               technique_id: 't'.repeat(32),
               tactic_ids: Array.from({ length: 20 }, () => 'x'.repeat(32)),
               confidence: 0.9,
-              rule_name: 'r'.repeat(256),
+              title: 'r'.repeat(256),
               execution: { executed: true, row_count: 1, hit: true },
             })),
           },

@@ -463,10 +463,8 @@ const mapBehavior = (behavior: CoordinatorBehavior): SseBehavior => ({
   ...(behavior.technique_name ? { technique_name: behavior.technique_name } : {}),
   tactic_ids: behavior.tactic_ids,
   confidence: behavior.confidence,
-  rule_name: behavior.rule_name,
-  ...(behavior.proposed_esql_rule
-    ? { proposed_esql_rule: behavior.proposed_esql_rule.slice(0, 32_000) }
-    : {}),
+  title: behavior.title,
+  ...(behavior.validated_esql ? { validated_esql: behavior.validated_esql.slice(0, 32_000) } : {}),
   ...(behavior.execution
     ? {
         execution: {
@@ -625,8 +623,8 @@ const buildChrome = ({
   | 'evidence_against'
   | 'evaluation_record_ref'
 > => {
-  const title = behavior?.rule_name
-    ? behavior.rule_name.slice(0, 512)
+  const title = behavior?.title
+    ? behavior.title.slice(0, 512)
     : huntResult.has_confirmed_hit
     ? `Hunt confirmed for ${reportId}`.slice(0, 512)
     : `Hunt complete for ${reportId}`.slice(0, 512);
@@ -638,7 +636,7 @@ const buildChrome = ({
 
   const hypothesisTested = (
     behavior?.evidence_quote ||
-    behavior?.rule_name ||
+    behavior?.title ||
     `Hunt Watch evaluated report ${reportId} against the environment.`
   ).slice(0, 4000);
 
@@ -660,9 +658,6 @@ const buildChrome = ({
     evidenceFor.push(
       `Tier 2 executed ${behavior.technique_id} with ${behavior.execution.row_count} required-index row(s).`
     );
-  }
-  if (behavior?.proposed_esql_rule) {
-    evidenceFor.push(`Proposed lasting rule: ${behavior.rule_name}.`);
   }
   if (evidenceFor.length === 0 && huntResult.has_confirmed_hit) {
     evidenceFor.push('Environment hit confirmed; see hunt_result for structured detail.');

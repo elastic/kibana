@@ -93,8 +93,8 @@ const HIT_TIER2_RESULT_TWO_BEHAVIORS = {
       technique_name: 'Valid Accounts: Cloud Accounts',
       reference: 'https://attack.mitre.org/techniques/T1078/004/',
       tactic_ids: ['TA0001', 'TA0004'],
-      proposed_esql_rule: 'FROM logs-aws.cloudtrail-default | WHERE ...',
-      rule_name: 'AssumeRole into high-risk policy boundary',
+      validated_esql: 'FROM logs-aws.cloudtrail-default | WHERE ...',
+      title: 'AssumeRole into high-risk policy boundary',
       severity: 'high' as const,
       risk_score: 73,
       execution: { executed: true, row_count: 2, hit: true },
@@ -116,8 +116,8 @@ const HIT_TIER2_RESULT_TWO_BEHAVIORS = {
       technique_name: 'Unsecured Credentials: Credentials In Files',
       reference: 'https://attack.mitre.org/techniques/T1552/001/',
       tactic_ids: ['TA0006'],
-      proposed_esql_rule: 'FROM logs-endpoint.alerts-default | WHERE ...',
-      rule_name: 'Credential file read on CI runner',
+      validated_esql: 'FROM logs-endpoint.alerts-default | WHERE ...',
+      title: 'Credential file read on CI runner',
       severity: 'medium' as const,
       risk_score: 51,
       execution: { executed: true, row_count: 1, hit: true },
@@ -201,8 +201,8 @@ const behaviorFixture = (over: Partial<TestBehavior> = {}): TestBehavior => ({
   technique_name: 'Valid Accounts: Cloud Accounts',
   reference: 'https://attack.mitre.org/techniques/T1078/004/',
   tactic_ids: ['TA0001'],
-  proposed_esql_rule: 'FROM logs-aws.cloudtrail-default | WHERE true',
-  rule_name: 'AssumeRole into high-risk policy boundary',
+  validated_esql: 'FROM logs-aws.cloudtrail-default | WHERE true',
+  title: 'AssumeRole into high-risk policy boundary',
   severity: 'high',
   risk_score: 73,
   execution: { executed: true, row_count: 1, hit: true },
@@ -324,7 +324,7 @@ describe('buildSseData', () => {
     expect(huntResultOf(entry).tier2).toBeDefined();
     expect(huntResultOf(entry).tier2?.status).toBe('behaviors_proposed');
     expect(huntResultOf(entry).tier2?.behaviors[0].technique_id).toBe('T1078.004');
-    expect(huntResultOf(entry).tier2?.behaviors[0].proposed_esql_rule).toContain(
+    expect(huntResultOf(entry).tier2?.behaviors[0].validated_esql).toContain(
       'FROM logs-aws.cloudtrail-default'
     );
     expect(huntResultOf(entry).tier2?.behaviors[0].execution).toEqual({
@@ -453,8 +453,8 @@ describe('buildSseData', () => {
           technique_name: 'Valid Accounts: Cloud Accounts',
           reference: 'https://attack.mitre.org/techniques/T1078/004/',
           tactic_ids: ['TA0001'],
-          proposed_esql_rule: 'FROM logs-aws.cloudtrail-default | WHERE true',
-          rule_name: 'AssumeRole into high-risk policy boundary',
+          validated_esql: 'FROM logs-aws.cloudtrail-default | WHERE true',
+          title: 'AssumeRole into high-risk policy boundary',
           severity: 'high' as const,
           risk_score: 73,
           execution: { executed: true, row_count: 3, hit: true },
@@ -556,7 +556,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
       technique_name: `Technique ${techniqueId}`,
       reference: `https://attack.mitre.org/techniques/${techniqueId}/`,
       evidence_quote: `report quote for ${techniqueId}`,
-      rule_name: ruleName,
+      title: ruleName,
       execution: { executed: true, row_count: hit ? 2 : 0, hit },
     });
 
@@ -799,7 +799,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     // would overwrite the first.
     expect(entries).toHaveLength(1);
     expect(entries[0].attachment_id).toEqual(idFor('T1078.004'));
-    expect(huntResultOf(entries[0]).tier2?.behaviors.map((b) => b.rule_name)).toEqual([
+    expect(huntResultOf(entries[0]).tier2?.behaviors.map((b) => b.title)).toEqual([
       'AssumeRole into high-risk policy boundary',
       'AssumeRole from an unused identity',
     ]);
@@ -940,8 +940,8 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
             technique_name: 'Valid Accounts: Cloud Accounts',
             reference: 'https://attack.mitre.org/techniques/T1078/004/',
             tactic_ids: ['TA0001'],
-            proposed_esql_rule: 'FROM logs-aws.cloudtrail-default | WHERE true',
-            rule_name: 'AssumeRole into high-risk policy boundary',
+            validated_esql: 'FROM logs-aws.cloudtrail-default | WHERE true',
+            title: 'AssumeRole into high-risk policy boundary',
             severity: 'high',
             risk_score: 73,
             execution: { executed: true, row_count: 1, hit: true },
@@ -972,7 +972,7 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     const behaviors = Array.from({ length: 21 }, (_, i) =>
       behaviorFixture({
         technique_id: `T90${String(i).padStart(2, '0')}`,
-        rule_name: `Proposed rule ${i}`,
+        title: `Proposed rule ${i}`,
         execution: { executed: true, row_count: 0, hit: false },
       })
     );

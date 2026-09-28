@@ -21,8 +21,7 @@ export const deriveCoverageSubjects = ({
   state: CurrentRunState;
   investigationConversationId: string;
 }): CoverageSubject[] => {
-  const techniqueIds =
-    state.techniques.length > 0 ? [...new Set(state.techniques)] : [undefined];
+  const techniqueIds = state.techniques.length > 0 ? [...new Set(state.techniques)] : [undefined];
 
   return techniqueIds.map((techniqueId) => {
     const subject = buildCoverageSubject({ reportId: state.reportId, techniqueId });
@@ -32,15 +31,20 @@ export const deriveCoverageSubjects = ({
       techniqueId,
     });
     const techniqueLabel = techniqueId ?? 'report';
+    // The validated query, when this technique is the one that hit: what Detection Watch
+    // reads to decide, on its own, whether the hunt is worth a lasting rule. Hunt Watch's
+    // job ends at reporting what it searched with and what it found.
+    const query = techniqueId ? state.huntedTechniqueQueries[techniqueId] : undefined;
+    const content = state.hasConfirmedHit
+      ? `Hunt confirmed a hit for ${techniqueLabel} on report ${state.reportId}.`
+      : `Hunt swept ${techniqueLabel} on report ${state.reportId} with no confirmed hit.`;
     return {
       kiId,
       subject,
       technique: techniqueId,
       title: `Coverage: ${techniqueLabel} (${state.reportId})`,
       description: `Coverage subject ${techniqueLabel} swept by Hunt Watch. Investigation ${investigationConversationId}.`,
-      content: state.hasConfirmedHit
-        ? `Hunt confirmed a hit for ${techniqueLabel} on report ${state.reportId}.`
-        : `Hunt swept ${techniqueLabel} on report ${state.reportId} with no confirmed hit.`,
+      content: query ? `${content}\n\nQuery that found the hit:\n${query}` : content,
     };
   });
 };

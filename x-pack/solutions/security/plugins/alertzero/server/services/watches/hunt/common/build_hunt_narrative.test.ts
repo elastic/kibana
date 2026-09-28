@@ -44,8 +44,8 @@ const behavior = (overrides: Partial<ValidatedBehavior> = {}): ValidatedBehavior
   confidence: 0.9,
   reference: 'https://attack.mitre.org/techniques/T1078/004/',
   tactic_ids: ['TA0004'],
-  proposed_esql_rule: 'FROM logs-aws.* | WHERE event.action == "AssumeRole"',
-  rule_name: 'AssumeRole into escalated-role',
+  validated_esql: 'FROM logs-aws.* | WHERE event.action == "AssumeRole"',
+  title: 'AssumeRole into escalated-role',
   severity: 'critical',
   risk_score: 90,
   execution: { executed: true, row_count: 5, hit: true },
@@ -137,7 +137,7 @@ describe('buildHuntNarrative', () => {
           behavior({
             technique_id: 'T1562.008',
             technique_name: 'Disable or Modify Cloud Logs',
-            rule_name: 'StopLogging',
+            title: 'StopLogging',
             execution: { executed: true, row_count: 0, hit: false },
           }),
         ]),
@@ -331,7 +331,7 @@ describe('buildHuntNarrative', () => {
     const many = Array.from({ length: 100 }, (_, i) =>
       behavior({
         technique_id: `T${1000 + i}`,
-        rule_name: 'x'.repeat(400),
+        title: 'x'.repeat(400),
         affected_hosts: Array.from({ length: 6 }, (__, j) => `host-${i}-${j}-${'y'.repeat(60)}`),
       })
     );

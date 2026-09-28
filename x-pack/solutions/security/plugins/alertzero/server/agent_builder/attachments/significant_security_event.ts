@@ -71,7 +71,7 @@ const formatSignificantSecurityEventForAgent = (
         lines.push(
           `  ${behavior.technique_id} (${behavior.tactic_ids.join(', ')}, confidence ${
             behavior.confidence
-          }): ${behavior.rule_name}`
+          }): ${behavior.title}`
         );
       }
     }

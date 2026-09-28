@@ -6,10 +6,7 @@
  */
 
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
-import {
-  buildProposalSubjectKey,
-  decidePackageReport,
-} from './decide_package_report';
+import { buildProposalSubjectKey, decidePackageReport } from './decide_package_report';
 import type { CurrentRunState } from './types';
 
 const isolateHost: ActionCatalogEntry = {
@@ -76,6 +73,7 @@ const baseHitState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState
   titles: ['Shadow admin AssumeRole'],
   evidenceLines: ['Tier 1 hits in cloudtrail'],
   techniques: ['T1078.004'],
+  huntedTechniqueQueries: {},
   hosts: [{ name: 'host-a', enrolled: true, agentId: 'agent-a' }],
   processSelectors: [],
   ...overrides,
@@ -219,9 +217,7 @@ describe('decidePackageReport', () => {
       catalog: { ok: true, actions: [killProcess] },
     });
     expect(result.proposals).toHaveLength(2);
-    expect(result.proposals.every((p) => p.actionWorkflowId === killProcess.workflowId)).toBe(
-      true
-    );
+    expect(result.proposals.every((p) => p.actionWorkflowId === killProcess.workflowId)).toBe(true);
     expect(result.proposals[0].actionInput?.parameters).toEqual({ pid: 100 });
     expect(result.proposals[1].actionInput?.parameters).toEqual({ entity_id: 'ent-9' });
   });

@@ -154,10 +154,8 @@ describe('huntBehavior', () => {
       text: REPORT_TEXT,
     });
     expect(generateEsqlMock).not.toHaveBeenCalled();
-    expect(result.behaviors[0].proposed_esql_rule).toContain(
-      'Grounded ES|QL generation unavailable'
-    );
-    expect(result.behaviors[0].proposed_esql_rule).not.toContain('FROM ');
+    expect(result.behaviors[0].validated_esql).toContain('Grounded ES|QL generation unavailable');
+    expect(result.behaviors[0].validated_esql).not.toContain('FROM ');
   });
 
   it('keeps a line break in an evidence quote from ending the comment that makes the placeholder safe', async () => {
@@ -173,7 +171,7 @@ describe('huntBehavior', () => {
       { text: `Incident report: ${injected} was observed.` }
     );
 
-    const rule = result.behaviors[0].proposed_esql_rule;
+    const rule = result.behaviors[0].validated_esql;
     expect(rule).toContain('Grounded ES|QL generation unavailable');
     // The whole placeholder stays commented out, which is the property that makes it
     // non-executable — a single uncommented line would be ES|QL.
@@ -312,7 +310,7 @@ describe('huntBehavior', () => {
       { text: REPORT_TEXT },
       esClient
     );
-    const rule = result.behaviors[0].proposed_esql_rule;
+    const rule = result.behaviors[0].validated_esql;
     expect(rule.startsWith('// Generated from hunt.hunt_behavior')).toBe(true);
     expect(rule.endsWith(`\n${GROUNDED_ESQL}`)).toBe(true);
   });
@@ -325,10 +323,8 @@ describe('huntBehavior', () => {
       executeParams,
       esClient
     );
-    expect(result.behaviors[0].proposed_esql_rule).toContain(
-      'Grounded ES|QL generation unavailable'
-    );
-    expect(result.behaviors[0].proposed_esql_rule).not.toContain('FROM ');
+    expect(result.behaviors[0].validated_esql).toContain('Grounded ES|QL generation unavailable');
+    expect(result.behaviors[0].validated_esql).not.toContain('FROM ');
     expect(executeEsqlMock).not.toHaveBeenCalled();
   });
 
@@ -351,10 +347,8 @@ describe('huntBehavior', () => {
       executeParams,
       esClient
     );
-    expect(result.behaviors[0].proposed_esql_rule).toContain(
-      'Grounded ES|QL generation unavailable'
-    );
-    expect(result.behaviors[0].proposed_esql_rule).not.toContain('FROM ');
+    expect(result.behaviors[0].validated_esql).toContain('Grounded ES|QL generation unavailable');
+    expect(result.behaviors[0].validated_esql).not.toContain('FROM ');
     expect(result.status).toBe('behaviors_proposed');
   });
 
@@ -646,7 +640,7 @@ describe('huntBehavior', () => {
         esClient
       );
 
-      expect(result.behaviors[0].proposed_esql_rule).not.toContain('.kibana-secrets');
+      expect(result.behaviors[0].validated_esql).not.toContain('.kibana-secrets');
       expect(result.behaviors[0].execution?.executed).toBe(false);
       expect(executeEsqlMock).not.toHaveBeenCalled();
     });
@@ -661,7 +655,7 @@ describe('huntBehavior', () => {
         esClient
       );
 
-      expect(result.behaviors[0].proposed_esql_rule).toContain(GROUNDED_ESQL);
+      expect(result.behaviors[0].validated_esql).toContain(GROUNDED_ESQL);
     });
 
     it('gives generateEsql a probe client that refuses an out-of-scope schema probe', async () => {
@@ -711,10 +705,8 @@ describe('huntBehavior', () => {
         esClient
       );
       expect(executeEsqlMock).not.toHaveBeenCalled();
-      expect(result.behaviors[0].proposed_esql_rule).toContain(
-        'Grounded ES|QL generation unavailable'
-      );
-      expect(result.behaviors[0].proposed_esql_rule).not.toContain('FROM ');
+      expect(result.behaviors[0].validated_esql).toContain('Grounded ES|QL generation unavailable');
+      expect(result.behaviors[0].validated_esql).not.toContain('FROM ');
       expect(result.behaviors[0].execution).toEqual({
         executed: false,
         row_count: 0,

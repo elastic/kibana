@@ -87,7 +87,7 @@ const huntResult = {
         technique_id: 'T1021',
         tactic_ids: ['TA0008'],
         confidence: 0.75,
-        rule_name: 'Lateral movement via RDP',
+        title: 'Lateral movement via RDP',
       },
     ],
   },

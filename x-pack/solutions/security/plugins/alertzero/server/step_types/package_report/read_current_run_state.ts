@@ -16,9 +16,7 @@ const currentVersionData = (attachment: VersionedAttachment): unknown => {
   return version?.data;
 };
 
-export type HostEnrollment =
-  | { enrolled: true; agentId: string }
-  | { enrolled: false };
+export type HostEnrollment = { enrolled: true; agentId: string } | { enrolled: false };
 
 export type ResolveHostEnrollment = (hostName: string) => Promise<HostEnrollment>;
 
@@ -69,10 +67,7 @@ export const readCurrentRunState = async ({
 
   const hasConfirmedHit = currentRun.some((sse) => sse.hunt_result?.has_confirmed_hit === true);
   const titles = currentRun.map((sse) => sse.title);
-  const evidenceLines = currentRun.flatMap((sse) => [
-    ...sse.evidence_for,
-    ...sse.evidence_against,
-  ]);
+  const evidenceLines = currentRun.flatMap((sse) => [...sse.evidence_for, ...sse.evidence_against]);
 
   const techniques = [
     ...new Set(
@@ -83,6 +78,19 @@ export const readCurrentRunState = async ({
       )
     ),
   ];
+
+  // The query that actually found a required-index hit, per technique -- for Detection
+  // Watch to read off the coverage KI and decide, on its own, whether it is worth a
+  // lasting rule. Only behaviors that hit qualify: a query that ran and found nothing is
+  // not evidence of anything to turn into a rule.
+  const huntedTechniqueQueries: Record<string, string> = {};
+  for (const sse of currentRun) {
+    for (const behavior of sse.hunt_result?.tier2?.behaviors ?? []) {
+      if (behavior.execution?.hit && behavior.validated_esql) {
+        huntedTechniqueQueries[behavior.technique_id] = behavior.validated_esql;
+      }
+    }
+  }
 
   const hostNames = [
     ...new Set(
@@ -121,6 +129,7 @@ export const readCurrentRunState = async ({
     titles,
     evidenceLines,
     techniques,
+    huntedTechniqueQueries,
     hosts,
     processSelectors,
   };

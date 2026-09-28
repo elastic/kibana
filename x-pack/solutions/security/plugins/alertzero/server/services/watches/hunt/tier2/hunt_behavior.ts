@@ -76,11 +76,7 @@ const severityToRiskScore = (severity: SeverityLevel): number => {
   }
 };
 
-const sanitizeRuleName = (
-  techniqueId: string,
-  techniqueName: string,
-  reportId?: string
-): string => {
+const buildHuntTitle = (techniqueId: string, techniqueName: string, reportId?: string): string => {
   const safe = techniqueName.replace(/[()\/\\]/g, '').trim();
   return reportId
     ? `Hunt: ${safe} (${techniqueId}) [${reportId.slice(0, 8)}]`
@@ -101,10 +97,10 @@ const commentBlock = (lines: string[]): string =>
 
 /**
  * Non-executable placeholder when grounded generation is unavailable or fails.
- * Never emits a FROM clause — a prior `FROM *` stub was unsafe to ship as a
- * proposed rule even though the execute path skipped it.
+ * Never emits a FROM clause — a prior `FROM *` stub was unsafe to leave
+ * executable even though the execute path skipped it.
  */
-const proposedEsqlRuleUnavailable = ({
+const huntQueryUnavailable = ({
   technique_id,
   technique_name,
   tactic_ids,
@@ -122,19 +118,19 @@ const proposedEsqlRuleUnavailable = ({
   severity: SeverityLevel;
   report_id?: string;
 }): string => {
-  const name = sanitizeRuleName(technique_id, technique_name, report_id);
+  const title = buildHuntTitle(technique_id, technique_name, report_id);
   return commentBlock([
-    `// rule_name: ${name}`,
+    `// hunt: ${title}`,
     `// technique: ${technique_id} (${technique_name})`,
     `// tactics: ${tactic_ids.join(', ') || '<unmapped>'}`,
     `// severity: ${severity}  confidence: ${confidence.toFixed(2)}`,
     `// evidence: ${evidence_quote.slice(0, 120)}`,
-    `// Grounded ES|QL generation unavailable; no executable query proposed.`,
+    `// Grounded ES|QL generation unavailable; no hunt query executed.`,
   ]);
 };
 
 const buildGroundedEsqlHeader = (b: {
-  rule_name: string;
+  title: string;
   severity: SeverityLevel;
   risk_score: number;
   technique_id: string;
@@ -143,9 +139,10 @@ const buildGroundedEsqlHeader = (b: {
 }): string =>
   commentBlock([
     `// Generated from hunt.hunt_behavior — grounded in the report's extracted`,
-    `// IOCs/behaviors and validated against the target index mappings.`,
-    `// Review the FROM clause and artifact values before enabling.`,
-    `// rule_name: ${b.rule_name}`,
+    `// IOCs/behaviors and validated against the target index mappings. This is`,
+    `// hunt evidence, not a rule proposal; Detection Watch decides separately,`,
+    `// from the coverage KI, whether this technique is worth a lasting rule.`,
+    `// hunt: ${b.title}`,
     `// severity: ${b.severity}  risk_score: ${b.risk_score}`,
     `// mitre_attack: ${b.technique_id}${
       b.parent_technique_id ? ` (parent ${b.parent_technique_id})` : ''
@@ -166,12 +163,12 @@ const ESQL_GENERATION_CONCURRENCY = 3;
  * `behaviors`, they just do not spend a generation call.
  */
 const MAX_GENERATED_BEHAVIORS = 20;
-/** LIMIT the generator writes into a proposed rule when the caller has no row bound. */
-const DEFAULT_PROPOSED_RULE_LIMIT = 100;
+/** LIMIT the generator writes into a hunt query when the caller has no row bound. */
+const DEFAULT_HUNT_QUERY_LIMIT = 100;
 /**
  * Generation target when neither Tier 1 hits nor the scope name an index (the
  * standalone route). Letting the generator discover one lands on a dated
- * physical index, which is never what a proposed rule should cite.
+ * physical index, which is never what a hunt query should cite.
  */
 const DEFAULT_GENERATION_INDEX = 'logs-*';
 
@@ -629,7 +626,7 @@ export const huntBehavior = async (
       continue;
     }
     // A revoked id resolves to its live successor; carry the live id forward so
-    // the proposed rule and the indexed projection never cite a retired technique.
+    // the hunt query and the indexed projection never cite a retired technique.
     const techniqueId = entry.id;
     // One behavior per live technique id. The LLM can emit the same id twice
     // (or a revoked id alongside its successor); generation, execution, and the
@@ -652,7 +649,7 @@ export const huntBehavior = async (
       reference: entry.reference,
       tactic_ids: tacticIds,
       ...(parentTechniqueId ? { parent_technique_id: parentTechniqueId } : {}),
-      proposed_esql_rule: proposedEsqlRuleUnavailable({
+      validated_esql: huntQueryUnavailable({
         technique_id: techniqueId,
         technique_name: entry.name,
         tactic_ids: tacticIds,
@@ -662,7 +659,7 @@ export const huntBehavior = async (
         report_id: reportId,
         ...(parentTechniqueId ? { parent_technique_id: parentTechniqueId } : {}),
       }),
-      rule_name: sanitizeRuleName(techniqueId, entry.name, reportId),
+      title: buildHuntTitle(techniqueId, entry.name, reportId),
       severity,
       risk_score: severityToRiskScore(severity),
       // No reason yet: generation below either fills this in with a real query's
@@ -741,7 +738,7 @@ export const huntBehavior = async (
       iocs,
       articleContext,
       requiredIndices,
-      rowLimit: rowLimit ?? DEFAULT_PROPOSED_RULE_LIMIT,
+      rowLimit: rowLimit ?? DEFAULT_HUNT_QUERY_LIMIT,
     });
     for (const behavior of validated) {
       // Budget-skipped behaviors are already recorded above; re-reporting them here
@@ -806,7 +803,7 @@ export const huntBehavior = async (
         );
         continue;
       }
-      behavior.proposed_esql_rule = `${buildGroundedEsqlHeader(behavior)}\n${esql}`;
+      behavior.validated_esql = `${buildGroundedEsqlHeader(behavior)}\n${esql}`;
       if (!canExecute) continue;
       const executed = await executeValidatedEsql({
         esClient,

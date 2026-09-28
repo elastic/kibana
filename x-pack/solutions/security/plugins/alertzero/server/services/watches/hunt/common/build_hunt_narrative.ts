@@ -88,8 +88,8 @@ const describeTier2Skip = (reason: HuntCoordinatorTier2SkipReason): string => {
 const describeBehavior = (behavior: ValidatedBehavior): string => {
   const label = `**${behavior.technique_id} ${behavior.technique_name}**`.trim();
   const confidence = `confidence ${Math.round(behavior.confidence * 100)}%`;
-  const meta = behavior.rule_name
-    ? ` ("${behavior.rule_name}", ${behavior.severity}, ${confidence})`
+  const meta = behavior.title
+    ? ` ("${behavior.title}", ${behavior.severity}, ${confidence})`
     : ` (${behavior.severity}, ${confidence})`;
   const { execution } = behavior;
   if (!execution || !execution.executed) {
