@@ -88,6 +88,7 @@ export interface SignificantEventsReadClient {
     options: CommonSearchOptions & { streamNames?: string[]; ruleUuids?: string[] }
   ): Promise<{ hits: SignificantEvent[] }>;
   findByEventId(eventId: string): Promise<{ hits: SignificantEventResponse[] }>;
+  findLatestByEventId(eventId: string): Promise<SignificantEventResponse | undefined>;
 }
 
 export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, StoredEvent>;

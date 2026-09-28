@@ -520,7 +520,16 @@ export async function eventsWriteBulkHandler({
   const validCandidates = markDuplicateKeys(candidates, results);
 
   const dedupCandidates = validCandidates.filter((c): c is DedupCandidate => c.mode === 'dedup');
-  const activeEvents = await fetchActiveEventsForDedup(client, dedupCandidates);
+  const searchClientActiveEvents = await fetchActiveEventsForDedup(client, dedupCandidates);
+  // When the flag-aware read client differs from the canonical write client, also scan the
+  // canonical store. A write succeeds with `wait_for` refresh on the legacy store, but the
+  // dual-write to `.rule-events` is fire-and-forget with no matching refresh guarantee — a scan
+  // of `.rule-events` alone can miss a recently written event and produce a permanent duplicate.
+  const canonicalActiveEvents =
+    client !== eventClient
+      ? await fetchActiveEventsForDedup(eventClient, dedupCandidates)
+      : [];
+  const activeEvents = [...searchClientActiveEvents, ...canonicalActiveEvents];
   const toWrite = resolveDedupSkips(validCandidates, activeEvents, results);
 
   const { latestByEventId, latestLegacyByEventId, priorDocsByEventId } =

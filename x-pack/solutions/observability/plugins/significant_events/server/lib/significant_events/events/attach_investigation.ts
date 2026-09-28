@@ -8,7 +8,10 @@
 import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import type { Logger } from '@kbn/core/server';
-import type { SignificantEventInvestigation } from '@kbn/significant-events-schema';
+import type {
+  SignificantEventInvestigation,
+  SignificantEventResponse,
+} from '@kbn/significant-events-schema';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { EventClient } from './event_client';
 import type { SignificantEventsReadClient } from './event_client';
@@ -38,19 +41,28 @@ export const attachInvestigationToEvent = async ({
   logger?: Logger;
 }): Promise<{ event_uuid: string; updated: number; ignored: number }> => {
   const resolvedSearchClient = eventSearchClient ?? eventClient;
-  const { hits: readHits } = await resolvedSearchClient.findLatestByEventId(eventId);
-
-  // Dual-write lag guard: when the flag-aware read store returns nothing, fall back to the
-  // canonical eventClient before treating the event as absent. An empty read-store result is not
-  // proof of absence — the dual-write to `.rule-events` can lag behind a successful legacy write.
-  const usedLegacyFallback = readHits.length === 0 && eventSearchClient !== undefined;
-  const hits = usedLegacyFallback ? (await eventClient.findByEventId(eventId)).hits : readHits;
-
-  const latest = hits[hits.length - 1];
-
-  if (!latest) {
-    return { event_uuid: eventId, updated: 0, ignored: 1 };
+  let latestByEventId: SignificantEventResponse | undefined;
+  let readStoreThrew = false;
+  try {
+    latestByEventId = await resolvedSearchClient.findLatestByEventId(eventId);
+  } catch (err) {
+    readStoreThrew = true;
+    logger?.warn(
+      `attach_investigation: read-store lookup failed, falling back to canonical client: ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
   }
+
+  // Dual-write lag guard: when the flag-aware read store returns nothing *or throws*, fall back
+  // to the canonical eventClient. An empty or errored read-store result is not proof of absence —
+  // the dual-write to `.rule-events` can lag behind a successful legacy write, or the read store
+  // may be temporarily unavailable.
+  const usedLegacyFallback =
+    (latestByEventId === undefined || readStoreThrew) && eventSearchClient !== undefined;
+  const latest = usedLegacyFallback
+    ? latestByEventId
+    : await eventClient.findLatestByEventId(eventId);
 
   // RuleEventsClient uses `group_hash` as a synthetic event_uuid, so a legacy write must retain
   // the actual EventClient version as its predecessor.
