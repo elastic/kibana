@@ -145,7 +145,7 @@ describe('ConversationsActionsGroup', () => {
       openMenu();
 
       expect(screen.getByText('Open an escalation')).toBeInTheDocument();
-      expect(screen.getByText('Add to an escalation')).toBeInTheDocument();
+      expect(screen.getByText('Attach to an escalation')).toBeInTheDocument();
     });
 
     it('hides escalation actions when canManageEscalations is false (default)', () => {
@@ -154,7 +154,7 @@ describe('ConversationsActionsGroup', () => {
       openMenu();
 
       expect(screen.queryByText('Open an escalation')).not.toBeInTheDocument();
-      expect(screen.queryByText('Add to an escalation')).not.toBeInTheDocument();
+      expect(screen.queryByText('Attach to an escalation')).not.toBeInTheDocument();
     });
 
     it('keeps close available while the decision is open when canCloseInvestigation is true', () => {
