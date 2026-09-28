@@ -57,10 +57,14 @@ export function createSseGatedFetch(resource: McpFetchResource): FetchLike {
     }
 
     const gate = gates.get(sessionId);
-    if (gate) {
+    // Only wait while the channel is still closed; an open gate needs no timer at all.
+    if (gate && gate.markOpen !== null) {
+      let timer: ReturnType<typeof setTimeout> | undefined;
       const races: Array<Promise<void>> = [
         gate.open,
-        new Promise<void>((resolve) => setTimeout(resolve, SSE_READY_TIMEOUT_MS)),
+        new Promise<void>((resolve) => {
+          timer = setTimeout(resolve, SSE_READY_TIMEOUT_MS);
+        }),
       ];
       if (init?.signal) {
         races.push(
@@ -70,7 +74,11 @@ export function createSseGatedFetch(resource: McpFetchResource): FetchLike {
           })
         );
       }
-      await Promise.race(races);
+      try {
+        await Promise.race(races);
+      } finally {
+        clearTimeout(timer);
+      }
     }
 
     const response = await resource.fetch(url, init);

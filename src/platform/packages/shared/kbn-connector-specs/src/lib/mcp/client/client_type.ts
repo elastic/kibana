@@ -12,6 +12,7 @@ import type { BuildContext, ClientTypeSpec } from '../../clients/client_type_spe
 import { createFetchResource, type McpFetchResource } from './fetch_resource';
 import { createSseGatedFetch } from './sse_fetch';
 
+const DEFAULT_MCP_CLIENT_NAME = 'kibana-mcp';
 const DEFAULT_MCP_CLIENT_VERSION = '1.0.0';
 const USER_ERROR_HTTP_STATUS_CODES = new Set([401, 403]);
 const TERMINAL_UNDICI_CODES = new Set(['UND_ERR_SOCKET', 'UND_ERR_CLOSED', 'UND_ERR_DESTROYED']);
@@ -65,6 +66,11 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
       throw new Error('config.serverUrl is required');
     }
 
+    const clientName =
+      typeof ctx.config?.clientName === 'string' && ctx.config.clientName !== ''
+        ? ctx.config.clientName
+        : DEFAULT_MCP_CLIENT_NAME;
+
     const resource = createFetchResource({
       networkSettings: ctx.networkSettings,
       logger: ctx.logger,
@@ -88,7 +94,7 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
       client = new McpClient(
         ctx.logger,
         {
-          name: `kibana-mcp-${serverUrl}`,
+          name: clientName,
           version: DEFAULT_MCP_CLIENT_VERSION,
           url: serverUrl,
         },

@@ -150,7 +150,10 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
   private buildClient(): Promise<McpClient> {
     return clientTypes.mcp.build({
       logger: this.logger,
-      config: { serverUrl: this.config.serverUrl },
+      config: {
+        serverUrl: this.config.serverUrl,
+        clientName: `kibana-mcp-connector-${this.connector.id}`,
+      },
       networkSettings: this.networkSettings,
       platform: this.platform,
       credential: this.credential,
@@ -197,14 +200,19 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
   }
 
   /**
-   * Test the connector by leasing a pooled MCP client. A successful lease means the server
-   * accepted the connection.
+   * Test the connector with a fresh client: drop any pooled client for this lease key, build and
+   * connect a new one, then verify the session with a live `listTools` round trip. The cached
+   * tool list is cleared only once the new client exists, so a failed connect keeps it.
    */
   public async testConnector(
     _params: z.infer<typeof TestConnectorRequestSchema>,
     _connectorUsageCollector: ConnectorUsageCollector
   ): Promise<{ connected: boolean }> {
-    await this.withPooledClient('test', async () => undefined);
+    await this.pool.drop(this.getLeaseKey());
+    await this.withPooledClient('test', async (client) => {
+      listToolsCache.delete(this.getListToolsCacheKey());
+      await client.listTools();
+    });
     return { connected: true };
   }
 

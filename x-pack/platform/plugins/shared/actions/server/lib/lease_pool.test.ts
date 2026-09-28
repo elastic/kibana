@@ -264,6 +264,89 @@ describe('LeasePool', () => {
     });
   });
 
+  describe('drop(key)', () => {
+    it('terminates and removes the entry so the next lease rebuilds', async () => {
+      const pool = new LeasePool<string>();
+      const terminateSpy = jest.fn().mockResolvedValue(undefined);
+      await pool.lease('conn:mcp:shared', async () => 'client-a', terminateSpy);
+
+      await pool.drop('conn:mcp:shared');
+
+      expect(terminateSpy).toHaveBeenCalledWith('client-a');
+
+      let rebuildCount = 0;
+      const rebuilt = await pool.lease(
+        'conn:mcp:shared',
+        async () => {
+          rebuildCount++;
+          return 'client-a2';
+        },
+        noopTerminate
+      );
+      expect(rebuildCount).toBe(1);
+      expect(rebuilt).toBe('client-a2');
+    });
+
+    it('does not need the entry promise, unlike invalidate', async () => {
+      const pool = new LeasePool<string>();
+      const terminateSpy = jest.fn().mockResolvedValue(undefined);
+      await pool.lease('conn:mcp:shared', async () => 'client-a', terminateSpy);
+      await pool.lease('conn:other:shared', async () => 'client-b', noopTerminate);
+
+      await pool.drop('conn:mcp:shared');
+
+      expect(terminateSpy).toHaveBeenCalledTimes(1);
+      expect(noopTerminate).not.toHaveBeenCalled();
+      expect(await pool.lease('conn:other:shared', async () => 'unexpected', noopTerminate)).toBe(
+        'client-b'
+      );
+    });
+
+    it('does not call terminate when the key is missing', async () => {
+      const pool = new LeasePool<string>();
+      const terminateSpy = jest.fn().mockResolvedValue(undefined);
+      await pool.lease('conn:mcp:shared', async () => 'client-a', terminateSpy);
+
+      await pool.drop('missing:mcp:shared');
+
+      expect(terminateSpy).not.toHaveBeenCalled();
+      expect(await pool.lease('conn:mcp:shared', async () => 'unexpected', noopTerminate)).toBe(
+        'client-a'
+      );
+    });
+
+    it('returns immediately for an empty key', async () => {
+      const pool = new LeasePool<string>();
+      const peekSpy = jest.spyOn(
+        (pool as unknown as { cache: { peek: () => unknown } }).cache,
+        'peek'
+      );
+
+      await pool.drop('');
+
+      expect(peekSpy).not.toHaveBeenCalled();
+    });
+
+    it('terminates after resolve when dropping an in-progress entry', async () => {
+      const pool = new LeasePool<string>();
+      const terminateSpy = jest.fn().mockResolvedValue(undefined);
+      let resolve!: (v: string) => void;
+      const buildPromise = new Promise<string>((res) => {
+        resolve = res;
+      });
+      const leasePromise = pool.lease('conn:mcp:shared', () => buildPromise, terminateSpy);
+
+      const dropPromise = pool.drop('conn:mcp:shared');
+      expect(terminateSpy).not.toHaveBeenCalled();
+
+      resolve('client-late');
+      await leasePromise;
+      await dropPromise;
+
+      expect(terminateSpy).toHaveBeenCalledWith('client-late');
+    });
+  });
+
   describe('evict(connectorId)', () => {
     it('calls terminate on matching-prefix resolved entries and removes them', async () => {
       const pool = new LeasePool<string>();

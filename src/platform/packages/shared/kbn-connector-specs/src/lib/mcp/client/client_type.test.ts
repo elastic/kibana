@@ -75,11 +75,51 @@ describe('createMcpClientType', () => {
 
       expect(McpClient).toHaveBeenCalledWith(
         ctx.logger,
-        expect.objectContaining({ url: 'https://mcp.example.com' }),
+        expect.objectContaining({ url: 'https://mcp.example.com', name: 'kibana-mcp' }),
         expect.objectContaining({ fetch: expect.any(Function) })
       );
       expect(client.connect).toHaveBeenCalled();
     });
+
+    it('names the McpClient from config.clientName when set', async () => {
+      const ctx = makeBuildContext({
+        config: {
+          serverUrl: 'https://mcp.example.com',
+          clientName: 'kibana-mcp-connector-abc-123',
+        },
+      });
+
+      await createMcpClientType().build(ctx);
+
+      expect(McpClient).toHaveBeenCalledWith(
+        ctx.logger,
+        expect.objectContaining({
+          url: 'https://mcp.example.com',
+          name: 'kibana-mcp-connector-abc-123',
+        }),
+        expect.anything()
+      );
+    });
+
+    it.each<[string, unknown]>([
+      ['empty string', ''],
+      ['non-string', 42],
+    ])(
+      'falls back to the default name when config.clientName is a %s',
+      async (_form, clientName) => {
+        const ctx = makeBuildContext({
+          config: { serverUrl: 'https://mcp.example.com', clientName },
+        });
+
+        await createMcpClientType().build(ctx);
+
+        expect(McpClient).toHaveBeenCalledWith(
+          ctx.logger,
+          expect.objectContaining({ name: 'kibana-mcp' }),
+          expect.anything()
+        );
+      }
+    );
 
     it('throws when config.serverUrl is missing', async () => {
       const ctx = makeBuildContext({ config: {} });

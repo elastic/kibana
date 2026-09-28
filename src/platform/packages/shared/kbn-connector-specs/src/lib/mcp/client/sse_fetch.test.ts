@@ -156,6 +156,39 @@ describe('createSseGatedFetch', () => {
       expect(mockFetch).toHaveBeenCalledTimes(3);
     });
 
+    it('does not start a timer for a POST once the GET has opened the gate', async () => {
+      mockFetch
+        .mockResolvedValueOnce(makeResponse(202)) // POST init → gate created
+        .mockResolvedValueOnce(makeResponse(200)) // GET SSE → gate open
+        .mockResolvedValueOnce(makeResponse(200)); // POST tool-call
+
+      await fetch('https://example.com/mcp', { method: 'POST' });
+      await fetch('https://example.com/mcp', { method: 'GET' });
+
+      await fetch('https://example.com/mcp', { method: 'POST' });
+
+      expect(mockFetch).toHaveBeenCalledTimes(3);
+      expect(jest.getTimerCount()).toBe(0);
+    });
+
+    it('clears the waiter timeout when the GET opens the gate before SSE_READY_TIMEOUT_MS', async () => {
+      mockFetch
+        .mockResolvedValueOnce(makeResponse(202)) // POST init → gate created
+        .mockResolvedValueOnce(makeResponse(200)) // GET SSE → gate open
+        .mockResolvedValueOnce(makeResponse(200)); // POST tool-call
+
+      await fetch('https://example.com/mcp', { method: 'POST' });
+
+      const toolCall = fetch('https://example.com/mcp', { method: 'POST' }); // gated
+      expect(jest.getTimerCount()).toBe(1);
+
+      await fetch('https://example.com/mcp', { method: 'GET' });
+      await toolCall;
+
+      expect(mockFetch).toHaveBeenCalledTimes(3);
+      expect(jest.getTimerCount()).toBe(0);
+    });
+
     it('falls through after SSE_READY_TIMEOUT_MS when GET never arrives', async () => {
       mockFetch.mockResolvedValueOnce(makeResponse(202)).mockResolvedValueOnce(makeResponse(200));
 
