@@ -410,4 +410,12 @@ export const ConnectorIconsMap: Map<
         import(/* webpackChunkName: "connectorIconelasticsearch" */ './specs/elasticsearch/icon')
     ),
   ],
+
+  [
+    '.azure_functions',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconazurefunctions" */ './specs/azure_functions/icon')
+    ),
+  ],
 ]);
