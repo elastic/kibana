@@ -56,6 +56,7 @@ function makeServicesStepReturn(): ReturnType<typeof useServicesStep> {
     handleNext: jest.fn(),
     dataFormat: 'ecs',
     setDataFormat: jest.fn(),
+    agentBasedOnlySelected: [],
   };
 }
 

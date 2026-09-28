@@ -507,7 +507,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       <DeploymentMethodCard
         selectedMethod={deploymentMethod}
         onChange={setDeploymentMethod}
-        locked={allAgentBasedOnly}
+        locked={allAgentBasedOnly && !isMethodLocked}
         disabled={isMethodLocked}
       />
 
@@ -529,7 +529,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
             <p>
               <FormattedMessage
                 id="xpack.ingestHub.authenticateAndDeployStep.agentBasedOnlyCallout.body"
-                defaultMessage="After completing this wizard, install the integrations on an Elastic Agent policy and enroll an Elastic Agent that has access to your AWS environment."
+                defaultMessage="After completing this step, enroll an Elastic Agent that has access to your AWS environment to start collecting data."
               />
             </p>
           </EuiCallOut>
@@ -567,9 +567,9 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         />
       )}
 
-      {hasAnyEcf && <EuiHorizontalRule margin="l" />}
+      {hasAnyEcf && !isAgentBased && <EuiHorizontalRule margin="l" />}
 
-      {hasAnyEcf && <EcfDeploymentSection {...ecfSectionProps} />}
+      {hasAnyEcf && !isAgentBased && <EcfDeploymentSection {...ecfSectionProps} />}
 
       <EuiSpacer size="l" />
 

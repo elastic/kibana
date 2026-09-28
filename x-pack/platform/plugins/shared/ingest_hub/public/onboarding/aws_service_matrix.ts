@@ -183,6 +183,8 @@ type AwsServiceStaticEntry = Omit<
   excludedDataStreams?: string[];
   /** Override which inputs are enabled by default when the manifest doesn't differentiate. */
   defaultEnabledInputs?: string[];
+  /** Static fallback shown before the manifest loads or if the manifest is unavailable. */
+  signalTypes?: SignalType[];
 };
 
 const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
@@ -592,6 +594,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'cloud_financial_management',
     packageName: 'aws_billing',
     deploymentMethods: [{ method: 'agent_based', preferred: true }],
+    signalTypes: ['metrics'],
   },
 
   // ── amazon_security_lake package — Security, Identity & Compliance ────────
@@ -601,6 +604,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'security_identity_compliance',
     packageName: 'amazon_security_lake',
     deploymentMethods: [{ method: 'agent_based', preferred: true }],
+    signalTypes: ['logs'],
   },
 
   // ── endace package — Networking and Content Delivery ──────────────────────
@@ -610,6 +614,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'networking_content_delivery',
     packageName: 'endace',
     deploymentMethods: [{ method: 'agent_based', preferred: true }],
+    signalTypes: ['logs'],
   },
 ];
 
@@ -978,18 +983,27 @@ export function buildAwsServiceMatrix(
       }
 
       // Fallback: packages with no matching policy template (e.g. awsfirehose) still expose
-      // their data streams — derive signal types directly from the package manifest.
+      // their data streams — derive signal types and populate dataStreams directly from the
+      // package manifest. varDefsByDataStream is intentionally left empty: these are agent-based
+      // services that are configured via the Elastic Agent policy, not the MI settings flyout.
       if (!pt) {
         for (const ds of packageInfo.data_streams ?? []) {
+          const dsId = (ds as any)?.path as string | undefined;
           const dsType = (ds as any)?.type as string | undefined;
           if (dsType === 'logs' || dsType === 'metrics') {
             signalTypesSet.add(dsType as SignalType);
+          }
+          if (dsId) {
+            dataStreams.push(dsId);
           }
         }
       }
     }
 
-    const signalTypes: SignalType[] = [...signalTypesSet];
+    // Use static fallback signal types when the manifest couldn't be derived (manifest unavailable
+    // or no PT matched). Manifest-derived types take precedence when present.
+    const signalTypes: SignalType[] =
+      signalTypesSet.size > 0 ? [...signalTypesSet] : (entry.signalTypes ?? []);
     const deploymentMethods = buildDeploymentMethods(
       staticMethods,
       managedIntegrations,
