@@ -1,5 +1,5 @@
 {
-  "sha1": "f24f1cb9a85b12e8ca2c85ac1862022932addd55",
+  "sha1": "de6f79051e39f1491bd906bf9b783f1d37ab06cd",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -281,7 +281,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_footer_date_nanos.spec.ts",
-        "line": 64,
+        "line": 66,
         "column": 25
       }
     },
