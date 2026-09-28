@@ -36,6 +36,7 @@ describe('TableVisualizationComponent', () => {
     done: jest.fn(),
     uiState: 'uiState',
     event: 'event',
+    isInteractive: jest.fn(),
   } as unknown as IInterpreterRenderHandlers;
   const visData: TableVisData = {
     table: {
