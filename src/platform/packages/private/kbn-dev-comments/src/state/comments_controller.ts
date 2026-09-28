@@ -67,6 +67,8 @@ export interface CommentsState {
   /** Comment mode: the page is not interactable and a click on it starts a comment. */
   active: boolean;
   panelMinimized: boolean;
+  /** The thread the panel shows in place of the list: the fallback for a comment whose element cannot be shown. */
+  panelThreadId: string | null;
   activeThreadId: string | null;
   /** Pin that should take focus once it is rendered: its thread was opened without a pointer. */
   focusPinId: string | null;
@@ -118,6 +120,8 @@ export interface CommentsController {
   guideTo(comment: Comment): Promise<void>;
   /** Ends the guide; with `found`, opens the comment it led to. */
   stopGuide(found?: boolean): void;
+  /** Shows the thread in the panel, in place of the list, ending any guide; `null` goes back to the list. */
+  showInPanel(id: string | null): void;
   setOverlayOpen(open: boolean): void;
   dismissNotice(): void;
 }
@@ -234,6 +238,7 @@ export const createCommentsController = (services: CommentsHostServices): Commen
     loadError: null,
     active: false,
     panelMinimized: false,
+    panelThreadId: null,
     activeThreadId: null,
     focusPinId: null,
     pending: null,
@@ -418,6 +423,7 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       activeThreadId: null,
       focusPinId: null,
       guide: null,
+      panelThreadId: null,
       ...(active ? {} : { panelMinimized: false }),
     });
   };
@@ -634,6 +640,21 @@ export const createCommentsController = (services: CommentsHostServices): Commen
         guide: null,
         ...(found ? { activeThreadId: guide.id, focusPinId: guide.id } : {}),
       });
+    },
+
+    showInPanel(id) {
+      store.setState((state) => ({
+        panelThreadId: id,
+        guide: null,
+        ...(id
+          ? {
+              activeThreadId: null,
+              focusPinId: null,
+              panelMinimized: false,
+              ...droppingDraft(state),
+            }
+          : {}),
+      }));
     },
 
     setOverlayOpen(open) {
