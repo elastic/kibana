@@ -153,11 +153,10 @@ export const visorStyles = (
     aiButtonSelected: css`
       /* Same gradient AiButton outlined uses on hover, so the selected fill stays visible at size xs. */
       background: linear-gradient(
-          180deg,
-          ${euiTheme.components.buttons.backgroundPrimaryHover} 18%,
-          ${euiTheme.components.buttons.backgroundAssistanceHover} 83%
-        )
-        !important;
+        180deg,
+        ${euiTheme.components.buttons.backgroundPrimaryHover} 18%,
+        ${euiTheme.components.buttons.backgroundAssistanceHover} 83%
+      ) !important;
     `,
     nlInputWrapper: css`
       justify-content: center;
