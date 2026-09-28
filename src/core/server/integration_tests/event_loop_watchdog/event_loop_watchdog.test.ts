@@ -135,6 +135,7 @@ describe('EventLoopWatchdog (real worker)', () => {
     const report = await nextReport(1);
     expect(report.blockedMs).toBeGreaterThanOrEqual(1_300);
     expect(report.profile.verdict).toBe('profiled');
+    expect(report.profile.startLatencyMs).toEqual(expect.any(Number));
     // V8 may inline the named function into its (transpiled) caller, so assert on location
     // and the combined frame/caller description rather than on the leaf function name alone.
     const [top] = report.profile.frames;

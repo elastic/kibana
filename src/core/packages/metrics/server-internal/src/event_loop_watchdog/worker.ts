@@ -33,6 +33,7 @@ import type {
 const hrUs = (): number => Number(process.hrtime.bigint() / 1000n);
 
 interface Capture {
+  requestedAtUs: number;
   startAckUs?: number;
   stopAckUs?: number;
   profile?: CpuProfile;
@@ -108,7 +109,7 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
   };
 
   const startCapture = (): Capture => {
-    const capture: Capture = { done: Promise.resolve() };
+    const capture: Capture = { requestedAtUs: hrUs(), done: Promise.resolve() };
     capture.done = inspect('Profiler.start')
       .then(() => {
         capture.startAckUs = hrUs();
@@ -147,13 +148,16 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
     if (capture.error || !capture.profile || capture.startAckUs === undefined) {
       return { verdict: 'unavailable', reason: capture.error ?? 'no profile returned', frames: [] };
     }
-    return summarizeProfile(capture.profile, {
-      windowStartUs: current.startedAtUs,
-      windowEndUs: Math.min(endedAtUs, capture.stopAckUs ?? endedAtUs),
-      startAckUs: capture.startAckUs,
-      sanitizeRoot,
-      maxFrames: options.maxFrames,
-    });
+    return {
+      ...summarizeProfile(capture.profile, {
+        windowStartUs: current.startedAtUs,
+        windowEndUs: Math.min(endedAtUs, capture.stopAckUs ?? endedAtUs),
+        startAckUs: capture.startAckUs,
+        sanitizeRoot,
+        maxFrames: options.maxFrames,
+      }),
+      startLatencyMs: Math.round((capture.startAckUs - capture.requestedAtUs) / 1000),
+    };
   };
 
   const onBlockStart = (event: Extract<DetectorEvent, { type: 'block-start' }>) => {

@@ -57,8 +57,12 @@ export const formatReportMessage = (report: BlockReport): string => {
       : '';
   const suppressed =
     suppressedBlocks > 0 ? ` ${suppressedBlocks} earlier block(s) were not reported.` : '';
+  const startLatency =
+    profile.startLatencyMs === undefined
+      ? ''
+      : ` (starting the profiler stalled the main thread for ~${profile.startLatencyMs}ms)`;
   return (
-    `Event loop was blocked for ~${blockedMs}ms${cpu}. Profile ${profile.verdict}: ${profile.reason}.${frames}` +
+    `Event loop was blocked for ~${blockedMs}ms${cpu}. Profile ${profile.verdict}${startLatency}: ${profile.reason}.${frames}` +
     ` Candidates (in flight, not necessarily the cause): ${formatCandidates(
       candidates,
       omittedCandidates

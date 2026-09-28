@@ -84,6 +84,12 @@ export interface ProfileSummary {
   frames: ProfileFrame[];
   /** Share of sampled time attributed to GC. */
   gcPercent?: number;
+  /**
+   * Time between requesting `Profiler.start` and its acknowledgement. Starting the V8 profiler
+   * stalls the main thread in proportion to the amount of compiled code, so this is also the
+   * approximate time the watchdog itself added to the block.
+   */
+  startLatencyMs?: number;
 }
 
 export interface BlockReport {
