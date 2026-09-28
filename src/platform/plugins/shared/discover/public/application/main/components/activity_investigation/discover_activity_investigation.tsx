@@ -88,9 +88,9 @@ const messages = {
       defaultMessage: 'Activity analysis timed out. Refresh the query to try again.',
     }),
   increasesFound: (count: number): string =>
-    i18n.translate('discover.activityInvestigation.increasesFoundTitle', {
+    i18n.translate('discover.activityInvestigation.investigationOptionsTitle', {
       defaultMessage:
-        '{count, plural, one {# activity increase found} other {# activity increases found}}',
+        '{count, plural, one {# investigation option} other {# investigation options}}',
       values: { count },
     }),
   actorOption: (activity: string, interval: string): string =>
@@ -201,7 +201,7 @@ const ActivityInvestigation = (): ReactElement | null => {
     ) : null;
   }
 
-  // The detector orders the results: total first, then fields by calibrated p or exploratory comparison.
+  // One detected total, followed by descriptive field measurements in the same windows.
   const orderedResults = results;
   // Tie selection to the frozen response, so refreshing cannot reuse an old actor or interval.
   const selectedId = selection?.results === results ? selection.id : orderedResults[0].id;
@@ -221,11 +221,15 @@ const ActivityInvestigation = (): ReactElement | null => {
       value: result.id,
       label: truncateMiddle(label, MAX_OPTION_LABEL_LENGTH),
       searchableLabel: label,
-      toolTipContent: messages.actorOption(getActivityInvestigationLabel(result), getInterval(result)),
+      toolTipContent: messages.actorOption(
+        getActivityInvestigationLabel(result),
+        getInterval(result)
+      ),
       checked: result.id === selectedResult.id ? 'on' : undefined,
     };
   });
-  const selectedLabel = selectedResult.metricField ?? getActivityInvestigationSubject(selectedResult);
+  const selectedLabel =
+    selectedResult.metricField ?? getActivityInvestigationSubject(selectedResult);
   const selectedTooltip = messages.actorOption(
     getActivityInvestigationLabel(selectedResult),
     getInterval(selectedResult)
@@ -252,7 +256,9 @@ const ActivityInvestigation = (): ReactElement | null => {
         }}
       />
     </div>
-  ) : selectedLabel;
+  ) : (
+    selectedLabel
+  );
 
   return (
     <EuiPanel

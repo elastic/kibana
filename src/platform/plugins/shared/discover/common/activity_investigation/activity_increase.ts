@@ -12,6 +12,8 @@ export const ACTIVITY_INCREASE_KINDS = [
   'trend_change',
   'historical_interval',
   'exploratory_interval',
+  'contributor',
+  'related_metric',
 ] as const;
 
 export const ACTIVITY_INCREASE_SELECTION_CONFIG = {
@@ -50,6 +52,13 @@ export interface ActivityIncrease {
   readonly observedTotal: number;
   readonly excess: number;
   readonly percentageChange: number | null;
+  /** Only the total was detected; field measurements share its windows, not its significance. */
+  readonly trigger?: {
+    readonly kind: (typeof ACTIVITY_INCREASE_KINDS)[number];
+    readonly pvalue?: number;
+    readonly observedTotal: number;
+    readonly percentageChange: number | null;
+  };
   readonly referenceTimeRange?: {
     readonly startTimeMs: number;
     readonly endTimeMs: number;

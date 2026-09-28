@@ -45,13 +45,17 @@ const messages = {
       values: { field },
     }),
   zeroBaselineQuestion: (): string =>
-    i18n.translate('discover.activityInvestigation.queryResultsWithoutBaselineQuestionDescription', {
-      defaultMessage: 'Why did activity in {queryResults} increase during this period?',
-      values: { queryResults: messages.queryResults() },
-    }),
+    i18n.translate(
+      'discover.activityInvestigation.queryResultsWithoutBaselineQuestionDescription',
+      {
+        defaultMessage: 'Why did activity in {queryResults} increase during this period?',
+        values: { queryResults: messages.queryResults() },
+      }
+    ),
   increaseQuestion: (multiplier: string): string =>
     i18n.translate('discover.activityInvestigation.queryResultsMultiplierQuestionDescription', {
-      defaultMessage: 'Why is there {multiplier} times as much activity in {queryResults} as before?',
+      defaultMessage:
+        'Why is there {multiplier} times as much activity in {queryResults} as before?',
       values: { multiplier, queryResults: messages.queryResults() },
     }),
   actorQuestion: (actor: string, multiplier: string): string =>
@@ -116,7 +120,7 @@ export const getActivityInvestigationSubject = ({
     ? messages.sumLabel(metricField)
     : messages.queryResults();
 
-/** Labels a detected actor with its own multiplier, without combining separate results. */
+/** Labels the selected measurement with its own multiplier, not the total's multiplier. */
 export const getActivityInvestigationLabel = (result: ActivityInvestigationResult): string => {
   const label = getActivityInvestigationSubject(result);
   const { percentageChange } = result.increase;
@@ -158,14 +162,11 @@ const buildInvestigationSnapshot = ({
 }: ActivityInvestigationResult): ActivityInvestigationSnapshot => {
   const firstBucket = buckets[0];
   const lastBucket = buckets[buckets.length - 1];
-  if (!firstBucket || !lastBucket) {
+  const isFieldMeasurement = increase.kind === 'contributor' || increase.kind === 'related_metric';
+  if ((!firstBucket || !lastBucket) && !isFieldMeasurement) {
     throw new Error('Cannot build an activity investigation without complete buckets');
   }
 
-  const seriesTimeRange = {
-    from: new Date(firstBucket.startTimeMs).toISOString(),
-    to: new Date(lastBucket.endTimeMs).toISOString(),
-  };
   const increaseTimeRange = {
     from: new Date(increase.startTimeMs).toISOString(),
     to: new Date(increase.endTimeMs).toISOString(),
@@ -222,6 +223,7 @@ const buildInvestigationSnapshot = ({
       observedMean: increase.observedMean,
       observedTotal: increase.observedTotal,
       percentageChange: increase.percentageChange,
+      trigger: increase.trigger,
       historicalComparison: increase.historicalComparison && {
         timeRange: {
           from: new Date(increase.historicalComparison.startTimeMs).toISOString(),
@@ -254,12 +256,15 @@ const buildInvestigationSnapshot = ({
         },
       },
     },
-    series: {
-      startTime: seriesTimeRange.from,
-      endTime: seriesTimeRange.to,
-      intervalMs: increase.intervalMs,
-      counts: buckets.map(({ count }) => count),
-    },
+    series:
+      firstBucket && lastBucket
+        ? {
+            startTime: new Date(firstBucket.startTimeMs).toISOString(),
+            endTime: new Date(lastBucket.endTimeMs).toISOString(),
+            intervalMs: increase.intervalMs,
+            counts: buckets.map(({ count }) => count),
+          }
+        : undefined,
   };
 };
 
