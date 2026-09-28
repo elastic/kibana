@@ -1039,6 +1039,7 @@ export const PostBulkAgentRollbackRequestSchema = {
 export const PostAgentRestartRequestSchema = {
   params: schema.object({
     agentId: schema.string({
+      maxLength: 512,
       meta: { description: 'The agent ID to restart' },
     }),
   }),
@@ -1048,8 +1049,11 @@ export const PostAgentRestartResponseSchema = ActionIdOrMessageSchema;
 
 export const PostBulkAgentRestartRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
-    batchSize: schema.maybe(schema.number()),
+    agents: schema.oneOf([
+      schema.arrayOf(schema.string({ maxLength: 512 }), { maxSize: 10000 }),
+      schema.string({ maxLength: 10000 }),
+    ]),
+    batchSize: schema.maybe(schema.number({ min: 1 })),
     includeInactive: schema.boolean({ defaultValue: false }),
   }),
 };

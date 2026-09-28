@@ -25,8 +25,14 @@ export default function (providerContext: FtrProviderContext) {
   const fleetAndAgents = getService('fleetAndAgents');
   let policy1: any;
 
-  async function createAgent(agentId: string, version: string, policyId?: string) {
+  async function createAgent(
+    agentId: string,
+    version: string,
+    policyId?: string,
+    policyBaseId?: string
+  ) {
     const now = new Date().toISOString();
+    const resolvedPolicyId = policyId ?? policy1.id;
     await es.index({
       refresh: 'wait_for',
       index: AGENTS_INDEX,
@@ -37,7 +43,8 @@ export default function (providerContext: FtrProviderContext) {
         active: true,
         enrolled_at: now,
         last_checkin: now,
-        policy_id: policyId ?? policy1.id,
+        policy_id: resolvedPolicyId,
+        policy_base_id: policyBaseId ?? resolvedPolicyId,
         policy_revision: 1,
         policy_revision_idx: 1,
         namespaces: ['default'],

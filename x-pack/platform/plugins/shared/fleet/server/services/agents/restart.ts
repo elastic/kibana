@@ -87,5 +87,5 @@ export async function bulkRestartAgents(
     },
     { pitId: await openPointInTime(esClient) }
   );
-  return await runner.processAgentsInBatches();
+  return await runner.runActionAsyncTask();
 }

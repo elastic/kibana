@@ -100,7 +100,8 @@ export const AgentRestartModal: React.FunctionComponent<AgentRestartModalProps> 
             id="xpack.fleet.restartAgents.singleAgentDescription"
             defaultMessage="You are about to restart the Elastic Agent running on ''{hostName}''."
             values={{
-              hostName: ((agents[0] as Agent).local_metadata.host as any).hostname,
+              hostName:
+                ((agents[0] as Agent).local_metadata?.host as any)?.hostname ?? agents[0].id,
             }}
           />
         ) : (

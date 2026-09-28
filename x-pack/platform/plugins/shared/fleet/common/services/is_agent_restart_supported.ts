@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import semverCoerce from 'semver/functions/coerce';
 import semverGte from 'semver/functions/gte';
 
 import type { Agent } from '../types';
@@ -19,5 +20,9 @@ export function isAgentRestartSupported(agent: Agent) {
     return false;
   }
   const agentVersion = agent.local_metadata.elastic.agent.version;
-  return semverGte(agentVersion, MINIMUM_RESTART_AGENT_VERSION);
+  const coerced = semverCoerce(agentVersion);
+  if (!coerced) {
+    return false;
+  }
+  return semverGte(coerced, MINIMUM_RESTART_AGENT_VERSION);
 }
