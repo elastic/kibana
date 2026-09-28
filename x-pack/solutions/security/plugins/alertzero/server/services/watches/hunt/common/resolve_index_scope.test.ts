@@ -10,7 +10,7 @@ import type { ScopedModel } from '@kbn/agent-builder-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { resolveIndexScope, resolveHuntScope, parseTechnologyInput } from './resolve_index_scope';
 import { HUNT_ALERTS_INDEX_PATTERN_PREFIX } from '../../../../../common/constants';
-import type { HuntTechnology } from '@kbn/alertzero-common';
+import type { HuntIoc, HuntTechnology } from '@kbn/alertzero-common';
 import { discoverHuntDatasets } from './discover_hunt_datasets';
 import type { DiscoveredDataset } from './discover_hunt_datasets';
 import { matchDatasetsDeterministic, matchDatasetsWithModel } from './match_hunt_datasets';
@@ -274,6 +274,8 @@ describe('resolveHuntScope', () => {
       data_streams: ['logs-cisco_asa.log-default'],
     };
     const report = { vendor: 'Okta', text: 'Okta session hijacking' };
+    const articleReport = { text: 'A campaign abusing session tokens' };
+    const iocs: HuntIoc[] = [{ type: 'ip', value: '203.0.113.7' }];
     const model = {} as ScopedModel;
     let logger: ReturnType<typeof loggerMock.create>;
 
@@ -285,9 +287,15 @@ describe('resolveHuntScope', () => {
       mockWithModel.mockResolvedValue(undefined);
     });
 
-    it('keeps the static result and never discovers when a known technology is present', async () => {
+    it('keeps the static result and never discovers when a known technology is present and the report names no vendor or product', async () => {
       const esClient = createMockEsClient(new Set(['logs-fortinet.*', alertsPattern]));
-      const result = await resolveHuntScope({ esClient, spaceId: SPACE_ID, report, model, logger });
+      const result = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        report: articleReport,
+        model,
+        logger,
+      });
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -299,6 +307,167 @@ describe('resolveHuntScope', () => {
         })
       );
       expect(mockDiscover).not.toHaveBeenCalled();
+      expect(mockDeterministic).not.toHaveBeenCalled();
+      expect(mockWithModel).not.toHaveBeenCalled();
+    });
+
+    it('keeps the static result and never discovers for an article report even when it carries IOCs', async () => {
+      const esClient = createMockEsClient(new Set(['logs-fortinet.*', alertsPattern]));
+      const result = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        report: { ...articleReport, iocs },
+        model,
+        logger,
+      });
+
+      expect(result.resolution).toBe('static');
+      expect(mockDiscover).not.toHaveBeenCalled();
+    });
+
+    it('runs the full discovery path for an article report when every technology is blocked', async () => {
+      const esClient = createMockEsClient(new Set([alertsPattern]));
+      const result = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        report: articleReport,
+        model,
+        logger,
+      });
+
+      expect(result.status).toBe('blocked');
+      expect(result.resolution).toBe('blocked:model_declined');
+      expect(mockDiscover).toHaveBeenCalledTimes(1);
+      expect(mockDeterministic).toHaveBeenCalledWith({
+        datasets: [oktaDataset, ciscoDataset],
+        vendor: undefined,
+        product: undefined,
+      });
+      expect(mockWithModel).toHaveBeenCalledWith({
+        model,
+        datasets: [oktaDataset, ciscoDataset],
+        report: articleReport,
+        logger,
+      });
+    });
+
+    describe('vendor match first', () => {
+      it('prefers a deterministic vendor match over a present static technology', async () => {
+        const esClient = createMockEsClient(new Set(['logs-fortinet.*', alertsPattern]));
+        const ciscoReport = { vendor: 'Cisco', text: 'Cisco ASA exploitation' };
+        mockDiscover.mockResolvedValue([ciscoDataset]);
+        mockDeterministic.mockReturnValue([ciscoDataset]);
+        const result = await resolveHuntScope({
+          esClient,
+          spaceId: SPACE_ID,
+          report: ciscoReport,
+          model,
+          logger,
+        });
+
+        expect(result).toEqual(
+          expect.objectContaining({
+            status: 'ok',
+            technologies: [],
+            required: ['logs-cisco_asa.log-*'],
+            index_patterns: ['logs-cisco_asa.log-*'],
+            resolution: 'discovered:deterministic',
+          })
+        );
+        expect(result.required).not.toContain('logs-fortinet.*');
+        expect(mockDeterministic).toHaveBeenCalledWith({
+          datasets: [ciscoDataset],
+          vendor: 'Cisco',
+          product: undefined,
+        });
+        expect(mockWithModel).not.toHaveBeenCalled();
+      });
+
+      it('runs the vendor leg on a product-only report', async () => {
+        const esClient = createMockEsClient(new Set(['logs-fortinet.*', alertsPattern]));
+        mockDeterministic.mockReturnValue([ciscoDataset]);
+        const result = await resolveHuntScope({
+          esClient,
+          spaceId: SPACE_ID,
+          report: { product: 'ASA' },
+          model,
+          logger,
+        });
+
+        expect(result.resolution).toBe('discovered:deterministic');
+        expect(mockDeterministic).toHaveBeenCalledWith({
+          datasets: [oktaDataset, ciscoDataset],
+          vendor: undefined,
+          product: 'ASA',
+        });
+      });
+
+      it('falls back to the static result when the vendor misses, discovering once and never asking the model', async () => {
+        const esClient = createMockEsClient(new Set(['logs-fortinet.*', alertsPattern]));
+        mockDiscover.mockResolvedValue([ciscoDataset]);
+        const result = await resolveHuntScope({
+          esClient,
+          spaceId: SPACE_ID,
+          report,
+          model,
+          logger,
+        });
+
+        expect(result).toEqual(
+          expect.objectContaining({
+            status: 'ok',
+            technologies: ['fortigate'],
+            required: ['logs-fortinet.*'],
+            index_patterns: ['logs-fortinet.*'],
+            resolution: 'static',
+          })
+        );
+        expect(mockDiscover).toHaveBeenCalledTimes(1);
+        expect(mockWithModel).not.toHaveBeenCalled();
+        expect(logger.info).toHaveBeenCalledWith('Hunt scope resolved via static: logs-fortinet.*');
+      });
+
+      it('keeps the static result when discovery returns no datasets', async () => {
+        const esClient = createMockEsClient(new Set(['logs-fortinet.*', alertsPattern]));
+        mockDiscover.mockResolvedValue([]);
+        const result = await resolveHuntScope({
+          esClient,
+          spaceId: SPACE_ID,
+          report,
+          model,
+          logger,
+        });
+
+        expect(result.resolution).toBe('static');
+        expect(result.status).toBe('ok');
+        expect(mockDeterministic).not.toHaveBeenCalled();
+      });
+
+      it('keeps the static result with a warning when discovery throws', async () => {
+        const esClient = createMockEsClient(new Set(['logs-fortinet.*', alertsPattern]));
+        mockDiscover.mockRejectedValue(new Error('cluster unavailable'));
+        const result = await resolveHuntScope({
+          esClient,
+          spaceId: SPACE_ID,
+          report,
+          model,
+          logger,
+        });
+
+        expect(result).toEqual(
+          expect.objectContaining({
+            status: 'ok',
+            technologies: ['fortigate'],
+            resolution: 'static',
+          })
+        );
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('vendor-first leg skipped')
+        );
+        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('cluster unavailable'));
+        expect(mockDeterministic).not.toHaveBeenCalled();
+        expect(mockWithModel).not.toHaveBeenCalled();
+      });
     });
 
     it('stays blocked:no_report without discovering when every technology is blocked and no report is given', async () => {
@@ -450,6 +619,171 @@ describe('resolveHuntScope', () => {
       expect(result.required).toEqual(['logs-okta.system-*']);
       expect(result.missing).toContain(alertsPattern);
       expect(result.missing).toEqual(expect.arrayContaining(['logs-aws.*', 'logs-fortinet.*']));
+    });
+
+    describe('broad Tier 1 over every discovered dataset', () => {
+      const iocReport = { ...report, iocs };
+
+      it('is discovered:broad over every discovered dataset when nothing matches, no model is given, and the report has IOCs', async () => {
+        const esClient = createMockEsClient(new Set([alertsPattern]));
+        const result = await resolveHuntScope({
+          esClient,
+          spaceId: SPACE_ID,
+          report: iocReport,
+          logger,
+        });
+
+        expect(result).toEqual(
+          expect.objectContaining({
+            status: 'degraded',
+            technologies: [],
+            required: ['logs-okta.system-*', 'logs-cisco_asa.log-*'],
+            optional: [alertsPattern],
+            resolution: 'discovered:broad',
+          })
+        );
+        expect(result.index_patterns).toEqual(result.required);
+        expect(result.missing).toEqual(expect.arrayContaining(['logs-aws.*', 'logs-fortinet.*']));
+        expect(result.missing).not.toContain(alertsPattern);
+        expect(mockDiscover).toHaveBeenCalledTimes(1);
+        expect(mockWithModel).not.toHaveBeenCalled();
+      });
+
+      it('is discovered:broad after the model declines when the report has IOCs', async () => {
+        const esClient = createMockEsClient(new Set([alertsPattern]));
+        mockWithModel.mockResolvedValue(undefined);
+        const result = await resolveHuntScope({
+          esClient,
+          spaceId: SPACE_ID,
+          report: iocReport,
+          model,
+          logger,
+        });
+
+        expect(result.resolution).toBe('discovered:broad');
+        expect(result.status).toBe('degraded');
+        expect(result.index_patterns).toEqual(['logs-okta.system-*', 'logs-cisco_asa.log-*']);
+        expect(mockWithModel).toHaveBeenCalledTimes(1);
+        expect(mockDiscover).toHaveBeenCalledTimes(1);
+      });
+
+      it('is discovered:broad after the model returns an empty match list when the report has IOCs', async () => {
+        const esClient = createMockEsClient(new Set([alertsPattern]));
+        mockWithModel.mockResolvedValue({ matches: [], confidence: 0, scored: [] });
+        const result = await resolveHuntScope({
+          esClient,
+          spaceId: SPACE_ID,
+          report: iocReport,
+          model,
+          logger,
+        });
+
+        expect(result.resolution).toBe('discovered:broad');
+      });
+
+      it('still prefers a model match over the broad scope when the report has IOCs', async () => {
+        const esClient = createMockEsClient(new Set([alertsPattern]));
+        mockWithModel.mockResolvedValue({
+          matches: [ciscoDataset],
+          confidence: 0.7,
+          scored: [{ dataset: 'cisco_asa.log', confidence: 0.7 }],
+        });
+        const result = await resolveHuntScope({
+          esClient,
+          spaceId: SPACE_ID,
+          report: iocReport,
+          model,
+          logger,
+        });
+
+        expect(result.resolution).toBe('discovered:model');
+        expect(result.required).toEqual(['logs-cisco_asa.log-*']);
+      });
+
+      it.each<{ label: string; iocs: HuntIoc[] | undefined }>([
+        { label: 'an empty IOC list', iocs: [] },
+        { label: 'no IOC list', iocs: undefined },
+      ])(
+        'stays blocked:model_unavailable with $label and no model',
+        async ({ iocs: reportIocs }) => {
+          const esClient = createMockEsClient(new Set([alertsPattern]));
+          const result = await resolveHuntScope({
+            esClient,
+            spaceId: SPACE_ID,
+            report: { ...report, iocs: reportIocs },
+            logger,
+          });
+
+          expect(result.status).toBe('blocked');
+          expect(result.resolution).toBe('blocked:model_unavailable');
+          expect(result.index_patterns).toEqual([]);
+        }
+      );
+
+      it.each<{ label: string; iocs: HuntIoc[] | undefined }>([
+        { label: 'an empty IOC list', iocs: [] },
+        { label: 'no IOC list', iocs: undefined },
+      ])(
+        'stays blocked:model_declined with $label after the model declines',
+        async ({ iocs: reportIocs }) => {
+          const esClient = createMockEsClient(new Set([alertsPattern]));
+          mockWithModel.mockResolvedValue(undefined);
+          const result = await resolveHuntScope({
+            esClient,
+            spaceId: SPACE_ID,
+            report: { ...report, iocs: reportIocs },
+            model,
+            logger,
+          });
+
+          expect(result.status).toBe('blocked');
+          expect(result.resolution).toBe('blocked:model_declined');
+          expect(result.index_patterns).toEqual([]);
+        }
+      );
+
+      it('is still degraded and lists the alerts alias as missing when it is absent', async () => {
+        const esClient = createMockEsClient(new Set());
+        const result = await resolveHuntScope({
+          esClient,
+          spaceId: SPACE_ID,
+          report: iocReport,
+          logger,
+        });
+
+        expect(result.resolution).toBe('discovered:broad');
+        expect(result.status).toBe('degraded');
+        expect(result.missing).toContain(alertsPattern);
+        expect(result.required).toEqual(['logs-okta.system-*', 'logs-cisco_asa.log-*']);
+      });
+
+      it('logs the pattern count and a sample at info instead of every pattern', async () => {
+        const esClient = createMockEsClient(new Set([alertsPattern]));
+        const manyDatasets: DiscoveredDataset[] = ['a', 'b', 'c', 'd', 'e'].map((name) => ({
+          index_pattern: `logs-${name}.log-*`,
+          dataset: `${name}.log`,
+          vendor: name,
+          data_streams: [`logs-${name}.log-default`],
+        }));
+        mockDiscover.mockResolvedValue(manyDatasets);
+        await resolveHuntScope({ esClient, spaceId: SPACE_ID, report: iocReport, logger });
+
+        expect(logger.info).toHaveBeenCalledWith(
+          'Hunt scope resolved via discovered:broad: 5 index pattern(s): logs-a.log-*, logs-b.log-*, logs-c.log-*, ...'
+        );
+        expect(logger.debug).not.toHaveBeenCalledWith(
+          expect.stringContaining('Hunt scope blocked')
+        );
+      });
+
+      it('names every pattern in the log line when there are three or fewer', async () => {
+        const esClient = createMockEsClient(new Set([alertsPattern]));
+        await resolveHuntScope({ esClient, spaceId: SPACE_ID, report: iocReport, logger });
+
+        expect(logger.info).toHaveBeenCalledWith(
+          'Hunt scope resolved via discovered:broad: 2 index pattern(s): logs-okta.system-*, logs-cisco_asa.log-*'
+        );
+      });
     });
   });
 });

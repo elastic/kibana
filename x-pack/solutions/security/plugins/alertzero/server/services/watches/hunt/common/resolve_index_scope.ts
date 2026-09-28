@@ -157,15 +157,16 @@ export const getKnownHuntIndexPatterns = (): string[] =>
 /** How the scope was produced, for messages and audit logs. */
 export type HuntScopeResolution =
   | 'pinned' // explicit technology, present
-  | 'static' // no technology given, at least one known technology present
-  | 'discovered:deterministic' // every known technology blocked; vendor/product match
+  | 'static' // no technology given, at least one known technology present, no vendor/product match
+  | 'discovered:deterministic' // report vendor/product matched a discovered dataset (wins over a present static technology)
   | 'discovered:model' // every known technology blocked; model match
+  | 'discovered:broad' // every known technology blocked, no dataset matched, report has IOCs: Tier 1 searches every discovered dataset
   | 'blocked:pinned' // explicit technology, its required indices absent
   | 'blocked:no_report' // every known technology blocked, nothing to match against
   | 'blocked:discovery_failed' // listSearchSources threw (fail closed)
   | 'blocked:no_datasets' // discovery returned nothing
-  | 'blocked:model_unavailable' // deterministic missed and no model was given
-  | 'blocked:model_declined'; // deterministic missed and the model returned no accepted match
+  | 'blocked:model_unavailable' // deterministic missed, no model was given, report has no IOCs
+  | 'blocked:model_declined'; // deterministic missed, the model returned no accepted match, report has no IOCs
 
 /**
  * The scope a hunt actually runs against: one or more technologies' patterns
@@ -188,10 +189,15 @@ const uniq = (values: string[]): string[] => Array.from(new Set(values));
 type DiscoveredResolution = Extract<HuntScopeResolution, `discovered:${string}`>;
 type BlockedResolution = Extract<HuntScopeResolution, `blocked:${string}`>;
 
+/** How many patterns a broad scope names in its log line before eliding the rest. */
+const BROAD_LOG_SAMPLE_SIZE = 3;
+
 /**
  * Logs how a scope was produced so a run's scope origin is auditable. A
  * usable scope logs at info with its patterns, plus every model score on the
  * model path so a model-chosen scope can be audited; a blocked one at debug.
+ * A broad scope can span hundreds of datasets, so it logs the count and a
+ * sample instead of the full list.
  */
 const logResolution = (
   logger: Logger | undefined,
@@ -200,6 +206,14 @@ const logResolution = (
 ): void => {
   if (scope.status === 'blocked') {
     logger?.debug(`Hunt scope blocked: ${scope.resolution}`);
+    return;
+  }
+  if (scope.resolution === 'discovered:broad') {
+    const sample = scope.index_patterns.slice(0, BROAD_LOG_SAMPLE_SIZE).join(', ');
+    const elided = scope.index_patterns.length > BROAD_LOG_SAMPLE_SIZE ? ', ...' : '';
+    logger?.info(
+      `Hunt scope resolved via discovered:broad: ${scope.index_patterns.length} index pattern(s): ${sample}${elided}`
+    );
     return;
   }
   const scores = scored?.map((entry) => `${entry.dataset}=${entry.confidence}`).join(', ');
@@ -250,10 +264,12 @@ const mergeStaticScopes = (scopes: ResolvedIndexScope[], pinned: boolean): HuntS
 
 /**
  * Builds a hunt scope from discovered datasets. A deterministic match is `ok`;
- * a model match is `degraded` since it is a weaker signal. The space-derived
- * alerts pattern is the only optional; its absence degrades the scope exactly
- * as it does for a static technology. `missing` carries the static patterns
- * that were checked and absent so the caller can still see what was looked for.
+ * a model match is `degraded` since it is a weaker signal, and a broad scope
+ * is always `degraded` since it was chosen by the absence of a better one.
+ * The space-derived alerts pattern is the only optional; its absence degrades
+ * the scope exactly as it does for a static technology. `missing` carries the
+ * static patterns that were checked and absent so the caller can still see
+ * what was looked for.
  */
 const buildDiscoveredScope = async ({
   esClient,
@@ -287,19 +303,30 @@ const buildDiscoveredScope = async ({
 };
 
 /**
- * Resolves the hunt scope for a space, static first.
+ * Resolves the hunt scope for a space.
  *
- * With an explicit `technology` it resolves that one entry. Without one it
- * resolves every known technology and keeps the ones whose required indices
- * exist, so a hunt never assumes a vendor the environment does not have.
+ * With an explicit `technology` it resolves that one entry and stops. Without
+ * one it resolves every known technology (cheap; this also supplies `window`,
+ * `row_limit`, and `missing`) and then, when a `report` is given, walks:
  *
- * Only when every known technology is blocked and a `report` is given does it
- * fall through to discovery: `discoverHuntDatasets` lists the cluster's log
- * datasets, a deterministic vendor/product match yields an `ok` scope, and
- * failing that a `model` (if given) picks datasets for a `degraded` scope,
- * since a model-chosen scope is a weaker signal. Anything else, including a
- * discovery error, is `blocked` (fail closed); there is no broad `logs-*`
- * fallback. A discovered scope has no `technologies`.
+ * 1. Vendor match, only when the report names a `vendor` or `product`:
+ *    `discoverHuntDatasets` lists the cluster's log datasets and a
+ *    deterministic vendor/product match yields an `ok` scope, even when a
+ *    known technology is present, since a vendor match is the stronger
+ *    signal. If discovery throws here and a static scope is present, the leg
+ *    is skipped with a warning and the static scope is kept.
+ * 2. Static: at least one known technology's required indices exist.
+ * 3. Model: every known technology is blocked, so a `model` (if given) picks
+ *    datasets for a `degraded` scope, a weaker signal than a vendor match.
+ * 4. Broad Tier 1, only when the report carries IOCs: the model was
+ *    unavailable or declined, so the scope is every discovered dataset,
+ *    always `degraded` since it was chosen by the absence of a better one.
+ * 5. Blocked (fail closed): no report, discovery error, no datasets, or no
+ *    match and no IOCs.
+ *
+ * A report with no vendor and no product never triggers discovery while a
+ * known technology is present. Discovery runs at most once per resolution. A
+ * discovered scope has no `technologies`.
  */
 export const resolveHuntScope = async ({
   esClient,
@@ -334,17 +361,33 @@ export const resolveHuntScope = async ({
   const blocked = (resolution: BlockedResolution): HuntScope =>
     finish({ ...staticScope, resolution });
 
-  // Pinned or no-report blocked scopes already carry their resolution.
-  if (staticScope.status !== 'blocked' || technology || !report) return finish(staticScope);
+  // Pinned and no-report scopes already carry their resolution.
+  if (technology || !report) return finish(staticScope);
+
+  const staticPresent = staticScope.status !== 'blocked';
+  // A report that names neither vendor nor product has nothing for the
+  // deterministic matcher to beat a present technology with, so it never
+  // pays for discovery: static-first, byte for byte.
+  const namesSubject = Boolean(report.vendor || report.product);
+  if (staticPresent && !namesSubject) return finish(staticScope);
 
   let datasets: DiscoveredDataset[];
   try {
     datasets = await discoverHuntDatasets({ esClient, logger });
   } catch (err) {
-    logger?.warn(`Hunt dataset discovery failed; scope stays blocked: ${(err as Error).message}`);
+    const message = (err as Error).message;
+    if (staticPresent) {
+      logger?.warn(
+        `Hunt dataset discovery failed; vendor-first leg skipped, keeping the static scope: ${message}`
+      );
+      return finish(staticScope);
+    }
+    logger?.warn(`Hunt dataset discovery failed; scope stays blocked: ${message}`);
     return blocked('blocked:discovery_failed');
   }
-  if (datasets.length === 0) return blocked('blocked:no_datasets');
+  if (datasets.length === 0) {
+    return staticPresent ? finish(staticScope) : blocked('blocked:no_datasets');
+  }
 
   const deterministic = matchDatasetsDeterministic({
     datasets,
@@ -362,10 +405,28 @@ export const resolveHuntScope = async ({
       })
     );
   }
+  if (staticPresent) return finish(staticScope);
 
-  if (!model) return blocked('blocked:model_unavailable');
+  // Nothing matched. With IOCs the hunt can still run Tier 1 across every
+  // discovered dataset; without them there is nothing to search for broadly.
+  const blockedOrBroad = async (resolution: BlockedResolution): Promise<HuntScope> => {
+    if (!report.iocs || report.iocs.length === 0) return blocked(resolution);
+    return finish(
+      await buildDiscoveredScope({
+        esClient,
+        spaceId,
+        matches: datasets,
+        blocked: staticScope,
+        resolution: 'discovered:broad',
+      })
+    );
+  };
+
+  if (!model) return blockedOrBroad('blocked:model_unavailable');
   const modelMatch = await matchDatasetsWithModel({ model, datasets, report, logger });
-  if (!modelMatch || modelMatch.matches.length === 0) return blocked('blocked:model_declined');
+  if (!modelMatch || modelMatch.matches.length === 0) {
+    return blockedOrBroad('blocked:model_declined');
+  }
 
   return finish(
     await buildDiscoveredScope({
