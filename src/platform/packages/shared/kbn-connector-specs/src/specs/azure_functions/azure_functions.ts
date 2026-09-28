@@ -268,7 +268,7 @@ export const AzureFunctions: ConnectorSpec = {
       isTool: true,
       scope: 'destroy',
       description:
-        'Invoke an HTTP-triggered Azure Function and return its response status, headers, and body. This is the primary action: use it to run custom remediation or enrichment code from a workflow. Requires a function or host key unless the trigger is anonymous — get one from listFunctionKeys (this function only) or listHostKeys (any function in the app). Any HTTP status the function returns is reported in the "status" field rather than raised as an error, so check it: a 4xx or 5xx body is returned for inspection, and only an authentication failure or a transport error throws. Classified as a write/destroy action because the function body can do anything.',
+        'Invoke an HTTP-triggered Azure Function and return its response status, headers, and body. This is the primary action: use it to run custom remediation or enrichment code from a workflow. Requires a function or host key unless the trigger is anonymous — get one from listFunctionKeys (this function only) or listHostKeys (any function in the app). Any HTTP status the function returns is reported in the "status" field rather than raised as an error, so check it: a 4xx or 5xx body is returned for inspection, and only an authentication failure or a transport error throws. Redirects are not followed, so a 3xx is returned as-is with its Location header — invoke the redirect target directly if you need it. Classified as a write/destroy action because the function body can do anything.',
       input: InvokeInputSchema,
       handler: async (ctx, input: InvokeInput) => {
         let defaultHostName: string | undefined;
@@ -299,6 +299,13 @@ export const AzureFunctions: ConnectorSpec = {
           const response = await ctx.client.request({
             method,
             url: `https://${defaultHostName}/${path}`,
+            // `x-functions-key` is a live credential in a custom header, and
+            // axios does not strip custom headers when a redirect crosses to
+            // another host — following one would hand the key to whatever the
+            // function redirected to (an identity provider, say). A redirect is
+            // returned as a result instead, so the caller can see the status and
+            // Location without the key ever leaving the app's own hostname.
+            maxRedirects: 0,
             ...(input.body !== undefined && { data: input.body }),
             ...(input.query && { params: input.query }),
             headers: {

@@ -18,6 +18,28 @@ import { z } from '@kbn/zod/v4';
 const MAX_INVOKE_BODY_BYTES = 1024 * 1024;
 
 /**
+ * A custom HTTP-trigger route, relative to the app root.
+ *
+ * Permits the RFC 3986 `pchar` set minus `:` , plus valid percent-encoded
+ * triplets, so a path parameter holding a reserved character works either raw
+ * (`api/users/alice@example.com`) or encoded (`api/users/alice%40example.com`).
+ *
+ * Three things are deliberately excluded, because the route is interpolated
+ * into the request URL after the app's own hostname:
+ * - `?` and `#`, so a route cannot smuggle in a query string or fragment
+ *   (query parameters belong in the `query` input, which is serialized safely)
+ * - `:`, which together with the leading `//` guard keeps an absolute URL
+ *   such as `http://evil.com` from being accepted as a path
+ * - a leading `//`, which a browser or client would read as a
+ *   protocol-relative URL pointing at another host
+ *
+ * A lone `%` or a malformed triplet is rejected rather than passed through,
+ * since it would otherwise reach Azure as an invalid escape.
+ */
+const ROUTE_PATTERN =
+  /^(?!\/\/)(?:[A-Za-z0-9._~!$&'()*+,;=@-]|%[0-9A-Fa-f]{2})+(?:\/(?:[A-Za-z0-9._~!$&'()*+,;=@-]|%[0-9A-Fa-f]{2})*)*$/;
+
+/**
  * Azure resource-group names allow letters, digits, periods, underscores,
  * hyphens and parentheses, up to 90 characters. Every action interpolates this
  * value into an ARM URL path, so it is constrained here as well as escaped in
@@ -130,10 +152,13 @@ export const InvokeInputSchema = FunctionAppRefSchema.extend({
     .string()
     .min(1)
     .max(200)
-    .regex(/^[A-Za-z0-9._~/-]+$/, 'Must be a URL path without query string or protocol.')
+    .regex(
+      ROUTE_PATTERN,
+      'Must be a relative URL path, optionally percent-encoded, without a query string, fragment, or host.'
+    )
     .optional()
     .describe(
-      'Route of the HTTP trigger relative to the app root, used when the function declares a custom route in function.json. Example: "api/quarantine/host". Defaults to "api/{functionName}". Do not include a query string.'
+      'Route of the HTTP trigger relative to the app root, used when the function declares a custom route in function.json. Example: "api/quarantine/host". A path parameter containing reserved characters may be percent-encoded, e.g. "api/users/alice%40example.com". Defaults to "api/{functionName}". Must not include a query string, a fragment, or a host — pass query parameters in "query" instead.'
     ),
   body: z
     .unknown()

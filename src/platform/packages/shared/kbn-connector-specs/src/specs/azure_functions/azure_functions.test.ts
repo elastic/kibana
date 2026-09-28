@@ -357,6 +357,8 @@ describe('AzureFunctions', () => {
         },
         // Asserted in detail by the status-handling tests below.
         validateStatus: expect.any(Function),
+        // A redirect must not carry the function key to another host.
+        maxRedirects: 0,
       });
       expect(result).toEqual({
         status: 202,
@@ -443,6 +445,33 @@ describe('AzureFunctions', () => {
       expect(validateStatus(403)).toBe(false);
     });
 
+    // axios follows redirects by default and does not strip custom headers
+    // across hosts, so following one would hand `x-functions-key` to the
+    // redirect target.
+    it('never follows a redirect, so the function key cannot leak cross-host', async () => {
+      mockClient.get.mockResolvedValue(siteResponse);
+      mockClient.request.mockResolvedValue({
+        status: 302,
+        headers: { location: 'https://login.example.com/authorize' },
+        data: '',
+      });
+
+      const result = await AzureFunctions.actions.invoke.handler(mockContext, {
+        ...APP_REF,
+        functionName: 'Ping',
+        functionKey: 'secret-key',
+      });
+
+      const [requestConfig] = mockClient.request.mock.calls[0];
+      expect(requestConfig.maxRedirects).toBe(0);
+      // The 3xx comes back as a result, so a caller can see where it pointed.
+      expect(result).toEqual({
+        status: 302,
+        headers: { location: 'https://login.example.com/authorize' },
+        body: '',
+      });
+    });
+
     it('fails with an actionable error when the app has no hostname', async () => {
       mockClient.get.mockResolvedValue({ data: { properties: {} } });
 
@@ -486,6 +515,40 @@ describe('AzureFunctions', () => {
       cyclic.self = cyclic;
 
       expect(InvokeInputSchema.safeParse({ ...validBase, body: cyclic }).success).toBe(false);
+    });
+  });
+
+  // The route is interpolated into the URL after the app's own hostname, so it
+  // must not be able to introduce a query string, a fragment, or another host.
+  describe('invoke route pattern', () => {
+    const validBase = { ...APP_REF, functionName: 'Ping' };
+    const parseRoute = (route: string) =>
+      InvokeInputSchema.safeParse({ ...validBase, route }).success;
+
+    it.each([
+      'api/ping',
+      'api/quarantine/host',
+      'api/v1/a-b_c.d~e',
+      // A reserved character in a path parameter, raw and percent-encoded.
+      'api/users/alice@example.com',
+      'api/users/alice%40example.com',
+    ])('accepts %s', (route) => {
+      expect(parseRoute(route)).toBe(true);
+    });
+
+    it.each([
+      // Query parameters belong in `query`, which is serialized safely.
+      'api/x?code=1',
+      'api/x#frag',
+      // Protocol-relative and absolute URLs both point at another host.
+      '//evil.com/x',
+      'http://evil.com',
+      'https://evil.com/x',
+      // A malformed escape would reach Azure as an invalid percent sequence.
+      'api/%zz',
+      'api/ a',
+    ])('rejects %s', (route) => {
+      expect(parseRoute(route)).toBe(false);
     });
   });
 
