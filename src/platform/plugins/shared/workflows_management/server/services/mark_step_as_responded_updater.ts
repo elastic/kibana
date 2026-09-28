@@ -41,10 +41,13 @@ const stripHitlTokenFieldsFromInput = (input: JsonValue | undefined): JsonValue 
     return input;
   }
 
-  const record = { ...(input as Record<string, unknown>) };
-  delete record[HITL_TOKEN_HASH_INPUT_FIELD];
-  delete record[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD];
-  return record as JsonValue;
+  // ES `_update` `doc` merges nested objects: omitted keys stay. `null` removes the field
+  // (same as Painless `ctx._source.input.remove(...)`).
+  return {
+    ...(input as Record<string, unknown>),
+    [HITL_TOKEN_HASH_INPUT_FIELD]: null,
+    [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: null,
+  } as JsonValue;
 };
 
 export const createMarkStepAsRespondedUpdater = (

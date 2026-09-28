@@ -21,7 +21,7 @@ describe('createMarkStepAsRespondedUpdater', () => {
     channel: 'inbox',
   };
 
-  it('writes hitl audit fields and strips token fields from input', () => {
+  it('writes hitl audit fields and nulls token fields so a doc merge removes them', () => {
     const updater = createMarkStepAsRespondedUpdater(audit, 'default');
 
     expect(
@@ -42,7 +42,11 @@ describe('createMarkStepAsRespondedUpdater', () => {
         respondedAt: audit.respondedAt,
         channel: audit.channel,
       },
-      input: { foo: 'bar' },
+      input: {
+        foo: 'bar',
+        [HITL_TOKEN_HASH_INPUT_FIELD]: null,
+        [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: null,
+      },
     });
   });
 
