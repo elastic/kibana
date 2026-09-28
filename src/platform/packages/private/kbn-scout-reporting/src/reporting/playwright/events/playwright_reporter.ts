@@ -25,8 +25,6 @@ import {
   SCOUT_REPORT_OUTPUT_ROOT,
   SCOUT_UNIFIED_CONFIG_PATH_REGEX,
   ScoutTestRunConfigCategory,
-  ScoutTestTarget,
-  targetAttributes,
 } from '@kbn/scout-info';
 import stripANSI from 'strip-ansi';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -44,6 +42,7 @@ import {
   type ScoutFileInfo,
   type ScoutTestInfo,
   type ScoutReportEvent,
+  buildScoutTargetInfo,
 } from '../../report';
 import { environmentMetadata } from '../../../datasources';
 import type { ScoutPlaywrightReporterOptions } from '../scout_playwright_reporter';
@@ -79,15 +78,9 @@ export class ScoutPlaywrightReporter implements Reporter {
 
     this.report = new ScoutEventsReport(this.log);
 
-    const testTarget = ScoutTestTarget.tryFromEnv();
-
     this.baseTestRunInfo = {
       id: this.runId,
-      target: {
-        type: testTarget?.location || 'unknown',
-        mode: testTarget?.tagWithoutLocation || 'unknown',
-        attributes: targetAttributes.current(),
-      },
+      target: buildScoutTargetInfo('unknown'),
     };
     this.codeOwnersEntries = getCodeOwnersEntries();
   }

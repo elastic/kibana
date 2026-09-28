@@ -70,6 +70,8 @@ export const getPlaywrightLimitGrepInvert = (
 
   // Playwright matches this against the title path and tags joined by spaces, so anchor on
   // whitespace: an unanchored '@limit/only-fips' would also match '@limit/only-fips140'.
+  // Playwright offers no tags-only matcher, so a title containing a limit tag verbatim is
+  // still matched and its test skipped.
   return new RegExp(`(?:^|\\s)(?:${unsatisfiedTags.join('|')})(?=\\s|$)`);
 };
 
