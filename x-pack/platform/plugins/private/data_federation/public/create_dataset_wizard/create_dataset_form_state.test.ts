@@ -81,15 +81,22 @@ describe('create_dataset_form_state', () => {
       expect(validateEscapeCharacter('/')).toBe(true);
     });
 
-    it('accepts two characters when the first is a backslash', () => {
+    it('accepts \\t and \\\\ escape sequences', () => {
       expect(validateEscapeCharacter('\\t')).toBe(true);
       expect(validateEscapeCharacter('\\\\')).toBe(true);
-      expect(validateEscapeCharacter('\\n')).toBe(true);
+      expect(validateEscapeCharacter('\\n')).toBe(createDatasetWizardStrings.settingsEscapeInvalid);
+      expect(validateEscapeCharacter('\\r')).toBe(createDatasetWizardStrings.settingsEscapeInvalid);
     });
 
     it('rejects two characters when the first is not a backslash', () => {
       expect(validateEscapeCharacter('ab')).toBe(createDatasetWizardStrings.settingsEscapeInvalid);
       expect(validateEscapeCharacter('""')).toBe(createDatasetWizardStrings.settingsEscapeInvalid);
+    });
+
+    it('rejects unsupported backslash escape sequences', () => {
+      expect(validateEscapeCharacter('\\a')).toBe(createDatasetWizardStrings.settingsEscapeInvalid);
+      expect(validateEscapeCharacter('\\0')).toBe(createDatasetWizardStrings.settingsEscapeInvalid);
+      expect(validateEscapeCharacter('\\u')).toBe(createDatasetWizardStrings.settingsEscapeInvalid);
     });
 
     it('rejects values longer than two characters', () => {
@@ -283,6 +290,25 @@ describe('create_dataset_form_state', () => {
           escape: '"',
         })
       ).toEqual({ format: 'csv', quote: "'", escape: '"' });
+    });
+
+    it('does not decode escape sequences in the payload (API receives the literal sequence)', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          format: 'tsv',
+          escape: '\\t',
+        })
+      ).toEqual({ format: 'tsv', escape: '\\t' });
+
+      // Backslash itself: user can enter `\\` in the form, and the API should receive `\\`.
+      expect(
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          format: 'tsv',
+          escape: '\\\\',
+        })
+      ).toEqual({ format: 'tsv', escape: '\\\\' });
     });
 
     it('includes trim_spaces when enabled', () => {

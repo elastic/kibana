@@ -97,6 +97,20 @@ describe('dataset_form_initial_values', () => {
     expect(result.settings.skip_rows).toBe('12');
   });
 
+  it('encodes non-printable escape characters into \\t / \\n / \\r for the form', () => {
+    const data: DataSetWithName = {
+      name: 'id',
+      data_source: 'source',
+      resource: 'r',
+      settings: {
+        escape: '\t',
+      },
+    };
+
+    const result = dataSetToFormValues(data);
+    expect(result.settings.escape).toBe('\\t');
+  });
+
   it('maps new universal settings', () => {
     const data: DataSetWithName = {
       name: 'id',

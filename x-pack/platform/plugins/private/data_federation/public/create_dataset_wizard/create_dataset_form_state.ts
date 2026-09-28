@@ -32,6 +32,26 @@ export const DEFAULT_COLUMN_PREFIX = 'col';
 export const DEFAULT_CSV_QUOTE = '"';
 export const DEFAULT_CSV_ESCAPE = '\\';
 
+const VALID_ESCAPE_CHARACTER_SEQUENCES = ['\\t', '\\\\'] as const;
+type ValidEscapeCharacterSequence = (typeof VALID_ESCAPE_CHARACTER_SEQUENCES)[number];
+
+const isValidEscapeCharacterSequence = (value: string): value is ValidEscapeCharacterSequence =>
+  (VALID_ESCAPE_CHARACTER_SEQUENCES as readonly string[]).includes(value);
+
+const CHARACTER_TO_ESCAPE_SEQUENCE: Partial<Record<string, '\\t' | '\\n' | '\\r'>> = {
+  '\t': '\\t',
+};
+
+/**
+ * The escape character field in the form allows either a single character, or a
+ * two-character escape sequence (`\\t`, `\\\\`) for non-printable values.
+ */
+/** Encodes non-printable characters into a two-character escape sequence for the form. */
+export const encodeEscapeCharacterToFormValue = (value: string): string => {
+  if (!value) return '';
+  return CHARACTER_TO_ESCAPE_SEQUENCE[value] ?? value;
+};
+
 export interface CreateDatasetSettingsFormValues {
   format: DatasetFormatFormValue;
   // Universal
@@ -191,7 +211,7 @@ export const validateEscapeCharacter = (value: string): true | string => {
   if (!value) return true;
 
   if (value.length === 1) return true;
-  if (value.length === 2 && value.startsWith('\\')) return true;
+  if (isValidEscapeCharacterSequence(value)) return true;
 
   return createDatasetWizardStrings.settingsEscapeInvalid;
 };

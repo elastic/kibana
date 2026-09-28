@@ -16,6 +16,7 @@ import type { MappingEditorValue } from './mapping_step/mapping_editor';
 import { emptyMappingEditorValue } from './mapping_step/mapping_editor';
 import {
   emptyCreateDatasetSettingsFormValues,
+  encodeEscapeCharacterToFormValue,
   type CreateDatasetFormValues,
   type CreateDatasetSettingsFormValues,
   type DatasetBooleanFormValue,
@@ -132,7 +133,7 @@ const settingsToFormValues = (
     encoding: s.encoding ?? defaults.encoding,
     column_prefix: s.column_prefix ?? defaults.column_prefix,
     quote: s.quote ?? '',
-    escape: s.escape ?? '',
+    escape: encodeEscapeCharacterToFormValue(s.escape ?? ''),
     trim_spaces: s.trim_spaces ?? false,
     // CSV/TSV error handling
     error_mode: (s.error_mode ?? '') as DatasetErrorModeFormValue,

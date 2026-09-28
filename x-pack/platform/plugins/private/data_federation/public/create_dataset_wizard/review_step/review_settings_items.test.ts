@@ -102,6 +102,14 @@ describe('getSettingsReviewItems', () => {
     expect(originOf('error_mode')).toBe('custom');
   });
 
+  it('renders non-printable escape characters using escape sequences', () => {
+    const { settings, unmanagedSettings } = allSettingsForFormat('tsv');
+    const items = getSettingsReviewItems(
+      mergedSettingsFromForm({ ...settings, escape: '\\t' }, unmanagedSettings)
+    );
+    expect(items.find((item) => item.key === 'escape')?.value).toBe('\\t');
+  });
+
   it('falls back to the documented default when a setting is untouched', () => {
     const items = reviewItemsFor({
       settings: {

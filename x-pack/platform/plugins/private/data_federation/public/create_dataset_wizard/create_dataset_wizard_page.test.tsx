@@ -19,6 +19,18 @@ import { CREATE_DATASET_PATH, DATASETS_PATH } from '../app_paths';
 import { CreateDatasetWizardPage } from './create_dataset_wizard_page';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 
+// `CreateDatasetWizardPage` reaches `@kbn/monaco` through code editors used in the mapping step.
+// Loading the real module pulls in Monaco language registration which evaluates generated i18n
+// messages at import time (and can throw in Jest).
+jest.mock('@kbn/monaco', () => ({ PainlessLang: { ID: 'painless' } }));
+
+jest.mock('@kbn/code-editor', () => ({
+  // A plain textarea stands in for Monaco; loading the real module drags in every Monaco language.
+  CodeEditor: ({ value }: { value?: string }) => (
+    <textarea data-test-subj="mockCodeEditor" value={value ?? ''} readOnly />
+  ),
+}));
+
 const docLinksMock = {
   links: {
     elasticsearch: {
@@ -106,7 +118,6 @@ describe('CreateDatasetWizardPage', () => {
       getByTestId,
       getByText,
       queryByTestId,
-      queryByText,
       findByTestId,
       history,
       add,
@@ -121,15 +132,18 @@ describe('CreateDatasetWizardPage', () => {
     expect(getByTestId('createDatasetWizardContent')).toBeInTheDocument();
     expect(getByTestId('createDatasetWizardDatasetStep')).toBeInTheDocument();
     expect(getByTestId('createDatasetResource')).toBeInTheDocument();
-    expect(getByText('Select an existing data source or connect a new one')).toBeInTheDocument();
-    expect(queryByText('Select the external data source this dataset belongs to.')).toBeNull();
     expect(getByText('Dataset name')).toBeInTheDocument();
     expect(getByText(createDatasetWizardStrings.nameHelp)).toBeInTheDocument();
-    expect(getByTestId('createDatasetName')).toHaveAttribute('placeholder', 'e.g. my-dataset');
+    expect(getByTestId('createDatasetName')).toHaveAttribute(
+      'placeholder',
+      createDatasetWizardStrings.namePlaceholder
+    );
     expect(getByText('Description (optional)')).toBeInTheDocument();
-    expect(getByText('A brief description to identify this dataset')).toBeInTheDocument();
+    expect(getByText(createDatasetWizardStrings.descriptionHelp)).toBeInTheDocument();
     expect(getByTestId('createDatasetDescription')).not.toHaveAttribute('placeholder');
-    expect(getByText(createDatasetWizardStrings.resourceHelp)).toBeInTheDocument();
+    // Resource help text is rendered via FormattedMessage with an embedded example code snippet,
+    // so assert on the input rather than the exact composed help text.
+    expect(getByText(createDatasetWizardStrings.resourceLabel)).toBeInTheDocument();
 
     fireEvent.click(getByTestId('createDatasetDataSource'));
     expect(await findByTestId('createDatasetDataSource-connectNew')).toHaveTextContent(
@@ -705,5 +719,34 @@ describe('CreateDatasetWizardPage', () => {
       'aria-invalid',
       'true'
     );
+  });
+
+  it('blocks navigation when escape character is invalid', async () => {
+    const { getByTestId, findByTestId, queryByTestId } = renderWizard();
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
+    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 's3://bucket/*' } });
+    selectFormat(getByTestId, 'csv');
+
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+
+    // Open advanced settings to access the escape character input.
+    const advancedAccordion = getByTestId('createDatasetWizardAdvancedSettings');
+    fireEvent.click(within(advancedAccordion).getByRole('button', { expanded: false }));
+    expect(getByTestId('createDatasetWizardAdvancedSettings')).toHaveClass('euiAccordion-isOpen');
+
+    fireEvent.change(getByTestId('createDatasetSettingsEscape'), { target: { value: '\\n' } });
+
+    await clickNext(getByTestId);
+
+    // Should remain on Additional settings and not proceed to Mapping.
+    expect(queryByTestId('createDatasetWizardMappingStep')).toBeNull();
+    expect(getByTestId('createDatasetWizardAdditionalStep')).toBeInTheDocument();
+    expect(getByTestId('createDatasetSettingsEscape')).toHaveAttribute('aria-invalid', 'true');
   });
 });

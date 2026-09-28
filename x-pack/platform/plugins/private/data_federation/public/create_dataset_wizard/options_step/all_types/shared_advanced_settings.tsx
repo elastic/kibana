@@ -53,10 +53,7 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
         <FileExclusionsSelect control={control} />
       </EuiFormRow>
 
-      <EuiFormRow
-        label={createDatasetWizardStrings.settingsPartitionDetectionLabel}
-        fullWidth
-      >
+      <EuiFormRow label={createDatasetWizardStrings.settingsPartitionDetectionLabel} fullWidth>
         <PartitionDetectionSelect control={control} />
       </EuiFormRow>
 

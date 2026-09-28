@@ -75,6 +75,7 @@ export function CreateDatasetWizardPage({
   );
   const methods = useForm<CreateDatasetFormValues>({
     defaultValues: formDefaultValues,
+    mode: 'onTouched',
   });
 
   const goToDatasets = useCallback(() => {

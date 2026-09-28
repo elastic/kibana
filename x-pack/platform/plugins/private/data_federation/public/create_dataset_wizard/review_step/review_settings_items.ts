@@ -108,10 +108,18 @@ const formatBoolean = (key: SettingKey, value: boolean): string => {
   return value ? createDatasetWizardStrings.enabledLabel : createDatasetWizardStrings.disabledLabel;
 };
 
+const formatEscapeCharacterForReview = (value: string): string => {
+  if (value === '\t') return '\\t';
+  return value;
+};
+
 const formatValue = (key: SettingKey, value: SettingValue): string => {
   if (typeof value === 'boolean') return formatBoolean(key, value);
   if (Array.isArray(value)) return value.join(', ');
-  if (typeof value === 'string') return enumLabels[key]?.[value] ?? value;
+  if (typeof value === 'string') {
+    if (key === 'escape') return formatEscapeCharacterForReview(value);
+    return enumLabels[key]?.[value] ?? value;
+  }
   return String(value);
 };
 
