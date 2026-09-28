@@ -75,8 +75,10 @@ outputs:
     type: boolean
 consts:
   # Worker settings. Scheduled runs carry no inputs, so every use goes through
-  # `inputs.x | default: consts.x`; a manual run can override any of them.
-  analysis_window_days: 14
+  # `inputs.x | default: consts.x`. The per-space Rule Tuning worker forwards
+  # analysis_window_days, min_fp_count and min_fp_rate_pct from its settings, so
+  # these three are reached only by a manual run that omits them.
+  analysis_window_days: 7
   min_fp_count: 10
   min_fp_rate_pct: 50
   max_rules_per_sweep: 10

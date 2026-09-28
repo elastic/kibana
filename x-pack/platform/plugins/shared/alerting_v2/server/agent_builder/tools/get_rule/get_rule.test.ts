@@ -24,7 +24,6 @@ const baseRuleData: RuleAttachmentData = {
     name: 'High CPU',
     description: 'CPU breach detection',
     tags: ['ops', 'cpu'],
-    owner: 'observability',
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '15m' },
@@ -33,9 +32,7 @@ const baseRuleData: RuleAttachmentData = {
     breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
   },
   state_transition: null,
-  created_by: 'elastic',
   created_at: '2026-04-01T00:00:00.000Z',
-  updated_by: 'elastic',
   updated_at: '2026-04-10T00:00:00.000Z',
 };
 
