@@ -81,7 +81,9 @@ describe('RulesTableAppHeader', () => {
   it('renders the page title and tabs', () => {
     renderHeader();
 
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Detection rules (SIEM)');
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      'Detection rules (SIEM)'
+    );
     expect(screen.getByTestId('tab-1')).toBeInTheDocument();
   });
 
