@@ -602,7 +602,214 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
   });
 
-  // TODO: add agent-based dirty redeploy test (service-var drift → package_policies PUT called).
-  // Blocked on kibana#292385 which adds SO creation on first agent-based deploy — without
-  // onboardingDeploymentId in session the drift effect returns early and isDirty is never set.
+  test('agent-based dirty redeploy: service-var drift triggers package policy PUT and SO update', async ({
+    browserAuth,
+    page,
+  }) => {
+    // Previously deployed via agent-based existing-policy mode. SO serviceVars is empty
+    // (all-defaults deploy). User changed bucket_arn in Step 2 — session now differs from SO.
+    const DEP_ID = 'dep-ab-drift-001';
+    const AB_PKG_POLICY_ID = 'mock-ab-pkg-policy-id';
+
+    // SO GET: agent-based deployment, empty serviceVars, assume_role auth.
+    await page.route(
+      (url) => new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
+      (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            item: {
+              id: DEP_ID,
+              provider: 'aws',
+              connectorId: null,
+              authMethod: 'assume_role',
+              mechanisms: ['agent_based'],
+              services: ['elb'],
+              serviceVars: {},
+              policyIdsByInstance: { elb: AB_PKG_POLICY_ID },
+              agentPolicyIds: ['mock-agent-policy-id'],
+              status: 'succeeded',
+              attemptCount: 1,
+              globalRegion: 'us-east-1',
+            },
+          }),
+        })
+    );
+
+    // Agent policies combobox — return empty list so the fetch doesn't hang.
+    await page.route(
+      (url) => /\/api\/fleet\/agent_policies/.test(url.pathname),
+      (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ items: [], total: 0, page: 1, perPage: 20 }),
+        })
+    );
+
+    await browserAuth.loginAsAdmin();
+    await page.gotoApp('onboarding/aws', {
+      params: { deploymentId: DEP_ID },
+      hash: 'authenticate-and-deploy',
+    });
+    await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
+
+    // Seed detectAndReview: policyIdsByInstance makes isAlreadyDeployed=true.
+    await page.evaluate(
+      ({ key, depId }) => {
+        sessionStorage.setItem(
+          key,
+          JSON.stringify({
+            policyIdsByInstance: { elb: 'mock-ab-pkg-policy-id' },
+            serviceStatuses: { elb: 'receiving' },
+            onboardingDeploymentId: depId,
+            failedInstances: [],
+            deployErrors: {},
+          })
+        );
+      },
+      { key: DETECT_AND_REVIEW_SESSION_KEY, depId: DEP_ID }
+    );
+
+    // Simulate changing bucket_arn in Step 2 — session serviceVars now has a new value.
+    await page.evaluate(
+      ({ key }) => {
+        sessionStorage.setItem(
+          key,
+          JSON.stringify({
+            globalRegion: 'us-east-1',
+            instances: [
+              { instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false },
+            ],
+            serviceVars: {
+              elb: {
+                enabledDataStreams: ['elb_logs'],
+                varsByDataStream: {
+                  elb_logs: {
+                    enabledInputs: ['aws-s3'],
+                    varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::agent-drift-bucket' } },
+                  },
+                },
+              },
+            },
+          })
+        );
+      },
+      { key: SERVICE_SETTINGS_SESSION_KEY }
+    );
+
+    // Set auth step to agent-based existing-policy mode with assume_role credentials.
+    await page.evaluate(
+      ({ key }) => {
+        sessionStorage.setItem(
+          key,
+          JSON.stringify({
+            deploymentMethod: 'agent_based',
+            agentHostsMode: 'existing',
+            selectedAgentPolicyIds: ['mock-agent-policy-id'],
+            agentCredentialMethod: 'assume_role',
+            // authMethod kept in sync with agentCredentialMethod so the drift check
+            // compares the correct value against the SO's stored authMethod.
+            authMethod: 'assume_role',
+          })
+        );
+      },
+      { key: AUTHENTICATE_AND_DEPLOY_SESSION_KEY }
+    );
+
+    // Reload — drift effect fires, fetches SO to compare against session.
+    const soGetPromise = page.waitForResponse(
+      (resp) =>
+        new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(
+          new URL(resp.url()).pathname
+        ) && resp.status() === 200
+    );
+    await page.reload();
+    await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
+    await soGetPromise;
+
+    // Drift detected: session has bucket_arn, SO has no serviceVars for elb → isDirty=true.
+    await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
+    // Next disabled: isAgentDone=false (isDirty) and credentials not yet entered.
+    await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeDisabled();
+
+    // Enter roleArn → isCredentialReady=true → isNextReady=true → Next enables.
+    await page.testSubj.locator('agentBasedSection-roleArn').fill('arn:aws:iam::123456789012:role/MyRole');
+    await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
+
+    // Mock Fleet package policy GET+PUT used by updateAgentBasedPolicy.
+    await page.route(
+      (url) => new RegExp(`/api/fleet/package_policies/${AB_PKG_POLICY_ID}$`).test(url.pathname),
+      async (route) => {
+        if (route.request().method() === 'GET') {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              item: {
+                name: 'mock-ab-pkg-policy-name',
+                namespace: 'default',
+                package: { name: 'aws', version: '7.1.1' },
+                policy_ids: ['mock-agent-policy-id'],
+                vars: {},
+              },
+            }),
+          });
+        } else if (route.request().method() === 'PUT') {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ item: { id: AB_PKG_POLICY_ID } }),
+          });
+        } else {
+          await route.continue();
+        }
+      }
+    );
+
+    const pkgPutPromise = page.waitForRequest(
+      (req) =>
+        req.method() === 'PUT' &&
+        new RegExp(`/api/fleet/package_policies/${AB_PKG_POLICY_ID}$`).test(
+          new URL(req.url()).pathname
+        )
+    );
+    const soPutPromise = page.waitForRequest(
+      (req) =>
+        req.method() === 'PUT' &&
+        new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(
+          new URL(req.url()).pathname
+        )
+    );
+    // Override SO handler to also handle PUT (Playwright LIFO: this route is checked first).
+    await page.route(
+      (url) =>
+        new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname) &&
+        true,
+      async (route) => {
+        if (route.request().method() === 'PUT') {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ item: { id: DEP_ID } }),
+          });
+        } else {
+          await route.continue();
+        }
+      }
+    );
+
+    await page.testSubj.locator('authenticateAndDeployStep-nextButton').click();
+
+    // Dirty redeploy must PUT the Fleet package policy carrying the changed bucket_arn.
+    const pkgPutRequest = await pkgPutPromise;
+    expect(pkgPutRequest.postData()).toContain('agent-drift-bucket');
+    // SO must be updated with the new serviceVars so resume reflects the current settings.
+    const soRequest = await soPutPromise;
+    expect(JSON.stringify(JSON.parse(soRequest.postData() ?? '{}'))).toContain('agent-drift-bucket');
+
+    // isDirty cleared → drift callout disappears.
+    await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
+  });
 });
