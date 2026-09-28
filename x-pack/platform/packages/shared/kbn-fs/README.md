@@ -90,6 +90,20 @@ await appendFile('log.txt', 'new log entry\n');
 appendFileSync('log.txt', 'another entry\n');
 ```
 
+### Sanitizing SVG content outside the file system
+
+The SVG sanitizer used by `writeFile` is also exported for SVG content that is persisted elsewhere,
+such as avatar images stored as `data:` URLs in saved objects or user profiles:
+
+```typescript
+import { sanitizeSvg, sanitizeImageDataUrl } from '@kbn/fs';
+
+const cleanSvg = sanitizeSvg(Buffer.from(svgString));
+
+// Returns non-SVG values unchanged; re-encodes SVG data URLs as sanitized base64.
+const cleanImageUrl = sanitizeImageDataUrl(space.imageUrl);
+```
+
 ## When NOT to Use This Package
 
 This package should **NOT** be used in:
