@@ -329,6 +329,38 @@ describe('ESQLEditor', () => {
     expect(await screen.findByRole('tooltip')).toHaveTextContent('Query error');
   });
 
+  it('keeps the error panel while a failed preview reloads', async () => {
+    renderEditor();
+    await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+
+    getSuggestionsMock.mockImplementationOnce(async (...args: unknown[]) => {
+      const setErrors = args[7] as ((errors: Error[]) => void) | undefined;
+      setErrors?.([new Error('Unknown index [index1]')]);
+      return undefined;
+    });
+    await act(() =>
+      capturedOnSubmit!({ esql: 'FROM index1 | STATS maxB = MAX(bytes)' }, new AbortController())
+    );
+
+    const results = screen.getByTestId('ESQLQueryResults');
+    await userEvent.click(within(results).getByRole('button', { name: /ES\|QL Query Results/i }));
+    expect(within(results).getByTestId('ESQLQueryResultsEmpty')).toBeInTheDocument();
+
+    getSuggestionsMock.mockReturnValue(new Promise(() => {}));
+    act(() => {
+      void capturedOnSubmit!(
+        { esql: 'FROM index1 | STATS minB = MIN(bytes)' },
+        new AbortController()
+      );
+    });
+
+    expect(within(results).queryByTestId('ESQLQueryResultsRefreshing')).not.toBeInTheDocument();
+    expect(within(results).getByTestId('ESQLQueryResultsEmpty')).toHaveTextContent(
+      'The query returned an error. See the errors in the query editor above.'
+    );
+    expect(within(results).getByTestId('ESQLQueryResultsErrorIcon')).toBeInTheDocument();
+  });
+
   it('does not show the error icon when the first preview returns nothing without an error', async () => {
     renderEditor();
     await waitFor(() => expect(capturedOnSubmit).toBeDefined());

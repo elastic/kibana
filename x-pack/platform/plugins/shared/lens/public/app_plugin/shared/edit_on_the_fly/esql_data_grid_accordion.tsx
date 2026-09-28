@@ -47,7 +47,7 @@ export const ESQLDataGridAccordion = ({
   onToggle,
 }: ESQLDataGridAccordionProps) => {
   const styles = useMemoCss(componentStyles);
-  const showQueryError = isAccordionOpen && !isLoading && !dataGridAttrs && hasQueryError;
+  const showQueryError = isAccordionOpen && !dataGridAttrs && hasQueryError;
   const fillsAvailableSpace = isAccordionOpen && Boolean(dataGridAttrs);
   const queryErrorLabel = i18n.translate('xpack.lens.config.ESQLQueryResultsErrorLabel', {
     defaultMessage: 'Query error',
@@ -94,10 +94,10 @@ export const ESQLDataGridAccordion = ({
             />
           ) : undefined
         }
-        isLoading={isLoading}
-        // Keep the previous table visible while refreshing; only take over the
-        // content area when there is nothing to show yet.
-        isLoadingMessage={!dataGridAttrs}
+        isLoading={isLoading && !showQueryError}
+        // The accordion loader is only for a first load. A reload keeps the
+        // error panel in place; the editor already shows that a run is in flight.
+        isLoadingMessage={!dataGridAttrs && !showQueryError}
       >
         {showQueryError && (
           <EuiPanel
@@ -118,7 +118,7 @@ export const ESQLDataGridAccordion = ({
         )}
         {isAccordionOpen && dataGridAttrs && (
           <div css={styles.gridContainer}>
-              {isLoading && dataGridAttrs.rows.length > 0 && (
+            {isLoading && dataGridAttrs.rows.length > 0 && (
               <EuiProgress
                 size="xs"
                 color="accent"
