@@ -227,6 +227,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   useEffect(() => {
     if (isConvSwitchRef.current) {
       messageEditorControllerRef.current?.clear();
+      lastEditorContentRef.current = '';
     }
     isConvSwitchRef.current = true;
     draftHydratedRef.current = false;
@@ -265,6 +266,8 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   }, [
     draft,
     username,
+    spaceId,
+    sessionTag,
     agentId,
     conversationId,
     initialMessage,
