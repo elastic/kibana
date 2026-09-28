@@ -255,7 +255,7 @@ describe('DescriptionPanel', () => {
     expect(screen.getByTestId('contextDescriptionSaveButton')).toBeDisabled();
   });
 
-  it('shows a loading state on the Save button while the PUT is in flight', async () => {
+  it('returns to read-only view while the PUT is in flight', async () => {
     const testServices = coreMock.createStart();
     testServices.http.put.mockImplementation(() => new Promise(() => {}));
 
@@ -276,7 +276,9 @@ describe('DescriptionPanel', () => {
     fireEvent.click(screen.getByTestId('contextDescriptionSaveButton'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('contextDescriptionSaveButton')).toBeDisabled();
+      expect(screen.queryByTestId('contextDescriptionTextArea')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contextDescriptionSaveButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('contextEditDescriptionButton')).toBeDisabled();
     });
   });
 });

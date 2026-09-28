@@ -49,6 +49,7 @@ export const DescriptionPanel = ({
     maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,
   });
   const hasDescription = Boolean(aiIndex?.description);
+  const isEditingActive = isEditing && !isSaving;
 
   const startEditing = () => {
     setDraft(aiIndex?.description ?? '');
@@ -94,13 +95,14 @@ export const DescriptionPanel = ({
             </AiIndexDetailPanelDescription>
           )}
         </EuiFlexItem>
-        {!isEditing && !isManaged && !isLoading && (
+        {!isEditingActive && !isManaged && !isLoading && (
           <EuiFlexItem grow={false}>
             {hasDescription ? (
               <EuiButtonEmpty
                 size="s"
                 iconType="pencil"
                 onClick={startEditing}
+                isLoading={isSaving}
                 isDisabled={aiIndex === undefined}
                 data-test-subj="contextEditDescriptionButton"
                 {...getEbtProps({
@@ -118,6 +120,7 @@ export const DescriptionPanel = ({
                 size="s"
                 iconType="plusCircle"
                 onClick={startEditing}
+                isLoading={isSaving}
                 isDisabled={aiIndex === undefined}
                 data-test-subj="contextAddDescriptionButton"
                 {...getEbtProps({
@@ -137,7 +140,7 @@ export const DescriptionPanel = ({
       <EuiSpacer size="m" />
       {isLoading ? (
         <EuiSkeletonText lines={2} />
-      ) : isEditing ? (
+      ) : isEditingActive ? (
         <>
           <AiIndexDescriptionField
             value={draft}
@@ -151,7 +154,6 @@ export const DescriptionPanel = ({
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 onClick={() => setIsEditing(false)}
-                isDisabled={isSaving}
                 data-test-subj="contextDescriptionCancelButton"
                 {...getEbtProps({
                   element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageDescriptionPanel,

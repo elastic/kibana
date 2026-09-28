@@ -11,7 +11,7 @@ import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mo
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import type { AiIndexSource, GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import type {
@@ -68,14 +68,14 @@ const sources: AiIndexSource[] = [
   { type: 'esql', value: 'FROM c' },
 ];
 
-const renderWithProviders = (ui: React.ReactElement) => {
+const renderWithProviders = (ui: React.ReactElement, services = coreMock.createStart()) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider
           services={{
-            ...coreMock.createStart(),
+            ...services,
             triggersActionsUi: triggersActionsUiMock.createStart(),
           }}
         >
@@ -292,5 +292,29 @@ describe('SourcesPanel', () => {
 
     expect(screen.queryByTestId('contextSelectedSource-esql-0')).not.toBeInTheDocument();
     expect(saveButton()).toBeDisabled();
+  });
+
+  it('shows a loading header action while sources are saving', async () => {
+    const testServices = coreMock.createStart();
+    testServices.http.put.mockImplementation(() => new Promise(() => {}));
+
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{ ...baseAiIndex, sources: [] }}
+        onSaved={jest.fn()}
+        isManaged={false}
+      />,
+      testServices
+    );
+
+    fireEvent.click(screen.getByTestId('contextAddSourcesButton'));
+    addEsqlSource('FROM logs-* | LIMIT 10');
+    fireEvent.click(saveButton());
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('contextEditSourcesInlineEditor')).not.toBeInTheDocument();
+      expect(screen.getByTestId('contextAddSourcesButton')).toBeDisabled();
+    });
   });
 });

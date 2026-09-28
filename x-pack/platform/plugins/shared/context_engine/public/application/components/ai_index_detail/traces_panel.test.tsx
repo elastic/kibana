@@ -404,7 +404,7 @@ describe('TracesPanel', () => {
     expect(screen.queryByTestId('contextTraceDataStreamComboBox')).not.toBeInTheDocument();
   });
 
-  it('shows a loading state on the Save button while the PUT is in flight', async () => {
+  it('returns to read-only view while the PUT is in flight', async () => {
     const testServices = coreMock.createStart();
     testServices.http.put.mockImplementation(() => new Promise(() => {}));
 
@@ -425,7 +425,10 @@ describe('TracesPanel', () => {
     fireEvent.click(screen.getByTestId('contextTracesSaveButton'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('contextTracesSaveButton')).toBeDisabled();
+      expect(screen.queryByTestId('contextTracesSaveButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contextTraceAgentComboBox')).not.toBeInTheDocument();
+      expect(screen.getByTestId('contextEditTracesButton')).toBeDisabled();
+      expect(screen.getByTestId('contextTracesReadOnlyValue')).toBeInTheDocument();
     });
   });
 

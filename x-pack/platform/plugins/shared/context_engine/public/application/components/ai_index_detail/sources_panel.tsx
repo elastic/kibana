@@ -39,6 +39,7 @@ interface SourcesPanelProps {
 export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: SourcesPanelProps) => {
   const sources = useMemo(() => aiIndex?.sources ?? [], [aiIndex?.sources]);
   const { startEditing, editing } = useSourcesEditor({ aiIndex, onSaved });
+  const isEditingActive = editing !== undefined && !editing.isSaving;
   const hasSources = sources.length > 0;
 
   const hasConnectorSources = useMemo(
@@ -46,10 +47,10 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
     [sources]
   );
   const { connectorNameById, connectorActionTypeById } = useDataConnectors({
-    enabled: hasConnectorSources && !editing,
+    enabled: hasConnectorSources && !isEditingActive,
   });
 
-  const showHeaderAction = !isManaged && !isLoading && !editing && aiIndex !== undefined;
+  const isSaving = editing?.isSaving ?? false;
 
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="contextSourcesPanel">
@@ -78,13 +79,14 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
             )}
           </AiIndexDetailPanelDescription>
         </EuiFlexItem>
-        {showHeaderAction && (
+        {!isEditingActive && !isManaged && !isLoading && aiIndex !== undefined && (
           <EuiFlexItem grow={false}>
             {hasSources ? (
               <EuiButtonEmpty
                 size="s"
                 iconType="pencil"
                 onClick={startEditing}
+                isLoading={isSaving}
                 data-test-subj="contextEditSourcesButton"
                 {...getEbtProps({
                   element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSourcesPanel,
@@ -101,6 +103,7 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
                 size="s"
                 iconType="plusCircle"
                 onClick={startEditing}
+                isLoading={isSaving}
                 data-test-subj="contextAddSourcesButton"
                 {...getEbtProps({
                   element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSourcesPanel,
@@ -119,7 +122,7 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
       <EuiSpacer size="m" />
       {isLoading ? (
         <EuiSkeletonText lines={2} data-test-subj="contextAiIndexSourcesLoading" />
-      ) : editing ? (
+      ) : isEditingActive ? (
         <div data-test-subj="contextEditSourcesInlineEditor">
           <SourcePicker
             selectedSources={editing.selectedSources}
@@ -131,7 +134,6 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
               <EuiButtonEmpty
                 size="s"
                 onClick={editing.cancel}
-                isDisabled={editing.isSaving}
                 data-test-subj="contextEditSourcesCancelButton"
                 {...getEbtProps({
                   element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSourcesPanel,

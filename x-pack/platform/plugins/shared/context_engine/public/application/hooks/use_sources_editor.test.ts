@@ -144,4 +144,20 @@ describe('useSourcesEditor', () => {
 
     expect(result.current.editing?.selectedSources).toEqual(newerSelected);
   });
+
+  it('ignores draft changes while a save is in progress', () => {
+    mockIsSaving = true;
+    const { result } = renderEditor();
+
+    act(() => result.current.startEditing());
+    const before = result.current.editing?.selectedSources;
+
+    act(() =>
+      result.current.editing?.setSelectedSources([
+        { type: 'esql', id: 'FROM blocked', label: 'FROM blocked', value: 'FROM blocked' },
+      ])
+    );
+
+    expect(result.current.editing?.selectedSources).toEqual(before);
+  });
 });

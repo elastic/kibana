@@ -38,7 +38,9 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
     aiIndex,
     onSaved,
   });
+  const isEditingActive = editing !== undefined && !editing.isSaving;
   const hasTrace = currentTrace !== undefined;
+  const isSaving = editing?.isSaving ?? false;
 
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="contextTracesPanel">
@@ -66,13 +68,14 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
             )}
           </AiIndexDetailPanelDescription>
         </EuiFlexItem>
-        {!editing && !isManaged && !isLoading && (
+        {!isEditingActive && !isManaged && !isLoading && (
           <EuiFlexItem grow={false}>
             {hasTrace ? (
               <EuiButtonEmpty
                 size="s"
                 iconType="pencil"
                 onClick={startEditing}
+                isLoading={isSaving}
                 isDisabled={aiIndex === undefined}
                 data-test-subj="contextEditTracesButton"
                 {...getEbtProps({
@@ -90,6 +93,7 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
                 size="s"
                 iconType="plusCircle"
                 onClick={startEditing}
+                isLoading={isSaving}
                 isDisabled={aiIndex === undefined}
                 data-test-subj="contextAddTracesButton"
                 {...getEbtProps({
@@ -109,7 +113,7 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
       <EuiSpacer size="m" />
       {isLoading ? (
         <EuiSkeletonText lines={2} />
-      ) : editing ? (
+      ) : isEditingActive ? (
         <>
           <TraceSelector
             value={editing.draft}
@@ -121,7 +125,6 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 onClick={editing.cancel}
-                isDisabled={editing.isSaving}
                 data-test-subj="contextTracesCancelButton"
                 {...getEbtProps({
                   element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageTracesPanel,
