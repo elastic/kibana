@@ -12,6 +12,7 @@ import {
   ChatEventType,
   ConversationRoundStatus,
   ConversationRoundStepType,
+  EventActorType,
   TimelineEventType,
   ToolResultType,
 } from '@kbn/agent-builder-common';
@@ -803,6 +804,78 @@ describe('compactConversation', () => {
       });
 
       expect(entryIds(result.processedConversation.timeline)).toEqual(['r3', 'n2', 'r4']);
+    });
+  });
+
+  describe('hard truncation', () => {
+    /** A user message that triggered no execution, sent between rounds. */
+    const standaloneMessage = (id: string, createdAt: string): ProcessedTimelineEvent =>
+      ({
+        id,
+        type: TimelineEventType.userMessage,
+        created_at: createdAt,
+        actor: { type: EventActorType.user, id: 'u1', username: 'user1' },
+        data: { message: `standalone ${id}`, attachments: [] },
+      } as unknown as ProcessedTimelineEvent);
+    const entryIds = (timeline: ProcessedTimelineEvent[]) =>
+      Array.from(new Set(timeline.map((event) => event.id.split('::')[0])));
+    const failingChatModel = () =>
+      ({
+        withStructuredOutput: jest.fn().mockReturnValue({
+          invoke: jest.fn().mockRejectedValue(new Error('llm down')),
+        }),
+      } as unknown as InferenceChatModel);
+    // Over budget even at the floor, so truncation drops every round it is allowed to.
+    const tightBudget: ContextBudget = {
+      totalBudget: 200,
+      historyBudget: 100,
+      triggerThreshold: 50,
+    };
+
+    it('keeps a standalone user message on the retained side of the cut', async () => {
+      const timeline = [
+        ...timelineFromRounds([
+          roundAt('r1', 0, 2000),
+          roundAt('r2', 1, 2000),
+          roundAt('r3', 2, 2000),
+        ]),
+        standaloneMessage('m', '2026-01-01T00:02:30.000Z'),
+        ...timelineFromRounds([roundAt('r4', 3, 2000)]),
+      ];
+      const conversation = conversationOf(timeline);
+
+      const result = await compact({
+        processedConversation: conversation,
+        perRoundTokenCounts: countsFor(conversation),
+        chatModel: failingChatModel(),
+        contextBudget: tightBudget,
+        logger: mockLogger,
+      });
+
+      expect(result.compactionTriggered).toBe(false);
+      expect(entryIds(result.processedConversation.timeline)).toEqual(['r3', 'm', 'r4']);
+    });
+
+    it('leaves the timeline untouched when no round can be dropped', async () => {
+      // Two rounds: PRESERVED_RECENT_ROUNDS keeps both, so there is nothing to truncate.
+      const timeline = [
+        ...timelineFromRounds([roundAt('r1', 0, 2000)]),
+        standaloneMessage('m', '2026-01-01T00:00:30.000Z'),
+        ...timelineFromRounds([roundAt('r2', 1, 2000)]),
+      ];
+      const conversation = conversationOf(timeline);
+
+      const result = await compact({
+        processedConversation: conversation,
+        perRoundTokenCounts: countsFor(conversation),
+        chatModel: failingChatModel(),
+        contextBudget: tightBudget,
+        logger: mockLogger,
+      });
+
+      expect(result.compactionTriggered).toBe(false);
+      expect(result.processedConversation.timeline).toBe(timeline);
+      expect(entryIds(result.processedConversation.timeline)).toEqual(['r1', 'm', 'r2']);
     });
   });
 

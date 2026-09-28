@@ -229,9 +229,10 @@ export const dropTimelineRounds = <E extends AnyTimelineEvent>(
 };
 
 /**
- * The events of the rounds at positions `[start, end)` of the round order, plus the custom
- * events that fall inside that range (by their timestamp). Custom events older than the cut
- * are dropped. Implemented as a filter over the timeline so stored order is preserved.
+ * The events of the rounds at positions `[start, end)` of the round order, plus the non-round
+ * events — standalone user messages, custom events — that fall inside that range (by their
+ * timestamp). Non-round events older than the cut are dropped. Implemented as a filter over the
+ * timeline so stored order is preserved.
  */
 export const sliceTimelineRounds = <E extends AnyTimelineEvent>(
   timeline: E[],
@@ -254,13 +255,13 @@ export const sliceTimelineRounds = <E extends AnyTimelineEvent>(
   };
   const inRange = (at: string): boolean =>
     afterLower(at) && (upperBound === undefined || at < upperBound);
+  const roundEventIds = new Set<string>(
+    rounds.flatMap((round) => round.events.map((event) => event.id))
+  );
   const keptIds = new Set<string>(kept.flatMap((round) => round.events.map((event) => event.id)));
-  for (const event of customEvents(timeline)) {
-    if (inRange(event.created_at)) {
-      keptIds.add(event.id);
-    }
-  }
-  return timeline.filter((event) => keptIds.has(event.id));
+  return timeline.filter(
+    (event) => keptIds.has(event.id) || (!roundEventIds.has(event.id) && inRange(event.created_at))
+  );
 };
 
 /** True when the round is paused on a prompt (on the folded timeline: its terminal is a pause). */

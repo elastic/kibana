@@ -362,28 +362,56 @@ describe('groupTimelineEntries with custom events', () => {
   });
 });
 
-describe('sliceTimelineRounds with custom events', () => {
+describe('sliceTimelineRounds with non-round events', () => {
+  /** A user message that triggered no execution, sent between rounds `b` and `c`. */
+  const standaloneMessage = {
+    id: 'm',
+    type: TimelineEventType.userMessage,
+    created_at: '2026-01-01T00:03:30.000Z',
+    actor: userActor,
+    data: { message: 'standalone' },
+  } as unknown as TimelineEvent;
   const timeline: ContextTimelineEvent[] = [
     customEventFixture({ id: 'n0', created_at: '2025-12-31T00:00:00.000Z' }),
     ...completedRoundEvents('a', '2026-01-01T00:00:00.000Z'),
     customEventFixture({ id: 'n1', created_at: '2026-01-01T00:01:00.000Z' }),
     ...completedRoundEvents('b', '2026-01-01T00:02:00.000Z'),
     customEventFixture({ id: 'n2', created_at: '2026-01-01T00:03:00.000Z' }),
+    standaloneMessage,
     ...completedRoundEvents('c', '2026-01-01T00:04:00.000Z'),
   ];
   const entryIds = (events: ContextTimelineEvent[]) =>
     Array.from(new Set(events.map((event) => event.id.split('::')[0])));
 
-  it('keeps every custom event when slicing from the start', () => {
-    expect(entryIds(sliceTimelineRounds(timeline, 0))).toEqual(['n0', 'a', 'n1', 'b', 'n2', 'c']);
+  it('keeps every non-round event when slicing from the start', () => {
+    expect(entryIds(sliceTimelineRounds(timeline, 0))).toEqual([
+      'n0',
+      'a',
+      'n1',
+      'b',
+      'n2',
+      'm',
+      'c',
+    ]);
   });
 
-  it('drops custom events older than the first kept round (the cut) and keeps the newer ones', () => {
-    expect(entryIds(sliceTimelineRounds(timeline, 1))).toEqual(['b', 'n2', 'c']);
+  it('drops non-round events older than the first kept round (the cut) and keeps the newer ones', () => {
+    expect(entryIds(sliceTimelineRounds(timeline, 1))).toEqual(['b', 'n2', 'm', 'c']);
   });
 
-  it('keeps custom events older than the first excluded round when an end bound is given', () => {
-    expect(entryIds(sliceTimelineRounds(timeline, 0, 2))).toEqual(['n0', 'a', 'n1', 'b', 'n2']);
+  it('drops a standalone user message older than the cut', () => {
+    expect(entryIds(sliceTimelineRounds(timeline, 2))).toEqual(['c']);
+  });
+
+  it('keeps non-round events older than the first excluded round when an end bound is given', () => {
+    expect(entryIds(sliceTimelineRounds(timeline, 0, 2))).toEqual([
+      'n0',
+      'a',
+      'n1',
+      'b',
+      'n2',
+      'm',
+    ]);
   });
 
   it('when the cut removes every round, keeps only custom events after the last removed round ended', () => {

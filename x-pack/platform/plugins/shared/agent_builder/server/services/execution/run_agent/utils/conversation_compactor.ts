@@ -553,6 +553,9 @@ const applyHardTruncation = (
     dropped.add(candidates[index].id);
     tokens -= tokensByRoundId.get(candidates[index].id) ?? 0;
   }
+  if (dropped.size === 0) {
+    return { conversation, tokens };
+  }
   return {
     conversation: {
       ...conversation,
