@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import type { FeatureFlagsStart } from '@kbn/core/server';
 import { FF_MIGRATE_LEGACY_SECURITY_ASSETS } from '../../../common';
 import { getLegacySecurityAssetsMigrationFlag } from './legacy_security_assets_migration';
@@ -23,5 +24,6 @@ describe('getLegacySecurityAssetsMigrationFlag', () => {
     const featureFlags = { getBooleanValue } as unknown as FeatureFlagsStart;
 
     await expect(getLegacySecurityAssetsMigrationFlag(featureFlags)).resolves.toBe(true);
+
   });
 });
