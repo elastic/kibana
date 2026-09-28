@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 
 export const DEFAULT_HISTORY_SNAPSHOT_FREQUENCY = '24h';
-export const DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS = 30;
+export const DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS = 60;
 export const MAX_HISTORY_SNAPSHOT_RETENTION_DAYS = 3650; // 10 years
 
 export const LOG_EXTRACTION_DELAY_DEFAULT = '1m';

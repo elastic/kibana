@@ -165,7 +165,7 @@ describe('HistorySnapshotClient', () => {
         expect.objectContaining({
           esClient: mockEsClient,
           namespace,
-          retentionDays: 30,
+          retentionDays: 60,
         })
       );
     });

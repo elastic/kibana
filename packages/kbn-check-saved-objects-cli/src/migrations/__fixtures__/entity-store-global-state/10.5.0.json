@@ -27,7 +27,7 @@
       "historySnapshot": {
         "status": "stopped",
         "frequency": "1h",
-        "retentionDays": 30
+        "retentionDays": 60
       },
       "logsExtraction": {
         "additionalIndexPatterns": [],

@@ -199,14 +199,14 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
         );
       };
 
-      const expiredIndex = getHistorySnapshotIndexName('default', utcDaysAgo(31, 0));
-      // 29 days ago is safely within the 30-day retention window regardless of when in the
+      const expiredIndex = getHistorySnapshotIndexName('default', utcDaysAgo(61, 0));
+      // 59 days ago is safely within the 60-day retention window regardless of when in the
       // UTC day the snapshot runs. Exact cutoff-day/hour behavior is covered by unit tests.
-      const withinRetentionIndex = getHistorySnapshotIndexName('default', utcDaysAgo(29, 0));
+      const withinRetentionIndex = getHistorySnapshotIndexName('default', utcDaysAgo(59, 0));
       const recentIndex = getHistorySnapshotIndexName('default', utcDaysAgo(5, 12));
       const expiredLegacyIndex = getLegacySecurityHistorySnapshotIndexName(
         'default',
-        utcDaysAgo(40, 0)
+        utcDaysAgo(70, 0)
       );
 
       // Create only indices that don't already exist so we only clean up what we own.
