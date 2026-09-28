@@ -11,6 +11,7 @@ import { TASK_TYPE_BY_SUB_ACTION } from '@kbn/connector-schemas/inference/consta
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { loadConnectors } from '@kbn/inference-connectors';
 import type { ConnectorIdSelectionHandler, ConnectorInstance } from '@kbn/workflows/types/v1';
+import { isHitlWaitStepType } from '@kbn/workflows';
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { stepSchemas } from '../../../common/step_schemas';
 
@@ -72,6 +73,11 @@ export function getConnectorTypesFromStepType(stepType: string): string[] {
 }
 
 export function isCreateConnectorEnabledForStepType(stepType: string): boolean {
+  // HITL wait steps are not Actions plugin types. Nested channel connector-ids
+  // must resolve to slack/slack_api first; never open `.waitForInput` / `.waitForApproval`.
+  if (isHitlWaitStepType(stepType)) {
+    return false;
+  }
   const customStepSelectionHandler = getCustomStepConnectorIdSelectionHandler(stepType);
   if (!customStepSelectionHandler) {
     // If no customStepSelectionHandler defined (regular connector step), the default is to enable creation

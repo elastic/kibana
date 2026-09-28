@@ -56,7 +56,6 @@ spaceTest.describe('Lens chart style settings', { tag: '@local-stateful-classic'
           expect(data.axes?.y?.map(({ position }) => position) ?? []).not.toContain('right');
 
           await lens.dimensions.changeAxisSide('right');
-          await lens.waitForVisualization('xyVisChart');
           await lens.closeDimensionEditor();
         }
       );

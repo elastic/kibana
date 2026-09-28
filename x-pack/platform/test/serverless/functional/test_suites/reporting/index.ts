@@ -12,5 +12,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
     this.tags(['esGate']);
 
     loadTestFile(require.resolve('./management'));
+    loadTestFile(require.resolve('./schedule_export'));
   });
 };
