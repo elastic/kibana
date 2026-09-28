@@ -85,7 +85,8 @@ export const reviseProposalTool = (
 
       const { proposalId: newProposalId, revision } = await service.revise(
         { id: liveProposalId, ...overrides },
-        spaceId
+        spaceId,
+        request
       );
 
       return {

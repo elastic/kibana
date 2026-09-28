@@ -8,14 +8,21 @@
  */
 
 import { setTimeout as timer } from 'timers/promises';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { loggingSystemMock, loggingServiceMock } from '@kbn/core-logging-server-mocks';
+import type { OtelAppenderPluginConfig, PluginAppenderConfigType } from '@kbn/core-logging-server';
 import type { InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { TrackUserActionParams, UserActivityActionId } from '@kbn/core-user-activity-server';
 import { UserActivityService } from './user_activity_service';
+import {
+  applyUserActivityOtelFieldMap,
+  USER_ACTIVITY_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
+  USER_ACTIVITY_OTEL_RESOURCE_ATTRIBUTES,
+} from './user_activity_otel_transform';
 import type { InternalUserActivityServiceSetup } from './types';
 
 const TEST_ACTION = 'create_alerting_rule' as UserActivityActionId;
@@ -56,6 +63,69 @@ describe('UserActivityService', () => {
     it('configures logging with user_activity namespace', () => {
       expect(loggingService.configure).toHaveBeenCalledTimes(1);
       expect(loggingService.configure).toHaveBeenCalledWith(['user_activity'], expect.any(Object));
+    });
+  });
+
+  describe('serverless OTel appender shaping', () => {
+    const otelAppender: PluginAppenderConfigType = {
+      type: 'otel',
+      protocol: 'http',
+      url: 'http://collector:4318/v1/logs',
+    };
+    const configWithOtel = {
+      ...defaultConfig,
+      appenders: new Map<string, PluginAppenderConfigType>([
+        ['console_appender', { type: 'console', layout: { type: 'json' } }],
+        [
+          'file_appender',
+          { type: 'file', fileName: 'easy_to_find.jsonl', layout: { type: 'json' } },
+        ],
+        ['otel_appender', otelAppender],
+      ]),
+    };
+
+    const setupWithFlavor = (serverless: boolean) => {
+      const coreContext = mockCoreContext.create({
+        env: createTestEnv({ envOptions: getEnvOptions({ cliArgs: { serverless } }) }),
+      });
+      coreContext.configService.atPath.mockReturnValue(new BehaviorSubject(configWithOtel));
+      new UserActivityService(coreContext).setup({ logging: loggingService });
+      const [, config$] = loggingService.configure.mock.calls[0];
+      return firstValueFrom(config$);
+    };
+
+    it('extends the otel appender with the user activity transforms when serverless', async () => {
+      const { appenders } = await setupWithFlavor(true);
+      const appendersMap = appenders as Map<string, PluginAppenderConfigType>;
+      const shaped = appendersMap.get('otel_appender') as OtelAppenderPluginConfig;
+
+      expect(shaped.transformAttributes).toBe(applyUserActivityOtelFieldMap);
+      expect(shaped.includeResources).toEqual(['service.name', 'service.type']);
+      expect(shaped.promoteResourceAttributes).toEqual(
+        USER_ACTIVITY_OTEL_PROMOTE_RESOURCE_ATTRIBUTES
+      );
+      expect(shaped.attributes).toEqual(USER_ACTIVITY_OTEL_RESOURCE_ATTRIBUTES);
+    });
+
+    it('leaves non-otel appenders untouched when serverless', async () => {
+      const { appenders } = await setupWithFlavor(true);
+      const appendersMap = appenders as Map<string, PluginAppenderConfigType>;
+
+      expect(appendersMap.get('console_appender')).toBe(
+        configWithOtel.appenders.get('console_appender')
+      );
+      expect(appendersMap.get('file_appender')).toBe(configWithOtel.appenders.get('file_appender'));
+    });
+
+    it('passes the otel appender through unchanged when not serverless', async () => {
+      const { appenders } = await setupWithFlavor(false);
+
+      // The transform is Serverless-only: on other build flavors the appenders pass through
+      // unchanged (full resource, raw field names).
+      expect(appenders).toBe(configWithOtel.appenders);
+      expect(otelAppender).not.toHaveProperty('transformAttributes');
+      expect(otelAppender).not.toHaveProperty('includeResources');
+      expect(otelAppender).not.toHaveProperty('promoteResourceAttributes');
     });
   });
 

@@ -21,7 +21,7 @@ import { ProposalsService } from './proposals_service';
 
 const SPACE_ID = 'default';
 const EXECUTION_ID = 'exec-1';
-const REQUEST = httpServerMock.createKibanaRequest();
+const request = httpServerMock.createKibanaRequest();
 
 /** The resolved actor, in the shape the service stores. */
 const analyst = (username: string, profileUid = `${username}-uid`) => ({
@@ -166,7 +166,7 @@ describe('ProposalsService', () => {
           confidence: 'medium',
           origin: 'alertzero',
         },
-        { spaceId: SPACE_ID, request: REQUEST }
+        { spaceId: SPACE_ID, request }
       );
 
       // The caller knows the situation the proposal came out of, which the
@@ -180,7 +180,7 @@ describe('ProposalsService', () => {
 
     it('should store a pending proposal with the category resolved from the action workflow', async () => {
       const storage = createStorage();
-      const { service } = createService(storage);
+      const { service, workflowsApi } = createService(storage);
 
       const proposal = await service.create(
         {
@@ -193,9 +193,14 @@ describe('ProposalsService', () => {
           origin: 'alertzero',
           workflowExecutionId: EXECUTION_ID,
         },
-        { spaceId: SPACE_ID, user: analyst('worker-user'), request: REQUEST }
+        { spaceId: SPACE_ID, request, user: analyst('worker-user') }
       );
 
+      expect(workflowsApi.getWorkflow).toHaveBeenCalledWith(
+        'system-alertzero-action-create-rule',
+        SPACE_ID,
+        request
+      );
       expect(proposal.status).toBe('pending');
       expect(proposal.category).toBe('tune');
       expect(proposal.workflowExecutionId).toBe(EXECUTION_ID);
@@ -217,7 +222,7 @@ describe('ProposalsService', () => {
           confidence: 'medium',
           origin: 'alertzero',
         },
-        { spaceId: SPACE_ID, request: REQUEST }
+        { spaceId: SPACE_ID, request }
       );
 
       // The id, plus a title the synchronous card label cannot read live. No
@@ -249,7 +254,7 @@ describe('ProposalsService', () => {
           confidence: 'medium',
           origin: 'alertzero',
         },
-        { spaceId: SPACE_ID, request: REQUEST }
+        { spaceId: SPACE_ID, request }
       );
 
       expect(attachmentsClient.create).toHaveBeenCalledWith(
@@ -273,7 +278,7 @@ describe('ProposalsService', () => {
           confidence: 'medium',
           origin: 'alertzero',
         },
-        { spaceId: SPACE_ID, request: REQUEST }
+        { spaceId: SPACE_ID, request }
       );
 
       expect(proposal.status).toBe('pending');
@@ -317,7 +322,7 @@ describe('ProposalsService', () => {
             confidence: 'medium',
             origin: 'alertzero',
           },
-          { spaceId: SPACE_ID, request: REQUEST }
+          { spaceId: SPACE_ID, request }
         )
       ).rejects.toThrow(ProposalInvalidActionInputError);
       expect(storage.index).not.toHaveBeenCalled();
@@ -340,7 +345,7 @@ describe('ProposalsService', () => {
           confidence: 'medium',
           origin: 'alertzero',
         },
-        { spaceId: SPACE_ID, request: REQUEST }
+        { spaceId: SPACE_ID, request }
       );
 
       // Metadata and input validation share the one fetch.
@@ -373,7 +378,7 @@ describe('ProposalsService', () => {
           confidence: 'high',
           origin: 'alertzero',
         },
-        { spaceId: SPACE_ID, request: REQUEST }
+        { spaceId: SPACE_ID, request }
       );
 
       expect(proposal.action?.approvalPolicy).toBe('always-gate');
@@ -392,7 +397,7 @@ describe('ProposalsService', () => {
           confidence: 'medium',
           origin: 'alertzero',
         },
-        { spaceId: SPACE_ID, request: REQUEST }
+        { spaceId: SPACE_ID, request }
       );
 
       expect(proposal.action).toBeUndefined();
@@ -417,7 +422,7 @@ describe('ProposalsService', () => {
           confidence: 'high',
           origin: 'alertzero',
         },
-        { spaceId: SPACE_ID, request: REQUEST }
+        { spaceId: SPACE_ID, request }
       );
 
       const [[indexArgs]] = storage.index.mock.calls;
@@ -447,7 +452,7 @@ describe('ProposalsService', () => {
           confidence: 'medium',
           origin: 'alertzero',
         },
-        { spaceId: SPACE_ID, request: REQUEST }
+        { spaceId: SPACE_ID, request }
       );
 
       expect(proposal.impact).toBe('critical');
@@ -472,7 +477,7 @@ describe('ProposalsService', () => {
           confidence: 'medium',
           origin: 'alertzero',
         },
-        { spaceId: SPACE_ID, request: REQUEST }
+        { spaceId: SPACE_ID, request }
       );
 
       expect(proposal.impact).toBe('high');
@@ -494,7 +499,7 @@ describe('ProposalsService', () => {
           confidence: 'medium',
           origin: 'alertzero',
         },
-        { spaceId: SPACE_ID, request: REQUEST }
+        { spaceId: SPACE_ID, request }
       );
 
       // The impact rank is the queue's primary sort key, so it always has a value.
@@ -526,7 +531,7 @@ describe('ProposalsService', () => {
           confidence: '' as never,
           origin: 'alertzero',
         },
-        { spaceId: SPACE_ID, request: REQUEST }
+        { spaceId: SPACE_ID, request }
       );
 
       expect(proposal.category).toBe('tune');
@@ -553,7 +558,7 @@ describe('ProposalsService', () => {
           confidence: 'medium',
           origin: 'alertzero',
         },
-        { spaceId: SPACE_ID, request: REQUEST }
+        { spaceId: SPACE_ID, request }
       );
 
       expect(proposal.category).toBe('contain');
@@ -574,7 +579,7 @@ describe('ProposalsService', () => {
           confidence: 'high',
           origin: 'alertzero',
         },
-        { spaceId: SPACE_ID, request: REQUEST }
+        { spaceId: SPACE_ID, request }
       );
 
       expect(proposal.category).toBe('contain');
@@ -596,7 +601,7 @@ describe('ProposalsService', () => {
           confidence: 'low',
           origin: 'alertzero',
         },
-        { spaceId: SPACE_ID, request: REQUEST }
+        { spaceId: SPACE_ID, request }
       );
 
       // The category vocabulary belongs to the solution that authored the
@@ -621,7 +626,7 @@ describe('ProposalsService', () => {
           origin: 'alertzero',
           workflowExecutionId: '',
         },
-        { spaceId: SPACE_ID, request: REQUEST }
+        { spaceId: SPACE_ID, request }
       );
 
       expect(proposal.expiresAt).toBeUndefined();
@@ -643,7 +648,7 @@ describe('ProposalsService', () => {
           confidence: 'high',
           origin: 'alertzero',
         },
-        { spaceId: SPACE_ID, request: REQUEST }
+        { spaceId: SPACE_ID, request }
       );
 
       expect(proposal.actionWorkflowId).toBeUndefined();
@@ -673,7 +678,11 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument());
       const { service, workflowsApi } = createService(storage);
 
-      await service.releaseGate('proposal-1', releaseParams());
+      const params = releaseParams();
+      await service.releaseGate('proposal-1', params);
+      expect(workflowsApi.getWorkflowExecution).toHaveBeenCalledWith(EXECUTION_ID, SPACE_ID, {
+        request: params.request,
+      });
 
       expect(workflowsApi.resumeWorkflowExecution).toHaveBeenCalledWith(
         EXECUTION_ID,
@@ -1356,7 +1365,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument({ origin: 'nightshift' }));
       const { service } = createService(storage);
 
-      await service.revise({ id: 'proposal-1', comment: 'Revised' }, SPACE_ID);
+      await service.revise({ id: 'proposal-1', comment: 'Revised' }, SPACE_ID, request);
 
       // No revise input can move it, and consumers filter on exact equality:
       // a revision that relabelled itself would vanish from the queue showing
@@ -1369,7 +1378,11 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument({ title: 'Tune noisy rule' }));
       const { service } = createService(storage);
 
-      await service.revise({ id: 'proposal-1', title: 'Tune the Okta rule' }, SPACE_ID);
+      await service.revise(
+        { id: 'proposal-1', title: 'Tune the Okta rule' },
+        SPACE_ID,
+        request
+      );
 
       const [[reviseArgs]] = storage.index.mock.calls;
       expect(reviseArgs.document).toMatchObject({ title: 'Tune the Okta rule' });
@@ -1383,7 +1396,7 @@ describe('ProposalsService', () => {
       );
       const { service } = createService(storage);
 
-      await service.revise({ id: 'proposal-1' }, SPACE_ID);
+      await service.revise({ id: 'proposal-1' }, SPACE_ID, request);
 
       const [[reviseArgs]] = storage.index.mock.calls;
       expect(reviseArgs.document.previousExecutionError).toBeUndefined();
@@ -1395,7 +1408,8 @@ describe('ProposalsService', () => {
 
       const result = await service.revise(
         { id: 'proposal-1', comment: 'Tightened the match' },
-        SPACE_ID
+        SPACE_ID,
+        request
       );
 
       expect(result).toEqual({ proposalId: expect.any(String), revision: 2 });
@@ -1431,7 +1445,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
-      await service.revise({ id: 'proposal-1' }, SPACE_ID);
+      await service.revise({ id: 'proposal-1' }, SPACE_ID, request);
 
       const newRevisionCallOrder = storage.index.mock.invocationCallOrder[0];
       const supersedeCallOrder = storage.index.mock.invocationCallOrder[1];
@@ -1447,7 +1461,7 @@ describe('ProposalsService', () => {
       );
       const { service } = createService(storage);
 
-      await service.revise({ id: 'proposal-1' }, SPACE_ID);
+      await service.revise({ id: 'proposal-1' }, SPACE_ID, request);
 
       expect(storage.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1467,7 +1481,7 @@ describe('ProposalsService', () => {
       );
       const { service } = createService(storage);
 
-      const result = await service.revise({ id: 'proposal-3' }, SPACE_ID);
+      const result = await service.revise({ id: 'proposal-3' }, SPACE_ID, request);
 
       expect(result.revision).toBe(4);
       expect(storage.index).toHaveBeenCalledWith(
@@ -1487,7 +1501,7 @@ describe('ProposalsService', () => {
       );
       const { service } = createService(storage);
 
-      const result = await service.revise({ id: 'proposal-1' }, SPACE_ID);
+      const result = await service.revise({ id: 'proposal-1' }, SPACE_ID, request);
 
       expect(result.revision).toBe(2);
       expect(storage.index).toHaveBeenCalledWith(
@@ -1503,7 +1517,7 @@ describe('ProposalsService', () => {
       );
       const { service } = createService(storage);
 
-      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toBeInstanceOf(
         ProposalConflictError
       );
       expect(storage.index).not.toHaveBeenCalled();
@@ -1513,7 +1527,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument({ decision: 'approved', status: 'executing' }));
       const { service } = createService(storage);
 
-      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toBeInstanceOf(
         ProposalConflictError
       );
       expect(storage.index).not.toHaveBeenCalled();
@@ -1523,7 +1537,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument({ expiresAt: '2020-01-01T00:00:00.000Z' }));
       const { service } = createService(storage);
 
-      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toBeInstanceOf(
         ProposalExpiredError
       );
       expect(storage.index).not.toHaveBeenCalled();
@@ -1533,7 +1547,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument({ status: 'executing' }));
       const { service } = createService(storage);
 
-      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toBeInstanceOf(
         ProposalConflictError
       );
       expect(storage.index).not.toHaveBeenCalled();
@@ -1543,7 +1557,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument());
       const { service, workflowsApi } = createService(storage);
 
-      await service.revise({ id: 'proposal-1' }, SPACE_ID);
+      await service.revise({ id: 'proposal-1' }, SPACE_ID, request);
 
       expect(workflowsApi.resumeWorkflowExecution).not.toHaveBeenCalled();
     });
@@ -1554,7 +1568,11 @@ describe('ProposalsService', () => {
       );
       const { service } = createService(storage);
 
-      await service.revise({ id: 'proposal-1', actionInput: { severity: 'high' } }, SPACE_ID);
+      await service.revise(
+        { id: 'proposal-1', actionInput: { severity: 'high' } },
+        SPACE_ID,
+        request
+      );
 
       // The stored input keeps the keys the caller did not mention: a
       // replacement would silently drop `name`, which the action requires.
@@ -1596,7 +1614,7 @@ describe('ProposalsService', () => {
       // The original input was valid; only the override makes it unrunnable.
       // Caught here rather than after the analyst approves the revision.
       await expect(
-        service.revise({ id: 'proposal-1', actionInput: { name: 123 } }, SPACE_ID)
+        service.revise({ id: 'proposal-1', actionInput: { name: 123 } }, SPACE_ID, request)
       ).rejects.toThrow(ProposalInvalidActionInputError);
       expect(storage.index).not.toHaveBeenCalled();
     });
@@ -1607,7 +1625,11 @@ describe('ProposalsService', () => {
       );
       const { service } = createService(storage);
 
-      await service.revise({ id: 'proposal-1', impact: 'critical', confidence: 'low' }, SPACE_ID);
+      await service.revise(
+        { id: 'proposal-1', impact: 'critical', confidence: 'low' },
+        SPACE_ID,
+        request
+      );
 
       // Without the recompute the revision would read `critical` while still
       // sorting as `low`, because the queue orders on the rank mirrors.
@@ -1628,7 +1650,7 @@ describe('ProposalsService', () => {
       );
       const { service } = createService(storage);
 
-      await service.revise({ id: 'proposal-1', confidence: 'high' }, SPACE_ID);
+      await service.revise({ id: 'proposal-1', confidence: 'high' }, SPACE_ID, request);
 
       expect(storage.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1648,7 +1670,7 @@ describe('ProposalsService', () => {
         .mockResolvedValueOnce({ _id: 'revision-1' })
         .mockRejectedValueOnce(Object.assign(new Error('version conflict'), { statusCode: 409 }));
 
-      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID)).rejects.toBeInstanceOf(
+      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toBeInstanceOf(
         ProposalConflictError
       );
 
@@ -1666,7 +1688,7 @@ describe('ProposalsService', () => {
 
       // A non-conflict failure does not prove the predecessor write did not land,
       // so the ambiguous case keeps both rows rather than risk orphaning it.
-      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID)).rejects.toThrow(
+      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toThrow(
         'connection reset'
       );
       expect(storage.delete).not.toHaveBeenCalled();
@@ -1709,10 +1731,10 @@ describe('ProposalsService', () => {
       // Dispatch on the query, not call order, so the asked-about row and the head
       // are genuinely different documents: answering both with the head would let a
       // read of the wrong document pass unnoticed.
-      storage.search.mockImplementation(async (request: { query?: unknown }) => {
+      storage.search.mockImplementation(async (searchRequest: { query?: unknown }) => {
         const filter =
           (
-            request.query as
+            searchRequest.query as
               | {
                   bool?: {
                     filter?: Array<{ term?: Record<string, unknown>; ids?: { values: string[] } }>;
@@ -1795,10 +1817,11 @@ describe('ProposalsService', () => {
         term?: Record<string, unknown>;
         ids?: { values: string[] };
       }
-      const queryFilter = (request: { query?: unknown }): QueryClause[] =>
-        (request.query as { bool?: { filter?: QueryClause[] } } | undefined)?.bool?.filter ?? [];
-      storage.search.mockImplementation(async (request) => {
-        const filter = queryFilter(request);
+      const queryFilter = (searchRequest: { query?: unknown }): QueryClause[] =>
+        (searchRequest.query as { bool?: { filter?: QueryClause[] } } | undefined)?.bool?.filter ??
+        [];
+      storage.search.mockImplementation(async (searchRequest) => {
+        const filter = queryFilter(searchRequest);
         if (filter.some((clause) => clause.term?.rootProposalId !== undefined)) {
           return { hits: { hits: [], total: { value: 0 } } };
         }
@@ -1846,7 +1869,7 @@ describe('ProposalsService', () => {
       const { service } = createService(storage, workflowsApi);
 
       await expect(
-        service.resolveActionMetadata('system-alertzero-action-create-rule', SPACE_ID)
+        service.resolveActionMetadata('system-alertzero-action-create-rule', SPACE_ID, request)
       ).resolves.toBeUndefined();
     });
 
@@ -1855,7 +1878,7 @@ describe('ProposalsService', () => {
       const { service } = createService(storage, null);
 
       await expect(
-        service.resolveActionMetadata('system-alertzero-action-create-rule', SPACE_ID)
+        service.resolveActionMetadata('system-alertzero-action-create-rule', SPACE_ID, request)
       ).resolves.toBeUndefined();
     });
   });
@@ -1865,7 +1888,11 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
-      await service.list(listQuery({ status: 'pending', conversationId: 'conv-1' }), SPACE_ID);
+      await service.list(
+        listQuery({ status: 'pending', conversationId: 'conv-1' }),
+        SPACE_ID,
+        request
+      );
 
       const [[searchArgs]] = storage.search.mock.calls;
       expect(searchArgs.query.bool.filter).toEqual(
@@ -1881,7 +1908,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
-      await service.list(listQuery(), SPACE_ID);
+      await service.list(listQuery(), SPACE_ID, request);
 
       const [[searchArgs]] = storage.search.mock.calls;
       // The keyword enums sort alphabetically, so the queue's order comes from
@@ -1898,7 +1925,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
-      await service.list(listQuery({ size: 25, from: 50 }), SPACE_ID);
+      await service.list(listQuery({ size: 25, from: 50 }), SPACE_ID, request);
 
       const [[searchArgs]] = storage.search.mock.calls;
       expect(searchArgs.size).toBe(25);
@@ -1910,7 +1937,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
-      await service.list(listQuery({ excludeExpired: true }), SPACE_ID);
+      await service.list(listQuery({ excludeExpired: true }), SPACE_ID, request);
 
       const [[searchArgs]] = storage.search.mock.calls;
       // A proposal without a deadline never expires, so it has to survive.
@@ -1933,7 +1960,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
-      await service.list(listQuery(), SPACE_ID);
+      await service.list(listQuery(), SPACE_ID, request);
 
       const [[searchArgs]] = storage.search.mock.calls;
       expect(JSON.stringify(searchArgs.query.bool.filter)).not.toContain('expiresAt');
@@ -1943,7 +1970,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
-      await service.list(listQuery({ status: 'pending' }), SPACE_ID);
+      await service.list(listQuery({ status: 'pending' }), SPACE_ID, request);
 
       // `pending` is only ever valid while undecided, so no separate
       // decision-absence clause is needed to say "awaiting".
@@ -1958,7 +1985,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
-      await service.list(listQuery({ decision: 'dismissed' }), SPACE_ID);
+      await service.list(listQuery({ decision: 'dismissed' }), SPACE_ID, request);
 
       const [[searchArgs]] = storage.search.mock.calls;
       expect(searchArgs.query.bool.filter).toEqual(
@@ -1970,7 +1997,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
-      await service.list(listQuery({ excludeSuperseded: true }), SPACE_ID);
+      await service.list(listQuery({ excludeSuperseded: true }), SPACE_ID, request);
 
       const [[searchArgs]] = storage.search.mock.calls;
       expect(searchArgs.query.bool.filter).toEqual(
@@ -1982,7 +2009,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
-      await service.list(listQuery({ decidedWithinHours: 72 }), SPACE_ID);
+      await service.list(listQuery({ decidedWithinHours: 72 }), SPACE_ID, request);
 
       const [[searchArgs]] = storage.search.mock.calls;
       expect(searchArgs.query.bool.filter).toEqual(
@@ -1994,7 +2021,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
-      await service.list(listQuery(), SPACE_ID);
+      await service.list(listQuery(), SPACE_ID, request);
 
       const [[searchArgs]] = storage.search.mock.calls;
       expect(JSON.stringify(searchArgs.query.bool.filter)).not.toContain('decidedAt');
@@ -2004,7 +2031,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
-      await service.list(listQuery(), SPACE_ID);
+      await service.list(listQuery(), SPACE_ID, request);
 
       const [[searchArgs]] = storage.search.mock.calls;
       const filter = JSON.stringify(searchArgs.query.bool.filter);
@@ -2016,7 +2043,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
-      const { proposals } = await service.list(listQuery(), SPACE_ID);
+      const { proposals } = await service.list(listQuery(), SPACE_ID, request);
 
       expect(proposals[0]).not.toHaveProperty('ranks');
     });
@@ -2035,7 +2062,7 @@ describe('ProposalsService', () => {
       const workflowsApi = createWorkflowsApi();
       const { service } = createService(storage, workflowsApi);
 
-      await service.list(listQuery(), SPACE_ID);
+      await service.list(listQuery(), SPACE_ID, request);
 
       expect(workflowsApi.getWorkflow).toHaveBeenCalledTimes(1);
     });

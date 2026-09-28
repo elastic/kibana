@@ -250,11 +250,14 @@ const renderPage = (
 
   // The sections discard their accumulated pages through the query client on
   // collapse, so the page needs a real one even with the hooks stubbed.
-  render(
+  // A fresh element each time: React bails out of a root update when the element
+  // is the same reference, so a poll-style mock change would never re-render.
+  const queryClient = new QueryClient();
+  const page = () => (
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={{ ...core, agentBuilder }}>
-          <QueryClientProvider client={new QueryClient()}>
+          <QueryClientProvider client={queryClient}>
             <Router history={history}>
               <ConversationsPage />
             </Router>
@@ -263,8 +266,9 @@ const renderPage = (
       </EuiProvider>
     </I18nProvider>
   );
+  const rendered = render(page());
 
-  return { core, agentBuilder, closeFlyout, history };
+  return { core, agentBuilder, closeFlyout, history, rerender: () => rendered.rerender(page()) };
 };
 
 const approveMutateAsync = jest.fn().mockResolvedValue(undefined);
@@ -786,6 +790,60 @@ describe('ConversationsPage impact pills', () => {
 
     expect(screen.getByText('Host investigation')).toBeInTheDocument();
     expect(screen.queryByText('User investigation')).not.toBeInTheDocument();
+  });
+
+  it('clears the filter when the selected pill is clicked again', () => {
+    renderPage('/');
+
+    fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+    fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+
+    expect(screen.getByText('Host investigation')).toBeInTheDocument();
+    expect(screen.getByText('User investigation')).toBeInTheDocument();
+  });
+
+  it('hides the pill row when no proposal carries entity ids and leaves the queue unfiltered', () => {
+    mockProposals({ investigate: [{ ...proposal, conversationTitle: 'No impact' }] });
+    renderPage('/');
+
+    expect(screen.queryByRole('heading', { name: 'Impact' })).not.toBeInTheDocument();
+    expect(screen.getByText('No impact')).toBeInTheDocument();
+  });
+
+  it('clears the filter when the selected entity disappears from the loaded proposals', () => {
+    const { rerender } = renderPage('/');
+
+    fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+    expect(screen.queryByText('User investigation')).not.toBeInTheDocument();
+
+    mockProposals({ investigate: [userProposal] });
+    rerender();
+
+    expect(screen.queryByRole('button', { name: 'host-1' })).not.toBeInTheDocument();
+    expect(screen.getByText('User investigation')).toBeInTheDocument();
+    expect(screen.queryByText('No events match the current filter.')).not.toBeInTheDocument();
+  });
+
+  it('shows the filtered empty state in a section whose rows do not carry the selected entity', () => {
+    mockProposals({
+      investigate: [hostProposal],
+      respond: [
+        {
+          ...proposal,
+          id: 'prop-respond',
+          category: 'respond',
+          conversationTitle: 'Respond investigation',
+          entityIds: ['user-9'],
+        },
+      ],
+    });
+    renderPage('/');
+
+    fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+
+    expect(screen.getByText('Host investigation')).toBeInTheDocument();
+    expect(screen.queryByText('Respond investigation')).not.toBeInTheDocument();
+    expect(screen.getAllByText('No events match the current filter.').length).toBeGreaterThan(0);
   });
 });
 

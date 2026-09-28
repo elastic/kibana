@@ -122,6 +122,7 @@ describe('ConversationProposalsService', () => {
     expect(proposalsService.list).toHaveBeenCalledWith(
       expect.objectContaining({ origin: ALERTZERO_PROPOSAL_ORIGIN }),
       spaceId,
+      expect.anything(),
       expect.anything()
     );
   });
@@ -155,6 +156,7 @@ describe('ConversationProposalsService', () => {
           from: 0,
         }),
         spaceId,
+        request,
         [
           { createdAt: { order: 'desc' } },
           { rootProposalId: { order: 'asc' } },
@@ -439,6 +441,7 @@ describe('ConversationProposalsService', () => {
           from: 0,
         }),
         spaceId,
+        request,
         [
           { decidedAt: { order: 'desc' } },
           { createdAt: { order: 'desc' } },

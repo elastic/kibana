@@ -75,6 +75,7 @@ export class ConversationProposalsService {
         from,
       },
       spaceId,
+      request,
       [{ createdAt: { order: 'desc' as const } }, ...TIEBREAKER]
     );
 
@@ -99,6 +100,7 @@ export class ConversationProposalsService {
         from,
       },
       spaceId,
+      request,
       [
         { decidedAt: { order: 'desc' as const } },
         { createdAt: { order: 'desc' as const } },

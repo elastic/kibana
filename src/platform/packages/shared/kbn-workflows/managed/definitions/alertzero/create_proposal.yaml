@@ -18,12 +18,12 @@ tags:
 
 settings:
   # Wall-clock from `startedAt`, and this run parks in WAITING_FOR_CHILD for as
-  # long as the gate below holds the decision. The engine's 6h default would
-  # cancel this bridge out from under the analyst, and a cancelled parent runs
-  # no handler at all, so the proposal would strand `pending`. Must therefore
-  # stay above the gate's own `168h` ceiling — same `176h` the review workflows
-  # use, for the same reason. A test pins the relationship.
-  timeout: "176h"
+  # long as the gate holds the decision — which `expiresIn` lets a caller set,
+  # so no fixed window is safe here. A sentinel for the same reason the gate's
+  # own is one: this workflow has no timeout handler, so a ceiling that fires
+  # first cancels the bridge, orphans the parked gate and strands the proposal
+  # `pending`. Tracks the gate's ceiling, and a test pins the relationship.
+  timeout: "52w"
 
 triggers:
   - type: manual
@@ -62,6 +62,11 @@ triggers:
           type: string
           enum: ["low", "medium", "high", ""]
           description: Confidence in the recommendation.
+        expiresIn:
+          type: string
+          description: >
+            How long the analyst has to decide, as a duration like `24h` or
+            `1w2d`. Defaults to 72h when unset, which the gate applies.
         autoApprove:
           type: boolean
           description: >
@@ -106,6 +111,7 @@ steps:
         impact: "${{ inputs.impact }}"
         category: "${{ inputs.category }}"
         confidence: "${{ inputs.confidence }}"
+        expiresIn: "${{ inputs.expiresIn }}"
         autoApprove: "${{ inputs.autoApprove }}"
         origin: alertzero
 
