@@ -225,8 +225,15 @@ describe('LandingPage', () => {
   });
 
   it('does not transition to the queue when a background refetch returns partial state mid-save', async () => {
-    // Render with no workers enabled — onboarding shown.
-    mockUseWorkers.mockReturnValue(workersResult([]));
+    // Seed useWorkers with the full catalog so OnboardingPage shows all toggles and
+    // the Enable button is active. (workersResult uses sequential w-N IDs; supply
+    // the real catalog IDs so the worker intersection in OnboardingPage matches.)
+    mockUseWorkers.mockReturnValue({
+      data: { workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({ id, enabled: false })) },
+      isLoading: false,
+      isFetching: false,
+      error: undefined,
+    });
     mockUseInvestigationsCount.mockReturnValue(investigationsResult(0));
 
     // Use a custom queryClient and core so we can keep PATCHes in-flight.
@@ -246,7 +253,7 @@ describe('LandingPage', () => {
       workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({ id, enabled: false })),
     });
 
-    render(
+    const ui = (
       <I18nProvider>
         <EuiProvider>
           <QueryClientProvider client={queryClient}>
@@ -260,6 +267,8 @@ describe('LandingPage', () => {
       </I18nProvider>
     );
 
+    const { rerender } = render(ui);
+
     expect(screen.getByText('Enable your workers')).toBeInTheDocument();
 
     // Start the save — this calls onSavingChange(true) in LandingPage.
@@ -271,12 +280,20 @@ describe('LandingPage', () => {
         'disabled'
       )
     );
+    expect(httpPatch).toHaveBeenCalledTimes(5);
 
     // Simulate a window-focus refetch returning a partially-committed enabled worker.
+    // Re-render so the updated mock value is picked up by the component.
+    mockUseWorkers.mockReturnValue({
+      data: { workers: [{ id: ALL_ONBOARDING_WORKER_IDS[0], enabled: true }] },
+      isLoading: false,
+      isFetching: false,
+      error: undefined,
+    });
+    rerender(ui);
+
     // LandingPage must not unmount OnboardingPage while savingInProgress=true, even
     // though showQueue would otherwise be true.
-    mockUseWorkers.mockReturnValue(workersResult([{ enabled: true }]));
-
     expect(screen.getByText('Enable your workers')).toBeInTheDocument();
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
   });

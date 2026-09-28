@@ -182,10 +182,10 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
                       <EuiText size="s">
                         <strong>{workerName(id, name)}</strong>
                         {description ? (
-                          <>
+                          <span id={`alertZeroOnboardingWorkerDescription-${id}`}>
                             {' — '}
                             {description}
-                          </>
+                          </span>
                         ) : null}
                       </EuiText>
                     </EuiFlexItem>
@@ -197,6 +197,11 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
                         disabled={isLastEnabled || isSaving}
                         onChange={(e) => handleToggle(wid, e.target.checked)}
                         data-test-subj={`alertZeroOnboardingWorkerToggle-${id}`}
+                        aria-describedby={
+                          description
+                            ? `alertZeroOnboardingWorkerDescription-${id}`
+                            : undefined
+                        }
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>

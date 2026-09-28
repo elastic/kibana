@@ -9,10 +9,19 @@ import { useState } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { API_VERSIONS, buildWorkerUrl } from '@kbn/alertzero-common';
 import type { ListWorkersResponse } from '@kbn/alertzero-common';
 import { notifyWorkerUpdateError } from '../../hooks/use_workers_api';
 import { queryKeys } from '../../query_keys';
+
+const PARTIAL_SUCCESS_WARNING = i18n.translate(
+  'xpack.alertzero.onboarding.partialSuccessWarning',
+  {
+    defaultMessage:
+      'Some workers were enabled before the error. Check Watches to review their status.',
+  }
+);
 
 type WorkerEnabledMap = Record<string, boolean>;
 
@@ -55,20 +64,32 @@ export const useEnableWorkers = (
       )
     );
     setIsSaving(false);
-    onSavingChange?.(false);
 
     let hadFailure = false;
+    let hadSuccess = false;
     results.forEach((result) => {
       if (result.status === 'rejected') {
         hadFailure = true;
         notifyWorkerUpdateError(services.notifications!.toasts, result.reason);
+      } else {
+        hadSuccess = true;
       }
     });
-    if (hadFailure) return;
-    // Invalidate the workers cache so the Watches page doesn't briefly render
-    // stale (disabled) worker state after navigating away. Not awaited — the
-    // refetch runs in the background while the navigation is processed.
+
+    if (hadFailure) {
+      // On partial or full failure, keep savingInProgress=true in LandingPage so a
+      // background workers refetch with partially-committed state cannot transition
+      // to ConversationsPage before the user has had a chance to retry or leave.
+      if (hadSuccess) {
+        services.notifications!.toasts.addWarning(PARTIAL_SUCCESS_WARNING);
+      }
+      return;
+    }
+
+    // Full success: release the save lock, invalidate the cache, and navigate.
+    // Invalidate first so the Watches page gets fresh state on mount.
     queryClient.invalidateQueries({ queryKey: queryKeys.workers.list() });
+    onSavingChange?.(false);
     onSuccess?.();
   };
 
