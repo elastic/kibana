@@ -8,7 +8,7 @@
  */
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import {
-  EuiBadge,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -239,16 +239,16 @@ export function QuickSearchVisor({
                           </EuiText>
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
-                          <EuiBadge
-                            color="hollow"
+                          <EuiButtonEmpty
+                            size="s"
+                            color="primary"
                             iconType="stop"
                             iconSide="left"
                             onClick={onStopGeneration}
-                            onClickAriaLabel={stopLabel}
                             data-test-subj="esqlVisorStopGeneration"
                           >
                             {stopLabel}
-                          </EuiBadge>
+                          </EuiButtonEmpty>
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>

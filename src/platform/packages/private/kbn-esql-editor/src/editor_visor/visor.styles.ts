@@ -118,35 +118,38 @@ export const visorStyles = (
         content: none;
       }
 
+      /* Starts at the resting icon so hover eases in instead of snapping to the dim frame. */
       @keyframes esqlVisorSparkleTwinkle {
         0%,
-        8% {
-          opacity: 1;
-        }
-        18%,
-        38% {
-          opacity: 0;
-        }
-        48%,
         100% {
           opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.45;
+          transform: scale(0.85);
         }
       }
 
       ${euiCanAnimate} {
         &:hover svg path,
         &:focus-visible svg path {
-          animation: esqlVisorSparkleTwinkle 1.1s ease-in-out infinite;
+          transform-box: fill-box;
+          transform-origin: center;
+          animation-name: esqlVisorSparkleTwinkle;
+          animation-duration: calc(${euiTheme.animation.extraSlow} * 2);
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
         }
 
         &:hover svg path:nth-of-type(2),
         &:focus-visible svg path:nth-of-type(2) {
-          animation-delay: 0.28s;
+          animation-delay: ${euiTheme.animation.slow};
         }
 
         &:hover svg path:nth-of-type(3),
         &:focus-visible svg path:nth-of-type(3) {
-          animation-delay: 0.56s;
+          animation-delay: ${euiTheme.animation.extraSlow};
         }
       }
     `,
