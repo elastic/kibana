@@ -127,15 +127,12 @@ export async function deployGroup(
 
   const { connectorId, staticKeys } = authenticateAndDeployStep;
 
-  // Build a vars map keyed by service.id for buildPackageInputs.
-  // Look up vars by instanceId first; fall back to serviceId for sessions predating instance keying.
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of group.members) {
-    serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ??
-      storedServiceVars[instance.serviceId] ?? {
-        enabledDataStreams: service.dataStreams,
-        varsByDataStream: {},
-      };
+    serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ?? {
+      enabledDataStreams: service.dataStreams,
+      varsByDataStream: {},
+    };
   }
 
   const services = group.members.map(({ service }) => service);

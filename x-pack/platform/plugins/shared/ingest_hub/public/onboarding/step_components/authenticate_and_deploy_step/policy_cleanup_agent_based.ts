@@ -120,11 +120,10 @@ export async function updateAgentBasedPolicy(
 
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of members) {
-    serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ??
-      storedServiceVars[instance.serviceId] ?? {
-        enabledDataStreams: service.dataStreams,
-        varsByDataStream: {},
-      };
+    serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ?? {
+      enabledDataStreams: service.dataStreams,
+      varsByDataStream: {},
+    };
   }
 
   const services = members.map(({ service }) => service);
