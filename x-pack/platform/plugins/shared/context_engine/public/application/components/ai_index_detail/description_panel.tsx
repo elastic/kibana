@@ -46,6 +46,7 @@ export const DescriptionPanel = ({
     value: draft,
     maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,
   });
+  const hasDescription = Boolean(aiIndex?.description);
 
   const startEditing = () => {
     setDraft(aiIndex?.description ?? '');
@@ -78,22 +79,41 @@ export const DescriptionPanel = ({
         </EuiFlexItem>
         {!isEditing && !isManaged && !isLoading && (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="pencil"
-              onClick={startEditing}
-              isDisabled={aiIndex === undefined}
-              data-test-subj="contextEditDescriptionButton"
-              {...getEbtProps({
-                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageDescriptionPanel,
-                action: CONTEXT_ENGINE_UI_EBT.action.description.EDIT,
-              })}
-            >
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.description.editButton"
-                defaultMessage="Edit"
-              />
-            </EuiButtonEmpty>
+            {hasDescription ? (
+              <EuiButtonEmpty
+                size="s"
+                iconType="pencil"
+                onClick={startEditing}
+                isDisabled={aiIndex === undefined}
+                data-test-subj="contextEditDescriptionButton"
+                {...getEbtProps({
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageDescriptionPanel,
+                  action: CONTEXT_ENGINE_UI_EBT.action.description.EDIT,
+                })}
+              >
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.description.editButton"
+                  defaultMessage="Edit"
+                />
+              </EuiButtonEmpty>
+            ) : (
+              <EuiButtonEmpty
+                size="s"
+                iconType="plusCircle"
+                onClick={startEditing}
+                isDisabled={aiIndex === undefined}
+                data-test-subj="contextAddDescriptionButton"
+                {...getEbtProps({
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageDescriptionPanel,
+                  action: CONTEXT_ENGINE_UI_EBT.action.description.EDIT,
+                })}
+              >
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.description.addButton"
+                  defaultMessage="Add description"
+                />
+              </EuiButtonEmpty>
+            )}
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

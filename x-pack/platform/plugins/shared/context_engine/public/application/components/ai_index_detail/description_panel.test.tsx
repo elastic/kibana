@@ -71,6 +71,8 @@ describe('DescriptionPanel', () => {
 
     expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
     expect(screen.getByText(ADD_ONE_HINT)).toBeInTheDocument();
+    expect(screen.getByTestId('contextAddDescriptionButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
   });
 
   it('renders read-only empty fallback for managed AI indexes', () => {
@@ -228,7 +230,7 @@ describe('DescriptionPanel', () => {
       <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
     );
 
-    fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
+    fireEvent.click(screen.getByTestId('contextAddDescriptionButton'));
     fireEvent.change(screen.getByTestId('contextDescriptionTextArea'), {
       target: { value: 'a'.repeat(MAX_AI_INDEX_DESCRIPTION_LENGTH - 10) },
     });
@@ -242,7 +244,7 @@ describe('DescriptionPanel', () => {
       <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
     );
 
-    fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
+    fireEvent.click(screen.getByTestId('contextAddDescriptionButton'));
     fireEvent.change(screen.getByTestId('contextDescriptionTextArea'), {
       target: { value: 'a'.repeat(MAX_AI_INDEX_DESCRIPTION_LENGTH + 1) },
     });

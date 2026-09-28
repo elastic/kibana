@@ -490,7 +490,7 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
     expect(services.http.get).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
+    fireEvent.click(screen.getByTestId('contextAddDescriptionButton'));
 
     const textArea = await screen.findByTestId('contextDescriptionTextArea');
     fireEvent.change(textArea, { target: { value: 'A brand new description' } });
