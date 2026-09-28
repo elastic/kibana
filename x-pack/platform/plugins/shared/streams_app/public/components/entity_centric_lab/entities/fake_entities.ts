@@ -87,7 +87,7 @@ export const ENTITY_CATEGORIES: readonly EntityCategoryDescriptor[] = [
  * stripped from nav, inventory, and Manage entity types when
  * `labMode === 'elasticOn'`.
  */
-export const ELASTICON_HIDDEN_CATEGORY_IDS: ReadonlySet<EntityCategoryId> = new Set([]);
+export const ELASTICON_HIDDEN_CATEGORY_IDS: ReadonlySet<EntityCategoryId> = new Set(['services']);
 
 export const isCategoryHiddenInElasticOn = (categoryId: EntityCategoryId): boolean =>
   ELASTICON_HIDDEN_CATEGORY_IDS.has(categoryId);

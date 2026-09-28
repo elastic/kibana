@@ -27,6 +27,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -188,32 +189,35 @@ const AccordionBadges = ({
   entityCount: number;
   alertingCount: number;
 }) => (
-  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+  <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
     <EuiFlexItem grow={false}>
-      <EuiBadge color="hollow">
-        {i18n.translate(
-          'xpack.streams.entityCentricLab.securityGrouping.stats.resourceCount',
-          {
-            defaultMessage: '{count, plural, one {# resource} other {# resources}}',
-            values: { count: entityCount },
-          }
-        )}
-      </EuiBadge>
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.streams.entityCentricLab.securityGrouping.stats.resourcesLabel', {
+              defaultMessage: 'Resources:',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">{entityCount.toLocaleString()}</EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexItem>
-    {alertingCount > 0 ? (
-      <EuiFlexItem grow={false}>
-        <EuiBadge color="danger">
-          {i18n.translate(
-            'xpack.streams.entityCentricLab.securityGrouping.stats.alertingCount',
-            {
-              defaultMessage:
-                '{count, plural, one {# resource with active alerts} other {# resources with active alerts}}',
-              values: { count: alertingCount },
-            }
-          )}
-        </EuiBadge>
-      </EuiFlexItem>
-    ) : null}
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.streams.entityCentricLab.securityGrouping.stats.resourcesWithAlertsLabel', {
+              defaultMessage: 'Resources with alerts:',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color={alertingCount > 0 ? 'danger' : 'hollow'}>{alertingCount.toLocaleString()}</EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
   </EuiFlexGroup>
 );
 

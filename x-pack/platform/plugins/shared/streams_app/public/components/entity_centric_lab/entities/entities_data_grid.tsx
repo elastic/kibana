@@ -32,6 +32,7 @@ import {
   EuiLink,
   EuiPanel,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   useEuiTheme,
   type EuiDataGridColumn,
@@ -599,11 +600,13 @@ const GridSectionHeader = ({
   category,
   subTypeLabel,
   total,
+  alertsCount,
   nested,
 }: {
   category: EntityCategoryId;
   subTypeLabel?: string;
   total: number;
+  alertsCount: number;
   nested?: boolean;
 }) => {
   const descriptor = getCategoryDescriptor(category);
@@ -616,7 +619,28 @@ const GridSectionHeader = ({
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow">{total.toLocaleString()}</EuiBadge>
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('xpack.streams.entityCentricLab.entities.datagrid.resourcesLabel', { defaultMessage: 'Resources:' })}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">{total.toLocaleString()}</EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('xpack.streams.entityCentricLab.entities.datagrid.resourcesWithAlertsLabel', { defaultMessage: 'Resources with alerts:' })}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color={alertsCount > 0 ? 'danger' : 'hollow'}>{alertsCount.toLocaleString()}</EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -819,6 +843,7 @@ export const EntityDataGridSection = ({
             category={category}
             subTypeLabel={subTypeLabel}
             total={rows.length}
+            alertsCount={rows.filter((e) => e.alerts.active > 0).length}
             nested={nested}
           />
           <EuiSpacer size="s" />

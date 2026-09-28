@@ -854,7 +854,7 @@ function createNavTree({
   // dividers bracketing them.
   // ElasticOn is infra-first: APM Services is omitted; drop "Other" catch-all.
   // Cloud services are distributed into Hosts / Functions / Storage.
-  // Explicit order: Hosts, Kubernetes, Databases, Storage, Functions, Networking, Messaging, AI/ML, [separator], APM Services.
+  // Explicit order: Hosts, Kubernetes, Databases, Storage, Functions, Networking, Messaging, AI/ML.
   const elasticOnCategoryChildren = [
     ...latestCategoryChildrenTop,
     ...latestCategoryChildrenMiddle,
@@ -885,9 +885,6 @@ function createNavTree({
         ...(savedViewsSection ? [savedViewsSection] : []),
         ...(latestEntitiesAllSection.children.length > 0 ? [latestEntitiesAllSection] : []),
         ...(elasticOnCategoryChildren.length > 0 ? [{ children: elasticOnCategoryChildren }] : []),
-        ...(latestApmServicesChildren.length > 0
-          ? [{ children: latestApmServicesChildren }]
-          : []),
         ...(isPhase1Nav ? [] : [manageEntityTypesSection]),
       ]
     : latestEnabled

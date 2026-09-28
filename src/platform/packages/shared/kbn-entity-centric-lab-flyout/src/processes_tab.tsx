@@ -20,12 +20,10 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIcon,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
@@ -135,6 +133,16 @@ const formatRuntime = (startTime: number, now: number): string => {
   return `${hh}${mm}${ss}`;
 };
 
+const STATE_PANEL_COLOR: Record<string, string> = {
+  running: 'var(--euiColorSuccess, #00BFB3)',
+  sleeping: 'var(--euiColorMediumShade, #98A2B3)',
+  stopped: 'var(--euiColorWarning, #F5A700)',
+  idle: 'var(--euiColorMediumShade, #98A2B3)',
+  dead: 'var(--euiColorDanger, #BD271E)',
+  zombie: 'var(--euiColorDanger, #BD271E)',
+  unknown: 'var(--euiColorMediumShade, #98A2B3)',
+};
+
 const ProcessSummary = ({
   processes,
 }: {
@@ -151,32 +159,35 @@ const ProcessSummary = ({
   const items = useMemo(
     () =>
       [
-        { label: 'Total processes', value: counts.total },
-        ...STATE_ORDER.map((s) => ({ label: STATE_LABELS[s], value: counts[s] })),
-      ].filter((item) => item.value > 0 || item.label === 'Total processes'),
+        { key: 'total', label: 'Total processes', value: counts.total },
+        ...STATE_ORDER.map((s) => ({ key: s, label: STATE_LABELS[s], value: counts[s] })),
+      ].filter((item) => item.value > 0 || item.key === 'total'),
     [counts]
   );
 
   return (
-    <>
-      <EuiFlexGroup gutterSize="m" responsive={false} wrap>
-        {items.map((item) => (
-          <EuiFlexItem key={item.label}>
-            <EuiDescriptionList compressed>
-              <EuiDescriptionListTitle
-                css={css`white-space: nowrap;`}
+    <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+      {items.map((item) => (
+        <EuiFlexItem key={item.key}>
+          <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+            <EuiText size="xs" color="subdued">
+              {item.label}
+            </EuiText>
+            <EuiTitle size="s">
+              <span
+                css={
+                  item.key !== 'total' && item.value > 0
+                    ? css`color: ${STATE_PANEL_COLOR[item.key]};`
+                    : undefined
+                }
               >
-                {item.label}
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
                 {item.value}
-              </EuiDescriptionListDescription>
-            </EuiDescriptionList>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-      <EuiHorizontalRule margin="m" />
-    </>
+              </span>
+            </EuiTitle>
+          </EuiPanel>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
   );
 };
 
@@ -348,28 +359,15 @@ export const ProcessesTab = ({ entityName }: ProcessesTabProps) => {
   return (
     <>
       <ProcessSummary processes={allProcesses} />
-      <EuiFlexGroup gutterSize="xs" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
-            <span>
-              {i18n.translate('entityCentricLabFlyout.flyout.processes.topTitle', {
-                defaultMessage: 'Top {count} processes',
-                values: { count: allProcesses.length },
-              })}
-            </span>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate('entityCentricLabFlyout.flyout.processes.topTooltip', {
-              defaultMessage:
-                'The top processes are sorted by CPU usage and show the most resource-intensive processes currently running on this host.',
-            })}
-          >
-            <EuiIcon type="questionInCircle" color="subdued" />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiTitle size="xxs">
+        <span>
+          {i18n.translate('entityCentricLabFlyout.flyout.processes.topTitle', {
+            defaultMessage: 'Top {count} processes',
+            values: { count: allProcesses.length },
+          })}
+        </span>
+      </EuiTitle>
       <EuiSpacer size="s" />
       <EuiFieldSearch
         fullWidth

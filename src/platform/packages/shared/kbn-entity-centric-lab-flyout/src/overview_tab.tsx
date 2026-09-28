@@ -32,21 +32,32 @@ import { useEntityFlyoutServices } from './services_context';
 import { labThingLabel } from './lab_terminology';
 import type { EntityOverview, GoldenSignal, GoldenSignalLevel } from './fake_entity_overview';
 import { formatGoldenSignalValue } from './fake_entity_overview';
+import type { MetricsTabData, MetricEvent } from './fake_entity_tabs';
+import { MetricChartCard } from './metrics_tab';
 
 interface OverviewTabProps {
   readonly overview: EntityOverview;
+  /** Metrics data relocated from the (now removed) Metrics tab. */
+  readonly metrics?: MetricsTabData;
   /** When true the AI-generated summary section is hidden (e.g. Phase 1). */
   readonly hideAiSummary?: boolean;
   /** When true the Ownership section is hidden (e.g. Phase 1). */
   readonly hideOwnership?: boolean;
+  /** When true the "Surface events on graphs" toggle and event annotations are hidden (Phase 1). */
+  readonly hideEvents?: boolean;
 }
 
-export const OverviewTab = ({ overview, hideAiSummary = false, hideOwnership = false }: OverviewTabProps) => {
+export const OverviewTab = ({ overview, metrics, hideAiSummary = false, hideOwnership = false, hideEvents = false }: OverviewTabProps) => {
   const { resourceCopy = false } = useEntityFlyoutServices();
   const summaryAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabSummary' });
   const signalsAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabSignals' });
   const detailsAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabDetails' });
   const ownershipAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabOwnership' });
+
+  const noEvents: readonly MetricEvent[] = [];
+  const events = hideEvents || !metrics ? noEvents : metrics.events;
+  const [primaryA, primaryB, primaryC] = metrics?.goldenSignals ?? [];
+  const [otherA, otherB] = metrics?.otherMetrics ?? [];
 
   return (
     <>
@@ -74,24 +85,7 @@ export const OverviewTab = ({ overview, hideAiSummary = false, hideOwnership = f
         </>
       )}
 
-      <EuiAccordion
-        id={signalsAccordionId}
-        initialIsOpen
-        buttonContent={
-          <SectionTitle
-            title={i18n.translate('entityCentricLabFlyout.flyout.overview.goldenSignalsTitle', {
-              defaultMessage: 'Golden signals',
-            })}
-          />
-        }
-        paddingSize="s"
-        data-test-subj="entityCentricLabOverviewGoldenSignals"
-      >
-        <GoldenSignalsRow signals={overview.goldenSignals} />
-      </EuiAccordion>
-
-      <EuiSpacer size="m" />
-
+      {/* Entity details (metadata) — quick-scan section before the heavier charts */}
       <EuiAccordion
         id={detailsAccordionId}
         initialIsOpen
@@ -122,6 +116,67 @@ export const OverviewTab = ({ overview, hideAiSummary = false, hideOwnership = f
             }
           )}
         />
+      </EuiAccordion>
+
+      <EuiSpacer size="m" />
+
+      {/* Golden signals: high-level cards followed by time-series charts (relocated from the Metrics tab) */}
+      <EuiAccordion
+        id={signalsAccordionId}
+        initialIsOpen
+        buttonContent={
+          <SectionTitle
+            title={i18n.translate('entityCentricLabFlyout.flyout.overview.goldenSignalsTitle', {
+              defaultMessage: 'Golden signals',
+            })}
+          />
+        }
+        paddingSize="s"
+        data-test-subj="entityCentricLabOverviewGoldenSignals"
+      >
+        <GoldenSignalsRow signals={overview.goldenSignals} />
+
+        {metrics && (primaryA || primaryB || primaryC) ? (
+          <>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+              {primaryA ? (
+                <EuiFlexItem style={{ minWidth: 220 }}>
+                  <MetricChartCard series={primaryA} events={events} />
+                </EuiFlexItem>
+              ) : null}
+              {primaryB ? (
+                <EuiFlexItem style={{ minWidth: 220 }}>
+                  <MetricChartCard series={primaryB} events={events} />
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+            {primaryC ? (
+              <>
+                <EuiSpacer size="m" />
+                <MetricChartCard series={primaryC} events={events} />
+              </>
+            ) : null}
+          </>
+        ) : null}
+
+        {metrics && (otherA || otherB) ? (
+          <>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+              {otherA ? (
+                <EuiFlexItem style={{ minWidth: 220 }}>
+                  <MetricChartCard series={otherA} events={events} />
+                </EuiFlexItem>
+              ) : null}
+              {otherB ? (
+                <EuiFlexItem style={{ minWidth: 220 }}>
+                  <MetricChartCard series={otherB} events={events} />
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </>
+        ) : null}
       </EuiAccordion>
 
       {!hideOwnership && (

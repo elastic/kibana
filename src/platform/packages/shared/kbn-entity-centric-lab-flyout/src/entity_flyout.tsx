@@ -47,7 +47,6 @@ import { css } from '@emotion/react';
 import { useEntityFlyoutServices } from './services_context';
 import { labThing } from './lab_terminology';
 import { OverviewTab } from './overview_tab';
-import { MetricsTab } from './metrics_tab';
 import { LogsTab } from './logs_tab';
 import { AlertsTab } from './alerts_tab';
 import { RelationshipsTab } from './relationships_tab';
@@ -191,7 +190,7 @@ interface EntityFlyoutProps {
   readonly hideAiSummary?: boolean;
   /** When true the Ownership section is hidden from the Overview tab (Phase 1). */
   readonly hideOwnership?: boolean;
-  /** When true the "Surface events on graphs" toggle and event annotations are hidden from the Metrics tab (Phase 1). */
+  /** When true the event annotations on the golden-signal charts are hidden (Phase 1). */
   readonly hideEvents?: boolean;
   /**
    * Tab IDs to exclude from the flyout. Used by Phase 1 to hide
@@ -217,7 +216,6 @@ interface EntityFlyoutProps {
 
 type BuiltInTabId =
   | 'overview'
-  | 'metrics'
   | 'logs'
   | 'traces'
   | 'alerts'
@@ -240,7 +238,6 @@ type TabId = BuiltInTabId | string;
 const BUILT_IN_TAB_IDS: readonly BuiltInTabId[] = [
   'overview',
   'dashboards',
-  'metrics',
   'logs',
   'traces',
   'alerts',
@@ -266,7 +263,6 @@ const isBuiltInTabId = (id: string): id is BuiltInTabId =>
  */
 const CORE_TAB_IDS: readonly string[] = [
   'overview',
-  'metrics',
   'logs',
   'traces',
   'alerts',
@@ -558,7 +554,6 @@ export const EntityFlyout = ({
 
     const tabActionMap: Record<string, Action | null> = {
       overview: kindDefault,
-      metrics: allActions.viewMetricsInDiscover,
       logs: allActions.viewLogsInDiscover,
       traces: isService ? allActions.viewInApm : allActions.viewTracesInDiscover,
       alerts: allActions.createAlertRule,
@@ -678,12 +673,6 @@ export const EntityFlyout = ({
         id: 'dashboards',
         label: i18n.translate('entityCentricLabFlyout.flyout.tabs.dashboards', {
           defaultMessage: 'Dashboards',
-        }),
-      },
-      {
-        id: 'metrics',
-        label: i18n.translate('entityCentricLabFlyout.flyout.tabs.metrics', {
-          defaultMessage: 'Metrics',
         }),
       },
       {
@@ -1169,9 +1158,7 @@ const TabContent = ({
 
   switch (activeTab) {
     case 'overview':
-      return <OverviewTab overview={overview} hideAiSummary={hideAiSummary} hideOwnership={hideOwnership} />;
-    case 'metrics':
-      return <MetricsTab metrics={tabsData.metrics} hideEvents={hideEvents} />;
+      return <OverviewTab overview={overview} metrics={tabsData.metrics} hideAiSummary={hideAiSummary} hideOwnership={hideOwnership} hideEvents={hideEvents} />;
     case 'logs':
       return <LogsTab entityName={entityName} logs={tabsData.logs} />;
     case 'traces':

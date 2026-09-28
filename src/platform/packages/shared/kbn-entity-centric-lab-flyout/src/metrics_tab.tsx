@@ -77,7 +77,7 @@ export const MetricsTab = ({ metrics, hideEvents = false }: MetricsTabProps) => 
           <EuiTitle size="xxs">
             <h3>
               {i18n.translate('entityCentricLabFlyout.flyout.metrics.goldenSignalsTitle', {
-                defaultMessage: 'Golden signals',
+                defaultMessage: 'Golden signals over time',
               })}
             </h3>
           </EuiTitle>
@@ -137,7 +137,7 @@ export const MetricsTab = ({ metrics, hideEvents = false }: MetricsTabProps) => 
 
 const CHART_HEIGHT = 200;
 
-const MetricChartCard = ({
+export const MetricChartCard = ({
   series,
   events,
 }: {
