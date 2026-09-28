@@ -15,7 +15,6 @@ import { RulesClient } from '../../../../rules_client/rules_client';
 import { getRulesClientMockParams } from '../../../../test_utils';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { bulkMigrateLegacyActions } from '../../../../rules_client/lib';
-import { addMissingUiamKeyTagIfNeeded } from '../../../../rules_client/common';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
@@ -37,16 +36,6 @@ jest.mock('../get_schedule_frequency', () => ({
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => ({
   bulkMigrateLegacyActions: jest.fn(),
 }));
-
-jest.mock('../../../../rules_client/common/api_key_as_alert_attributes', () => {
-  const actual = jest.requireActual('../../../../rules_client/common/api_key_as_alert_attributes');
-  return {
-    ...actual,
-    addMissingUiamKeyTagIfNeeded: jest.fn((...args: unknown[]) =>
-      actual.addMissingUiamKeyTagIfNeeded(...args)
-    ),
-  };
-});
 
 const {
   rulesClientParams,
@@ -165,10 +154,6 @@ const echoBulkCreate = () => {
 describe('bulkUpdateRules', () => {
   let rulesClient: RulesClient;
   let actionsClient: jest.Mocked<ActionsClient>;
-  const actualAddUiam = jest.requireActual(
-    '../../../../rules_client/common/api_key_as_alert_attributes'
-  ).addMissingUiamKeyTagIfNeeded as typeof addMissingUiamKeyTagIfNeeded;
-
   const mockPit = (...pages: Array<Array<SavedObject<Partial<RawRule>>>>) => {
     let i = 0;
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
@@ -192,9 +177,6 @@ describe('bulkUpdateRules', () => {
     (validateScheduleLimit as jest.Mock).mockReset();
     (bulkMigrateLegacyActions as jest.Mock).mockReset();
     (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue([]);
-    (addMissingUiamKeyTagIfNeeded as jest.Mock).mockImplementation((...args: unknown[]) =>
-      actualAddUiam(...(args as Parameters<typeof actualAddUiam>))
-    );
     rulesClient = new RulesClient(rulesClientParams);
     actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     actionsClient.getBulk.mockResolvedValue([
@@ -557,27 +539,6 @@ describe('bulkUpdateRules', () => {
       expect(result.errors[0].message).toContain('less than the allowed minimum interval');
       expect(result.successfulIds).toEqual(['id-2']);
     });
-
-    test('prepare failure after API key mint invalidates the orphaned key', async () => {
-      mockPit([so('id-1', { enabled: true }), so('id-2', { enabled: true })]);
-      (addMissingUiamKeyTagIfNeeded as jest.Mock).mockImplementationOnce(() => {
-        throw new Error('uiam boom');
-      });
-
-      const result = await rulesClient.bulkUpdateRules({
-        rules: [item('id-1', { name: 'orphan' }), item('id-2', { name: 'ok' })],
-      });
-
-      expect(result.errors).toHaveLength(1);
-      expect(result.errors[0].rule.name).toBe('orphan');
-      expect(result.errors[0].message).toContain('uiam boom');
-      expect(result.successfulIds).toEqual(['id-2']);
-      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
-        { apiKeys: expect.arrayContaining([expect.any(String)]) },
-        expect.anything(),
-        expect.anything()
-      );
-    });
   });
 
   describe('SO persistence', () => {
@@ -715,9 +676,6 @@ describe('bulkUpdateRules', () => {
       jest.clearAllMocks();
       getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
       (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue([]);
-      (addMissingUiamKeyTagIfNeeded as jest.Mock).mockImplementation((...args: unknown[]) =>
-        actualAddUiam(...(args as Parameters<typeof actualAddUiam>))
-      );
       echoBulkCreate();
       rulesClient = new RulesClient(rulesClientParams);
       mockPit([

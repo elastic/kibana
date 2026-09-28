@@ -17,7 +17,7 @@ export class AppMenuPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
 
   private async ensureOverflowPopoverClosed() {
-    if (await this.testSubjects.exists(APP_MENU_POPOVER, { timeout: 500 })) {
+    if (await this.testSubjects.exists(APP_MENU_POPOVER)) {
       await this.testSubjects.click(APP_MENU_OVERFLOW_BUTTON);
       await this.testSubjects.missingOrFail(APP_MENU_POPOVER, { timeout: 2000 });
     }
@@ -35,7 +35,7 @@ export class AppMenuPageObject extends FtrService {
 
   async clickMenuItem(testId: string, { isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
     await this.retry.try(async () => {
-      if (!isInOverflowMenu && (await this.testSubjects.exists(testId, { timeout: 1000 }))) {
+      if (!isInOverflowMenu && (await this.testSubjects.exists(testId))) {
         await this.testSubjects.click(testId);
         return;
       }
