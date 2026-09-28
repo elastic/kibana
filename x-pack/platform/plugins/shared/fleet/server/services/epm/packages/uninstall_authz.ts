@@ -91,6 +91,12 @@ export async function collectSpacesForUninstallClosure(
       continue;
     }
     const isDependencyOf = depInstallation.is_dependency_of ?? [];
+    // Mirror cleanupDependenciesStep: deps with an empty is_dependency_of list are not
+    // removed at runtime (the guard is `if (isDependencyOf.length > 0)`), so don't
+    // include them in the pre-auth closure — [].every(...) would be vacuously true.
+    if (isDependencyOf.length === 0) {
+      continue;
+    }
     const allDependantsBeingRemoved = isDependencyOf.every((p) => beingRemoved.has(p.name));
     if (!allDependantsBeingRemoved) {
       continue;
