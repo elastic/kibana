@@ -483,6 +483,32 @@ describe('KibanaEvalsClient', () => {
     expect((firstRun.output as { traceId?: string }).traceId).toBe('this-task-span-trace');
   });
 
+  it('preserves an array-valued task output shape when backfilling the trace id', async () => {
+    const client = createClient();
+    const dataset: EvaluationDataset = {
+      name: 'ds',
+      description: 'desc',
+      examples: [{ input: { q: 1 }, output: { expected: 1 } }],
+    };
+    // `TaskOutput` is `unknown`, so an array is a valid task output; backfilling must not reshape
+    // it into a plain `{ 0: .., 1: .. }` object.
+    const task = async () => [1, 2];
+
+    (withTaskSpan as jest.Mock).mockImplementationOnce(
+      (_name: string, _opts: unknown, cb: (span?: unknown) => unknown) =>
+        cb({ spanContext: () => ({ traceId: 'this-task-span-trace' }) })
+    );
+
+    const [exp] = await client.runExperiment({ datasets: [dataset], task }, []);
+    const [firstRun] = Object.values(exp.runs);
+
+    expect(Array.isArray(firstRun.output)).toBe(true);
+    expect(firstRun.output).toEqual(expect.arrayContaining([1, 2]));
+    expect((firstRun.output as unknown as { traceId?: string }).traceId).toBe(
+      'this-task-span-trace'
+    );
+  });
+
   it('does not overwrite a task-surfaced traceId with this task span id', async () => {
     const client = createClient();
     const dataset: EvaluationDataset = {

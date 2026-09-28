@@ -235,14 +235,23 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
               // asserts as `run.traceId === output.traceId`). Build a per-run output object
               // instead of mutating the task-owned return value in place: a task that reuses (or
               // freezes) one output object across examples/repetitions would otherwise leak the
-              // first run's id onto every run (or throw on a frozen object). We never overwrite a
-              // trace id the task already surfaced, and we leave the output untouched otherwise.
+              // first run's id onto every run (or throw on a frozen object). Clone while
+              // preserving the original shape (arrays stay arrays, prototypes are kept) so we do
+              // not reshape the task output; `TaskOutput` is `unknown`, so array outputs are
+              // valid. We never overwrite a trace id the task already surfaced, and we leave the
+              // output untouched otherwise.
               const runOutput =
                 taskOrClientTraceId &&
                 !taskSurfacedTraceId &&
                 taskOutput &&
                 typeof taskOutput === 'object'
-                  ? { ...(taskOutput as Record<string, unknown>), traceId: taskOrClientTraceId }
+                  ? Object.assign(
+                      Array.isArray(taskOutput)
+                        ? []
+                        : Object.create(Object.getPrototypeOf(taskOutput)),
+                      taskOutput,
+                      { traceId: taskOrClientTraceId }
+                    )
                   : taskOutput;
 
               runs[runKey] = {
