@@ -178,7 +178,7 @@ export class ExecutionContextService
           onActivityEnd();
           throw error;
         }
-      ) as typeof result;
+      ) as unknown as R;
     } catch (error) {
       // `onActivityEnd` is idempotent for the registry, so ending twice is harmless
       onActivityEnd();
