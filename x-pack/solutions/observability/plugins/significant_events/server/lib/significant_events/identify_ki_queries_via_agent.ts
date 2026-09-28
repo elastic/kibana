@@ -25,7 +25,6 @@ import {
   type GeneratedSignificantEventQuery,
 } from '@kbn/significant-events-schema';
 import { EMPTY_TOKENS } from '@kbn/nightshift-ai';
-import type { Streams } from '@kbn/streams-schema';
 import type { AnalysisTarget, ExistingQuerySummary } from '@kbn/nightshift-ai';
 import { KI_QUERY_GENERATION_AGENT_ID } from '../../agent_builder/agents/ki_query_generation';
 import {
@@ -33,7 +32,6 @@ import {
   type AcceptedQuery,
 } from '../../agent_builder/skills/ki_query_generation';
 import { chatTokenCountFromModelUsage } from './features/chat_token_count';
-import { streamToAnalysisTarget } from './stream_to_analysis_target';
 
 const QUERY_GENERATION_MAX_DURATION_MS = 300_000;
 export const MAX_EXISTING_QUERIES_FOR_CONTEXT = 50;
@@ -60,7 +58,7 @@ export interface ExecuteKIQueryGenerationAgentOptions {
   request: KibanaRequest;
   connectorId: string;
   interactionId: string;
-  definition: Streams.all.Definition;
+  target: AnalysisTarget;
   existingQueries: ExistingQuerySummary[];
   signal?: AbortSignal;
   logger: Logger;
@@ -71,7 +69,7 @@ export async function executeKIQueryGenerationAgent({
   request,
   connectorId,
   interactionId,
-  definition,
+  target,
   existingQueries,
   signal,
   logger,
@@ -79,13 +77,12 @@ export async function executeKIQueryGenerationAgent({
   queries: GeneratedSignificantEventQuery[];
   tokensUsed: ChatCompletionTokenCount;
 }> {
-  const target = streamToAnalysisTarget(definition);
   const userMessage = buildKIQueryGenerationUserMessage(target, existingQueries);
 
   const conversationClient = await agentBuilder.conversations.getScopedClient({ request });
   const conversation = await conversationClient.create({
     agentId: KI_QUERY_GENERATION_AGENT_ID,
-    title: `KI query generation: ${definition.name}`.slice(0, CONVERSATION_TITLE_MAX_LENGTH),
+    title: `KI query generation: ${target.name}`.slice(0, CONVERSATION_TITLE_MAX_LENGTH),
     accessControl: { access_mode: ConversationAccessControlMode.Public },
   });
 
@@ -149,9 +146,7 @@ export async function executeKIQueryGenerationAgent({
     roundEvent?.data.round.model_usage
   ) ?? { ...EMPTY_TOKENS };
 
-  logger.debug(
-    `KI query generation agent returned ${queries.length} queries for "${definition.name}"`
-  );
+  logger.debug(`KI query generation agent returned ${queries.length} queries for "${target.id}"`);
 
   return { queries, tokensUsed };
 }

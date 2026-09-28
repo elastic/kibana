@@ -11,7 +11,7 @@ import { ChatEventType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { Streams } from '@kbn/streams-schema';
+import type { AnalysisTarget } from '@kbn/nightshift-ai';
 import { SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID } from '../../agent_builder/skills/ki_query_generation';
 import {
   buildKIQueryGenerationUserMessage,
@@ -19,18 +19,11 @@ import {
   MAX_EXISTING_QUERIES_FOR_CONTEXT,
 } from './identify_ki_queries_via_agent';
 
-const definition: Streams.WiredStream.Definition = {
+const target: AnalysisTarget = {
+  id: 'logs.test',
   name: 'logs.test',
-  description: 'Test logs',
-  updated_at: new Date().toISOString(),
-  type: 'wired',
-  ingest: {
-    lifecycle: { inherit: {} },
-    processing: { steps: [], updated_at: new Date().toISOString() },
-    settings: {},
-    failure_store: { inherit: {} },
-    wired: { fields: {}, routing: [] },
-  },
+  sources: ['logs.test'],
+  samplingSource: 'logs.test',
 };
 
 describe('executeKIQueryGenerationAgent', () => {
@@ -121,7 +114,7 @@ describe('executeKIQueryGenerationAgent', () => {
         request,
         connectorId: 'connector-1',
         interactionId: 'run-1',
-        definition,
+        target,
         existingQueries: [],
         signal: requestSignal,
         logger: loggerMock.create(),
@@ -200,7 +193,7 @@ describe('executeKIQueryGenerationAgent', () => {
         request: {} as KibanaRequest,
         connectorId: 'connector-1',
         interactionId: 'run-1',
-        definition,
+        target,
         existingQueries: [],
         logger: loggerMock.create(),
       })
@@ -209,13 +202,6 @@ describe('executeKIQueryGenerationAgent', () => {
 });
 
 describe('buildKIQueryGenerationUserMessage', () => {
-  const target = {
-    id: 'logs.test',
-    name: 'logs.test',
-    sources: ['logs.test'],
-    samplingSource: 'logs.test',
-  };
-
   it('omits existing_queries when there are none', () => {
     expect(buildKIQueryGenerationUserMessage(target, [])).toBe('`target_id`: logs.test');
   });

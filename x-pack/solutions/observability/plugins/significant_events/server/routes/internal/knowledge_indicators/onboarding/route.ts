@@ -231,7 +231,10 @@ const onboardingBulkStatusRoute = createServerRoute({
     // are looked up; anything else stays not_started.
     const catalogIds = new Set((await listAllSources(sourcesClient)).map((source) => source.id));
     const knownIds = streamNames.filter((sourceId) => catalogIds.has(sourceId));
-    const knownStatuses = await streamsKIsOnboardingClient.getStatuses({ streamNames: knownIds });
+    const knownStatuses = await streamsKIsOnboardingClient.getStatuses({
+      streamNames: knownIds,
+      request,
+    });
 
     const statuses: Record<string, SignificantEventsWorkflowStatusResult> = {};
     for (const sourceId of streamNames) {

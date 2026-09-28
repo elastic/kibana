@@ -47,7 +47,10 @@ describe('onboardingBulkStatusRoute', () => {
 
     const result = await route.handler(handlerParams);
 
-    expect(getStatuses).toHaveBeenCalledWith({ streamNames: ['source-a'] });
+    expect(getStatuses).toHaveBeenCalledWith({
+      streamNames: ['source-a'],
+      request: handlerParams.request,
+    });
     expect(result).toEqual({
       'source-a': {
         status: SignificantEventsWorkflowStatus.InProgress,
