@@ -8,6 +8,7 @@
 import { createHash } from 'node:crypto';
 import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import { isContextLengthExceededError } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
 import {
   THREAT_CATEGORIES,
@@ -25,7 +26,6 @@ import { severityScore } from './severity';
 import { logStageUsage } from '../lib/cost_tracker';
 import {
   fullArticleContext,
-  isContextLengthError,
   selectDistributedArticleContext,
   type ArticleContext,
 } from './article_context';
@@ -208,13 +208,14 @@ export const enrichReportCore = async (
     raw: { response_metadata: Record<string, unknown> };
     parsed: ReportCoreModelOutput;
   };
+  const startedAt = Date.now();
   try {
     result = (await structured.invoke(buildPrompt(params, context.text, prepared.reviewable))) as {
       raw: { response_metadata: Record<string, unknown> };
       parsed: ReportCoreModelOutput;
     };
   } catch (error) {
-    if (!isContextLengthError(error)) throw error;
+    if (!isContextLengthExceededError(error as Error)) throw error;
     context = selectDistributedArticleContext(params.text);
     result = (await structured.invoke(buildPrompt(params, context.text, prepared.reviewable))) as {
       raw: { response_metadata: Record<string, unknown> };
@@ -226,7 +227,8 @@ export const enrichReportCore = async (
     logger,
     'enrich_report_core',
     model.connector.connectorId,
-    result.raw.response_metadata ?? {}
+    result.raw.response_metadata ?? {},
+    Date.now() - startedAt
   );
 
   const validCandidateIds = new Set(prepared.reviewable.map((candidate) => candidate.id));

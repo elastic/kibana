@@ -17,11 +17,13 @@ import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { MemoryRouter, Route } from '@kbn/shared-ux-router';
+import { MemoryRouter, Route, Router } from '@kbn/shared-ux-router';
 import { createEvent, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
+import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
 import { CONTEXT_ENGINE_PATHS, getAiIndexDetailPath } from '../paths';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { AiIndexDetailPage } from './ai_index_detail_page';
@@ -133,7 +135,10 @@ const createServices = () => {
   return services;
 };
 
-const renderWithProviders = (services: ReturnType<typeof createServices>) => {
+const renderWithProviders = (
+  services: ReturnType<typeof createServices>,
+  locationState?: typeof AI_INDEX_CREATED_LOCATION_STATE
+) => {
   const discoverLocator = sharePluginMock.createLocator();
   discoverLocator.getRedirectUrl.mockReturnValue('/app/discover');
 
@@ -160,7 +165,14 @@ const renderWithProviders = (services: ReturnType<typeof createServices>) => {
             services={{ ...services, triggersActionsUi: triggersActionsUiMock.createStart() }}
           >
             <QueryClientProvider client={queryClient}>
-              <MemoryRouter initialEntries={[getAiIndexDetailPath(aiIndex.id)]}>
+              <MemoryRouter
+                initialEntries={[
+                  {
+                    pathname: getAiIndexDetailPath(aiIndex.id),
+                    ...(locationState ? { state: locationState } : {}),
+                  },
+                ]}
+              >
                 <Route path={CONTEXT_ENGINE_PATHS.detail} component={AiIndexDetailPage} />
               </MemoryRouter>
             </QueryClientProvider>
@@ -182,6 +194,97 @@ describe('AiIndexDetailPage', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('shows a dismissible success callout when navigated from AI index creation', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.getByTestId('contextAiIndexCreatedCallout')).toBeInTheDocument();
+    expect(screen.getByText('Your AI index is ready')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Add sources to build agent context from your data, or use it to store agent memory/i
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexCreatedCalloutDocumentationLink')).toHaveAttribute(
+      'href',
+      services.docLinks.links.contextEngine.overview
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss AI index created message' }));
+
+    expect(screen.queryByTestId('contextAiIndexCreatedCallout')).not.toBeInTheDocument();
+  });
+
+  it('does not show the success callout without creation navigation state', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAiIndexCreatedCallout')).not.toBeInTheDocument();
+  });
+
+  it('strips creation navigation state from history after showing the callout', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+    const history = createMemoryHistory({
+      initialEntries: [
+        {
+          pathname: getAiIndexDetailPath(aiIndex.id),
+          state: AI_INDEX_CREATED_LOCATION_STATE,
+        },
+      ],
+    });
+
+    const discoverLocator = sharePluginMock.createLocator();
+    discoverLocator.getRedirectUrl.mockReturnValue('/app/discover');
+
+    const indexManagementLocator = sharePluginMock.createLocator();
+    indexManagementLocator.getUrl.mockResolvedValue(
+      '/app/management/data/index_management/indices/index_details?indexName=ai-index-ds-my-ai-index'
+    );
+
+    jest.spyOn(services.share.url.locators, 'get').mockImplementation((locatorId: string) => {
+      if (locatorId === DISCOVER_APP_LOCATOR) {
+        return discoverLocator;
+      }
+      if (locatorId === INDEX_MANAGEMENT_LOCATOR_ID) {
+        return indexManagementLocator;
+      }
+      return undefined;
+    });
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <ChromeServiceProvider value={{ chrome: services.chrome }}>
+        <I18nProvider>
+          <EuiProvider>
+            <KibanaContextProvider
+              services={{ ...services, triggersActionsUi: triggersActionsUiMock.createStart() }}
+            >
+              <QueryClientProvider client={queryClient}>
+                <Router history={history}>
+                  <Route path={CONTEXT_ENGINE_PATHS.detail} component={AiIndexDetailPage} />
+                </Router>
+              </QueryClientProvider>
+            </KibanaContextProvider>
+          </EuiProvider>
+        </I18nProvider>
+      </ChromeServiceProvider>
+    );
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.getByTestId('contextAiIndexCreatedCallout')).toBeInTheDocument();
+    expect(history.location.state).toBeUndefined();
   });
 
   it('fetches the AI index and renders its id and sources', async () => {

@@ -71,6 +71,7 @@ const buildDefaultDeps = (
   esClient.search.mockResolvedValue(buildUsableStatsResponse() as never);
 
   const searchInferenceEndpoints = {
+    features: { get: jest.fn().mockImplementation((featureId: string) => ({ featureId })) },
     endpoints: {
       getForFeature: jest.fn().mockResolvedValue({
         endpoints: [{ connectorId: 'enrich-connector' }],
@@ -223,6 +224,7 @@ describe('getThreatIntelReadiness', () => {
   it('returns degraded with no_enrich_connector when the enrich feature has no endpoint', async () => {
     const deps = buildDefaultDeps({
       getSearchInferenceEndpoints: jest.fn().mockReturnValue({
+        features: { get: jest.fn().mockImplementation((featureId: string) => ({ featureId })) },
         endpoints: {
           getForFeature: jest.fn().mockResolvedValue({ endpoints: [] }),
         },
@@ -232,6 +234,32 @@ describe('getThreatIntelReadiness', () => {
     const result = await getThreatIntelReadiness(deps);
 
     expect(result.reasonCodes).toContain('no_enrich_connector');
+  });
+
+  it.each([
+    ['alertzero_fast', 'no_enrich_connector'],
+    ['alertzero_reasoning', 'diamond_unavailable'],
+  ])('reports %s as unavailable when the tier is unregistered', async (missingTier, reason) => {
+    const getForFeature = jest.fn().mockResolvedValue({
+      endpoints: [{ connectorId: 'genai-default' }],
+    });
+    const deps = buildDefaultDeps({
+      getSearchInferenceEndpoints: jest.fn().mockReturnValue({
+        features: {
+          get: jest
+            .fn()
+            .mockImplementation((featureId: string) =>
+              featureId === missingTier ? undefined : { featureId }
+            ),
+        },
+        endpoints: { getForFeature },
+      }),
+    });
+
+    const result = await getThreatIntelReadiness(deps);
+
+    expect([...result.reasonCodes, ...(result.optional ?? [])]).toContain(reason);
+    expect(getForFeature).not.toHaveBeenCalledWith(missingTier, deps.request);
   });
 
   it('returns degraded with no_enrich_connector when inference plugin is missing', async () => {

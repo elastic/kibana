@@ -63,7 +63,13 @@ const fullyMigratedReportMappings = () => ({
         rendered_body_text: {},
         materialization: {
           properties: {
+            provider: {},
             status: {},
+            attempted_at: {},
+            source_url: {},
+            rendered_chars: {},
+            truncated: {},
+            reason: {},
           },
         },
       },
@@ -73,6 +79,15 @@ const fullyMigratedReportMappings = () => ({
     evidence: { properties: { space_id: {} } },
     extracted: {
       properties: {
+        core: {
+          properties: {
+            model_id: {},
+            context_mode: {},
+            context_coverage: {},
+            context_chars: {},
+            source_chars: {},
+          },
+        },
         diamond: {
           properties: {
             context_mode: {},
@@ -221,6 +236,7 @@ describe('index_templates — migrations', () => {
   });
 
   it.each([
+    ['extracted.core', 'core'],
     ['extracted.diamond', 'diamond'],
     ['extracted.gate', 'gate'],
     ['extracted.vulnerability', 'vulnerability'],
@@ -271,6 +287,17 @@ describe('index_templates — migrations', () => {
         'content.materialization.status',
       ])
     );
+  });
+
+  it('repairs a partial article materialization mapping', async () => {
+    const mappings = fullyMigratedReportMappings();
+    delete (
+      mappings.properties.content.properties.materialization.properties as Record<string, unknown>
+    ).rendered_chars;
+
+    const { patchedPaths } = await runMigrations({ reportMappings: mappings });
+
+    expect(patchedPaths).toContain('content.materialization.rendered_chars');
   });
 
   it('adds space_id to the indicators index when absent', async () => {

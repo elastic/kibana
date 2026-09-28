@@ -12,9 +12,10 @@ import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { significantEventSchema } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../../routes/types';
+import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { updateEventStatusToolHandler } from './handler';
@@ -34,7 +35,7 @@ export function createEventStatusUpdateTool({
   telemetry,
 }: {
   getScopedClients: GetScopedClients;
-  server: StreamsServer;
+  server: SignificantEventsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
 }): StaticToolRegistration<typeof eventStatusUpdateSchema> {
@@ -59,13 +60,18 @@ export function createEventStatusUpdateTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventClient, licensing } = await getScopedClients({ request });
+        const { getEventClient, getAlertEventsClient, licensing } = await getScopedClients({
+          request,
+        });
         await assertSignificantEventsAccess({ server, licensing });
+        await assertCanManageSignificantEvents({ request, server });
 
         const data = await updateEventStatusToolHandler({
           eventClient: await getEventClient(),
           eventUuid: toolParams.event_uuid,
           status: toolParams.status,
+          alertEventsClient: await getAlertEventsClient(),
+          logger,
         });
 
         telemetry.trackAgentToolEventStatusUpdate({

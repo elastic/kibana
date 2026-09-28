@@ -200,6 +200,15 @@ const threatReportsTemplate = {
             // `THREAT_CATEGORIES` in `common/constants.ts` for the allowed
             // values.
             categories: { type: 'keyword' as const },
+            core: {
+              properties: {
+                model_id: { type: 'keyword' as const },
+                context_mode: { type: 'keyword' as const },
+                context_coverage: { type: 'float' as const },
+                context_chars: { type: 'integer' as const },
+                source_chars: { type: 'integer' as const },
+              },
+            },
             // Diamond Model extraction — populated by extract_diamond for
             // threat-positive reports (gated on enrich_taxonomy actionability).
             diamond: {
@@ -932,7 +941,25 @@ const migrateExistingMaterializationMappings = async (
         )?.content as { properties?: Record<string, unknown> } | undefined
       )?.properties;
 
-      if (!contentProps?.materialization) {
+      const materializationProps = (
+        contentProps?.materialization as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+      const needsMigration = !(
+        contentProps?.article_url &&
+        contentProps?.rss_body_text &&
+        contentProps?.rss_body_chars &&
+        contentProps?.rss_truncated &&
+        contentProps?.rendered_body_text &&
+        materializationProps?.provider &&
+        materializationProps?.status &&
+        materializationProps?.attempted_at &&
+        materializationProps?.source_url &&
+        materializationProps?.rendered_chars &&
+        materializationProps?.truncated &&
+        materializationProps?.reason
+      );
+
+      if (needsMigration) {
         await esClient.indices.putMapping({
           index: indexName,
           properties: {
@@ -992,8 +1019,14 @@ const migrateExistingCoreEnrichmentMappings = async (
         | undefined;
       const diamondProps = extractedProps?.diamond?.properties;
       const gateProps = extractedProps?.gate?.properties;
+      const coreProps = extractedProps?.core?.properties;
       const needsMigration = !(
         extractedProps?.artifacts &&
+        coreProps?.model_id &&
+        coreProps?.context_mode &&
+        coreProps?.context_coverage &&
+        coreProps?.context_chars &&
+        coreProps?.source_chars &&
         diamondProps?.context_mode &&
         diamondProps?.context_coverage &&
         gateProps?.context_mode &&
@@ -1012,6 +1045,15 @@ const migrateExistingCoreEnrichmentMappings = async (
                     type: { type: 'keyword' },
                     value: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
                     context: { type: 'text', index: false },
+                  },
+                },
+                core: {
+                  properties: {
+                    model_id: { type: 'keyword' },
+                    context_mode: { type: 'keyword' },
+                    context_coverage: { type: 'float' },
+                    context_chars: { type: 'integer' },
+                    source_chars: { type: 'integer' },
                   },
                 },
                 gate: {
@@ -1496,6 +1538,7 @@ const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
   { path: 'content.rendered_body_text' },
   { path: 'content.materialization.status' },
   { path: 'extracted.artifacts' },
+  { path: 'extracted.core.context_mode' },
   { path: 'extracted.diamond' },
   { path: 'extracted.diamond.context_mode' },
   { path: 'extracted.gate.context_mode' },

@@ -7,12 +7,12 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import { isContextLengthExceededError } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
 import type { CostTraceBuilder } from '../lib/cost_tracker';
 import { logStageUsage, extractUsageFromMetadata } from '../lib/cost_tracker';
 import {
   fullArticleContext,
-  isContextLengthError,
   selectDistributedArticleContext,
   type ArticleContext,
 } from './article_context';
@@ -314,7 +314,7 @@ export const extractDiamond = async (
         buildSingleCallPrompt(context.text)
       )) as RawResult<DiamondLlmOutput>;
     } catch (error) {
-      if (!isContextLengthError(error)) throw error;
+      if (!isContextLengthExceededError(error as Error)) throw error;
       context = selectDistributedArticleContext(text);
       result = (await structured.invoke(
         buildSingleCallPrompt(context.text)
@@ -327,7 +327,8 @@ export const extractDiamond = async (
       logger,
       'extract_diamond/single_call',
       modelId,
-      result.raw.response_metadata ?? {}
+      result.raw.response_metadata ?? {},
+      wallMs
     );
     traceBuilder?.addStage({
       stage: 'extract_diamond/single_call',
@@ -404,7 +405,13 @@ export const extractDiamond = async (
     usage: { input_tokens: fallbackInputTokens, output_tokens: fallbackOutputTokens },
   };
 
-  logStageUsage(logger, 'extract_diamond/per_vertex_fallback', modelId, fallbackMetadata);
+  logStageUsage(
+    logger,
+    'extract_diamond/per_vertex_fallback',
+    modelId,
+    fallbackMetadata,
+    fallbackWallMs
+  );
   traceBuilder?.addStage({
     stage: 'extract_diamond/per_vertex_fallback',
     inferenceEndpointId: modelId,

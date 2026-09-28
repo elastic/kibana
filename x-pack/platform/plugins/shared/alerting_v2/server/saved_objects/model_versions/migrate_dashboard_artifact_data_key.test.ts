@@ -19,8 +19,8 @@ const baseAttributes = {
     breach: { query: 'FROM logs-* | LIMIT 1' },
   },
   enabled: true,
-  createdBy: 'elastic',
-  updatedBy: 'elastic',
+  createdBy: { profile_uid: 'elastic' },
+  updatedBy: { profile_uid: 'elastic' },
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedAt: '2026-01-01T00:00:00.000Z',
 };

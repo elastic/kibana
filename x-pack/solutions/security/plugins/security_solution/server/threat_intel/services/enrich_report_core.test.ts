@@ -7,6 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import { ChatCompletionErrorCode, InferenceTaskError } from '@kbn/inference-common';
 import type { ExtractedIoc } from './extract_iocs';
 import {
   enrichReportCore,
@@ -112,9 +113,11 @@ describe('enrichReportCore', () => {
   });
 
   it('retries with evenly distributed degraded context only after overflow', async () => {
-    const overflow = Object.assign(new Error('context window exceeded'), {
-      code: 'contextLengthExceededError',
-    });
+    const overflow = new InferenceTaskError(
+      ChatCompletionErrorCode.ContextLengthExceededError,
+      'context window exceeded',
+      {}
+    );
     const invoke = jest
       .fn()
       .mockRejectedValueOnce(overflow)

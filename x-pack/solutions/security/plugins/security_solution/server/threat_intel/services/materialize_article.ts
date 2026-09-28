@@ -30,18 +30,46 @@ const CHALLENGE_MARKERS = [
 
 let nextUnauthenticatedRequestAt = 0;
 
-const paceUnauthenticatedRequest = async (): Promise<void> => {
+const abortableDelay = async (waitMs: number, abortSignal: AbortSignal): Promise<void> =>
+  new Promise((resolve, reject) => {
+    const onAbort = () => {
+      clearTimeout(timeout);
+      abortSignal.removeEventListener('abort', onAbort);
+      reject(new Error('Jina request pacing aborted'));
+    };
+    const onElapsed = () => {
+      abortSignal.removeEventListener('abort', onAbort);
+      resolve();
+    };
+    const timeout = setTimeout(onElapsed, waitMs);
+    if (abortSignal.aborted) onAbort();
+    else abortSignal.addEventListener('abort', onAbort, { once: true });
+  });
+
+const paceUnauthenticatedRequest = async (abortSignal: AbortSignal): Promise<void> => {
   const now = Date.now();
   const startAt = Math.max(now, nextUnauthenticatedRequestAt);
   nextUnauthenticatedRequestAt = startAt + UNAUTHENTICATED_REQUEST_INTERVAL_MS;
   const waitMs = startAt - now;
   if (waitMs > 0) {
-    await new Promise((resolvePromise) => setTimeout(resolvePromise, waitMs));
+    await abortableDelay(waitMs, abortSignal);
   }
 };
 
 const reason = (value: unknown): string =>
   (value instanceof Error ? value.message : String(value)).slice(0, MAX_REASON_CHARS);
+
+const sliceWithoutSplittingSurrogatePair = (value: string, maxChars: number): string => {
+  if (value.length <= maxChars) return value;
+  const lastIncluded = value.charCodeAt(maxChars - 1);
+  const firstExcluded = value.charCodeAt(maxChars);
+  const splitSurrogatePair =
+    lastIncluded >= 0xd800 &&
+    lastIncluded <= 0xdbff &&
+    firstExcluded >= 0xdc00 &&
+    firstExcluded <= 0xdfff;
+  return value.slice(0, splitSurrogatePair ? maxChars - 1 : maxChars);
+};
 
 const validateArticleUrl = async (
   articleUrl: string,
@@ -145,12 +173,14 @@ const fallbackOutput = ({
   status,
   fallbackReason,
   renderedBodyText = '',
+  renderedChars = renderedBodyText.length,
 }: {
   input: MaterializeArticleInput;
   now: Date;
   status: 'fallback' | 'skipped';
   fallbackReason: string;
   renderedBodyText?: string;
+  renderedChars?: number;
 }): MaterializeArticleOutput => ({
   body_text: input.rss_body_text,
   rendered_body_text: renderedBodyText,
@@ -159,7 +189,7 @@ const fallbackOutput = ({
     status,
     attempted_at: now.toISOString(),
     source_url: input.article_url,
-    rendered_chars: renderedBodyText.length,
+    rendered_chars: renderedChars,
     truncated: false,
     reason: fallbackReason,
   },
@@ -169,7 +199,7 @@ export interface MaterializeArticleDependencies {
   fetchFn?: typeof fetch;
   lookupFn?: DnsLookupFn;
   now?: () => Date;
-  pace?: () => Promise<void>;
+  pace?: (abortSignal: AbortSignal) => Promise<void>;
 }
 
 export const materializeArticle = async (
@@ -212,7 +242,7 @@ export const materializeArticle = async (
 
   try {
     await validateArticleUrl(input.article_url, abortSignal, dependencies.lookupFn);
-    await (dependencies.pace ?? paceUnauthenticatedRequest)();
+    await (dependencies.pace ?? paceUnauthenticatedRequest)(abortSignal);
 
     const controller = new AbortController();
     const onAbort = () => controller.abort(abortSignal.reason);
@@ -258,12 +288,12 @@ export const materializeArticle = async (
         now,
         status: 'fallback',
         fallbackReason: validation.reason,
-        renderedBodyText: rendered.slice(0, MAX_ARTICLE_CHARS),
+        renderedChars: rendered.length,
       });
     }
 
     const truncated = rendered.length > MAX_ARTICLE_CHARS;
-    const renderedBodyText = rendered.slice(0, MAX_ARTICLE_CHARS);
+    const renderedBodyText = sliceWithoutSplittingSurrogatePair(rendered, MAX_ARTICLE_CHARS);
     return {
       body_text: renderedBodyText,
       rendered_body_text: renderedBodyText,

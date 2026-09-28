@@ -59,12 +59,3 @@ export const selectDistributedArticleContext = (
     coverage: selectedChars / text.length,
   };
 };
-
-export const isContextLengthError = (error: unknown): boolean => {
-  const value = error as { code?: unknown; message?: unknown };
-  return (
-    value?.code === 'contextLengthExceededError' ||
-    (typeof value?.message === 'string' &&
-      /context (?:length|window)|too many (?:input )?tokens|maximum context/i.test(value.message))
-  );
-};

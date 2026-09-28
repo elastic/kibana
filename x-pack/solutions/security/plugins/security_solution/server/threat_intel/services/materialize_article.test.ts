@@ -106,8 +106,10 @@ describe('materializeArticle', () => {
     const result = await run({}, fetchFn);
 
     expect(result.body_text).toBe(INPUT.rss_body_text);
+    expect(result.rendered_body_text).toBe('');
     expect(result.materialization.status).toBe('fallback');
     expect(result.materialization.reason).toBe('render_is_access_challenge');
+    expect(result.materialization.rendered_chars).toBeGreaterThan(0);
   });
 
   it('falls back to RSS when the render is suspiciously short', async () => {
@@ -139,5 +141,20 @@ describe('materializeArticle', () => {
     expect(result.materialization.status).toBe('fallback');
     expect(result.materialization.reason).toMatch(/restricted IPv4/);
     expect(fetchFn).not.toHaveBeenCalled();
+  });
+
+  it('does not split a UTF-16 surrogate pair at the retained article boundary', async () => {
+    const rendered = `${'a'.repeat(499_999)}😀tail`;
+    const fetchFn = jest
+      .fn()
+      .mockResolvedValue(
+        new Response(JSON.stringify({ data: { markdown: rendered } }), { status: 200 })
+      ) as typeof fetch;
+
+    const result = await run({}, fetchFn);
+
+    expect(result.materialization.truncated).toBe(true);
+    expect(result.rendered_body_text).toHaveLength(499_999);
+    expect(result.rendered_body_text.endsWith('\ud83d')).toBe(false);
   });
 });

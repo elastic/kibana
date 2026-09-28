@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import type { ScopedModel } from '@kbn/agent-builder-server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ExtractedIoc } from './extract_iocs';
-import {
-  adjudicateIocs,
-  type IocAdjudicationModelOutput,
-  iocAdjudicationModelOutputSchema,
-} from './adjudicate_iocs';
+import { prepareIocAdjudication, reconcileIocAdjudication } from './adjudicate_iocs';
 
 const candidate = (value: string, overrides: Partial<ExtractedIoc> = {}): ExtractedIoc => ({
   type: 'url',
@@ -24,36 +18,15 @@ const candidate = (value: string, overrides: Partial<ExtractedIoc> = {}): Extrac
   ...overrides,
 });
 
-const buildModel = (
-  output: IocAdjudicationModelOutput
-): { model: ScopedModel; invoke: jest.Mock } => {
-  const invoke = jest.fn().mockResolvedValue({
-    raw: { response_metadata: {} },
-    parsed: output,
-  });
-  const chatModel = {
-    withStructuredOutput: jest.fn().mockReturnValue({ invoke }),
-  } as unknown as ScopedModel['chatModel'];
-  const connector = { connectorId: 'test-connector' } as ScopedModel['connector'];
-  return { model: { chatModel, connector } as ScopedModel, invoke };
-};
-
-describe('adjudicateIocs', () => {
-  const logger = loggingSystemMock.createLogger();
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('downgrades Markdown citations without spending a model call', async () => {
+describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
+  it('downgrades Markdown citations without semantic review', () => {
     const url = 'https://attack.mitre.org/techniques/T1059/';
-    const { model, invoke } = buildModel({ indicator_ids: [] });
-
-    const result = await adjudicateIocs(model, logger, {
+    const prepared = prepareIocAdjudication({
       text: `See [ATT&CK](${url}) for background.`,
       article_url: 'https://www.elastic.co/security-labs/example',
       iocs: [candidate(url)],
     });
+    const result = reconcileIocAdjudication(prepared, new Set());
 
     expect(result.iocs[0]).toEqual(
       expect.objectContaining({
@@ -63,34 +36,32 @@ describe('adjudicateIocs', () => {
     );
     expect(result.promotable_count).toBe(0);
     expect(result.ioc_set_hash).toBeNull();
-    expect(invoke).not.toHaveBeenCalled();
+    expect(prepared.reviewable).toHaveLength(0);
   });
 
-  it('downgrades same-origin article links without a model call', async () => {
-    const { model, invoke } = buildModel({ indicator_ids: [] });
-    const result = await adjudicateIocs(model, logger, {
+  it('downgrades same-origin article links without semantic review', () => {
+    const prepared = prepareIocAdjudication({
       text: 'More research at https://research.example/another-post',
       article_url: 'https://research.example/current-post',
       iocs: [candidate('https://research.example/another-post')],
     });
+    const result = reconcileIocAdjudication(prepared, new Set());
 
     expect(result.iocs[0].tier).toBe('reference');
     expect(result.adjudication.deterministic_references).toBe(1);
-    expect(invoke).not.toHaveBeenCalled();
+    expect(prepared.reviewable).toHaveLength(0);
   });
 
-  it('keeps only candidates the semantic model affirms as attacker controlled', async () => {
+  it('keeps only candidates selected by stable candidate id', () => {
     const malicious = 'https://evil.example/payload';
     const documentation = 'https://docs.example/product';
-    const { model, invoke } = buildModel({ indicator_ids: [0] });
-
-    const result = await adjudicateIocs(model, logger, {
-      title: 'Campaign report',
+    const prepared = prepareIocAdjudication({
       text:
         `The attacker downloaded its payload from ${malicious}. ` +
         `Defenders can read ${documentation} for product guidance.`,
       iocs: [candidate(malicious), candidate(documentation)],
     });
+    const result = reconcileIocAdjudication(prepared, new Set([0]));
 
     expect(result.iocs[0]).toEqual(
       expect.objectContaining({
@@ -104,14 +75,12 @@ describe('adjudicateIocs', () => {
     expect(result.anchor_iocs).toHaveLength(1);
     expect(result.promotable_count).toBe(1);
     expect(result.ioc_set_hash).toMatch(/^[a-f0-9]{64}$/);
-    expect(invoke).toHaveBeenCalledTimes(1);
-    expect(invoke.mock.calls[0][0]).toContain('attacker downloaded its payload');
+    expect(prepared.reviewable[0].context).toContain('attacker downloaded its payload');
   });
 
-  it('preserves deterministic non-URL indicators without model review', async () => {
+  it('preserves deterministic non-URL indicators without semantic review', () => {
     const hash = 'a'.repeat(64);
-    const { model, invoke } = buildModel({ indicator_ids: [] });
-    const result = await adjudicateIocs(model, logger, {
+    const prepared = prepareIocAdjudication({
       text: `Payload SHA-256: ${hash}`,
       iocs: [
         candidate(hash, {
@@ -122,15 +91,10 @@ describe('adjudicateIocs', () => {
         }),
       ],
     });
+    const result = reconcileIocAdjudication(prepared, new Set());
 
     expect(result.iocs[0].tier).toBe('discriminating');
     expect(result.promotable_count).toBe(1);
-    expect(invoke).not.toHaveBeenCalled();
-  });
-});
-
-describe('iocAdjudicationModelOutputSchema', () => {
-  it('rejects invalid candidate ids', () => {
-    expect(() => iocAdjudicationModelOutputSchema.parse({ indicator_ids: [-1] })).toThrow();
+    expect(prepared.reviewable).toHaveLength(0);
   });
 });

@@ -7,12 +7,12 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import { isContextLengthExceededError } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
 import { logStageUsage } from '../lib/cost_tracker';
 import { MAX_URL_LENGTH } from '../../../common/threat_intel';
 import {
   fullArticleContext,
-  isContextLengthError,
   selectDistributedArticleContext,
   type ArticleContext,
 } from './article_context';
@@ -134,13 +134,14 @@ export const assessRelevance = async (
     raw: { response_metadata: Record<string, unknown> };
     parsed: RelevanceOutput;
   };
+  const startedAt = Date.now();
   try {
     result = (await structured.invoke(buildRelevancePrompt(params, context.text))) as {
       raw: { response_metadata: Record<string, unknown> };
       parsed: RelevanceOutput;
     };
   } catch (error) {
-    if (!isContextLengthError(error)) throw error;
+    if (!isContextLengthExceededError(error as Error)) throw error;
     context = selectDistributedArticleContext(params.text);
     result = (await structured.invoke(buildRelevancePrompt(params, context.text))) as {
       raw: { response_metadata: Record<string, unknown> };
@@ -152,7 +153,8 @@ export const assessRelevance = async (
     logger,
     'assess_relevance',
     inferenceEndpointId,
-    result.raw.response_metadata ?? {}
+    result.raw.response_metadata ?? {},
+    Date.now() - startedAt
   );
 
   logger.debug(

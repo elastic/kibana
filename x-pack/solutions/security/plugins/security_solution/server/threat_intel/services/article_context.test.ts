@@ -6,10 +6,11 @@
  */
 
 import {
-  fullArticleContext,
-  isContextLengthError,
-  selectDistributedArticleContext,
-} from './article_context';
+  ChatCompletionErrorCode,
+  InferenceTaskError,
+  isContextLengthExceededError,
+} from '@kbn/inference-common';
+import { fullArticleContext, selectDistributedArticleContext } from './article_context';
 
 describe('article context selection', () => {
   it('keeps the complete source when it fits', () => {
@@ -34,9 +35,16 @@ describe('article context selection', () => {
     );
   });
 
-  it('recognizes typed and provider context-limit errors', () => {
-    expect(isContextLengthError({ code: 'contextLengthExceededError' })).toBe(true);
-    expect(isContextLengthError(new Error('maximum context window exceeded'))).toBe(true);
-    expect(isContextLengthError(new Error('model unavailable'))).toBe(false);
+  it('recognizes typed context-limit errors', () => {
+    expect(
+      isContextLengthExceededError(
+        new InferenceTaskError(
+          ChatCompletionErrorCode.ContextLengthExceededError,
+          'maximum context window exceeded',
+          {}
+        )
+      )
+    ).toBe(true);
+    expect(isContextLengthExceededError(new Error('model unavailable'))).toBe(false);
   });
 });

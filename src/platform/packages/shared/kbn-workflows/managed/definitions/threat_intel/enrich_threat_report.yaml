@@ -108,7 +108,11 @@ steps:
           id: "{{ foreach.item._id }}"
           doc:
             content:
-              body_text: "{{ steps.materialize_article.output.body_text }}"
+              # Keep semantic_text embedding bounded; the complete retained
+              # render remains available once in rendered_body_text and all
+              # inference in this run uses the transient step output.
+              body_text: "{{ steps.materialize_article.output.body_text | slice: 0, 32000 }}"
+              rss_body_text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.rss_body_text | default: steps.load_full_doc.output.hits.hits[0]._source.content.body_text }}"
               rendered_body_text: "{{ steps.materialize_article.output.rendered_body_text }}"
               materialization: "${{ steps.materialize_article.output.materialization }}"
         on-failure:
@@ -322,6 +326,12 @@ steps:
               behaviors: "${{ steps.enrich_report_core.output.behaviors }}"
               artifacts: "${{ steps.enrich_report_core.output.artifacts }}"
               relevance: "${{ variables.relevance }}"
+              core:
+                model_id: "{{ steps.enrich_report_core.output.model_id }}"
+                context_mode: "{{ steps.enrich_report_core.output.context.mode }}"
+                context_coverage: "${{ steps.enrich_report_core.output.context.coverage }}"
+                context_chars: "${{ steps.enrich_report_core.output.context.selected_chars }}"
+                source_chars: "${{ steps.enrich_report_core.output.context.original_chars }}"
               diamond:
                 suitable: "${{ variables.diamond_suitable }}"
               gate:

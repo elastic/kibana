@@ -5,35 +5,17 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { ALERTZERO_REASONING_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
 import {
+  ENRICH_REPORT_CORE_MAX_BODY_BYTES,
   ENRICH_REPORT_CORE_API_PATH,
-  THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
+  enrichReportCoreBodySchema,
+  enrichReportCoreResponseSchema,
 } from '../../../common/threat_intel';
-import type { ExtractedIoc } from '../services/extract_iocs';
 import { enrichReportCore } from '../services';
 import { resolveScopedModel } from './lib/scoped_model';
 import { THREAT_INTEL_WRITE_AUTHZ } from './lib/authz';
 import type { RouteRegistrationDeps } from '.';
-
-const iocSchema = schema.object({
-  type: schema.string({ minLength: 1, maxLength: 32 }),
-  value: schema.string({ minLength: 1, maxLength: 32_768 }),
-  defanged: schema.maybe(schema.string({ maxLength: 32_768 })),
-  tier: schema.string({ minLength: 1, maxLength: 32 }),
-  tier_heuristic: schema.string({ minLength: 1, maxLength: 32 }),
-  tier_basis: schema.string({ minLength: 1, maxLength: 256 }),
-  port: schema.maybe(schema.number({ min: 1, max: 65_535 })),
-});
-
-const bodySchema = schema.object({
-  text: schema.string({ minLength: 1, maxLength: 5_000_000 }),
-  iocs: schema.arrayOf(iocSchema, { maxSize: 5_000 }),
-  title: schema.maybe(schema.string({ maxLength: 1_024 })),
-  article_url: schema.maybe(schema.string({ maxLength: 32_768 })),
-  report_id: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
-  truncated: schema.maybe(schema.boolean()),
-});
 
 export const registerEnrichReportCoreRoute = ({
   router,
@@ -49,14 +31,17 @@ export const registerEnrichReportCoreRoute = ({
       options: {
         body: {
           accepts: ['application/json'],
-          maxBytes: 10 * 1024 * 1024,
+          maxBytes: ENRICH_REPORT_CORE_MAX_BODY_BYTES,
         },
       },
     })
     .addVersion(
       {
         version: '1',
-        validate: { request: { body: bodySchema } },
+        validate: {
+          request: { body: enrichReportCoreBodySchema },
+          response: { 200: { body: () => enrichReportCoreResponseSchema } },
+        },
       },
       async (context, request, response) => {
         const core = await context.core;
@@ -65,7 +50,7 @@ export const registerEnrichReportCoreRoute = ({
           searchInferenceEndpoints: getSearchInferenceEndpoints(),
           request,
           uiSettingsClient: core.uiSettings.client,
-          featureId: THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
+          featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
           logger,
         });
         if (!modelOutcome.ok) {
@@ -79,7 +64,6 @@ export const registerEnrichReportCoreRoute = ({
           return response.ok({
             body: await enrichReportCore(modelOutcome.model, logger, {
               ...request.body,
-              iocs: request.body.iocs as ExtractedIoc[],
             }),
           });
         } catch (error) {
