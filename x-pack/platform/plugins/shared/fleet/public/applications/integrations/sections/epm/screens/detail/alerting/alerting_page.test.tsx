@@ -184,8 +184,10 @@ describe('AlertingPage', () => {
     expect(
       screen.getByTestId('fleetAssetsAccordion.button.alerting_rule_template')
     ).toBeInTheDocument();
-    expect(screen.getByTestId('fleetAlertingEngineTab-v2')).toHaveTextContent('Alerting v2');
-    expect(screen.getByTestId('fleetAlertingEngineTab-v1')).toHaveTextContent('Classic Alerting');
+    expect(screen.getByTestId('fleetAlertingEngineTab-v2')).toHaveTextContent('Kibana ES|QL Rules');
+    expect(screen.getByTestId('fleetAlertingEngineTab-v1')).toHaveTextContent(
+      'Kibana Standard Rules'
+    );
     expect(screen.getByText('[System] Metrics template')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: '[System] Metrics template' })).toHaveAttribute(
       'href',
@@ -197,7 +199,7 @@ describe('AlertingPage', () => {
     expect(screen.queryByTestId('fleetAssetsAccordion.engineBadge.v1')).not.toBeInTheDocument();
   });
 
-  it('should show v1 templates on the Classic Alerting tab', async () => {
+  it('should show v1 templates on the Kibana Standard Rules tab', async () => {
     mockIsAlertingV2Enabled.mockReturnValue(true);
     renderComponent();
 

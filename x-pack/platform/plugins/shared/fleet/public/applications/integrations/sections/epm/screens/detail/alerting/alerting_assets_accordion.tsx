@@ -85,8 +85,8 @@ const AlertingEngineTabs: React.FunctionComponent<{
         isSelected={selectedEngineTab === 'v2'}
       >
         <FormattedMessage
-          id="xpack.fleet.epm.assets.alertingV2TabLabel"
-          defaultMessage="Alerting v2"
+          id="xpack.fleet.epm.assets.kibanaEsqlRulesTabLabel"
+          defaultMessage="Kibana ES|QL Rules"
         />
       </EuiTab>
       <EuiTab
@@ -95,8 +95,8 @@ const AlertingEngineTabs: React.FunctionComponent<{
         isSelected={selectedEngineTab === 'v1'}
       >
         <FormattedMessage
-          id="xpack.fleet.epm.assets.classicAlertingTabLabel"
-          defaultMessage="Classic Alerting"
+          id="xpack.fleet.epm.assets.kibanaStandardRulesTabLabel"
+          defaultMessage="Kibana Standard Rules"
         />
       </EuiTab>
     </EuiTabs>
