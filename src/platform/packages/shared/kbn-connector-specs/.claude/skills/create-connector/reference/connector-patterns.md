@@ -246,7 +246,7 @@ forwarded to whatever host the redirect names — a live credential leak to a th
 Set `maxRedirects: 0` on any request that sends a credential in a custom header, and return the 3xx with
 its `Location` intact so the caller can decide:
 
-```typescript
+const response = await ctx.client.request({
 const response = await ctx.request({
   method,
   url: `https://${host}/${path}`,
