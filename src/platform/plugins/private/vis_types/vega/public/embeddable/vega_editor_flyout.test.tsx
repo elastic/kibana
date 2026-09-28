@@ -11,10 +11,8 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { Filter, Query } from '@kbn/es-query';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { setDataViews } from '../services';
 import type { VegaEmbeddableApi } from './vega_embeddable';
 import { VegaEditorFlyout } from './vega_editor_flyout';
 
@@ -36,18 +34,17 @@ jest.mock('../components/vega_vis_editor', () => ({
   ),
 }));
 
-const defaultDataView = { id: 'default-view' } as DataView;
-const getDefaultDataView = jest.fn(async (): Promise<DataView | null> => defaultDataView);
-
 const renderFlyout = ({
   initialQuery,
   initialFilters,
   initialDataViews = [],
+  defaultDataView,
   isNewPanel = false,
 }: {
   initialQuery?: Query;
   initialFilters?: Filter[];
   initialDataViews?: DataView[];
+  defaultDataView?: DataView;
   isNewPanel?: boolean;
 } = {}) => {
   const query$ = new BehaviorSubject<Query | undefined>(initialQuery);
@@ -106,6 +103,7 @@ const renderFlyout = ({
       api={api}
       ariaLabelledBy="vegaEditorTitle"
       closeFlyout={closeFlyout}
+      defaultDataView={defaultDataView}
       initialSpec={{ format: 'hjson', value: '{ mark: point }' }}
       SearchBar={SearchBar}
       isNewPanel={isNewPanel}
@@ -119,13 +117,6 @@ const renderFlyout = ({
 };
 
 describe('VegaEditorFlyout', () => {
-  beforeEach(() => {
-    const dataViews = dataViewPluginMocks.createStartContract();
-    getDefaultDataView.mockClear();
-    dataViews.getDefault = getDefaultDataView;
-    setDataViews(dataViews);
-  });
-
   it('renders the title with the flyout label id and all footer actions', async () => {
     renderFlyout();
 
@@ -198,16 +189,17 @@ describe('VegaEditorFlyout', () => {
   });
 
   it('gives the search bar the default data view when the spec names none', async () => {
-    renderFlyout();
+    renderFlyout({ defaultDataView: { id: 'default-view' } as DataView });
 
     expect(await screen.findByText('dataViews:default-view')).toBeInTheDocument();
-    expect(getDefaultDataView).toHaveBeenCalledTimes(1);
   });
 
   it('gives the search bar the data views named by the spec', async () => {
-    renderFlyout({ initialDataViews: [{ id: 'spec-view' } as DataView] });
+    renderFlyout({
+      initialDataViews: [{ id: 'spec-view' } as DataView],
+      defaultDataView: { id: 'default-view' } as DataView,
+    });
 
     expect(await screen.findByText('dataViews:spec-view')).toBeInTheDocument();
-    expect(getDefaultDataView).not.toHaveBeenCalled();
   });
 });

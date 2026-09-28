@@ -464,6 +464,20 @@ describe('vegaEmbeddableFactory', () => {
     expect(jest.mocked(parentApi.removePanel)).toHaveBeenCalledWith(api.uuid);
   });
 
+  it('gives the editor the default data view', async () => {
+    const defaultDataView = { id: 'default-view' } as DataView;
+    const dataViews = dataViewPluginMocks.createStartContract();
+    dataViews.getDefault = jest.fn(async () => defaultDataView);
+    setDataViews(dataViews);
+
+    const { api } = await buildEmbeddable();
+    const content = (await api.getEditPanel?.({
+      ariaLabelledBy: 'vegaEditorTitle',
+    })) as React.ReactElement<{ defaultDataView?: DataView }>;
+
+    expect(content.props.defaultDataView).toBe(defaultDataView);
+  });
+
   it('keeps the edited spec when saving', async () => {
     const { api } = await buildEmbeddable();
     const content = (await api.getEditPanel?.({

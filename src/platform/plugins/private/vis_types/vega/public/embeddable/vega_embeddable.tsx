@@ -81,6 +81,7 @@ import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { extractProjectRoutingOverrides } from '../lib/extract_project_routing_overrides';
 import { getEsqlQueriesFromSpec } from '../lib/spec_uses_esql';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
+import { getDataViews } from '../services';
 import { createInspectorAdapters } from '../vega_inspector';
 import type { VegaByValueState } from '../../server';
 // Frame only. The spec editor stays a separate lazy chunk inside this module, so Edit does not
@@ -299,12 +300,18 @@ export const vegaEmbeddableFactory = (
     }) => {
       const initialSpec = spec$.getValue();
       const initialSearch = panelSearchStateManager.getLatestState();
+      // A missing default data view shouldn't block editing.
+      const defaultDataView =
+        (await getDataViews()
+          .getDefault()
+          .catch((): null => null)) ?? undefined;
       return (
         <VegaEditorFlyout
           api={api}
           ariaLabelledBy={ariaLabelledBy}
           SearchBar={deps.SearchBar}
           closeFlyout={closeFlyout}
+          defaultDataView={defaultDataView}
           initialSpec={initialSpec}
           isNewPanel={isNewPanel}
           onPreview={(spec) => spec$.next(spec)}

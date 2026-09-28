@@ -28,7 +28,6 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { isEqual } from 'lodash';
 import type { VegaByValueState } from '../../server';
-import { getDataViews } from '../services';
 import { vegaTitleInWizard } from '../vega_icon';
 import type { VegaEmbeddableApi } from './vega_embeddable';
 
@@ -80,6 +79,7 @@ export const VegaEditorFlyout = ({
   api,
   ariaLabelledBy,
   closeFlyout,
+  defaultDataView,
   initialSpec,
   SearchBar,
   isNewPanel = false,
@@ -91,6 +91,7 @@ export const VegaEditorFlyout = ({
   SearchBar: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
   ariaLabelledBy: string;
   closeFlyout: () => void;
+  defaultDataView?: DataView;
   initialSpec: VegaByValueState['spec'];
   isNewPanel?: boolean;
   onPreview: (spec: VegaByValueState['spec']) => void;
@@ -108,21 +109,6 @@ export const VegaEditorFlyout = ({
     api.dataViews$
   );
   // Like Visualize's search bar, fall back to the default data view when the spec names none.
-  const [defaultDataView, setDefaultDataView] = useState<DataView | undefined>();
-  const needsDefaultDataView = publishedDataViews?.length === 0;
-  useEffect(() => {
-    if (!needsDefaultDataView || defaultDataView) return;
-    let cancelled = false;
-    getDataViews()
-      .getDefault()
-      .then((dataView) => {
-        if (!cancelled && dataView) setDefaultDataView(dataView);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [needsDefaultDataView, defaultDataView]);
   const dataViews = publishedDataViews?.length
     ? publishedDataViews
     : defaultDataView
