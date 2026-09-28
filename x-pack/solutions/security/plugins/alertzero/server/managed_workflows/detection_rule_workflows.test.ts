@@ -383,11 +383,11 @@ describe('detection rule workflows', () => {
       // to be checked against the ceiling here.
       //
       // Flattened, not top-level: only `propose_entry` sits at the top, and
-      // the other four hang off `propose_tuning`'s switch cases and default.
+      // the other six hang off `propose_tuning`'s switch cases and default.
       const proposals = flattenSteps(review.steps as NestedStep[]).filter(
         (step) => step.with?.['workflow-id'] === CREATE_PROPOSAL_WORKFLOW_ID
       );
-      expect(proposals.length).toBe(5);
+      expect(proposals.length).toBe(7);
       for (const proposal of proposals) {
         expect((proposal.with?.inputs as Record<string, unknown>)?.expiresIn).toBeUndefined();
       }
