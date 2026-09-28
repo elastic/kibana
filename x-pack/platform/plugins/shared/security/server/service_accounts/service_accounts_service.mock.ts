@@ -15,6 +15,16 @@ export const serviceAccountsServiceMock = {
       create: jest.fn().mockResolvedValue({
         id: 'mock-service-account-id',
         name: 'mock-service-account-name',
+        roles: ['viewer'],
+      }),
+      list: jest.fn().mockResolvedValue({ serviceAccounts: [] }),
+      get: jest.fn().mockResolvedValue({
+        id: 'mock-service-account-id',
+        name: 'mock-service-account-name',
+        roles: [],
+        enabled: true,
+        assumable: true,
+        createdBy: { type: 'user' as const, username: 'mock-user-id' },
       }),
       createFakeRequest: jest.fn().mockImplementation(async () =>
         httpServerMock.createFakeKibanaRequest({
