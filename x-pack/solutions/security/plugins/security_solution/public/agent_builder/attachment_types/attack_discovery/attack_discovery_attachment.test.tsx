@@ -44,7 +44,9 @@ const renderInline = (data: AttackDiscoveryAttachment['data']) =>
 
 describe('createAttackDiscoveryAttachmentDefinition', () => {
   it('labels the attachment with the discovery title', () => {
-    const definition = createAttackDiscoveryAttachmentDefinition();
+    const definition = createAttackDiscoveryAttachmentDefinition({
+      resolveSecurityCanvasContext: jest.fn(),
+    });
 
     expect(definition.getLabel(makeAttachment({ title: 'Lateral movement' }))).toBe(
       'Lateral movement'
@@ -52,19 +54,25 @@ describe('createAttackDiscoveryAttachmentDefinition', () => {
   });
 
   it('falls back to a default label when the title is missing', () => {
-    const definition = createAttackDiscoveryAttachmentDefinition();
+    const definition = createAttackDiscoveryAttachmentDefinition({
+      resolveSecurityCanvasContext: jest.fn(),
+    });
 
     expect(definition.getLabel(makeAttachment({}))).toBe('Attack Discovery');
   });
 
   it('uses the sparkles icon', () => {
-    const definition = createAttackDiscoveryAttachmentDefinition();
+    const definition = createAttackDiscoveryAttachmentDefinition({
+      resolveSecurityCanvasContext: jest.fn(),
+    });
 
     expect(definition.getIcon?.()).toBe('sparkles');
   });
 
   it('renders inline content through AttackDiscoveryInlineContent', () => {
-    const definition = createAttackDiscoveryAttachmentDefinition();
+    const definition = createAttackDiscoveryAttachmentDefinition({
+      resolveSecurityCanvasContext: jest.fn(),
+    });
     const element = definition.renderInlineContent?.({
       attachment: makeAttachment({ details_markdown: 'd', summary_markdown: 's' }),
       isSidebar: false,

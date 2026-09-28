@@ -98,11 +98,32 @@ describe('AttachmentSummaryList', () => {
     expect(screen.getByRole('list')).toHaveAttribute('id', controlledId);
   });
 
-  it('leaves the rows out of the tab order, since they do not navigate yet', () => {
+  it('leaves the rows out of the tab order when their type has no drill-down', () => {
     renderList(makeAttachments(3));
 
     // No toggle at three rows, so nothing in the section should be interactive at all.
     expect(screen.queryAllByRole('button')).toHaveLength(0);
     expect(screen.queryAllByRole('link')).toHaveLength(0);
+  });
+
+  it('gives each row a single tab stop once the type registers a drill-down', () => {
+    render(
+      <AttachmentSummaryList
+        attachments={makeAttachments(3)}
+        attachmentsService={
+          {
+            getAttachmentUiDefinition: () => ({
+              getLabel: (attachment: { id: string }) => `Label for ${attachment.id}`,
+              getIcon: () => 'bell',
+              renderConversationDetailsContent: () => null,
+            }),
+          } as unknown as AttachmentServiceStartContract
+        }
+      />
+    );
+
+    expect(screen.getAllByRole('button')).toHaveLength(3);
+    // The button nests inside the row rather than replacing it, so the list semantics survive.
+    expect(screen.getAllByRole('listitem')).toHaveLength(3);
   });
 });

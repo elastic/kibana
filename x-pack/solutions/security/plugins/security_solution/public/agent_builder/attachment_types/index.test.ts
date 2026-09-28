@@ -15,12 +15,20 @@ describe('registerAttachmentUiDefinitions', () => {
     addAttachmentType: mockAddAttachmentType,
   } as unknown as AttachmentServiceStartContract;
 
+  const resolveSecurityCanvasContext = jest.fn();
+
+  const register = () =>
+    registerAttachmentUiDefinitions({
+      attachments: mockAttachments,
+      resolveSecurityCanvasContext,
+    });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('returns attachmentLabel when provided in alert attachment data', () => {
-    registerAttachmentUiDefinitions(mockAttachments);
+    register();
 
     const ruleCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
@@ -36,7 +44,7 @@ describe('registerAttachmentUiDefinitions', () => {
   });
 
   it('returns default label when attachmentLabel is not provided', () => {
-    registerAttachmentUiDefinitions(mockAttachments);
+    register();
 
     const ruleCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
@@ -52,7 +60,7 @@ describe('registerAttachmentUiDefinitions', () => {
   });
 
   it('does not register the security.entity attachment type (owned by registerEntityAttachment)', () => {
-    registerAttachmentUiDefinitions(mockAttachments);
+    register();
 
     const entityCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.entity

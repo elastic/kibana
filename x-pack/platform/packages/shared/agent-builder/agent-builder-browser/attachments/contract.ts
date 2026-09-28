@@ -219,6 +219,13 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
     props: ConversationDetailsRenderProps<TAttachment>
   ) => ReactNode;
   /**
+   * Whether {@link renderConversationDetailsContent} would render anything for this particular
+   * attachment. Types whose payload does not always carry what the content needs can implement
+   * this so consumers can present the attachment as inert rather than offering an affordance that
+   * does nothing. Assumed `true` when not implemented.
+   */
+  hasConversationDetailsContent?: (attachment: TAttachment) => boolean;
+  /**
    * Optional preferred width for the canvas flyout when opened in full-screen context.
    * Accepts any valid CSS width value (e.g. `'600px'`, `'40vw'`).
    * Defaults to `'50vw'` when not specified.

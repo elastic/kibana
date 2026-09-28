@@ -21,6 +21,8 @@ import {
 } from '../../../common/components/user_privileges/user_privileges_context';
 import { extractRulesCapabilities } from '../../../common/utils/rules_capabilities';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
+import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
+import { createAttachmentSummaryDrilldown } from '../attachment_summary_drilldown/create_details_drilldown';
 import { RuleInlineContent } from './rule_inline_content';
 import { buildRuleActionButtons } from './rule_action_buttons';
 import {
@@ -36,15 +38,22 @@ export const registerRuleAttachment = ({
   application,
   aiRuleCreation,
   uiSettings,
+  resolveSecurityCanvasContext,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   aiRuleCreation: AiRuleCreationService;
   uiSettings: IUiSettingsClient;
+  resolveSecurityCanvasContext?: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): void => {
   attachments.addAttachmentType(
     SecurityAgentBuilderAttachments.rule,
-    createRuleAttachmentDefinition({ application, aiRuleCreation, uiSettings })
+    createRuleAttachmentDefinition({
+      application,
+      aiRuleCreation,
+      uiSettings,
+      resolveSecurityCanvasContext,
+    })
   );
 };
 
@@ -52,10 +61,12 @@ export const createRuleAttachmentDefinition = ({
   application,
   aiRuleCreation,
   uiSettings,
+  resolveSecurityCanvasContext,
 }: {
   application: ApplicationStart;
   aiRuleCreation: AiRuleCreationService;
   uiSettings: IUiSettingsClient;
+  resolveSecurityCanvasContext?: () => Promise<SecurityCanvasEmbeddedBundle>;
 }): AttachmentUIDefinition<RuleAttachment> => {
   // `RuleInlineContent` only reads `rulesPrivileges.rules.read`, so derive privileges once from the
   // already-loaded capabilities instead of mounting the fetching `UserPrivilegesProvider` per card
@@ -77,6 +88,8 @@ export const createRuleAttachmentDefinition = ({
         <RuleInlineContent {...props} aiRuleCreation={aiRuleCreation} />
       </UserPrivilegesContext.Provider>
     ),
+    ...(resolveSecurityCanvasContext &&
+      createAttachmentSummaryDrilldown<RuleAttachment>({ resolveSecurityCanvasContext })),
     // Runs outside the render boundary, so a parse throw here would take down the whole card.
     getActionButtons: ({ attachment, updateOrigin }) => {
       try {

@@ -153,5 +153,6 @@
     "@kbn/files-plugin",
     "@kbn/ui-callout",
     "@kbn/core-http-browser-mocks",
+    "@kbn/unified-doc-viewer",
   ]
 }

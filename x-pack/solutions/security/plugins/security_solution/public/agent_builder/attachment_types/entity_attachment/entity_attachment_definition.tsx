@@ -29,6 +29,7 @@ import {
   type SecurityAgentBuilderChrome,
 } from '../entity_explore_navigation';
 import { EntityAnalyticsAgentNavigationProvider } from '../entity_analytics_agent_navigation_context';
+import { createAttachmentSummaryDrilldown } from '../attachment_summary_drilldown/create_details_drilldown';
 import { APP_UI_ID, ENABLE_NEW_FLYOUT_SETTING } from '../../../../common/constants';
 
 const DEFAULT_LABEL = i18n.translate(
@@ -141,6 +142,10 @@ export const createEntityAttachmentDefinition = ({
         </React.Suspense>
       </EntityAnalyticsAgentNavigationProvider>
     ),
+    // The attachment summary drill-down needs the Security store, and nothing else, so it is
+    // available on surfaces that get no `application` and therefore no Canvas.
+    ...(resolveSecurityCanvasContext &&
+      createAttachmentSummaryDrilldown<EntityAttachment>({ resolveSecurityCanvasContext })),
   };
 
   if (application == null || resolveSecurityCanvasContext == null) {
