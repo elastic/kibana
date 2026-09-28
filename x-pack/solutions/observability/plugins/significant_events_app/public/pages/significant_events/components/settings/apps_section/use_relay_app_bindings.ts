@@ -13,9 +13,9 @@ import type {
   SlackAppUnbindChannelResponse,
   SlackChannelBinding,
 } from '@kbn/significant-events-plugin/common';
+import { buildPath } from '@kbn/core-http-browser';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../../util/errors';
-import { buildPath } from '@kbn/core/packages/http/browser';
 
 const BINDINGS_ROUTE = '/internal/significant_events/apps/slack/bindings';
 const BIND_CHANNEL_ROUTE = `/internal/significant_events/apps/slack/bindings/{channelId}/bind`;
