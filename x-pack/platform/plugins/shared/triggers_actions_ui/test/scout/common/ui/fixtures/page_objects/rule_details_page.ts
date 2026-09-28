@@ -51,14 +51,6 @@ export class RuleDetailsPage {
     return this.page.testSubj.locator(RULE_DETAILS_TEST_SUBJECTS.ALERTS_TABLE_EMPTY_STATE);
   }
 
-  public get alertSummaryTotalCount() {
-    return this.page.testSubj.locator('totalAlertCount');
-  }
-
-  public get alertSummaryActiveCount() {
-    return this.page.testSubj.locator('activeAlertCount');
-  }
-
   async expectAlertsTabLoaded() {
     await expect(this.alertsSearchBarRow).toBeVisible({ timeout: SHORTER_TIMEOUT });
   }
