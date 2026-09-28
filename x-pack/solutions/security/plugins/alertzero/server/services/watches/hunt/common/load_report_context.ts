@@ -81,10 +81,11 @@ const isHuntTechnique = (value: unknown): value is string =>
   typeof value === 'string' && value.length > 0 && value.length <= MAX_HUNT_TECHNIQUE_CHARS;
 
 /** A stored vendor or product label, or undefined when it is absent, blank, or not a string. */
-const readVendorProduct = (value: unknown): string | undefined =>
-  typeof value === 'string' && value.length > 0
-    ? value.slice(0, MAX_HUNT_VENDOR_PRODUCT_CHARS)
-    : undefined;
+const readVendorProduct = (value: unknown): string | undefined => {
+  if (typeof value !== 'string') return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed.slice(0, MAX_HUNT_VENDOR_PRODUCT_CHARS) : undefined;
+};
 
 /**
  * Loads the hunt inputs for one report from `.kibana-threat-reports`, scoped to

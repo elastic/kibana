@@ -164,7 +164,7 @@ describe('discoverHuntDatasets', () => {
     expect(listSearchSourcesMock).toHaveBeenCalledWith({
       esClient,
       pattern: HUNT_DISCOVERY_PATTERN,
-      perTypeLimit: 500,
+      perTypeLimit: 2000,
       includeHidden: false,
     });
   });
@@ -183,6 +183,21 @@ describe('discoverHuntDatasets', () => {
     mockDataStreams([]);
 
     await expect(discoverHuntDatasets({ esClient })).resolves.toEqual([]);
+  });
+
+  it('logs the truncation warnings listSearchSources reports', async () => {
+    const logger = loggerMock.create();
+    listSearchSourcesMock.mockResolvedValue({
+      indices: [],
+      aliases: [],
+      datasets: [],
+      data_streams: [],
+      warnings: ['DataStreams results truncated to 2000 elements - Total result count was 2612'],
+    } as unknown as ListSourcesResponse);
+
+    await discoverHuntDatasets({ esClient, logger });
+
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('truncated to 2000'));
   });
 
   it('logs a warning and rethrows when listSearchSources fails', async () => {

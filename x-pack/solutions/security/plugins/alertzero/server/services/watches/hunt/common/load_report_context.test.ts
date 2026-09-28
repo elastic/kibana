@@ -371,6 +371,17 @@ describe('loadReportHuntContext', () => {
       expect(context).not.toHaveProperty('product');
     });
 
+    it('ignores a whitespace-only label and trims the rest', async () => {
+      esClient.search.mockResolvedValue(withVulnerability({ vendor: '   ', product: ' Okta ' }));
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(context).not.toHaveProperty('vendor');
+      expect(context?.product).toBe('Okta');
+    });
+
     it('clamps an overlong label', async () => {
       esClient.search.mockResolvedValue(
         withVulnerability({ vendor: 'v'.repeat(300), product: 'p'.repeat(257) })

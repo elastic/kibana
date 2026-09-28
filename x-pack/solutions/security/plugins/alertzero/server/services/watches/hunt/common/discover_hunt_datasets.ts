@@ -24,8 +24,14 @@ export const HUNT_DISCOVERY_PATTERN = 'logs-*';
 /** Agent-internal datasets never worth hunting; dropped from discovery. */
 export const INTERNAL_DATASET_PREFIXES = ['elastic_agent', 'fleet_server'];
 
-/** `_resolve/index` caps each result type; 500 covers any realistic Fleet deployment. */
-const DISCOVERY_PER_TYPE_LIMIT = 500;
+/**
+ * Cap on data streams returned by `listSearchSources`. It counts data streams
+ * (one per dataset per namespace), not datasets, so namespaces multiply against
+ * it, and truncation drops the alphabetical tail before dedupe, silently making
+ * those datasets unmatchable. It must sit well above the largest expected
+ * estate; the truncation warning logged below is the signal to raise it further.
+ */
+const DISCOVERY_PER_TYPE_LIMIT = 2000;
 
 /**
  * Splits a data stream name into its `{type}-{dataset}-{namespace}` parts: type
@@ -87,6 +93,11 @@ export const discoverHuntDatasets = async ({
       includeHidden: false,
     });
     dataStreamNames = sources.data_streams.map((stream) => stream.name);
+    // `listSearchSources` truncates silently past `perTypeLimit`; a shrunken option
+    // list means a real dataset can never be matched, so say so.
+    for (const warning of sources.warnings ?? []) {
+      logger?.warn(`Hunt dataset discovery for pattern "${pattern}": ${warning}`);
+    }
   } catch (err) {
     logger?.warn(
       `Hunt dataset discovery failed for pattern "${pattern}": ${

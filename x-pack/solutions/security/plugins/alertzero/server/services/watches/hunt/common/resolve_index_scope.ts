@@ -12,7 +12,7 @@ import { HUNT_ALERTS_INDEX_PATTERN_PREFIX } from '../../../../../common/constant
 import { discoverHuntDatasets } from './discover_hunt_datasets';
 import type { DiscoveredDataset } from './discover_hunt_datasets';
 import { matchDatasetsDeterministic, matchDatasetsWithModel } from './match_hunt_datasets';
-import type { HuntScopeReportContext } from './match_hunt_datasets';
+import type { HuntScopeReportContext, ModelDatasetMatch } from './match_hunt_datasets';
 
 /** Default lookback window: 30 days. */
 const DEFAULT_WINDOW_DAYS = 30;
@@ -154,6 +154,19 @@ export const getKnownHuntIndexPatterns = (): string[] =>
     )
   );
 
+/** How the scope was produced, for messages and audit logs. */
+export type HuntScopeResolution =
+  | 'pinned' // explicit technology, present
+  | 'static' // no technology given, at least one known technology present
+  | 'discovered:deterministic' // every known technology blocked; vendor/product match
+  | 'discovered:model' // every known technology blocked; model match
+  | 'blocked:pinned' // explicit technology, its required indices absent
+  | 'blocked:no_report' // every known technology blocked, nothing to match against
+  | 'blocked:discovery_failed' // listSearchSources threw (fail closed)
+  | 'blocked:no_datasets' // discovery returned nothing
+  | 'blocked:model_unavailable' // deterministic missed and no model was given
+  | 'blocked:model_declined'; // deterministic missed and the model returned no accepted match
+
 /**
  * The scope a hunt actually runs against: one or more technologies' patterns
  * merged, or patterns discovered from the cluster when no known technology is
@@ -167,21 +180,43 @@ export type HuntScope = Omit<ResolvedIndexScope, 'technology'> & {
    * blocked). This is what the coordinator reports on the wire.
    */
   index_patterns: string[];
+  resolution: HuntScopeResolution;
 };
 
 const uniq = (values: string[]): string[] => Array.from(new Set(values));
 
-/** Which path produced a hunt scope; logged so a run's scope origin is auditable. */
-type HuntScopeSource = 'static' | 'discovered:deterministic' | 'discovered:model';
+type DiscoveredResolution = Extract<HuntScopeResolution, `discovered:${string}`>;
+type BlockedResolution = Extract<HuntScopeResolution, `blocked:${string}`>;
 
-const logScopeSource = (logger: Logger | undefined, source: HuntScopeSource, count: number) =>
-  logger?.info(`Hunt scope resolved via ${source} (${count} index pattern(s))`);
+/**
+ * Logs how a scope was produced so a run's scope origin is auditable. A
+ * usable scope logs at info with its patterns, plus every model score on the
+ * model path so a model-chosen scope can be audited; a blocked one at debug.
+ */
+const logResolution = (
+  logger: Logger | undefined,
+  scope: HuntScope,
+  scored?: ModelDatasetMatch['scored']
+): void => {
+  if (scope.status === 'blocked') {
+    logger?.debug(`Hunt scope blocked: ${scope.resolution}`);
+    return;
+  }
+  const scores = scored?.map((entry) => `${entry.dataset}=${entry.confidence}`).join(', ');
+  logger?.info(
+    `Hunt scope resolved via ${scope.resolution}: ${scope.index_patterns.join(', ')}${
+      scores ? ` (${scores})` : ''
+    }`
+  );
+};
 
 /**
  * Merges per-technology scopes into one static hunt scope. When none is
  * present the result is `blocked` and `missing` lists every checked pattern.
+ * A blocked unpinned scope starts as `blocked:no_report`; the dynamic path in
+ * `resolveHuntScope` narrows that when it gets to run.
  */
-const mergeStaticScopes = (scopes: ResolvedIndexScope[]): HuntScope => {
+const mergeStaticScopes = (scopes: ResolvedIndexScope[], pinned: boolean): HuntScope => {
   const present = scopes.filter((scope) => scope.status !== 'blocked');
   const source = present.length > 0 ? present : scopes;
   const status = deriveStatus(
@@ -189,6 +224,14 @@ const mergeStaticScopes = (scopes: ResolvedIndexScope[]): HuntScope => {
     present.some((scope) => scope.status === 'degraded')
   );
   const required = uniq(source.flatMap((scope) => scope.required));
+  const resolution: HuntScopeResolution =
+    status === 'blocked'
+      ? pinned
+        ? 'blocked:pinned'
+        : 'blocked:no_report'
+      : pinned
+      ? 'pinned'
+      : 'static';
 
   return {
     technologies: present.map((scope) => scope.technology),
@@ -196,34 +239,39 @@ const mergeStaticScopes = (scopes: ResolvedIndexScope[]): HuntScope => {
     required,
     optional: uniq(source.flatMap((scope) => scope.optional)),
     missing: uniq(source.flatMap((scope) => scope.missing)),
-    index_patterns: required,
+    // The wire contract says empty when blocked: `required` still names what was
+    // checked (for `missing`), but nothing was hunted against it.
+    index_patterns: status === 'blocked' ? [] : required,
+    resolution,
     window: scopes[0].window,
     row_limit: scopes[0].row_limit,
   };
 };
 
 /**
- * Builds a hunt scope from discovered datasets. The space-derived alerts
- * pattern is the only optional; its absence degrades the scope exactly as it
- * does for a static technology. `missing` carries the static patterns that
- * were checked and absent so the caller can still see what was looked for.
+ * Builds a hunt scope from discovered datasets. A deterministic match is `ok`;
+ * a model match is `degraded` since it is a weaker signal. The space-derived
+ * alerts pattern is the only optional; its absence degrades the scope exactly
+ * as it does for a static technology. `missing` carries the static patterns
+ * that were checked and absent so the caller can still see what was looked for.
  */
 const buildDiscoveredScope = async ({
   esClient,
   spaceId,
   matches,
   blocked,
-  status,
+  resolution,
 }: {
   esClient: ElasticsearchClient;
   spaceId: string;
   matches: DiscoveredDataset[];
   blocked: HuntScope;
-  status: 'ok' | 'degraded';
+  resolution: DiscoveredResolution;
 }): Promise<HuntScope> => {
   const alertsPattern = alertsIndexPattern(spaceId);
   const [, alertsPresent] = await checkPattern(esClient, alertsPattern);
   const required = uniq(matches.map((match) => match.index_pattern));
+  const status = resolution === 'discovered:deterministic' ? 'ok' : 'degraded';
 
   return {
     technologies: [],
@@ -232,6 +280,7 @@ const buildDiscoveredScope = async ({
     optional: [alertsPattern],
     missing: uniq([...blocked.missing, ...(alertsPresent ? [] : [alertsPattern])]),
     index_patterns: required,
+    resolution,
     window: blocked.window,
     row_limit: blocked.row_limit,
   };
@@ -277,21 +326,25 @@ export const resolveHuntScope = async ({
       resolveIndexScope({ esClient, technology: candidate, spaceId, window, row_limit })
     )
   );
-  const staticScope = mergeStaticScopes(scopes);
-  if (staticScope.status !== 'blocked') {
-    logScopeSource(logger, 'static', staticScope.index_patterns.length);
-    return staticScope;
-  }
-  if (technology || !report) return staticScope;
+  const staticScope = mergeStaticScopes(scopes, technology !== undefined);
+  const finish = (scope: HuntScope, scored?: ModelDatasetMatch['scored']): HuntScope => {
+    logResolution(logger, scope, scored);
+    return scope;
+  };
+  const blocked = (resolution: BlockedResolution): HuntScope =>
+    finish({ ...staticScope, resolution });
+
+  // Pinned or no-report blocked scopes already carry their resolution.
+  if (staticScope.status !== 'blocked' || technology || !report) return finish(staticScope);
 
   let datasets: DiscoveredDataset[];
   try {
     datasets = await discoverHuntDatasets({ esClient, logger });
   } catch (err) {
     logger?.warn(`Hunt dataset discovery failed; scope stays blocked: ${(err as Error).message}`);
-    return staticScope;
+    return blocked('blocked:discovery_failed');
   }
-  if (datasets.length === 0) return staticScope;
+  if (datasets.length === 0) return blocked('blocked:no_datasets');
 
   const deterministic = matchDatasetsDeterministic({
     datasets,
@@ -299,30 +352,31 @@ export const resolveHuntScope = async ({
     product: report.product,
   });
   if (deterministic.length > 0) {
-    const scope = await buildDiscoveredScope({
-      esClient,
-      spaceId,
-      matches: deterministic,
-      blocked: staticScope,
-      status: 'ok',
-    });
-    logScopeSource(logger, 'discovered:deterministic', scope.index_patterns.length);
-    return scope;
+    return finish(
+      await buildDiscoveredScope({
+        esClient,
+        spaceId,
+        matches: deterministic,
+        blocked: staticScope,
+        resolution: 'discovered:deterministic',
+      })
+    );
   }
 
-  if (!model) return staticScope;
+  if (!model) return blocked('blocked:model_unavailable');
   const modelMatch = await matchDatasetsWithModel({ model, datasets, report, logger });
-  if (!modelMatch || modelMatch.matches.length === 0) return staticScope;
+  if (!modelMatch || modelMatch.matches.length === 0) return blocked('blocked:model_declined');
 
-  const scope = await buildDiscoveredScope({
-    esClient,
-    spaceId,
-    matches: modelMatch.matches,
-    blocked: staticScope,
-    status: 'degraded',
-  });
-  logScopeSource(logger, 'discovered:model', scope.index_patterns.length);
-  return scope;
+  return finish(
+    await buildDiscoveredScope({
+      esClient,
+      spaceId,
+      matches: modelMatch.matches,
+      blocked: staticScope,
+      resolution: 'discovered:model',
+    }),
+    modelMatch.scored
+  );
 };
 
 const isHuntTechnology = (value: string): value is HuntTechnology =>
