@@ -39,7 +39,7 @@ describe('getAlertZeroDeepLinks', () => {
 
   it('includes the escalations link when showEscalations capability is true', () => {
     const capabilities = {
-      escalations: { showEscalations: true },
+      agenticInvestigations: { showEscalations: true },
     } as unknown as Capabilities;
 
     const ids = getAlertZeroDeepLinks(capabilities).map((link) => link.id);
@@ -50,7 +50,7 @@ describe('getAlertZeroDeepLinks', () => {
 
   it('omits the escalations link when showEscalations capability is false', () => {
     const capabilities = {
-      escalations: { showEscalations: false },
+      agenticInvestigations: { showEscalations: false },
     } as unknown as Capabilities;
 
     const ids = getAlertZeroDeepLinks(capabilities).map((link) => link.id);
@@ -61,7 +61,7 @@ describe('getAlertZeroDeepLinks', () => {
     expect(ids).toContain(SecurityPageName.alertZeroWatches);
   });
 
-  it('includes the escalations link when escalations capability namespace is absent', () => {
+  it('includes the escalations link when agenticInvestigations capability namespace is absent', () => {
     // A deployment where the plugin is not installed; capabilities block is missing entirely.
     const capabilities = {} as unknown as Capabilities;
 

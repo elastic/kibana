@@ -20,11 +20,11 @@ import * as i18n from './components/app_chrome/translations';
  * @param capabilities Optional Kibana capabilities object. When absent (e.g. at setup time before
  * capabilities are resolved) all links are included. When present, links guarded by a specific
  * capability are omitted when that capability is false. The escalations link requires
- * `capabilities.escalations.showEscalations`.
+ * `capabilities.agenticInvestigations.showEscalations`.
  */
 export const getAlertZeroDeepLinks = (capabilities?: Capabilities): AppDeepLink[] => {
   const showEscalations =
-    capabilities === undefined || capabilities.escalations?.showEscalations !== false;
+    capabilities === undefined || capabilities.agenticInvestigations?.showEscalations !== false;
 
   return [
     {
