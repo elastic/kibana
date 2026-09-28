@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
 import {
   NIGHTSHIFT_INVESTIGATION_LOCATOR_ID,
@@ -17,9 +18,18 @@ import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../utils/kibana_react';
 import { getInvestigationsClient } from '../services/investigations_client';
 
+export const VIEWED_INVESTIGATIONS_STORAGE_KEY = 'xpack.observability.viewedInvestigationIds';
+export const MAX_VIEWED_INVESTIGATIONS = 200;
+
 const getStatusQuery = (alertId: string) => ({
   concurrency_key: alertId,
-  statuses: ['pending', 'running', 'completed'] satisfies InvestigationStatus[],
+  statuses: [
+    'pending',
+    'running',
+    'completed',
+    'failed',
+    'cancelled',
+  ] satisfies InvestigationStatus[],
   subject_types: ['alert'] satisfies InvestigationSubjectType[],
   sort_field: 'created_at' as const,
   sort_order: 'desc' as const,
@@ -77,6 +87,10 @@ export const useInvestigateAlert = ({
         ? 5_000
         : false,
   });
+  const [viewedInvestigationIds = [], setViewedInvestigationIds] = useLocalStorage<string[]>(
+    VIEWED_INVESTIGATIONS_STORAGE_KEY,
+    []
+  );
   const [isStarting, setIsStarting] = useState(false);
   const latestInvestigation = investigations?.results[0];
   const latestStatus = latestInvestigation?.status;
@@ -89,6 +103,30 @@ export const useInvestigateAlert = ({
     () => (investigationId ? investigationLocator?.getRedirectUrl({ investigationId }) : undefined),
     [investigationId, investigationLocator]
   );
+
+  const markInvestigationViewed = useCallback(() => {
+    if (!investigationId) return;
+    setViewedInvestigationIds((prev = []) =>
+      [investigationId, ...prev.filter((id) => id !== investigationId)].slice(
+        0,
+        MAX_VIEWED_INVESTIGATIONS
+      )
+    );
+  }, [investigationId, setViewedInvestigationIds]);
+
+  const isFinished = latestStatus === 'failed' || latestStatus === 'cancelled';
+  const isOpened = Boolean(investigationId && viewedInvestigationIds.includes(investigationId));
+
+  const showViewInvestigation =
+    showInvestigateAction &&
+    !isInvestigating &&
+    (latestStatus === 'completed' || isFinished) &&
+    Boolean(viewInvestigationUrl);
+  const showInvestigateButton =
+    showInvestigateAction &&
+    !isInvestigating &&
+    (!latestInvestigation || (latestStatus === 'completed' && isOpened) || isFinished);
+
   const viewInvestigationActionLabel = i18n.translate(
     'xpack.observability.alerts.viewInvestigationButtonLabel',
     {
@@ -100,9 +138,9 @@ export const useInvestigateAlert = ({
   });
   if (isInvestigating) {
     investigateActionLabel = i18n.translate('xpack.observability.alerts.investigating', {
-      defaultMessage: 'Investigating',
+      defaultMessage: 'Investigating…',
     });
-  } else if (latestStatus === 'completed') {
+  } else if (latestInvestigation) {
     investigateActionLabel = i18n.translate('xpack.observability.alerts.reinvestigate', {
       defaultMessage: 'Re-investigate',
     });
@@ -140,10 +178,13 @@ export const useInvestigateAlert = ({
 
   return {
     showInvestigateAction,
+    showInvestigateButton,
+    showViewInvestigation,
     handleInvestigate,
     isInvestigating,
     investigateActionLabel,
     viewInvestigationUrl,
     viewInvestigationActionLabel,
+    markInvestigationViewed,
   };
 };

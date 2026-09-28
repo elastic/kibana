@@ -54,8 +54,9 @@ export const EpisodeFooterActionMenu = ({
   viewDetailsHref,
   onSuccess,
 }: EpisodeFooterActionMenuProps) => {
-  const [workflowActions, otherActions] = partition(actions, ({ id }) =>
-    WORKFLOW_ACTION_IDS.has(id)
+  const [workflowActions, otherActions] = partition(
+    actions,
+    (action) => WORKFLOW_ACTION_IDS.has(action.id) || action.isWorkflowAction === true
   );
 
   const toMenuItem = (action: EpisodeAction): EuiContextMenuPanelItemDescriptor => {

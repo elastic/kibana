@@ -51,4 +51,8 @@ export interface EpisodeAction {
    * Defaults to `true` when omitted.
    */
   supportsBulk?: boolean;
+  /**
+   * Whether this action is a workflow action grouped with lifecycle operations.
+   */
+  isWorkflowAction?: boolean;
 }

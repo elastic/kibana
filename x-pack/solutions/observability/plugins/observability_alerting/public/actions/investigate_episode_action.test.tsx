@@ -73,18 +73,22 @@ describe('createInvestigateEpisodeAction', () => {
     jest.clearAllMocks();
     mockUseInvestigateAlert.mockReturnValue({
       showInvestigateAction: true,
+      showInvestigateButton: true,
+      showViewInvestigation: false,
       handleInvestigate: jest.fn(),
       isInvestigating: false,
       investigateActionLabel: 'Investigate',
       viewInvestigationUrl: undefined,
       viewInvestigationActionLabel: 'View investigation',
+      markInvestigationViewed: jest.fn(),
     });
   });
 
-  it('has correct metadata and order 60', () => {
+  it('has correct metadata, order 35, and isWorkflowAction: true', () => {
     const action = createInvestigateEpisodeAction();
     expect(action.id).toBe(INVESTIGATE_EPISODE_ACTION_ID);
-    expect(action.order).toBe(60);
+    expect(action.order).toBe(35);
+    expect(action.isWorkflowAction).toBe(true);
     expect(action.iconType).toBe('inspect');
   });
 
@@ -108,16 +112,19 @@ describe('createInvestigateEpisodeAction', () => {
     expect(action.showWhenDisabled?.({ episodes: [native] })).toBe(false);
   });
 
-  it('renders Investigate button in menu item', () => {
+  it('renders Investigate button with inspect icon in menu item', () => {
     const action = createInvestigateEpisodeAction();
     const handleInvestigate = jest.fn();
     mockUseInvestigateAlert.mockReturnValue({
       showInvestigateAction: true,
+      showInvestigateButton: true,
+      showViewInvestigation: false,
       handleInvestigate,
       isInvestigating: false,
       investigateActionLabel: 'Investigate',
       viewInvestigationUrl: undefined,
       viewInvestigationActionLabel: 'View investigation',
+      markInvestigationViewed: jest.fn(),
     });
 
     render(
@@ -133,20 +140,24 @@ describe('createInvestigateEpisodeAction', () => {
     expect(button).toBeInTheDocument();
     expect(button).toHaveTextContent('Investigate');
     expect(button).not.toBeDisabled();
+    expect(button.querySelector('[data-euiicon-type="inspect"]')).toBeInTheDocument();
 
     fireEvent.click(button);
     expect(handleInvestigate).toHaveBeenCalledTimes(1);
   });
 
-  it('renders disabled button when isInvestigating is true', () => {
+  it('renders disabled button with spinner when isInvestigating is true', () => {
     const action = createInvestigateEpisodeAction();
     mockUseInvestigateAlert.mockReturnValue({
       showInvestigateAction: true,
+      showInvestigateButton: false,
+      showViewInvestigation: false,
       handleInvestigate: jest.fn(),
       isInvestigating: true,
-      investigateActionLabel: 'Investigating',
+      investigateActionLabel: 'Investigating…',
       viewInvestigationUrl: undefined,
       viewInvestigationActionLabel: 'View investigation',
+      markInvestigationViewed: jest.fn(),
     });
 
     render(
@@ -160,20 +171,26 @@ describe('createInvestigateEpisodeAction', () => {
 
     const button = screen.getByTestId('investigateAlert');
     expect(button).toBeInTheDocument();
-    expect(button).toHaveTextContent('Investigating');
-    expect(button).toBeDisabled();
+    expect(button).toHaveTextContent('Investigating…');
+    expect(button).toHaveAttribute('aria-disabled', 'true');
+    expect(button.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+    expect(screen.queryByTestId('viewAlertInvestigation')).not.toBeInTheDocument();
   });
 
-  it('renders View investigation and Re-investigate when investigation exists', () => {
+  it('renders View investigation only with eye icon when completed and not opened', () => {
     const action = createInvestigateEpisodeAction();
     const closeMenu = jest.fn();
+    const markInvestigationViewed = jest.fn();
     mockUseInvestigateAlert.mockReturnValue({
       showInvestigateAction: true,
+      showInvestigateButton: false,
+      showViewInvestigation: true,
       handleInvestigate: jest.fn(),
       isInvestigating: false,
-      investigateActionLabel: 'Re-investigate',
+      investigateActionLabel: 'Investigate',
       viewInvestigationUrl: '/app/nightshift?investigationId=inv-1',
       viewInvestigationActionLabel: 'View investigation',
+      markInvestigationViewed,
     });
 
     render(<>{action.renderMenuItem!({ episodes: [makeClassicEpisode('alert-1')], closeMenu })}</>);
@@ -182,24 +199,63 @@ describe('createInvestigateEpisodeAction', () => {
     expect(viewButton).toBeInTheDocument();
     expect(viewButton).toHaveAttribute('href', '/app/nightshift?investigationId=inv-1');
     expect(viewButton).toHaveTextContent('View investigation');
-
-    const investigateButton = screen.getByTestId('investigateAlert');
-    expect(investigateButton).toBeInTheDocument();
-    expect(investigateButton).toHaveTextContent('Re-investigate');
+    expect(viewButton.querySelector('[data-euiicon-type="eye"]')).toBeInTheDocument();
+    expect(screen.queryByTestId('investigateAlert')).not.toBeInTheDocument();
 
     fireEvent.click(viewButton);
+    expect(markInvestigationViewed).toHaveBeenCalledTimes(1);
     expect(closeMenu).toHaveBeenCalledTimes(1);
   });
 
-  it('returns null when neither action is available', () => {
+  it('renders View investigation then Re-investigate when investigation is opened', () => {
+    const action = createInvestigateEpisodeAction();
+    const closeMenu = jest.fn();
+    const markInvestigationViewed = jest.fn();
+    mockUseInvestigateAlert.mockReturnValue({
+      showInvestigateAction: true,
+      showInvestigateButton: true,
+      showViewInvestigation: true,
+      handleInvestigate: jest.fn(),
+      isInvestigating: false,
+      investigateActionLabel: 'Re-investigate',
+      viewInvestigationUrl: '/app/nightshift?investigationId=inv-1',
+      viewInvestigationActionLabel: 'View investigation',
+      markInvestigationViewed,
+    });
+
+    render(<>{action.renderMenuItem!({ episodes: [makeClassicEpisode('alert-1')], closeMenu })}</>);
+
+    const viewButton = screen.getByTestId('viewAlertInvestigation');
+    const investigateButton = screen.getByTestId('investigateAlert');
+
+    expect(viewButton.compareDocumentPosition(investigateButton)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+
+    expect(viewButton).toBeInTheDocument();
+    expect(viewButton.querySelector('[data-euiicon-type="eye"]')).toBeInTheDocument();
+
+    expect(investigateButton).toBeInTheDocument();
+    expect(investigateButton).toHaveTextContent('Re-investigate');
+    expect(investigateButton.querySelector('[data-euiicon-type="inspect"]')).toBeInTheDocument();
+
+    fireEvent.click(viewButton);
+    expect(markInvestigationViewed).toHaveBeenCalledTimes(1);
+    expect(closeMenu).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns null when investigation action is not available', () => {
     const action = createInvestigateEpisodeAction();
     mockUseInvestigateAlert.mockReturnValue({
       showInvestigateAction: false,
+      showInvestigateButton: false,
+      showViewInvestigation: false,
       handleInvestigate: jest.fn(),
       isInvestigating: false,
       investigateActionLabel: 'Investigate',
       viewInvestigationUrl: undefined,
       viewInvestigationActionLabel: 'View investigation',
+      markInvestigationViewed: jest.fn(),
     });
 
     const { container } = render(

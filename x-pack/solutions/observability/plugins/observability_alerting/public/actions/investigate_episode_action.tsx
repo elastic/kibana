@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiContextMenuItem } from '@elastic/eui';
+import { EuiContextMenuItem, EuiLoadingSpinner } from '@elastic/eui';
 import type {
   EpisodeAction,
   EpisodeActionContext,
@@ -41,49 +41,61 @@ export const InvestigateEpisodeMenuItem = ({
   closeMenu,
 }: InvestigateEpisodeMenuItemProps) => {
   const alertId = getAlertIdFromEpisode(episode);
-  const handleInvestigateSuccess = useCallback(() => {
-    onSuccess?.();
-    closeMenu?.();
-  }, [onSuccess, closeMenu]);
-
   const {
     showInvestigateAction,
+    showInvestigateButton,
+    showViewInvestigation,
     handleInvestigate,
     isInvestigating,
     investigateActionLabel,
     viewInvestigationUrl,
     viewInvestigationActionLabel,
+    markInvestigationViewed,
   } = useInvestigateAlert({
     alertId,
     enabled: Boolean(alertId),
-    onInvestigate: handleInvestigateSuccess,
+    onInvestigate: onSuccess,
   });
 
   const onInvestigateClick = useCallback(async () => {
     await handleInvestigate();
   }, [handleInvestigate]);
 
-  if (!showInvestigateAction && !viewInvestigationUrl) {
+  if (!showInvestigateAction) {
     return null;
+  }
+
+  if (isInvestigating) {
+    return (
+      <EuiContextMenuItem
+        data-test-subj="investigateAlert"
+        disabled
+        icon={<EuiLoadingSpinner size="m" />}
+      >
+        {investigateActionLabel}
+      </EuiContextMenuItem>
+    );
   }
 
   return (
     <>
-      {viewInvestigationUrl && (
+      {showViewInvestigation && (
         <EuiContextMenuItem
           data-test-subj="viewAlertInvestigation"
           href={viewInvestigationUrl}
+          icon="eye"
           onClick={() => {
+            markInvestigationViewed();
             closeMenu?.();
           }}
         >
           {viewInvestigationActionLabel}
         </EuiContextMenuItem>
       )}
-      {showInvestigateAction && (
+      {showInvestigateButton && (
         <EuiContextMenuItem
           data-test-subj="investigateAlert"
-          disabled={isInvestigating}
+          icon="inspect"
           onClick={onInvestigateClick}
         >
           {investigateActionLabel}
@@ -95,7 +107,8 @@ export const InvestigateEpisodeMenuItem = ({
 
 export const createInvestigateEpisodeAction = (): EpisodeAction => ({
   id: INVESTIGATE_EPISODE_ACTION_ID,
-  order: 60,
+  order: 35,
+  isWorkflowAction: true,
   displayName: i18n.translate('xpack.observabilityAlerting.actions.investigateDisplayName', {
     defaultMessage: 'Investigate',
   }),

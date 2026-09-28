@@ -215,9 +215,6 @@ export const AlertingV2EpisodesPage = ({
           <LocatorProvider locators={locators}>
             <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
               <PrivilegeCheckProvider value={privilegeCheck}>
-                <I18nProvider>
-                  <EpisodesApp dataSource={dataSource} />
-                </I18nProvider>
                 <ManageRulesHrefProvider value={manageRulesHref}>
                   <I18nProvider>
                     <EpisodesApp dataSource={dataSource} />

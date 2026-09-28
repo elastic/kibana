@@ -150,5 +150,57 @@ test.describe(
         subject: { type: 'alert', id: alertId },
       });
     });
+
+    test('shows investigating state while running and reveals re-investigate only after viewing', async ({
+      page,
+      pageObjects,
+    }) => {
+      let status: 'running' | 'completed' = 'running';
+      await page.route('**/internal/nightshift/investigations?*', async (route: any) => {
+        await route.fulfill({
+          status: 200,
+          json: {
+            results: [{ investigation_id: 'investigation-1', status }],
+            page: 1,
+            size: 2,
+            total: 1,
+          },
+        });
+      });
+
+      const alerting = pageObjects.observabilityAlerting;
+      await alerting.gotoInboxFilteredByRule(ruleId);
+      await expect(alerting.pageTitle).toHaveText('Alert episodes', { timeout: 30_000 });
+      await expect(alerting.episodesListPage).toBeVisible();
+
+      const menuButton = page.testSubj.locator('unifiedDataTable_additionalRowControl_actionsMenu');
+      await expect(menuButton).toBeVisible({ timeout: 30_000 });
+
+      await menuButton.click();
+      const investigateItem = page.testSubj.locator('investigateAlert');
+      const viewItem = page.testSubj.locator('viewAlertInvestigation');
+
+      await expect(investigateItem).toBeVisible();
+      await expect(investigateItem).toBeDisabled();
+      await expect(viewItem).not.toBeVisible();
+
+      await page.keyboard.press('Escape');
+
+      status = 'completed';
+
+      await menuButton.click();
+      await expect(viewItem).toBeVisible();
+      await expect(investigateItem).not.toBeVisible();
+
+      await page.route('**/app/nightshift*', async (route: any) => {
+        await route.abort();
+      });
+      await viewItem.click().catch(() => {});
+
+      await menuButton.click();
+      await expect(viewItem).toBeVisible();
+      await expect(investigateItem).toBeVisible();
+      await expect(investigateItem).toHaveText('Re-investigate');
+    });
   }
 );
