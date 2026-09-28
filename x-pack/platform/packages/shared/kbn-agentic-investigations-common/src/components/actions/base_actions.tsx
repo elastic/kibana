@@ -66,7 +66,7 @@ const useContextMenuItems = (
   );
 };
 
-export type CardActionType = 'createEscalation' | 'addToEscalation' | 'close' | 'assign';
+export type CardActionType = 'createEscalation' | 'attachToEscalation' | 'close';
 
 /**
  * Returns true when at least one action will appear in the menu for this investigation.
@@ -159,22 +159,16 @@ export const BaseActions = memo<BaseActionsProps>(
                 onClick: () => onClickAction('createEscalation', investigation.recordId),
               },
               {
-                key: 'addToEscalation',
-                icon: 'link' as IconType,
-                name: ACTIONS_TRANSLATIONS.buttons.addToEscalation,
-                onClick: () => onClickAction('addToEscalation', investigation.recordId),
+                key: 'attachToEscalation',
+                icon: 'branch' as IconType,
+                name: ACTIONS_TRANSLATIONS.buttons.attachToEscalation,
+                onClick: () => onClickAction('attachToEscalation', investigation.recordId),
               },
             ]
           : []),
         ...(decided
           ? []
           : [
-              {
-                key: 'assign',
-                icon: 'user',
-                name: ACTIONS_TRANSLATIONS.buttons.assign,
-                onClick: () => onClickAction('assign', investigation.recordId),
-              },
               // Only show Close when the caller has the capability AND the investigation is not
               // already closed. Flyout investigations are conversation-derived and have no
               // `recommendedAction`, so `isDecided` alone is not a reliable gate; we also
