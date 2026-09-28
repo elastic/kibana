@@ -154,6 +154,7 @@ export const postBulkUninstallPackagesHandler: FleetRequestHandler<
       pkgName: installation.name,
       installation,
       packagePolicies: policiesByPkg.get(installation.name) ?? [],
+      savedObjectsClient,
     });
   }
 

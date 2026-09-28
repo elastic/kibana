@@ -142,6 +142,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
           installed_kibana_space_id: 'default',
         } as any,
         packagePolicies: [],
+        savedObjectsClient: {} as any,
       })
     ).resolves.toBeUndefined();
   });
@@ -158,6 +159,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
           installed_kibana_space_id: 'default',
         } as any,
         packagePolicies: [],
+        savedObjectsClient: {} as any,
       })
     ).resolves.toBeUndefined();
 
@@ -182,6 +184,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
       pkgName: 'nginx',
       installation,
       packagePolicies,
+      savedObjectsClient: {} as any,
     });
 
     expect(mockFns.checkPrivilegesAtSpaces).toHaveBeenCalledWith(
@@ -205,6 +208,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
           installed_kibana_space_id: 'default',
         } as any,
         packagePolicies: [{ id: 'policy-1', spaceIds: ['other-space'] }] as any,
+        savedObjectsClient: {} as any,
       })
     ).rejects.toThrow(FleetUnauthorizedError);
   });
@@ -221,6 +225,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
           installed_kibana_space_id: 'default',
         } as any,
         packagePolicies: [{ id: 'policy-1', spaceIds: ['secret-space'] }] as any,
+        savedObjectsClient: {} as any,
       })
     ).rejects.toThrow(
       'Insufficient privileges to uninstall package nginx: it is used in spaces you are not authorized to access'
