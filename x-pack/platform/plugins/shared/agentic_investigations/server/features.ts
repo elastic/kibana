@@ -85,7 +85,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
                 name: i18n.translate('xpack.agenticInvestigations.escalationsAllPrivilegeName', {
                   defaultMessage: 'Manage escalations',
                 }),
-                includeIn: 'all',
+                includeIn: 'none',
                 api: [ESCALATIONS_API_PRIVILEGE_READ, ESCALATIONS_API_PRIVILEGE_MANAGE],
                 savedObject: { all: [], read: [] },
                 ui: [ESCALATIONS_UI_CAPABILITY_SHOW, ESCALATIONS_UI_CAPABILITY_MANAGE],

@@ -197,6 +197,7 @@ editor:
         - feature_workflowsManagement.all
         - feature_alertzero.all
         - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
         - feature_proposals.all
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
@@ -270,6 +271,7 @@ t1_analyst:
         - feature_workflowsManagement.all
         - feature_alertzero.read
         - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
         - feature_proposals.all
       resources: "*"
 
@@ -344,6 +346,7 @@ t2_analyst:
         - feature_workflowsManagement.all
         - feature_alertzero.read
         - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
         - feature_proposals.all
       resources: "*"
 
@@ -520,6 +523,7 @@ threat_intelligence_analyst:
         - feature_workflowsManagement.all
         - feature_alertzero.read
         - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
         - feature_proposals.all
       resources: "*"
 
@@ -979,6 +983,7 @@ endpoint_operations_analyst:
         - feature_workflowsManagement.all
         - feature_alertzero.read
         - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
         - feature_proposals.all
       resources: "*"
 
@@ -1073,5 +1078,6 @@ endpoint_policy_manager:
         - feature_workflowsManagement.all
         - feature_alertzero.read
         - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
         - feature_proposals.all
       resources: "*"
