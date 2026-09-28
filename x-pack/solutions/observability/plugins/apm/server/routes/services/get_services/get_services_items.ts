@@ -22,7 +22,7 @@ import { getServicesSloStats } from './get_services_slo_stats';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
 import { mergeServiceStats } from './merge_service_stats';
 
-export const MAX_NUMBER_OF_SERVICES = 1_000;
+export const MAX_NUMBER_OF_SERVICES = 2_000;
 
 export async function getServicesItems({
   environment,
