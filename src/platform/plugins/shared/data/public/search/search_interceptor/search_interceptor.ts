@@ -207,6 +207,9 @@ export class SearchInterceptor {
   }
 
   private sendCancelRequest(searchId: string, strategy: string) {
+    // TEMP DEBUG (issue #246775 investigation) — remove before merging
+    // eslint-disable-next-line no-console
+    console.log('[DEBUG sendCancelRequest] DELETE', { searchId, strategy });
     return this.deps.http.delete(
       buildPath('/internal/search/{strategy}/{id}', { strategy, id: searchId }),
       { version: '1', keepalive: true }
@@ -439,6 +442,15 @@ export class SearchInterceptor {
     );
 
     const cancel = async () => {
+      // TEMP DEBUG (issue #246775 investigation) — remove before merging
+      // eslint-disable-next-line no-console
+      console.log('[DEBUG cancel()]', {
+        id,
+        reason: searchAbortController.getSignal().reason,
+        isSavedToBackground,
+        isTimeout: searchAbortController.isTimeout(),
+        isCanceled: searchAbortController.isCanceled(),
+      });
       // If the request times out/is canceled, we handle cancellation after we make the last call to retrieve the results
       if (
         !id ||
@@ -448,6 +460,8 @@ export class SearchInterceptor {
       )
         return;
       try {
+        // eslint-disable-next-line no-console
+        console.log('[DEBUG cancel()] sending immediate cancel/DELETE request', { id });
         await sendCancelRequest();
       } catch (e) {
         // eslint-disable-next-line no-console
@@ -504,6 +518,15 @@ export class SearchInterceptor {
           : response;
       }),
       catchError((e: Error) => {
+        // TEMP DEBUG (issue #246775 investigation) — remove before merging
+        // eslint-disable-next-line no-console
+        console.log('[DEBUG outer catchError]', {
+          id,
+          errorMessage: e?.message,
+          isTimeout: searchAbortController.isTimeout(),
+          isCanceled: searchAbortController.isCanceled(),
+          reason: searchAbortController.getSignal().reason,
+        });
         // If we aborted (search:timeout advanced setting) or the user canceled and there was a partial response, return it instead of just erroring out
         // Only attempt to fetch partial results if we have a valid async search ID
         if (id && (searchAbortController.isTimeout() || searchAbortController.isCanceled())) {
@@ -513,6 +536,8 @@ export class SearchInterceptor {
               [EVENT_PROPERTY_EXECUTION_CONTEXT]: options.executionContext,
             });
           }
+          // eslint-disable-next-line no-console
+          console.log('[DEBUG outer catchError] retrieving partial results via GET', { id });
           return from(
             this.runSearch(
               { id, ...request },
@@ -523,7 +548,14 @@ export class SearchInterceptor {
               }
             )
           ).pipe(
-            catchError(() => of(getFallbackPartialResponse(id))),
+            catchError((retrievalError) => {
+              // eslint-disable-next-line no-console
+              console.log('[DEBUG outer catchError] partial-results GET FAILED, using fallback', {
+                id,
+                retrievalError: (retrievalError as Error)?.message ?? retrievalError,
+              });
+              return of(getFallbackPartialResponse(id));
+            }),
             map((response) =>
               options.strategy === ENHANCED_ES_SEARCH_STRATEGY
                 ? toPartialResponseAfterTimeout(response)
@@ -686,6 +718,15 @@ export class SearchInterceptor {
     const sessionOptions = this.deps.session.getSearchOptions(options.sessionId);
     const cached =
       requestHash && !sessionOptions?.isRestore ? this.responseCache.get(requestHash) : undefined; // don't use cache if restoring a session
+
+    // TEMP DEBUG (issue #246775 investigation) — remove before merging
+    // eslint-disable-next-line no-console
+    console.log('[DEBUG getSearchResponse$]', {
+      requestHash,
+      cacheHit: Boolean(cached),
+      cachedControllerAlreadyAborted: cached?.searchAbortController.getSignal().aborted,
+      cachedControllerReason: cached?.searchAbortController.getSignal().reason,
+    });
 
     const searchAbortController =
       cached?.searchAbortController || new SearchAbortController(this.searchTimeout);
