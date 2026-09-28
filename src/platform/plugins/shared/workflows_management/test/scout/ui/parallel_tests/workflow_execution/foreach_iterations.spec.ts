@@ -130,12 +130,6 @@ test.describe(
 
       await pageObjects.workflowExecution.expandStepsTree();
 
-      const showMoreIterations = pageObjects.workflowExecution.executionPanel.getByRole('button', {
-        name: /Show \d+ more iterations/,
-      });
-      await showMoreIterations.click();
-      await pageObjects.workflowExecution.expandStepsTree();
-
       const iterationSteps = pageObjects.workflowExecution.executionPanel.getByRole('button', {
         name: /^(?!foreach_).*hello_world_step/,
       });
