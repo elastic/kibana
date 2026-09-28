@@ -476,6 +476,42 @@ describe('getIndexFields', () => {
     }
   });
 
+  it('returns view output columns when the name is an ES|QL view', async () => {
+    const resolveIndex = jest.fn().mockRejectedValue(
+      new esErrors.ResponseError({
+        statusCode: 404,
+        body: { error: { type: 'index_not_found_exception' } },
+        headers: {},
+        meta: {} as any,
+        warnings: [],
+      } as any)
+    );
+    const esClient = {
+      ...createEsClient({ resolveIndex }),
+      esql: {
+        getView: jest.fn().mockResolvedValue({
+          views: [{ name: 'logs-proxy-parsed', query: 'FROM logs-* | KEEP status' }],
+        }),
+        query: jest.fn().mockResolvedValue({
+          columns: [{ name: 'status', type: 'integer' }],
+          values: [],
+        }),
+      },
+    } as unknown as ElasticsearchClient;
+
+    const result = await getIndexFields({
+      indices: ['logs-proxy-parsed'],
+      includeViews: true,
+      esClient,
+    });
+
+    expect(result['logs-proxy-parsed'].type).toBe('view');
+    expect(result['logs-proxy-parsed'].fields).toEqual([
+      { path: 'status', type: 'integer', meta: {} },
+    ]);
+    expect(esClient.fieldCaps).not.toHaveBeenCalled();
+  });
+
   it('treats a 404 from resolveIndex as indexPattern (empty fields)', async () => {
     const notFound = new esErrors.ResponseError({
       statusCode: 404,

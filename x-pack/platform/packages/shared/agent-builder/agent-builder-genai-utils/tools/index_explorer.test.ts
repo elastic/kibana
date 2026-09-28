@@ -172,6 +172,7 @@ describe('indexExplorer', () => {
       excludeIndicesRepresentedAsDatastream: true,
       excludeIndicesRepresentedAsAlias: false,
       includeDatasets: false,
+      includeViews: false,
       esClient,
     });
   });
@@ -421,5 +422,42 @@ describe('gatherResourceDescriptors', () => {
       expect.arrayContaining([expect.objectContaining({ path: '@timestamp' })])
     );
     expect(denied?.fields).toEqual([]);
+  });
+
+  it('returns view descriptors with output columns and the stored query', async () => {
+    listSearchSourcesMock.mockResolvedValue({
+      datasets: [],
+      indices: [],
+      aliases: [],
+      data_streams: [],
+      views: [
+        {
+          type: EsResourceType.view,
+          name: 'logs-proxy-parsed',
+          query: 'FROM logs-* | KEEP status',
+          description: 'Parsed proxy logs',
+        },
+      ],
+    });
+    esClient.esql.query.mockResolvedValue({
+      columns: [{ name: 'status', type: 'integer' }],
+      values: [],
+    });
+
+    const result = await gatherResourceDescriptors({
+      indexPattern: 'logs-proxy-parsed',
+      includeViews: true,
+      esClient,
+    });
+
+    expect(result).toEqual([
+      {
+        type: EsResourceType.view,
+        name: 'logs-proxy-parsed',
+        description:
+          'Parsed proxy logs ES|QL view. Query with "FROM logs-proxy-parsed". Defined as: FROM logs-* | KEEP status',
+        fields: [{ path: 'status', type: 'integer' }],
+      },
+    ]);
   });
 });
