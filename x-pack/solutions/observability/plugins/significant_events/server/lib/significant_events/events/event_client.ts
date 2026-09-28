@@ -14,20 +14,18 @@ import type {
   SignificantEventResponse,
   SignalEntry,
   SignalVerdict,
+  Severity,
+  SignificantEventStatus,
 } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS } from '@kbn/significant-events-schema';
 import {
   type BulkCreateOptions,
   type CommonSearchOptions,
   type PaginatedResponse,
+  type PaginatedSearchOptions,
   MAX_DEDUP_SCAN_LIMIT,
   throwOnBulkCreateErrors,
 } from '../query_utils';
-import type {
-  EventsFilterOptions,
-  EventsPaginatedSearchOptions,
-  SignificantEventsReadClient,
-} from './read_client';
 import {
   andWhere,
   applyTimeRange,
@@ -52,6 +50,45 @@ import type {
   SignificantEventsTriggerId,
   SignificantEventsTriggerPayloadMap,
 } from '../../../../common/workflows/triggers';
+
+/**
+ * Filters shared by every "latest current state" read path, whether backed by `EventClient`
+ * (`EVENTS_DATA_STREAM`) or `RuleEventsClient` (`.rule-events`, gated by
+ * `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ`).
+ */
+export interface EventsFilterOptions {
+  status?: SignificantEventStatus[];
+  severity?: Severity[];
+  stream?: string[];
+  search?: string;
+  eventIds?: string[];
+  ruleUuids?: string[];
+  topologyFeatureIds?: string[];
+}
+
+export type EventsPaginatedSearchOptions = PaginatedSearchOptions & EventsFilterOptions;
+
+/**
+ * Read-only surface both `EventClient` and `RuleEventsClient` implement, so agent-side read call
+ * sites (`event_search`, `event_write`'s dedup scan, `attach_investigation`, SML) can depend on
+ * this interface instead of a concrete client and stay correct regardless of
+ * `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ`. Write-only surface (`bulkCreate`, `emitTrigger`,
+ * `findByEventUuid`) is intentionally excluded — `RuleEventsClient` is read-only and
+ * `event_uuid` is not a real `.rule-events` field (see `RuleEventsClient` doc comment) — callers
+ * needing those must keep a separate `EventClient` obtained via `getEventClient()`.
+ */
+export interface SignificantEventsReadClient {
+  findLatestPaginated(
+    options?: EventsPaginatedSearchOptions
+  ): Promise<PaginatedResponse<SignificantEventResponse>>;
+  findLatestByCurrentStatePaginated(
+    options: EventsPaginatedSearchOptions
+  ): Promise<PaginatedResponse<SignificantEventResponse>>;
+  findLatestActive(
+    options: CommonSearchOptions & { streamNames?: string[]; ruleUuids?: string[] }
+  ): Promise<{ hits: SignificantEvent[] }>;
+  findByEventId(eventId: string): Promise<{ hits: SignificantEventResponse[] }>;
+}
 
 export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, StoredEvent>;
 export type LegacySignal = Omit<SignalEntry, 'verdict'> & {
@@ -134,8 +171,6 @@ const topologyFeatureFilter = (
 };
 
 type EventsCurrentStateSearchOptions = CommonSearchOptions & EventsFilterOptions;
-
-export type { EventsFilterOptions, EventsPaginatedSearchOptions };
 
 export type EventsBatchSearchOptions = EventsCurrentStateSearchOptions & {
   afterEventId?: string;

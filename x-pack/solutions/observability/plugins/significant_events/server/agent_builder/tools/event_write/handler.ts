@@ -511,7 +511,7 @@ export async function eventsWriteBulkHandler({
   logger?: Logger;
 }): Promise<EventsWriteBulkResult[]> {
   const timestamp = new Date().toISOString();
-  const dedupSearchClient = eventSearchClient ?? eventClient;
+  const client = eventSearchClient ?? eventClient;
 
   assertValidBulkWriteSize(inputs);
 
@@ -520,11 +520,11 @@ export async function eventsWriteBulkHandler({
   const validCandidates = markDuplicateKeys(candidates, results);
 
   const dedupCandidates = validCandidates.filter((c): c is DedupCandidate => c.mode === 'dedup');
-  const activeEvents = await fetchActiveEventsForDedup(dedupSearchClient, dedupCandidates);
+  const activeEvents = await fetchActiveEventsForDedup(client, dedupCandidates);
   const toWrite = resolveDedupSkips(validCandidates, activeEvents, results);
 
   const { latestByEventId, latestLegacyByEventId, priorDocsByEventId } =
-    await fetchPriorDocsByEventId(dedupSearchClient, eventClient, toWrite);
+    await fetchPriorDocsByEventId(client, eventClient, toWrite);
   const calibrated = toWrite.map((candidate) => ({
     ...candidate,
     input: {

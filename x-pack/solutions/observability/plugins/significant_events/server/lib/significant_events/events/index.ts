@@ -17,4 +17,4 @@ export type {
 export { EventService } from './event_service';
 export { RuleEventsClient } from './rule_events_client';
 export { toRuleEvent } from './to_rule_event';
-export type { SignificantEventsReadClient } from './read_client';
+export type { SignificantEventsReadClient } from './event_client';

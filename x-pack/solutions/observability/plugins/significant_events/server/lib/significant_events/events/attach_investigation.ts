@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import type { SignificantEventInvestigation } from '@kbn/significant-events-schema';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { EventClient } from './event_client';
-import type { SignificantEventsReadClient } from './read_client';
+import type { SignificantEventsReadClient } from './event_client';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
 import { toRuleEvent } from './to_rule_event';
 

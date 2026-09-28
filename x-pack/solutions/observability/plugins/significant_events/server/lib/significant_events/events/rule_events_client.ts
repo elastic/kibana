@@ -39,7 +39,7 @@ import type {
   EventsFilterOptions,
   EventsPaginatedSearchOptions,
   SignificantEventsReadClient,
-} from './read_client';
+} from './event_client';
 
 /** `.rule-events` groups a series of writes by `group_hash`, not `event_id` (unavailable as a column). */
 const GROUP_HASH_FIELD = 'group_hash';
