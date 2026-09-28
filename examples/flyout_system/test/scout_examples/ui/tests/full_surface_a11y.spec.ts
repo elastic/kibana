@@ -30,9 +30,10 @@ test.describe(
       const session = app.session('component');
       await app.openFlyout('component', session);
 
-      // Wait for header blocks to render before testing.
+      // Wait for header blocks and body banner to render before testing.
       await expect(app.infoBlocks('component', session)).toBeVisible();
       await expect(app.badgeOverflow('component', session)).toBeVisible();
+      await expect(app.bodyBanner('component', session)).toBeVisible();
 
       const { violations } = await page.checkA11y({
         include: [app.rootSelector('component', session)],
@@ -50,6 +51,7 @@ test.describe(
 
       await expect(app.infoBlocks('service', session)).toBeVisible();
       await expect(flyout.getByRole('tablist')).toBeVisible();
+      await expect(app.bodyBanner('service', session)).toBeVisible();
 
       const { violations } = await page.checkA11y({
         include: [app.rootSelector('service', session)],
@@ -173,9 +175,12 @@ test.describe(
       await expect(panel).toBeVisible();
       await expect(panel).toHaveAttribute('aria-labelledby', /.+/);
 
-      // EUI gives the body overflow container tabIndex={0}, which appears before the tab panel.
+      // EUI gives the body overflow container tabIndex={0}. The banner sits inside it, so its
+      // callout action comes after the container and before the tab panel.
       await activity.press('Tab');
       await expect(app.scrollContainer('service', session)).toBeFocused();
+      await page.keyboard.press('Tab');
+      await expect(app.bodyCalloutRetry('service', session)).toBeFocused();
       await page.keyboard.press('Tab');
       await expect(panel).toBeFocused();
     });
