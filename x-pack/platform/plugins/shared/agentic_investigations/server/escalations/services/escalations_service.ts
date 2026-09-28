@@ -111,22 +111,15 @@ export class EscalationsService {
     const metadata = {
       ...filteredMetadata,
       [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: [body.linked_investigation_id],
-      ...(body.assignees?.length ? { [ESCALATION_ASSIGNEES_FIELD]: body.assignees } : {}),
+      [ESCALATION_ASSIGNEES_FIELD]: body.assignees,
     };
-
-    // For private escalations, any assignees who aren't already collaborators are added
-    // as ACL members so they can see the escalation from the start.
-    const privateEntryIds =
-      body.visibility === 'private'
-        ? [...new Set([...body.collaborators, ...(body.assignees ?? [])])]
-        : [];
 
     const accessControl =
       body.visibility === 'public'
         ? { access_mode: ConversationAccessControlMode.Public }
         : {
             access_mode: ConversationAccessControlMode.Private,
-            entries: privateEntryIds.map((id) => ({
+            entries: body.assignees.map((id) => ({
               type: 'user' as const,
               id,
               role: ConversationAccessControlRole.Member,

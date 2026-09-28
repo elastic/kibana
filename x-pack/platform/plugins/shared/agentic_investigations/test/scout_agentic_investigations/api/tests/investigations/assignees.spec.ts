@@ -27,6 +27,7 @@ apiTest.describe(
     let viewerCookieHeader: Record<string, string>;
 
     let editorProfileUid: string;
+    let adminProfileUid: string;
     const conversationIds: string[] = [];
 
     apiTest.beforeAll(async ({ samlAuth, apiClient }) => {
@@ -34,22 +35,35 @@ apiTest.describe(
       ({ cookieHeader: editorCookieHeader } = await samlAuth.asInteractiveUser('editor'));
       ({ cookieHeader: viewerCookieHeader } = await samlAuth.asInteractiveUser('viewer'));
 
-      // Resolve editor profile uid
-      const probeRes = await apiClient.post(AB_CONVERSATIONS_PATH, {
-        headers: { ...PUBLIC_HEADERS, ...editorCookieHeader },
-        body: {
-          title: '__investigations-assignees-probe__',
-          template_id: 'investigation',
-          access_control: { access_mode: 'public' },
-          metadata: { status: 'open' },
-        },
-        responseType: 'json',
-      });
-      if (probeRes.statusCode !== 200) {
-        throw new Error(`Setup: probe creation failed (${probeRes.statusCode})`);
+      // Resolve editor and admin profile uids via probe conversations.
+      const [editorProbeRes, adminProbeRes] = await Promise.all([
+        apiClient.post(AB_CONVERSATIONS_PATH, {
+          headers: { ...PUBLIC_HEADERS, ...editorCookieHeader },
+          body: {
+            title: '__investigations-assignees-probe__',
+            template_id: 'investigation',
+            access_control: { access_mode: 'public' },
+            metadata: { status: 'open' },
+          },
+          responseType: 'json',
+        }),
+        apiClient.post(AB_CONVERSATIONS_PATH, {
+          headers: { ...PUBLIC_HEADERS, ...adminCookieHeader },
+          body: {
+            title: '__investigations-assignees-admin-probe__',
+            template_id: 'investigation',
+            access_control: { access_mode: 'public' },
+            metadata: { status: 'open' },
+          },
+          responseType: 'json',
+        }),
+      ]);
+      if (editorProbeRes.statusCode !== 200 || adminProbeRes.statusCode !== 200) {
+        throw new Error(`Setup: probe creation failed`);
       }
-      editorProfileUid = probeRes.body.user?.id as string;
-      conversationIds.push(probeRes.body.id);
+      editorProfileUid = editorProbeRes.body.user?.id as string;
+      adminProfileUid = adminProbeRes.body.user?.id as string;
+      conversationIds.push(editorProbeRes.body.id, adminProbeRes.body.id);
     });
 
     apiTest.afterAll(async ({ apiClient }) => {
@@ -125,7 +139,7 @@ apiTest.describe(
           body: {
             linked_investigation_id: investigationId,
             visibility: 'public',
-            collaborators: [],
+            assignees: [adminProfileUid],
           },
           responseType: 'json',
         });

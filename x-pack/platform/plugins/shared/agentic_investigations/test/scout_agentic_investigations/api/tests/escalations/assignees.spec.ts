@@ -112,7 +112,11 @@ apiTest.describe(
     const createPublicEscalation = async (apiClient: any, investigationId: string) => {
       const res = await apiClient.post(CREATE_ESCALATION_PATH, {
         headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-        body: { linked_investigation_id: investigationId, visibility: 'public', collaborators: [] },
+        body: {
+          linked_investigation_id: investigationId,
+          visibility: 'public',
+          assignees: [adminProfileUid],
+        },
         responseType: 'json',
       });
       const id = expectCreated(res, 'public escalation');
@@ -120,15 +124,15 @@ apiTest.describe(
       return id;
     };
 
-    /** Creates a private escalation with the given collaborator uids (returns its id). */
+    /** Creates a private escalation with the given assignee uids as the initial ACL (returns its id). */
     const createPrivateEscalation = async (
       apiClient: any,
       investigationId: string,
-      collaborators: string[]
+      assignees: string[]
     ) => {
       const res = await apiClient.post(CREATE_ESCALATION_PATH, {
         headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
-        body: { linked_investigation_id: investigationId, visibility: 'private', collaborators },
+        body: { linked_investigation_id: investigationId, visibility: 'private', assignees },
         responseType: 'json',
       });
       const id = expectCreated(res, 'private escalation');
@@ -225,10 +229,10 @@ apiTest.describe(
     );
 
     apiTest(
-      'a collaborator (not assigned) can still reassign a private escalation',
+      'an assignee with converse access can reassign a private escalation',
       async ({ apiClient }) => {
         const investigationId = await createInvestigation(apiClient);
-        // Editor is a collaborator from the start
+        // Editor is an assignee (and ACL member) from the start
         const escalationId = await createPrivateEscalation(apiClient, investigationId, [
           editorProfileUid,
         ]);

@@ -164,7 +164,7 @@ describe('escalation routes', () => {
           body: {
             linked_investigation_id: 'inv-1',
             visibility: 'private',
-            collaborators: ['user-1'],
+            assignees: ['user-1'],
           },
         }),
         response

@@ -23,7 +23,7 @@ export const ESCALATION_MODAL_TRANSLATIONS = Object.freeze({
         defaultMessage: 'Create escalation',
       }),
       description: i18n.translate('xpack.alertzero.escalationModal.modes.create.description', {
-        defaultMessage: 'New escalation, this investigation linked',
+        defaultMessage: 'New escalation, with link',
       }),
     },
     addToExisting: {

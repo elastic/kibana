@@ -55,7 +55,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
     const { euiTheme } = useEuiTheme();
     const [mode, setMode] = useState(initialMode);
     const [incidentSearch, setIncidentSearch] = useState('');
-    const [collaboratorSearch, setCollaboratorSearch] = useState('');
+    const [assigneeSearch, setAssigneeSearch] = useState('');
     const {
       services: { notifications, application },
     } = useKibana<CoreStart>();
@@ -76,8 +76,8 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
     );
 
     const { data: currentUserProfile } = useCurrentUserProfile();
-    const { data: suggestedCollaborators = [], isFetching: isSearchingCollaborators } =
-      useSuggestUserProfiles(collaboratorSearch);
+    const { data: suggestedAssignees = [], isFetching: isSearchingAssignees } =
+      useSuggestUserProfiles(assigneeSearch);
     const {
       data: escalationsData,
       isLoading: isLoadingEscalations,
@@ -158,27 +158,26 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
           </EuiFlexGroup>
         </div>
 
-        {mode === 'create' ? (
+        {mode === 'create' && !!currentUserProfile ? (
           <CreateEscalationForm
             investigationTitle={investigation.title}
-            suggestedCollaborators={suggestedCollaborators}
-            isSearchingCollaborators={isSearchingCollaborators}
-            currentUserUid={currentUserProfile?.uid ?? ''}
+            suggestedAssignees={suggestedAssignees}
+            isSearchingAssignees={isSearchingAssignees}
+            currentUser={currentUserProfile}
             currentUserName={currentUserProfile ? getUserDisplayName(currentUserProfile.user) : ''}
             isSubmitting={createEscalation.isLoading}
-            onSearchCollaborators={setCollaboratorSearch}
-            onSubmit={({ title, visibility, collaboratorUids }) =>
+            onSearchAssignees={setAssigneeSearch}
+            onSubmit={({ title, visibility, assigneeUids }) =>
               createEscalation.mutate(
                 {
                   linked_investigation_id: conversationId,
                   title,
                   visibility,
-                  collaborators: collaboratorUids,
-                  // For private escalations collaboratorUids already includes the creator uid.
-                  // For public escalations there are no ACL entries, so add the creator alone.
+                  // For private escalations, assigneeUids already includes the creator uid.
+                  // For public escalations, add the creator alone as the sole assignee.
                   assignees:
                     visibility === 'private'
-                      ? collaboratorUids
+                      ? assigneeUids
                       : [currentUserProfile?.uid].filter(
                           (uid): uid is string => typeof uid === 'string' && uid.length > 0
                         ),
@@ -201,7 +200,9 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
             }
             onCancel={onClose}
           />
-        ) : (
+        ) : null}
+
+        {mode === 'addToExisting' ? (
           <AddToExistingEscalationForm
             incidents={incidents}
             isLoading={isLoadingEscalations}
@@ -232,7 +233,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
             isSubmitting={addToEscalation.isLoading}
             onCancel={onClose}
           />
-        )}
+        ) : null}
       </EuiModal>
     );
   }

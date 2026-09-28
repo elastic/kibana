@@ -35,7 +35,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 
 jest.mock('@kbn/user-profile-components', () => ({
   getUserDisplayName: (user: { username?: string }) => user?.username ?? '',
-  UserProfilesSelectable: () => <div data-test-subj="escalationModalCollaboratorPicker" />,
+  UserProfilesSelectable: () => <div data-test-subj="escalationModalAssigneePicker" />,
 }));
 
 jest.mock('@kbn/core-http-browser', () => ({
