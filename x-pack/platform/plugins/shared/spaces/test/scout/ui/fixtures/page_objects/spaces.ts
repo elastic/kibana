@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ScoutPage } from '@kbn/scout';
 
@@ -22,7 +23,7 @@ export class SpacesPage {
   constructor(private readonly page: ScoutPage) {}
 
   async isProjectHeaderVisible() {
-    return await this.page.testSubj.locator('chromeNextGlobalHeader').isVisible();
+    return await this.page.testSubj.locator(CHROME_HEADER_TEST_SUBJECTS.root).isVisible();
   }
 
   async navigateToHome() {

@@ -7,13 +7,11 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  AGENTIC_INVESTIGATIONS_API_VERSION,
-  PROPOSAL_CHARTS_SUMMARY_URL,
-} from '@kbn/agentic-investigations-plugin/common';
-import type { ProposalChartsSummaryResponse } from '@kbn/agentic-investigations-plugin/common';
-import { retryOnTransientError } from '@kbn/agentic-investigations-plugin/public';
+import { PROPOSALS_API_VERSION, PROPOSAL_CHARTS_SUMMARY_URL } from '@kbn/proposals-common';
+import type { ProposalChartsSummaryResponse } from '@kbn/proposals-common';
+import { retryOnTransientError } from './retry_on_transient_error';
 import { queryKeys } from '../query_keys';
+import { PROPOSALS_POLL_INTERVAL_MS } from './use_proposals_api';
 
 /**
  * Exported so callers that render the window (axis labels, tooltip ranges) read
@@ -32,10 +30,13 @@ export const useProposalChartsSummary = ({
     queryKey: queryKeys.proposals.chartsSummary(windowHours, bucketMinutes),
     queryFn: (): Promise<ProposalChartsSummaryResponse> =>
       services.http!.get<ProposalChartsSummaryResponse>(PROPOSAL_CHARTS_SUMMARY_URL, {
-        version: AGENTIC_INVESTIGATIONS_API_VERSION,
+        version: PROPOSALS_API_VERSION,
         query: { windowHours, bucketMinutes },
       }),
     keepPreviousData: true,
+    // Shares the queues' cadence: this drives the header count, which would otherwise
+    // disagree with the badges beside it for up to a minute.
+    refetchInterval: PROPOSALS_POLL_INTERVAL_MS,
     retry: retryOnTransientError,
   });
 };

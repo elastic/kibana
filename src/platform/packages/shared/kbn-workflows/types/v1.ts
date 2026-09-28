@@ -14,6 +14,7 @@ import {
 } from '@kbn/human-readable-id';
 import type { DotKeysOf, DotObject, JsonValue, RecursivePartial } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
+import type { WorkflowAccessSubject, WorkflowPermissions } from '../common/access_control';
 import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type {
   SerializedError,
@@ -145,6 +146,8 @@ export interface EsWorkflowExecution {
   originManagedWorkflowId?: string | null;
   managedVersion?: number | null;
   isTestRun: boolean;
+  /** Whether the test uses a submitted definition instead of the saved workflow. */
+  isEphemeral?: boolean;
   status: ExecutionStatus;
   context: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   workflowDefinition: WorkflowYaml;
@@ -156,7 +159,8 @@ export interface EsWorkflowExecution {
   createdAt: string;
   error: SerializedError | null;
   createdBy?: string; // Keep for backwards compatibility with existing documents
-  executedBy?: string; // User who executed the workflow
+  effectiveIdentity?: { type: 'service_account'; id: string };
+  executedBy?: string; // User who triggered the workflow
   startedAt: string;
   finishedAt: string;
   cancelRequested: boolean;
@@ -304,8 +308,11 @@ export interface WorkflowExecutionDto {
   /** If specified, only this step and its children were executed */
   stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
+  /** Ordered step IDs returned by modern runs, which support pagination beyond the search window. */
+  stepExecutionIds?: string[];
   duration: number | null;
-  executedBy?: string; // User who executed the workflow
+  effectiveIdentity?: { type: 'service_account'; id: string };
+  executedBy?: string; // User who triggered the workflow
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
   context?: Record<string, unknown>;
@@ -372,7 +379,7 @@ export const EsWorkflowSchema = z.object({
   version: z.number().optional(),
 });
 
-export type EsWorkflow = z.infer<typeof EsWorkflowSchema>;
+export type EsWorkflow = z.infer<typeof EsWorkflowSchema> & WorkflowAccessSubject;
 
 export type EsWorkflowCreate = Omit<
   EsWorkflow,
@@ -466,7 +473,8 @@ export interface UpdatedWorkflowResponseDto {
   validationErrors: string[];
 }
 
-export interface WorkflowDetailDto {
+export interface WorkflowDetailDto extends WorkflowAccessSubject {
+  permissions?: WorkflowPermissions;
   id: string;
   name: string;
   description?: string;
@@ -488,12 +496,18 @@ export interface WorkflowDetailDto {
   version?: number;
 }
 
+export type WorkflowAccessControlUpdateResponseDto = Pick<
+  WorkflowDetailDto,
+  'owner_id' | 'access_control' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'version'
+>;
+
 export interface WorkflowPartialDetailDto extends Partial<WorkflowDetailDto> {
   id: string;
 }
 export type WorkflowMgetResponseDto = WorkflowPartialDetailDto[];
 
-export interface WorkflowListItemDto {
+export interface WorkflowListItemDto extends WorkflowAccessSubject {
+  permissions?: WorkflowPermissions;
   id: string;
   name: string;
   description: string;
@@ -904,6 +918,13 @@ export interface ValidateWorkflowResponseDto {
   valid: boolean;
   diagnostics: WorkflowDiagnostic[];
   parsedWorkflow?: WorkflowYaml;
+  /**
+   * What the checks did not cover, each with the reason: a check either never
+   * ran or stopped at a budget part-way through. Reported separately from
+   * `diagnostics` because the absence of a diagnostic here means "not checked",
+   * not "nothing wrong".
+   */
+  notChecked?: string[];
 }
 
 export interface GetAvailableConnectorsResponse {

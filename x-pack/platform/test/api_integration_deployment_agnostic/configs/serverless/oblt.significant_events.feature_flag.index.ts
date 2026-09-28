@@ -9,7 +9,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   // Significant events API suites. These hit routes guarded by the
-  // streams.significantEventsAvailable feature flag, which the parent config forces on. They
+  // nightshift.enabled feature flag, which the parent config forces on. They
   // cannot run in the default deployment-agnostic configs (the flag defaults to false there), so
   // they live in this dedicated feature-flag config. snapshot_restore is stateful-only and is
   // therefore omitted here.

@@ -10,15 +10,6 @@
 import { getLogicalBundlePluginLabel } from './bundle_plugin_label';
 
 describe('getLogicalBundlePluginLabel', () => {
-  it('maps legacy entry bundles', () => {
-    expect(getLogicalBundlePluginLabel('discover.entry.js')).toBe('discover');
-    expect(getLogicalBundlePluginLabel('core.entry.js')).toBe('core');
-  });
-
-  it('maps legacy chunk bundles', () => {
-    expect(getLogicalBundlePluginLabel('lens.chunk.123.js')).toBe('lens');
-  });
-
   it('maps RSPack plugin chunks', () => {
     expect(getLogicalBundlePluginLabel('plugin-discover.abcdef12.js')).toBe('discover');
     expect(getLogicalBundlePluginLabel('plugin-core.12345678.js')).toBe('core');

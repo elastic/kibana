@@ -98,6 +98,7 @@ export function createNavigationTree({
             children: [
               { link: 'management:index_management', breadcrumbStatus: 'hidden' },
               { link: 'management:data_federation', breadcrumbStatus: 'hidden' },
+              { link: 'management:esql_views', breadcrumbStatus: 'hidden' },
             ],
             title: i18n.translate('xpack.serverlessVectordb.nav.ingest.indices.title', {
               defaultMessage: 'Indices and data streams',
@@ -146,6 +147,7 @@ export function createNavigationTree({
             title: ACCESS_TITLE,
             children: [
               { link: 'management:api_keys', breadcrumbStatus: 'hidden' },
+              { link: 'management:service_accounts', breadcrumbStatus: 'hidden' },
               { link: 'management:roles', breadcrumbStatus: 'hidden' },
             ],
           },
