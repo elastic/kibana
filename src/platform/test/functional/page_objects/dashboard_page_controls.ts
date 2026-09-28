@@ -551,6 +551,9 @@ export class DashboardPageControls extends FtrService {
       await input.clearValue();
       await input.type(search, { charByChar: true });
     });
+    // Search and the loading indicator are debounced. Waiting only for an absent indicator can
+    // return before the request starts and leave the previous result count in the popover.
+    await this.testSubjects.waitForExists('optionsList-control-popover-loading', { timeout: 250 });
     await this.optionsListPopoverWaitForLoading();
   }
 
