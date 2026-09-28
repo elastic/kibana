@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import {
   EuiCheckableCard,
   EuiFlexGroup,
@@ -15,6 +15,7 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -30,11 +31,13 @@ import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
+import { ALERTZERO_APP_ID } from '@kbn/alertzero-common';
 import {
   ESCALATION_MODAL_TRANSLATIONS,
   ESCALATION_ERRORS,
   ESCALATION_SUCCESS,
 } from './escalation_modal_translations';
+import { SELECTED_CONVERSATION_ID_PARAM } from './conversations_url_params';
 import { AddToExistingEscalationForm } from './add_to_existing_escalation_form';
 import { CreateEscalationForm } from './create_escalation_form';
 
@@ -55,8 +58,23 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
     const [incidentSearch, setIncidentSearch] = useState('');
     const [collaboratorSearch, setCollaboratorSearch] = useState('');
     const {
-      services: { notifications },
+      services: { notifications, application },
     } = useKibana<CoreStart>();
+
+    const makeViewEscalationPrimary = useCallback(
+      (escalationId: string) => {
+        const path = `/escalations?${SELECTED_CONVERSATION_ID_PARAM}=${escalationId}`;
+        return {
+          children: ESCALATION_SUCCESS.linkText,
+          href: application.getUrlForApp(ALERTZERO_APP_ID, { path }),
+          onClick: (e: React.MouseEvent) => {
+            e.preventDefault();
+            void application.navigateToApp(ALERTZERO_APP_ID, { path });
+          },
+        };
+      },
+      [application]
+    );
 
     const { data: currentUserProfile } = useCurrentUserProfile();
     const { data: suggestedCollaborators = [], isFetching: isSearchingCollaborators } =
@@ -89,7 +107,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
     return (
       <EuiModal
         onClose={onClose}
-        style={{ width: 600 }}
+        style={{ maxWidth: 640, width: '100%', borderRadius: euiTheme.size.s }}
         aria-labelledby="escalationModalTitle"
         data-test-subj="escalationModal"
       >
@@ -114,7 +132,11 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
             <EuiFlexItem>
               <EuiCheckableCard
                 id="escalation-mode-create"
-                label={T.modes.create.label}
+                label={
+                  <EuiTitle size="xs">
+                    <h4>{T.modes.create.label}</h4>
+                  </EuiTitle>
+                }
                 checked={mode === 'create'}
                 onChange={() => setMode('create')}
                 data-test-subj="escalationModalModeCreate"
@@ -128,7 +150,11 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
             <EuiFlexItem>
               <EuiCheckableCard
                 id="escalation-mode-add-to-existing"
-                label={T.modes.addToExisting.label}
+                label={
+                  <EuiTitle size="xs">
+                    <h4>{T.modes.addToExisting.label}</h4>
+                  </EuiTitle>
+                }
                 checked={mode === 'addToExisting'}
                 onChange={() => setMode('addToExisting')}
                 data-test-subj="escalationModalModeAddToExisting"
@@ -167,15 +193,10 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
                         ),
                 },
                 {
-                  onSuccess: () => {
+                  onSuccess: (escalation) => {
                     notifications?.toasts.addSuccess({
                       title: ESCALATION_SUCCESS.createTitle,
-                      actionProps: {
-                        primary: {
-                          children: ESCALATION_SUCCESS.linkText,
-                          href: '/app/alertzero/escalations',
-                        },
-                      },
+                      actionProps: { primary: makeViewEscalationPrimary(escalation.id) },
                     });
                     onClose();
                   },
@@ -205,12 +226,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
                   onSuccess: () => {
                     notifications?.toasts.addSuccess({
                       title: ESCALATION_SUCCESS.addToTitle,
-                      actionProps: {
-                        primary: {
-                          children: ESCALATION_SUCCESS.linkText,
-                          href: '/app/alertzero/escalations',
-                        },
-                      },
+                      actionProps: { primary: makeViewEscalationPrimary(escalationId) },
                     });
                     onClose();
                   },
