@@ -777,7 +777,9 @@ export const getFullAgentPolicy: FleetRequestHandler<
     const esClient = coreContext.elasticsearch.client.asInternalUser;
     // getFleetServerPolicy queries .fleet-policies as internal user; verify the policy
     // exists in the caller's Space first so the soClient enforces Space scoping.
-    const policyInSpace = await agentPolicyService.get(soClient, agentPolicyId, false);
+    // Strip any version suffix (e.g. policy-1#9.2 → policy-1) since SO objects are keyed by base ID.
+    const basePolicyId = removeVersionSuffixFromPolicyId(agentPolicyId);
+    const policyInSpace = await agentPolicyService.get(soClient, basePolicyId, false);
     if (!policyInSpace) {
       return response.customError({
         statusCode: 404,
@@ -875,7 +877,9 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
     const esClient = coreContext.elasticsearch.client.asInternalUser;
     // getFleetServerPolicy queries .fleet-policies as internal user; verify the policy
     // exists in the caller's Space first so the soClient enforces Space scoping.
-    const policyInSpace = await agentPolicyService.get(soClient, agentPolicyId, false);
+    // Strip any version suffix (e.g. policy-1#9.2 → policy-1) since SO objects are keyed by base ID.
+    const basePolicyId = removeVersionSuffixFromPolicyId(agentPolicyId);
+    const policyInSpace = await agentPolicyService.get(soClient, basePolicyId, false);
     if (!policyInSpace) {
       return response.customError({
         statusCode: 404,
