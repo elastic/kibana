@@ -17,7 +17,12 @@ To apply these settings in your deployment, refer to [Elastic Stack settings](do
 
 ## Built-in and custom locales
 
-{{kib}} ships translation files for English, French, Japanese, Simplified Chinese, and German. Plugins and admin-installed translation files can add additional locales. Any locale listed in `i18n.locales` for which a translation file exists will be served; locales without translation files fall back to English.
+{{kib}} ships translation files for the following locales:
+
+- {applies_to}`serverless: ga` {applies_to}`stack: ga 9.6+` English, French, Japanese, Simplified Chinese, German, and Portuguese (Brazil)
+- {applies_to}`stack: ga 9.0-9.5` English, French, Japanese, Simplified Chinese, and German
+
+Plugins and admin-installed translation files can add additional locales. Any locale listed in `i18n.locales` for which a translation file exists will be served. Locales without translation files fall back to English.
 
 ## Per-user language selection
 ```{applies_to}
@@ -76,7 +81,7 @@ previously resolved locale.
 ## Example configurations
 
 ```yaml
-# 1. Default behavior — language selection offers the five bundled locales,
+# 1. Default behavior — language selection offers the bundled locales,
 #    server defaults to English. Equivalent to omitting all i18n.* keys.
 
 # 2. Curate the available languages to a subset:
