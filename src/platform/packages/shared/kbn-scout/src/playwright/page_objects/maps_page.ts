@@ -10,6 +10,7 @@
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { AppMenu } from './app_menu';
+import { InspectorPage } from './inspector';
 import { SavedObjectSaveModal } from './saved_object_save_modal';
 
 // Maps first paint regularly exceeds Scout's 10s actionTimeout under parallel load.
@@ -33,6 +34,7 @@ export class MapsPage {
   private readonly setViewForm;
   /** Save modal locators/actions, shared with other apps (e.g. Visualize) via `SavedObjectSaveModal`. */
   public readonly saveModal: SavedObjectSaveModal;
+  public readonly inspector: InspectorPage;
 
   constructor(private readonly page: ScoutPage) {
     // Only present when Maps is the top-level app (standalone). Not available in embeddable contexts (e.g. dashboard panels).
@@ -53,6 +55,7 @@ export class MapsPage {
     this.mapContainer = this.page.testSubj.locator('mapContainer');
     this.setViewForm = this.page.testSubj.locator('mapSetViewForm');
     this.saveModal = new SavedObjectSaveModal(this.page);
+    this.inspector = new InspectorPage(this.page);
   }
 
   async gotoNewMap() {
@@ -263,50 +266,20 @@ export class MapsPage {
     await this.waitForLayersToLoad();
   }
 
-  /** Opens the inspector panel from the Maps top nav. */
-  private async openInspectorPanel() {
-    await this.appMenu.clickItem('openInspectorButton');
-    await this.page.testSubj.locator('inspectorPanel').waitFor({ state: 'visible' });
-  }
-
-  /** Closes the inspector panel. */
-  private async closeInspectorPanel() {
-    await this.page.testSubj.click('euiFlyoutCloseButton');
-    await this.page.testSubj.locator('inspectorPanel').waitFor({ state: 'hidden' });
-  }
-
-  /** Switches the inspector to its Requests view. */
-  private async openInspectorRequestsView() {
-    await this.page.testSubj.click('inspectorViewChooser');
-    await this.page.testSubj.click('inspectorViewChooserRequests');
-  }
-
-  /** Reads the first Monaco editor model's text content from the page context. */
-  private async getMonacoEditorContent(): Promise<string> {
-    return this.page.evaluate(() => {
-      const monaco = (window as any).MonacoEnvironment?.monaco;
-      const models = monaco?.editor?.getModels?.() ?? [];
-      return (models[0]?.getValue() ?? '') as string;
-    });
-  }
-
   /**
    * Opens the inspector, selects a request by name, reads its raw JSON response,
    * closes the inspector, and returns the parsed response body.
    */
   async getResponse(requestName: string): Promise<{ rawResponse: any }> {
-    await this.openInspectorPanel();
-    await this.openInspectorRequestsView();
+    await this.inspector.open();
+    await this.inspector.openInspectorRequestsView();
 
     const comboBox = this.page.components.comboBox('inspectorRequestChooser');
     await comboBox.setSelectedOptions([requestName]);
 
-    await this.page.testSubj.click('inspectorRequestDetailResponse');
-    await this.page.locator('.react-monaco-editor-container').waitFor({ state: 'visible' });
-
-    const responseBody = await this.getMonacoEditorContent();
-    await this.closeInspectorPanel();
-    return { rawResponse: JSON.parse(responseBody) };
+    const responseBody = await this.inspector.getResponse();
+    await this.inspector.close();
+    return { rawResponse: responseBody };
   }
 
   /**
@@ -314,26 +287,15 @@ export class MapsPage {
    * closes the inspector, and returns it as a string.
    */
   async getHits(): Promise<string> {
-    await this.openInspectorPanel();
-    await this.openInspectorRequestsView();
-    await this.page.testSubj.click('inspectorRequestDetailStatistics');
+    await this.inspector.open();
+    await this.inspector.openInspectorRequestsView();
+    await this.inspector.getOpenRequestStatisticButton().click();
 
-    const inspectorPanel = this.page.testSubj.locator('inspectorPanel');
-    await inspectorPanel.locator('tbody').waitFor({ state: 'visible' });
-
-    const rows: string[][] = await inspectorPanel.locator('tbody tr').evaluateAll((trs) =>
-      trs.map((tr) =>
-        Array.from(tr.querySelectorAll('td')).map((td) => {
-          const content = td.querySelector('.euiTableCellContent');
-          return (content ?? td).textContent?.trim() ?? '';
-        })
-      )
-    );
-
+    const rows = await this.inspector.getTableData();
     const hitsRow = rows.find((row) => row[0] === 'Hits');
     const hits = hitsRow?.[1] ?? '0';
 
-    await this.closeInspectorPanel();
+    await this.inspector.close();
     return hits;
   }
 

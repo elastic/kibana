@@ -34,16 +34,16 @@ test.describe(
       await uiSettings.set({ defaultIndex: DEFAULT_INDEX_ID });
     });
 
-    test.afterAll(async ({ kbnClient, uiSettings }) => {
+    /*test.afterAll(async ({ kbnClient, uiSettings }) => {
       await kbnClient.savedObjects.cleanStandardList();
       if (prevDefaultIndex !== undefined) {
         await uiSettings.set({ defaultIndex: prevDefaultIndex });
       } else {
         await uiSettings.unset('defaultIndex');
       }
-    });
+    });*/
 
-    test.describe('initial location', () => {
+    test.describe.only('initial location', () => {
       test.beforeEach(async ({ browserAuth, pageObjects }) => {
         await browserAuth.loginAsPrivilegedUser();
         await pageObjects.maps.openMapWithId(AUTO_FIT_INITIAL_LOCATION_MAP_ID);
