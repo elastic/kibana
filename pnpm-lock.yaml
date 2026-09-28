@@ -5084,9 +5084,6 @@ importers:
       '@jest/types':
         specifier: 29.6.3
         version: 29.6.3
-      '@kbn/ai-tools-cli':
-        specifier: workspace:*
-        version: link:x-pack/platform/packages/shared/kbn-ai-tools-cli
       '@kbn/alerting-api-integration-helpers':
         specifier: workspace:*
         version: link:x-pack/platform/test/alerting_api_integration/packages/helpers
@@ -8991,8 +8988,6 @@ importers:
   x-pack/platform/packages/shared/kbn-ai-assistant: {}
 
   x-pack/platform/packages/shared/kbn-ai-tools: {}
-
-  x-pack/platform/packages/shared/kbn-ai-tools-cli: {}
 
   x-pack/platform/packages/shared/kbn-alerting-comparators: {}
 
