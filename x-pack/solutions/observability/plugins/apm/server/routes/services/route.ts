@@ -38,6 +38,7 @@ import {
   UnknownMLCapabilitiesError,
 } from '@kbn/ml-plugin/server';
 import type { Annotation } from '@kbn/observability-plugin/common/annotations';
+import { apmMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { mergeWith, uniq } from 'lodash';
@@ -74,7 +75,7 @@ import { getServiceSlos } from './get_service_slos';
 import { getServiceTransactionTypes } from './get_service_transaction_types';
 import { getServicesAlerts } from './get_services/get_service_alerts';
 import { getServiceAnomalyScoreForService } from './get_services/get_service_anomaly_score_for_service';
-import { getServicesItems } from './get_services/get_services_items';
+import { getServicesItems, MAX_NUMBER_OF_SERVICES } from './get_services/get_services_items';
 import { getServiceTransactionDetailedStatsPeriods } from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
 import { getThroughput } from './get_throughput';
 
@@ -97,11 +98,12 @@ const servicesRoute = createApmServerRoute({
       rollupInterval,
       useDurationSummary,
     } = params.query;
-    const savedObjectsClient = (await context.core).savedObjects.client;
+    const { savedObjects: { client: savedObjectsClient }, uiSettings: { client: uiSettingsClient } } =
+      await context.core;
 
     const coreStart = await core.start();
 
-    const [mlClient, apmEventClient, apmAlertsClient, sloClient, serviceGroup, randomSampler] =
+    const [mlClient, apmEventClient, apmAlertsClient, sloClient, serviceGroup, randomSampler, maxNumServices] =
       await Promise.all([
         getMlClient(resources),
         getApmEventClient(resources),
@@ -111,6 +113,7 @@ const servicesRoute = createApmServerRoute({
           ? getServiceGroup({ savedObjectsClient, serviceGroupId })
           : Promise.resolve(null),
         getRandomSampler({ coreStart, request, probability }),
+        uiSettingsClient.get<number>(apmMaxNumberOfServices).catch(() => MAX_NUMBER_OF_SERVICES),
       ]);
 
     return getServicesItems({
@@ -129,6 +132,7 @@ const servicesRoute = createApmServerRoute({
       rollupInterval,
       useDurationSummary,
       searchQuery,
+      maxNumServices,
     });
   },
 });

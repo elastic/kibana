@@ -19,12 +19,11 @@
  *
  *   This produces ~1 800 intra-cluster + ~400 inter-cluster service-map edges.
  *
- * Known APM display limits (ingestion is unlimited):
- *   - Services Inventory query cap:  MAX_NUMBER_OF_SERVICES = 1 000
- *     (get_services_items.ts). Only the top 1 000 by throughput are surfaced.
- *   - Service Map node cap: 500 by default (Advanced Settings:
- *     observability:apmServiceGroupMaxNumberOfServices). Raise to ≥ 2 000 before
- *     running if the full graph is needed.
+ * APM display limits (both configurable via Stack Management → Advanced Settings):
+ *   - Services Inventory cap: observability:apmMaxNumberOfServices (default 1 000, max 5 000).
+ *     Raise to ≥ 2 000 to see all services in the inventory.
+ *   - Service Map node cap: observability:apmServiceGroupMaxNumberOfServices (default 500).
+ *     Raise to ≥ 2 000 before running if the full graph is needed.
  *
  * Usage:
  *   node scripts/synthtrace.js \

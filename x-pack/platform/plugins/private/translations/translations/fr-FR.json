@@ -14293,7 +14293,6 @@
     "xpack.apm.servicesTable.sloViolatedAriaLabel": "Afficher les SLO non respectés pour {serviceName}",
     "xpack.apm.servicesTable.throughputColumnLabel": "Rendement",
     "xpack.apm.servicesTable.tooltip.alertsCount": "Le nombre d'alertes actives",
-    "xpack.apm.servicesTable.tooltip.maxCountExceededWarning": "Vous avez dépassé la limite de 1 000 services. Veuillez utiliser la barre de requêtes pour affiner les résultats ou créer des groupes de services.",
     "xpack.apm.servicesTable.tooltip.metricsExplanation": "Les indicateurs du services sont agrégés sur le type de transaction, qui peut être une requête ou un chargement de page. Si ni l'un ni l'autre n'existent, les indicateurs sont agrégés sur le type de transaction disponible en premier.",
     "xpack.apm.servicesTable.tooltip.noSLOs": "Aucun SLO n'est défini pour ce service. Cliquez pour créer un nouveau SLO.",
     "xpack.apm.servicesTable.tooltip.sloDegrading": "Un ou plusieurs SLO se dégradent. Cliquez pour afficher les SLO.",

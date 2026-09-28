@@ -35,6 +35,7 @@ import {
   apmTraceLogsDefaultColumns,
   searchExcludedDataTiers,
   enableDiagnosticMode,
+  apmMaxNumberOfServices,
 } from '../common/ui_settings_keys';
 
 /**
@@ -155,6 +156,20 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
       defaultMessage: 'Limit the number of services in a given service group',
     }),
     schema: schema.number({ min: 1 }),
+    solutionViews: ['classic', 'oblt'],
+  },
+  [apmMaxNumberOfServices]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmMaxNumberOfServicesUiSettingName', {
+      defaultMessage: 'Maximum services in the Services Inventory',
+    }),
+    value: 1000,
+    description: i18n.translate('xpack.observability.apmMaxNumberOfServicesUiSettingDescription', {
+      defaultMessage:
+        'Limit the number of services shown in the Services Inventory. ' +
+        'Increasing this value beyond the default may slow down queries and increase memory usage on Elasticsearch.',
+    }),
+    schema: schema.number({ min: 1, max: 5000 }),
     solutionViews: ['classic', 'oblt'],
   },
   [enableInfrastructureAssetCustomDashboards]: {
