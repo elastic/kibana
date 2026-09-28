@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui';
+
 import {
   AGENT_BUILDER_API_DISCOVERY_SETTING_ID,
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
@@ -23,7 +24,7 @@ const REQUIRED_SETTINGS_TOOLTIP_CONTENT = i18n.translate(
   'xpack.securitySolution.siemMigrations.requiredSettingsTooltip',
   {
     defaultMessage:
-      'To add rules to chat, enable the following in Stack Management → Advanced Settings:',
+      'To add rules to chat, enable the following settings in Stack Management → Advanced Settings:',
   }
 );
 
@@ -31,13 +32,14 @@ export const RequiredUiSettingsTooltipContent = React.memo<{ settingNames: strin
   ({ settingNames }) => (
     <>
       {REQUIRED_SETTINGS_TOOLTIP_CONTENT}
-      <EuiCode>
-        <ul>
-          {settingNames.map((name) => (
-            <li key={name}>{name}</li>
-          ))}
-        </ul>
-      </EuiCode>
+      <EuiSpacer />
+      <ul>
+        {settingNames.map((name) => (
+          <li key={name}>
+            <b>{name}</b>
+          </li>
+        ))}
+      </ul>
     </>
   )
 );
