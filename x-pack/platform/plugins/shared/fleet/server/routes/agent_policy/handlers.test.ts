@@ -298,6 +298,62 @@ describe('Agent policy API handlers', () => {
       // Deep-clone per test because redactProxySecretsFromPolicy mutates in place
       const makeStoredDoc = () => ({ data: JSON.parse(JSON.stringify(POLICY_WITH_SECRETS)) });
 
+      beforeEach(() => {
+        // Space ownership check: default to policy existing in the current Space
+        agentPolicyServiceMock.get.mockResolvedValue({ id: 'policy-1' } as any);
+      });
+
+      it('returns 404 when agentPolicyId does not belong to the current Space (cross-Space IDOR block)', async () => {
+        agentPolicyServiceMock.get.mockResolvedValue(null);
+
+        const request = httpServerMock.createKibanaRequest({
+          params: { agentPolicyId: 'space-b-policy-id' },
+          query: { revision: 1 },
+        });
+
+        await getFullAgentPolicy(context, request, response);
+
+        expect(response.customError).toHaveBeenCalledWith(
+          expect.objectContaining({ statusCode: 404 })
+        );
+        expect(agentPolicyServiceMock.getFleetServerPolicy).not.toHaveBeenCalled();
+      });
+
+      it('returns 404 on download when agentPolicyId does not belong to the current Space (cross-Space IDOR block)', async () => {
+        agentPolicyServiceMock.get.mockResolvedValue(null);
+
+        const request = httpServerMock.createKibanaRequest({
+          params: { agentPolicyId: 'space-b-policy-id' },
+          query: { revision: 1 },
+        });
+
+        await downloadFullAgentPolicy(context, request, response);
+
+        expect(response.customError).toHaveBeenCalledWith(
+          expect.objectContaining({ statusCode: 404 })
+        );
+        expect(agentPolicyServiceMock.getFleetServerPolicy).not.toHaveBeenCalled();
+      });
+
+      it('returns revision when agentPolicyId belongs to the current Space', async () => {
+        agentPolicyServiceMock.getFleetServerPolicy.mockResolvedValue(makeStoredDoc() as any);
+
+        const request = httpServerMock.createKibanaRequest({
+          params: { agentPolicyId: 'policy-1' },
+          query: { revision: 2 },
+        });
+
+        await getFullAgentPolicy(context, request, response);
+
+        expect(agentPolicyServiceMock.get).toHaveBeenCalledWith(
+          expect.anything(),
+          'policy-1',
+          false
+        );
+        expect(agentPolicyServiceMock.getFleetServerPolicy).toHaveBeenCalled();
+        expect(response.ok).toHaveBeenCalled();
+      });
+
       it('strips proxy secrets from the response when caller lacks fleet-settings-read', async () => {
         const fleetContext = (await context.fleet) as any;
         fleetContext.authz.fleet.readSettings = false;

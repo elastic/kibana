@@ -775,6 +775,16 @@ export const getFullAgentPolicy: FleetRequestHandler<
   if (request.query.revision) {
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
+    // Verify policy belongs to the current Space before fetching the revision from ES.
+    // getFleetServerPolicy queries .fleet-policies as internal user without Space filtering,
+    // so skipping this check would allow cross-Space policy content disclosure (IDOR).
+    const policyInSpace = await agentPolicyService.get(soClient, agentPolicyId, false);
+    if (!policyInSpace) {
+      return response.customError({
+        statusCode: 404,
+        body: { message: 'Agent policy not found' },
+      });
+    }
     const fleetServerPolicy = await agentPolicyService.getFleetServerPolicy(
       esClient,
       agentPolicyId,
@@ -864,6 +874,16 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
   if (request.query.revision) {
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
+    // Verify policy belongs to the current Space before fetching the revision from ES.
+    // getFleetServerPolicy queries .fleet-policies as internal user without Space filtering,
+    // so skipping this check would allow cross-Space policy content disclosure (IDOR).
+    const policyInSpace = await agentPolicyService.get(soClient, agentPolicyId, false);
+    if (!policyInSpace) {
+      return response.customError({
+        statusCode: 404,
+        body: { message: 'Agent policy not found' },
+      });
+    }
     const fleetServerPolicy = await agentPolicyService.getFleetServerPolicy(
       esClient,
       agentPolicyId,
