@@ -17,7 +17,10 @@ import {
   EuiButton,
   EuiPageSection,
 } from '@elastic/eui';
-import type { ArtifactEntryCardDecoratorProps } from '../../../../../components/artifact_entry_card';
+import type {
+  ArtifactEntryCardDecoratorProps,
+  ArtifactEntryCardProps,
+} from '../../../../../components/artifact_entry_card';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import type { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
@@ -49,6 +52,10 @@ export interface PolicyArtifactsLayoutProps {
   disableArtifactsByPolicy?: boolean;
   // Artifact specific decorations to display in the cards
   CardDecorator?: React.ComponentType<ArtifactEntryCardDecoratorProps>;
+  /**
+   * Replaces the default field, operator, and value block inside policy artifact cards.
+   */
+  CriteriaComponent?: ArtifactEntryCardProps['CriteriaComponent'];
 }
 export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
   ({
@@ -60,6 +67,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
     getPolicyArtifactsPath,
     canWriteArtifact = false,
     CardDecorator,
+    CriteriaComponent,
     disableArtifactsByPolicy,
   }) => {
     const exceptionsListApiClient = useMemo(
@@ -167,6 +175,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
               onClose={handleOnCloseFlyout}
               labels={labels}
               CardDecorator={CardDecorator}
+              CriteriaComponent={CriteriaComponent}
             />
           )}
           {allArtifacts && allArtifacts.total !== 0 ? (
@@ -219,6 +228,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             onClose={handleOnCloseFlyout}
             labels={labels}
             CardDecorator={CardDecorator}
+            CriteriaComponent={CriteriaComponent}
           />
         )}
         {exceptionItemToDelete && (
@@ -243,6 +253,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             getPolicyArtifactsPath={getPolicyArtifactsPath}
             getArtifactPath={getArtifactPath}
             CardDecorator={CardDecorator}
+            CriteriaComponent={CriteriaComponent}
           />
         </EuiPageSection>
       </div>

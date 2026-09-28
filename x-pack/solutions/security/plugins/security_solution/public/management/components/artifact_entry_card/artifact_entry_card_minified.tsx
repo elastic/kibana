@@ -48,6 +48,11 @@ export interface ArtifactEntryCardMinifiedProps extends CommonProps {
    * above the selected OS and the condition entries.
    */
   Decorator?: React.ComponentType<ArtifactEntryCardDecoratorProps>;
+  /**
+   * Replaces the default field, operator, and value criteria block.
+   * When omitted, the card renders `CriteriaConditions`.
+   */
+  CriteriaComponent?: React.ComponentType<CriteriaConditionsProps>;
 }
 
 /**
@@ -61,6 +66,7 @@ export const ArtifactEntryCardMinified = memo(
     onToggleSelectedArtifact,
     'data-test-subj': dataTestSubj,
     Decorator,
+    CriteriaComponent = CriteriaConditions,
     ...commonProps
   }: ArtifactEntryCardMinifiedProps) => {
     const artifact = useNormalizedArtifact(item);
@@ -138,7 +144,7 @@ export const ArtifactEntryCardMinified = memo(
               <EuiAccordion id="showDetails" arrowDisplay="none" forceState={accordionTrigger}>
                 {Decorator && <Decorator item={item} data-test-subj={getTestId('decorator')} />}
 
-                <CriteriaConditions
+                <CriteriaComponent
                   os={artifact.os as CriteriaConditionsProps['os']}
                   entries={artifact.entries}
                   data-test-subj={getTestId('criteriaConditions')}

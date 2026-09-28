@@ -14,6 +14,7 @@ import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_util
 import type { ArtifactEntryCollapsibleCardProps } from './artifact_entry_collapsible_card';
 import { ArtifactEntryCollapsibleCard } from './artifact_entry_collapsible_card';
 import type { ArtifactEntryCardDecoratorProps } from './artifact_entry_card';
+import type { CriteriaConditionsProps } from './components/criteria_conditions';
 
 describe.each([
   ['trusted apps', getTrustedAppProviderMock],
@@ -147,5 +148,15 @@ describe.each([
 
     expect(renderResult.queryByText('mock decorator')).not.toBeInTheDocument();
     expect(passedItem).toBe(null);
+  });
+
+  it('should replace criteria conditions when CriteriaComponent is provided', () => {
+    const MockCriteria = memo<CriteriaConditionsProps>(() => <p>{'custom criteria'}</p>);
+    MockCriteria.displayName = 'MockCriteria';
+
+    render({ CriteriaComponent: MockCriteria, expanded: true });
+
+    expect(renderResult.getByText('custom criteria')).toBeInTheDocument();
+    expect(renderResult.queryByTestId('testCard-criteriaConditions-condition')).toBeNull();
   });
 });

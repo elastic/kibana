@@ -31,6 +31,7 @@ export const ArtifactEntryCollapsibleCard = memo<ArtifactEntryCollapsibleCardPro
     expanded = false,
     'data-test-subj': dataTestSubj,
     Decorator,
+    CriteriaComponent = CriteriaConditions,
     ...commonProps
   }) => {
     const artifact = useNormalizedArtifact(item);
@@ -55,7 +56,7 @@ export const ArtifactEntryCollapsibleCard = memo<ArtifactEntryCollapsibleCardPro
             <CardSectionPanel>
               {Decorator && <Decorator item={item} data-test-subj={getTestId('decorator')} />}
 
-              <CriteriaConditions
+              <CriteriaComponent
                 os={artifact.os as CriteriaConditionsProps['os']}
                 entries={artifact.entries}
                 data-test-subj={getTestId('criteriaConditions')}

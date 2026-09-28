@@ -14,6 +14,7 @@ import { act, fireEvent } from '@testing-library/react';
 import type { AnyArtifact } from './types';
 import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
 import type { ArtifactEntryCardDecoratorProps } from './artifact_entry_card';
+import type { CriteriaConditionsProps } from './components/criteria_conditions';
 
 describe.each([
   ['trusted apps', getTrustedAppProviderMock],
@@ -113,5 +114,20 @@ describe.each([
 
     expect(renderResult.getByText('mock decorator')).toBeInTheDocument();
     expect(passedItem).toBe(item);
+  });
+
+  it('should replace criteria conditions when CriteriaComponent is provided', () => {
+    const MockCriteria = memo<CriteriaConditionsProps>(() => <p>{'custom criteria'}</p>);
+    MockCriteria.displayName = 'MockCriteria';
+
+    render({
+      item,
+      isSelected: false,
+      onToggleSelectedArtifact: onToggleSelectedArtifactMock,
+      CriteriaComponent: MockCriteria,
+    });
+
+    expect(renderResult.getByText('custom criteria')).toBeInTheDocument();
+    expect(renderResult.queryByTestId('testCard-criteriaConditions-condition')).toBeNull();
   });
 });

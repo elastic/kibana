@@ -24,7 +24,10 @@ import {
   EuiEmptyPrompt,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { ArtifactEntryCardDecoratorProps } from '../../../../../components/artifact_entry_card';
+import type {
+  ArtifactEntryCardDecoratorProps,
+  ArtifactEntryCardProps,
+} from '../../../../../components/artifact_entry_card';
 import { SearchExceptions } from '../../../../../components/search_exceptions';
 import type { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
 import { useToasts } from '../../../../../../common/lib/kibana';
@@ -40,12 +43,21 @@ interface PolicyArtifactsFlyoutProps {
   onClose: () => void;
   labels: typeof POLICY_ARTIFACT_FLYOUT_LABELS;
   CardDecorator: React.ComponentType<ArtifactEntryCardDecoratorProps> | undefined;
+  CriteriaComponent?: ArtifactEntryCardProps['CriteriaComponent'];
 }
 
 export const MAX_ALLOWED_RESULTS = 100;
 
 export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
-  ({ policyItem, apiClient, searchableFields, onClose, labels, CardDecorator }) => {
+  ({
+    policyItem,
+    apiClient,
+    searchableFields,
+    onClose,
+    labels,
+    CardDecorator,
+    CriteriaComponent,
+  }) => {
     const toasts = useToasts();
     const queryClient = useQueryClient();
     const [selectedArtifactIds, setSelectedArtifactIds] = useState<string[]>([]);
@@ -213,6 +225,7 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
             isListLoading={isLoadingArtifacts || isRefetchingArtifacts}
             selectedArtifactsUpdated={handleSelectArtifacts}
             CardDecorator={CardDecorator}
+            CriteriaComponent={CriteriaComponent}
           />
 
           {noItemsMessage}
