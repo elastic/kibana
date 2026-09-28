@@ -127,7 +127,7 @@ export class NodesFactory {
         node as ElasticsearchGraphNode,
         stepExecutionRuntime,
         this.workflowRuntime,
-        this.workflowLogger
+        stepExecutionRuntime.stepLogger
       );
     }
 
@@ -140,7 +140,7 @@ export class NodesFactory {
         node as KibanaGraphNode,
         stepExecutionRuntime,
         this.workflowRuntime,
-        this.workflowLogger
+        stepExecutionRuntime.stepLogger
       );
     }
 
@@ -154,7 +154,7 @@ export class NodesFactory {
         node,
         stepExecutionRuntime,
         this.workflowRuntime,
-        this.workflowLogger
+        stepExecutionRuntime.stepLogger
       );
     }
 
@@ -173,7 +173,7 @@ export class NodesFactory {
           stepExecutionRuntime,
           this.connectorExecutor,
           this.workflowRuntime,
-          this.workflowLogger
+          stepExecutionRuntime.stepLogger
         );
       }
     }
@@ -420,7 +420,7 @@ export class NodesFactory {
           workflowsExecutionEngine: this.dependencies.workflowsExecutionEngine,
           workflowExecutionRepository: this.dependencies.workflowExecutionRepository,
           stepExecutionRepository: this.dependencies.stepExecutionRepository,
-          workflowLogger: this.workflowLogger,
+          workflowLogger: stepExecutionRuntime.stepLogger,
           config: this.dependencies.config,
         });
       case 'workflow.output':
