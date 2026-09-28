@@ -15,9 +15,9 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { SecondaryMenu } from '../secondary_menu';
 import { getFocusableElements } from '../../utils/get_focusable_elements';
-import { getScrollFadeStyles } from '../../hooks/use_scroll';
+import { scrollLayoutStyles, useScroll } from '../../hooks/use_scroll';
 import { useNestedMenu } from './use_nested_menu';
-import { NAVIGATION_SELECTOR_PREFIX, NESTED_PANEL_FOOTER_CLASS_NAME } from '../../constants';
+import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
 export interface PanelIds {
   panelNavigationInstructionsId: string;
@@ -29,16 +29,21 @@ export type PanelChildren = ReactNode | ((ids: PanelIds) => ReactNode);
 export interface PanelProps {
   children: PanelChildren;
   /**
-   * Content pinned to the bottom of the scroll container while the panel is shown.
+   * Content shown below the scrolling panel body.
    */
   footer?: ReactNode;
+  /**
+   * Content shown above the scrolling panel body when the panel has no `title`.
+   */
+  header?: PanelChildren;
   id: string;
   title?: string;
 }
 
-export const Panel: FC<PanelProps> = ({ children, footer, id, title }) => {
+export const Panel: FC<PanelProps> = ({ children, footer, header, id, title }) => {
   const { currentPanel, panelStackDepth, returnFocusId } = useNestedMenu();
   const { euiTheme } = useEuiTheme();
+  const scrollStyles = useScroll(true);
   const nestedPanelTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-nestedPanel-${id}`;
   const panelNavigationInstructionsId = useGeneratedHtmlId({
     prefix: `panel-navigation-instructions-${id}`,
@@ -87,73 +92,60 @@ export const Panel: FC<PanelProps> = ({ children, footer, id, title }) => {
     [currentPanel, id, returnFocusId, isRootPanel]
   );
 
-  const renderChildren = () => {
-    if (typeof children === 'function') {
-      return children({
+  const renderContent = (content: PanelChildren) => {
+    if (typeof content === 'function') {
+      return content({
         panelNavigationInstructionsId,
         panelEnterSubmenuInstructionsId,
       });
     }
-    return children;
+    return content;
   };
 
   if (currentPanel !== id) return null;
 
-  const menu = title ? (
-    <SecondaryMenu
-      data-test-subj={nestedPanelTestSubj}
-      ref={panelRef}
-      title={title}
-      isPanel={false}
-    >
-      <EuiScreenReaderOnly>
-        <p id={panelNavigationInstructionsId}>{navigationInstructions}</p>
-      </EuiScreenReaderOnly>
-      <EuiScreenReaderOnly>
-        <p id={panelEnterSubmenuInstructionsId}>{enterSubmenuInstructions}</p>
-      </EuiScreenReaderOnly>
-      {renderChildren()}
-    </SecondaryMenu>
-  ) : (
-    <div data-test-subj={nestedPanelTestSubj} ref={panelRef}>
-      <EuiScreenReaderOnly>
-        <p id={panelNavigationInstructionsId}>{navigationInstructions}</p>
-      </EuiScreenReaderOnly>
-      {renderChildren()}
-    </div>
-  );
-
-  if (!footer) return menu;
-
-  // Mirrors the sticky menu header, which also uses the 1px margin and radius to stay inside the popover border.
   const footerStyles = css`
-    position: sticky;
-    bottom: 0;
-    z-index: calc(${euiTheme.levels.content} + 1);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    box-sizing: border-box;
-    min-height: var(--secondary-menu-footer-height);
-    margin: 0 1px;
-    // Less top padding offsets the fade above the footer
+    flex-shrink: 0;
+    // Less top padding since the section above already ends with padding
     padding: ${euiTheme.size.s} ${euiTheme.size.m} ${euiTheme.size.m};
-    background: ${euiTheme.colors.backgroundBasePlain};
-    border-radius: ${euiTheme.border.radius.medium};
-    ${getScrollFadeStyles(euiTheme, 'bottom')}
   `;
 
-  // Rendered as a sibling of the menu so it sticks to the popover scroll container.
-  return (
-    <>
-      {menu}
-      <div
-        className={NESTED_PANEL_FOOTER_CLASS_NAME}
-        css={footerStyles}
-        data-test-subj={`${nestedPanelTestSubj}-footer`}
+  const footerNode = footer ? (
+    <div css={footerStyles} data-test-subj={`${nestedPanelTestSubj}-footer`}>
+      {footer}
+    </div>
+  ) : null;
+
+  if (title) {
+    return (
+      <SecondaryMenu
+        data-test-subj={nestedPanelTestSubj}
+        footer={footerNode}
+        ref={panelRef}
+        title={title}
+        isPanel={false}
       >
-        {footer}
+        <EuiScreenReaderOnly>
+          <p id={panelNavigationInstructionsId}>{navigationInstructions}</p>
+        </EuiScreenReaderOnly>
+        <EuiScreenReaderOnly>
+          <p id={panelEnterSubmenuInstructionsId}>{enterSubmenuInstructions}</p>
+        </EuiScreenReaderOnly>
+        {renderContent(children)}
+      </SecondaryMenu>
+    );
+  }
+
+  return (
+    <div css={scrollLayoutStyles} data-test-subj={nestedPanelTestSubj} ref={panelRef}>
+      {renderContent(header)}
+      <div css={scrollStyles}>
+        <EuiScreenReaderOnly>
+          <p id={panelNavigationInstructionsId}>{navigationInstructions}</p>
+        </EuiScreenReaderOnly>
+        {renderContent(children)}
       </div>
-    </>
+      {footerNode}
+    </div>
   );
 };

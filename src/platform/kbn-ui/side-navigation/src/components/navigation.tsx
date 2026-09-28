@@ -285,6 +285,7 @@ export const Navigation = ({
                               iconType="controls"
                               color="text"
                               size="s"
+                              fullWidth
                               onClick={() => {
                                 closePopover();
                                 onCustomizeNavigation();
@@ -337,34 +338,35 @@ export const Navigation = ({
                         )}
                       </SideNav.NestedSecondaryMenu.Panel>
                       {allOverflowItems.filter(getHasMoreSubmenu).map((item) => (
-                        <SideNav.NestedSecondaryMenu.Panel key={`submenu-${item.id}`} id={item.id}>
-                          {({ panelNavigationInstructionsId }) => (
-                            <>
-                              <SideNav.NestedSecondaryMenu.Header
-                                title={item.secondaryMenuTitle ?? item.label}
-                                aria-describedby={panelNavigationInstructionsId}
-                              />
-                              {item.sections?.map((section) => (
-                                <SideNav.NestedSecondaryMenu.Section
-                                  key={section.id}
-                                  label={section.label}
-                                >
-                                  {section.items.map((subItem) => (
-                                    <SideNav.NestedSecondaryMenu.Item
-                                      key={subItem.id}
-                                      isHighlighted={subItem.id === visuallyActiveSubpageId}
-                                      isCurrent={actualActiveItemId === subItem.id}
-                                      isNew={getIsNewSecondary(subItem.id)}
-                                      onClick={() => handleItemClick(subItem, closePopover)}
-                                      {...subItem}
-                                    >
-                                      {subItem.label}
-                                    </SideNav.NestedSecondaryMenu.Item>
-                                  ))}
-                                </SideNav.NestedSecondaryMenu.Section>
-                              ))}
-                            </>
+                        <SideNav.NestedSecondaryMenu.Panel
+                          key={`submenu-${item.id}`}
+                          id={item.id}
+                          header={({ panelNavigationInstructionsId }) => (
+                            <SideNav.NestedSecondaryMenu.Header
+                              title={item.secondaryMenuTitle ?? item.label}
+                              aria-describedby={panelNavigationInstructionsId}
+                            />
                           )}
+                        >
+                          {item.sections?.map((section) => (
+                            <SideNav.NestedSecondaryMenu.Section
+                              key={section.id}
+                              label={section.label}
+                            >
+                              {section.items.map((subItem) => (
+                                <SideNav.NestedSecondaryMenu.Item
+                                  key={subItem.id}
+                                  isHighlighted={subItem.id === visuallyActiveSubpageId}
+                                  isCurrent={actualActiveItemId === subItem.id}
+                                  isNew={getIsNewSecondary(subItem.id)}
+                                  onClick={() => handleItemClick(subItem, closePopover)}
+                                  {...subItem}
+                                >
+                                  {subItem.label}
+                                </SideNav.NestedSecondaryMenu.Item>
+                              ))}
+                            </SideNav.NestedSecondaryMenu.Section>
+                          ))}
                         </SideNav.NestedSecondaryMenu.Panel>
                       ))}
                     </SideNav.NestedSecondaryMenu>

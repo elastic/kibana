@@ -36,7 +36,7 @@ import { getFocusableElements } from '../../utils/get_focusable_elements';
 import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { updateTabIndices } from '../../utils/update_tab_indices';
 import { useHoverTimeout } from '../../hooks/use_hover_timeout';
-import { useScroll } from '../../hooks/use_scroll';
+import { scrollLayoutStyles } from '../../hooks/use_scroll';
 
 export interface PopoverIds {
   popoverNavigationInstructionsId: string;
@@ -166,8 +166,6 @@ export const Popover = ({
       setHoverTimeout(handleClose, POPOVER_HOVER_DELAY);
     }
   }, [persistent, isOpenedByClick, setHoverTimeout, handleClose]);
-
-  const scrollStyles = useScroll(true);
 
   const handleTriggerMouseDown = useCallback(() => {
     if (persistent) {
@@ -299,7 +297,7 @@ export const Popover = ({
       var(--popover-max-height),
       calc(100dvh - ${TOP_BAR_HEIGHT + TOP_BAR_POPOVER_GAP + BOTTOM_POPOVER_GAP}px)
     );
-    ${scrollStyles};
+    ${scrollLayoutStyles};
   `;
 
   const maskStyles = css`
