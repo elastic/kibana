@@ -31,6 +31,7 @@ export {
   type IndexSearchSource,
   type DataStreamSearchSource,
   type DatasetSearchSource,
+  type ViewSearchSource,
   type EsSearchSource,
   type ListSourcesResponse,
 } from './tools/steps';
