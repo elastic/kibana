@@ -104,7 +104,11 @@ beforeEach(() => {
   mockUseAssignInvestigation.mockReturnValue({ mutateAsync: investigationMutate });
   mockUseUserProfiles.mockReturnValue({ data: [], isFetching: false });
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
-  mockUseCapabilities.mockReturnValue({ showEscalations: true, manageEscalations: true, manageInvestigations: true });
+  mockUseCapabilities.mockReturnValue({
+    showEscalations: true,
+    manageEscalations: true,
+    manageInvestigations: true,
+  });
 });
 
 afterEach(() => jest.clearAllMocks());

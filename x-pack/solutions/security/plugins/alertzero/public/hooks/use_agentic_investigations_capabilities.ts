@@ -10,7 +10,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import {
   AGENTIC_INVESTIGATIONS_PLUGIN_ID,
-  ESCALATIONS_FEATURE_ID,
   ESCALATIONS_UI_CAPABILITY_SHOW,
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   INVESTIGATIONS_UI_CAPABILITY_MANAGE,
