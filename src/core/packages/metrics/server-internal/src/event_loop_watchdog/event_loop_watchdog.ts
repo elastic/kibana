@@ -147,8 +147,6 @@ export class EventLoopWatchdog {
       stdout: false,
       stderr: false,
     });
-    // a diagnostic must never keep the process alive
-    worker.unref();
     this.worker = worker;
 
     const post = (message: MainToWorkerMessage) => worker.postMessage(message);
@@ -163,6 +161,9 @@ export class EventLoopWatchdog {
       this.logger.warn(`Event loop watchdog worker failed: ${error.message}`);
     });
     worker.on('exit', (code) => this.onWorkerExit(worker, buffer, code));
+    // A diagnostic must never keep the process alive. This must come after adding the `message`
+    // listener, which re-refs the worker's message port.
+    worker.unref();
   }
 
   private onWorkerExit(worker: Worker, buffer: SharedArrayBuffer, code: number): void {

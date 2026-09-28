@@ -61,7 +61,9 @@ describe('EventLoopWatchdog', () => {
 
     expect(MockWorker.instances).toHaveLength(1);
     const worker = lastWorker();
+    // `unref` must follow the `message` listener, which would otherwise re-ref the port
     expect(worker.unref).toHaveBeenCalled();
+    expect(worker.messageListenersAtUnref).toBe(1);
     expect(worker.postMessage).toHaveBeenCalledWith({
       type: 'snapshot',
       activities: [[0, expect.objectContaining({ type: 'a', id: '1' })]],

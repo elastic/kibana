@@ -202,7 +202,8 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
     block = undefined;
     if (!current || (!current.capture && !event.report)) return;
     if (pendingReports >= MAX_PENDING_REPORTS) {
-      droppedReports++;
+      // keep the detector's bundled suppression count; non-reported blocks are already counted
+      if (event.report) droppedReports += 1 + event.suppressedBlocks;
       reportError('reports dropped', new Error('inspector responses are pending for too long'));
       return;
     }
