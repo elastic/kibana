@@ -21,6 +21,10 @@ import { VegaPanelIcon } from '../vega_icon';
 import type { VegaEmbeddableApi } from './vega_embeddable';
 import { openVegaEditor } from './open_vega_editor';
 
+/** Canvas opts out of inline editing and does not return the new panel's API from `addNewPanel`. */
+const parentDisablesInlineEditing = (api: unknown): boolean =>
+  typeof api === 'object' && api !== null && 'canEditInline' in api && api.canEditInline === false;
+
 export const getAddVegaEmbeddableAction = (
   core: CoreStart
 ): ActionDefinition<EmbeddableApiContext> => ({
@@ -37,18 +41,25 @@ export const getAddVegaEmbeddableAction = (
   isCompatible: async ({ embeddable }) => apiCanAddNewPanel(embeddable),
   execute: async ({ embeddable, returnFocus }) => {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
+    const addDefaultPanel = async () => {
+      const panel = await embeddable.addNewPanel<VegaByValueState, VegaEmbeddableApi>({
+        panelType: VEGA_EMBEDDABLE_TYPE,
+        serializedState: { spec: { format: 'hjson', value: getDefaultSpec() } },
+      });
+      return panel ?? undefined;
+    };
+
+    if (parentDisablesInlineEditing(embeddable)) {
+      await addDefaultPanel();
+      return;
+    }
+
     openVegaEditor({
       core,
       parentApi: embeddable,
       returnFocus,
       isNewPanel: true,
-      loadApi: async () => {
-        const panel = await embeddable.addNewPanel<VegaByValueState, VegaEmbeddableApi>({
-          panelType: VEGA_EMBEDDABLE_TYPE,
-          serializedState: { spec: { format: 'hjson', value: getDefaultSpec() } },
-        });
-        return panel ?? undefined;
-      },
+      loadApi: addDefaultPanel,
     });
   },
 });

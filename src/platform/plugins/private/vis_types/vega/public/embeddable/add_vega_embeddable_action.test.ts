@@ -26,6 +26,10 @@ const core = {
 } as unknown as CoreStart;
 
 describe('getAddVegaEmbeddableAction', () => {
+  beforeEach(() => {
+    mockOpenVegaEditor.mockClear();
+  });
+
   it('uses the Vega SVG icon in the add panel menu', () => {
     const action = getAddVegaEmbeddableAction(core);
 
@@ -69,5 +73,22 @@ describe('getAddVegaEmbeddableAction', () => {
     resolvePanel(panel);
 
     await expect(loading).resolves.toBe(panel);
+  });
+
+  it('adds a default panel without opening the editor when the parent disables inline editing', async () => {
+    const action = getAddVegaEmbeddableAction(core);
+    const addNewPanel = jest.fn().mockResolvedValue(undefined);
+
+    await action.execute({
+      embeddable: { addNewPanel, canEditInline: false },
+      returnFocus: jest.fn(),
+    });
+
+    expect(mockOpenVegaEditor).not.toHaveBeenCalled();
+    expect(addNewPanel).toHaveBeenCalledTimes(1);
+    expect(addNewPanel).toHaveBeenCalledWith({
+      panelType: VEGA_EMBEDDABLE_TYPE,
+      serializedState: { spec: { format: 'hjson', value: getDefaultSpec() } },
+    });
   });
 });
