@@ -36,7 +36,7 @@ Tab selection props also live on the root: `selectedTabId` (controlled), `defaul
 **`FlyoutTemplate.Header`** renders three stacked regions: an always-visible title row, a collapsible region holding the description, and an always-visible trailing region with the full-bleed bottom divider. See [`src/header/README.md`](src/header/README.md) for header blocks (MetaBlock, Badge, InfoBlock) and collapse behavior.
 
 - `title` — required `ReactNode`. Rendered as an `<h3>` carrying a generated id.
-- `titleIcon` — EUI icon type rendered after the title. Without `titleTooltip` it is decorative (`aria-hidden`).
+- `titleIcon` — EUI icon type rendered after the title, in both the expanded and the compact layout. Without `titleTooltip` it is decorative (`aria-hidden`).
 - `titleTooltip` — when set, the title icon becomes a focusable `EuiIconTip` using `titleIcon` as its type, defaulting to `info`.
 - `description` — arbitrary `ReactNode` rendered below the title in subdued text. Not wrapped in a `<p>`, so block content is valid.
 - `collapsed` — renders the compact layout permanently, regardless of scroll position.

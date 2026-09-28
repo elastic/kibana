@@ -12,6 +12,7 @@ import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { isEnterStepTimeoutZone } from '@kbn/workflows/graph';
 import type { WorkflowExecutionLoopParams } from './types';
+import { getResolvedStepTimeout } from '../step/timeout_zone_step/step_level/enter_step_timeout_zone_node_impl';
 import {
   getHitlIdleDeadlineMsForNode,
   getHitlIdleDeadlineMsForStep,
@@ -57,9 +58,14 @@ export function getIdleTimeoutResumeDeadlineMs(
     for (const scope of frame.nestedScopes) {
       const graphNode = params.workflowExecutionGraph.getNode(scope.nodeId);
       if (graphNode && isEnterStepTimeoutZone(graphNode)) {
-        const latest = params.workflowExecutionState.getLatestStepExecution(graphNode.stepId);
-        if (latest?.startedAt) {
-          deadlineMs.push(new Date(latest.startedAt).getTime() + parseDuration(graphNode.timeout));
+        // The zone and its inner step share a step id, so pick the zone's own execution.
+        const zoneExecution = params.workflowExecutionState
+          .getStepExecutionsByStepId(graphNode.stepId)
+          .filter(({ stepType }) => stepType === graphNode.stepType)
+          .at(-1);
+        if (zoneExecution?.startedAt) {
+          const timeout = getResolvedStepTimeout(zoneExecution.state, graphNode.timeout);
+          deadlineMs.push(new Date(zoneExecution.startedAt).getTime() + parseDuration(timeout));
         }
       }
     }

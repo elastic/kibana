@@ -12,6 +12,7 @@ import {
   ALERTING_V2_RULES_READ_ROLE,
   apiTest,
   buildCreateRuleData,
+  MAX_PER_PAGE,
   NO_ACCESS_ROLE,
   testData,
 } from '../fixtures';
@@ -358,7 +359,7 @@ apiTest.describe('Find rules API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest('validation: should reject perPage above the maximum', async ({ apiClient }) => {
-    const response = await apiClient.get(findRulesUrl({ per_page: 1001 }), {
+    const response = await apiClient.get(findRulesUrl({ per_page: MAX_PER_PAGE + 1 }), {
       headers: adminHeaders,
     });
 

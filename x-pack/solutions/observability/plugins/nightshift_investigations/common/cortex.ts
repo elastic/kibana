@@ -29,6 +29,11 @@ export const CORTEX_PAGE_STATUSES = ['established', 'tentative', 'archived'] as 
 
 export type CortexPageStatus = (typeof CORTEX_PAGE_STATUSES)[number];
 
+/** Edits the post-run optimizer can apply to a page. */
+export const CORTEX_EDIT_ACTIONS = ['upsert', 'corroborate', 'archive'] as const;
+
+export type CortexEditAction = (typeof CORTEX_EDIT_ACTIONS)[number];
+
 export const CORTEX_ENTITY_TYPE_BUCKETS: Record<CortexEntityType, string> = {
   integration: 'integrations',
   service: 'services',

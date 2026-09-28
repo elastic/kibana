@@ -240,7 +240,7 @@ describe('CountTimeframeStrategy', () => {
         stateTransition: {
           pending_count: 5,
           pending_timeframe: '2m',
-          pending_operator: 'OR',
+          pending_operator: 'or',
         },
         statusCount: 1,
         eventTimestamp: '2025-01-01T00:02:00.000Z',
@@ -256,7 +256,7 @@ describe('CountTimeframeStrategy', () => {
         stateTransition: {
           pending_count: 5,
           pending_timeframe: '2m',
-          pending_operator: 'AND',
+          pending_operator: 'and',
         },
         statusCount: 1,
         expectedStatusCount: 2,
@@ -358,7 +358,7 @@ describe('CountTimeframeStrategy', () => {
         stateTransition: {
           recovering_count: 5,
           recovering_timeframe: '2m',
-          recovering_operator: 'OR',
+          recovering_operator: 'or',
         },
         statusCount: 1,
         eventTimestamp: '2025-01-01T00:02:00.000Z',
@@ -374,7 +374,7 @@ describe('CountTimeframeStrategy', () => {
         stateTransition: {
           recovering_count: 5,
           recovering_timeframe: '2m',
-          recovering_operator: 'AND',
+          recovering_operator: 'and',
         },
         statusCount: 1,
         expectedStatusCount: 2,
