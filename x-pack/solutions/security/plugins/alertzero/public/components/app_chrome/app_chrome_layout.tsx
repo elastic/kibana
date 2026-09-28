@@ -10,8 +10,7 @@ import { AppHeaderView } from '@kbn/app-header';
 import { css } from '@emotion/react';
 import { transparentize, useEuiTheme } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
+import { useAlertZeroDocumentationLink } from '../../hooks/use_alertzero_documentation_link';
 
 /**
  * Routes that rely on the chrome's application scroll container (`#kbnChromeLayoutApplication`).
@@ -28,16 +27,6 @@ const CHROME_SCROLLED_ROUTES = ['/watches'];
 const matchesRoute = (pathname: string, prefixes: string[]) =>
   prefixes.some((prefix) => pathname.startsWith(prefix));
 
-/**
- * Documentation link for the header overflow (⋮) menu. Together with the globally registered
- * feedback handler (rendered by the header itself as a "Feedback" entry), this matches the
- * prototype's overflow menu: Documentation + Give feedback.
- */
-const useDocumentationLink = (): string | undefined => {
-  const { services } = useKibana<CoreStart>();
-  return services.docLinks?.links.securitySolution.guide;
-};
-
 interface AppChromeLayoutProps {
   children: React.ReactNode;
 }
@@ -47,7 +36,7 @@ interface AppChromeLayoutProps {
  * and left rail (including Launchpad, Dev Tools, Settings, collapse).
  */
 export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) => {
-  const docLink = useDocumentationLink();
+  const docLink = useAlertZeroDocumentationLink();
   const { euiTheme } = useEuiTheme();
   const { pathname } = useLocation();
 
