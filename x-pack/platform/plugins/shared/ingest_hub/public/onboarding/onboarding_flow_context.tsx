@@ -438,7 +438,6 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         // during the load window would change the sorted signature and wrongly mark downstream
         // steps incomplete on every reload.
         if (!entry) return true;
-        // Agent-based-only services bypass the ECS/OTel pipeline — keep them across data formats.
         return entry.showInUI !== false && (entry.dataFormat ?? 'ecs') === dataFormat;
       }),
     [persistedServices, awsServicesMap, dataFormat]
