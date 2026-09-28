@@ -1,24 +1,27 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-
   // Every rule enabled here (and in ./.oxlint/*.jsonc) is intentionally absent from
   // `@kbn/eslint-config` so each rule runs in exactly one linter. When enabling a rule here,
   // delete it from packages/kbn-eslint-config/*.js; when removing one, add it back there.
   // A rule whose ESLint options are stricter than oxlint's implementation must stay in ESLint.
-
   "extends": [
     "./.oxlint/javascript.jsonc",
     "./.oxlint/typescript.jsonc",
     "./.oxlint/jest.jsonc",
     "./.oxlint/react.jsonc"
   ],
-
-  "plugins": ["react", "typescript", "import", "jsx-a11y", "react-perf", "node", "jest"],
-
+  "plugins": [
+    "react",
+    "typescript",
+    "import",
+    "jsx-a11y",
+    "react-perf",
+    "node",
+    "jest"
+  ],
   "categories": {
     "correctness": "off"
   },
-
   // Oxlint 1.79 drops rule options inherited from JSON configs, so option-bearing rules stay here.
   // https://github.com/oxc-project/oxc/issues/22230
   "rules": {
@@ -44,13 +47,35 @@
         }
       }
     ],
-    "dot-notation": ["error", { "allowKeywords": true }],
-    "react/no-multi-comp": ["error", { "ignoreStateless": true }],
-    "react/no-unknown-property": ["error", { "ignore": ["css"] }],
-    "react/prefer-es6-class": ["error", "always"]
+    "dot-notation": [
+      "error",
+      {
+        "allowKeywords": true
+      }
+    ],
+    "react/no-multi-comp": [
+      "error",
+      {
+        "ignoreStateless": true
+      }
+    ],
+    "react/no-unknown-property": [
+      "error",
+      {
+        "ignore": [
+          "css"
+        ]
+      }
+    ],
+    "react/prefer-es6-class": [
+      "error",
+      "always"
+    ]
   },
-
   // oxlint's parser rejects TypeScript grammar errors (TS1016: required parameter after an
   // optional one) that ESLint's parser and tsc's `skipLibCheck` let through in this declaration.
-  "ignorePatterns": ["x-pack/solutions/security/test/security_solution_cypress/cypress/support/index.d.ts"]
+  "ignorePatterns": [
+    "x-pack/solutions/security/test/security_solution_cypress/cypress/support/index.d.ts",
+    "src/platform/packages/shared/kbn-flot-charts/lib/**"
+  ]
 }
