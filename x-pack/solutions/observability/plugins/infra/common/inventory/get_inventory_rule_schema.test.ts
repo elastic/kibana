@@ -21,8 +21,9 @@ describe('getInventoryRuleSchema', () => {
   it('follows the stored pod schema once the caller owns the Pods Schema control', () => {
     expect(getInventoryRuleSchema('pod', 'semconv', true)).toBe('semconv');
     expect(getInventoryRuleSchema('pod', 'ecs', true)).toBe('ecs');
-    expect(getInventoryRuleSchema('pod', undefined, true)).toBeUndefined();
-    expect(getInventoryRuleSchema('pod', null, true)).toBeUndefined();
+    // Omitted schema still defaults to ecs so the kubernetes node filter is kept.
+    expect(getInventoryRuleSchema('pod', undefined, true)).toBe('ecs');
+    expect(getInventoryRuleSchema('pod', null, true)).toBe('ecs');
   });
 
   it('keeps the pod coerce when the control is explicitly disabled', () => {
@@ -44,10 +45,14 @@ describe('getInventoryRuleSchema', () => {
 });
 
 describe('getInventoryAlertGroupingField', () => {
-  it('groups a stored semconv pod rule on kubernetes.pod.uid', () => {
-    // Same ecs coerce as rule evaluation. Becomes k8s.pod.uid when that pod branch is removed.
+  it('groups a stored semconv pod rule on kubernetes.pod.uid when the Pods Schema control is off', () => {
     expect(getInventoryAlertGroupingField('pod', 'semconv')).toBe('kubernetes.pod.uid');
     expect(getInventoryAlertGroupingField('pod', undefined)).toBe('kubernetes.pod.uid');
+  });
+
+  it('groups a stored semconv pod rule on k8s.pod.uid when the Pods Schema control is on', () => {
+    expect(getInventoryAlertGroupingField('pod', 'semconv', true)).toBe('k8s.pod.uid');
+    expect(getInventoryAlertGroupingField('pod', undefined, true)).toBe('kubernetes.pod.uid');
   });
 
   it('keeps host.name for a SemConv host rule', () => {
