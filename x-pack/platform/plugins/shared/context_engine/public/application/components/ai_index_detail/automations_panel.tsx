@@ -14,7 +14,6 @@ import {
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -31,6 +30,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { getAiIndexDetailPath } from '../../paths';
+import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
 import { AiIndexDetailPanelEmptyPrompt } from './ai_index_detail_panel_empty_prompt';
 import { AutomationRow } from './automation_row';
 
@@ -105,20 +105,17 @@ export const AutomationsPanel = ({
               })}
             </h2>
           </EuiTitle>
-          <EuiSpacer size="xs" />
-          <EuiText size="s" color="subdued">
-            <p>
-              {!isLoading && !hasAutomations
-                ? i18n.translate('xpack.contextEngine.aiIndexDetail.automations.descriptionEmpty', {
-                    defaultMessage:
-                      "Create an automation to extract and refresh Knowledge Indicators from this index's sources.",
-                  })
-                : i18n.translate('xpack.contextEngine.aiIndexDetail.automations.description', {
-                    defaultMessage:
-                      "Automations extract and refresh this AI index's Knowledge Indicators from its sources.",
-                  })}
-            </p>
-          </EuiText>
+          <AiIndexDetailPanelDescription>
+            {!isLoading && !hasAutomations
+              ? i18n.translate('xpack.contextEngine.aiIndexDetail.automations.descriptionEmpty', {
+                  defaultMessage:
+                    "Create an automation to extract and refresh Knowledge Indicators from this index's sources.",
+                })
+              : i18n.translate('xpack.contextEngine.aiIndexDetail.automations.description', {
+                  defaultMessage:
+                    "Automations extract and refresh this AI index's Knowledge Indicators from its sources.",
+                })}
+          </AiIndexDetailPanelDescription>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {isEditing ? (

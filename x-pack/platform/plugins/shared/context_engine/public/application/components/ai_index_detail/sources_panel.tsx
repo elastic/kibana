@@ -13,7 +13,6 @@ import {
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -24,6 +23,7 @@ import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices'
 import { useDataConnectors } from '../../hooks/use_data_connectors';
 import { useSourcesEditor } from '../../hooks/use_sources_editor';
 import { toSourceType } from '../../utils/sources';
+import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
 import { AiIndexDetailPanelEmptyPrompt } from './ai_index_detail_panel_empty_prompt';
 import { SourcePicker } from '../source_picker';
 import { getSourceDisplay } from '../source_display';
@@ -64,22 +64,19 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
               />
             </h2>
           </EuiTitle>
-          <EuiSpacer size="xs" />
-          <EuiText size="s" color="subdued">
-            <p>
-              {!isLoading && !hasSources ? (
-                <FormattedMessage
-                  id="xpack.contextEngine.aiIndexDetail.sources.descriptionEmpty"
-                  defaultMessage="Add a source to start building context for this AI index."
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.contextEngine.aiIndexDetail.sources.description"
-                  defaultMessage="Data feeding this AI index. Context and suggestions refresh as sources change."
-                />
-              )}
-            </p>
-          </EuiText>
+          <AiIndexDetailPanelDescription>
+            {!isLoading && !hasSources ? (
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.sources.descriptionEmpty"
+                defaultMessage="Add a source to start building context for this AI index."
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.sources.description"
+                defaultMessage="Data feeding this AI index. Context and suggestions refresh as sources change."
+              />
+            )}
+          </AiIndexDetailPanelDescription>
         </EuiFlexItem>
         {showHeaderAction && (
           <EuiFlexItem grow={false}>

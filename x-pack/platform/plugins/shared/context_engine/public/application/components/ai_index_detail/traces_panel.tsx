@@ -13,7 +13,6 @@ import {
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -22,6 +21,7 @@ import React from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { useTracesEditor } from '../../hooks/use_traces_editor';
+import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
 import { AiIndexDetailPanelEmptyPrompt } from './ai_index_detail_panel_empty_prompt';
 import { TraceDisplay } from '../trace_display';
 import { TraceSelector } from '../trace_selector';
@@ -52,22 +52,19 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
               />
             </h2>
           </EuiTitle>
-          <EuiSpacer size="xs" />
-          <EuiText size="s" color="subdued">
-            <p>
-              {!isLoading && !hasTrace ? (
-                <FormattedMessage
-                  id="xpack.contextEngine.aiIndexDetail.traces.descriptionEmpty"
-                  defaultMessage="Add agent traces so Knowledge Indicators tune against the questions agents actually ask."
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.contextEngine.aiIndexDetail.traces.description"
-                  defaultMessage="Traces this AI index learns from. Knowledge Indicators are tuned against the questions agents actually ask."
-                />
-              )}
-            </p>
-          </EuiText>
+          <AiIndexDetailPanelDescription>
+            {!isLoading && !hasTrace ? (
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.traces.descriptionEmpty"
+                defaultMessage="Add agent traces so Knowledge Indicators tune against the questions agents actually ask."
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.traces.description"
+                defaultMessage="Traces this AI index learns from. Knowledge Indicators are tuned against the questions agents actually ask."
+              />
+            )}
+          </AiIndexDetailPanelDescription>
         </EuiFlexItem>
         {!editing && !isManaged && !isLoading && (
           <EuiFlexItem grow={false}>

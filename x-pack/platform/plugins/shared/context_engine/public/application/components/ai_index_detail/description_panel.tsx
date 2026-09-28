@@ -22,6 +22,7 @@ import React, { useState } from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../../common/constants';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
+import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
 import { AiIndexDetailPanelEmptyPrompt } from './ai_index_detail_panel_empty_prompt';
 import { AiIndexDescriptionField } from '../ai_index_description_field';
 import { useSaveAiIndexDescription } from '../../hooks/use_save_ai_index_description';
@@ -78,24 +79,19 @@ export const DescriptionPanel = ({
             </h2>
           </EuiTitle>
           {!isLoading && !hasDescription && (
-            <>
-              <EuiSpacer size="xs" />
-              <EuiText size="s" color="subdued">
-                <p>
-                  {isManaged ? (
-                    <FormattedMessage
-                      id="xpack.contextEngine.aiIndexDetail.description.descriptionEmptyManaged"
-                      defaultMessage="No description is configured for this AI index."
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.contextEngine.aiIndexDetail.description.descriptionEmpty"
-                      defaultMessage="Add one to help agents understand this AI index."
-                    />
-                  )}
-                </p>
-              </EuiText>
-            </>
+            <AiIndexDetailPanelDescription>
+              {isManaged ? (
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.description.descriptionEmptyManaged"
+                  defaultMessage="No description is configured for this AI index."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.description.descriptionEmpty"
+                  defaultMessage="Add one to help agents understand this AI index."
+                />
+              )}
+            </AiIndexDetailPanelDescription>
           )}
         </EuiFlexItem>
         {!isEditing && !isManaged && !isLoading && (
