@@ -140,6 +140,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
           agentBuilder: {
             tools: { register: jest.fn() },
             attachments: { registerType: jest.fn() },
+            conversationTemplates: { register: jest.fn() },
           },
         } as never
       );
@@ -176,11 +177,15 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         coreSetup as never,
         {
           features: { registerKibanaFeature: jest.fn() },
-          workflowsExtensions: { registerManagedWorkflowOwner: jest.fn() },
+          workflowsExtensions: {
+            registerManagedWorkflowOwner: jest.fn(),
+            registerStepDefinition: jest.fn(),
+          },
           workflowsManagement: { management: {} },
           agentBuilder: {
             tools: { register: jest.fn() },
             attachments: { registerType: jest.fn() },
+            conversationTemplates: { register: jest.fn() },
           },
         } as never
       );
@@ -199,11 +204,15 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         coreMock.createSetup() as never,
         {
           features: { registerKibanaFeature: jest.fn() },
-          workflowsExtensions: { registerManagedWorkflowOwner: jest.fn() },
+          workflowsExtensions: {
+            registerManagedWorkflowOwner: jest.fn(),
+            registerStepDefinition: jest.fn(),
+          },
           workflowsManagement: { management: {} },
           agentBuilder: {
             tools: { register: jest.fn() },
             attachments: { registerType: jest.fn() },
+            conversationTemplates: { register: jest.fn() },
           },
         } as never
       );
@@ -223,6 +232,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         agents: { registerType: jest.fn() },
         tools: { register: jest.fn() },
         attachments: { registerType: jest.fn() },
+        conversationTemplates: { register: jest.fn() },
       };
 
       plugin.setup(
@@ -255,6 +265,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
           agentBuilder: {
             tools: { register: jest.fn() },
             attachments: { registerType: jest.fn() },
+            conversationTemplates: { register: jest.fn() },
           },
           searchInferenceEndpoints,
         } as never

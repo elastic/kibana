@@ -11,7 +11,7 @@ import dateMath from '@kbn/datemath';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { significantSecurityEventAttachmentDataSchema } from '../../../../../common/significant_security_event_schema';
 import { huntCoordinator } from '../hunt_coordinator';
-import type { HuntCoordinatorResult } from '../hunt_coordinator';
+import type { HuntCoordinatorCoreResult } from '../hunt_coordinator';
 import { buildSseData, buildSseAttachmentId } from './sse_mapper';
 
 const huntResultOf = (entry: ReturnType<typeof buildSseData>[number]) => {
@@ -162,10 +162,12 @@ const runCoordinator = (
 ): ReturnType<typeof huntCoordinator> =>
   huntCoordinator({ esClient, reportsEsClient: esClient }, mockModel, logger, params);
 
-type TestBehavior = NonNullable<HuntCoordinatorResult['tier2']>['behaviors'][number];
+type TestBehavior = NonNullable<HuntCoordinatorCoreResult['tier2']>['behaviors'][number];
 
 /** A coordinator result the coordinator itself considers valid, Tier 1 only. */
-const tier1Result = (over: Partial<HuntCoordinatorResult['tier1']>): HuntCoordinatorResult => ({
+const tier1Result = (
+  over: Partial<HuntCoordinatorCoreResult['tier1']>
+): HuntCoordinatorCoreResult => ({
   status: 'tier1_only',
   run_id: 'run-1',
   technologies: ['aws_iam'],
@@ -208,9 +210,9 @@ const behaviorFixture = (over: Partial<TestBehavior> = {}): TestBehavior => ({
 });
 
 const withBehaviors = (
-  result: HuntCoordinatorResult,
+  result: HuntCoordinatorCoreResult,
   behaviors: TestBehavior[]
-): HuntCoordinatorResult => ({
+): HuntCoordinatorCoreResult => ({
   ...result,
   status: 'tier1_and_tier2',
   tier2: {
@@ -223,7 +225,7 @@ const withBehaviors = (
   },
 });
 
-const schemaIssues = (result: HuntCoordinatorResult): string[] => {
+const schemaIssues = (result: HuntCoordinatorCoreResult): string[] => {
   const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
   const parsed = significantSecurityEventAttachmentDataSchema.safeParse(entry.data);
   return parsed.success
@@ -538,7 +540,7 @@ describe('buildSseData', () => {
  * the strength of one unrelated technique clearing the hit bar.
  */
 describe('buildSseData publishes an entry only for a corroborated technique', () => {
-  type RawTier1 = Omit<HuntCoordinatorResult['tier1'], 'tier'>;
+  type RawTier1 = Omit<HuntCoordinatorCoreResult['tier1'], 'tier'>;
 
   const proposedBehavior = ({
     techniqueId,
@@ -561,7 +563,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
   const run = async (
     tier1: RawTier1,
     behaviors: TestBehavior[]
-  ): Promise<HuntCoordinatorResult> => {
+  ): Promise<HuntCoordinatorCoreResult> => {
     const { huntForThreat } = jest.requireMock('../tier1/hunt_for_threat');
     const { huntBehavior } = jest.requireMock('../tier2/hunt_behavior');
     huntForThreat.mockResolvedValue(tier1);
@@ -582,7 +584,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     });
   };
 
-  const entriesFor = (result: HuntCoordinatorResult) =>
+  const entriesFor = (result: HuntCoordinatorCoreResult) =>
     buildSseData(result, 'tr-corroboration', { spaceId: 'default' });
 
   const idFor = (techniqueId?: string) =>
@@ -924,7 +926,7 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
       type: 'ip' as const,
       value: `10.0.0.${i}`,
     }));
-    const result: HuntCoordinatorResult = {
+    const result: HuntCoordinatorCoreResult = {
       ...tier1Result({ resolved_iocs: resolvedIocs }),
       tier2: {
         tier: 2,
