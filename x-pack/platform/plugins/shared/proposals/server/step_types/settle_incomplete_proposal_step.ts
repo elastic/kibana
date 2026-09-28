@@ -40,7 +40,11 @@ export const getSettleIncompleteProposalStepDefinition = ({
         // Same adopt the loop does before every write: a revision appended
         // while the gate was parked would leave the carried id superseded.
         const latest = await service.getLatestRevision(input.proposalId, spaceId);
-        const proposal = await service.get(latest.proposalId, spaceId);
+        const proposal = await service.get(
+          latest.proposalId,
+          spaceId,
+          context.contextManager.getFakeRequest()
+        );
 
         const status = input.status ?? (proposal.decision !== undefined ? 'failed' : 'expired');
 
