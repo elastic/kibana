@@ -159,6 +159,35 @@ describe('KibanaActionStepImpl', () => {
       );
     });
 
+    it('JSON-encodes a scalar string for +json media types and leaves jsonl raw', async () => {
+      step = createStep({
+        request: {
+          method: 'POST',
+          path: '/api/test',
+          body: 'hello',
+          headers: { 'Content-Type': 'application/vnd.api+json; charset=utf-8' },
+        },
+      });
+      await (step as any)._run();
+      expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
+        expect.objectContaining({ body: '"hello"' })
+      );
+
+      contextManager.callKibanaApi.mockClear();
+      step = createStep({
+        request: {
+          method: 'POST',
+          path: '/api/test',
+          body: 'hello',
+          headers: { 'Content-Type': 'application/jsonl' },
+        },
+      });
+      await (step as any)._run();
+      expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
+        expect.objectContaining({ body: 'hello' })
+      );
+    });
+
     it('preserves JSON strings and caller content type', async () => {
       step = createStep({
         request: {

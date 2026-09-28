@@ -321,7 +321,11 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     const contentType = Object.entries(headers ?? {}).find(
       ([name]) => name.toLowerCase() === 'content-type'
     )?.[1];
-    return contentType === undefined || contentType.toLowerCase().includes('application/json');
+    if (contentType === undefined) {
+      return true;
+    }
+    const mediaType = contentType.split(';', 1)[0].trim().toLowerCase();
+    return mediaType === 'application/json' || mediaType.endsWith('+json');
   }
 
   private getKibanaUrl(use_server_info = false, use_localhost = false): string {
