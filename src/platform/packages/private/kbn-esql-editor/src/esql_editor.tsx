@@ -31,8 +31,9 @@ import { ESQL_LANG_ID, monaco } from '@kbn/code-editor';
 import { DataSourceBrowser } from '@kbn/esql-resource-browser';
 import { FieldsBrowser } from '@kbn/esql-resource-browser';
 import { useStableCallback } from '@kbn/react-hooks';
+import type { RestorableStateProviderApi } from '@kbn/restorable-state';
 import type { ComponentProps } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
@@ -904,6 +905,16 @@ const ESQLEditorInternal = function ESQLEditor({
                     onLayoutChangeRef.current(layoutInfoEvent);
                   });
 
+                  const tabKeyDisposable = editor.onKeyDown((e) => {
+                    if (
+                      e.keyCode === monaco.KeyCode.Tab &&
+                      !e.shiftKey &&
+                      !isSuggestionPopupOpenRef.current
+                    ) {
+                      suppressSuggestionsRef.current = true;
+                    }
+                  });
+
                   const modelContentDisposable = editor.onDidChangeModelContent(async () => {
                     trackInputLatencyOnKeystroke(editor.getValue() ?? '');
                     await addLookupIndicesDecorator();
@@ -917,6 +928,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     mouseDownDisposable,
                     focusDisposable,
                     layoutChangeDisposable,
+                    tabKeyDisposable,
                     modelContentDisposable,
                     suggestionPopupDisposable,
                     commentLineDisposable,
@@ -1105,19 +1117,22 @@ const ESQLEditorInternal = function ESQLEditor({
   return editorPanel;
 };
 
-const ESQLEditorWithState = withRestorableState(ESQLEditorInternal);
-
-export const ESQLEditor = (props: ComponentProps<typeof ESQLEditorWithState>) => {
+const ESQLEditorWithActionsProvider = forwardRef<
+  RestorableStateProviderApi,
+  ESQLEditorPropsInternal
+>(function ESQLEditorWithActionsProvider(props, _ref) {
   const hasProvider = useHasEsqlEditorActionsProvider();
 
   if (hasProvider) {
-    return <ESQLEditorWithState {...props} />;
+    return <ESQLEditorInternal {...props} />;
   }
 
   return (
     <EsqlEditorActionsProvider>
-      <ESQLEditorWithState {...props} />
+      <ESQLEditorInternal {...props} />
     </EsqlEditorActionsProvider>
   );
-};
+});
+
+export const ESQLEditor = withRestorableState(ESQLEditorWithActionsProvider);
 export type ESQLEditorProps = ComponentProps<typeof ESQLEditor>;

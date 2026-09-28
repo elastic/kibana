@@ -8,8 +8,8 @@
  */
 
 import type { ConnectorTypeInfo } from '@kbn/workflows';
+import type { ConnectorIdItem } from '@kbn/workflows-yaml';
 import { validateConnectorIds } from './validate_connector_ids';
-import type { ConnectorIdItem } from '../model/types';
 
 describe('validateConnectorIds', () => {
   const mockConnectorInstance = {
@@ -20,6 +20,23 @@ describe('validateConnectorIds', () => {
   };
 
   const mockConnectorTypes: Record<string, ConnectorTypeInfo> = {
+    '.inboundWebhook': {
+      actionTypeId: '.inboundWebhook',
+      displayName: 'Inbound Webhook',
+      instances: [
+        {
+          id: 'testyng',
+          name: 'testyng',
+          isPreconfigured: false,
+          isDeprecated: false,
+        },
+      ],
+      enabled: true,
+      enabledInConfig: true,
+      enabledInLicense: true,
+      minimumLicenseRequired: 'gold',
+      subActions: [],
+    },
     '.slack': {
       actionTypeId: '.slack',
       displayName: 'Slack',
@@ -91,6 +108,85 @@ describe('validateConnectorIds', () => {
       expect(results[0].hoverMessage).toBeDefined();
       expect(typeof results[0].hoverMessage).toBe('string');
       expect(results[0]).not.toHaveProperty('ruleId');
+    });
+
+    it('should accept an inbound webhook instance id on a trigger connector-id', () => {
+      const connectorIdItems: ConnectorIdItem[] = [
+        createConnectorIdItem({
+          key: 'testyng',
+          connectorType: '.inboundWebhook',
+        }),
+      ];
+
+      const results = validateConnectorIds(connectorIdItems, mockConnectorTypes, '');
+
+      expect(results).toHaveLength(1);
+      expect(results[0]).toMatchObject({
+        severity: 'info',
+        message: null,
+        owner: 'connector-id-validation',
+        beforeMessage: '✓ testyng',
+      });
+    });
+
+    it('should accept the wildcard only on a trigger connector-id', () => {
+      const results = validateConnectorIds(
+        [
+          createConnectorIdItem({
+            key: '*',
+            connectorType: '.inboundWebhook',
+            yamlPath: ['triggers', 0, 'connector-id'],
+          }),
+        ],
+        mockConnectorTypes,
+        ''
+      );
+
+      expect(results).toEqual([
+        expect.objectContaining({
+          severity: 'info',
+          message: null,
+          beforeMessage: 'All connectors of this type',
+          hoverMessage:
+            'This trigger starts the workflow for events from every connector instance of this type.',
+        }),
+      ]);
+    });
+
+    it('should reject the wildcard on a connector action step', () => {
+      const results = validateConnectorIds(
+        [createConnectorIdItem({ key: '*', connectorType: '.slack' })],
+        mockConnectorTypes,
+        ''
+      );
+
+      expect(results).toEqual([
+        expect.objectContaining({
+          severity: 'error',
+          ruleId: 'connectorNotFound',
+        }),
+      ]);
+    });
+
+    it('should reject the wildcard on a HITL channel connector-id', () => {
+      const results = validateConnectorIds(
+        [
+          createConnectorIdItem({
+            key: '*',
+            connectorType: '.slack',
+            yamlPath: ['steps', 0, 'with', 'channels', 'slack', 'connector-id'],
+          }),
+        ],
+        mockConnectorTypes,
+        ''
+      );
+
+      expect(results).toEqual([
+        expect.objectContaining({
+          severity: 'error',
+          ruleId: 'connectorNotFound',
+        }),
+      ]);
     });
   });
 
@@ -193,6 +289,31 @@ describe('validateConnectorIds', () => {
       expect(results[0].message).toContain(
         'Unknown-type connector UUID "non-existent-connector" not found'
       );
+    });
+
+    it('does not offer Create connector for waitForInput or waitForApproval step types', () => {
+      const results = validateConnectorIds(
+        [
+          createConnectorIdItem({
+            key: 'non-existent-connector',
+            connectorType: 'waitForInput',
+          }),
+          createConnectorIdItem({
+            id: 'test-id-2',
+            key: 'non-existent-connector',
+            connectorType: 'waitForApproval',
+          }),
+        ],
+        mockConnectorTypes,
+        ''
+      );
+
+      expect(results).toHaveLength(2);
+      for (const result of results) {
+        expect(result.hoverMessage).not.toContain('createConnector');
+        expect(result.hoverMessage).not.toContain('.waitForInput');
+        expect(result.hoverMessage).not.toContain('.waitForApproval');
+      }
     });
   });
 

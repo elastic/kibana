@@ -7,16 +7,25 @@
 
 import { z } from '@kbn/zod/v4';
 import { EntityType } from '../../../../common/domain/definitions/entity_schema';
+import {
+  LogExtractionTypeOverride,
+  NonPriorityLogExtractionTypeOverride,
+} from '../global_state/constants';
 
 export type EngineStatus = z.infer<typeof EngineStatus>;
 export const EngineStatus = z.enum(['installing', 'started', 'stopped', 'updating', 'error']);
 
 export type EngineLogExtractionState = z.infer<typeof EngineLogExtractionState>;
 export const EngineLogExtractionState = z.object({
-  /** Inclusive lower bound for the next log-slice probe and the fromDateISO for entity recovery. */
+  /** Inclusive lower bound for the next log-slice probe. Stays at the slice start while a
+   * slice's entity pages are in flight, so a resumed run re-enters the interrupted slice. */
   checkpointTimestamp: z.string().nullable().default(null),
   paginationId: z.string().nullable().default(null),
   lastExecutionTimestamp: z.string().nullable().default(null),
+  /** Inclusive upper bound of the in-progress log slice. Set only while entity pages of a slice
+   * are being processed; cleared when the slice completes. On resume it pins the slice bounds so
+   * the (sampled, non-deterministic) boundary probe is not re-run for a partially processed slice. */
+  sliceEndTimestamp: z.string().nullable().default(null),
 });
 
 export type EngineError = z.infer<typeof EngineError>;
@@ -37,6 +46,18 @@ export const EngineDescriptor = z.object({
   type: EntityType,
   status: EngineStatus,
   logExtractionState: EngineLogExtractionState,
+  /** Per entity-type log extraction overrides. Optional: descriptors written before model version 8 do not have the field. */
+  logExtractionConfig: LogExtractionTypeOverride.optional(),
+  /** Non-priority-specific per entity-type overrides. Not exposed via any API - populated only
+   * by internal server logic. Optional: descriptors written before model version 11 do not have the field. */
+  nonPriorityLogExtractionConfig: NonPriorityLogExtractionTypeOverride.optional(),
+  /** Non-priority process cursor. Absent before model version 9, null when the non-priority process
+   * is not running. Both mean no cursor: extraction starts from now - lookbackPeriod. */
+  nonPriorityLogExtractionState: EngineLogExtractionState.nullish(),
+  /** Kept separate from `status` and `error` so the two processes do not overwrite each other, and
+   * so a non-priority failure cannot mark the whole engine errored. */
+  nonPriorityStatus: EngineStatus.nullish(),
+  nonPriorityError: EngineError.nullish(),
   error: EngineError.nullable().default(null),
   versionState: VersionState,
 });

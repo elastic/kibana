@@ -34,10 +34,10 @@ export function AgentBuilderNavControl() {
   const tooltipRef = useRef<EuiToolTipRef>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [tooltipVisible, setTooltipVisible] = useState(true);
+  const sidebarApp = chrome.sidebar.getApp('agentBuilder');
 
   useEffect(() => {
-    const sub = chrome.sidebar.getCurrentAppId$().subscribe((appId) => {
-      const isOpen = appId === 'agentBuilder';
+    const sub = sidebarApp.isOpen$().subscribe((isOpen) => {
       setIsSidebarOpen((prev) => {
         if (prev && !isOpen) {
           setTooltipVisible(true);
@@ -50,7 +50,7 @@ export function AgentBuilderNavControl() {
     });
 
     return () => sub.unsubscribe();
-  }, [chrome.sidebar]);
+  }, [sidebarApp]);
 
   const handleClick = useCallback(() => {
     tooltipRef.current?.hideToolTip();

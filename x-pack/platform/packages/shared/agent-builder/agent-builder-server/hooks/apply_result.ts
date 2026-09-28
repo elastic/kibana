@@ -11,6 +11,7 @@ import {
   type BeforeAgentHookContext,
   type BeforeToolCallHookContext,
   type AfterToolCallHookContext,
+  type AfterExecutionHookContext,
   type HookHandlerResult,
 } from './types';
 
@@ -44,6 +45,13 @@ export function applyAfterToolCallResult(
   return { ...context, toolReturn: result.toolReturn };
 }
 
+export function applyAfterExecutionResult(
+  context: AfterExecutionHookContext,
+  _result: void | HookHandlerResult<HookLifecycle.afterExecution>
+): AfterExecutionHookContext {
+  return context;
+}
+
 /**
  * Map of each hook lifecycle to its corresponding apply-result function.
  */
@@ -58,4 +66,5 @@ export const applyHookResultByLifecycle: ApplyHookResultByLifecycle = {
   [HookLifecycle.beforeAgent]: applyBeforeAgentResult,
   [HookLifecycle.beforeToolCall]: applyBeforeToolCallResult,
   [HookLifecycle.afterToolCall]: applyAfterToolCallResult,
+  [HookLifecycle.afterExecution]: applyAfterExecutionResult,
 };

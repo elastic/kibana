@@ -23,7 +23,8 @@ import { EVALS_API_PRIVILEGES } from '../../../common';
 import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import type { EvaluatorDefinition, EvaluatorRegistry } from '../../evaluators/types';
 import { awaitTraceReady, TraceReadinessError } from '../../evaluators/trace_readiness';
-import { getInstrumentationProfile } from '../../evaluators/evidence/resolve_instrumentation';
+import type { EvidenceRound, InstrumentationProfile } from '../../evaluators/evidence/types';
+import { withEvaluatorNameBaggage } from '../../evaluators/evaluator_tracing_context';
 import { registerEvaluateRoute } from './evaluate';
 import {
   buildClaudeCodeApiResponseDoc,
@@ -38,12 +39,31 @@ jest.mock('../../evaluators/trace_readiness', () => ({
   ...jest.requireActual('../../evaluators/trace_readiness'),
   awaitTraceReady: jest.fn(),
 }));
+jest.mock('../../evaluators/evaluator_tracing_context', () => ({
+  withEvaluatorNameBaggage: jest.fn((_: string, fn: () => unknown) => fn()),
+}));
 const awaitTraceReadyMock = awaitTraceReady as jest.MockedFunction<typeof awaitTraceReady>;
+const withEvaluatorNameBaggageMock = withEvaluatorNameBaggage as jest.MockedFunction<
+  typeof withEvaluatorNameBaggage
+>;
 const DEFAULT_ROUND = {
   input: { message: 'default input' },
   response: { message: 'default response' },
   steps: [],
 };
+const buildReadyResult = (
+  round: EvidenceRound,
+  profile: InstrumentationProfile = 'elastic-inference'
+): Awaited<ReturnType<typeof awaitTraceReady>> => ({
+  round,
+  profile,
+  readiness: 'complete',
+  evidence: {
+    user_query: { status: round.input.message ? 'found' : 'not_found' },
+    agent_response: { status: round.response.message ? 'found' : 'not_found' },
+    tool_calls: { status: round.steps.length ? 'found' : 'not_found' },
+  },
+});
 const CLAUDE_TRACE_ID = '0af7651916cd43dd8448eb211c8031ab';
 
 describe('POST /internal/evals/_evaluate', () => {
@@ -124,7 +144,7 @@ describe('POST /internal/evals/_evaluate', () => {
   };
 
   beforeEach(() => {
-    awaitTraceReadyMock.mockResolvedValue(DEFAULT_ROUND);
+    awaitTraceReadyMock.mockResolvedValue(buildReadyResult(DEFAULT_ROUND));
   });
 
   afterEach(() => {
@@ -178,7 +198,7 @@ describe('POST /internal/evals/_evaluate', () => {
         },
       ],
     };
-    awaitTraceReadyMock.mockResolvedValueOnce(round);
+    awaitTraceReadyMock.mockResolvedValueOnce(buildReadyResult(round));
     const firstEvaluate = jest.fn().mockResolvedValue({
       scores: [{ name: 'groundedness', score: 0.9, label: 'GROUNDED' }],
     });
@@ -296,6 +316,16 @@ describe('POST /internal/evals/_evaluate', () => {
         log: logger,
       })
     );
+    expect(withEvaluatorNameBaggageMock).toHaveBeenNthCalledWith(
+      1,
+      'groundedness',
+      expect.any(Function)
+    );
+    expect(withEvaluatorNameBaggageMock).toHaveBeenNthCalledWith(
+      2,
+      'correctness',
+      expect.any(Function)
+    );
   });
 
   it('uses otel-genai-attributes mapping when requested', async () => {
@@ -304,7 +334,7 @@ describe('POST /internal/evals/_evaluate', () => {
       response: { message: 'There were 12 failed payments today.' },
       steps: [],
     };
-    awaitTraceReadyMock.mockResolvedValueOnce(round);
+    awaitTraceReadyMock.mockResolvedValueOnce(buildReadyResult(round, 'otel-genai-attributes'));
     const evaluate = jest.fn().mockResolvedValue({
       scores: [{ name: 'latency', score: 42 }],
     });
@@ -379,17 +409,24 @@ describe('POST /internal/evals/_evaluate', () => {
     );
     expect(awaitTraceReadyMock).toHaveBeenCalledWith(
       expect.objectContaining({ traceId: '0af7651916cd43dd8448eb211c80319c' }),
-      getInstrumentationProfile('otel-genai-attributes'),
-      'otel-genai-attributes',
+      { mode: 'complete', profile: 'otel-genai-attributes' },
       logger
     );
   });
 
-  it('normalizes claude-code instrumentation into an EvidenceRound for evaluator execution', async () => {
+  it('normalizes claude-code evidence through the real readiness path', async () => {
     const actualTraceReadiness = jest.requireActual(
       '../../evaluators/trace_readiness'
     ) as typeof import('../../evaluators/trace_readiness');
-    awaitTraceReadyMock.mockImplementation(actualTraceReadiness.awaitTraceReady);
+    awaitTraceReadyMock.mockImplementation((traceAccessor, request, log) =>
+      actualTraceReadiness.awaitTraceReady(traceAccessor, request, log, {
+        retries: 2,
+        minTimeout: 1,
+        maxTimeout: 1,
+        factor: 1,
+        stabilityWindowMs: 0,
+      })
+    );
 
     const evaluate = jest.fn().mockResolvedValue({
       scores: [{ name: 'groundedness', score: 0.95, label: 'GROUNDED' }],
@@ -478,11 +515,13 @@ describe('POST /internal/evals/_evaluate', () => {
   });
 
   it('returns evidence_unmet without inference calls when evaluator evidence requirements fail', async () => {
-    awaitTraceReadyMock.mockResolvedValueOnce({
-      input: { message: 'What is the payment status?' },
-      response: { message: '' },
-      steps: [],
-    });
+    awaitTraceReadyMock.mockResolvedValueOnce(
+      buildReadyResult({
+        input: { message: 'What is the payment status?' },
+        response: { message: '' },
+        steps: [],
+      })
+    );
     const groundednessEvaluate = jest.fn().mockResolvedValue({
       scores: [{ name: 'groundedness', score: 1, label: 'GROUNDED' }],
     });
@@ -570,11 +609,13 @@ describe('POST /internal/evals/_evaluate', () => {
   });
 
   it('returns 200 for metrics-only evaluators when response evidence is missing', async () => {
-    awaitTraceReadyMock.mockResolvedValueOnce({
-      input: { message: 'What is the payment status?' },
-      response: { message: '' },
-      steps: [],
-    });
+    awaitTraceReadyMock.mockResolvedValueOnce(
+      buildReadyResult({
+        input: { message: 'What is the payment status?' },
+        response: { message: '' },
+        steps: [],
+      })
+    );
     const latencyEvaluate = jest.fn().mockResolvedValue({
       scores: [{ name: 'latency', score: 42 }],
     });

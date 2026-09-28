@@ -28,35 +28,49 @@ export const AttackDiscovery = lazySchema(() =>
     /**
      * The alert IDs that the attack discovery is based on
      */
-    alertIds: z.array(z.string()),
+    alertIds: z.array(z.string()).describe('The alert IDs that the attack discovery is based on'),
     /**
      * UUID of attack discovery
      */
-    id: z.string().optional(),
+    id: z.string().optional().describe('UUID of attack discovery'),
     /**
      * Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.
      */
-    detailsMarkdown: z.string(),
+    detailsMarkdown: z
+      .string()
+      .describe(
+        'Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.'
+      ),
     /**
      * A short (no more than a sentence) summary of the attack discovery featuring only the host.name and user.name fields (when they are applicable), using the same syntax
      */
-    entitySummaryMarkdown: z.string().optional(),
+    entitySummaryMarkdown: z
+      .string()
+      .optional()
+      .describe(
+        'A short (no more than a sentence) summary of the attack discovery featuring only the host.name and user.name fields (when they are applicable), using the same syntax'
+      ),
     /**
      * An array of MITRE ATT&CK tactic for the attack discovery
      */
-    mitreAttackTactics: z.array(z.string()).optional(),
+    mitreAttackTactics: z
+      .array(z.string())
+      .optional()
+      .describe('An array of MITRE ATT&CK tactic for the attack discovery'),
     /**
      * A markdown summary of attack discovery, using the same syntax
      */
-    summaryMarkdown: z.string(),
+    summaryMarkdown: z
+      .string()
+      .describe('A markdown summary of attack discovery, using the same syntax'),
     /**
      * A title for the attack discovery, in plain text
      */
-    title: z.string(),
+    title: z.string().describe('A title for the attack discovery, in plain text'),
     /**
      * The time the attack discovery was generated
      */
-    timestamp: NonEmptyTimestamp.optional(),
+    timestamp: NonEmptyTimestamp.optional().describe('The time the attack discovery was generated'),
   })
 );
 export type AttackDiscovery = z.infer<typeof AttackDiscovery>;
@@ -85,11 +99,11 @@ export const GenerationInterval = lazySchema(() =>
     /**
      * The time the attack discovery was generated
      */
-    date: z.string(),
+    date: z.string().describe('The time the attack discovery was generated'),
     /**
      * The duration of the attack discovery generation
      */
-    durationMs: z.number().int(),
+    durationMs: z.number().int().describe('The duration of the attack discovery generation'),
   })
 );
 export type GenerationInterval = z.infer<typeof GenerationInterval>;
@@ -102,19 +116,21 @@ export const AttackDiscoveryStat = lazySchema(() =>
     /**
      * Whether the user has viewed the results of the attack discovery run
      */
-    hasViewed: z.boolean(),
+    hasViewed: z
+      .boolean()
+      .describe('Whether the user has viewed the results of the attack discovery run'),
     /**
      * The number of attack discoveries for the connector
      */
-    count: z.number().int(),
+    count: z.number().int().describe('The number of attack discoveries for the connector'),
     /**
      * The connector ID for the attack discovery
      */
-    connectorId: z.string(),
+    connectorId: z.string().describe('The connector ID for the attack discovery'),
     /**
      * The status of the attack discovery.
      */
-    status: AttackDiscoveryStatus,
+    status: AttackDiscoveryStatus.describe('The status of the attack discovery.'),
   })
 );
 export type AttackDiscoveryStat = z.infer<typeof AttackDiscoveryStat>;
@@ -127,15 +143,23 @@ export const AttackDiscoveryStats = lazySchema(() =>
     /**
      * The number of attack discoveries that have not yet been viewed
      */
-    newDiscoveriesCount: z.number().int(),
+    newDiscoveriesCount: z
+      .number()
+      .int()
+      .describe('The number of attack discoveries that have not yet been viewed'),
     /**
      * The number of connectors with new results that have not yet been viewed
      */
-    newConnectorResultsCount: z.number().int(),
+    newConnectorResultsCount: z
+      .number()
+      .int()
+      .describe('The number of connectors with new results that have not yet been viewed'),
     /**
      * Attack discovery stats per connector
      */
-    statsPerConnector: z.array(AttackDiscoveryStat),
+    statsPerConnector: z
+      .array(AttackDiscoveryStat)
+      .describe('Attack discovery stats per connector'),
   })
 );
 export type AttackDiscoveryStats = z.infer<typeof AttackDiscoveryStats>;
@@ -147,53 +171,59 @@ export const AttackDiscoveryResponse = lazySchema(() =>
     /**
      * The last time attack discovery was updated.
      */
-    updatedAt: z.string(),
+    updatedAt: z.string().describe('The last time attack discovery was updated.'),
     /**
      * The last time attack discovery was viewed in the browser.
      */
-    lastViewedAt: z.string(),
+    lastViewedAt: z.string().describe('The last time attack discovery was viewed in the browser.'),
     /**
      * The number of alerts in the context.
      */
-    alertsContextCount: z.number().int().optional(),
+    alertsContextCount: z
+      .number()
+      .int()
+      .optional()
+      .describe('The number of alerts in the context.'),
     /**
      * The time attack discovery was created.
      */
-    createdAt: z.string(),
+    createdAt: z.string().describe('The time attack discovery was created.'),
     replacements: Replacements.optional(),
     users: z.array(User),
     /**
      * The status of the attack discovery.
      */
-    status: AttackDiscoveryStatus,
+    status: AttackDiscoveryStatus.describe('The status of the attack discovery.'),
     /**
      * The attack discoveries.
      */
-    attackDiscoveries: AttackDiscoveries,
+    attackDiscoveries: AttackDiscoveries.describe('The attack discoveries.'),
     /**
      * LLM API configuration.
      */
-    apiConfig: ApiConfig,
+    apiConfig: ApiConfig.describe('LLM API configuration.'),
     /**
      * Kibana space
      */
-    namespace: z.string(),
+    namespace: z.string().describe('Kibana space'),
     /**
      * The backing index required for update requests.
      */
-    backingIndex: z.string(),
+    backingIndex: z.string().describe('The backing index required for update requests.'),
     /**
      * The most 5 recent generation intervals
      */
-    generationIntervals: z.array(GenerationInterval),
+    generationIntervals: z
+      .array(GenerationInterval)
+      .describe('The most 5 recent generation intervals'),
     /**
      * The average generation interval in milliseconds
      */
-    averageIntervalMs: z.number().int(),
+    averageIntervalMs: z.number().int().describe('The average generation interval in milliseconds'),
     /**
      * The reason for a status of failed.
      */
-    failureReason: z.string().optional(),
+    failureReason: z.string().optional().describe('The reason for a status of failed.'),
   })
 );
 export type AttackDiscoveryResponse = z.infer<typeof AttackDiscoveryResponse>;
@@ -203,45 +233,64 @@ export const CreateAttackDiscoveryAlertsParams = lazySchema(() =>
     /**
      * The number of alerts provided as context to the LLM
      */
-    alertsContextCount: z.number().int(),
+    alertsContextCount: z
+      .number()
+      .int()
+      .describe('The number of alerts provided as context to the LLM'),
     /**
      * The anonymized alerts that were used to generate the attack discovery
      */
-    anonymizedAlerts: z.array(
-      z.object({
-        id: z.string().optional(),
-        metadata: z.object({}),
-        pageContent: z.string(),
-      })
-    ),
+    anonymizedAlerts: z
+      .array(
+        z.object({
+          id: z.string().optional(),
+          metadata: z.object({}),
+          pageContent: z.string(),
+        })
+      )
+      .describe('The anonymized alerts that were used to generate the attack discovery'),
     /**
      * LLM API configuration
      */
-    apiConfig: ApiConfig,
+    apiConfig: ApiConfig.describe('LLM API configuration'),
     /**
      * The generated Attack discoveries
      */
-    attackDiscoveries: AttackDiscoveries,
+    attackDiscoveries: AttackDiscoveries.describe('The generated Attack discoveries'),
     /**
      * The name of the connector that generated the attack discovery
      */
-    connectorName: z.string(),
+    connectorName: z
+      .string()
+      .describe('The name of the connector that generated the attack discovery'),
     /**
      * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.
      */
-    enableFieldRendering: z.boolean(),
+    enableFieldRendering: z
+      .boolean()
+      .describe(
+        'Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.'
+      ),
     /**
      * The generation ID of the run that created the attack discovery
      */
-    generationUuid: z.string(),
+    generationUuid: z
+      .string()
+      .describe('The generation ID of the run that created the attack discovery'),
     /**
      * Replacements enable anonymization of data sent to the LLM. When Attack discoveries are added to an assistant conversation, replacements must be provided at the same time.
      */
-    replacements: Replacements.optional(),
+    replacements: Replacements.optional().describe(
+      'Replacements enable anonymization of data sent to the LLM. When Attack discoveries are added to an assistant conversation, replacements must be provided at the same time.'
+    ),
     /**
      * When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields.
      */
-    withReplacements: z.boolean(),
+    withReplacements: z
+      .boolean()
+      .describe(
+        'When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields.'
+      ),
   })
 );
 export type CreateAttackDiscoveryAlertsParams = z.infer<typeof CreateAttackDiscoveryAlertsParams>;
@@ -251,63 +300,92 @@ export const FindAttackDiscoveryAlertsParams = lazySchema(() =>
     /**
      * filter by alert IDs within Attack discovery
      */
-    alertIds: z.array(z.string()).optional(),
+    alertIds: z
+      .array(z.string())
+      .optional()
+      .describe('filter by alert IDs within Attack discovery'),
     /**
      * filter by connector names
      */
-    connectorNames: z.array(z.string()).optional(),
+    connectorNames: z.array(z.string()).optional().describe('filter by connector names'),
     /**
      * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.
      */
-    enableFieldRendering: z.boolean(),
+    enableFieldRendering: z
+      .boolean()
+      .describe(
+        'Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.'
+      ),
     /**
      * filter by end date (relative or absolute)
      */
-    end: z.string().optional(),
+    end: z.string().optional().describe('filter by end date (relative or absolute)'),
     /**
      * filter by execution UUID
      */
-    executionUuid: z.string().optional(),
+    executionUuid: z.string().optional().describe('filter by execution UUID'),
     /**
      * whether to include attack alert IDs in the response
      */
-    includeUniqueAlertIds: z.boolean().optional(),
+    includeUniqueAlertIds: z
+      .boolean()
+      .optional()
+      .describe('whether to include attack alert IDs in the response'),
     /**
      * filter by Attack discovery IDs
      */
-    ids: z.array(z.string()).optional(),
+    ids: z.array(z.string()).optional().describe('filter by Attack discovery IDs'),
     page: z.number().int().min(1).optional().default(1),
     perPage: z.number().int().min(0).optional().default(10),
     /**
      * filter by search query
      */
-    search: z.string().optional(),
+    search: z.string().optional().describe('filter by search query'),
     /**
      * `undefined`: show both shared, and only visible to me Attack discoveries. `true`: show only shared Attack discoveries. `false`: show only visible to me Attack discoveries. Mutually exclusive with `includeAllAuthors`.
      */
-    shared: z.boolean().optional(),
+    shared: z
+      .boolean()
+      .optional()
+      .describe(
+        '`undefined`: show both shared, and only visible to me Attack discoveries. `true`: show only shared Attack discoveries. `false`: show only visible to me Attack discoveries. Mutually exclusive with `includeAllAuthors`.'
+      ),
     /**
      * If `true`, the response will include all attack discoveries matching other criteria regardless of who created them. Mutually exclusive with `shared`.
      */
-    includeAllAuthors: z.boolean().optional(),
+    includeAllAuthors: z
+      .boolean()
+      .optional()
+      .describe(
+        'If `true`, the response will include all attack discoveries matching other criteria regardless of who created them. Mutually exclusive with `shared`.'
+      ),
     /**
      * Whether to return scheduled or ad-hoc attack discoveries. If omitted, both types of attack discoveries are returned. Use `true` to return only scheduled discoveries or `false` to return only ad-hoc discoveries.
      */
-    scheduled: z.boolean().optional(),
+    scheduled: z
+      .boolean()
+      .optional()
+      .describe(
+        'Whether to return scheduled or ad-hoc attack discoveries. If omitted, both types of attack discoveries are returned. Use `true` to return only scheduled discoveries or `false` to return only ad-hoc discoveries.'
+      ),
     sortField: z.string().optional().default('@timestamp'),
     sortOrder: z.string().optional(),
     /**
      * filter by start date (relative or absolute)
      */
-    start: z.string().optional(),
+    start: z.string().optional().describe('filter by start date (relative or absolute)'),
     /**
      * filter by kibana.alert.workflow.status
      */
-    status: z.array(z.string()).optional(),
+    status: z.array(z.string()).optional().describe('filter by kibana.alert.workflow.status'),
     /**
      * When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields.
      */
-    withReplacements: z.boolean(),
+    withReplacements: z
+      .boolean()
+      .describe(
+        'When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields.'
+      ),
   })
 );
 export type FindAttackDiscoveryAlertsParams = z.infer<typeof FindAttackDiscoveryAlertsParams>;
@@ -320,15 +398,23 @@ context for the attack discovery.
 Example: .alerts-security.alerts-default
 
       */
-    alertsIndexPattern: z.string(),
+    alertsIndexPattern: z
+      .string()
+      .describe(
+        'The (space specific) index pattern that contains the alerts to use as\ncontext for the attack discovery.\nExample: .alerts-security.alerts-default\n'
+      ),
     /**
      * The list of fields, and whether or not they are anonymized, allowed to be sent to LLMs. Consider using the output of the `/api/security_ai_assistant/anonymization_fields/_find` API (for a specific Kibana space) to provide this value.
      */
-    anonymizationFields: z.array(AnonymizationFieldResponse),
+    anonymizationFields: z
+      .array(AnonymizationFieldResponse)
+      .describe(
+        'The list of fields, and whether or not they are anonymized, allowed to be sent to LLMs. Consider using the output of the `/api/security_ai_assistant/anonymization_fields/_find` API (for a specific Kibana space) to provide this value.'
+      ),
     /**
      * LLM API configuration.
      */
-    apiConfig: ApiConfig,
+    apiConfig: ApiConfig.describe('LLM API configuration.'),
     connectorName: z.string().optional(),
     end: z.string().optional(),
     /**
@@ -357,7 +443,13 @@ Example: .alerts-security.alerts-default
   }
 } ```
       */
-    filter: z.object({}).catchall(z.unknown()).optional(),
+    filter: z
+      .object({})
+      .catchall(z.unknown())
+      .optional()
+      .describe(
+        'An Elasticsearch-style query DSL object used to filter alerts. For example:\n```json {\n  "filter": {\n    "bool": {\n      "must": [],\n      "filter": [\n        {\n          "bool": {\n            "should": [\n              {\n                "term": {\n                  "user.name": { "value": "james" }\n                }\n              }\n            ],\n            "minimum_should_match": 1\n          }\n        }\n      ],\n      "should": [],\n      "must_not": []\n    }\n  }\n} ```'
+      ),
     langSmithProject: z.string().optional(),
     langSmithApiKey: z.string().optional(),
     model: z.string().optional(),

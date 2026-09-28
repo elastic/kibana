@@ -5,12 +5,39 @@
  * 2.0.
  */
 
-import { AddEditMonitorAPI } from './add_monitor_api';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { AddEditMonitorAPI, isPackagePolicyConflictFailure } from './add_monitor_api';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsService } from '../../../synthetics_service/synthetics_service';
 import { syntheticsMonitorAttributes } from '../../../../common/types/saved_objects';
 import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
+
+describe('isPackagePolicyConflictFailure', () => {
+  it('matches Fleet bulkCreate saved-object 409 payloads', () => {
+    expect(
+      isPackagePolicyConflictFailure({
+        statusCode: 409,
+        error: 'Conflict',
+        message: 'Saved object [fleet-package-policies/mon-1-loc-1] conflict',
+      })
+    ).toBe(true);
+  });
+
+  it('matches decorated conflict Errors', () => {
+    expect(
+      isPackagePolicyConflictFailure(
+        SavedObjectsErrorHelpers.createConflictError('fleet-package-policies', 'mon-1-loc-1')
+      )
+    ).toBe(true);
+  });
+
+  it('ignores non-conflict failures', () => {
+    expect(isPackagePolicyConflictFailure(new Error('boom'))).toBe(false);
+    expect(isPackagePolicyConflictFailure({ statusCode: 500, error: 'Error' })).toBe(false);
+    expect(isPackagePolicyConflictFailure(undefined)).toBe(false);
+  });
+});
 
 describe('AddNewMonitorsPublicAPI', () => {
   describe('revertMonitorIfCreated', () => {

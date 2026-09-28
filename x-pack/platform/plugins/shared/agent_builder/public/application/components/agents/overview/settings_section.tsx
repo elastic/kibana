@@ -49,6 +49,7 @@ export interface SettingsSectionProps {
   currentInstructions: string;
   showWorkflowSection: boolean;
   workflowIds: string[];
+  postExecutionWorkflowIds: string[];
   canEditAgent: boolean;
   onOpenEditFlyout: () => void;
   agentId: string;
@@ -59,6 +60,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
   currentInstructions,
   showWorkflowSection,
   workflowIds,
+  postExecutionWorkflowIds,
   canEditAgent,
   onOpenEditFlyout,
   agentId,
@@ -81,6 +83,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
   `;
 
   const hasWorkflows = workflowIds.length > 0;
+  const hasPostExecutionWorkflows = postExecutionWorkflowIds.length > 0;
 
   return (
     <>
@@ -242,6 +245,45 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                           data-test-subj="agentOverviewWorkflowsBadge"
                         >
                           {hasWorkflows ? overviewLabels.enabledBadge : overviewLabels.notSetBadge}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+
+                  <EuiHorizontalRule margin="none" />
+
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow>
+                        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            <EuiText
+                              size="s"
+                              color={
+                                hasPostExecutionWorkflows
+                                  ? 'textPrimary'
+                                  : euiTheme.colors.textDisabled
+                              }
+                            >
+                              {overviewLabels.postExecutionWorkflowTitle}
+                            </EuiText>
+                          </EuiFlexItem>
+                          <EuiFlexItem
+                            grow={false}
+                            css={hasPostExecutionWorkflows ? undefined : textDisabledStyles}
+                          >
+                            <EuiIcon type="info" size="s" aria-hidden={true} />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge
+                          color={hasPostExecutionWorkflows ? 'success' : 'default'}
+                          data-test-subj="agentOverviewPostExecutionWorkflowsBadge"
+                        >
+                          {hasPostExecutionWorkflows
+                            ? overviewLabels.enabledBadge
+                            : overviewLabels.notSetBadge}
                         </EuiBadge>
                       </EuiFlexItem>
                     </EuiFlexGroup>

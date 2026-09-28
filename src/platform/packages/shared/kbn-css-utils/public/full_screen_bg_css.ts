@@ -12,16 +12,9 @@
 import { useMemo } from 'react';
 import { css, keyframes } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { COLOR_MODES_STANDARD, euiCanAnimate, useEuiTheme } from '@elastic/eui';
-import bg_top_branded from './images/bg_top_branded.svg';
-import bg_top_branded_dark from './images/bg_top_branded_dark.svg';
-import bg_bottom_branded from './images/bg_bottom_branded.svg';
-import bg_bottom_branded_dark from './images/bg_bottom_branded_dark.svg';
+import { euiCanAnimate, useEuiTheme } from '@elastic/eui';
 
-export const kbnFullScreenBgCss = ({ euiTheme, colorMode }: UseEuiTheme) => {
-  const lightOrDarkTheme = (lightSvg: string, darkSvg: any) => {
-    return colorMode === COLOR_MODES_STANDARD.light ? lightSvg : darkSvg;
-  };
+export const kbnFullScreenBgCss = ({ euiTheme }: UseEuiTheme) => {
   const fullScreenGraphicsFadeIn = keyframes`
   from {
     opacity: 0;
@@ -46,26 +39,6 @@ export const kbnFullScreenBgCss = ({ euiTheme, colorMode }: UseEuiTheme) => {
     },
     '.kbnBody--hasHeaderBanner &': {
       top: 'var(--kbnHeaderBannerHeight)',
-    },
-    '&::before, &::after': {
-      position: 'fixed',
-      zIndex: 1,
-      width: '400px',
-      height: '400px',
-      content: `url(${lightOrDarkTheme(bg_top_branded, bg_top_branded_dark)})`,
-      [`@media (max-width: ${euiTheme.breakpoint.l}px)`]: {
-        content: 'none',
-      },
-    },
-    '&::before': {
-      top: 0,
-      left: 0,
-      content: `url(${lightOrDarkTheme(bg_top_branded, bg_top_branded_dark)})`,
-    },
-    '&::after': {
-      bottom: 0,
-      right: 0,
-      content: `url(${lightOrDarkTheme(bg_bottom_branded, bg_bottom_branded_dark)})`,
     },
   });
 };

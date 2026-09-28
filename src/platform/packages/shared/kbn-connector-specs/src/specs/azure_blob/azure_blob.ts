@@ -169,6 +169,7 @@ export const AzureBlob: ConnectorSpec = {
   actions: {
     listContainers: {
       isTool: true,
+      scope: 'read',
       description:
         'List all containers in the Azure Blob Storage account. Supports optional prefix filtering and cursor-based pagination via marker.',
       input: lazySchema(() =>
@@ -213,6 +214,7 @@ export const AzureBlob: ConnectorSpec = {
 
     listBlobs: {
       isTool: true,
+      scope: 'read',
       description:
         'List blobs inside a specific Azure Blob Storage container. Supports optional prefix filtering and cursor-based pagination.',
       input: lazySchema(() =>
@@ -262,6 +264,7 @@ export const AzureBlob: ConnectorSpec = {
 
     getBlob: {
       isTool: true,
+      scope: 'read',
       description:
         'Download the full content of a blob from Azure Blob Storage, returned as base64. Always call getBlobProperties first to check contentLength — do not call this if the blob exceeds 1048576 bytes (1 MB).',
       input: lazySchema(() =>
@@ -298,6 +301,7 @@ export const AzureBlob: ConnectorSpec = {
 
     getBlobProperties: {
       isTool: true,
+      scope: 'read',
       description:
         'Get metadata for a blob (content type, size, last modified, etag) without downloading its content. Call this before getBlob to check whether the blob is small enough to download (limit: 1048576 bytes / 1 MB).',
       input: lazySchema(() =>

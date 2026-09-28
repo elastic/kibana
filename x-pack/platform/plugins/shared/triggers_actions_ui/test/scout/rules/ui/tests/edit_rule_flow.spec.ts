@@ -85,6 +85,7 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
 
   test('Edit from rule details page: navigate, cancel, and save', async ({
     page,
+    pageObjects,
     kbnUrl,
     apiServices,
   }) => {
@@ -92,8 +93,7 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
     await expect(page.testSubj.locator('appHeaderTitle')).toBeVisible();
 
     await test.step('navigates to edit page when clicking edit button', async () => {
-      await page.testSubj.click('app-menu-overflow-button');
-      await page.testSubj.click('openEditRuleFlyoutButton');
+      await pageObjects.appMenu.clickItem('openEditRuleFlyoutButton');
 
       await expect(page).toHaveURL(RULES_EDIT_URL_RE);
       expect(page.url()).toContain(`/${SM_BASE}/edit/${testRuleId}`);
@@ -111,8 +111,7 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
     await test.step('returns to rule details page after saving', async () => {
       const updatedName = `${testRuleName}-details-v2`;
 
-      await page.testSubj.click('app-menu-overflow-button');
-      await page.testSubj.click('openEditRuleFlyoutButton');
+      await pageObjects.appMenu.clickItem('openEditRuleFlyoutButton');
       await expect(page.testSubj.locator('ruleForm')).toBeVisible();
 
       await page.testSubj.locator('ruleDetailsNameInput').fill(updatedName);

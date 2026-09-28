@@ -28,6 +28,17 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   useGetSettingsQuery: () => ({ data: undefined }),
 }));
 
+const plainLeftClick = (overrides: Partial<React.MouseEvent> = {}) =>
+  ({
+    button: 0,
+    metaKey: false,
+    altKey: false,
+    ctrlKey: false,
+    shiftKey: false,
+    preventDefault: jest.fn(),
+    ...overrides,
+  } as unknown as React.MouseEvent);
+
 const makeCollectionCard = (groupId: string, memberCount: number) => ({
   id: `collection:${groupId}`,
   name: groupId,
@@ -65,7 +76,12 @@ beforeEach(() => {
 const buildServices = ({
   isServerless = false,
   featureFlagValues = {},
-}: { isServerless?: boolean; featureFlagValues?: Record<string, boolean> } = {}) => {
+  metricsOnboardingEnabled = true,
+}: {
+  isServerless?: boolean;
+  featureFlagValues?: Record<string, boolean>;
+  metricsOnboardingEnabled?: boolean;
+} = {}) => {
   const core = coreMock.createStart();
   core.application.getUrlForApp.mockImplementation(
     (app: string, options?: { path?: string }) => `/app/${app}${options?.path ?? ''}`
@@ -73,9 +89,12 @@ const buildServices = ({
   return {
     ...core,
     featureFlags: {
-      getBooleanValue: jest.fn(
+      useBooleanValue: jest.fn(
         (key: string, fallback: boolean) => featureFlagValues[key] ?? fallback
       ),
+    },
+    pricing: {
+      isFeatureAvailable: jest.fn(() => metricsOnboardingEnabled),
     },
     observability: { config: { managedOtlpServiceUrl: '' } },
     cloud: undefined,
@@ -101,7 +120,7 @@ const createProviderWrapper = () => {
     <I18nProvider>
       <KibanaContextProvider services={buildServices()}>
         <MemoryRouter initialEntries={['/']}>
-          <FleetCardsProvider enabled>{children}</FleetCardsProvider>
+          <FleetCardsProvider>{children}</FleetCardsProvider>
         </MemoryRouter>
       </KibanaContextProvider>
     </I18nProvider>
@@ -123,6 +142,16 @@ describe('useObservabilityCuratedCategories', () => {
       'host',
       'applications',
     ]);
+  });
+
+  it('hides the Applications category when metrics onboarding is unavailable', () => {
+    const { result } = renderHook(
+      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
+      {
+        wrapper: createWrapper(buildServices({ metricsOnboardingEnabled: false })),
+      }
+    );
+    expect(result.current.map((category) => category.id)).toEqual(['cloud', 'containers', 'host']);
   });
 
   it('wires internal routes for quickstart tiles', () => {
@@ -154,7 +183,33 @@ describe('useObservabilityCuratedCategories', () => {
     const tiles = result.current.flatMap((category) => category.tiles);
     const aws = tiles.find((tile) => tile.id === 'aws');
     expect(aws?.href).toBe('/app/onboarding/aws');
-    expect(aws?.onClick).toBeUndefined();
+
+    const event = plainLeftClick();
+    aws?.onClick?.(event);
+    expect(event.preventDefault).toHaveBeenCalled();
+    expect(services.application.navigateToApp).toHaveBeenCalledWith('onboarding', {
+      path: '/aws',
+      state: { newSession: true },
+    });
+  });
+
+  it('leaves a modified click on the AWS tile to the browser so it opens in a new tab', () => {
+    const services = buildServices({
+      featureFlagValues: { [IS_INGEST_HUB_ONBOARDING_ENABLED]: true },
+    });
+    const { result } = renderHook(
+      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
+      {
+        wrapper: createWrapper(services),
+      }
+    );
+    const tiles = result.current.flatMap((category) => category.tiles);
+    const aws = tiles.find((tile) => tile.id === 'aws');
+
+    const event = plainLeftClick({ metaKey: true });
+    aws?.onClick?.(event);
+    expect(event.preventDefault).not.toHaveBeenCalled();
+    expect(services.application.navigateToApp).not.toHaveBeenCalled();
   });
 
   it('wires EPR-backed tiles to the integrations detail page', () => {
@@ -266,6 +321,21 @@ describe('useObservabilityMiniTiles', () => {
     expect(result.current[0].onClick).toBeUndefined();
   });
 
+  it('swaps the metrics-only tiles for OpenTelemetry when metrics onboarding is unavailable', () => {
+    const { result } = renderHook(
+      () => useObservabilityMiniTiles({ onOpenCollection: jest.fn() }),
+      {
+        wrapper: createWrapper(buildServices({ metricsOnboardingEnabled: false })),
+      }
+    );
+    expect(result.current.map((tile) => tile.id)).toEqual([
+      'opentelemetry',
+      'auto_import',
+      'upload_file',
+      'custom_logs',
+    ]);
+  });
+
   it('wires EPR-backed mini tiles to the integrations detail page', () => {
     const { result } = renderHook(
       () => useObservabilityMiniTiles({ onOpenCollection: jest.fn() }),
@@ -280,6 +350,20 @@ describe('useObservabilityMiniTiles', () => {
     expect(hrefById.supabase).toBe(
       '/app/integrations/detail/supabase/overview?returnAppId=observabilityOnboarding&returnPath=%3F'
     );
+  });
+
+  it('sends the OpenTelemetry mini tile to the OTel quickstart on serverless Logs Essentials', () => {
+    const { result } = renderHook(
+      () => useObservabilityMiniTiles({ onOpenCollection: jest.fn() }),
+      {
+        wrapper: createWrapper(
+          buildServices({ isServerless: true, metricsOnboardingEnabled: false })
+        ),
+      }
+    );
+    const opentelemetry = result.current.find((tile) => tile.id === 'opentelemetry');
+    expect(opentelemetry?.href).toBe('/otel-apm');
+    expect(opentelemetry?.onClick).toBeDefined();
   });
 
   it('wires the custom logs mini tile to the OTel logs flow route', () => {

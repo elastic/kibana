@@ -387,6 +387,143 @@ describe('AWS service matrix', () => {
     });
   });
 
+  describe('agent_based fallback deployment method', () => {
+    it('applies to non-ECF entries when no package is available', () => {
+      const [result] = buildAwsServiceMatrix({} as any, [
+        {
+          id: 'aws_securityhub',
+          category: 'security_identity_compliance',
+          packageName: 'aws_securityhub',
+        },
+      ]);
+      expect(result.deploymentMethods).toEqual([{ method: 'agent_based', preferred: true }]);
+      expect(result.showInUI).toBe(true);
+    });
+
+    it('does not apply to ecfOnly entries when no package is available', () => {
+      const [result] = buildAwsServiceMatrix({} as any, [
+        {
+          id: 'vpcflow_otel',
+          category: 'networking_content_delivery',
+          packageName: 'aws',
+          ecfOnly: true,
+          deploymentMethods: [{ method: 'ecf', preferred: true }],
+        },
+      ]);
+      expect(result.deploymentMethods).toEqual([{ method: 'ecf', preferred: true }]);
+    });
+
+    it('applies to non-ECF entries whose PT is not agentless-enabled', () => {
+      const pkg = {
+        policy_templates: [
+          {
+            name: 'fargate',
+            // no deployment_modes.agentless → managedIntegrations = false → fallback fires
+            inputs: [{ type: 'awsfargate/metrics', title: 'Fargate Metrics' }],
+          },
+        ],
+        data_streams: [
+          {
+            path: 'task_stats',
+            type: 'metrics',
+            streams: [{ input: 'awsfargate/metrics', vars: [] }],
+          },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ awsfargate: pkg as any }, [
+        {
+          id: 'awsfargate',
+          category: 'containers',
+          packageName: 'awsfargate',
+          policyTemplate: 'fargate',
+        },
+      ]);
+      expect(result.deploymentMethods).toEqual([{ method: 'agent_based', preferred: true }]);
+    });
+  });
+
+  describe('PT data_streams fallback', () => {
+    it('uses all package data_streams when PT omits the data_streams field', () => {
+      const pkg = {
+        policy_templates: [
+          {
+            name: 'aws_securityhub',
+            inputs: [{ type: 'cel', title: 'Security Hub via API' }],
+            deployment_modes: { agentless: { enabled: true } },
+          },
+        ],
+        data_streams: [
+          {
+            path: 'finding',
+            type: 'logs',
+            streams: [
+              { input: 'cel', vars: [{ name: 'proxy_url', type: 'text', required: false }] },
+            ],
+          },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ aws_securityhub: pkg as any }, [
+        {
+          id: 'aws_securityhub',
+          category: 'security_identity_compliance',
+          packageName: 'aws_securityhub',
+        },
+      ]);
+      expect(result.dataStreams).toEqual(['finding']);
+      expect(result.signalTypes).toContain('logs');
+      expect(result.inputs).toContain('cel');
+      expect(result.varDefsByDataStream?.finding).toBeDefined();
+      expect(result.varDefsByDataStream?.finding?.varDefsByInput?.cel?.proxy_url).toBeDefined();
+    });
+
+    it('uses all package data_streams when PT has an explicit empty data_streams array', () => {
+      const pkg = {
+        policy_templates: [
+          {
+            name: 'aws_bedrock',
+            data_streams: [],
+            inputs: [{ type: 'aws-cloudwatch', title: 'Bedrock via CloudWatch' }],
+            deployment_modes: { agentless: { enabled: true } },
+          },
+        ],
+        data_streams: [
+          {
+            path: 'model_invocation',
+            type: 'logs',
+            streams: [{ input: 'aws-cloudwatch', vars: [] }],
+          },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ aws_bedrock: pkg as any }, [
+        { id: 'aws_bedrock', category: 'machine_learning', packageName: 'aws_bedrock' },
+      ]);
+      expect(result.dataStreams).toEqual(['model_invocation']);
+      expect(result.signalTypes).toContain('logs');
+      expect(result.inputs).toContain('aws-cloudwatch');
+    });
+
+    it('uses only explicit PT data_streams when present — no regression for aws-style packages', () => {
+      const pkg = {
+        policy_templates: [
+          {
+            name: 'elb',
+            data_streams: ['elb_logs'],
+            deployment_modes: { agentless: { enabled: true } },
+          },
+        ],
+        data_streams: [
+          { path: 'elb_logs', type: 'logs', streams: [{ input: 'aws-s3', vars: [] }] },
+          { path: 'other_logs', type: 'logs', streams: [{ input: 'aws-cloudwatch', vars: [] }] },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ aws: pkg as any }, [
+        { id: 'elb', category: 'networking_content_delivery', packageName: 'aws' },
+      ]);
+      expect(result.dataStreams).toEqual(['elb_logs']);
+      expect(result.dataStreams).not.toContain('other_logs');
+    });
+  });
+
   describe('defaultEnabledInputs derivation', () => {
     it('excludes inputs whose stream has enabled:false', () => {
       const pkg = {

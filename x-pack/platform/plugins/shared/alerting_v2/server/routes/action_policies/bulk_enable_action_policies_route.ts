@@ -16,6 +16,7 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { bulkEnableActionPoliciesOasExamples } from './bulk_enable_action_policies_oas_example';
+import { ACTION_POLICY_LICENSE_FORBIDDEN_DESCRIPTION } from './action_policy_route_descriptions';
 
 @injectable()
 export class BulkEnableActionPoliciesRoute extends BaseAlertingRoute {
@@ -27,6 +28,7 @@ export class BulkEnableActionPoliciesRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Enable action policies in bulk by ID',
     oasOperationObject: bulkEnableActionPoliciesOasExamples,
   } as const;
@@ -42,6 +44,10 @@ export class BulkEnableActionPoliciesRoute extends BaseAlertingRoute {
       400: {
         body: () => errorResponseSchema,
         description: 'Indicates an invalid schema or parameters.',
+      },
+      403: {
+        body: () => errorResponseSchema,
+        description: ACTION_POLICY_LICENSE_FORBIDDEN_DESCRIPTION,
       },
     },
   };

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -31,8 +31,11 @@ import {
   DISCOVER_CELL_ACTIONS_TRIGGER_ID,
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { isOfQueryType } from '@kbn/es-query';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_allowed_sample_size';
+import { buildDatatableFromTextBasedGrid } from '../../utils/build_datatable_from_text_based_grid';
+import { getGridRequestId } from '../../utils/get_grid_request_id';
 import { isEsqlMode } from '../initialize_fetch';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
 import { DiscoverGridEmbeddable, type InlineEditing } from './saved_search_grid';
@@ -43,11 +46,19 @@ import { useAdditionalCellActions } from '../../context_awareness';
 import { getTimeRangeFromFetchContext } from '../utils/update_search_source';
 import { createDataSource } from '../../../common/data_sources';
 import { replaceColumnsWithVariableDriven } from '../utils/replace_columns_with_variable_driven';
+import type { DiscoverAppLocatorParams } from '../../../common';
+import { getExpandedDocLinkability } from '../../application/main/utils/expanded_doc';
+import { getExpandedDocLocatorParams } from '../utils/get_discover_locator_params';
+import {
+  useCopyLocatorLink,
+  useShareDirectLinkAction,
+} from '../../components/discover_grid_flyout';
 
 interface SavedSearchEmbeddableComponentProps {
   api: SearchEmbeddableApi & {
     fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
+    abortSignal$: BehaviorSubject<AbortSignal | undefined>;
   };
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
@@ -100,6 +111,7 @@ export function SearchEmbeddableGridComponent({
     savedSearchTitle,
     savedSearchDescription,
     esqlVariables,
+    abortSignal,
   ] = useBatchedPublishingSubjects(
     api.dataLoading$,
     api.savedSearch$,
@@ -116,7 +128,8 @@ export function SearchEmbeddableGridComponent({
     api.description$,
     api.defaultTitle$,
     api.defaultDescription$,
-    esqlVariables$ ?? emptyEsqlVariables$
+    esqlVariables$ ?? emptyEsqlVariables$,
+    api.abortSignal$
   );
 
   // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
@@ -168,6 +181,61 @@ export function SearchEmbeddableGridComponent({
   const timeRange = useMemo(
     () => (fetchContext ? getTimeRangeFromFetchContext(fetchContext) : undefined),
     [fetchContext]
+  );
+
+  const expandedDocLinkability = useMemo(
+    () => getExpandedDocLinkability(savedSearchQuery, expandedDoc),
+    [savedSearchQuery, expandedDoc]
+  );
+
+  const buildExpandedDocLocatorParams = useCallback(
+    (): DiscoverAppLocatorParams =>
+      getExpandedDocLocatorParams({
+        api,
+        savedSearch,
+        dataView,
+        query: savedSearchQuery,
+        panelFilters: savedSearchFilters,
+        dashboardFilters: fetchContext?.filters,
+        columns,
+        sort,
+        grid,
+        isEsql,
+        esqlVariables,
+        expandedDoc,
+        timeRange,
+        timefilter: discoverServices.timefilter,
+      }),
+    [
+      api,
+      dataView,
+      savedSearchQuery,
+      savedSearchFilters,
+      fetchContext,
+      columns,
+      sort,
+      grid,
+      savedSearch,
+      isEsql,
+      esqlVariables,
+      expandedDoc,
+      timeRange,
+      discoverServices.timefilter,
+    ]
+  );
+
+  const copyExpandedDocLink = useCopyLocatorLink(buildExpandedDocLocatorParams);
+  const shareDirectLinkActions = useShareDirectLinkAction({
+    copyLink: copyExpandedDocLink,
+    linkability: expandedDocLinkability,
+    query: savedSearchQuery,
+  });
+  const canShareExpandedDocLink =
+    Boolean(discoverServices.capabilities.discover_v2.show) ||
+    Boolean(discoverServices.capabilities.discover_v2.save);
+  const flyoutMenuTrailingActions = useMemo(
+    () => (canShareExpandedDocLink && expandedDoc ? shareDirectLinkActions : undefined),
+    [canShareExpandedDocLink, expandedDoc, shareDirectLinkActions]
   );
 
   const cellActionsMetadata = useAdditionalCellActions({
@@ -251,10 +319,38 @@ export function SearchEmbeddableGridComponent({
     [discoverServices.uiSettings, savedSearchQuery]
   );
 
-  const isDataTableJsonViewEnabled = useMemo(
-    () => discoverServices.discoverFeatureFlags.getDataTableJsonViewEnabled(),
-    [discoverServices.discoverFeatureFlags]
-  );
+  const searchContext = useMemo(() => {
+    if (!isEsql) {
+      return undefined;
+    }
+    const table = buildDatatableFromTextBasedGrid({ rows, columnsMeta });
+    if (!table || !savedSearchQuery) {
+      return undefined;
+    }
+    return {
+      query: savedSearchQuery,
+      filterQuery:
+        fetchContext?.query && isOfQueryType(fetchContext.query) ? fetchContext.query : undefined,
+      table,
+      filters: fetchContext?.filters,
+      timeRange,
+      esqlVariables: fetchContext?.esqlVariables ?? esqlVariables,
+      searchSessionId: fetchContext?.searchSessionId,
+      projectRouting: fetchContext?.projectRouting,
+      isApproximate: fetchContext?.isApproximate,
+      requestId: getGridRequestId(rows),
+      abortSignal,
+    };
+  }, [
+    abortSignal,
+    columnsMeta,
+    esqlVariables,
+    fetchContext,
+    isEsql,
+    rows,
+    savedSearchQuery,
+    timeRange,
+  ]);
 
   return (
     <DiscoverGridEmbeddableMemoized
@@ -294,22 +390,18 @@ export function SearchEmbeddableGridComponent({
       services={discoverServices}
       showTimeCol={showTimeCol}
       dataGridDensityState={savedSearch.density}
-      documentsDisplayModeState={
-        isDataTableJsonViewEnabled ? savedSearch.documentsDisplayMode : undefined
-      }
-      onUpdateDocumentsDisplayMode={
-        isDataTableJsonViewEnabled ? onStateEditedProps.onUpdateDocumentsDisplayMode : undefined
-      }
-      jsonModeSettingsState={isDataTableJsonViewEnabled ? savedSearch.jsonModeSettings : undefined}
-      onUpdateJsonModeSettings={
-        isDataTableJsonViewEnabled ? onStateEditedProps.onUpdateJsonModeSettings : undefined
-      }
+      documentsDisplayModeState={savedSearch.documentsDisplayMode}
+      onUpdateDocumentsDisplayMode={onStateEditedProps.onUpdateDocumentsDisplayMode}
+      jsonModeSettingsState={savedSearch.jsonModeSettings}
+      onUpdateJsonModeSettings={onStateEditedProps.onUpdateJsonModeSettings}
       enableDocumentViewer={enableDocumentViewer}
       inlineEditing={inlineEditing}
       expandedDoc={expandedDoc}
       initialDocViewerTabId={initialDocViewerTabId}
       docViewerRef={docViewerRef}
       setExpandedDoc={setExpandedDoc}
+      searchContext={searchContext}
+      flyoutMenuTrailingActions={flyoutMenuTrailingActions}
     />
   );
 }

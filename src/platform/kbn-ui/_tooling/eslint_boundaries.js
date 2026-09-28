@@ -50,7 +50,7 @@ module.exports = {
 
     '@kbn/ui-chrome-layout': {
       alternative:
-        'See src/core/packages/chrome/layout/layout_overview.mdx for layout CSS variables, sizing, and the application scroll container.',
+        'See src/core/packages/chrome/layout/README.md for layout CSS variables, sizing, and the application scroll container.',
       overrides: [
         {
           path: 'src/core/packages/chrome/',

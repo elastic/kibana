@@ -27,7 +27,9 @@ export type {
   ScopedRunnerRunToolsParams,
   RunContext,
   RunContextStackEntry,
+  RunApprovals,
   RunToolParams,
+  RequestBoundRunToolParams,
   RunToolFn,
   Runner,
   RunToolReturn,
@@ -102,6 +104,7 @@ export type {
   BeforeAgentHookContext,
   BeforeToolCallHookContext,
   AfterToolCallHookContext,
+  AfterExecutionHookContext,
 } from './hooks/types';
 export { HookLifecycle, HookExecutionMode } from './hooks/types';
 export {
@@ -109,6 +112,7 @@ export {
   applyBeforeAgentResult,
   applyBeforeToolCallResult,
   applyAfterToolCallResult,
+  applyAfterExecutionResult,
 } from './hooks/apply_result';
 export { chatSystemIndex, chatSystemIndexPrefix } from './indices';
 export type { AgentBuilderAnalytics, AgentBuilderTracking, SkillInvokedEvent } from './telemetry';
@@ -127,6 +131,8 @@ export type {
   ExecuteAgentResult,
   FindExecutionsFilter,
   FindExecutionsOptions,
+  AbortExecutionOptions,
+  AbortExecutionResult,
   AgentExecutionService,
 } from './execution';
 export type {
@@ -139,6 +145,10 @@ export type {
 export type { SkillRegistry } from './skills';
 export type { RendererTypeDefinition } from './renderers';
 export type {
+  ConversationEventTypeDefinition,
+  ConversationEventPayloadOf,
+} from './conversation_events';
+export type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
   TopSnippetsConfig,
@@ -146,6 +156,7 @@ export type {
   ToolsStart,
   AttachmentsSetup,
   RenderersSetup,
+  ConversationEventsSetup,
   SkillsSetup,
   SkillsStart,
   AgentsSetup,
@@ -157,8 +168,23 @@ export type {
   ConversationsStart,
   ConversationTemplatesSetup,
   ConversationTemplatesStart,
+  AttachmentsStart,
 } from './plugin_contract';
-export type { ConversationPublicClient, ConversationCreatePublicRequest } from './conversations';
+export type {
+  AttachmentPublicClient,
+  ListAttachmentsResult,
+  CreateAttachmentArgs,
+  GetAttachmentArgs,
+  UpdateAttachmentArgs,
+  DeleteAttachmentArgs,
+  ListAttachmentsArgs,
+} from './attachments';
+export type {
+  ConversationPublicClient,
+  ConversationCreatePublicRequest,
+  ConversationUpdatePublicRequest,
+  ConversationAddEventsRequest,
+} from './conversations';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
 export type {
   AvailabilityContext,
@@ -166,3 +192,9 @@ export type {
   AvailabilityHandler,
   AvailabilityConfig,
 } from './availability';
+export type {
+  ConnectorSummary,
+  ConnectorSubActionDetail,
+  ConnectorDetail,
+} from './agent_connectors';
+export { listAgentConnectors, getAgentConnectorDetail } from './agent_connectors';

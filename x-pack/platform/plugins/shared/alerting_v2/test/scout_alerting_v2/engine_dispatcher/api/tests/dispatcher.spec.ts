@@ -182,6 +182,20 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
 
     await apiServices.alertingV2.rules.bulkDisable({ ids: [...TEST_RULE_IDS] });
 
+    // Tag rule-001 so the tag-scoped policy (SINGLE_RULE_POLICY_ID) can match it.
+    await apiServices.alertingV2.rules.upsert(
+      'rule-001',
+      buildCreateRuleData({
+        metadata: { name: 'Dispatcher test rule-001', tags: ['notify-rule-001'] },
+        schedule: { every: '1d' },
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM .alert-actions | WHERE rule_id == "__never_matches__"' },
+        },
+        state_transition: { pending_count: 0, recovering_count: 0 },
+      })
+    );
+
     await apiServices.alertingV2.actionPolicies.upsert(ACTION_POLICY_ID, {
       name: 'Test Policy',
       description: 'Default test action policy',
@@ -194,7 +208,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       name: 'Matcher Policy',
       description: 'Only matches critical severity',
       destinations: [{ type: 'workflow', id: 'test-workflow' }],
-      matcher: 'data.severity: "critical"',
+      matcher: { expression: 'data.severity: "critical"' },
     });
 
     await apiServices.alertingV2.actionPolicies.disable(ACTION_POLICY_MATCHER_ID);
@@ -210,10 +224,10 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
     await apiServices.alertingV2.actionPolicies.disable(ACTION_POLICY_GROUPBY_ID);
 
     await apiServices.alertingV2.actionPolicies.upsert(SINGLE_RULE_POLICY_ID, {
-      name: 'Rule-scoped policy bound to rule-001',
-      description: 'Must filter to its linked rule only',
+      name: 'Tag-scoped policy bound to rule-001',
+      description: 'Must filter to rules tagged notify-rule-001 only',
       destinations: [{ type: 'workflow', id: 'test-workflow' }],
-      matcher: 'rule.id: "rule-001"',
+      matcher: { tags: ['notify-rule-001'] },
     });
 
     await apiServices.alertingV2.actionPolicies.disable(SINGLE_RULE_POLICY_ID);
@@ -1444,6 +1458,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
             duration: '10m',
           },
         },
+        scope: { alerting_v2: {} },
       });
 
       await apiServices.alertingV2.dispatcher.waitForDispatcherTick();
@@ -1517,12 +1532,12 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    'rule-scoped policy / dispatches only for the linked rule and skips unrelated rules',
+    'tag-scoped policy / dispatches only for rules with the matching tag and skips unrelated rules',
     async ({ apiServices }) => {
       await apiServices.alertingV2.actionPolicies.enable(SINGLE_RULE_POLICY_ID);
 
       await apiServices.alertingV2.ruleEvents.seed([
-        // Linked rule: matched by np-1 (catch-all) AND by the rule-scoped policy.
+        // Tagged rule: matched by np-1 (catch-all) AND by the tag-scoped policy.
         buildAlertEvent({
           ruleId: 'rule-001',
           groupHash: 'rule-001-single-series',
@@ -1531,7 +1546,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           status: 'breached',
           timestamp: relativeTime(20),
         }),
-        // Unrelated rule: matched by np-1; the rule-scoped policy MUST NOT match.
+        // Untagged rule: matched by np-1; the tag-scoped policy MUST NOT match.
         buildAlertEvent({
           ruleId: 'rule-002',
           groupHash: 'rule-002-single-series',
@@ -1555,7 +1570,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       );
 
       // rule-002 must produce exactly one fire (np-1 only). A second fire
-      // here would mean the rule-scoped matcher leaked across rules.
+      // here would mean the tag-scoped matcher leaked across rules.
       const rule002Fires = await expectStableCount(apiServices, 1, {
         ruleId: 'rule-002',
         actionTypes: ['fire'],

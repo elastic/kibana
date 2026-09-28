@@ -77,12 +77,12 @@ exit 0
   );
 
   writeExecutable(
-    Path.join(binDir, 'ts-node'),
+    Path.join(binDir, 'node'),
     `#!/usr/bin/env bash
 set -euo pipefail
-echo "ts-node $*" >> "$CALLS_FILE"
-if [[ "\${MOCK_FAIL_CMD:-}" == "ts-node" ]]; then
-  echo "forced ts-node failure" >&2
+echo "node $*" >> "$CALLS_FILE"
+if [[ "\${MOCK_FAIL_CMD:-}" == "node" ]]; then
+  echo "forced node failure" >&2
   exit 1
 fi
 exit 0
@@ -160,8 +160,7 @@ describe('lifecycle pre_build.sh', () => {
     expect(result.status).toBe(0);
     expect(result.calls).toEqual(
       expect.arrayContaining([
-        expect.stringContaining('ts-node '),
-        expect.stringContaining('ci_stats_start.ts'),
+        expect.stringMatching(/node .*ci_stats_start\.ts/),
         expect.stringContaining(
           'buildkite-agent meta-data set ES_SNAPSHOT_MANIFEST_DEFAULT https://storage.googleapis.com/mock-bucket/manifest.json'
         ),
@@ -175,8 +174,8 @@ describe('lifecycle pre_build.sh', () => {
     const result = runPreBuildScript();
 
     expect(result.status).toBe(0);
-    // We stub ts-node itself, so ci_stats_start.ts is not executed in tests.
-    expect(hasCall(result.calls, 'ts-node ')).toBe(true);
+    // We stub node itself, so ci_stats_start.ts is not executed in tests.
+    expect(result.calls.some((call) => /node .*ci_stats_start\.ts/.test(call))).toBe(true);
     // If ci_stats_start.ts had run, it would set ci_stats_build_id via buildkite-agent meta-data.
     expect(hasCall(result.calls, 'buildkite-agent meta-data set ci_stats_build_id')).toBe(false);
   });

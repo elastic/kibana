@@ -25,7 +25,7 @@ const baseRuleResponse: RuleResponse = {
   id: 'rule-1',
   kind: 'alert',
   enabled: true,
-  metadata: { name: 'Test Rule', version: 1, owner: 'test-owner', tags: ['tag1'] },
+  metadata: { name: 'Test Rule', version: 1, tags: ['tag1'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '2m' },
   query: {
@@ -33,15 +33,15 @@ const baseRuleResponse: RuleResponse = {
     base: BASE,
     breach: { segment: ALERT_SEGMENT },
   },
-  created_by: 'test',
+  created_by: { profile_uid: 'test' },
   created_at: '2026-01-01T00:00:00Z',
-  updated_by: 'test',
+  updated_by: { profile_uid: 'test' },
   updated_at: '2026-01-01T00:00:00Z',
 };
 
 const baseFormValues: FormValues = {
   kind: 'alert',
-  metadata: { name: 'Test Rule', enabled: true, owner: 'test-owner', tags: ['tag1'] },
+  metadata: { name: 'Test Rule', enabled: true, tags: ['tag1'] },
   timeField: '@timestamp',
   schedule: { every: '5m', lookback: '2m' },
   query: {
@@ -59,7 +59,7 @@ describe('composeFormToCreateRequest', () => {
   it('maps basic form values to create request', () => {
     const result = composeFormToCreateRequest(baseFormValues);
     expect(result.kind).toBe('alert');
-    expect(result.metadata).toEqual({ name: 'Test Rule', owner: 'test-owner', tags: ['tag1'] });
+    expect(result.metadata).toEqual({ name: 'Test Rule', tags: ['tag1'] });
     expect(result.time_field).toBe('@timestamp');
     expect(result.schedule).toEqual({ every: '5m', lookback: '2m' });
     expect(result.query).toEqual({
@@ -170,9 +170,26 @@ describe('composeFormToCreateRequest', () => {
     expect(result.state_transition).toBeUndefined();
   });
 
-  it('maps state_transition for immediate delay mode', () => {
+  it('maps state_transition for immediate delay mode (recovery disabled omits recovering_count)', () => {
     const result = composeFormToCreateRequest(baseFormValues);
+    expect(result.state_transition).toEqual({ pending_count: 0 });
+  });
+
+  it('emits recovering_count: 0 for immediate delay mode when recovery is enabled', () => {
+    const values: FormValues = { ...baseFormValues, recoveryStrategy: 'no_breach' };
+    const result = composeFormToCreateRequest(values);
     expect(result.state_transition).toEqual({ pending_count: 0, recovering_count: 0 });
+  });
+
+  it('omits recovering fields when recovery_strategy is "none" even if recovering values are set', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      recoveryStrategy: 'none',
+      stateTransitionRecoveryDelayMode: 'recoveries',
+      stateTransition: { recoveringCount: 3 },
+    };
+    const result = composeFormToCreateRequest(values);
+    expect(result.state_transition).toEqual({ pending_count: 0 });
   });
 
   it('maps state_transition for breaches delay mode', () => {
@@ -211,7 +228,7 @@ describe('composeFormToCreateRequest', () => {
         {
           id: 'dashboard-id',
           type: DASHBOARD_ARTIFACT_TYPE,
-          data: { dashboardId: '  dashboard-123  ' },
+          data: { dashboard_id: '  dashboard-123  ' },
         },
       ],
     };
@@ -227,7 +244,7 @@ describe('composeFormToCreateRequest', () => {
       {
         id: 'dashboard-id',
         type: DASHBOARD_ARTIFACT_TYPE,
-        data: { dashboardId: '  dashboard-123  ' },
+        data: { dashboard_id: '  dashboard-123  ' },
       },
     ]);
   });
@@ -239,7 +256,7 @@ describe('composeFormToCreateRequest', () => {
         { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, data: { content: '   ' } },
       ],
       dashboardArtifacts: [
-        { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: '' } },
+        { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboard_id: '' } },
       ],
       artifacts: [{ id: 'other-id', type: 'other', data: { value: 'kept' } }],
     };
@@ -249,7 +266,7 @@ describe('composeFormToCreateRequest', () => {
     expect(result.artifacts).toEqual([
       { id: 'other-id', type: 'other', data: { value: 'kept' } },
       { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, data: { content: '   ' } },
-      { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: '' } },
+      { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboard_id: '' } },
     ]);
   });
 
@@ -260,7 +277,7 @@ describe('composeFormToCreateRequest', () => {
         { id: '', type: RUNBOOK_ARTIFACT_TYPE, data: { content: 'Runbook steps' } },
       ],
       dashboardArtifacts: [
-        { id: '', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dashboard-123' } },
+        { id: '', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboard_id: 'dashboard-123' } },
       ],
     };
 
@@ -268,7 +285,7 @@ describe('composeFormToCreateRequest', () => {
 
     expect(result.artifacts).toEqual([
       { id: '', type: RUNBOOK_ARTIFACT_TYPE, data: { content: 'Runbook steps' } },
-      { id: '', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dashboard-123' } },
+      { id: '', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboard_id: 'dashboard-123' } },
     ]);
   });
 });
@@ -287,6 +304,24 @@ describe('composeFormToUpdateRequest', () => {
     expect(result.artifacts).toBeNull();
     expect(result.recovery_strategy).toBeNull();
     expect(result.no_data_strategy).toBeNull();
+  });
+
+  it('nullifies tags when empty (clear all tags on a partial update)', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, tags: [] },
+    };
+    const result = composeFormToUpdateRequest(values);
+    expect(result.metadata?.tags).toBeNull();
+  });
+
+  it('preserves tags when present', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, tags: ['prod', 'infra'] },
+    };
+    const result = composeFormToUpdateRequest(values);
+    expect(result.metadata?.tags).toEqual(['prod', 'infra']);
   });
 
   it('preserves grouping when present', () => {
@@ -361,7 +396,6 @@ describe('mapRuleToComposeFormValues', () => {
     expect(result.metadata).toEqual({
       name: 'Test Rule',
       enabled: true,
-      owner: 'test-owner',
       tags: ['tag1'],
     });
     expect(result.stateTransitionAlertDelayMode).toBe('immediate');
@@ -518,7 +552,7 @@ describe('mapRuleToComposeFormValues', () => {
       artifacts: [
         { id: 'host-id', type: 'host', data: { value: 'host-a' } },
         { id: 'runbook-id', type: 'runbook', data: { content: 'steps here' } },
-        { id: 'dashboard-id', type: 'dashboard', data: { dashboardId: 'dashboard-123' } },
+        { id: 'dashboard-id', type: 'dashboard', data: { dashboard_id: 'dashboard-123' } },
       ],
     } as RuleResponse;
     const result = mapRuleToComposeFormValues(rule);
@@ -527,7 +561,7 @@ describe('mapRuleToComposeFormValues', () => {
       { id: 'runbook-id', type: 'runbook', data: { content: 'steps here' } },
     ]);
     expect(result.dashboardArtifacts).toEqual([
-      { id: 'dashboard-id', type: 'dashboard', data: { dashboardId: 'dashboard-123' } },
+      { id: 'dashboard-id', type: 'dashboard', data: { dashboard_id: 'dashboard-123' } },
     ]);
   });
 

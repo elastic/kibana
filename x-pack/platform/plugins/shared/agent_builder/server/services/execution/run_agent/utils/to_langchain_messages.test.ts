@@ -6,11 +6,12 @@
  */
 
 import type { AIMessage, ToolMessage } from '@langchain/core/messages';
-import { isAIMessage, isHumanMessage } from '@langchain/core/messages';
+import { isAIMessage, isHumanMessage, isToolMessage } from '@langchain/core/messages';
 import type {
   CompactionSummary,
   ConversationRoundStep,
   ReasoningStep,
+  TimelineEvent,
   ToolCallStep,
   ToolCallWithResult,
 } from '@kbn/agent-builder-common';
@@ -18,19 +19,33 @@ import {
   ConversationRoundStatus,
   ConversationRoundStepType,
   ExecutionStatus,
+  TimelineEventType,
 } from '@kbn/agent-builder-common';
 import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
 import { sanitizeToolId, wrapToolResultContent } from '@kbn/agent-builder-genai-utils/langchain';
-import { convertPreviousRounds, groupToolCallSteps } from './to_langchain_messages';
+import { prepareMessages, groupToolCallSteps } from './to_langchain_messages';
 import { formatDate } from '../prompts/utils/helpers';
 import type { ToolCallResultTransformer } from './tool_summarization';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
-import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
+import type { ProcessedConversation } from './prepare_conversation';
+import {
+  T0,
+  abortedExec0Timeline,
+  completedRoundTimeline,
+  eventsNativeConversation,
+  failedExec0Timeline,
+  pausedAndResumedRoundTimeline,
+  pausedThenInterruptedResumeTimeline,
+  roundsOfTimeline,
+  timelineFromRounds,
+  type ProcessedConversationRound,
+} from '../../../../test_utils/timeline';
+import { eventsForContext, type ProcessedTimelineEvent } from './context_timeline';
 
-describe('convertPreviousRounds', () => {
+describe('prepareMessages', () => {
   const now = new Date().toISOString();
 
   const makeRoundInput = (
@@ -78,12 +93,17 @@ describe('convertPreviousRounds', () => {
     tools: [],
   });
 
-  const createConversation = (
-    parts: Partial<ProcessedConversation> = {}
-  ): ProcessedConversation => {
+  // Rounds fixtures are normalized to the timeline the pipeline consumes, so every expectation
+  // below also checks the rounds -> events -> messages path.
+  const createConversation = ({
+    previousRounds = [],
+    ...parts
+  }: Partial<Omit<ProcessedConversation, 'timeline'>> & {
+    previousRounds?: ProcessedConversationRound[];
+  } = {}): ProcessedConversation => {
     return {
       nextInput: { message: '', attachments: [] },
-      previousRounds: [],
+      timeline: timelineFromRounds(previousRounds),
       attachmentTypes: [],
       attachmentStateManager: createAttachmentStateManager([], {
         getTypeDefinition: (type: string) =>
@@ -126,7 +146,7 @@ describe('convertPreviousRounds', () => {
 
   it('returns only the user message if no previous rounds', async () => {
     const nextInput = makeRoundInput('hello');
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({ nextInput }),
     });
     expect(result).toHaveLength(1);
@@ -136,7 +156,7 @@ describe('convertPreviousRounds', () => {
 
   it('prefixes the next-input user message when conversationTimestamp is provided', async () => {
     const nextInput = makeRoundInput('hello');
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({ nextInput }),
       conversationTimestamp: now,
     });
@@ -147,7 +167,7 @@ describe('convertPreviousRounds', () => {
 
   it('includes the author in the next-input prefix when provided', async () => {
     const nextInput = makeRoundInput('hello', [], { author: { id: 'u1', username: 'alice' } });
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({ nextInput }),
       conversationTimestamp: now,
     });
@@ -158,7 +178,7 @@ describe('convertPreviousRounds', () => {
 
   it('emits a user-only prefix when the author is provided without a timestamp', async () => {
     const nextInput = makeRoundInput('hello', [], { author: { id: 'u1', username: 'alice' } });
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({ nextInput }),
     });
     expect(result).toHaveLength(1);
@@ -169,13 +189,13 @@ describe('convertPreviousRounds', () => {
     const nameOnlyInput = makeRoundInput('hello', [], {
       author: { id: 'u1', full_name: 'Alice Smith' },
     });
-    const nameOnlyResult = await convertPreviousRounds({
+    const nameOnlyResult = await prepareMessages({
       conversation: createConversation({ nextInput: nameOnlyInput }),
     });
     expect(nameOnlyResult[0].content).toBe(`[User: Alice Smith]\n\nhello`);
 
     const idOnlyInput = makeRoundInput('hello', [], { author: { id: 'u1' } });
-    const idOnlyResult = await convertPreviousRounds({
+    const idOnlyResult = await prepareMessages({
       conversation: createConversation({ nextInput: idOnlyInput }),
     });
     expect(idOnlyResult[0].content).toBe(`[User: u1]\n\nhello`);
@@ -191,7 +211,7 @@ describe('convertPreviousRounds', () => {
       }),
     ];
     const nextInput = makeRoundInput('how are you?');
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({ previousRounds, nextInput }),
     });
 
@@ -213,7 +233,7 @@ describe('convertPreviousRounds', () => {
       }),
     ];
 
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({
         previousRounds,
         nextInput: makeRoundInput('prompt answer', [], {
@@ -236,7 +256,7 @@ describe('convertPreviousRounds', () => {
       'This is the formatted text content'
     );
     const nextInput = makeRoundInput('hello with attachment', [attachment]);
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({ nextInput }),
       conversationTimestamp: now,
     });
@@ -260,7 +280,7 @@ describe('convertPreviousRounds', () => {
       }),
     ];
 
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({
         previousRounds,
         nextInput: makeRoundInput('prompt answer'),
@@ -285,7 +305,7 @@ describe('convertPreviousRounds', () => {
       }),
     ];
 
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({
         previousRounds,
         nextInput: makeRoundInput('current message'),
@@ -310,7 +330,7 @@ describe('convertPreviousRounds', () => {
       }),
     ];
     const nextInput = makeRoundInput('how are you?');
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({ previousRounds, nextInput }),
     });
 
@@ -347,7 +367,7 @@ describe('convertPreviousRounds', () => {
       }),
     ];
     const nextInput = makeRoundInput('next');
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({ previousRounds, nextInput }),
     });
     // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
@@ -415,7 +435,7 @@ describe('convertPreviousRounds', () => {
       }),
     ];
     const nextInput = makeRoundInput('bye');
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({ previousRounds, nextInput }),
     });
     // 1 user + 1 assistant + 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
@@ -476,7 +496,7 @@ describe('convertPreviousRounds', () => {
       }),
     ];
     const nextInput = makeRoundInput('next');
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({ previousRounds, nextInput }),
     });
     // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
@@ -497,7 +517,7 @@ describe('convertPreviousRounds', () => {
         'This is the formatted text content'
       );
       const nextInput = makeRoundInput('hello with attachment', [attachment]);
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({ previousRounds: [], nextInput }),
       });
 
@@ -528,7 +548,7 @@ describe('convertPreviousRounds', () => {
         attachment1,
         attachment2,
       ]);
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({ nextInput }),
       });
 
@@ -563,7 +583,7 @@ describe('convertPreviousRounds', () => {
         }),
       ];
       const nextInput = makeRoundInput('next message');
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({ previousRounds, nextInput }),
       });
 
@@ -592,7 +612,7 @@ describe('convertPreviousRounds', () => {
         attachment_refs: [{ attachment_id: 'a-1', version: 1, type: 'esql' }],
       });
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({
           nextInput,
           attachmentTypes: [{ type: 'esql', description: 'An ES|QL query.' }],
@@ -620,7 +640,7 @@ describe('convertPreviousRounds', () => {
         }),
       ];
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({
           previousRounds,
           nextInput: makeRoundInput('follow-up', [], {
@@ -644,7 +664,7 @@ describe('convertPreviousRounds', () => {
         attachment_refs: [{ attachment_id: 'a-1', version: 1, type: 'unknown-type' }],
       });
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({
           nextInput,
           attachmentTypes: [], // 'unknown-type' has no entry in the master list
@@ -657,7 +677,7 @@ describe('convertPreviousRounds', () => {
     it('omits type instructions when there are no attachment_refs', async () => {
       const nextInput = makeRoundInput('hello');
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({
           nextInput,
           attachmentTypes: [{ type: 'esql', description: 'An ES|QL query.' }],
@@ -697,7 +717,7 @@ describe('convertPreviousRounds', () => {
         }),
       ];
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({
           previousRounds,
           nextInput: makeRoundInput('follow-up', [], {
@@ -736,7 +756,7 @@ describe('convertPreviousRounds', () => {
         attachment_context: sampleContext,
       });
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({ nextInput }),
       });
 
@@ -758,7 +778,7 @@ describe('convertPreviousRounds', () => {
         }),
       ];
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({
           previousRounds,
           nextInput: makeRoundInput('next question'),
@@ -773,7 +793,7 @@ describe('convertPreviousRounds', () => {
     it('omits attachment_context when the field is absent', async () => {
       const nextInput = makeRoundInput('just a message');
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({ nextInput }),
       });
 
@@ -791,7 +811,7 @@ describe('convertPreviousRounds', () => {
           '<attachment-context count="1"><attachment attachment_id="att-1" /></attachment-context>',
       });
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({
           nextInput,
           attachmentTypes: [{ type: 'text', description: 'Plain text.' }],
@@ -816,7 +836,7 @@ describe('convertPreviousRounds', () => {
         attachment_context: 'The following attachment(s) were added this turn:\n\n<x/>',
       });
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({
           nextInput,
           attachmentTypes: [{ type: 'esql', description: 'An ES|QL query.' }],
@@ -867,7 +887,7 @@ describe('convertPreviousRounds', () => {
         );
       });
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation,
         resultTransformer: customTransformer,
       });
@@ -934,7 +954,7 @@ describe('convertPreviousRounds', () => {
         return aggregated;
       });
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation,
         resultTransformer: customTransformer,
       });
@@ -976,7 +996,7 @@ describe('convertPreviousRounds', () => {
         }),
       ];
       const nextInput = makeRoundInput('next');
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({ previousRounds, nextInput }),
       });
 
@@ -1014,7 +1034,7 @@ describe('convertPreviousRounds', () => {
         }),
       ];
       const nextInput = makeRoundInput('next');
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({ previousRounds, nextInput }),
       });
 
@@ -1052,7 +1072,7 @@ describe('convertPreviousRounds', () => {
         }),
       ];
       const nextInput = makeRoundInput('next');
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({ previousRounds, nextInput }),
       });
 
@@ -1090,7 +1110,7 @@ describe('convertPreviousRounds', () => {
         }),
       ];
       const nextInput = makeRoundInput('next');
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({ previousRounds, nextInput }),
       });
 
@@ -1123,7 +1143,7 @@ describe('convertPreviousRounds', () => {
         }),
       ];
       const nextInput = makeRoundInput('next');
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({ previousRounds, nextInput }),
       });
 
@@ -1176,7 +1196,7 @@ describe('convertPreviousRounds', () => {
         }),
       ];
       const nextInput = makeRoundInput('next');
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({ previousRounds, nextInput }),
       });
 
@@ -1212,7 +1232,7 @@ describe('convertPreviousRounds', () => {
         steps: [makeBgStep()],
       });
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({
           previousRounds: [round],
           nextInput: makeRoundInput('next'),
@@ -1242,7 +1262,7 @@ describe('convertPreviousRounds', () => {
         ],
       });
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({
           previousRounds: [round],
           nextInput: makeRoundInput('next'),
@@ -1265,7 +1285,7 @@ describe('convertPreviousRounds', () => {
         steps: [],
       });
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({
           previousRounds: [round],
           nextInput: makeRoundInput('next'),
@@ -1402,11 +1422,11 @@ describe('groupToolCallSteps', () => {
   });
 });
 
-describe('convertPreviousRounds — relevant_skills replay', () => {
+describe('prepareMessages — relevant_skills replay', () => {
   const conversationWith = (steps: ConversationRoundStep[]): ProcessedConversation =>
     ({
       nextInput: { message: 'current', attachments: [] },
-      previousRounds: [
+      timeline: timelineFromRounds([
         {
           id: 'round-1',
           status: ConversationRoundStatus.completed,
@@ -1418,7 +1438,7 @@ describe('convertPreviousRounds — relevant_skills replay', () => {
           time_to_last_token: 0,
           model_usage: { connector_id: 'x', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
         },
-      ],
+      ]),
       attachments: [],
       attachmentTypes: [],
       attachmentStateManager: createAttachmentStateManager([], {
@@ -1439,7 +1459,7 @@ describe('convertPreviousRounds — relevant_skills replay', () => {
     } as unknown as ConversationRoundStep);
 
   it('replays a relevant_skills step as a <relevant_skills> user notification', async () => {
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: conversationWith([
         relevantSkillsStep([
           {
@@ -1464,7 +1484,7 @@ describe('convertPreviousRounds — relevant_skills replay', () => {
   });
 
   it('renders the notice between the round input and the assistant response', async () => {
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: conversationWith([
         relevantSkillsStep([
           { id: 'a.b', name: 'alpha', path: '/p/SKILL.md', description: 'Alpha' },
@@ -1480,12 +1500,251 @@ describe('convertPreviousRounds — relevant_skills replay', () => {
   });
 
   it('emits no notice for an empty relevant_skills step', async () => {
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: conversationWith([relevantSkillsStep([])]),
     });
     const hasNotice = result
       .filter(isHumanMessage)
       .some((m) => (m.content as string).includes('<relevant_skills>'));
     expect(hasNotice).toBe(false);
+  });
+});
+
+describe('prepareMessages — multi-execution (HITL) timelines', () => {
+  const baseConversation = (timeline: ProcessedTimelineEvent[]): ProcessedConversation => ({
+    nextInput: { message: 'current', attachments: [] },
+    timeline,
+    attachmentTypes: [],
+    attachmentStateManager: createAttachmentStateManager([], {
+      getTypeDefinition: () => undefined,
+    } as any),
+  });
+
+  // The pipeline normalizes the stored timeline (eventsForContext) and processes user_message
+  // payloads (prepareConversation) before prepareMessages sees it; mirror both steps here.
+  const normalizedAndProcessed = (stored: ReturnType<typeof pausedAndResumedRoundTimeline>) =>
+    eventsForContext(eventsNativeConversation(stored)).map((event) =>
+      event.type === TimelineEventType.userMessage
+        ? { ...event, data: { ...event.data, attachments: [] } }
+        : event
+    ) as ProcessedTimelineEvent[];
+
+  it('renders the paused execution, the answer and the resume as one round', async () => {
+    const messages = await prepareMessages({
+      conversation: baseConversation(normalizedAndProcessed(pausedAndResumedRoundTimeline())),
+    });
+
+    // user message, ask_user_question tool call + answer, assistant response, next input
+    expect(messages).toHaveLength(5);
+    expect(messages[0].content as string).toContain('do it');
+    expect(isAIMessage(messages[1]) && messages[1].tool_calls?.[0]).toMatchObject({
+      id: 'p1',
+      name: 'ask_user_question',
+    });
+    expect(isToolMessage(messages[2]) && messages[2].tool_call_id).toBe('p1');
+    expect(messages[2].content as string).toMatch(
+      /^<tool_result>.*"selected_options":\["a"\].*<\/tool_result>$/
+    );
+    expect(messages[3].content).toBe('done');
+    expect(messages[4].content).toBe('current');
+  });
+
+  it('is byte-identical to the same round stored as a single execution', async () => {
+    const appendOnly = normalizedAndProcessed(pausedAndResumedRoundTimeline());
+    const [folded] = roundsOfTimeline(appendOnly);
+    const singleExecution = timelineFromRounds([
+      { ...folded, input: { ...folded.input, attachments: [] } },
+    ]);
+
+    const fromAppendOnly = await prepareMessages({ conversation: baseConversation(appendOnly) });
+    const fromSingle = await prepareMessages({ conversation: baseConversation(singleExecution) });
+
+    // The materialized ask_user_question tool call is keyed on the prompt id, so both renderings match exactly.
+    expect(JSON.stringify(fromAppendOnly)).toEqual(JSON.stringify(fromSingle));
+  });
+
+  describe('interrupted rounds', () => {
+    /** Processes a raw timeline the way `prepareConversation` would: `attachments: []` on user messages. */
+    const processedTimeline = (events: TimelineEvent[]): ProcessedTimelineEvent[] =>
+      eventsForContext(eventsNativeConversation(events)).map((event) =>
+        event.type === TimelineEventType.userMessage
+          ? { ...event, data: { ...event.data, attachments: [] } }
+          : event
+      ) as ProcessedTimelineEvent[];
+
+    const conversationOf = (timeline: ProcessedTimelineEvent[]): ProcessedConversation => ({
+      nextInput: { message: 'bye', attachments: [] },
+      timeline,
+      attachmentTypes: [],
+      attachmentStateManager: createAttachmentStateManager([], {
+        getTypeDefinition: () => undefined as never,
+      }),
+    });
+
+    it('renders an interrupted round as user message, steps, notice — no assistant message', async () => {
+      const toolStep: ToolCallStep = {
+        type: ConversationRoundStepType.toolCall,
+        tool_call_id: 'tc1',
+        tool_id: 'my_tool',
+        params: { q: 1 },
+        results: [{ type: ToolResultType.other, tool_result_id: 'res1', data: { value: 'a' } }],
+      };
+      const timeline = processedTimeline([
+        ...completedRoundTimeline('r1', '2026-01-01T00:00:00.000Z'),
+        ...failedExec0Timeline('r2', [toolStep], '2026-01-01T00:01:00.000Z'),
+      ]);
+
+      const messages = await prepareMessages({ conversation: conversationOf(timeline) });
+
+      const texts = messages.map((message) => ({
+        type: message.getType(),
+        content: typeof message.content === 'string' ? message.content : '',
+      }));
+      // r1: human + ai; r2: human input, ai tool call, tool result, human notice; then next input
+      expect(texts.map((text) => text.type)).toEqual([
+        'human',
+        'ai',
+        'human',
+        'ai',
+        'tool',
+        'human',
+        'human',
+      ]);
+      const r2Start = texts.findIndex((text) => text.content.includes('hello r2'));
+      expect(r2Start).toBe(2);
+      expect((messages[3] as AIMessage).tool_calls?.[0].id).toBe('tc1');
+      expect(texts[5].content).toContain('<system_notice>');
+      expect(texts[5].content).toContain('attempt to answer the previous message failed');
+      expect(texts[5].content).toContain('code="internalError"');
+      expect(texts[6].content).toContain('bye');
+    });
+
+    it('renders an aborted round with the aborted notice', async () => {
+      const timeline = processedTimeline(abortedExec0Timeline('r1', T0, 'api'));
+
+      const messages = await prepareMessages({ conversation: conversationOf(timeline) });
+
+      expect(messages.map((message) => message.getType())).toEqual(['human', 'human', 'human']);
+      expect(messages[1].content).toContain('interrupted before the agent finished');
+      expect(messages[1].content).toContain('<interruption source="api"');
+    });
+
+    it('renders a paused round whose resume was interrupted as one interrupted round', async () => {
+      const timeline = processedTimeline(
+        pausedThenInterruptedResumeTimeline(
+          'r1',
+          [],
+          [{ type: ConversationRoundStepType.reasoning, reasoning: 'again' }]
+        )
+      );
+
+      const messages = await prepareMessages({ conversation: conversationOf(timeline) });
+
+      // the round is no longer pending: it is rendered as history, not re-used as the next input
+      const types = messages.map((message) => message.getType());
+      expect(types[0]).toBe('human');
+      expect(types.at(-2)).toBe('human');
+      expect(String(messages.at(-2)?.content)).toContain('<system_notice>');
+      expect(String(messages.at(-1)?.content)).toContain('bye');
+    });
+
+    it('end to end: a confirmation-blocked call + prompt_response + failed setup-window resume renders the call as interrupted', async () => {
+      // the pause left `tc1` pending; the resume failed before reaching it, so it never returned
+      const timeline = processedTimeline(pausedThenInterruptedResumeTimeline('r1', ['tc1']));
+
+      const messages = await prepareMessages({ conversation: conversationOf(timeline) });
+
+      const tool = messages.find((message) => message.getType() === 'tool');
+      expect(tool).toBeDefined();
+      expect(String(tool?.content)).toContain('"interrupted":true');
+      expect(String(tool?.content)).toContain(
+        'The tool call was interrupted before it returned a result.'
+      );
+    });
+
+    it('renders Round A, then the failed round with its notice, then Round B', async () => {
+      const a = timelineFromRounds([
+        {
+          id: 'a',
+          input: { message: 'first', attachments: [] },
+          response: { message: 'first answer' },
+          started_at: '2026-01-01T00:00:00.000Z',
+        },
+      ]);
+      const b = timelineFromRounds([
+        {
+          id: 'b',
+          input: { message: 'third', attachments: [] },
+          response: { message: 'third answer' },
+          started_at: '2026-01-01T00:02:00.000Z',
+        },
+      ]);
+      const failedAt = '2026-01-01T00:01:00.000Z';
+      const failed = [
+        {
+          id: 'f::user_message',
+          type: TimelineEventType.userMessage,
+          created_at: failedAt,
+          actor: { type: 'user', id: 'u1', username: 'user1' },
+          data: { message: 'second', attachments: [] },
+        },
+        {
+          id: 'f::execution_started',
+          type: TimelineEventType.executionStarted,
+          created_at: failedAt,
+          actor: { type: 'agent', id: 'agent-1' },
+          execution_id: 'f::execution',
+          trigger_event_id: 'f::user_message',
+          data: { trigger_type: 'user_message' },
+        },
+        {
+          id: 'f::step::0',
+          type: TimelineEventType.executionStep,
+          created_at: failedAt,
+          actor: { type: 'agent', id: 'agent-1' },
+          execution_id: 'f::execution',
+          trigger_event_id: 'f::user_message',
+          data: { step: { type: 'reasoning', reasoning: 'standalone reasoning' }, sequence: 0 },
+        },
+        {
+          id: 'f::execution_failed',
+          type: TimelineEventType.executionFailed,
+          created_at: failedAt,
+          actor: { type: 'agent', id: 'agent-1' },
+          execution_id: 'f::execution',
+          trigger_event_id: 'f::user_message',
+          data: { time_to_last_token: 1, error: { code: 'internalError', message: 'LLM <boom>' } },
+        },
+      ] as unknown as ProcessedTimelineEvent[];
+      const result = await prepareMessages({
+        conversation: {
+          nextInput: { message: 'bye', attachments: [] },
+          timeline: [...a, ...failed, ...b],
+          attachmentTypes: [],
+          attachmentStateManager: createAttachmentStateManager([], {
+            getTypeDefinition: () => undefined as never,
+          }),
+        },
+      });
+
+      // A: user + assistant; F: user + notice (a lone reasoning step renders nothing); B: user +
+      // assistant; next input
+      expect(result).toHaveLength(7);
+      expect(result.map((message) => message.getType())).toEqual([
+        'human',
+        'ai',
+        'human',
+        'human',
+        'human',
+        'ai',
+        'human',
+      ]);
+      expect(result[2].content).toContain('second');
+      expect(result[3].content).toContain('<system_notice>');
+      expect(result[3].content).toContain('attempt to answer the previous message failed');
+      expect(result[3].content).toContain('code="internalError"');
+      expect(result[3].content).toContain('LLM &lt;boom&gt;');
+      expect(result[4].content).toContain('third');
+    });
   });
 });

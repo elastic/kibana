@@ -24,7 +24,8 @@ import {
 const end = moment().valueOf();
 const start = moment(end).subtract(10, 'minutes').valueOf();
 
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/290494
+apiTest.describe.skip(
   'Observability alert details context when logs are annotated with service.name',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

@@ -11,6 +11,7 @@ import type {
   BaseConnectorContract,
   ConnectorContractUnion,
   ConnectorTypeInfo,
+  CustomTriggerSchemaInput,
   StepDeprecationInfo,
   StepPropertyHandler,
 } from '@kbn/workflows';
@@ -151,30 +152,25 @@ function getRegisteredStepDefinitions(): BaseConnectorContract[] {
   return stepSchemas
     .getAllRegisteredStepDefinitions()
     .map((stepDefinition): BaseConnectorContract => {
+      // Match the convention used by every other connector source: summary is the
+      // short label, description is the longer behavioral explanation.
       const definition = {
         type: stepDefinition.id,
         paramsSchema: stepDefinition.inputSchema,
         outputSchema: stepDefinition.outputSchema,
         configSchema: stepDefinition.configSchema,
         deprecation: stepDefinition.deprecation,
-        summary: null,
-        description: null,
+        summary: stepDefinition.label,
+        description: stepDefinition.description,
+        documentation: stepDefinition.documentation?.url,
+        examples: stepDefinition.documentation?.examples
+          ? { snippet: stepDefinition.documentation.examples.join('\n') }
+          : undefined,
       };
 
-      if (stepSchemas.isPublicStepDefinition(stepDefinition)) {
-        // Only public step definitions have documentation and examples.
-        // Match the convention used by every other connector source: summary
-        // is the short label, description is the longer behavioral explanation.
-        return {
-          ...definition,
-          summary: stepDefinition.label,
-          description: stepDefinition.description ?? null,
-          documentation: stepDefinition.documentation?.url,
-          examples: stepDefinition.documentation?.examples
-            ? { snippet: stepDefinition.documentation?.examples.join('\n') }
-            : undefined,
-          editorHandlers: stepDefinition.editorHandlers,
-        };
+      // Editor handlers are the one field the server definition does not carry.
+      if ('editorHandlers' in stepDefinition) {
+        return { ...definition, editorHandlers: stepDefinition.editorHandlers };
       }
       return definition;
     });
@@ -187,9 +183,13 @@ function getRegisteredStepDefinitions(): BaseConnectorContract[] {
 function convertDynamicConnectorsToContractsInternal(
   connectorTypes: Record<string, ConnectorTypeInfo>
 ): ConnectorContractUnion[] {
+  const { inboundOnlyConnectorTypeIds } = getConnectorSchemas();
   const connectorContracts: ConnectorContractUnion[] = [];
   Object.values(connectorTypes).forEach((connectorType) => {
     if (connectorType.enabled === false) {
+      return;
+    }
+    if (inboundOnlyConnectorTypeIds.has(connectorType.actionTypeId)) {
       return;
     }
     try {
@@ -461,16 +461,22 @@ export function getAllConnectorsWithDynamic(
 
 export const getWorkflowZodSchema = (
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo>,
-  registeredTriggerIds: string[] = [],
+  registeredTriggers: CustomTriggerSchemaInput[] = [],
   options: WorkflowZodSchemaOptions = {}
 ): z.ZodType => {
   if (options.lightweight) {
-    return generateLightweightYamlSchema(registeredTriggerIds);
+    return generateLightweightYamlSchema(registeredTriggers);
   }
 
   const allConnectors = getAllConnectorsWithDynamicInternal(dynamicConnectorTypes);
-  return generateYamlSchemaFromConnectors(allConnectors, registeredTriggerIds);
+  return getWorkflowZodSchemaFromConnectors(allConnectors, registeredTriggers);
 };
+
+/** Same schema from an already-resolved list, for callers that need the list too. */
+export const getWorkflowZodSchemaFromConnectors = (
+  allConnectors: ConnectorContractUnion[],
+  registeredTriggers: CustomTriggerSchemaInput[] = []
+): z.ZodType => generateYamlSchemaFromConnectors(allConnectors, registeredTriggers);
 
 export const getWorkflowZodSchemaLoose = (
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> = {}

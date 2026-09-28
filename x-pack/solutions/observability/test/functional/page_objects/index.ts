@@ -13,7 +13,6 @@ import { UptimePageObject } from './uptime_page';
 import { ObservabilityPageProvider } from './observability_page';
 import { AlertControlsProvider } from './alert_controls';
 import { ObservabilityLogsExplorerPageObject } from './observability_logs_explorer';
-import { DatasetQualityPageObject } from './dataset_quality';
 
 export const pageObjects = {
   ...platformPageObjects,
@@ -24,5 +23,4 @@ export const pageObjects = {
   observability: ObservabilityPageProvider,
   uptime: UptimePageObject,
   observabilityLogsExplorer: ObservabilityLogsExplorerPageObject,
-  datasetQuality: DatasetQualityPageObject,
 };

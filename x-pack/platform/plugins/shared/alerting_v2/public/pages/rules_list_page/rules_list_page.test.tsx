@@ -29,7 +29,10 @@ jest.mock('../../application/breadcrumb_context', () => ({
 
 let mockAgentBuilderShow = true;
 let mockExperimentalFeaturesEnabled = true;
+let mockAlertingV2ExperimentalFeaturesEnabled = true;
 let mockCanWriteRules = true;
+let mockCanWriteActionPolicies = true;
+let mockToursEnabled = true;
 
 jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
@@ -39,7 +42,11 @@ jest.mock('@kbn/core-di-browser', () => {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
         return {
-          canWrite: (feature: string) => (feature === 'rules' ? mockCanWriteRules : true),
+          canWrite: (feature: string) => {
+            if (feature === 'rules') return mockCanWriteRules;
+            if (feature === 'actionPolicies') return mockCanWriteActionPolicies;
+            return true;
+          },
           canRead: () => true,
           can: () => mockCanWriteRules,
         };
@@ -58,11 +65,23 @@ jest.mock('@kbn/core-di-browser', () => {
           get: (id: string) =>
             id === 'agentBuilder:experimentalFeatures'
               ? mockExperimentalFeaturesEnabled
+              : id === 'alerting:v2:experimentalFeatures'
+              ? mockAlertingV2ExperimentalFeaturesEnabled
               : undefined,
         },
         chrome: { docTitle: { change: mockDocTitleChange } },
         http: { basePath: { prepend: (p: string) => p } },
-        notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
+        notifications: {
+          toasts: { addSuccess: jest.fn(), addError: jest.fn() },
+          tours: { isEnabled: () => mockToursEnabled },
+        },
+        docLinks: {
+          links: {
+            alerting: {
+              actionPolicies: 'https://docs.test/action-policies',
+            },
+          },
+        },
       };
 
       return services[token as string] ?? {};
@@ -70,10 +89,6 @@ jest.mock('@kbn/core-di-browser', () => {
     CoreStart: (key: string) => key,
   };
 });
-
-jest.mock('@kbn/core-di', () => ({
-  PluginStart: (key: string) => key,
-}));
 
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   ComposeDiscoverFlyout: ({ onCreateRule }: { onCreateRule: (payload: unknown) => void }) => (
@@ -104,10 +119,6 @@ jest.mock('../../hooks/use_create_rule', () => ({
 const mockUpdateRuleMutate = jest.fn();
 jest.mock('../../hooks/use_update_rule', () => ({
   useUpdateRule: () => ({ mutate: mockUpdateRuleMutate, isLoading: false }),
-}));
-
-jest.mock('../../hooks/use_setup_rule_notifications', () => ({
-  useSetupRuleNotifications: () => ({ mutate: jest.fn(), isLoading: false }),
 }));
 
 const mockDeleteMutate = jest.fn();
@@ -210,9 +221,13 @@ describe('RulesListPage', () => {
     jest.clearAllMocks();
     // Content List uses a shared QueryClient; clear cached pages between tests.
     contentListQueryClient.clear();
+    window.localStorage.clear();
     mockAgentBuilderShow = true;
     mockExperimentalFeaturesEnabled = true;
+    mockAlertingV2ExperimentalFeaturesEnabled = true;
     mockCanWriteRules = true;
+    mockCanWriteActionPolicies = true;
+    mockToursEnabled = true;
     mockUseDeleteRule.mockReturnValue({
       mutate: mockDeleteMutate,
       isLoading: false,
@@ -230,6 +245,77 @@ describe('RulesListPage', () => {
     await waitForRules();
 
     expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+  });
+
+  it('marks the sequence builder entry point as experimental', async () => {
+    renderPage();
+    await waitForRules();
+
+    const overflowButton = screen.queryByTestId('app-menu-overflow-button');
+    if (overflowButton) {
+      fireEvent.click(overflowButton);
+    }
+
+    await waitFor(() =>
+      expect(screen.getByTestId('createSequenceRuleButton')).toHaveTextContent(
+        'Build a sequence (Experimental)'
+      )
+    );
+  });
+
+  it('hides the sequence builder entry point when Alerting V2 experimental features are disabled', async () => {
+    mockAlertingV2ExperimentalFeaturesEnabled = false;
+    renderPage();
+    await waitForRules();
+
+    expect(screen.queryByTestId('createSequenceRuleButton')).not.toBeInTheDocument();
+  });
+
+  describe('centralized action policies banner', () => {
+    it('renders the banner above the search bar when rules exist', async () => {
+      renderPage();
+      await waitForRules();
+
+      const banner = screen.getByTestId('centralizedActionPoliciesBanner');
+      const searchBar = screen.getByPlaceholderText('Search rules');
+      expect(banner).toBeInTheDocument();
+      expect(banner.compareDocumentPosition(searchBar)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
+    it('renders the banner even when there are no rules (empty phase)', async () => {
+      resolveRules([], 0);
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('centralizedActionPoliciesBanner')).toBeInTheDocument();
+      });
+    });
+
+    it('hides the banner after dismissal', async () => {
+      renderPage();
+      await waitForRules();
+
+      const dismissBtn = screen.getByTestId('centralizedActionPoliciesBannerDismiss');
+      fireEvent.click(dismissBtn);
+
+      expect(screen.queryByTestId('centralizedActionPoliciesBanner')).not.toBeInTheDocument();
+    });
+
+    it('does not show the banner for users without action-policy write privilege', async () => {
+      mockCanWriteActionPolicies = false;
+      renderPage();
+      await waitForRules();
+
+      expect(screen.queryByTestId('centralizedActionPoliciesBanner')).not.toBeInTheDocument();
+    });
+
+    it('does not show the banner when hideAnnouncements is enabled', async () => {
+      mockToursEnabled = false;
+      renderPage();
+      await waitForRules();
+
+      expect(screen.queryByTestId('centralizedActionPoliciesBanner')).not.toBeInTheDocument();
+    });
   });
 
   it('renders loading state', async () => {
@@ -603,6 +689,12 @@ describe('RulesListPage', () => {
     await waitFor(() => {
       expect(screen.getByTestId('createWithAgentButton')).toBeInTheDocument();
     });
+    expect(
+      screen.getByTestId('createWithAgentButton').querySelector('[data-euiicon-type="sparkles"]')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('createWithAgentButton')).toHaveTextContent(
+      'Create with agent (Experimental)'
+    );
 
     fireEvent.click(screen.getByTestId('createWithAgentButton'));
 
@@ -610,6 +702,30 @@ describe('RulesListPage', () => {
       path: '/agents/elastic-ai-agent/conversations/new',
       state: { initialMessage: CREATE_WITH_AGENT_INITIAL_PROMPT },
     });
+  });
+
+  it('hides all Create with AI Agent entry points when Alerting V2 experimental features are disabled', async () => {
+    mockAlertingV2ExperimentalFeaturesEnabled = false;
+    resolveRules([], 0);
+
+    renderPage();
+
+    await waitFor(() => expect(screen.getByTestId('createEsqlRuleCard')).toBeInTheDocument());
+    expect(screen.queryByTestId('createWithAgentCard')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('createWithAgentExperimentalBadge')).not.toBeInTheDocument();
+  });
+
+  it('hides the populated-list Create with AI Agent menu option when Alerting V2 experimental features are disabled', async () => {
+    mockAlertingV2ExperimentalFeaturesEnabled = false;
+    renderPage();
+
+    await waitFor(() =>
+      expect(screen.getByTestId('createRuleButton-secondary-button')).toBeInTheDocument()
+    );
+    fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
+
+    await waitFor(() => expect(screen.getByTestId('createEsqlRuleButton')).toBeInTheDocument());
+    expect(screen.queryByTestId('createWithAgentButton')).not.toBeInTheDocument();
   });
 
   it('disables the split button agent option (does not hide it) when agent builder is not available', async () => {
@@ -707,7 +823,7 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('cloneRule-rule-1')).toHaveTextContent('Clone rule');
+      expect(screen.getByTestId('cloneRule-rule-1')).toHaveTextContent('Clone');
     });
   });
 
@@ -874,6 +990,14 @@ describe('RulesListPage', () => {
   describe('when the user only has read privilege', () => {
     beforeEach(() => {
       mockCanWriteRules = false;
+      mockCanWriteActionPolicies = false;
+    });
+
+    it('hides the centralized action policies banner', async () => {
+      renderPage();
+      await waitForRules();
+
+      expect(screen.queryByTestId('centralizedActionPoliciesBanner')).not.toBeInTheDocument();
     });
 
     it('hides the header create controls even when rules exist', async () => {

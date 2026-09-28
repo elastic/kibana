@@ -24,6 +24,7 @@ import type { ExperimentalFeatures } from '../../../common/experimental_features
 import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_embedded_provider';
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
 import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
+import { createImpactAttachmentDefinition } from './impact';
 
 /**
  * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property
@@ -89,6 +90,63 @@ export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceSt
       },
       getIcon: () => 'bell',
     }
+  );
+};
+
+/**
+ * Registers the `security.investigation.timeline` attachment renderer
+ * (chronological event table for forensic artifacts).
+ */
+export const registerInvestigationTimelineAttachment = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_investigation_timeline_attachment" */
+    './investigation_timeline'
+  ).then(({ createInvestigationTimelineAttachmentDefinition }) => {
+    attachments.addAttachmentType(
+      SecurityAgentBuilderAttachments.investigationTimeline,
+      createInvestigationTimelineAttachmentDefinition()
+    );
+  });
+};
+
+/**
+ * Registers the `security.investigation.iocs` attachment renderer
+ * (category table of indicator badges for forensic artifacts).
+ */
+export const registerInvestigationIocsAttachment = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_investigation_iocs_attachment" */
+    './investigation_iocs'
+  ).then(({ createInvestigationIocsAttachmentDefinition }) => {
+    attachments.addAttachmentType(
+      SecurityAgentBuilderAttachments.investigationIocs,
+      createInvestigationIocsAttachmentDefinition()
+    );
+  });
+};
+
+/**
+ * Registers the `security.impact` attachment renderer (entity × verdict table summarising
+ * alert-analysis results for impacted hosts and users). The definition is registered
+ * synchronously so Agent Builder can resolve the type on first render; `ImpactInlineContent`
+ * stays behind `React.lazy` inside the definition so the table UI remains code-split.
+ */
+export const registerImpactAttachment = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}): void => {
+  attachments.addAttachmentType(
+    SecurityAgentBuilderAttachments.impact,
+    createImpactAttachmentDefinition()
   );
 };
 
@@ -338,6 +396,23 @@ export const registerEntityRiskScoreHistoryAttachment = ({
 };
 
 /**
+ * Registers the `security.exception` attachment renderer (read-only card showing
+ * a proposed rule exception's description and conditions).
+ */
+export const registerExceptionAttachment = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_exception_attachment" */
+    './exception'
+  ).then(({ registerExceptionAttachment: register }) => {
+    register({ attachments });
+  });
+};
+
+/**
  * Registers the `security.rulePreview` attachment renderer (inline alert table showing
  * preview results). Dynamically imports {@link ./rule_preview_attachment} so the heavy
  * transitive deps (SecuritySolutionFlyout, RulePreviewAlertsTable, sourcerer, etc.)
@@ -361,5 +436,54 @@ export const registerRulePreviewAttachment = ({
     './rule_preview'
   ).then(({ registerRulePreviewAttachment: register }) => {
     register({ attachments, data, spaces, getServices, getStore });
+  });
+};
+
+/**
+ * Registers the `security.attack_discovery` attachment renderer (inline summary
+ * and details via `AttackDiscoveryMarkdownFormatter`).
+ *
+ * Dynamically imports
+ * [./attack_discovery](./attack_discovery) so the markdown field-plugin stack stays
+ * off the main `securitySolution` page-load bundle.
+ *
+ * Race-window: same semantics as {@link registerRuleAttachment} — until the chunk
+ * resolves, `security.attack_discovery` attachments are header-only.
+ */
+export const registerAttackDiscoveryAttachment = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_attack_discovery_attachment" */
+    './attack_discovery'
+  ).then(({ registerAttackDiscoveryAttachment: register }) => {
+    register({ attachments });
+  });
+};
+
+/**
+ * Registers the `security.attack_discovery.verdict` attachment renderer (per-verdict
+ * header icon and badge, plus the summary and optional rationale via
+ * `AttackDiscoveryMarkdownFormatter`).
+ *
+ * Dynamically imports
+ * [./attack_discovery_verdict](./attack_discovery_verdict) so the markdown field-plugin
+ * stack stays off the main `securitySolution` page-load bundle.
+ *
+ * Race-window: same semantics as {@link registerRuleAttachment} — until the chunk
+ * resolves, `security.attack_discovery.verdict` attachments are header-only.
+ */
+export const registerAttackDiscoveryVerdictAttachment = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_attack_discovery_verdict_attachment" */
+    './attack_discovery_verdict'
+  ).then(({ registerAttackDiscoveryVerdictAttachment: register }) => {
+    register({ attachments });
   });
 };

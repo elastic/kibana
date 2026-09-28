@@ -14,8 +14,25 @@ import {
 } from '@kbn/agent-builder-common';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
-import type { ProcessedConversationRound } from './prepare_conversation';
-import { estimateMessagesTokens, estimatePerRoundTokens } from './estimate_conversation_tokens';
+import type { ProcessedConversationRound } from '../../../../test_utils/timeline';
+import {
+  estimateMessagesTokens,
+  estimatePerRoundTokens as estimateTimelineTokens,
+} from './estimate_conversation_tokens';
+import {
+  eventsNativeConversation,
+  failedExec0Timeline,
+  timelineFromRounds,
+} from '../../../../test_utils/timeline';
+import { eventsForContext, groupTimelineRounds } from './context_timeline';
+import type { ProcessedTimelineEvent } from './context_timeline';
+import { roundToLangchain } from './to_langchain_messages';
+import { createSummarizationTransformer, type ToolSummarizationDeps } from './tool_summarization';
+
+const estimatePerRoundTokens = (
+  rounds: ProcessedConversationRound[],
+  deps: ToolSummarizationDeps
+) => estimateTimelineTokens(timelineFromRounds(rounds), createSummarizationTransformer(deps));
 
 const createMockToolManager = (
   summarizers: Map<
@@ -123,5 +140,30 @@ describe('estimatePerRoundTokens', () => {
     });
 
     expect(summarizedCounts[0]).toBeLessThan(rawCounts[0]);
+  });
+});
+
+describe('interrupted rounds', () => {
+  it('estimates an interrupted round including its steps and the notice', async () => {
+    const toolStep = createMockRound('r'.repeat(200)).steps[0];
+    const timeline = eventsForContext(
+      eventsNativeConversation(failedExec0Timeline('r1', [toolStep]))
+    ).map((event) =>
+      event.type === 'user_message' ? { ...event, data: { ...event.data, attachments: [] } } : event
+    ) as ProcessedTimelineEvent[];
+    const transformer = createSummarizationTransformer({
+      toolManager: createMockToolManager(),
+      toolRegistry: createMockToolRegistry(),
+    });
+
+    const [tokens] = await estimateTimelineTokens(timeline, transformer);
+    const [round] = groupTimelineRounds(timeline);
+    const messages = await roundToLangchain(round);
+
+    expect(tokens).toBe(estimateMessagesTokens(messages));
+    expect(messages.some((message) => String(message.content).includes('<system_notice>'))).toBe(
+      true
+    );
+    expect(messages.some((message) => message.getType() === 'tool')).toBe(true);
   });
 });

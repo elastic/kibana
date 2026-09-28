@@ -6,19 +6,28 @@
  */
 
 import type { HTTPFields } from '../../../../common/runtime_types';
-import { ConfigKey } from '../../../../common/runtime_types';
+import {
+  ConfigKey,
+  HTTPMethod,
+  Mode,
+  ResponseBodyIndexPolicy,
+} from '../../../../common/runtime_types';
 import type { Formatter } from './common';
 import { commonFormatters } from './common';
 import { tlsFormatters } from './tls';
-import { arrayFormatter, objectFormatter } from './formatting_utils';
+import { arrayFormatter, objectFormatter, omitDefaultFormatter } from './formatting_utils';
 
 export type HTTPFormatMap = Record<keyof HTTPFields, Formatter>;
+
+// These defaults match Heartbeat's own defaults, so omitting them leaves
+// monitor behavior unchanged (elastic/kibana#241818).
 export const httpFormatters: HTTPFormatMap = {
   ...tlsFormatters,
   ...commonFormatters,
-  [ConfigKey.MAX_REDIRECTS]: null,
-  [ConfigKey.REQUEST_METHOD_CHECK]: null,
-  [ConfigKey.RESPONSE_BODY_INDEX]: null,
+  [ConfigKey.MAX_REDIRECTS]: omitDefaultFormatter('0'),
+  [ConfigKey.REQUEST_METHOD_CHECK]: omitDefaultFormatter(HTTPMethod.GET),
+  [ConfigKey.RESPONSE_BODY_INDEX]: omitDefaultFormatter(ResponseBodyIndexPolicy.ON_ERROR),
+  [ConfigKey.MODE]: omitDefaultFormatter(Mode.ANY),
   [ConfigKey.RESPONSE_HEADERS_INDEX]: null,
   [ConfigKey.URLS]: null,
   [ConfigKey.USERNAME]: null,
@@ -30,7 +39,8 @@ export const httpFormatters: HTTPFormatMap = {
       ? JSON.stringify(fields[ConfigKey.REQUEST_BODY_CHECK]?.value)
       : null,
   [ConfigKey.RESPONSE_BODY_MAX_BYTES]: null,
-  [ConfigKey.MODE]: null,
+  // ipv4/ipv6 default to true but can be explicitly set to false, so they are
+  // intentionally still emitted (an omit-on-default would drop a real `false`).
   [ConfigKey.IPV4]: null,
   [ConfigKey.IPV6]: null,
   [ConfigKey.METADATA]: objectFormatter,

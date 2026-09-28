@@ -118,6 +118,23 @@ describe('DataView component', () => {
     jest.clearAllMocks();
   });
 
+  it('uses the full data view label as the accessible name without a browser tooltip', () => {
+    render(wrapDataViewComponentInContext());
+
+    const trigger = screen.getByTestId('dataview-trigger');
+    expect(trigger).toHaveAccessibleName('Dataview 1');
+    expect(trigger).not.toHaveAttribute('title');
+  });
+
+  it('can hide the prepended data view label', async () => {
+    render(wrapDataViewComponentInContext({ showDataViewLabel: false }));
+
+    await waitFor(() => {
+      expect(screen.queryByText('Data view')).not.toBeInTheDocument();
+      expect(screen.getByTestId('dataview-trigger')).toHaveTextContent('Dataview 1');
+    });
+  });
+
   it.each([
     {
       description: 'should not render the add runtime field menu if addField is not given',

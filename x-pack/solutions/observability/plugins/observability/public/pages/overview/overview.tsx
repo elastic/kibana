@@ -11,8 +11,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiLoadingSpinner,
+  EuiPageSection,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import {
@@ -26,14 +30,12 @@ import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observ
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { usePageReady } from '@kbn/ebt-tools';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
-import { LoadingObservability } from '../../components/loading_observability';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 import { DATA_SECTIONS, DataSections, type DataSectionsApps } from './components/data_sections';
 import { HeaderActions } from './components/header_actions/header_actions';
-import { HeaderMenu } from './components/header_menu/header_menu';
 import { getNewsFeed } from './components/news_feed/helpers/get_news_feed';
 import { NewsFeed } from './components/news_feed/news_feed';
 import { ObservabilityOnboardingCallout } from './components/observability_onboarding_callout';
@@ -41,6 +43,14 @@ import { calculateBucketSize } from './helpers/calculate_bucket_size';
 import { useKibana } from '../../utils/kibana_react';
 import type { DataContextApps, HasDataMap } from '../../context/has_data_context/has_data_context';
 import { appLabels } from '../../context/has_data_context/has_data_context';
+
+const pageTitle = i18n.translate('xpack.observability.overview.pageTitle', {
+  defaultMessage: 'Overview',
+});
+
+const addDataButtonLabel = i18n.translate('xpack.observability.home.addData', {
+  defaultMessage: 'Add data',
+});
 
 export function OverviewPage() {
   const { http, observabilityAIAssistant, kibanaVersion, serverless, share } = useKibana().services;
@@ -163,106 +173,133 @@ export function OverviewPage() {
     },
   });
 
-  if (!hasAnyData && !isAllRequestsComplete) {
-    return <LoadingObservability />;
-  }
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      primaryActionItem: onboardingHref
+        ? {
+            id: 'addData',
+            label: addDataButtonLabel,
+            iconType: 'indexOpen',
+            href: onboardingHref,
+            testId: 'o11yOverviewHeaderAddDataButton',
+            ebt: { action: EBT_CLICK_ACTIONS.ADD_DATA },
+          }
+        : undefined,
+    }),
+    [onboardingHref]
+  );
+
+  const isPageLoading = !hasAnyData && !isAllRequestsComplete;
 
   return (
     <ObservabilityPageTemplate
       isPageDataLoaded={isAllRequestsComplete}
-      pageHeader={{
-        pageTitle: i18n.translate('xpack.observability.overview.pageTitle', {
-          defaultMessage: 'Overview',
-        }),
-        rightSideItems: hasAnyData ? [<HeaderActions />] : [],
-        rightSideGroupProps: {
-          responsive: true,
-        },
-        'data-test-subj': 'obltOverviewPageHeader',
-      }}
-      pageSectionProps={{
-        contentProps: {
+      pageSectionProps={{ paddingSize: 'none' }}
+    >
+      <AppHeader title={pageTitle} menu={menu} />
+      <EuiPageSection
+        paddingSize="l"
+        restrictWidth={false}
+        alignment={isPageLoading ? 'center' : undefined}
+        contentProps={{
           style: {
             display: 'flex',
             flexDirection: 'column',
             flexGrow: 1,
           },
-        },
-      }}
-    >
-      <HeaderMenu />
-
-      {hasAnyData ? (
-        <>
-          <ObservabilityOnboardingCallout />
-
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <DataSections bucketSize={bucketSize} />
-            </EuiFlexItem>
-            <EuiSpacer size="s" />
-          </EuiFlexGroup>
-        </>
-      ) : (
-        <EuiEmptyPrompt
-          iconType="logoObservability"
-          data-test-subj="obltOverviewNoDataPrompt"
-          css={{
-            flexGrow: 1,
-            display: 'flex',
-            alignItems: 'center',
-          }}
-          title={
-            <h2>
-              {i18n.translate('xpack.observability.overview.emptyState.title', {
-                defaultMessage: 'Welcome to Observability',
-              })}
-            </h2>
-          }
-          body={
-            <p>
-              {i18n.translate('xpack.observability.overview.emptyState.body', {
-                defaultMessage:
-                  'Start collecting data to start detecting and resolving problems with your systems.',
-              })}
-            </p>
-          }
-          actions={
-            <EuiButton
-              data-test-subj="o11yOverviewPageAddDataButton"
-              color="primary"
-              fill
-              href={onboardingHref}
-              {...getEbtProps({
-                action: EBT_CLICK_ACTIONS.ADD_DATA,
-                element: 'obsOverviewPageEmptyPrompt',
-              })}
-            >
-              {i18n.translate('xpack.observability.overview.emptyState.action', {
-                defaultMessage: 'Add data',
-              })}
-            </EuiButton>
-          }
-        />
-      )}
-      <EuiHorizontalRule
-        css={{
-          width: 'auto',
-          marginLeft: `-${euiTheme.size.l}`,
-          marginRight: `-${euiTheme.size.l}`,
         }}
-      />
+      >
+        {isPageLoading ? (
+          <EuiFlexGroup data-test-subj="obltOverviewPageLoading">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="xl" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+              <EuiText>
+                {i18n.translate('xpack.observability.overview.loadingObservability', {
+                  defaultMessage: 'Loading Observability',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : hasAnyData ? (
+          <>
+            <HeaderActions />
+            <EuiSpacer size="m" />
+            <ObservabilityOnboardingCallout />
 
-      <EuiFlexGroup direction="column" gutterSize="xl" css={{ flexGrow: 0 }}>
-        {!!newsFeed?.items?.length && (
-          <EuiFlexItem grow={false}>
-            <NewsFeed items={newsFeed.items.slice(0, 3)} />
-          </EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <DataSections bucketSize={bucketSize} />
+              </EuiFlexItem>
+              <EuiSpacer size="s" />
+            </EuiFlexGroup>
+          </>
+        ) : (
+          <EuiEmptyPrompt
+            iconType="logoObservability"
+            data-test-subj="obltOverviewNoDataPrompt"
+            css={{
+              flexGrow: 1,
+              display: 'flex',
+              alignItems: 'center',
+            }}
+            title={
+              <h2>
+                {i18n.translate('xpack.observability.overview.emptyState.title', {
+                  defaultMessage: 'Welcome to Observability',
+                })}
+              </h2>
+            }
+            body={
+              <p>
+                {i18n.translate('xpack.observability.overview.emptyState.body', {
+                  defaultMessage:
+                    'Start collecting data to start detecting and resolving problems with your systems.',
+                })}
+              </p>
+            }
+            actions={
+              <EuiButton
+                data-test-subj="o11yOverviewPageAddDataButton"
+                color="primary"
+                fill
+                href={onboardingHref}
+                {...getEbtProps({
+                  action: EBT_CLICK_ACTIONS.ADD_DATA,
+                  element: 'obsOverviewPageEmptyPrompt',
+                })}
+              >
+                {i18n.translate('xpack.observability.overview.emptyState.action', {
+                  defaultMessage: 'Add data',
+                })}
+              </EuiButton>
+            }
+          />
         )}
-        <EuiFlexItem grow={false}>
-          <ExternalResourceLinks />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        {!isPageLoading && (
+          <>
+            <EuiHorizontalRule
+              css={{
+                width: 'auto',
+                marginLeft: `-${euiTheme.size.l}`,
+                marginRight: `-${euiTheme.size.l}`,
+              }}
+            />
+
+            <EuiFlexGroup direction="column" gutterSize="xl" css={{ flexGrow: 0 }}>
+              {!!newsFeed?.items?.length && (
+                <EuiFlexItem grow={false}>
+                  <NewsFeed items={newsFeed.items.slice(0, 3)} />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                <ExternalResourceLinks />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
+      </EuiPageSection>
     </ObservabilityPageTemplate>
   );
 }

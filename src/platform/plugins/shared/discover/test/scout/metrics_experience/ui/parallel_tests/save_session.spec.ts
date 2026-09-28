@@ -10,9 +10,8 @@
 /**
  * Save session tests.
  *
- * Validates that a configured metrics view (query, breakdown selection,
- * card count) can be saved, cleared, and then reloaded from saved searches
- * with full metrics-specific state restoration.
+ * Validates that a configured metrics view can be saved, reloaded, and
+ * restored after unsaved metrics-specific changes.
  */
 
 import { expect } from '@kbn/scout/ui';
@@ -20,6 +19,8 @@ import { spaceTest, testData, DEFAULT_TIME_RANGE, DEFAULT_CONFIG } from '../fixt
 
 const SAVED_SEARCH_NAME = 'Metrics Tier 3 Save Test';
 const FIRST_DIMENSION = DEFAULT_CONFIG.dimensions[0].name;
+const SECOND_DIMENSION = DEFAULT_CONFIG.dimensions[1].name;
+const SEARCH_TERM = 'counter_0';
 
 spaceTest.describe(
   'Metrics in Discover - Save Session',
@@ -48,12 +49,26 @@ spaceTest.describe(
       await expect(metricsExperience.grid).toBeVisible();
       await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
 
-      await spaceTest.step('select a breakdown dimension', async () => {
+      await spaceTest.step('select two breakdown dimensions', async () => {
         await metricsExperience.breakdownSelector.selectDimension(FIRST_DIMENSION);
+        await metricsExperience.breakdownSelector.selectDimension(SECOND_DIMENSION);
         await expect(
           metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
         ).toBeVisible();
+        await expect(
+          metricsExperience.breakdownSelector.getToggleWithSelection(SECOND_DIMENSION)
+        ).toBeVisible();
         await discover.waitUntilSearchingHasFinished();
+      });
+
+      await spaceTest.step('configure aggregations and filter the grid', async () => {
+        await metricsExperience.gridSettings.open();
+        await metricsExperience.gridSettings.selectCounterAggregation('max');
+        await metricsExperience.gridSettings.selectGaugeAggregation('min');
+        await metricsExperience.gridSettings.selectHistogramPercentile('p50');
+        await metricsExperience.gridSettings.apply();
+        await metricsExperience.searchMetric(SEARCH_TERM);
+        await metricsExperience.waitForFirstCard('counter_0-0');
       });
 
       const cardCountBefore = await metricsExperience.getVisibleCardCount();
@@ -79,10 +94,25 @@ spaceTest.describe(
         await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
       });
 
-      await spaceTest.step('breakdown selection should be preserved', async () => {
+      await spaceTest.step('breakdown selections should be preserved', async () => {
         await expect(
           metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
         ).toBeVisible();
+        await expect(
+          metricsExperience.breakdownSelector.getToggleWithSelection(SECOND_DIMENSION)
+        ).toBeVisible();
+      });
+
+      await spaceTest.step('grid settings and search should be preserved', async () => {
+        await expect(metricsExperience.searchInput).toHaveValue(SEARCH_TERM);
+        await metricsExperience.waitForFirstCard('counter_0-0');
+        await metricsExperience.gridSettings.open();
+        await expect(metricsExperience.gridSettings.counterSelect).toContainText('Maximum');
+        await expect(metricsExperience.gridSettings.gaugeSelect).toContainText('Minimum');
+        await expect(metricsExperience.gridSettings.histogramSelect).toContainText(
+          '50th percentile'
+        );
+        await metricsExperience.gridSettings.cancel();
       });
 
       await spaceTest.step('card count should match the original session', async () => {
@@ -92,6 +122,26 @@ spaceTest.describe(
       await spaceTest.step('ES|QL query should be preserved', async () => {
         const queryAfter = await discover.getEsqlQueryValue();
         expect(queryAfter).toStrictEqual(queryBefore);
+      });
+
+      await spaceTest.step('remove a saved breakdown selection', async () => {
+        await metricsExperience.breakdownSelector.selectDimension(SECOND_DIMENSION);
+        await expect(
+          metricsExperience.breakdownSelector.getToggleWithSelection(SECOND_DIMENSION)
+        ).toBeHidden();
+        await expect(discover.unsavedChangesIndicator()).toBeVisible();
+      });
+
+      await spaceTest.step('revert to the saved breakdown selection', async () => {
+        await discover.revertUnsavedChanges();
+        await expect(
+          metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
+        ).toBeVisible();
+        await expect(
+          metricsExperience.breakdownSelector.getToggleWithSelection(SECOND_DIMENSION)
+        ).toBeVisible();
+        await expect(metricsExperience.searchInput).toHaveValue(SEARCH_TERM);
+        await expect(discover.unsavedChangesIndicator()).toBeHidden();
       });
     });
   }
