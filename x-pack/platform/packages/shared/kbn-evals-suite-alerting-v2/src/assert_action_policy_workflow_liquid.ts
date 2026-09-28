@@ -61,7 +61,7 @@ const resolveSegment = (schema: JsonSchema, segment: string): JsonSchema | null 
     return named;
   }
 
-  // Boolean `true` is an open map (groupKey, episode data): any key, unconstrained values.
+  // Boolean `true` is an open map: any key, unconstrained values.
   // A schema describes the value of every other key (typed maps such as `rules`).
   const additional = schema.additionalProperties;
   if (additional === true) {
