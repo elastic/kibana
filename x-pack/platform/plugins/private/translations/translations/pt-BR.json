@@ -18650,7 +18650,6 @@
     "xpack.dataFederation.errors.idRequired": "O nome é obrigatório.",
     "xpack.dataFederation.errors.unknown": "Erro desconhecido",
     "xpack.dataFederation.filters.allDataSources": "Fontes de dados",
-    "xpack.dataFederation.filters.dataSource": "Fonte de dados",
     "xpack.dataFederation.pageDescription": "Conecte-se a fontes de dados externas e adicione conjuntos de dados específicos para consultar com o ES|QL, assim como seus dados indexados. Não é necessária ingestão.",
     "xpack.dataFederation.pageTitle": "Federação de dados ES|QL",
     "xpack.dataFederation.pluginName": "Federação de dados ES|QL",
