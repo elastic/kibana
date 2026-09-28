@@ -84,19 +84,48 @@ describe('CommentsLayer', () => {
     expect(document.activeElement).toBe(target());
   });
 
-  it('lists comments by page, the current page first', async () => {
+  it('lists comments by page, the current page first and open, the others closed until opened or arrived at', async () => {
+    const { location, navigate } = createLocation();
     const elsewhere = createComment('far', {
       route: { pageKey: '/app/two', path: '/app/two' },
       anchor: anchorById('missing'),
     });
-    const controller = await renderLayer({ api: createInMemoryCommentsApi([elsewhere, seeded]) });
+    const controller = await renderLayer({
+      location,
+      api: createInMemoryCommentsApi([elsewhere, seeded]),
+    });
     act(() => controller.setActive(true));
 
     const [current, other] = await screen.findAllByTestId('devCommentsPanelPage');
     expect(current).toHaveTextContent('/page');
     expect(other).toHaveTextContent('/app/two');
+    expect(other).toHaveTextContent('1');
+    const currentTrigger = within(current).getByRole('button', { name: '/page' });
+    const otherTrigger = within(other).getByRole('button', { name: '/app/two' });
+    expect(currentTrigger).toHaveAttribute('aria-expanded', 'true');
     expect(within(current).getByTestId('devCommentsPanelItem-a')).toBeInTheDocument();
+    expect(otherTrigger).toHaveAttribute('aria-expanded', 'false');
+    expect(within(other).queryByTestId('devCommentsPanelItem-far')).toBeNull();
+
+    fireEvent.click(otherTrigger);
     expect(within(other).getByTestId('devCommentsPanelItem-far')).toBeInTheDocument();
+    fireEvent.click(currentTrigger);
+    expect(within(current).queryByTestId('devCommentsPanelItem-a')).toBeNull();
+    fireEvent.click(otherTrigger);
+
+    // Arriving at a page opens its comments.
+    act(() => navigate('/app/two'));
+    await waitFor(() => expect(screen.getByTestId('devCommentsPanelItem-far')).toBeInTheDocument());
+  });
+
+  it('opens the only page listed, whichever it is', async () => {
+    const elsewhere = createComment('far', {
+      route: { pageKey: '/app/two', path: '/app/two' },
+      anchor: anchorById('missing'),
+    });
+    const controller = await renderLayer({ api: createInMemoryCommentsApi([elsewhere]) });
+    act(() => controller.setActive(true));
+    expect(await screen.findByTestId('devCommentsPanelItem-far')).toBeInTheDocument();
   });
 
   it('leaves resolved comments out of the list until asked for, the filter showing as on while it hides some', async () => {

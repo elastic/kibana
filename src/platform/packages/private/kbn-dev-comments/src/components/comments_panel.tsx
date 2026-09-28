@@ -18,6 +18,7 @@ import React, {
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import {
+  EuiAccordion,
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -37,6 +38,7 @@ import {
   euiScrollBarStyles,
   getDefaultEuiMarkdownProcessingPlugins,
   useEuiFontSize,
+  useGeneratedHtmlId,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -148,14 +150,21 @@ const ActionsMenu = ({
 };
 
 /** The page a comment was made on, as the heading of what is shown of it. */
-const PagePath = ({ pageKey, flush = false }: { pageKey: string; flush?: boolean }) => {
+const PagePath = ({
+  pageKey,
+  element: Element = 'h4',
+}: {
+  pageKey: string;
+  /** A span in an accordion's button, which can hold no heading. */
+  element?: 'h4' | 'span';
+}) => {
   const { euiTheme } = useEuiTheme();
   const { fontSize, lineHeight } = useEuiFontSize('xxs');
   return (
-    <h4
+    <Element
       title={pageKey}
       css={css`
-        ${flush ? '' : `margin-top: ${euiTheme.size.m};`}
+        display: block;
         min-width: 0;
         font-family: ${euiTheme.font.familyCode};
         font-size: ${fontSize};
@@ -167,17 +176,67 @@ const PagePath = ({ pageKey, flush = false }: { pageKey: string; flush?: boolean
       `}
     >
       {pageKey}
-    </h4>
+    </Element>
   );
 };
 
 /** The comments of a page under its path. */
-const PageGroup = ({ pageKey, children }: PropsWithChildren<{ pageKey: string }>) => (
-  <section data-test-subj="devCommentsPanelPage">
-    <PagePath pageKey={pageKey} />
-    {children}
-  </section>
-);
+/**
+ * The comments of a page under its path, which opens and closes them. It opens on
+ * its own when it becomes `defaultOpen`: on arriving at its page.
+ */
+const PageGroup = ({
+  pageKey,
+  count,
+  defaultOpen,
+  children,
+}: PropsWithChildren<{ pageKey: string; count: number; defaultOpen: boolean }>) => {
+  const { euiTheme } = useEuiTheme();
+  const id = useGeneratedHtmlId({ prefix: 'devCommentsPanelPage' });
+  const [open, setOpen] = useState(defaultOpen);
+
+  useEffect(() => {
+    if (defaultOpen) {
+      setOpen(true);
+    }
+  }, [defaultOpen]);
+
+  return (
+    <section
+      css={css`
+        margin-block-start: ${euiTheme.size.m};
+      `}
+      data-test-subj="devCommentsPanelPage"
+    >
+      <EuiAccordion
+        id={id}
+        forceState={open ? 'open' : 'closed'}
+        onToggle={setOpen}
+        buttonContent={<PagePath pageKey={pageKey} element="span" />}
+        buttonProps={{
+          css: css`
+            min-width: 0;
+          `,
+        }}
+        buttonContentClassName="eui-textTruncate"
+        extraAction={
+          <EuiNotificationBadge
+            color="subdued"
+            aria-label={i18n.translate('devComments.panel.pageCount', {
+              defaultMessage: '{count, plural, one {# comment} other {# comments}}',
+              values: { count },
+            })}
+          >
+            {count}
+          </EuiNotificationBadge>
+        }
+      >
+        {/* Only while open: the rows of a closed page are not in the way of the keyboard. */}
+        {open && children}
+      </EuiAccordion>
+    </section>
+  );
+};
 
 /**
  * A thread in place of the list, screenshot shown: the fallback for a comment
@@ -214,7 +273,7 @@ const PanelThread = ({ comment, onBack }: { comment: Comment; onBack: () => void
             min-width: 0;
           `}
         >
-          <PagePath pageKey={comment.route.pageKey} flush />
+          <PagePath pageKey={comment.route.pageKey} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
@@ -708,7 +767,13 @@ export const CommentsPanel = () => {
               </EuiText>
             )}
             {groups.map((group) => (
-              <PageGroup key={group.pageKey} pageKey={group.pageKey}>
+              <PageGroup
+                key={group.pageKey}
+                pageKey={group.pageKey}
+                count={group.comments.length}
+                // The current page's comments are open, or the only page's; the others are an index.
+                defaultOpen={group.pageKey === pageKey || groups.length === 1}
+              >
                 {group.comments.map((comment) => {
                   const placed = resolvedAnchors.get(comment.id);
                   const element = placed?.exposed ? placed.element : null;
