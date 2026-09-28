@@ -15,9 +15,7 @@ interface HttpAuthFields {
 }
 
 /** Clear the credential for the inactive Kerberos auth method so agents never get both. */
-const stripInactiveKerberosCredential = (
-  kerberos: KerberosConfig
-): KerberosConfig => {
+const stripInactiveKerberosCredential = (kerberos: KerberosConfig): KerberosConfig => {
   if (kerberos.auth_type === KerberosAuthType.KEYTAB) {
     return { ...kerberos, password: '' };
   }
