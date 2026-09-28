@@ -608,6 +608,63 @@ describe('getIndexFields', () => {
     expect(result['still-missing'].type).toBe('indexPattern');
   });
 
+  it('keeps a healthy index when a view in the same request cannot be introspected', async () => {
+    const notFound = new esErrors.ResponseError({
+      statusCode: 404,
+      body: { error: { type: 'index_not_found_exception' } },
+      headers: {},
+      meta: {} as any,
+      warnings: [],
+    } as any);
+    const resolveIndex = jest.fn().mockImplementation(({ name }: { name: string[] }) => {
+      if (name[0] === 'logs-hot') {
+        return Promise.resolve({
+          indices: [{ name: 'logs-hot' }],
+          aliases: [],
+          data_streams: [],
+        });
+      }
+      return Promise.reject(notFound);
+    });
+    const esClient = {
+      ...createEsClient({ resolveIndex }),
+      esql: {
+        getView: jest.fn().mockResolvedValue({
+          views: [
+            { name: 'logs-proxy-parsed', query: 'FROM missing | KEEP status' },
+            { name: 'errors-only', query: 'FROM logs-* | KEEP status' },
+          ],
+        }),
+        query: jest.fn().mockImplementation(({ query }: { query: string }) => {
+          if (query.startsWith('FROM errors-only')) {
+            return Promise.resolve({
+              columns: [{ name: 'status', type: 'integer' }],
+              values: [],
+            });
+          }
+          return Promise.reject(new Error('Unknown index [missing]'));
+        }),
+      },
+    } as unknown as ElasticsearchClient;
+    getIndexMappingsMock.mockResolvedValue({
+      'logs-hot': { mappings: { properties: { message: { type: 'text' } } } },
+    });
+
+    const result = await getIndexFields({
+      indices: ['logs-hot', 'logs-proxy-parsed', 'errors-only'],
+      includeViews: true,
+      esClient,
+    });
+
+    expect(result['logs-hot'].type).toBe('index');
+    expect(result['logs-hot'].fields).toEqual([
+      { path: 'message', type: 'text', meta: {}, searchable: true },
+    ]);
+    expect(result['logs-proxy-parsed']).toEqual({ type: 'view', fields: [] });
+    expect(result['errors-only'].type).toBe('view');
+    expect(result['errors-only'].fields).toEqual([{ path: 'status', type: 'integer', meta: {} }]);
+  });
+
   it('treats a 404 from resolveIndex as indexPattern (empty fields)', async () => {
     const notFound = new esErrors.ResponseError({
       statusCode: 404,

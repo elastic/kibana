@@ -269,7 +269,10 @@ export const getIndexFields = async ({
     const viewResults = Promise.all(
       buckets.view.map(async (b) => ({
         input: b.input,
-        fields: await fetchLimit(() => getViewFields({ name: b.concrete, esClient })),
+        // A stale view definition must not fail mapping for the other names in this request.
+        fields: await fetchLimit(() =>
+          getViewFields({ name: b.concrete, esClient }).catch(() => [])
+        ),
       }))
     );
 
