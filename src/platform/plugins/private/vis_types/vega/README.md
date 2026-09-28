@@ -6,8 +6,9 @@ exactly, so comments and formatting round-trip.
 
 Add or edit a panel from Dashboard's **Add panel** menu. Editing does not run the spec's queries as
 you type: **Run preview** renders the current spec on the panel, **Apply and close** commits it to the
-dashboard, and any other close — Cancel, Esc, or click-away — reverts, removing a new panel or
-restoring an existing panel's prior spec.
+dashboard, and any other close — Cancel or Esc — reverts, removing a new panel or restoring an
+existing panel's prior spec. Clicking outside the editor does not close it, so a stray click cannot
+discard unsaved edits.
 
 Creation and panel JSON export are gated by the `vega.standaloneEmbeddable` feature flag (off by
 default). The embeddable definition itself is always registered so existing panels keep rendering

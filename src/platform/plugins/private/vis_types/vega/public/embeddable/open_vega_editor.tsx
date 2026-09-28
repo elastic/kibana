@@ -36,6 +36,8 @@ export const openVegaEditor = ({
     flyoutProps: {
       focusedPanelId,
       size: 'm',
+      // A stray click would otherwise revert unsaved spec edits.
+      outsideClickCloses: false,
     },
     loadContent: async ({ ariaLabelledBy, closeFlyout }) => {
       const api = await loadApi();
