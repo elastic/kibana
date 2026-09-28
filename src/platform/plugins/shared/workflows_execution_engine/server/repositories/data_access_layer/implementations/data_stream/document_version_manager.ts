@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { LRUCache } from 'lru-cache';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataStreamMetadataManager } from './data_stream_metadata_manager';
 import type { DocumentVersionFields } from '../../types';
+
+const VERSION_CACHE_MAX = 32;
+const VERSION_CACHE_TTL_MS = 60_000;
 
 export interface DocumentVersionManagerDeps {
   esClient: ElasticsearchClient;
@@ -18,7 +22,10 @@ export interface DocumentVersionManagerDeps {
 }
 
 export class DocumentVersionManager {
-  private readonly cache = new Map<string, Required<DocumentVersionFields>>();
+  private readonly cache = new LRUCache<string, Required<DocumentVersionFields>>({
+    max: VERSION_CACHE_MAX,
+    ttl: VERSION_CACHE_TTL_MS,
+  });
 
   constructor(private readonly deps: DocumentVersionManagerDeps) {}
 
