@@ -180,6 +180,10 @@ export {
   type PublishesWritableDescription,
 } from './interfaces/titles/publishes_description';
 export {
+  apiPublishesBreakdownFieldName,
+  type PublishesBreakdownFieldName,
+} from './interfaces/titles/publishes_breakdown_field_name';
+export {
   apiPublishesTitle,
   apiPublishesWritableTitle,
   getTitle,

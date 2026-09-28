@@ -110,10 +110,10 @@ export const EmbeddableRenderer = <
       canceled = true;
     };
 
-    // Ancestry chain is expected to use 'key' attribute to reset DOM and state
-    // when unwrappedComponent needs to be re-loaded
+    // Rebuild when type or maybeId changes so each panel gets its own embeddable
+    // with the correct uuid and initial state (e.g. new panels get the right api).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [type]);
+  }, [type, maybeId]);
 
   useEffect(() => {
     return () => {

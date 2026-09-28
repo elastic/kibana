@@ -204,6 +204,11 @@ export type DashboardApi = CanExpandPanels &
       grid?: GridData;
       serializedState: object;
     };
+    getDashboardPanelFromIdAsync?: (id: string) => Promise<{
+      type: string;
+      grid: GridData;
+      serializedState: object;
+    }>;
     hasOverlays$: PublishingSubject<boolean>;
     hasUnsavedChanges$: PublishingSubject<boolean>;
     highlightPanel: (panelRef: HTMLDivElement) => void;
@@ -223,6 +228,12 @@ export type DashboardApi = CanExpandPanels &
     setFilters: (filters?: Filter[] | undefined) => void;
     setFullScreenMode: (fullScreenMode: boolean) => void;
     setHighlightPanelId: (id: string | undefined) => void;
+    selectedPanelIds$: PublishingSubject<Set<string>>;
+    setSelectedPanelIds: (ids: Set<string>) => void;
+    togglePanelSelection: (id: string) => void;
+    copiedPanelIds$: PublishingSubject<Set<string>>;
+    copySelectedPanels: () => void;
+    runPastePanels: () => Promise<void>;
     setQuery: (query?: Query | undefined) => void;
     setProjectRouting: (projectRouting?: ProjectRouting) => void;
     setEsqlApproximation: (esqlApproximation: boolean) => void;
@@ -243,6 +254,11 @@ export type DashboardApi = CanExpandPanels &
     layout$: BehaviorSubject<DashboardLayout>;
 
     registerChildApi: (api: DefaultEmbeddableApi) => void;
+
+    duplicatePanel: (uuid: string, options?: { silent?: boolean }) => Promise<string>;
+    duplicatePanels: (uuids: string[]) => Promise<string[]>;
+    removePanels: (uuids: string[]) => void;
+    movePanelsToNewSection: (panelIds: string[]) => void;
 
     accessControl$: PublishingSubject<Partial<SavedObjectAccessControl>>;
     changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;

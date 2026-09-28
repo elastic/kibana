@@ -21,6 +21,7 @@ import {
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
+import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../common/constants';
 import { CREATE_NEW_DASHBOARD_URL, createDashboardEditUrl } from '../utils/urls';
 import { coreServices, embeddableService } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
@@ -48,15 +49,62 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
   );
 
   const dashboardId = api.parentApi.savedObjectId$.value;
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const onSubmit = useCallback(() => {
-    let panelToCopy;
-    try {
-      panelToCopy = api.parentApi.getDashboardPanelFromId(api.uuid);
-      // TODO When we implement the ability to duplicate pinned panels,
-      // we should handle copying panels that don't have a `grid` defined
-      if (!isDashboardLayoutPanel(panelToCopy)) throw new Error();
-    } catch {
+  const onSubmit = useCallback(async () => {
+    const selectedIds = api.parentApi.selectedPanelIds$?.getValue?.() ?? new Set<string>();
+    const panelIdsToCopy =
+      selectedIds.has(api.uuid) && selectedIds.size > 0 ? [...selectedIds] : [api.uuid];
+
+    const getPanelAsync = api.parentApi.getDashboardPanelFromIdAsync;
+    let states: EmbeddablePackageState[] = [];
+
+    if (getPanelAsync) {
+      setIsSubmitting(true);
+      try {
+        const results = await Promise.allSettled(
+          panelIdsToCopy.map((panelId) => getPanelAsync(panelId))
+        );
+        for (const result of results) {
+          if (result.status === 'fulfilled') {
+            const p = result.value;
+            const grid = p.grid as { w?: number; h?: number };
+            states.push({
+              type: p.type,
+              serializedState: p.serializedState,
+              size: {
+                width: grid.w ?? DEFAULT_PANEL_WIDTH,
+                height: grid.h ?? DEFAULT_PANEL_HEIGHT,
+              },
+            });
+          }
+        }
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      for (const panelId of panelIdsToCopy) {
+        try {
+          const panelToCopy = api.parentApi.getDashboardPanelFromId(panelId);
+          // TODO When we implement the ability to duplicate pinned panels,
+          // we should handle copying panels that don't have a `grid` defined
+          if (!isDashboardLayoutPanel(panelToCopy)) continue;
+          const grid = panelToCopy.grid as { w?: number; h?: number };
+          states.push({
+            type: panelToCopy.type,
+            serializedState: panelToCopy.serializedState,
+            size: {
+              width: grid.w ?? DEFAULT_PANEL_WIDTH,
+              height: grid.h ?? DEFAULT_PANEL_HEIGHT,
+            },
+          });
+        } catch {
+          // Panel may have been removed; skip it
+        }
+      }
+    }
+
+    if (states.length === 0) {
       coreServices.notifications.toasts.addDanger({
         title: dashboardCopyToDashboardActionStrings.getPanelNotFoundError(api.uuid),
         'data-test-subj': 'copyToDashboardPanelNotFound',
@@ -65,15 +113,6 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
       return;
     }
 
-    const state: EmbeddablePackageState = {
-      type: panelToCopy.type,
-      serializedState: panelToCopy.serializedState,
-      size: {
-        width: panelToCopy.grid.w,
-        height: panelToCopy.grid.h,
-      },
-    };
-
     const path =
       dashboardOption === 'existing' && selectedDashboard
         ? `#${createDashboardEditUrl(selectedDashboard.id, true)}`
@@ -81,7 +120,7 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
 
     closeModal();
     stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
-      state: [state],
+      state: states,
       path,
     });
   }, [api, dashboardOption, selectedDashboard, closeModal, stateTransfer]);
@@ -151,8 +190,9 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
         <EuiButton
           fill
           data-test-subj="confirmCopyToButton"
-          onClick={onSubmit}
-          disabled={dashboardOption === 'existing' && !selectedDashboard}
+          onClick={() => void onSubmit()}
+          disabled={(dashboardOption === 'existing' && !selectedDashboard) || isSubmitting}
+          isLoading={isSubmitting}
         >
           {dashboardCopyToDashboardActionStrings.getAcceptButtonName()}
         </EuiButton>

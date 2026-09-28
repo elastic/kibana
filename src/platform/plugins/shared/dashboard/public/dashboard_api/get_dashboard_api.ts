@@ -262,6 +262,16 @@ export function getDashboardApi({
     canCancel$,
     ...initializeTrackContentfulRender(),
     anyStateChange$,
+    runPastePanels: async () => {
+      const idsToPaste = Array.from(trackPanel.api.copiedPanelIds$.value);
+      for (const id of idsToPaste) {
+        try {
+          await layoutManager.api.duplicatePanel(id);
+        } catch {
+          // Skip panel if duplicate fails (e.g. panel no longer exists)
+        }
+      }
+    },
     executionContext: {
       type: 'dashboard',
       description: settingsManager.api.title$.value,

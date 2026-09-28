@@ -47,6 +47,7 @@ describe('CopyToDashboardModal', () => {
     parentApi: {
       type: 'dashboard',
       savedObjectId$: new BehaviorSubject<string | undefined>('dashboardOne'),
+      selectedPanelIds$: new BehaviorSubject<Set<string>>(new Set(['panelOne'])),
       getDashboardPanelFromId: () => ({
         type: 'testPanelType',
         grid: { w: 1, h: 1, x: 0, y: 0, i: 'panelOne' },
@@ -85,6 +86,7 @@ describe('CopyToDashboardModal', () => {
         parentApi: {
           ...api.parentApi,
           savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
+          selectedPanelIds$: new BehaviorSubject<Set<string>>(new Set(['panelOne'])),
         },
       };
       const result = render(
@@ -174,6 +176,51 @@ describe('CopyToDashboardModal', () => {
           ],
         })
       );
+    });
+
+    test('should copy all selected panels when multiple are selected', async () => {
+      const getDashboardPanelFromId = jest.fn((id: string) => ({
+        type: 'testPanelType',
+        grid: { w: 2, h: 2, x: 0, y: 0, i: id },
+        serializedState: { title: `Panel ${id}` },
+      }));
+      const multiSelectApi: CopyToDashboardAPI = {
+        ...api,
+        uuid: 'panelOne',
+        parentApi: {
+          ...api.parentApi,
+          selectedPanelIds$: new BehaviorSubject<Set<string>>(
+            new Set(['panelOne', 'panelTwo', 'panelThree'])
+          ),
+          getDashboardPanelFromId,
+        },
+      };
+      const result = render(
+        <CopyToDashboardModal api={multiSelectApi} closeModal={closeModalMock} />
+      );
+
+      await waitFor(() => {
+        const mockDashboardPickerButton = result.container.querySelector('#mockDashboardPicker');
+        expect(mockDashboardPickerButton).not.toBeNull();
+        userEvent.click(mockDashboardPickerButton!);
+        const submitButton = result.container.querySelector('[data-test-subj=confirmCopyToButton]');
+        expect(submitButton).not.toBeNull();
+        userEvent.click(submitButton!);
+      });
+
+      await waitFor(() => {
+        expect(navigateToWithEmbeddablePackagesMock).toHaveBeenCalledWith('dashboards', {
+          path: '#/view/dashboardTwo?_a=(viewMode:edit)',
+          state: [
+            { type: 'testPanelType', serializedState: { title: 'Panel panelOne' }, size: { width: 2, height: 2 } },
+            { type: 'testPanelType', serializedState: { title: 'Panel panelTwo' }, size: { width: 2, height: 2 } },
+            { type: 'testPanelType', serializedState: { title: 'Panel panelThree' }, size: { width: 2, height: 2 } },
+          ],
+        });
+        expect(getDashboardPanelFromId).toHaveBeenCalledWith('panelOne');
+        expect(getDashboardPanelFromId).toHaveBeenCalledWith('panelTwo');
+        expect(getDashboardPanelFromId).toHaveBeenCalledWith('panelThree');
+      });
     });
   });
 });

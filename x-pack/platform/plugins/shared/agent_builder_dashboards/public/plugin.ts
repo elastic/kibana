@@ -10,6 +10,7 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import {
   OPEN_DASHBOARD_CHAT_ACTION_ID,
   ENHANCE_DASHBOARD_ACTION_ID,
+  ADD_PANELS_TO_CHAT_ACTION_ID,
 } from '@kbn/dashboard-plugin/public';
 import type {
   AgentBuilderDashboardsPluginPublicSetup,
@@ -69,6 +70,16 @@ export class AgentBuilderDashboardsPlugin
           './dashboard_empty_screen/open_dashboard_chat_action'
         );
         return createOpenDashboardChatAction(plugins.agentBuilder.openChat);
+      });
+
+      plugins.uiActions.registerActionAsync(ADD_PANELS_TO_CHAT_ACTION_ID, async () => {
+        const { createAddPanelsToChatAction } = await import(
+          './add_panels_to_chat/add_panels_to_chat_action'
+        );
+        return createAddPanelsToChatAction({
+          openChat: plugins.agentBuilder.openChat,
+          getAgentBuilderAccess: plugins.agentBuilder.getAgentBuilderAccess,
+        });
       });
 
       if (ENHANCE_DASHBOARD_ENABLED) {

@@ -16,6 +16,7 @@ import type { Props as DashboardGridItemProps } from './dashboard_grid_item';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
+import { PanelContextMenuContext } from './panel_context_menu';
 import { act, render } from '@testing-library/react';
 
 // Alias required so the jest.mock factory can reference useEffect without triggering
@@ -59,7 +60,10 @@ const buildMockChildApi = (id: string): DefaultEmbeddableApi =>
     relatedPanels$: new BehaviorSubject<string[]>([]),
   } as unknown as DefaultEmbeddableApi);
 
-const createAndMountDashboardGridItem = (props: DashboardGridItemProps) => {
+const createAndMountDashboardGridItem = (
+  props: DashboardGridItemProps,
+  openContextMenu: jest.Mock = jest.fn()
+) => {
   const panels = [
     {
       grid: { x: 0, y: 0, w: 6, h: 6, i: '1' },
@@ -83,7 +87,9 @@ const createAndMountDashboardGridItem = (props: DashboardGridItemProps) => {
   const component = render(
     <DashboardContext.Provider value={api}>
       <DashboardInternalContext.Provider value={internalApi}>
-        <DashboardGridItem {...props} />
+        <PanelContextMenuContext.Provider value={{ openContextMenu }}>
+          <DashboardGridItem {...props} />
+        </PanelContextMenuContext.Provider>
       </DashboardInternalContext.Provider>
     </DashboardContext.Provider>
   );
@@ -105,6 +111,7 @@ test('renders Item', async () => {
   expect(panelElement!.classList.contains('dshDashboardGrid__item--hidden')).toBe(false);
   expect(panelElement!.classList.contains('dshDashboardGrid__item--focused')).toBe(false);
   expect(panelElement!.classList.contains('dshDashboardGrid__item--blurred')).toBe(false);
+  expect(panelElement!.classList.contains('dshDashboardGrid__item--selected')).toBe(false);
 });
 
 test('renders expanded panel', async () => {
@@ -242,5 +249,93 @@ describe('cancelRequests on unmount', () => {
 
     // Unmount before onApiAvailable is ever called (embeddable still loading)
     expect(() => component.unmount()).not.toThrow();
+  });
+});
+
+test('Shift+click toggles panel selection and applies selected class', async () => {
+  const { component } = createAndMountDashboardGridItem({
+    id: '1',
+    key: '1',
+    type: TEST_EMBEDDABLE,
+  });
+
+  const panelElement = component.container.querySelector('#panel-1');
+  expect(panelElement).not.toBeNull();
+  expect(panelElement!.classList.contains('dshDashboardGrid__item--selected')).toBe(false);
+
+  await act(async () => {
+    panelElement!.dispatchEvent(
+      new MouseEvent('click', { bubbles: true, cancelable: true, shiftKey: true })
+    );
+    await new Promise((resolve) => setTimeout(resolve, 1));
+  });
+
+  expect(panelElement!.classList.contains('dshDashboardGrid__item--selected')).toBe(true);
+
+  await act(async () => {
+    panelElement!.dispatchEvent(
+      new MouseEvent('click', { bubbles: true, cancelable: true, shiftKey: true })
+    );
+    await new Promise((resolve) => setTimeout(resolve, 1));
+  });
+
+  expect(panelElement!.classList.contains('dshDashboardGrid__item--selected')).toBe(false);
+});
+
+describe('right-click menu', () => {
+  // the grid item reads the selection through batched subjects, which update asynchronously
+  const select = async (
+    dashboardApi: { setSelectedPanelIds: (ids: Set<string>) => void },
+    ids: string[]
+  ) => {
+    await act(async () => {
+      dashboardApi.setSelectedPanelIds(new Set(ids));
+      await new Promise((resolve) => setTimeout(resolve, 1));
+    });
+  };
+
+  const rightClick = (element: Element) => {
+    const event = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
+    act(() => {
+      element.dispatchEvent(event);
+    });
+    return event;
+  };
+
+  test('keeps the browser menu when the panel is not selected', () => {
+    const openContextMenu = jest.fn();
+    const { component } = createAndMountDashboardGridItem(
+      { id: '1', key: '1', type: TEST_EMBEDDABLE },
+      openContextMenu
+    );
+
+    const event = rightClick(component.container.querySelector('#panel-1')!);
+    expect(openContextMenu).not.toHaveBeenCalled();
+    expect(event.defaultPrevented).toBe(false);
+  });
+
+  test('keeps the browser menu when only other panels are selected', async () => {
+    const openContextMenu = jest.fn();
+    const { component, dashboardApi } = createAndMountDashboardGridItem(
+      { id: '1', key: '1', type: TEST_EMBEDDABLE },
+      openContextMenu
+    );
+    await select(dashboardApi, ['2']);
+
+    rightClick(component.container.querySelector('#panel-1')!);
+    expect(openContextMenu).not.toHaveBeenCalled();
+  });
+
+  test('opens the bulk actions menu on a selected panel', async () => {
+    const openContextMenu = jest.fn();
+    const { component, dashboardApi } = createAndMountDashboardGridItem(
+      { id: '1', key: '1', type: TEST_EMBEDDABLE },
+      openContextMenu
+    );
+    await select(dashboardApi, ['1', '2']);
+
+    const event = rightClick(component.container.querySelector('#panel-1')!);
+    expect(openContextMenu).toHaveBeenCalledWith('1', expect.any(Object));
+    expect(event.defaultPrevented).toBe(true);
   });
 });

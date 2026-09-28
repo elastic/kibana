@@ -293,6 +293,17 @@ export function initializeLayoutManager(
   // --------------------------------------------------------------------------------------
   // API definition
   // --------------------------------------------------------------------------------------
+  /** Get full serialized state (including by-value / library state e.g. colors) for copy/transfer. */
+  function getSerializedStateForPanel(childApi: DefaultEmbeddableApi): object {
+    if (apiHasLibraryTransforms(childApi)) {
+      return childApi.getSerializedStateByValue();
+    }
+    if (apiHasSerializableState(childApi)) {
+      return childApi.serializeState();
+    }
+    return {};
+  }
+
   function getDashboardPanelFromId(panelId: string) {
     const childLayout =
       getSafe(layout$.value.panels, panelId) ?? getSafe(layout$.value.pinnedPanels, panelId);
@@ -302,9 +313,21 @@ export function initializeLayoutManager(
     return {
       type: childLayout.type,
       grid: !isPinned ? childLayout.grid : null,
-      serializedState: apiHasSerializableState(childApi) ? childApi.serializeState() : {},
+      serializedState: getSerializedStateForPanel(childApi),
     };
   }
+
+  const getDashboardPanelFromIdAsync = async (panelId: string) => {
+    const childLayout = layout$.value.panels[panelId];
+    if (!childLayout) throw new PanelNotFoundError();
+    const childApi = await getChildApi(panelId);
+    if (!childApi) throw new PanelNotFoundError();
+    return {
+      type: childLayout.type,
+      grid: childLayout.grid,
+      serializedState: getSerializedStateForPanel(childApi),
+    };
+  };
 
   async function getPanelTitles(): Promise<string[]> {
     const titles: string[] = [];
@@ -368,7 +391,6 @@ export function initializeLayoutManager(
       layout$.next({ ...layout$.value, panels });
     } else if (pinnedPanels[uuid]) {
       delete pinnedPanels[uuid];
-      // Recompute the order of the remaining pinned panels
       const newPinnedPanels: typeof pinnedPanels = Object.entries(pinnedPanels)
         .sort(([, a], [, b]) => a.order - b.order)
         .reduce(
@@ -377,7 +399,6 @@ export function initializeLayoutManager(
         );
       layout$.next({ ...layout$.value, pinnedPanels: newPinnedPanels });
     }
-
     const children = { ...children$.value };
     if (children[uuid]) {
       delete children[uuid];
@@ -385,6 +406,12 @@ export function initializeLayoutManager(
     }
     if (currentChildState[uuid]) {
       delete currentChildState[uuid];
+    }
+  };
+
+  const removePanels = (uuids: string[]) => {
+    for (const uuid of uuids) {
+      removePanel(uuid);
     }
   };
 
@@ -413,7 +440,10 @@ export function initializeLayoutManager(
     }
   };
 
-  const duplicatePanel = async (uuidToDuplicate: string) => {
+  const duplicatePanel = async (
+    uuidToDuplicate: string,
+    options?: { silent?: boolean }
+  ): Promise<string> => {
     const layoutItemToDuplicate = layout$.value.panels[uuidToDuplicate];
     const apiToDuplicate = children$.value[uuidToDuplicate];
     if (!apiToDuplicate || !layoutItemToDuplicate) throw new PanelNotFoundError();
@@ -445,12 +475,47 @@ export function initializeLayoutManager(
     });
     layout$.next(updatedLayout);
 
-    coreServices.notifications.toasts.addSuccess({
-      title: dashboardClonePanelActionStrings.getSuccessMessage(),
-      'data-test-subj': 'addObjectToContainerSuccess',
-    });
+    if (!options?.silent) {
+      coreServices.notifications.toasts.addSuccess({
+        title: dashboardClonePanelActionStrings.getSuccessMessage(),
+        'data-test-subj': 'addObjectToContainerSuccess',
+      });
+    }
     trackPanel.setScrollToPanelId(uuidOfDuplicate);
     trackPanel.setHighlightPanelId(uuidOfDuplicate);
+
+    return uuidOfDuplicate;
+  };
+
+  const duplicatePanels = async (uuids: string[]): Promise<string[]> => {
+    const newIds: string[] = [];
+    for (const id of uuids) {
+      try {
+        const newId = await duplicatePanel(id, { silent: true });
+        newIds.push(newId);
+      } catch {
+        // skip if panel no longer exists
+      }
+    }
+    if (newIds.length > 1) {
+      coreServices.notifications.toasts.addSuccess({
+        title: i18n.translate('dashboard.panel.duplicatedPanelsToast', {
+          defaultMessage: 'Duplicated {count} panels',
+          values: { count: newIds.length },
+        }),
+        'data-test-subj': 'addObjectToContainerSuccess',
+      });
+    } else if (newIds.length === 1) {
+      coreServices.notifications.toasts.addSuccess({
+        title: dashboardClonePanelActionStrings.getSuccessMessage(),
+        'data-test-subj': 'addObjectToContainerSuccess',
+      });
+    }
+    if (newIds.length > 0) {
+      trackPanel.setScrollToPanelId(newIds[newIds.length - 1]);
+      trackPanel.setHighlightPanelId(newIds[newIds.length - 1]);
+    }
+    return newIds;
   };
 
   const pinPanel = (uuid: string, panelToPin: DashboardPinnablePanel) => {
@@ -630,9 +695,12 @@ export function initializeLayoutManager(
       addNewPanel,
       addIncomingEmbeddables,
       removePanel,
+      removePanels,
       replacePanel,
       duplicatePanel,
+      duplicatePanels,
       getDashboardPanelFromId,
+      getDashboardPanelFromIdAsync,
       getPanelCount: () => Object.keys(layout$.value.panels).length,
       canRemovePanels: () => trackPanel.expandedPanelId$.value === undefined,
 
@@ -706,6 +774,43 @@ export function initializeLayoutManager(
           sections,
         });
         trackPanel.scrollToBottom$.next();
+      },
+      movePanelsToNewSection: (panelIds: string[]) => {
+        if (panelIds.length === 0) return;
+        const currentLayout = layout$.getValue();
+        const panels = { ...currentLayout.panels };
+        const sectionPanelIds = panelIds.filter((id) => panels[id]);
+        if (sectionPanelIds.length === 0) return;
+
+        let minY = Infinity;
+        sectionPanelIds.forEach((id) => {
+          const y = panels[id].grid.y ?? 0;
+          minY = Math.min(minY, y);
+        });
+        if (minY === Infinity) minY = 0;
+
+        const sections = { ...currentLayout.sections };
+        const newSectionId = v4();
+        sections[newSectionId] = {
+          grid: { y: minY },
+          title: i18n.translate('dashboard.defaultSectionTitle', {
+            defaultMessage: 'New collapsible section',
+          }),
+          collapsed: false,
+        };
+
+        sectionPanelIds.forEach((id) => {
+          panels[id] = {
+            ...panels[id],
+            grid: { ...panels[id].grid, sectionId: newSectionId },
+          };
+        });
+
+        layout$.next({
+          ...currentLayout,
+          sections,
+          panels,
+        });
       },
       getPanelSection: (uuid: string) => {
         return layout$.getValue().panels[uuid]?.grid?.sectionId;

@@ -171,14 +171,12 @@ describe('track panel', () => {
   });
 
   describe('highlightPanel', () => {
-    it('should set the scroll position to the panel', () => {
+    it('should clear the highlight panel id without adding the highlight class (no creation animation)', () => {
       setHighlightPanelId('highlight-panel-id');
       const mockPanelRef = document.createElement('div');
       highlightPanel(mockPanelRef);
-      setTimeout(() => {
-        expect(mockPanelRef.classList.contains('dshDashboardGrid__item--highlighted')).toBe(true);
-      });
       expect(highlightPanelId$.value).toBe(undefined);
+      expect(mockPanelRef.classList.contains('dshDashboardGrid__item--highlighted')).toBe(false);
     });
   });
 

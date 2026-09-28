@@ -29,25 +29,189 @@ import {
   DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
 } from './constants';
 import { DashboardGridItem } from './dashboard_grid_item';
+import {
+  PanelContextMenu,
+  PanelContextMenuContext,
+  SelectionPreviewContext,
+} from './panel_context_menu';
 import { useLayoutStyles } from './use_layout_styles';
+
+const DRAG_THRESHOLD_PX = 5;
+
+function getAllPanelIdsFromLayout(layout: GridLayoutData): string[] {
+  const ids: string[] = [];
+  Object.values(layout).forEach((widget) => {
+    if ('panels' in widget && widget.panels) {
+      ids.push(...Object.keys(widget.panels));
+    } else {
+      ids.push((widget as GridPanelData).id);
+    }
+  });
+  return ids;
+}
+
+function rectsIntersect(
+  sel: { left: number; top: number; right: number; bottom: number },
+  panel: DOMRect
+): boolean {
+  return !(
+    sel.right < panel.left ||
+    sel.left > panel.right ||
+    sel.bottom < panel.top ||
+    sel.top > panel.bottom
+  );
+}
 
 export const DashboardGrid = () => {
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
   const layoutRef = useRef<HTMLDivElement | null>(null);
+  const justDidSelectionDragRef = useRef(false);
 
   const layoutStyles = useLayoutStyles();
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
 
   const [topOffset, setTopOffset] = useState(DEFAULT_DASHBOARD_DRAG_TOP_OFFSET);
-  const [expandedPanelId, useMargins, viewMode, layout, dashboardContainerRef] =
+  const [contextMenu, setContextMenu] = useState<{
+    panelId: string;
+    position: { x: number; y: number };
+  } | null>(null);
+  const [selectionDrag, setSelectionDrag] = useState<{
+    start: { x: number; y: number };
+    current: { x: number; y: number };
+  } | null>(null);
+  const [previewSelectedPanelIds, setPreviewSelectedPanelIds] = useState<Set<string>>(new Set());
+  const [expandedPanelId, useMargins, viewMode, layout, dashboardContainerRef, selectedPanelIds] =
     useBatchedPublishingSubjects(
       dashboardApi.expandedPanelId$,
       dashboardApi.settings.useMargins$,
       dashboardApi.viewMode$,
       dashboardInternalApi.gridLayout$,
-      dashboardInternalApi.dashboardContainerRef$
+      dashboardInternalApi.dashboardContainerRef$,
+      dashboardApi.selectedPanelIds$
     );
+  const panelContextMenuValue = useMemo(
+    () => ({
+      openContextMenu: (panelId: string, position: { x: number; y: number }) => {
+        setContextMenu({ panelId, position });
+      },
+    }),
+    []
+  );
+
+  const getPanelsInRect = useCallback(
+    (rect: { left: number; top: number; right: number; bottom: number }) => {
+      const ids: string[] = [];
+      const panelIds = getAllPanelIdsFromLayout(layout);
+      panelIds.forEach((id) => {
+        const ref = panelRefs.current[id];
+        if (typeof ref !== 'function' && ref?.current) {
+          const bounds = ref.current.getBoundingClientRect();
+          if (rectsIntersect(rect, bounds)) ids.push(id);
+        }
+      });
+      return ids;
+    },
+    [layout]
+  );
+
+  const dragStateRef = useRef<{
+    start: { x: number; y: number };
+    current: { x: number; y: number };
+  } | null>(null);
+
+  const handleGridClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (viewMode !== 'edit') return;
+      if ((selectedPanelIds?.size ?? 0) === 0) return;
+      if ((e.target as HTMLElement).closest('[data-test-subj="dashboardPanel"]')) return;
+      dashboardApi.setSelectedPanelIds(new Set());
+    },
+    [viewMode, selectedPanelIds, dashboardApi]
+  );
+
+  // The click that ends a selection drag must not reach the panel, or its Shift+click handler
+  // would immediately toggle off the panel the drag just selected
+  const handleGridClickCapture = useCallback((e: React.MouseEvent) => {
+    if (!justDidSelectionDragRef.current) return;
+    justDidSelectionDragRef.current = false;
+    e.stopPropagation();
+  }, []);
+
+  const handleGridMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (viewMode !== 'edit' || !e.shiftKey) return;
+      // keep native Shift+click behavior (extending the text selection) inside editable fields
+      if ((e.target as HTMLElement).closest('input, textarea, [contenteditable="true"]')) return;
+      // prevent the browser from extending the text selection across the page
+      e.preventDefault();
+      window.getSelection()?.removeAllRanges();
+      justDidSelectionDragRef.current = false;
+      const start = { x: e.clientX, y: e.clientY };
+
+      const onMove = (moveEvent: MouseEvent) => {
+        if (dragStateRef.current) {
+          dragStateRef.current = {
+            ...dragStateRef.current,
+            current: { x: moveEvent.clientX, y: moveEvent.clientY },
+          };
+          setSelectionDrag((prev) =>
+            prev ? { ...prev, current: { x: moveEvent.clientX, y: moveEvent.clientY } } : null
+          );
+          return;
+        }
+        const dx = moveEvent.clientX - start.x;
+        const dy = moveEvent.clientY - start.y;
+        const hasDragged =
+          Math.abs(dx) >= DRAG_THRESHOLD_PX || Math.abs(dy) >= DRAG_THRESHOLD_PX;
+        if (hasDragged) {
+          dragStateRef.current = {
+            start: { ...start },
+            current: { x: moveEvent.clientX, y: moveEvent.clientY },
+          };
+          setSelectionDrag({
+            start: { ...start },
+            current: { x: moveEvent.clientX, y: moveEvent.clientY },
+          });
+        }
+      };
+
+      const onUp = () => {
+        const state = dragStateRef.current;
+        if (state) {
+          const left = Math.min(state.start.x, state.current.x);
+          const top = Math.min(state.start.y, state.current.y);
+          const right = Math.max(state.start.x, state.current.x);
+          const bottom = Math.max(state.start.y, state.current.y);
+          const ids = getPanelsInRect({ left, top, right, bottom });
+          dashboardApi.setSelectedPanelIds(new Set(ids));
+          dragStateRef.current = null;
+          setSelectionDrag(null);
+          setPreviewSelectedPanelIds(new Set());
+          justDidSelectionDragRef.current = true;
+        }
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      };
+
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    },
+    [viewMode, getPanelsInRect, dashboardApi]
+  );
+
+  useEffect(() => {
+    if (!selectionDrag) {
+      setPreviewSelectedPanelIds(new Set());
+      return;
+    }
+    const left = Math.min(selectionDrag.start.x, selectionDrag.current.x);
+    const top = Math.min(selectionDrag.start.y, selectionDrag.current.y);
+    const right = Math.max(selectionDrag.start.x, selectionDrag.current.x);
+    const bottom = Math.max(selectionDrag.start.y, selectionDrag.current.y);
+    const ids = getPanelsInRect({ left, top, right, bottom });
+    setPreviewSelectedPanelIds(new Set(ids));
+  }, [selectionDrag, getPanelsInRect]);
 
   useEffect(() => {
     const newTopOffset =
@@ -176,6 +340,7 @@ export const DashboardGrid = () => {
         onLayoutChange={onLayoutChange}
         expandedPanelId={expandedPanelId}
         accessMode={viewMode === 'edit' ? 'EDIT' : 'VIEW'}
+        selectedPanelIds={selectedPanelIds ?? undefined}
       />
     );
   }, [
@@ -187,6 +352,7 @@ export const DashboardGrid = () => {
     expandedPanelId,
     viewMode,
     topOffset,
+    selectedPanelIds,
   ]);
 
   useEffect(() => {
@@ -201,18 +367,61 @@ export const DashboardGrid = () => {
     });
   }, [layout]);
 
+  const selectionRect = selectionDrag
+    ? (() => {
+        const left = Math.min(selectionDrag.start.x, selectionDrag.current.x);
+        const top = Math.min(selectionDrag.start.y, selectionDrag.current.y);
+        const right = Math.max(selectionDrag.start.x, selectionDrag.current.x);
+        const bottom = Math.max(selectionDrag.start.y, selectionDrag.current.y);
+        return { left, top, width: right - left, height: bottom - top };
+      })()
+    : null;
+
   return (
-    <div
-      ref={layoutRef}
-      className={classNames({
-        'dshLayout--editing': viewMode === 'edit',
-        'dshLayout-withoutMargins': !useMargins,
-        'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
-      })}
-      css={styles.dashboard}
-    >
-      {memoizedGridLayout}
-    </div>
+    <PanelContextMenuContext.Provider value={panelContextMenuValue}>
+      <SelectionPreviewContext.Provider value={previewSelectedPanelIds}>
+        <div
+          ref={layoutRef}
+          className={classNames({
+            'dshLayout--editing': viewMode === 'edit',
+            'dshLayout-withoutMargins': !useMargins,
+            'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
+          })}
+          css={styles.dashboard}
+          // capture phase, so area selection starts even if panel content stops mousedown
+          onMouseDownCapture={handleGridMouseDown}
+          onClick={handleGridClick}
+          onClickCapture={handleGridClickCapture}
+        >
+          {memoizedGridLayout}
+        </div>
+        {selectionRect && viewMode === 'edit' && (
+          <div
+            role="presentation"
+            style={{
+              position: 'fixed',
+              left: selectionRect.left,
+              top: selectionRect.top,
+              width: Math.max(1, selectionRect.width),
+              height: Math.max(1, selectionRect.height),
+              border: '1px solid #0B64DD',
+              backgroundColor: 'rgba(11, 100, 221, 0.08)',
+              pointerEvents: 'none',
+              zIndex: 9998,
+            }}
+            data-test-subj="dashboardSelectionOverlay"
+          />
+        )}
+        {contextMenu && viewMode === 'edit' && (
+          <PanelContextMenu
+            panelId={contextMenu.panelId}
+            position={contextMenu.position}
+            selectedPanelIds={selectedPanelIds}
+            onClose={() => setContextMenu(null)}
+          />
+        )}
+      </SelectionPreviewContext.Provider>
+    </PanelContextMenuContext.Provider>
   );
 };
 

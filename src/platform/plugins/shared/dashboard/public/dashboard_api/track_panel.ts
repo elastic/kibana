@@ -61,6 +61,8 @@ export function initializeTrackPanel(
   const expandedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const focusedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const highlightPanelId$ = new BehaviorSubject<string | undefined>(undefined);
+  const selectedPanelIds$ = new BehaviorSubject<Set<string>>(new Set());
+  const copiedPanelIds$ = new BehaviorSubject<Set<string>>(new Set());
   const scrollToPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const scrollToBottom$ = new Subject<void>();
   const scrollPosition$ = new BehaviorSubject<number | undefined>(undefined);
@@ -135,13 +137,8 @@ export function initializeTrackPanel(
         const id = highlightPanelId$.value;
         if (!id) return;
 
-        untilLoaded(id).then(async () => {
-          // Adds the highlight class in the next event loop to allow the DOM to update
-          await new Promise((res) => setTimeout(res, 0));
-          panelRef.classList.add('dshDashboardGrid__item--highlighted');
-          // Removes the class after the highlight animation finishes
-          await new Promise((res) => setTimeout(res, highlightAnimationDuration));
-          panelRef.classList.remove('dshDashboardGrid__item--highlighted');
+        untilLoaded(id).then(() => {
+          // Panel creation highlight animation disabled; panel appears without animation
         });
 
         highlightPanelId$.next(undefined);
@@ -186,6 +183,23 @@ export function initializeTrackPanel(
       },
       setHighlightPanelId: (id: string | undefined) => {
         if (highlightPanelId$.value !== id) highlightPanelId$.next(id);
+      },
+      selectedPanelIds$,
+      setSelectedPanelIds: (ids: Set<string>) => {
+        selectedPanelIds$.next(ids);
+      },
+      togglePanelSelection: (id: string) => {
+        const next = new Set(selectedPanelIds$.value);
+        if (next.has(id)) {
+          next.delete(id);
+        } else {
+          next.add(id);
+        }
+        selectedPanelIds$.next(next);
+      },
+      copiedPanelIds$,
+      copySelectedPanels: () => {
+        copiedPanelIds$.next(new Set(selectedPanelIds$.value));
       },
       setScrollToPanelId,
       blurredPanelIds$,

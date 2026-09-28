@@ -66,6 +66,9 @@ export const CustomizePanelEditor = ({
    */
   const editMode = getInheritedViewMode(api) === 'edit';
   const [hideTitle, setHideTitle] = useState(api.hideTitle$?.value);
+  const [smartTitle, setSmartTitle] = useState(
+    (api as { smartTitle$?: { value?: boolean } })?.smartTitle$?.value
+  );
   const [panelTitle, setPanelTitle] = useState(getTitle(api));
   const [panelDescription, setPanelDescription] = useState(getDescription(api));
   const [timeRange, setTimeRange] = useState(
@@ -111,6 +114,11 @@ export const CustomizePanelEditor = ({
     }
     if (hideTitle !== api.hideTitle$?.value) api.setHideTitle?.(hideTitle);
     if (isPanelBorderless !== api.hideBorder$?.value) api.setHideBorder?.(isPanelBorderless);
+    const setSmartTitleApi = (api as { setSmartTitle?: (v: boolean | undefined) => void })
+      ?.setSmartTitle;
+    if (setSmartTitleApi && smartTitle !== (api as { smartTitle$?: { value?: boolean } })?.smartTitle$?.value) {
+      setSmartTitleApi(smartTitle);
+    }
     if (panelDescription !== api.description$?.value) api.setDescription?.(panelDescription);
 
     const newTimeRange = hasOwnTimeRange ? timeRange : undefined;
@@ -140,6 +148,29 @@ export const CustomizePanelEditor = ({
             onChange={(e) => setHideTitle(!e.target.checked)}
           />
         </EuiFormRow>
+        {(api as { smartTitle$?: unknown }).smartTitle$ !== undefined && (
+          <EuiFormRow
+            helpText={
+              <FormattedMessage
+                defaultMessage="When on, the panel title is replaced by the breakdown dimension field name for charts that use a breakdown."
+                id="presentationPanel.action.customizePanel.flyout.optionsMenuForm.smartTitleHelp"
+              />
+            }
+          >
+            <EuiSwitch
+              checked={Boolean(smartTitle)}
+              data-test-subj="customEmbeddablePanelSmartTitleSwitch"
+              id="smartTitle"
+              label={
+                <FormattedMessage
+                  defaultMessage="Smart title"
+                  id="presentationPanel.action.customizePanel.flyout.optionsMenuForm.smartTitle"
+                />
+              }
+              onChange={(e) => setSmartTitle(e.target.checked)}
+            />
+          </EuiFormRow>
+        )}
         <EuiFormRow
           label={
             <FormattedMessage

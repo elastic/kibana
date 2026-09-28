@@ -35,6 +35,14 @@ import { getDashboardAccessControlState } from '../../utils/get_dashboard_access
 import { topNavStrings } from '../_dashboard_app_strings';
 import { useShareOptions } from './share/use_share_options';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
+import {
+  dashboardClonePanelActionStrings,
+  dashboardPanelContextMenuStrings,
+} from '../../dashboard_actions/_dashboard_actions_strings';
+
+const PRETTIFY_PANEL_WIDTH = 16;
+const PRETTIFY_PANEL_HEIGHT = 10;
+const PRETTIFY_PANELS_PER_ROW = 3; // 48 / 16
 
 export const useDashboardMenuItems = ({
   redirectTo,
@@ -55,16 +63,25 @@ export const useDashboardMenuItems = ({
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
 
-  const [hasOverlays, hasUnsavedChanges, lastSavedId, viewMode, accessControl, canRedo, canUndo] =
-    useBatchedPublishingSubjects(
-      dashboardApi.hasOverlays$,
-      dashboardApi.hasUnsavedChanges$,
-      dashboardApi.savedObjectId$,
-      dashboardApi.viewMode$,
-      dashboardApi.accessControl$,
-      dashboardInternalApi.canRedo$,
-      dashboardInternalApi.canUndo$
-    );
+  const [
+    hasOverlays,
+    hasUnsavedChanges,
+    lastSavedId,
+    viewMode,
+    accessControl,
+    canRedo,
+    canUndo,
+    selectedPanelIds,
+  ] = useBatchedPublishingSubjects(
+    dashboardApi.hasOverlays$,
+    dashboardApi.hasUnsavedChanges$,
+    dashboardApi.savedObjectId$,
+    dashboardApi.viewMode$,
+    dashboardApi.accessControl$,
+    dashboardInternalApi.canRedo$,
+    dashboardInternalApi.canUndo$,
+    dashboardApi.selectedPanelIds$
+  );
 
   const disableTopNav = isSaveInProgress || hasOverlays;
   const { isInEditAccessMode, canManageAccessControl } = useMemo(
@@ -234,6 +251,33 @@ export const useDashboardMenuItems = ({
     };
   }, [disableTopNav, canRedo, canUndo, dashboardInternalApi]);
 
+  const prettifyDashboard = useCallback(() => {
+    const layout = dashboardApi.layout$.getValue();
+    const panelIds = Object.keys(layout.panels).sort((a, b) => {
+      const ga = layout.panels[a].grid;
+      const gb = layout.panels[b].grid;
+      const ya = ga.y ?? 0;
+      const yb = gb.y ?? 0;
+      if (ya !== yb) return ya - yb;
+      return (ga.x ?? 0) - (gb.x ?? 0);
+    });
+    const newPanels = { ...layout.panels };
+    panelIds.forEach((id, index) => {
+      const col = index % PRETTIFY_PANELS_PER_ROW;
+      const row = Math.floor(index / PRETTIFY_PANELS_PER_ROW);
+      newPanels[id] = {
+        ...layout.panels[id],
+        grid: {
+          x: col * PRETTIFY_PANEL_WIDTH,
+          y: row * PRETTIFY_PANEL_HEIGHT,
+          w: PRETTIFY_PANEL_WIDTH,
+          h: PRETTIFY_PANEL_HEIGHT,
+        },
+      };
+    });
+    dashboardApi.layout$.next({ ...layout, panels: newPanels });
+  }, [dashboardApi]);
+
   /**
    * Register all of the top nav configs that can be used by dashboard.
    */
@@ -306,6 +350,72 @@ export const useDashboardMenuItems = ({
             appId: appId!,
             trackingProps: { openedFrom: 'background search button' },
           }),
+      } as AppMenuItemType,
+
+      prettifyDashboard: {
+        order: 8,
+        label: topNavStrings.prettifyDashboard.label,
+        id: 'prettifyDashboard',
+        iconType: 'grid',
+        testId: 'dashboardPrettifyDashboard',
+        disableButton: disableTopNav,
+        run: prettifyDashboard,
+      } as AppMenuItemType,
+
+      duplicateSelectedPanels: {
+        order: 9,
+        label: dashboardClonePanelActionStrings.getDisplayName(),
+        id: 'duplicateSelectedPanels',
+        iconType: 'copy',
+        testId: 'dashboardDuplicateSelectedPanels',
+        disableButton: disableTopNav || (selectedPanelIds ?? new Set()).size === 0,
+        run: async () => {
+          const ids = Array.from(selectedPanelIds ?? new Set<string>());
+          for (const id of ids) {
+            try {
+              await dashboardApi.duplicatePanel(id);
+            } catch {
+              // skip if panel no longer exists
+            }
+          }
+        },
+      } as AppMenuItemType,
+
+      removeSelectedPanels: {
+        order: 10,
+        label: dashboardPanelContextMenuStrings.getRemoveLabel(),
+        id: 'removeSelectedPanels',
+        iconType: 'trash',
+        testId: 'dashboardRemoveSelectedPanels',
+        disableButton: disableTopNav || (selectedPanelIds ?? new Set()).size === 0,
+        run: () => {
+          const ids = selectedPanelIds ?? new Set<string>();
+          ids.forEach((id) => {
+            try {
+              dashboardApi.removePanel(id);
+            } catch {
+              // skip
+            }
+          });
+          const nextSelected = new Set(ids);
+          ids.forEach((id) => nextSelected.delete(id));
+          dashboardApi.setSelectedPanelIds(nextSelected);
+        },
+      } as AppMenuItemType,
+
+      groupSelectedPanels: {
+        order: 11,
+        label: dashboardPanelContextMenuStrings.getGroupLabel(),
+        id: 'groupSelectedPanels',
+        iconType: 'folderClosed',
+        testId: 'dashboardGroupSelectedPanels',
+        disableButton:
+          disableTopNav || (selectedPanelIds ?? new Set()).size < 2,
+        run: () => {
+          const ids = selectedPanelIds ?? new Set<string>();
+          if (ids.size < 2) return;
+          dashboardApi.movePanelsToNewSection(Array.from(ids));
+        },
       } as AppMenuItemType,
 
       fullScreen: {
@@ -416,6 +526,8 @@ export const useDashboardMenuItems = ({
     resetChangesMenuItem,
     exportItems,
     viewMode,
+    prettifyDashboard,
+    selectedPanelIds,
   ]);
 
   /**
@@ -495,6 +607,11 @@ export const useDashboardMenuItems = ({
       items.push(menuItems.backgroundSearch);
     }
 
+    items.push(menuItems.prettifyDashboard);
+    items.push(menuItems.duplicateSelectedPanels);
+    items.push(menuItems.removeSelectedPanels);
+    items.push(menuItems.groupSelectedPanels);
+
     const editModeConfig: AppMenuConfig = {
       items,
       primaryActionItem: menuItems.save,
@@ -507,6 +624,10 @@ export const useDashboardMenuItems = ({
     menuItems.share,
     menuItems.settings,
     menuItems.backgroundSearch,
+    menuItems.prettifyDashboard,
+    menuItems.duplicateSelectedPanels,
+    menuItems.removeSelectedPanels,
+    menuItems.groupSelectedPanels,
     menuItems.save,
     menuItems.add,
     hasExportMenuItems,

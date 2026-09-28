@@ -109,6 +109,11 @@ export const getHighlightStyles = (context: UseEuiTheme) => {
         filter: `${brightenInDarkMode(1.3)} blur(25px)`,
         animation: `${shineKeyframes} ${highlightAnimationDuration}ms ease-out`,
       },
+
+      // Shift+click selected panels: 2px solid blue border
+      '&.dshDashboardGrid__item--selected .embPanel': {
+        outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.borderStrongPrimary}`,
+      },
     },
   ]);
 };

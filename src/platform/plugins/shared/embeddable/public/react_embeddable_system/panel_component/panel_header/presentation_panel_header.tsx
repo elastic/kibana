@@ -23,6 +23,8 @@ export type PresentationPanelHeaderProps<ApiType extends DefaultPresentationPane
   panelTitle?: string;
   panelDescription?: string;
   setDragHandle: (id: string, ref: HTMLDivElement | null) => void;
+  smartTitleActive?: boolean;
+  breakdownFieldName?: string;
 } & Pick<PresentationPanelProps, 'showBadges' | 'getActions' | 'titleHighlight'>;
 
 export const PresentationPanelHeader = <
@@ -38,6 +40,8 @@ export const PresentationPanelHeader = <
   setDragHandle,
   showBadges = true,
   titleHighlight,
+  smartTitleActive,
+  breakdownFieldName,
 }: PresentationPanelHeaderProps<ApiType>) => {
   const { euiTheme } = useEuiTheme();
 
@@ -56,14 +60,17 @@ export const PresentationPanelHeader = <
       captionStyles: css`
         .dshLayout--editing &:hover {
           cursor: move;
-          background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.1)};
+          background-color: ${transparentize(euiTheme.colors.backgroundBasePrimary, 0.5)};
         }
       `,
       headerStyles: css`
-        height: ${euiTheme.size.xl};
+        height: ${euiTheme.size.xxl};
         overflow: hidden;
         line-height: ${euiTheme.size.xl};
-        padding: 0px ${euiTheme.size.s};
+        padding-top: 0;
+        padding-right: ${euiTheme.size.s};
+        padding-bottom: 0;
+        padding-left: ${euiTheme.size.base};
 
         display: flex;
         flex-wrap: nowrap;
@@ -103,6 +110,8 @@ export const PresentationPanelHeader = <
           panelTitle={panelTitle}
           panelDescription={panelDescription}
           titleHighlight={titleHighlight}
+          smartTitleActive={smartTitleActive}
+          breakdownFieldName={breakdownFieldName}
         />
         {showBadges && badges}
       </div>

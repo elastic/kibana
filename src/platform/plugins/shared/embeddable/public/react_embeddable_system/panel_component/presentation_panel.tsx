@@ -16,6 +16,7 @@ import type {
   PublishesFetchOnlyVisible,
   PublishesHideBorder,
   PublishesTitle,
+  PublishingSubject,
 } from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
@@ -91,10 +92,23 @@ const PresentationPanelChrome = <
   );
   const viewMode = rawViewMode ?? 'view';
 
+  const [smartTitle, breakdownFieldName] = useBatchedPublishingSubjects(
+    (componentApi as Partial<{ smartTitle$: PublishingSubject<boolean | undefined> }>)
+      .smartTitle$ ?? new BehaviorSubject<boolean | undefined>(undefined),
+    (componentApi as Partial<{ breakdownFieldName$: PublishingSubject<string | undefined> }>)
+      .breakdownFieldName$ ?? new BehaviorSubject<string | undefined>(undefined)
+  );
+
+  const baseTitle = panelTitle ?? defaultPanelTitle;
+  const smartTitleActive = Boolean(smartTitle) && Boolean(breakdownFieldName);
+  const displayTitle = smartTitleActive
+    ? `Count of records by ${breakdownFieldName}`
+    : baseTitle;
+
   const hideTitle =
     Boolean(hidePanelTitle) ||
     Boolean(parentHidePanelTitle) ||
-    !Boolean(panelTitle ?? defaultPanelTitle);
+    !Boolean(displayTitle);
 
   const dataAttributes = useMemo(() => {
     const dataTitle = panelTitle ?? defaultPanelTitle;
@@ -164,9 +178,11 @@ const PresentationPanelChrome = <
             hideTitle={hideTitle}
             showBadges={showBadges}
             getActions={getActions}
-            panelTitle={panelTitle ?? defaultPanelTitle}
+            panelTitle={displayTitle}
             panelDescription={panelDescription ?? defaultPanelDescription}
             titleHighlight={titleHighlight}
+            smartTitleActive={smartTitleActive}
+            breakdownFieldName={breakdownFieldName}
           />
         )}
         {children}

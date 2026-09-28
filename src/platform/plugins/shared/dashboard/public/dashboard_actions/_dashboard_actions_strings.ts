@@ -54,6 +54,48 @@ export const dashboardAddToLibraryActionStrings = {
     }),
 };
 
+export const dashboardShareColorMappingActionStrings = {
+  getDisplayName: () =>
+    i18n.translate('dashboard.panel.shareColorMapping', {
+      defaultMessage: 'Share color mapping',
+    }),
+};
+
+export const dashboardPanelContextMenuStrings = {
+  getContextMenuAriaLabel: () =>
+    i18n.translate('dashboard.panel.contextMenu.ariaLabel', {
+      defaultMessage: 'Panel actions',
+    }),
+  getDuplicateLabel: () =>
+    i18n.translate('dashboard.panel.contextMenu.duplicate', {
+      defaultMessage: 'Duplicate',
+    }),
+  getRemoveLabel: () =>
+    i18n.translate('dashboard.panel.contextMenu.remove', {
+      defaultMessage: 'Remove',
+    }),
+  getGroupLabel: () =>
+    i18n.translate('dashboard.panel.contextMenu.group', {
+      defaultMessage: 'Group',
+    }),
+  getLayoutLabel: () =>
+    i18n.translate('dashboard.panel.contextMenu.layout', {
+      defaultMessage: 'Layout',
+    }),
+  getLayoutHeaderLabel: () =>
+    i18n.translate('dashboard.panel.contextMenu.layoutHeader', {
+      defaultMessage: 'Header',
+    }),
+  getLayoutGridLabel: () =>
+    i18n.translate('dashboard.panel.contextMenu.layoutGrid', {
+      defaultMessage: 'Grid',
+    }),
+  getLayoutSideLabel: () =>
+    i18n.translate('dashboard.panel.contextMenu.layoutSide', {
+      defaultMessage: 'Side',
+    }),
+};
+
 export const dashboardClonePanelActionStrings = {
   getDisplayName: () =>
     i18n.translate('dashboard.panel.clonePanel', {

@@ -31,10 +31,10 @@ export const useLayoutStyles = () => {
      */
     return css`
       --dashboardActivePanelBorderStyle: ${euiTheme.border.width.thick} solid
-        ${euiTheme.colors.vis.euiColorVis0};
+        ${euiTheme.colors.borderStrongPrimary};
 
       --dashboardHoverActionsActivePanelBoxShadow--singleWrapper: 0 0 0
-        ${euiTheme.border.width.thin} ${euiTheme.colors.vis.euiColorVis0};
+        ${euiTheme.border.width.thin} ${euiTheme.colors.vis.euiColorVis2};
 
       .kbnGridSection--targeted {
         background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
@@ -51,7 +51,7 @@ export const useLayoutStyles = () => {
       .kbnGridSection--dragPreview {
         border-radius: ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
 
-        background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
+        background-color: ${transparentize(euiTheme.colors.vis.euiColorVis2, 0.2)};
       }
 
       // allows embeddables (specifically the control embeddables in this case) to hide the drag handle icon
@@ -103,7 +103,7 @@ export const useLayoutStyles = () => {
         &:hover,
         &:focus-visible {
           &:after {
-            background-color: ${euiTheme.colors.vis.euiColorVis0};
+            background-color: ${euiTheme.colors.borderStrongPrimary};
           }
         }
       }
