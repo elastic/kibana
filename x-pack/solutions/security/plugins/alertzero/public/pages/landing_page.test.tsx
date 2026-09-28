@@ -253,7 +253,10 @@ describe('LandingPage', () => {
       workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({ id, enabled: false })),
     });
 
-    const ui = (
+    // Build the element as a factory so each call produces a distinct React element.
+    // Passing the same object reference to rerender can allow React to skip
+    // reconciliation, preventing the component from seeing the updated mock value.
+    const makeUI = () => (
       <I18nProvider>
         <EuiProvider>
           <QueryClientProvider client={queryClient}>
@@ -267,7 +270,7 @@ describe('LandingPage', () => {
       </I18nProvider>
     );
 
-    const { rerender } = render(ui);
+    const { rerender } = render(makeUI());
 
     expect(screen.getByText('Enable your workers')).toBeInTheDocument();
 
@@ -283,14 +286,15 @@ describe('LandingPage', () => {
     expect(httpPatch).toHaveBeenCalledTimes(5);
 
     // Simulate a window-focus refetch returning a partially-committed enabled worker.
-    // Re-render so the updated mock value is picked up by the component.
+    // Construct a fresh element tree for rerender so React reconciles from the new root
+    // and LandingPage reads the updated mock return value.
     mockUseWorkers.mockReturnValue({
       data: { workers: [{ id: ALL_ONBOARDING_WORKER_IDS[0], enabled: true }] },
       isLoading: false,
       isFetching: false,
       error: undefined,
     });
-    rerender(ui);
+    rerender(makeUI());
 
     // LandingPage must not unmount OnboardingPage while savingInProgress=true, even
     // though showQueue would otherwise be true.
