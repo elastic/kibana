@@ -110,22 +110,22 @@ const settingsToFormValues = (
     return defaults;
   }
 
-  const s = settings as DatasetSettingsFile;
+  const s: DatasetSettingsFile = settings;
 
   return {
     ...defaults,
-    format: (s.format ?? '') as DatasetFormatFormValue,
+    format: (s.format ?? ''),
     // Universal
     file_exclusions: s.file_exclusions ? [...s.file_exclusions] : [...defaults.file_exclusions],
-    partition_detection: (s.partition_detection ?? '') as DatasetPartitionDetectionFormValue,
-    schema_resolution: (s.schema_resolution ?? '') as DatasetSchemaResolutionFormValue,
+    partition_detection: (s.partition_detection ?? ''),
+    schema_resolution: (s.schema_resolution ?? ''),
     partition_path: s.partition_path ?? '',
     hive_partitioning: boolToFormValue(s.hive_partitioning),
     optimized_reader: boolToFormValue(s.optimized_reader),
     late_materialization: boolToFormValue(s.late_materialization),
     // CSV/TSV core
     delimiter: s.delimiter ?? '',
-    mode: (s.mode ?? '') as DatasetModeFormValue,
+    mode: (s.mode ?? ''),
     header_row: boolToFormValue(s.header_row),
     skip_rows: s.skip_rows !== undefined ? String(s.skip_rows) : '',
     datetime_format: s.datetime_format === 'ISO-8601' ? 'ISO8601' : s.datetime_format ?? '',
@@ -136,7 +136,7 @@ const settingsToFormValues = (
     escape: encodeEscapeCharacterToFormValue(s.escape ?? ''),
     trim_spaces: s.trim_spaces ?? false,
     // CSV/TSV error handling
-    error_mode: (s.error_mode ?? '') as DatasetErrorModeFormValue,
+    error_mode: (s.error_mode ?? ''),
     max_errors: s.max_errors !== undefined ? String(s.max_errors) : '',
     max_error_ratio: s.max_error_ratio !== undefined ? String(s.max_error_ratio) : '',
     // API-only fields (segment_size) are not in the form.
