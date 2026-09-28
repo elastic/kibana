@@ -167,6 +167,7 @@ describe('initializeManagedWorkflows', () => {
         workflowId: `${RULE_TUNING_ID}-default`,
         spaceId: 'default',
         values: { ...stored, extras: RULE_TUNING_DEFAULT_EXTRAS },
+        expectedDocumentVersion: 9,
       });
       const migrationOrder = client.install.mock.invocationCallOrder.at(-1) ?? 0;
       const readyOrder = client.ready.mock.invocationCallOrder[0] ?? 0;
@@ -200,6 +201,7 @@ describe('initializeManagedWorkflows', () => {
           ...stored,
           extras: { ...RULE_TUNING_DEFAULT_EXTRAS, analysisWindowDays: 21 },
         },
+        expectedDocumentVersion: 9,
       });
     });
 

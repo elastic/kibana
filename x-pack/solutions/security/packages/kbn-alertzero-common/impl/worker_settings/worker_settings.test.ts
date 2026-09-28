@@ -12,6 +12,7 @@ import {
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_IDS,
 } from '../../constants';
 import { WorkerSettings } from '../schemas';
@@ -260,6 +261,9 @@ describe('allowed autonomy levels', () => {
   // edit from silently re-opening a level the gate cannot run.
   it('narrows the registered Workers to the levels their gates support', () => {
     expect(getAllowedAutonomyLevels(ATTACK_DISCOVERY)).toEqual(['manual', 'supervised']);
+    expect(getAllowedAutonomyLevels(SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID)).toEqual(
+      ['manual', 'supervised']
+    );
     expect(getAllowedAutonomyLevels(RULE_TUNING)).toEqual(['manual', 'assisted']);
     expect(getAllowedAutonomyLevels(SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID)).toEqual([
       'manual',

@@ -157,10 +157,13 @@ describe('AlertZeroPlugin feature-flag gating', () => {
               ]),
               ui: expect.arrayContaining(['write']),
             }),
-            read: expect.objectContaining({ api: [ALERTZERO_API_PRIVILEGE_READ] }),
+            read: expect.objectContaining({
+              api: [ALERTZERO_API_PRIVILEGE_READ],
+            }),
           }),
         })
       );
+      expect(features.registerKibanaFeature.mock.calls[0][0].subFeatures).toBeUndefined();
       expect(registerRoutes).toHaveBeenCalled();
       expect(registerAgentType).toHaveBeenCalled();
     });
