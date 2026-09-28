@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,11 +18,13 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import React from 'react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../../common/features';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { MAX_AI_INDEX_AUTOMATIONS } from '../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { useAutomationsEditor } from '../../hooks/use_automations_editor';
@@ -70,7 +73,11 @@ export const AutomationsPanel = ({
     save,
     createAndAttach,
   } = useAutomationsEditor({ aiIndex, onSaved });
-  const { summaries, isLoading: isLoadingSummaries } = useWorkflowSummaries(workflowIds);
+  const {
+    summaries,
+    isLoading: isLoadingSummaries,
+    missingReadPrivilege,
+  } = useWorkflowSummaries(workflowIds);
   const { canSuggest, suggestAutomation } = useSuggestAutomation({ aiIndex, isManaged, onSaved });
 
   const returnSearch = aiIndex ? `?${getWorkflowReturnSearch(aiIndex.id)}` : '';
@@ -107,6 +114,10 @@ export const AutomationsPanel = ({
                   onClick={stopEditing}
                   isDisabled={isBusy}
                   data-test-subj="contextCancelEditingAutomationsButton"
+                  {...getEbtProps({
+                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
+                    action: CONTEXT_ENGINE_UI_EBT.action.automations.CANCEL,
+                  })}
                 >
                   {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.cancelButton', {
                     defaultMessage: 'Cancel',
@@ -121,6 +132,10 @@ export const AutomationsPanel = ({
                   isLoading={isSaving}
                   isDisabled={isCreating}
                   data-test-subj="contextSaveAutomationsButton"
+                  {...getEbtProps({
+                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
+                    action: CONTEXT_ENGINE_UI_EBT.action.automations.SAVE,
+                  })}
                 >
                   {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.saveButton', {
                     defaultMessage: 'Save',
@@ -137,6 +152,10 @@ export const AutomationsPanel = ({
                     iconType="productAgent"
                     onClick={suggestAutomation}
                     data-test-subj="contextSuggestAutomationButton"
+                    {...getEbtProps({
+                      element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
+                      action: CONTEXT_ENGINE_UI_EBT.action.automations.SUGGEST,
+                    })}
                   >
                     {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.suggestButton', {
                       defaultMessage: 'Suggest automation',
@@ -160,6 +179,10 @@ export const AutomationsPanel = ({
                     { defaultMessage: 'Create automation' }
                   )}
                   data-test-subj="contextCreateAutomationButton"
+                  {...getEbtProps({
+                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
+                    action: CONTEXT_ENGINE_UI_EBT.action.automations.CREATE,
+                  })}
                 >
                   {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.createButton', {
                     defaultMessage: 'Create automation',
@@ -171,8 +194,12 @@ export const AutomationsPanel = ({
                   size="s"
                   iconType="pencil"
                   onClick={startEditing}
-                  isDisabled={aiIndex === undefined}
+                  isDisabled={isBusy || aiIndex === undefined}
                   data-test-subj="contextEditAutomationsButton"
+                  {...getEbtProps({
+                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
+                    action: CONTEXT_ENGINE_UI_EBT.action.automations.EDIT,
+                  })}
                 >
                   {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.editButton', {
                     defaultMessage: 'Edit',
@@ -193,13 +220,31 @@ export const AutomationsPanel = ({
         </p>
       </EuiText>
       <EuiSpacer size="m" />
+      {missingReadPrivilege && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="warning"
+            iconType="warning"
+            title={i18n.translate(
+              'xpack.contextEngine.aiIndexDetail.automations.missingWorkflowPrivilege',
+              {
+                defaultMessage: 'You need the Workflows read privilege to see automation details.',
+              }
+            )}
+            data-test-subj="contextAutomationsMissingPrivilegeCallout"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
       {isLoading || isLoadingSummaries ? (
         <EuiSkeletonText lines={2} data-test-subj="contextAiIndexAutomationsLoading" />
       ) : (
         <>
           {automations.length === 0 && !isEditing ? (
             <EuiEmptyPrompt
-              iconType="indexRuntime"
+              iconType="tablePlay"
               titleSize="xs"
               data-test-subj="contextAiIndexAutomationsEmpty"
               title={

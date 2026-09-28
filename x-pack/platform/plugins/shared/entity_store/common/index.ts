@@ -67,6 +67,8 @@ export const ENTITY_STORE_ROUTES = {
     STATUS: `${PUBLIC_BASE_ROUTE}/status`,
     START: `${PUBLIC_BASE_ROUTE}/start`,
     STOP: `${PUBLIC_BASE_ROUTE}/stop`,
+    ENABLE_HISTORY_SNAPSHOT: `${PUBLIC_BASE_ROUTE}/history_snapshot/enable`,
+    DISABLE_HISTORY_SNAPSHOT: `${PUBLIC_BASE_ROUTE}/history_snapshot/disable`,
     CRUD_CREATE: `${PUBLIC_BASE_ROUTE}/entities/{entityType}`,
     CRUD_UPDATE: `${PUBLIC_BASE_ROUTE}/entities/{entityType}`,
     CRUD_BULK_UPDATE: `${PUBLIC_BASE_ROUTE}/entities/bulk`,

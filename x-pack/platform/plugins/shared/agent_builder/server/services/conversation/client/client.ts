@@ -15,19 +15,23 @@ import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
   ConversationOrigin,
+  ConversationRoundAuthor,
   ConversationRoundFeedback,
   FeedbackChipId,
 } from '@kbn/agent-builder-common';
 import {
+  type ConversationEvent,
   type CurrentUser,
   type Conversation,
   type ConversationAccessControl,
   type ConversationAccessControlEntry,
+  type ConversationAddEventInput,
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   CONVERSATION_SCHEMA_VERSION,
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
+  EventActorType,
   isConversationAccessControlRole,
   normalizeConversationAccessControl,
   createBadRequestError,
@@ -45,7 +49,6 @@ import type {
   ConversationSearchOptions,
   SerializedMetadataValue,
   MetadataFieldValue,
-  TimelineEvent,
 } from '@kbn/agent-builder-common';
 import type {
   ConversationWithPermissions,
@@ -104,6 +107,11 @@ import {
   type Document,
 } from './converters';
 import type { ScopedConversationEventEmitter } from '../../../workflows/triggers/conversation_event_bus';
+import type { ConversationEventsServiceStart } from '../../conversation_events';
+import {
+  materializeConversationEvents,
+  validateConversationEvents,
+} from '../../conversation_events';
 
 // Note: comparison is order-sensitive for arrays — reordering elements counts as a change.
 // This is intentional: metadata arrays (e.g. ordered checklists) preserve insertion order.
@@ -129,6 +137,10 @@ export interface ConversationClient {
     request: AppendEventsRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
+  addCustomEvents(request: {
+    id: string;
+    events: ConversationAddEventInput[];
+  }): Promise<ConversationEvent[]>;
   replaceRoundEvents(
     request: ReplaceRoundEventsRequest,
     options?: { access: ConversationAccess }
@@ -151,8 +163,11 @@ export interface ConversationClient {
   applyTemplate(conversationId: string, templateId: string): Promise<Conversation>;
   patchMetadata(
     conversationId: string,
-    updates: Record<string, unknown>
+    updates: Record<string, unknown>,
+    options?: { access: ConversationAccess }
   ): Promise<{ conversation: Conversation; changedFields: string[] }>;
+  getUser(): CurrentUser;
+  getAuthor(originAuthor?: ConversationRoundAuthor): ConversationRoundAuthor | undefined;
 }
 
 /**
@@ -212,6 +227,7 @@ export const createClient = ({
   esClient,
   user,
   agentRegistry,
+  conversationEvents,
   eventEmitter,
 }: {
   space: string;
@@ -219,6 +235,7 @@ export const createClient = ({
   esClient: ElasticsearchClient;
   user: CurrentUser;
   agentRegistry: AgentRegistry;
+  conversationEvents: ConversationEventsServiceStart;
   eventEmitter?: ScopedConversationEventEmitter;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
@@ -228,6 +245,7 @@ export const createClient = ({
     user,
     space,
     agentRegistry,
+    conversationEvents,
     logger,
     eventEmitter,
   });
@@ -261,6 +279,7 @@ class ConversationClientImpl implements ConversationClient {
   private readonly esClient: ElasticsearchClient;
   private readonly user: CurrentUser;
   private readonly agentRegistry: AgentRegistry;
+  private readonly conversationEvents: ConversationEventsServiceStart;
   private readonly logger: Logger;
   private readonly eventEmitter?: ScopedConversationEventEmitter;
 
@@ -270,6 +289,7 @@ class ConversationClientImpl implements ConversationClient {
     user,
     space,
     agentRegistry,
+    conversationEvents,
     logger,
     eventEmitter,
   }: {
@@ -278,6 +298,7 @@ class ConversationClientImpl implements ConversationClient {
     user: CurrentUser;
     space: string;
     agentRegistry: AgentRegistry;
+    conversationEvents: ConversationEventsServiceStart;
     logger: Logger;
     eventEmitter?: ScopedConversationEventEmitter;
   }) {
@@ -286,6 +307,7 @@ class ConversationClientImpl implements ConversationClient {
     this.user = user;
     this.space = space;
     this.agentRegistry = agentRegistry;
+    this.conversationEvents = conversationEvents;
     this.logger = logger;
     this.eventEmitter = eventEmitter;
   }
@@ -294,7 +316,7 @@ class ConversationClientImpl implements ConversationClient {
    * Notifies the attachment-events listener with the attachment events that were just persisted.
    * Best-effort: listener failures are logged and never fail the write.
    */
-  private notifyAttachmentEvents(conversationId: string, writtenEvents: TimelineEvent[]): void {
+  private notifyAttachmentEvents(conversationId: string, writtenEvents: ConversationEvent[]): void {
     if (!this.eventEmitter) {
       return;
     }
@@ -325,7 +347,7 @@ class ConversationClientImpl implements ConversationClient {
       return { results: [], total: 0 };
     }
 
-    const pinnedFilter = buildPinnedFilter({ user: this.user, pinned });
+    const pinnedFilter = buildPinnedFilter({ user: this.getUser(), pinned });
 
     const response = await this.storage.getClient().search({
       // Cap at MAX_RESULT_WINDOW: anything beyond is unreachable via offset pagination.
@@ -471,7 +493,7 @@ class ConversationClientImpl implements ConversationClient {
   ): QueryDslQueryContainer[] {
     return [
       createSpaceDslFilter(this.space),
-      buildReadAccessFilter({ user: this.user, agentIds }),
+      buildReadAccessFilter({ user: this.getUser(), agentIds }),
       ...(includeSubAgentConversations
         ? []
         : [{ bool: { must_not: [{ exists: { field: 'parent_conversation' } }] } }]),
@@ -493,7 +515,7 @@ class ConversationClientImpl implements ConversationClient {
 
       return toResponseConversationWithoutRounds({
         document: hit,
-        user: this.user,
+        user: this.getUser(),
         resolveTemplate: getTemplate,
       });
     });
@@ -506,7 +528,7 @@ class ConversationClientImpl implements ConversationClient {
 
     return toResponseConversation({
       document,
-      user: this.user,
+      user: this.getUser(),
       resolveTemplate: getTemplate,
     });
   }
@@ -551,7 +573,7 @@ class ConversationClientImpl implements ConversationClient {
 
       return toConversationResponseFromDocument({
         document,
-        user: this.user,
+        user: this.getUser(),
         resolveTemplate: getTemplate,
       });
     } catch (error) {
@@ -610,7 +632,7 @@ class ConversationClientImpl implements ConversationClient {
           access_mode: conversationWithoutTemplateId.access_control.access_mode,
           entries: validateAccessControlEntries({
             entries: conversationWithoutTemplateId.access_control.entries,
-            ownerId: this.user.id,
+            ownerId: this.getUser().id,
             addedAtById: new Map(),
           }),
         }
@@ -626,16 +648,18 @@ class ConversationClientImpl implements ConversationClient {
           ? { template_version: resolvedTemplateVersion }
           : {}),
       },
-      currentUser: this.user,
+      currentUser: this.getUser(),
       creationDate: now,
       space: this.space,
     });
 
+    let indexed: { _seq_no?: number; _primary_term?: number };
     try {
-      await this.storage.getClient().index({
+      indexed = await this.storage.getClient().index({
         id,
         document: attributes,
         op_type: 'create',
+        refresh: true,
       });
     } catch (error) {
       if (isVersionConflictError(error)) {
@@ -643,6 +667,10 @@ class ConversationClientImpl implements ConversationClient {
       }
 
       throw error;
+    }
+
+    if (indexed._seq_no === undefined || indexed._primary_term === undefined) {
+      throw createInternalError(`Conversation ${id} was indexed without version metadata`);
     }
 
     this.notifyAttachmentEvents(id, conversation.events ?? []);
@@ -667,6 +695,29 @@ class ConversationClientImpl implements ConversationClient {
     return result;
   }
 
+  async addCustomEvents({
+    id,
+    events: inputs,
+  }: {
+    id: string;
+    events: ConversationAddEventInput[];
+  }): Promise<ConversationEvent[]> {
+    const { id: userId, username } = this.getUser();
+    const actor = {
+      type: EventActorType.user,
+      id: userId ?? username,
+      ...(username ? { username } : {}),
+    };
+    const validatedEvents = validateConversationEvents(inputs, this.conversationEvents);
+    const materialized = materializeConversationEvents({
+      events: validatedEvents,
+      actor,
+      now: new Date(),
+    });
+    await this.appendEvents({ id, events: materialized });
+    return materialized;
+  }
+
   /** Appends timeline events onto a conversation.*/
   async appendEvents(
     request: AppendEventsRequest,
@@ -685,7 +736,7 @@ class ConversationClientImpl implements ConversationClient {
     const { access } = options;
 
     // `fields` may run more than once on OCC retry; the last run is the one that was written.
-    let writtenEvents: TimelineEvent[] = [];
+    let writtenEvents: ConversationEvent[] = [];
 
     const result = await this.writeConversation({
       conversationId,
@@ -744,7 +795,7 @@ class ConversationClientImpl implements ConversationClient {
     const { access } = options;
     const roundPrefix = `${roundId}::`;
 
-    let writtenEvents: TimelineEvent[] = [];
+    let writtenEvents: ConversationEvent[] = [];
 
     const result = await this.writeConversation({
       conversationId,
@@ -760,7 +811,15 @@ class ConversationClientImpl implements ConversationClient {
         // collide only when a caller re-inserts an existing uuid, which we drop.
         const eventsToWrite = events.filter((event) => !existingIds.has(event.id));
         writtenEvents = eventsToWrite;
-        const replaced = [...nonRoundEvents, ...eventsToWrite];
+        const firstRoundIndex = currentEvents.findIndex((event) =>
+          event.id.startsWith(roundPrefix)
+        );
+        const insertAt = firstRoundIndex === -1 ? nonRoundEvents.length : firstRoundIndex;
+        const replaced = [
+          ...nonRoundEvents.slice(0, insertAt),
+          ...eventsToWrite,
+          ...nonRoundEvents.slice(insertAt),
+        ];
         return {
           events: replaced,
           schema_version: CONVERSATION_SCHEMA_VERSION,
@@ -794,7 +853,7 @@ class ConversationClientImpl implements ConversationClient {
       access: 'converse',
       fields: (current) =>
         updateReadBy({
-          userId: this.user.id,
+          userId: this.getUser().id,
           readBy: current.read_by,
           currentRead: current.read ?? false,
           nextRead: read,
@@ -808,7 +867,7 @@ class ConversationClientImpl implements ConversationClient {
       access: 'converse',
       fields: (current) =>
         updatePinnedBy({
-          userId: this.user.id,
+          userId: this.getUser().id,
           pinnedBy: current.pinned_by,
           currentPinned: current.pinned ?? false,
           nextPinned: pinned,
@@ -956,13 +1015,14 @@ class ConversationClientImpl implements ConversationClient {
 
   async patchMetadata(
     conversationId: string,
-    updates: Record<string, unknown>
+    updates: Record<string, unknown>,
+    { access = 'owner' }: { access?: ConversationAccess } = {}
   ): Promise<{ conversation: Conversation; changedFields: string[] }> {
     let changedFields: string[] = [];
 
     const result = await this.writeConversation({
       conversationId,
-      access: 'owner',
+      access,
       fields: (current) => {
         if (!current.template_id) {
           throw createBadRequestError(
@@ -1006,6 +1066,20 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     return { conversation: result, changedFields };
+  }
+
+  getUser(): CurrentUser {
+    return this.user;
+  }
+
+  getAuthor(originAuthor?: ConversationRoundAuthor): ConversationRoundAuthor | undefined {
+    if (originAuthor) {
+      return originAuthor;
+    }
+
+    const { id, username } = this.getUser();
+
+    return id === undefined ? undefined : { id, username };
   }
 
   private async getDocument(conversationId: string): Promise<Document | undefined> {
@@ -1101,11 +1175,11 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     let allowed = false;
-    const conversation = fromEsWithoutRounds(document, this.user);
+    const conversation = fromEsWithoutRounds(document, this.getUser());
 
     switch (access) {
       case 'converse':
-        allowed = hasConversationConverseAccess({ conversation, user: this.user });
+        allowed = hasConversationConverseAccess({ conversation, user: this.getUser() });
 
         if (allowed) {
           try {
@@ -1124,19 +1198,19 @@ class ConversationClientImpl implements ConversationClient {
         break;
 
       case 'owner':
-        allowed = hasConversationOwnerAccess({ conversation, user: this.user });
+        allowed = hasConversationOwnerAccess({ conversation, user: this.getUser() });
         break;
 
       case 'rename':
-        allowed = hasConversationRenameAccess({ conversation, user: this.user });
+        allowed = hasConversationRenameAccess({ conversation, user: this.getUser() });
         break;
 
       case 'delete':
-        allowed = hasConversationDeleteAccess({ conversation, user: this.user });
+        allowed = hasConversationDeleteAccess({ conversation, user: this.getUser() });
         break;
 
       case 'updateAccessControl':
-        allowed = hasConversationUpdateAccessControlAccess({ conversation, user: this.user });
+        allowed = hasConversationUpdateAccessControlAccess({ conversation, user: this.getUser() });
         break;
     }
 
@@ -1210,7 +1284,7 @@ class ConversationClientImpl implements ConversationClient {
 
         return {
           id,
-          source: fromEs(document, this.user),
+          source: fromEs(document, this.getUser()),
           occ: { seqNo: document._seq_no, primaryTerm: document._primary_term },
         };
       },
@@ -1249,12 +1323,6 @@ class ConversationClientImpl implements ConversationClient {
       throw createBadRequestError('ACL entries are not supported when access_mode is "public"');
     }
 
-    if (entries.length > CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES) {
-      throw createBadRequestError(
-        `ACL entries exceed maximum of ${CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES}`
-      );
-    }
-
     const addedAtById = new Map(
       normalizeConversationAccessControl(current.access_control).entries.map((entry) => [
         `${entry.type}:${entry.id}`,
@@ -1283,6 +1351,12 @@ export const validateAccessControlEntries = ({
   ownerId: string | undefined;
   addedAtById: Map<string, string>;
 }): ConversationAccessControlEntry[] => {
+  if (entries.length > CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES) {
+    throw createBadRequestError(
+      `ACL entries exceed maximum of ${CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES}`
+    );
+  }
+
   const now = new Date().toISOString();
   const seen = new Set<string>();
   const normalizedEntries: ConversationAccessControlEntry[] = [];

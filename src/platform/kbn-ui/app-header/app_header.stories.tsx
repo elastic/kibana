@@ -169,6 +169,7 @@ const ComposedHeader = ({
           showEnhance
             ? {
                 onClick: action('enhance'),
+                tooltip: 'Improve the content and style of your dashboard using AI',
               }
             : undefined
         }

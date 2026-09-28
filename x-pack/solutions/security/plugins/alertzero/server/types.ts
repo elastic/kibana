@@ -11,13 +11,27 @@ import type {
   AgenticInvestigationsPluginSetup,
   AgenticInvestigationsPluginStart,
 } from '@kbn/agentic-investigations-plugin/server';
+import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type {
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
-export type AlertZeroPluginSetup = Record<string, never>;
+export interface AlertZeroPluginSetup {
+  /**
+   * `false` when the `xpack.alertzero.enabled` kill switch is off, in which case AlertZero
+   * registered nothing — including its `securitySolution:enableAlertZero` advanced setting.
+   * Serverless checks this before allowlisting that setting: allowlisting an unregistered key
+   * fails startup in dev (`UiSettingsService#validateAllowlist`).
+   */
+  isEnabled: boolean;
+}
 export type AlertZeroPluginStart = Record<string, never>;
 
 export interface AlertZeroSetupDependencies {
@@ -26,6 +40,8 @@ export interface AlertZeroSetupDependencies {
   workflowsManagement: WorkflowsServerPluginSetup;
   agentBuilder: AgentBuilderPluginSetup;
   agenticInvestigations: AgenticInvestigationsPluginSetup;
+  proposals: ProposalsPluginSetup;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
 
 export interface AlertZeroStartDependencies {
@@ -33,6 +49,21 @@ export interface AlertZeroStartDependencies {
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   agentBuilder: AgentBuilderPluginStart;
   agenticInvestigations: AgenticInvestigationsPluginStart;
+  proposals: ProposalsPluginStart;
+  /**
+   * Optional, matching the plugin manifest. Requiring it would take the whole
+   * plugin down with it, including the index-scope, Tier 1 and candidates routes
+   * that need no model at all. Absence is handled at the Tier 2 boundary
+   * instead: `resolveScopedModel` reports `no_inference_plugin`, the coordinator
+   * degrades to Tier 1, and the standalone Tier 2 route answers 503.
+   */
+  inference?: InferenceServerStart;
+  /**
+   * Optional, matching the plugin manifest. Setup registers the AlertZero model
+   * tiers through it; start needs it again so hunt routes can resolve the
+   * connector an operator picked for a tier.
+   */
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
 }
 
 export type AlertZeroRouter = IRouter;

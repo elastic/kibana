@@ -44,7 +44,7 @@ export const AnomalyInsights = memo(
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody data-test-subj={ANOMALY_INSIGHTS_TOOL_TEST_ID}>
-          <AnomaliesTab entityId={entityId ?? ''} entityType={entityType} />
+          <AnomaliesTab entityId={entityId ?? ''} entityName={value} entityType={entityType} />
         </EuiFlyoutBody>
       </>
     );
