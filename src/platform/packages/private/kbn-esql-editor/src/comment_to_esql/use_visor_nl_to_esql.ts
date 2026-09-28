@@ -12,8 +12,8 @@ import { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { useCallback, useMemo, useRef } from 'react';
 import type { MutableRefObject } from 'react';
-import { findChangedRegion } from '../suggest_fix/utils';
 import { useReplaceReview } from './use_replace_review';
+import { getVisorNlInsertPlan } from './visor_nl_insert';
 
 interface UseVisorNlToEsqlParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
@@ -74,53 +74,44 @@ export const useVisorNlToEsql = ({
 
       generatedContentRef.current = generatedContent;
 
-      const originalLines = model.getValue().split('\n');
-      const generatedLines = generatedContent.split('\n');
+      const plan = getVisorNlInsertPlan(model.getValue().split('\n'), generatedContent.split('\n'));
+      if (!plan) return;
 
-      const { prefixLen, suffixLen } = findChangedRegion(originalLines, generatedLines);
-
-      const firstChangedOriginalLine = prefixLen + 1;
-      const lastChangedOriginalLine = originalLines.length - suffixLen;
-      const genChangedLines = generatedLines.slice(prefixLen, generatedLines.length - suffixLen);
-
-      if (genChangedLines.length === 0 && firstChangedOriginalLine > lastChangedOriginalLine)
-        return;
-
-      const insertText = genChangedLines.join('\n') + '\n';
-      const isLastLine = lastChangedOriginalLine >= model.getLineCount();
-
-      if (isLastLine) {
-        const lineContent = model.getLineContent(lastChangedOriginalLine);
-        editor.executeEdits('nl-to-esql-visor', [
-          {
-            range: new monaco.Range(
-              lastChangedOriginalLine,
-              lineContent.length + 1,
-              lastChangedOriginalLine,
-              lineContent.length + 1
-            ),
-            text: '\n' + insertText,
-            forceMoveMarkers: true,
-          },
-        ]);
-      } else {
-        editor.executeEdits('nl-to-esql-visor', [
-          {
-            range: new monaco.Range(lastChangedOriginalLine + 1, 1, lastChangedOriginalLine + 1, 1),
-            text: insertText,
-            forceMoveMarkers: true,
-          },
-        ]);
+      if (plan.insert) {
+        const { lastChangedOriginalLine } = plan.review;
+        if (plan.insert.isLastLine) {
+          const lineContent = model.getLineContent(lastChangedOriginalLine);
+          editor.executeEdits('nl-to-esql-visor', [
+            {
+              range: new monaco.Range(
+                lastChangedOriginalLine,
+                lineContent.length + 1,
+                lastChangedOriginalLine,
+                lineContent.length + 1
+              ),
+              text: plan.insert.text,
+              forceMoveMarkers: true,
+            },
+          ]);
+        } else {
+          editor.executeEdits('nl-to-esql-visor', [
+            {
+              range: new monaco.Range(
+                lastChangedOriginalLine + 1,
+                1,
+                lastChangedOriginalLine + 1,
+                1
+              ),
+              text: plan.insert.text,
+              forceMoveMarkers: true,
+            },
+          ]);
+        }
       }
 
       onAfterInsert?.();
 
-      showReview({
-        firstChangedOriginalLine,
-        lastChangedOriginalLine,
-        generatedLineStart: lastChangedOriginalLine + 1,
-        generatedLineEnd: lastChangedOriginalLine + genChangedLines.length,
-      });
+      showReview(plan.review);
     },
     [editorRef, editorModel, cleanup, showReview, onAfterInsert]
   );

@@ -67,6 +67,7 @@ export const useNlGeneration = ({
 
   const onStopGeneration = useCallback(() => {
     abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
     setIsNlLoading(false);
     setNlValue('');
   }, []);
@@ -109,8 +110,9 @@ export const useNlGeneration = ({
       const message = (error as { body?: { message?: string } })?.body?.message ?? nlErrorMessage;
       core.notifications.toasts.addDanger({ title: message });
     } finally {
-      setNlValue('');
-      if (!abortController.signal.aborted) {
+      if (abortControllerRef.current === abortController) {
+        abortControllerRef.current = null;
+        setNlValue('');
         setIsNlLoading(false);
       }
     }

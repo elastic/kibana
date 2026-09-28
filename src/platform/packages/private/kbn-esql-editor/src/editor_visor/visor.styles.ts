@@ -30,11 +30,13 @@ export const visorStyles = (
       width: 100%;
       ${isInline
         ? `
-          height: ${isVisible ? euiTheme.size.xl : '0'};
+          min-height: ${isVisible ? euiTheme.size.xl : '0'};
+          height: ${isVisible ? 'auto' : '0'};
+          max-height: ${isVisible ? NL_TEXTAREA_MAX_HEIGHT : '0'};
           opacity: ${isVisible ? 1 : 0};
           pointer-events: ${isVisible ? 'auto' : 'none'};
-          overflow: hidden;
-          transition: height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+          overflow: ${isVisible ? 'visible' : 'hidden'};
+          transition: min-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), max-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
         `
         : `min-height: ${euiTheme.size.xl};`}
     `,

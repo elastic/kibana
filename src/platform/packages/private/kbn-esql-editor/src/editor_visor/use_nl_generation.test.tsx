@@ -135,6 +135,69 @@ describe('useNlGeneration', () => {
     expect(result.current.nlValue).toBe('');
   });
 
+  it('does not clear a new prompt when a stopped request later settles', async () => {
+    let resolveFirst: (value: { content: string }) => void = () => {};
+    (coreStart.http.post as jest.Mock).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveFirst = resolve;
+        })
+    );
+
+    const { result } = renderHook(() => useNlGeneration(defaultParams), {
+      wrapper: createWrapper(),
+    });
+
+    act(() => result.current.setNlValue('first prompt'));
+    act(() => {
+      result.current.onNlSubmit();
+    });
+    act(() => result.current.onStopGeneration());
+    act(() => result.current.setNlValue('second prompt'));
+
+    await act(async () => {
+      resolveFirst({ content: 'FROM first' });
+    });
+
+    expect(result.current.nlValue).toBe('second prompt');
+    expect(result.current.isNlLoading).toBe(false);
+  });
+
+  it('does not reset an in-flight second request when a stopped request settles', async () => {
+    let resolveFirst: (value: { content: string }) => void = () => {};
+    (coreStart.http.post as jest.Mock)
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveFirst = resolve;
+          })
+      )
+      .mockImplementationOnce(() => new Promise(() => {}));
+
+    const { result } = renderHook(() => useNlGeneration(defaultParams), {
+      wrapper: createWrapper(),
+    });
+
+    act(() => result.current.setNlValue('first prompt'));
+    act(() => {
+      result.current.onNlSubmit();
+    });
+    act(() => result.current.onStopGeneration());
+    act(() => result.current.setNlValue('second prompt'));
+    act(() => {
+      result.current.onNlSubmit();
+    });
+
+    expect(result.current.isNlLoading).toBe(true);
+
+    await act(async () => {
+      resolveFirst({ content: 'FROM first' });
+    });
+
+    expect(result.current.nlValue).toBe('second prompt');
+    expect(result.current.isNlLoading).toBe(true);
+  });
+
   it('onNlSubmit is a no-op when already loading', async () => {
     (coreStart.http.post as jest.Mock).mockImplementation(() => new Promise(() => {}));
 

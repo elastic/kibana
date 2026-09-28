@@ -153,18 +153,20 @@ export const useSuggestFix = ({
       const model = editorModel.current;
       if (!editor || !model) return;
 
+      clearGeneratingDecoration();
       rejectFix();
       abortControllerRef.current?.abort();
       abortControllerRef.current = undefined;
 
       const decorationLine = errorLineNumber ?? model.getLineCount();
       const decorationCol = model.getLineMaxColumn(decorationLine);
-      generatingDecorationsRef.current = editor.createDecorationsCollection([
+      const generatingDecoration = editor.createDecorationsCollection([
         {
           range: new monaco.Range(decorationLine, decorationCol, decorationLine, decorationCol),
           options: { afterContentClassName: GENERATING_HINT_CLASS },
         },
       ]);
+      generatingDecorationsRef.current = generatingDecoration;
 
       const controller = new AbortController();
       abortControllerRef.current = controller;
@@ -248,7 +250,9 @@ export const useSuggestFix = ({
           });
         notifications.toasts.addDanger({ title: message });
       } finally {
-        clearGeneratingDecoration();
+        if (generatingDecorationsRef.current === generatingDecoration) {
+          clearGeneratingDecoration();
+        }
       }
     },
     [
