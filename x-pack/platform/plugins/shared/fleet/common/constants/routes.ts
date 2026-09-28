@@ -76,11 +76,12 @@ export const DATA_STREAM_API_ROUTES = {
 };
 
 /**
- * Validates a `logs-<dataset>-*` or `metrics-<dataset>-*` wildcard index pattern, as accepted by
- * the `dataStreams` query param of `DATA_STREAM_API_ROUTES.HAS_DATA_PATTERN`. Callers should use
- * this to drop patterns the route would reject before making the request.
+ * Validates a `logs-<dataset>-<namespace>` or `metrics-<dataset>-<namespace>` pattern accepted by
+ * `DATA_STREAM_API_ROUTES.HAS_DATA_PATTERN`. `<namespace>` is `*` or any value `isValidNamespace`
+ * accepts, so keep the character class in sync with `INVALID_NAMESPACE_CHARACTERS`.
  */
-export const DATA_STREAM_INDEX_PATTERN_REGEX = /^(logs|metrics)-[a-z0-9_.]+-\*$/;
+export const DATA_STREAM_INDEX_PATTERN_REGEX =
+  /^(logs|metrics)-[a-z0-9_.]+-(\*|[^\p{Lu}\p{Lt}*\\/?"<>|\s,#:-]+)$/u;
 
 // Package policy API routes
 export const PACKAGE_POLICY_API_ROUTES = {

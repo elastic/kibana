@@ -48,6 +48,66 @@ describe('getServiceIndexPatterns', () => {
     expect(patterns).toEqual(['logs-aws.ec2_logs-*', 'metrics-aws.ec2_metrics-*']);
   });
 
+  it('uses the namespace instead of the wildcard when one is given', () => {
+    const entry = makeEntry({
+      varDefsByDataStream: {
+        ec2_logs: {
+          type: 'logs',
+          dataset: 'aws.ec2_logs',
+          inputs: [],
+          defaultEnabledInputs: {},
+          varDefsByInput: {},
+        } as any,
+      },
+    });
+    expect(getServiceIndexPatterns(entry, 'prod_eu')).toEqual(['logs-aws.ec2_logs-prod_eu']);
+  });
+
+  it('falls back to the wildcard for an empty namespace', () => {
+    const entry = makeEntry({
+      varDefsByDataStream: {
+        ec2_logs: {
+          type: 'logs',
+          dataset: 'aws.ec2_logs',
+          inputs: [],
+          defaultEnabledInputs: {},
+          varDefsByInput: {},
+        } as any,
+      },
+    });
+    expect(getServiceIndexPatterns(entry, '')).toEqual(['logs-aws.ec2_logs-*']);
+  });
+
+  it('falls back to the wildcard for a namespace the has_data route would reject', () => {
+    const entry = makeEntry({
+      varDefsByDataStream: {
+        ec2_logs: {
+          type: 'logs',
+          dataset: 'aws.ec2_logs',
+          inputs: [],
+          defaultEnabledInputs: {},
+          varDefsByInput: {},
+        } as any,
+      },
+    });
+    expect(getServiceIndexPatterns(entry, 'Prod')).toEqual(['logs-aws.ec2_logs-*']);
+  });
+
+  it.each(['prod@eu', 'producción'])('keeps the Fleet-valid namespace %s concrete', (namespace) => {
+    const entry = makeEntry({
+      varDefsByDataStream: {
+        ec2_logs: {
+          type: 'logs',
+          dataset: 'aws.ec2_logs',
+          inputs: [],
+          defaultEnabledInputs: {},
+          varDefsByInput: {},
+        } as any,
+      },
+    });
+    expect(getServiceIndexPatterns(entry, namespace)).toEqual([`logs-aws.ec2_logs-${namespace}`]);
+  });
+
   it('skips data streams missing dataset and falls back to package-level pattern', () => {
     const entry = makeEntry({
       varDefsByDataStream: {

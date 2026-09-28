@@ -103,19 +103,21 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     (instanceId: string) =>
     (
       varsByDataStream: Record<string, import('./use_service_settings').ServiceDataStreamVars>,
-      enabledDataStreams: string[]
+      enabledDataStreams: string[],
+      namespace: string
     ) => {
-      setServiceFieldsAndInputs(instanceId, varsByDataStream, enabledDataStreams);
+      setServiceFieldsAndInputs(instanceId, varsByDataStream, enabledDataStreams, namespace);
       setActiveFlyoutInstanceId(null);
     };
 
   const handleDuplicateAdd = (
     name: string,
     varsByDataStream: Record<string, import('./use_service_settings').ServiceDataStreamVars>,
-    enabledDataStreams: string[]
+    enabledDataStreams: string[],
+    namespace: string
   ) => {
     if (!duplicateSourceInstanceId) return;
-    addDuplicate(duplicateSourceInstanceId, name, varsByDataStream, enabledDataStreams);
+    addDuplicate(duplicateSourceInstanceId, name, varsByDataStream, enabledDataStreams, namespace);
     setDuplicateSourceInstanceId(null);
   };
 
@@ -546,6 +548,9 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
           service={activeFlyoutService}
           config={getServiceVars(activeFlyoutInstance.instanceId)}
           globalRegion={globalRegion}
+          isNamespaceLocked={
+            !!detectAndReviewStep.policyIdsByInstance[activeFlyoutInstance.instanceId]
+          }
           onApply={handleFlyoutApply(activeFlyoutInstance.instanceId)}
           onClose={() => setActiveFlyoutInstanceId(null)}
         />

@@ -23,6 +23,8 @@ import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { appContextService } from '../../services';
 
 import { FleetUnauthorizedError } from '../../errors';
+import { DATA_STREAM_INDEX_PATTERN_REGEX } from '../../constants';
+import { isValidNamespace } from '../../../common/services';
 
 import { getDeprecatedILMCheckHandler, getListHandler, getHasDataHandler } from './handlers';
 import { getDataStreamsQueryMetadata } from './get_data_streams_query_metadata';
@@ -498,6 +500,97 @@ describe('getHasDataHandler', () => {
       body: { message: 'Invalid index pattern: ".security-7"' },
     });
     expect(mockEsClient.msearch).not.toHaveBeenCalled();
+  });
+
+  it('accepts a pattern with a concrete namespace', async () => {
+    mockEsClient.msearch.mockResolvedValue({
+      responses: [{ hits: { total: { value: 1 } } }],
+    } as any);
+
+    const request = makeRequest({
+      dataStreams: 'logs-aws.cloudtrail-prod_eu.1',
+      start: '2025-01-01T00:00:00Z',
+    });
+
+    await getHasDataHandler(context, request, response);
+
+    expect(response.badRequest).not.toHaveBeenCalled();
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { results: { 'logs-aws.cloudtrail-prod_eu.1': true } },
+    });
+  });
+
+  it('rejects a namespace containing characters outside the data stream charset', async () => {
+    const request = makeRequest({
+      dataStreams: 'logs-aws.cloudtrail-Prod*',
+      start: '2025-01-01T00:00:00Z',
+    });
+
+    await getHasDataHandler(context, request, response);
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: { message: 'Invalid index pattern: "logs-aws.cloudtrail-Prod*"' },
+    });
+    expect(mockEsClient.msearch).not.toHaveBeenCalled();
+  });
+
+  it.each(['prod@eu', 'producción', 'a+b=c', 'team(1)'])(
+    'accepts the Fleet-valid namespace %s',
+    async (namespace) => {
+      mockEsClient.msearch.mockResolvedValue({
+        responses: [{ hits: { total: { value: 0 } } }],
+      } as any);
+      const pattern = `logs-aws.cloudtrail-${namespace}`;
+
+      await getHasDataHandler(
+        context,
+        makeRequest({ dataStreams: pattern, start: '2025-01-01T00:00:00Z' }),
+        response
+      );
+
+      expect(response.badRequest).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each(['prodÉ', 'prod eu', 'prod-eu', 'prod*', 'prod?', 'prod:eu', 'prod#eu', 'prod<eu'])(
+    'rejects the namespace %s',
+    async (namespace) => {
+      const pattern = `logs-aws.cloudtrail-${namespace}`;
+
+      await getHasDataHandler(
+        context,
+        makeRequest({ dataStreams: pattern, start: '2025-01-01T00:00:00Z' }),
+        response
+      );
+
+      expect(response.badRequest).toHaveBeenCalled();
+      expect(mockEsClient.msearch).not.toHaveBeenCalled();
+    }
+  );
+
+  it('accepts exactly the namespaces Fleet accepts', () => {
+    const samples = [
+      'prod',
+      'prod.eu',
+      'prod@eu',
+      'producción',
+      'Prod',
+      'prodÉ',
+      'prod eu',
+      'prod-eu',
+      'prod*',
+      'prod,eu',
+      'prod/eu',
+      'prod"eu',
+      'prod|eu',
+      'prod\\eu',
+    ];
+    for (const namespace of samples) {
+      expect([
+        namespace,
+        DATA_STREAM_INDEX_PATTERN_REGEX.test(`logs-aws.cloudtrail-${namespace}`),
+      ]).toEqual([namespace, isValidNamespace(namespace).valid]);
+    }
   });
 
   it('returns results with true for patterns with hits and false for empty', async () => {

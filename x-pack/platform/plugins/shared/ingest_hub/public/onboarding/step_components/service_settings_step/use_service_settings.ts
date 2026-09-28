@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
+import { isValidNamespace } from '@kbn/fleet-plugin/common';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
@@ -32,6 +33,8 @@ export interface ServiceVars {
    * Per-data-stream var values. Keys are data stream ids (e.g. 'vpcflow', 'ec2_logs').
    */
   varsByDataStream: Record<string, ServiceDataStreamVars>;
+  /** Data stream namespace for this instance's policy. Empty or absent inherits the agent policy's. */
+  namespace?: string;
 }
 
 /**
@@ -57,6 +60,11 @@ export interface ServiceSettingsPersistedState {
 }
 
 export const SERVICE_SETTINGS_SESSION_KEY = getOnboardingSessionKey('aws', 'serviceSettingsStep');
+
+export const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
+  globalRegion: '',
+  serviceVars: {},
+};
 
 /** Derive the canonical base instances (one per serviceId) from the selected ids list. */
 function baseInstances(
@@ -129,10 +137,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
 
   const [persisted, setPersisted] = useSessionStorage<ServiceSettingsPersistedState>(
     SERVICE_SETTINGS_SESSION_KEY,
-    {
-      globalRegion: '',
-      serviceVars: {},
-    }
+    DEFAULT_SERVICE_SETTINGS
   );
 
   const globalRegion = persisted?.globalRegion ?? '';
@@ -193,7 +198,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     (
       instanceId: string,
       newVarsByDataStream: Record<string, ServiceDataStreamVars>,
-      enabledDataStreams: string[]
+      enabledDataStreams: string[],
+      namespace?: string
     ) => {
       const current = getServiceVars(instanceId);
       const merged = mergeVarsByDataStream(current.varsByDataStream, newVarsByDataStream);
@@ -202,7 +208,11 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
         instances,
         serviceVars: {
           ...(persisted?.serviceVars ?? {}),
-          [instanceId]: { enabledDataStreams, varsByDataStream: merged },
+          [instanceId]: {
+            enabledDataStreams,
+            varsByDataStream: merged,
+            namespace: namespace ?? current.namespace,
+          },
         },
       });
     },
@@ -214,7 +224,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       sourceInstanceId: string,
       newName: string,
       newVarsByDataStream: Record<string, ServiceDataStreamVars>,
-      enabledDataStreams: string[]
+      enabledDataStreams: string[],
+      namespace?: string
     ) => {
       const source = instances.find((i) => i.instanceId === sourceInstanceId);
       if (!source) return;
@@ -246,6 +257,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
               ? enabledDataStreams
               : sourceVars.enabledDataStreams,
             varsByDataStream: mergedByDs,
+            namespace: namespace ?? sourceVars.namespace,
           },
         },
       });
@@ -290,6 +302,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
         const service = awsServicesMap?.get(inst.serviceId);
         if (!service) return false;
         const config = getServiceVars(inst.instanceId);
+        if (!isValidNamespace(config.namespace ?? '', true).valid) return true;
         // getServiceVars returns service.dataStreams when the key is absent (never configured).
         // An explicitly stored empty array means the user disabled all inputs — respect it.
         const activeDataStreams = config.enabledDataStreams;

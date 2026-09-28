@@ -5,21 +5,30 @@
  * 2.0.
  */
 
+import { DATA_STREAM_INDEX_PATTERN_REGEX } from '@kbn/fleet-plugin/common';
 import type { AwsServiceMatrixEntry } from '../aws_service_matrix';
 
 /**
  * Returns the index patterns for a service entry.
  * Each data stream with a known dataset produces a pattern of the form
- * `<type>-<dataset>-*`. Falls back to `logs-<packageName>.*-*` when the
- * manifest doesn't expose the dataset field.
+ * `<type>-<dataset>-<namespace>`. The namespace falls back to `*` when none is given or when the
+ * has_data route would reject the resulting pattern.
+ * Falls back to `logs-<packageName>.*-*` when the manifest doesn't expose the dataset field.
  */
-export function getServiceIndexPatterns(entry: AwsServiceMatrixEntry): string[] {
+export function getServiceIndexPatterns(
+  entry: AwsServiceMatrixEntry,
+  namespace?: string
+): string[] {
   const patterns: string[] = [];
-
   if (entry.varDefsByDataStream) {
     for (const [, dsInfo] of Object.entries(entry.varDefsByDataStream)) {
       if (dsInfo.dataset && dsInfo.type) {
-        patterns.push(`${dsInfo.type}-${dsInfo.dataset}-*`);
+        const concrete = `${dsInfo.type}-${dsInfo.dataset}-${namespace}`;
+        patterns.push(
+          namespace && DATA_STREAM_INDEX_PATTERN_REGEX.test(concrete)
+            ? concrete
+            : `${dsInfo.type}-${dsInfo.dataset}-*`
+        );
       }
     }
   }
