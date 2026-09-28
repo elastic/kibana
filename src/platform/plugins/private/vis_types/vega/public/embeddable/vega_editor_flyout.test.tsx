@@ -10,8 +10,11 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { Filter, Query } from '@kbn/es-query';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { setDataViews } from '../services';
 import type { VegaEmbeddableApi } from './vega_embeddable';
 import { VegaEditorFlyout } from './vega_editor_flyout';
 
@@ -33,18 +36,23 @@ jest.mock('../components/vega_vis_editor', () => ({
   ),
 }));
 
+const defaultDataView = { id: 'default-view' } as DataView;
+const getDefaultDataView = jest.fn(async (): Promise<DataView | null> => defaultDataView);
+
 const renderFlyout = ({
   initialQuery,
   initialFilters,
+  initialDataViews = [],
   isNewPanel = false,
 }: {
   initialQuery?: Query;
   initialFilters?: Filter[];
+  initialDataViews?: DataView[];
   isNewPanel?: boolean;
 } = {}) => {
   const query$ = new BehaviorSubject<Query | undefined>(initialQuery);
   const filters$ = new BehaviorSubject<Filter[] | undefined>(initialFilters);
-  const dataViews$ = new BehaviorSubject([]);
+  const dataViews$ = new BehaviorSubject<DataView[] | undefined>(initialDataViews);
   const api = {
     query$,
     filters$,
@@ -54,8 +62,9 @@ const renderFlyout = ({
   } as unknown as VegaEmbeddableApi;
 
   const SearchBar = ((props: unknown) => {
-    const { filters, onQuerySubmit, onFiltersUpdated } = props as {
+    const { filters, indexPatterns, onQuerySubmit, onFiltersUpdated } = props as {
       filters: Filter[];
+      indexPatterns: DataView[];
       onQuerySubmit: (payload: { dateRange: unknown; query?: Query }) => void;
       onFiltersUpdated: (filters: Filter[]) => void;
     };
@@ -63,6 +72,7 @@ const renderFlyout = ({
     return (
       <div>
         <div>{`filtersLength:${filters.length}`}</div>
+        <div>{`dataViews:${indexPatterns.map(({ id }) => id).join(',')}`}</div>
         <button
           onClick={() =>
             onQuerySubmit({
@@ -109,6 +119,13 @@ const renderFlyout = ({
 };
 
 describe('VegaEditorFlyout', () => {
+  beforeEach(() => {
+    const dataViews = dataViewPluginMocks.createStartContract();
+    getDefaultDataView.mockClear();
+    dataViews.getDefault = getDefaultDataView;
+    setDataViews(dataViews);
+  });
+
   it('renders the title with the flyout label id and all footer actions', async () => {
     renderFlyout();
 
@@ -178,5 +195,19 @@ describe('VegaEditorFlyout', () => {
     renderFlyout();
 
     expect(await screen.findByText('filtersLength:0')).toBeInTheDocument();
+  });
+
+  it('gives the search bar the default data view when the spec names none', async () => {
+    renderFlyout();
+
+    expect(await screen.findByText('dataViews:default-view')).toBeInTheDocument();
+    expect(getDefaultDataView).toHaveBeenCalledTimes(1);
+  });
+
+  it('gives the search bar the data views named by the spec', async () => {
+    renderFlyout({ initialDataViews: [{ id: 'spec-view' } as DataView] });
+
+    expect(await screen.findByText('dataViews:spec-view')).toBeInTheDocument();
+    expect(getDefaultDataView).not.toHaveBeenCalled();
   });
 });

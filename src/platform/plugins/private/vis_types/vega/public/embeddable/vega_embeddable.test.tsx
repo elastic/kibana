@@ -189,18 +189,17 @@ describe('vegaEmbeddableFactory', () => {
     mockVegaVisComponentProps = undefined;
   });
 
-  it('uses the default data view when the spec has none', async () => {
-    const defaultDataView = { id: 'default-view', title: 'logs-*' } as DataView;
+  it('does not publish the default data view when the spec has none', async () => {
     const dataViews = dataViewPluginMocks.createStartContract();
-    dataViews.getDefault = jest.fn(async () => defaultDataView);
+    dataViews.getDefault = jest.fn(async () => ({ id: 'default-view' } as DataView));
     setDataViews(dataViews);
 
     const { api } = await buildEmbeddable({
       spec: { format: 'json', value: { mark: 'point' } },
     });
 
-    await waitFor(() => expect(api.dataViews$.getValue()).toEqual([defaultDataView]));
-    expect(dataViews.getDefault).toHaveBeenCalled();
+    await waitFor(() => expect(api.dataViews$.getValue()).toEqual([]));
+    expect(dataViews.getDefault).not.toHaveBeenCalled();
   });
 
   it('keeps data views named by the spec', async () => {

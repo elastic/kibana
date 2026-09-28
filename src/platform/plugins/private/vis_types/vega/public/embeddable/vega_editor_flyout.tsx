@@ -28,6 +28,7 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { isEqual } from 'lodash';
 import type { VegaByValueState } from '../../server';
+import { getDataViews } from '../services';
 import type { VegaEmbeddableApi } from './vega_embeddable';
 
 type PanelSearch = Omit<QueryState, 'time' | 'refreshInterval'>;
@@ -105,7 +106,27 @@ export const VegaEditorFlyout = ({
     api.filters$,
     api.dataViews$
   );
-  const dataViews = publishedDataViews ?? [];
+  // Like Visualize's search bar, fall back to the default data view when the spec names none.
+  const [defaultDataView, setDefaultDataView] = useState<DataView | undefined>();
+  const needsDefaultDataView = publishedDataViews?.length === 0;
+  useEffect(() => {
+    if (!needsDefaultDataView || defaultDataView) return;
+    let cancelled = false;
+    getDataViews()
+      .getDefault()
+      .then((dataView) => {
+        if (!cancelled && dataView) setDefaultDataView(dataView);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [needsDefaultDataView, defaultDataView]);
+  const dataViews = publishedDataViews?.length
+    ? publishedDataViews
+    : defaultDataView
+    ? [defaultDataView]
+    : [];
   const search = useMemo<PanelSearch>(
     () => ({
       query: isOfQueryType(publishedQuery) ? publishedQuery : undefined,
@@ -168,7 +189,7 @@ export const VegaEditorFlyout = ({
               appName="vegaEditorFlyout"
               query={search.query && isOfQueryType(search.query) ? search.query : emptyQuery}
               filters={search.filters ?? []}
-              indexPatterns={dataViews as DataView[]}
+              indexPatterns={dataViews}
               showQueryInput
               showFilterBar
               showDatePicker={false}

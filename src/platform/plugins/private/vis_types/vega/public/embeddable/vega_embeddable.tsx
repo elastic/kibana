@@ -24,6 +24,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import {
   BehaviorSubject,
   combineLatest,
+  EMPTY,
   firstValueFrom,
   map,
   merge,
@@ -77,7 +78,6 @@ import type { VegaEvent } from '../types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
 import type { VegaParser } from '../data_model/vega_parser';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
-import { getDataViews } from '../services';
 import { extractProjectRoutingOverrides } from '../lib/extract_project_routing_overrides';
 import { getEsqlQueriesFromSpec } from '../lib/spec_uses_esql';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
@@ -217,7 +217,7 @@ export const vegaEmbeddableFactory = (
     const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
 
     // A spec change is parsed once for all derived subjects. `switchMap` is used instead
-    // of `tap` for dataViews$ because resolving data views is async.
+    // of `tap` for dataViews$ because `extractIndexPatternsFromSpec` is async.
     const specSubscription = spec$
       .pipe(
         map((spec) => {
@@ -232,13 +232,7 @@ export const vegaEmbeddableFactory = (
           esql$.next(spec ? getEsqlQueriesFromSpec(spec).map((esql) => ({ esql })) : []);
           projectRoutingOverrides$.next(spec ? extractProjectRoutingOverrides(spec) : undefined);
         }),
-        switchMap(async (spec) => {
-          const fromSpec = spec ? await extractIndexPatternsFromSpec(spec) : [];
-          if (fromSpec.length > 0) return fromSpec;
-          // Visualize's search bar uses the default data view when the spec names none.
-          const defaultDataView = await getDataViews().getDefault();
-          return defaultDataView ? [defaultDataView] : [];
-        })
+        switchMap((spec) => (spec ? extractIndexPatternsFromSpec(spec) : EMPTY))
       )
       .subscribe((dataViews) => dataViews$.next(dataViews));
 
