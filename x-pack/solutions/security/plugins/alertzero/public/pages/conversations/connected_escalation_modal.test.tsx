@@ -14,7 +14,7 @@ import type { Investigation } from '@kbn/agentic-investigations-common';
 import {
   useListEscalations,
   useCreateEscalation,
-  useAddToEscalation,
+  useAttachToEscalation,
   useCurrentUserProfile,
   useSuggestUserProfiles,
 } from '@kbn/agentic-investigations-plugin/public';
@@ -24,7 +24,7 @@ import { ConnectedEscalationModal } from './connected_escalation_modal';
 jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
   useListEscalations: jest.fn(),
   useCreateEscalation: jest.fn(),
-  useAddToEscalation: jest.fn(),
+  useAttachToEscalation: jest.fn(),
   useCurrentUserProfile: jest.fn(),
   useSuggestUserProfiles: jest.fn(),
 }));
@@ -46,7 +46,9 @@ const mockUseListEscalations = useListEscalations as jest.MockedFunction<typeof 
 const mockUseCreateEscalation = useCreateEscalation as jest.MockedFunction<
   typeof useCreateEscalation
 >;
-const mockUseAddToEscalation = useAddToEscalation as jest.MockedFunction<typeof useAddToEscalation>;
+const mockUseAttachToEscalation = useAttachToEscalation as jest.MockedFunction<
+  typeof useAttachToEscalation
+>;
 const mockUseCurrentUserProfile = useCurrentUserProfile as jest.MockedFunction<
   typeof useCurrentUserProfile
 >;
@@ -102,10 +104,10 @@ beforeEach(() => {
     isLoading: false,
   } as unknown as ReturnType<typeof useCreateEscalation>);
 
-  mockUseAddToEscalation.mockReturnValue({
+  mockUseAttachToEscalation.mockReturnValue({
     mutate: addMutate,
     isLoading: false,
-  } as unknown as ReturnType<typeof useAddToEscalation>);
+  } as unknown as ReturnType<typeof useAttachToEscalation>);
 
   mockUseCurrentUserProfile.mockReturnValue({
     data: { uid: 'user-1', user: { username: 'alice' } },
@@ -306,7 +308,7 @@ describe('ConnectedEscalationModal', () => {
 
     renderModal({ mode: 'addToExisting' });
     fireEvent.click(screen.getByTestId('escalationModalIncident-esc-3'));
-    fireEvent.click(screen.getByTestId('escalationModalAddToEscalation'));
+    fireEvent.click(screen.getByTestId('escalationModalattachToEscalation'));
 
     const [, callbacks] = addMutate.mock.calls[0];
     const { services } = (mockUseKibana as jest.Mock).mock.results[0].value;

@@ -275,6 +275,7 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/core-ui-settings-server-mocks'
   - '@kbn/agent-builder-browser'
+  - '@kbn/agentic-investigations-common'
   - '@kbn/mitre-attack-plugin'
   - '@kbn/security-mitre-attack-common'
   - '@kbn/lazy-object'

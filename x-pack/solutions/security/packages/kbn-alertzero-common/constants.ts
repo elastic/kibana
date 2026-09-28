@@ -13,6 +13,13 @@ export const ALERTZERO_PLUGIN_NAME = 'AlertZero' as const;
 export const ALERTZERO_APP_ID = 'alertzero' as const;
 export const ALERTZERO_APP_PATH = '/app/alertzero' as const;
 
+/**
+ * Per-space advanced setting gating the AlertZero app, its Security navigation nodes, and its
+ * internal API. Registered by the AlertZero server plugin (`server/ui_settings.ts`), and only when
+ * the `xpack.alertzero.enabled` deployment kill switch is on.
+ */
+export const ALERTZERO_ENABLED_SETTING_ID = 'securitySolution:enableAlertZero' as const;
+
 export const ALERTZERO_INTERNAL_URL = '/internal/alertzero' as const;
 
 export const ALERTZERO_WATCHES_URL = `${ALERTZERO_INTERNAL_URL}/watches` as const;
@@ -84,8 +91,6 @@ export const WATCH_AUTONOMY_LEVELS = ['manual', 'assisted', 'supervised'] as con
  * never leave these declarations behind.
  */
 export const WATCH_AUTONOMY_REVIEW_GATED = ['manual', 'assisted'] as const;
-
-export const WATCH_AUTONOMY_MANUAL = ['manual'] as const;
 
 /**
  * Presentation metadata for the managed watch catalog.

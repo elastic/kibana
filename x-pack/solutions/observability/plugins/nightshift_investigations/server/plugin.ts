@@ -37,6 +37,7 @@ import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize
 import { decisionTreeHydrateStepDefinition } from './step_definitions/decision_tree_hydrate';
 import { decisionTreePrepareStepDefinition } from './step_definitions/decision_tree_prepare';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
+import { registerCortexTelemetryEvents } from './telemetry';
 import { createDecisionTreeStore } from './decision_trees/store';
 import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
@@ -54,6 +55,8 @@ import { createSandboxWorkspaceManager } from './tools/sandbox_bash/sandbox_work
 import {
   nightshiftInvestigationSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
+  nightshiftAutomationSavedObjectType,
+  NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
 import { createInvestigationSweepRepository, SavedObjectInvestigationRepository } from './storage';
 import {
@@ -111,6 +114,7 @@ export class NightshiftInvestigationsPlugin
     this.cortexEnabled = this.ctx.config.get().cortex.enabled;
     if (this.cortexEnabled) {
       registerCortexAiIndex(plugins.contextEngine, this.logger.get('cortex'));
+      registerCortexTelemetryEvents(core.analytics);
     }
 
     // Decision trees are edited in the sandbox and read the Cortex investigator context, so the
@@ -124,6 +128,7 @@ export class NightshiftInvestigationsPlugin
     }
 
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
+    core.savedObjects.registerType(nightshiftAutomationSavedObjectType);
 
     registerInvestigationReconciliationTask({
       core,
@@ -241,6 +246,7 @@ export class NightshiftInvestigationsPlugin
           plugins.workflowsExtensions.registerStepDefinition(
             cortexHydrateStepDefinition({
               getSandboxStart: () => this.sandboxStart,
+              analytics: core.analytics,
               logger: this.logger.get('cortex'),
             })
           );
@@ -248,6 +254,7 @@ export class NightshiftInvestigationsPlugin
             cortexOptimizeStepDefinition({
               getInference: () => this.inference,
               getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
+              analytics: core.analytics,
               logger: this.logger.get('cortex'),
             })
           );
@@ -276,6 +283,8 @@ export class NightshiftInvestigationsPlugin
           getTriggerEmitter,
           getAlertsClient: (request: KibanaRequest) =>
             this.ruleRegistry?.getRacClientWithRequest(request),
+          getAutomationsSoClient: this.getAutomationsSoClient,
+          getWorkflowsManagement: () => this.workflowsManagement,
           isCortexEnabled: () => this.cortexEnabled,
           getCortexPageStore: (request: KibanaRequest) => {
             if (!this.elasticsearch) {
@@ -445,6 +454,18 @@ export class NightshiftInvestigationsPlugin
           workflowsManagement: this.workflowsManagement,
         }),
     });
+  };
+
+  private getAutomationsSoClient = (request: KibanaRequest, spaceId: string) => {
+    if (!this.savedObjects) {
+      throw new Error('savedObjects is not available — plugin start() has not been called');
+    }
+    return this.savedObjects
+      .getScopedClient(request, {
+        excludedExtensions: [SECURITY_EXTENSION_ID],
+        includedHiddenTypes: [NIGHTSHIFT_AUTOMATION_SO_TYPE],
+      })
+      .asScopedToNamespace(spaceId);
   };
 
   private createInvestigationRepository = (
