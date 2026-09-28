@@ -904,6 +904,7 @@ export const GetActionStatusResponseSchema = schema.object({
         schema.literal('PRIVILEGE_LEVEL_CHANGE'),
         schema.literal('ROLLBACK'),
         schema.literal('REMOVE_COLLECTOR'),
+        schema.literal('RESTART'),
       ]),
       nbAgentsActioned: schema.number({
         meta: {

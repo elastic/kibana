@@ -60,8 +60,6 @@ export async function restartBatch(
     }
   }
 
-  await createErrorActionResults(esClient, actionId, errors, 'hosted agent policy restriction');
-
   const spaceId = options.spaceId;
   const namespaces = spaceId ? [spaceId] : [];
   const internalSoClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
@@ -74,6 +72,8 @@ export async function restartBatch(
     total,
     namespaces,
   });
+
+  await createErrorActionResults(esClient, actionId, errors, 'hosted agent policy restriction');
 
   return { actionId };
 }
