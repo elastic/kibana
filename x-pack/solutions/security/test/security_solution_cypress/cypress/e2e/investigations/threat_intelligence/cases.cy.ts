@@ -7,7 +7,6 @@
 
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
-  navigateToThreatIntelligence,
   openFlyout,
   openFlyoutTakeAction,
   openIndicatorsTableMoreActions,
@@ -30,6 +29,15 @@ import {
 import { login } from '../../../tasks/login';
 
 const URL = '/app/security/threat_intelligence/indicators';
+
+// Navigating to a case is a full page load, which drops the global time range set by
+// visitWithTimeRange. Coming back through the navbar would land here with the default time range,
+// where the archived indicators fall outside of it and the table never renders. Re-visit with the
+// time range instead, as block_list.cy.ts does.
+const returnToIndicators = () => {
+  visitWithTimeRange(URL);
+  waitForViewToBeLoaded();
+};
 
 // Failing: See https://github.com/elastic/kibana/issues/244231
 describe.skip('Cases with invalid indicators', { tags: ['@ess'] }, () => {
@@ -82,7 +90,7 @@ describe('Cases interactions', { tags: ['@ess'] }, () => {
       .and('contain.text', 'Indicator type')
       .and('contain.text', 'Feed name');
 
-    navigateToThreatIntelligence();
+    returnToIndicators();
 
     cy.log('should add to existing case when clicking on the button in the indicators table');
 
@@ -98,7 +106,7 @@ describe('Cases interactions', { tags: ['@ess'] }, () => {
       .and('contain.text', 'Indicator type')
       .and('contain.text', 'Feed name');
 
-    navigateToThreatIntelligence();
+    returnToIndicators();
 
     cy.log('should add to new case when clicking on the button in the indicators flyout');
 
@@ -115,7 +123,7 @@ describe('Cases interactions', { tags: ['@ess'] }, () => {
       .and('contain.text', 'Indicator type')
       .and('contain.text', 'Feed name');
 
-    navigateToThreatIntelligence();
+    returnToIndicators();
 
     cy.log('should add to existing case when clicking on the button in the indicators flyout');
 
