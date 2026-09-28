@@ -12,6 +12,8 @@ import { BehaviorSubject } from 'rxjs';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { loggingSystemMock, loggingServiceMock } from '@kbn/core-logging-server-mocks';
 import type { InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { TrackUserActionParams, UserActivityActionId } from '@kbn/core-user-activity-server';
 import { UserActivityService } from './user_activity_service';
 import type { InternalUserActivityServiceSetup } from './types';
@@ -75,10 +77,24 @@ describe('UserActivityService', () => {
           {
             message: 'Custom message for action',
             event: { action: TEST_ACTION, type: ['change'], outcome: 'unknown' },
-            object: { id: 'obj-1', name: 'Test Object', type: 'rule', tags: ['tag1'] },
+            kibana: { object: { id: 'obj-1', name: 'Test Object', type: 'rule', tags: ['tag1'] } },
           },
         ],
       ]);
+    });
+
+    it('does not log the object at the top level', () => {
+      service.trackUserAction({
+        message: 'Custom message for action',
+        event: { action: TEST_ACTION, type: ['change'] },
+        object: { id: 'obj-1', name: 'Test Object', type: 'rule', tags: ['tag1'] },
+      });
+
+      const logCalls = loggingSystemMock.collect(core.logger).info;
+      expect(logCalls[0][1]).not.toHaveProperty('object');
+      expect(logCalls[0][1]).toMatchObject({
+        kibana: { object: { id: 'obj-1', name: 'Test Object', type: 'rule', tags: ['tag1'] } },
+      });
     });
 
     it('defaults event.outcome to unknown when not provided', () => {
@@ -113,11 +129,13 @@ describe('UserActivityService', () => {
 
       service.trackUserAction(params);
 
+      const { object, ...paramsWithoutObject } = params;
       const logCalls = loggingSystemMock.collect(core.logger).info;
       expect(logCalls).toHaveLength(1);
       expect(logCalls[0][0]).toBe('Action with metadata');
       expect(logCalls[0][1]).toMatchObject({
-        ...params,
+        ...paramsWithoutObject,
+        kibana: { object },
       });
     });
 
@@ -171,7 +189,7 @@ describe('UserActivityService', () => {
       expect(loggingSystemMock.collect(core.logger).info[0][1]).toMatchObject({
         message: 'Merged payload',
         event: { action: TEST_ACTION, type: ['change'], outcome: 'success' },
-        object: { id: 'obj-m', name: 'Obj', type: 'dashboard', tags: ['t1'] },
+        kibana: { object: { id: 'obj-m', name: 'Obj', type: 'dashboard', tags: ['t1'] } },
         metadata: { attempt: 1 },
         error: { message: 'ignored downstream' },
       });
@@ -219,7 +237,11 @@ describe('UserActivityService', () => {
           email: 'jesuswr@test.com',
           roles: ['superuser', 'normaluser', 'magicknight'],
         },
-        kibana: { space: { id: 'default' }, session: { id: 'session-456' } },
+        kibana: {
+          space: { id: 'default' },
+          session: { id: 'session-456' },
+          object: { id: 'obj-3', name: 'Object', type: 'visualization', tags: [] },
+        },
       });
     });
 
@@ -380,6 +402,93 @@ describe('UserActivityService', () => {
       });
 
       expect(loggingSystemMock.collect(coreWithFilters.logger).info).toHaveLength(0);
+    });
+  });
+
+  describe('kibana.saved_object', () => {
+    beforeEach(() => {
+      service = new UserActivityService(core).setup({ logging: loggingService });
+    });
+
+    const createStartedService = (registeredTypeNames: string[]) => {
+      const userActivityService = new UserActivityService(core);
+      userActivityService.setup({ logging: loggingService });
+      const typeRegistry = typeRegistryMock.create();
+      typeRegistry.getAllTypes.mockReturnValue(
+        registeredTypeNames.map((name) => ({ name } as SavedObjectsType))
+      );
+      return userActivityService.start({ typeRegistry });
+    };
+
+    it('emits kibana.saved_object when object.type is a registered saved object type', () => {
+      const startedService = createStartedService(['dashboard', 'index-pattern']);
+
+      startedService.trackUserAction({
+        message: 'Test',
+        event: { action: TEST_ACTION, type: ['change'] },
+        object: { id: 'dash-1', name: 'My Dashboard', type: 'dashboard', tags: [] },
+      });
+
+      const logCalls = loggingSystemMock.collect(core.logger).info;
+      expect(logCalls[0][1]).toMatchObject({
+        kibana: {
+          object: { id: 'dash-1', name: 'My Dashboard', type: 'dashboard', tags: [] },
+          saved_object: { type: 'dashboard', id: 'dash-1' },
+        },
+      });
+    });
+
+    it('omits kibana.saved_object when object.type is not a registered saved object type', () => {
+      const startedService = createStartedService(['dashboard']);
+
+      startedService.trackUserAction({
+        message: 'Test',
+        event: { action: TEST_ACTION, type: ['change'] },
+        object: { id: 'rule-1', name: 'My Rule', type: 'rule', tags: [] },
+      });
+
+      const logCalls = loggingSystemMock.collect(core.logger).info;
+      expect(logCalls[0][1]).toMatchObject({
+        kibana: { object: { id: 'rule-1', name: 'My Rule', type: 'rule', tags: [] } },
+      });
+      expect(logCalls[0][1]).not.toHaveProperty('kibana.saved_object');
+    });
+
+    it('omits kibana.saved_object when the type registry is not available yet', () => {
+      // `service` only went through setup, so the registry has not been read.
+      service.trackUserAction({
+        message: 'Test',
+        event: { action: TEST_ACTION, type: ['change'] },
+        object: { id: 'dash-1', name: 'My Dashboard', type: 'dashboard', tags: [] },
+      });
+
+      const logCalls = loggingSystemMock.collect(core.logger).info;
+      expect(logCalls[0][1]).toMatchObject({
+        kibana: { object: { id: 'dash-1', name: 'My Dashboard', type: 'dashboard', tags: [] } },
+      });
+      expect(logCalls[0][1]).not.toHaveProperty('kibana.saved_object');
+    });
+
+    it('reads the type registry only once at start', () => {
+      const userActivityService = new UserActivityService(core);
+      const setupContract = userActivityService.setup({ logging: loggingService });
+      const typeRegistry = typeRegistryMock.create();
+      typeRegistry.getAllTypes.mockReturnValue([{ name: 'dashboard' } as SavedObjectsType]);
+      userActivityService.start({ typeRegistry });
+
+      setupContract.trackUserAction({
+        message: 'First',
+        event: { action: TEST_ACTION, type: ['change'] },
+        object: { id: 'dash-1', name: 'Dash', type: 'dashboard', tags: [] },
+      });
+      setupContract.trackUserAction({
+        message: 'Second',
+        event: { action: TEST_ACTION, type: ['change'] },
+        object: { id: 'dash-2', name: 'Dash', type: 'dashboard', tags: [] },
+      });
+
+      expect(typeRegistry.getAllTypes).toHaveBeenCalledTimes(1);
+      expect(loggingSystemMock.collect(core.logger).info).toHaveLength(2);
     });
   });
 

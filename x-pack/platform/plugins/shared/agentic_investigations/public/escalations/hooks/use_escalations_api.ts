@@ -13,14 +13,21 @@ import useDebounce from 'react-use/lib/useDebounce';
 import {
   AGENTIC_INVESTIGATIONS_API_VERSION,
   ESCALATION_ASSIGN_URL,
+  ESCALATION_LINKED_INVESTIGATIONS_URL,
   ESCALATIONS_INTERNAL_URL,
   ESCALATION_BY_ID_URL,
+  ESCALATION_STATUS_URL,
+  ESCALATION_CLOSE_PREVIEW_URL,
 } from '../../../common';
 import type {
   CreateEscalationRequest,
   EscalationConversation,
+  LinkedInvestigationSummary,
   ListEscalationsResponse,
-  UpdateEscalationRequest,
+  ListLinkedInvestigationsResponse,
+  SetEscalationStatusRequest,
+  SetEscalationStatusResponse,
+  EscalationClosePreviewResponse,
 } from '../../../common';
 import { retryOnTransientError } from '../../retry_on_transient_error';
 import { escalationQueryKeys } from '../query_keys';
@@ -118,17 +125,103 @@ export const useAssignEscalation = () => {
   });
 };
 
-/** Patches an escalation. Invalidates the full escalations query key on success. */
-export const useUpdateEscalation = () => {
+/**
+ * Fetches the linked investigations for an escalation.
+ *
+ * The query key includes the comma-joined list of linked investigation ids read from the
+ * escalation's metadata so that the flyout's 5 s poll triggers a re-fetch when a new
+ * investigation is linked. Pass `linkedInvestigationIds` from the live conversation object
+ * that the flyout already holds.
+ */
+export const useLinkedInvestigations = ({
+  escalationId,
+  linkedInvestigationIds,
+}: {
+  escalationId: string;
+  linkedInvestigationIds: readonly string[];
+}): {
+  data: LinkedInvestigationSummary[] | undefined;
+  isLoading: boolean;
+  isError: boolean;
+  refetch: () => void;
+} => {
+  const { services } = useKibana<CoreStart>();
+  const linkedIds = linkedInvestigationIds.join(',');
+
+  const result = useQuery({
+    queryKey: escalationQueryKeys.linkedInvestigations(escalationId, linkedIds),
+    queryFn: async (): Promise<ListLinkedInvestigationsResponse> =>
+      services.http.get<ListLinkedInvestigationsResponse>(
+        ESCALATION_LINKED_INVESTIGATIONS_URL.replace('{id}', encodeURIComponent(escalationId)),
+        { version: AGENTIC_INVESTIGATIONS_API_VERSION }
+      ),
+    // Poll at the same cadence as the flyout's own conversation poll (5 s) so that
+    // status and title changes on existing linked investigations are reflected without
+    // waiting for the linked-IDs list itself to change.
+    refetchInterval: 5000,
+    // Keep the previous list visible during the brief re-fetch triggered by a linked-id change
+    // (e.g. a new investigation was just added), avoiding a skeleton flash.
+    keepPreviousData: true,
+    retry: retryOnTransientError,
+  });
+
+  return {
+    data: result.data?.results,
+    isLoading: result.isLoading,
+    isError: result.isError,
+    refetch: result.refetch,
+  };
+};
+
+/** Opens or closes an escalation (and its open linked investigations when closing). */
+export const useSetEscalationStatus = () => {
   const { services } = useKibana<CoreStart>();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ escalationId, body }: { escalationId: string; body: UpdateEscalationRequest }) =>
-      services.http.patch(ESCALATION_BY_ID_URL.replace('{id}', encodeURIComponent(escalationId)), {
-        version: AGENTIC_INVESTIGATIONS_API_VERSION,
-        body: JSON.stringify(body),
-      }),
+    mutationFn: ({
+      escalationId,
+      body,
+    }: {
+      escalationId: string;
+      body: SetEscalationStatusRequest;
+    }): Promise<SetEscalationStatusResponse> =>
+      services.http.put<SetEscalationStatusResponse>(
+        ESCALATION_STATUS_URL.replace('{id}', encodeURIComponent(escalationId)),
+        {
+          version: AGENTIC_INVESTIGATIONS_API_VERSION,
+          body: JSON.stringify(body),
+        }
+      ),
     onSuccess: () => invalidateEscalations(queryClient),
+  });
+};
+
+/**
+ * Fetches a preview of what closing an escalation would affect.
+ *
+ * The query is always fresh: `staleTime` and `cacheTime` are both 0 so every
+ * mount starts a network request, and `refetchInterval` keeps the list current
+ * while the close dialog is open. Pass `enabled: false` to pause polling.
+ */
+export const useEscalationClosePreview = (
+  escalationId: string | undefined,
+  { enabled }: { enabled: boolean }
+) => {
+  const { services } = useKibana<CoreStart>();
+
+  return useQuery({
+    queryKey: [...escalationQueryKeys.all, 'closePreview', escalationId],
+    queryFn: (): Promise<EscalationClosePreviewResponse> =>
+      services.http.get<EscalationClosePreviewResponse>(
+        ESCALATION_CLOSE_PREVIEW_URL.replace('{id}', encodeURIComponent(escalationId!)),
+        { version: AGENTIC_INVESTIGATIONS_API_VERSION }
+      ),
+    enabled: enabled && Boolean(escalationId),
+    // Never serve stale data: every mount triggers a fresh fetch.
+    staleTime: 0,
+    cacheTime: 0,
+    // Keep the list current while the dialog is open.
+    refetchInterval: 10_000,
   });
 };

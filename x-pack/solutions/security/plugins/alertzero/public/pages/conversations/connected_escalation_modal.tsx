@@ -15,6 +15,7 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -106,7 +107,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
     return (
       <EuiModal
         onClose={onClose}
-        style={{ width: 600 }}
+        style={{ maxWidth: 640, width: '100%', borderRadius: euiTheme.size.s }}
         aria-labelledby="escalationModalTitle"
         data-test-subj="escalationModal"
       >
@@ -131,7 +132,11 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
             <EuiFlexItem>
               <EuiCheckableCard
                 id="escalation-mode-create"
-                label={T.modes.create.label}
+                label={
+                  <EuiTitle size="xs">
+                    <h4>{T.modes.create.label}</h4>
+                  </EuiTitle>
+                }
                 checked={mode === 'create'}
                 onChange={() => setMode('create')}
                 data-test-subj="escalationModalModeCreate"
@@ -145,7 +150,11 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
             <EuiFlexItem>
               <EuiCheckableCard
                 id="escalation-mode-add-to-existing"
-                label={T.modes.addToExisting.label}
+                label={
+                  <EuiTitle size="xs">
+                    <h4>{T.modes.addToExisting.label}</h4>
+                  </EuiTitle>
+                }
                 checked={mode === 'addToExisting'}
                 onChange={() => setMode('addToExisting')}
                 data-test-subj="escalationModalModeAddToExisting"
