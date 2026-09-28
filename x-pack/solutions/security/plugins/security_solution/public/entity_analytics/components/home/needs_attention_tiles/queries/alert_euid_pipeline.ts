@@ -34,12 +34,24 @@ export const buildAlertEuidPipeline = (euid: EntityStoreEuid): string[] => {
     parts.push(`| EVAL ${euid.esql.getEuidEvaluation(entityType, `${entityType}_euid`)}`);
   }
 
-  // Pick the first non-null EUID across the stamped fast-path and the three derived paths.
-  // MV_APPEND null-propagates (MV_APPEND(null, x) = null), so it cannot safely chain scalars
-  // when the leading field may be null. COALESCE is used here instead — multi-entity alerts
-  // (both user + host context) contribute via the first non-null EUID only.
-  const euidVars = ENTITY_TYPES.map((t) => `${t}_euid`);
-  parts.push(`| EVAL _ea_entity_id = COALESCE(\`kibana.alert.entity.id\`, ${euidVars.join(', ')})`);
+  // Build a multi-value EUID column so multi-entity alerts (e.g. lateral movement with both
+  // user + host context) produce one row per entity after MV_EXPAND.
+  //
+  // MV_APPEND(null, x) = null (null propagates from the first arg), so we use CASE to ensure
+  // the leading arg is always non-null. ENTITY_TYPES order is [user, host, service]:
+  //   - user present: MV_APPEND(MV_APPEND(user_euid, host_euid), service_euid)
+  //   - host present: MV_APPEND(host_euid, service_euid)
+  //   - otherwise: service_euid
+  // Null values appended as second-arg are included in the array but filtered by WHERE below.
+  // The stamped field (kibana.alert.entity.id) is preferred via COALESCE when present.
+  const [first, second, third] = ENTITY_TYPES;
+  parts.push(
+    `| EVAL _ea_entity_id = CASE(` +
+      `${first}_euid IS NOT NULL, MV_APPEND(MV_APPEND(${first}_euid, ${second}_euid), ${third}_euid), ` +
+      `${second}_euid IS NOT NULL, MV_APPEND(${second}_euid, ${third}_euid), ` +
+      `${third}_euid)`
+  );
+  parts.push(`| EVAL _ea_entity_id = COALESCE(\`kibana.alert.entity.id\`, _ea_entity_id)`);
   parts.push('| MV_EXPAND _ea_entity_id');
   parts.push('| WHERE _ea_entity_id IS NOT NULL');
   // Rename only after STATS to avoid STATS BY grouping on the mapped entity.id field
