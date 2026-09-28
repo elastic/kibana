@@ -31,6 +31,7 @@ import {
 } from './saved_object';
 import {
   createFeatureSettingsController,
+  hasPausedSettings,
   shouldRestoreSettingsBackedWorkflow,
   type PausedFeatureSettings,
 } from './feature_settings';
@@ -112,9 +113,9 @@ export interface SignificantEventsMaintenanceService {
   /**
    * Re-enable workflows/rules pause recorded, and restore only the Settings
    * toggles that were enabled before pause. Always flips the control plane to
-   * `enabled` (best-effort; no compensating rollback). Targets that fail to
-   * re-enable stay in the disabled snapshot so a later Resume can retry them
-   * even after the deployment is already reported as enabled.
+   * `enabled` (best-effort; no compensating rollback). Targets and Settings
+   * that fail to re-enable stay in the snapshot so a later Resume can retry
+   * them even after the deployment is already reported as enabled.
    */
   resume(params: {
     request: KibanaRequest;
@@ -858,7 +859,10 @@ export const createSignificantEventsMaintenanceService = ({
         const currentState = normalizeState(existing?.state);
         const recordedWorkflows = existing?.disabledWorkflows ?? [];
         const recordedRuleIds = existing?.disabledRuleIds ?? [];
-        const hasRetryInventory = recordedWorkflows.length > 0 || recordedRuleIds.length > 0;
+        const hasRetryInventory =
+          recordedWorkflows.length > 0 ||
+          recordedRuleIds.length > 0 ||
+          hasPausedSettings(existing?.pausedSettings);
 
         // Idempotent when fully enabled. Also accept a follow-up Resume while
         // already enabled if a prior partial resume left failed targets recorded.
@@ -913,7 +917,11 @@ export const createSignificantEventsMaintenanceService = ({
           failures
         );
 
-        await featureSettings.resumeFeatureSettings({ request, pausedSettings, failures });
+        const remainingSettings = await featureSettings.resumeFeatureSettings({
+          request,
+          pausedSettings,
+          failures,
+        });
 
         const summary: SignificantEventsMaintenanceSummary = {
           state: 'enabled',
@@ -930,6 +938,7 @@ export const createSignificantEventsMaintenanceService = ({
             updatedBy,
             disabledWorkflows: remainingWorkflows,
             disabledRuleIds: remainingRuleIds,
+            pausedSettings: remainingSettings,
             lastSummary: summary,
           });
         } catch (writeError) {

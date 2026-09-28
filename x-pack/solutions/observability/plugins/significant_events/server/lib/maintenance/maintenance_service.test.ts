@@ -1188,8 +1188,24 @@ describe('SignificantEventsMaintenanceService', () => {
         pausedSettings?: { continuousOnboardingWasEnabled: boolean };
       };
       expect(lastWrite.state).toBe('enabled');
-      expect(lastWrite.pausedSettings).toBeUndefined();
+      // Kept so a later Resume (e.g. by someone who can write the setting) restores it.
+      expect(lastWrite.pausedSettings).toEqual({
+        continuousOnboardingWasEnabled: true,
+        scheduledDiscoveryEnabledSpaceIds: [],
+      });
       expect(lastWrite.disabledWorkflows).toEqual([]);
+
+      globalUiSettingsClient.set.mockClear();
+      globalUiSettingsClient.set.mockImplementation(async () => {});
+      await service.resume({ request: REQUEST });
+
+      expect(globalUiSettingsClient.set).toHaveBeenCalledWith(
+        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
+        true
+      );
+      expect(soClient.create.mock.calls.at(-1)?.[1]).toEqual(
+        expect.objectContaining({ state: 'enabled', pausedSettings: undefined })
+      );
     });
 
     it('flips to enabled with warnings when scheduled-discovery restore fails', async () => {
