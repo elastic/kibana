@@ -5069,9 +5069,6 @@ importers:
       '@hey-api/openapi-ts':
         specifier: 0.90.3
         version: 0.90.3(typescript@6.0.3)
-      '@huggingface/hub':
-        specifier: 2.2.0
-        version: 2.2.0
       '@jest/console':
         specifier: 29.7.0
         version: 29.7.0
@@ -11709,14 +11706,6 @@ packages:
     engines: {node: '>=18.14.1'}
     peerDependencies:
       hono: ^4
-
-  '@huggingface/hub@2.2.0':
-    resolution: {integrity: sha512-G+VS1eMp80KovIHBlsiEigS6I6qmI4j+VQ1UZ8CaXT+pw2A7tj6e/crfxFdKNE2uOK5oQkRFiCBJykMwrWQ8OA==}
-    engines: {node: '>=18'}
-    hasBin: true
-
-  '@huggingface/tasks@0.19.90':
-    resolution: {integrity: sha512-nfV9luJbvwGQ/5oKXkKhCV9h4X7mwh1YaGG3ORd6UMLDSwr1OFSSatcBX0O9OtBtmNK19aGSjbLFqqgcIR6+IA==}
 
   '@humanwhocodes/config-array@0.11.14':
     resolution: {integrity: sha512-3T8LkOmg45BV5FICb15QQMsyUSWrQ8AygVfC7ZG32zOalnqrilm018ZVCw0eapXux8FtA33q8PSRSstjee3jSg==}
@@ -28930,12 +28919,6 @@ snapshots:
   '@hono/node-server@1.19.17(hono@4.13.8)':
     dependencies:
       hono: 4.13.8
-
-  '@huggingface/hub@2.2.0':
-    dependencies:
-      '@huggingface/tasks': 0.19.90
-
-  '@huggingface/tasks@0.19.90': {}
 
   '@humanwhocodes/config-array@0.11.14(supports-color@10.2.2)':
     dependencies:

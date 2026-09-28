@@ -1718,7 +1718,6 @@
     "@eslint-community/eslint-plugin-eslint-comments": "4.4.1",
     "@fast-check/jest": "2.1.1",
     "@hey-api/openapi-ts": "0.90.3",
-    "@huggingface/hub": "2.2.0",
     "@jest/console": "29.7.0",
     "@jest/reporters": "29.7.0",
     "@jest/transform": "29.7.0",
