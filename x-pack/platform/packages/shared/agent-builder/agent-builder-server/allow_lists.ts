@@ -126,10 +126,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'nightshift_sandbox_write_file',
 
   // Nightshift – Decision trees
-  'submit_optimizer_result',
-  'record_system_learning',
-  'record_tool_learning',
-  'record_remediation',
+  'nightshift_submit_optimizer_result',
+  'nightshift_record_system_learning',
+  'nightshift_record_tool_learning',
+  'nightshift_record_remediation',
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
@@ -171,8 +171,7 @@ export const isAllowedBuiltinAgent = (agentName: string): agentName is AgentBuil
  */
 export const AGENT_BUILDER_AGENT_TYPES = [
   chatAgentTypeId,
-  `${internalNamespaces.platformSignificantEvents}.investigation-type`,
-  `${internalNamespaces.platformSignificantEvents}.deductive-investigation-type`,
+  `${internalNamespaces.platformNightshift}.investigation-type`,
   `${internalNamespaces.platformSignificantEvents}.decision-tree-reinforcement-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
   `${internalNamespaces.security}.alertzero-type`,
@@ -242,6 +241,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Evals
   'eval-experiment-authoring',
+  'eval-dataset-management',
 
   // Security Solution
   'entity-analytics-leads',
@@ -272,7 +272,6 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'attack-discovery-workflow-troubleshooting',
 
   // O11Y
-  'observability.rca',
   'observability.investigation',
   'observability.service-map',
   'observability.investigate-service-map',
@@ -365,6 +364,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Security Solution
   'security.alert',
+  'security.impact',
   'security.alerts',
   'security.entity',
   'security.entity_analytics_dashboard',

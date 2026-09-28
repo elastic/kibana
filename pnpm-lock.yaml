@@ -325,9 +325,6 @@ importers:
       '@a2a-js/sdk':
         specifier: 0.3.4
         version: 0.3.4(express@5.2.1(supports-color@10.2.2))
-      '@ai-sdk/langchain':
-        specifier: 1.0.190
-        version: 1.0.190(zod@4.4.3)
       '@apidevtools/json-schema-ref-parser':
         specifier: 15.3.6
         version: 15.3.6(@types/json-schema@7.0.15)
@@ -2023,6 +2020,12 @@ importers:
       '@kbn/enterprise-search-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/search/plugins/enterprise_search
+      '@kbn/entity-access-control':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-entity-access-control
+      '@kbn/entity-access-control-ui':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-entity-access-control-ui
       '@kbn/entity-store':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/entity_store
@@ -2073,7 +2076,7 @@ importers:
         version: link:src/platform/packages/private/kbn-esql-editor
       '@kbn/esql-language':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-language
+        version: link:src/platform/packages/shared/esql/kbn-esql-language
       '@kbn/esql-language-inspector-plugin':
         specifier: workspace:*
         version: link:examples/esql_ast_inspector
@@ -2082,13 +2085,13 @@ importers:
         version: link:src/platform/packages/shared/kbn-esql-resource-browser
       '@kbn/esql-server-utils':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-server-utils
+        version: link:src/platform/packages/shared/esql/kbn-esql-server-utils
       '@kbn/esql-types':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-types
+        version: link:src/platform/packages/shared/esql/kbn-esql-types
       '@kbn/esql-utils':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-utils
+        version: link:src/platform/packages/shared/esql/kbn-esql-utils
       '@kbn/esql-ux-example-plugin':
         specifier: workspace:*
         version: link:examples/esql_ux_example
@@ -2380,9 +2383,6 @@ importers:
       '@kbn/index-management-shared-types':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/index-management/index_management_shared_types
-      '@kbn/index-patterns-test-plugin':
-        specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/index_patterns
       '@kbn/indices-metadata-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/indices_metadata
@@ -2454,7 +2454,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-interpreter
       '@kbn/investigation-output':
         specifier: workspace:*
-        version: link:x-pack/platform/packages/shared/kbn-investigation-output
+        version: link:x-pack/solutions/observability/packages/kbn-investigation-output
       '@kbn/io-ts-utils':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-io-ts-utils
@@ -2793,7 +2793,7 @@ importers:
         version: link:x-pack/platform/packages/shared/kbn-nightshift-ai
       '@kbn/nightshift-decision-trees':
         specifier: workspace:*
-        version: link:x-pack/platform/packages/shared/kbn-nightshift-decision-trees
+        version: link:x-pack/solutions/observability/packages/kbn-nightshift-decision-trees
       '@kbn/nightshift-investigations-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/nightshift_investigations
@@ -2802,10 +2802,10 @@ importers:
         version: link:x-pack/solutions/observability/plugins/nightshift
       '@kbn/nightshift-shared':
         specifier: workspace:*
-        version: link:x-pack/platform/packages/shared/kbn-nightshift-shared
+        version: link:x-pack/solutions/observability/packages/kbn-nightshift-shared
       '@kbn/nightshift-sources-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/nightshift_sources
+        version: link:x-pack/solutions/observability/plugins/nightshift_sources
       '@kbn/no-data-page-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/no_data_page
@@ -3292,9 +3292,6 @@ importers:
       '@kbn/search-notebooks':
         specifier: workspace:*
         version: link:x-pack/solutions/search/plugins/search_notebooks
-      '@kbn/search-playground':
-        specifier: workspace:*
-        version: link:x-pack/solutions/search/plugins/search_playground
       '@kbn/search-queries':
         specifier: workspace:*
         version: link:x-pack/solutions/search/packages/kbn-search-queries
@@ -4300,9 +4297,6 @@ importers:
       adm-zip:
         specifier: 0.6.1
         version: 0.6.1
-      ai:
-        specifier: 5.0.190
-        version: 5.0.190(zod@4.4.3)
       ajv-formats:
         specifier: 3.0.1
         version: 3.0.1(ajv@8.20.0)
@@ -4646,8 +4640,8 @@ importers:
         specifier: 1.4.0
         version: 1.4.0
       nodemailer:
-        specifier: 9.0.4
-        version: 9.0.4
+        specifier: 10.0.10
+        version: 10.0.10
       normalize-path:
         specifier: 3.0.0
         version: 3.0.0
@@ -4867,9 +4861,6 @@ importers:
       suricata-sid-db:
         specifier: 1.0.2
         version: 1.0.2
-      swr:
-        specifier: 2.3.3
-        version: 2.3.3(react@18.2.0)
       symbol-observable:
         specifier: 4.0.0
         version: 4.0.0
@@ -5483,6 +5474,9 @@ importers:
       '@kbn/evals-suite-attack-discovery-agent-builder':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder
+      '@kbn/evals-suite-attack-discovery-fp-tp':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp
       '@kbn/evals-suite-detection-watch-rule-creation':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation
@@ -5768,6 +5762,9 @@ importers:
       '@kbn/security-evals-alerts-snapshot':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot
+      '@kbn/security-evals-matrix':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-security-evals-matrix
       '@kbn/security-evals-workflow-traces':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-security-evals-workflow-traces
@@ -7878,6 +7875,14 @@ importers:
 
   src/platform/packages/shared/esql/kbn-esql-browser: {}
 
+  src/platform/packages/shared/esql/kbn-esql-language: {}
+
+  src/platform/packages/shared/esql/kbn-esql-server-utils: {}
+
+  src/platform/packages/shared/esql/kbn-esql-types: {}
+
+  src/platform/packages/shared/esql/kbn-esql-utils: {}
+
   src/platform/packages/shared/home/sample_data_card: {}
 
   src/platform/packages/shared/home/sample_data_tab: {}
@@ -8030,6 +8035,10 @@ importers:
 
   src/platform/packages/shared/kbn-encrypted-saved-objects-shared: {}
 
+  src/platform/packages/shared/kbn-entity-access-control: {}
+
+  src/platform/packages/shared/kbn-entity-access-control-ui: {}
+
   src/platform/packages/shared/kbn-es: {}
 
   src/platform/packages/shared/kbn-es-archiver: {}
@@ -8048,17 +8057,9 @@ importers:
 
   src/platform/packages/shared/kbn-esql-composer: {}
 
-  src/platform/packages/shared/kbn-esql-language: {}
-
   src/platform/packages/shared/kbn-esql-resource-browser: {}
 
   src/platform/packages/shared/kbn-esql-resource-browser/.storybook: {}
-
-  src/platform/packages/shared/kbn-esql-server-utils: {}
-
-  src/platform/packages/shared/kbn-esql-types: {}
-
-  src/platform/packages/shared/kbn-esql-utils: {}
 
   src/platform/packages/shared/kbn-eval-kql: {}
 
@@ -8762,8 +8763,6 @@ importers:
 
   src/platform/test/plugin_functional/plugins/hardening: {}
 
-  src/platform/test/plugin_functional/plugins/index_patterns: {}
-
   src/platform/test/plugin_functional/plugins/kbn_top_nav: {}
 
   src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations: {}
@@ -9058,8 +9057,6 @@ importers:
 
   x-pack/platform/packages/shared/kbn-ink: {}
 
-  x-pack/platform/packages/shared/kbn-investigation-output: {}
-
   x-pack/platform/packages/shared/kbn-key-value-metadata-table: {}
 
   x-pack/platform/packages/shared/kbn-kibana-api-cli: {}
@@ -9071,10 +9068,6 @@ importers:
   x-pack/platform/packages/shared/kbn-mcp-client: {}
 
   x-pack/platform/packages/shared/kbn-nightshift-ai: {}
-
-  x-pack/platform/packages/shared/kbn-nightshift-decision-trees: {}
-
-  x-pack/platform/packages/shared/kbn-nightshift-shared: {}
 
   x-pack/platform/packages/shared/kbn-profiler-cli: {}
 
@@ -9398,8 +9391,6 @@ importers:
 
   x-pack/platform/plugins/shared/ml/evals: {}
 
-  x-pack/platform/plugins/shared/nightshift_sources: {}
-
   x-pack/platform/plugins/shared/notification_center: {}
 
   x-pack/platform/plugins/shared/notifications: {}
@@ -9550,6 +9541,12 @@ importers:
 
   x-pack/solutions/observability/packages/kbn-genai-cli: {}
 
+  x-pack/solutions/observability/packages/kbn-investigation-output: {}
+
+  x-pack/solutions/observability/packages/kbn-nightshift-decision-trees: {}
+
+  x-pack/solutions/observability/packages/kbn-nightshift-shared: {}
+
   x-pack/solutions/observability/packages/kbn-observability-schema: {}
 
   x-pack/solutions/observability/packages/kbn-scout-oblt: {}
@@ -9583,6 +9580,8 @@ importers:
   x-pack/solutions/observability/plugins/nightshift: {}
 
   x-pack/solutions/observability/plugins/nightshift_investigations: {}
+
+  x-pack/solutions/observability/plugins/nightshift_sources: {}
 
   x-pack/solutions/observability/plugins/observability: {}
 
@@ -9644,8 +9643,6 @@ importers:
 
   x-pack/solutions/search/plugins/search_notebooks: {}
 
-  x-pack/solutions/search/plugins/search_playground: {}
-
   x-pack/solutions/search/plugins/search_query_rules: {}
 
   x-pack/solutions/search/plugins/search_synonyms: {}
@@ -9694,6 +9691,8 @@ importers:
 
   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder: {}
 
+  x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp: {}
+
   x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-endpoint: {}
@@ -9721,6 +9720,8 @@ importers:
   x-pack/solutions/security/packages/kbn-scout-security: {}
 
   x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot: {}
+
+  x-pack/solutions/security/packages/kbn-security-evals-matrix: {}
 
   x-pack/solutions/security/packages/kbn-security-evals-workflow-traces: {}
 
@@ -9847,26 +9848,6 @@ packages:
 
   '@adobe/css-tools@4.5.0':
     resolution: {integrity: sha512-6OzddxPio9UiWTCemp4N8cYLV2ZN1ncRnV1cVGtve7dhPOtRkleRyx32GQCYSwDYgaHU3USMm84tNsvKzRCa1Q==}
-
-  '@ai-sdk/gateway@2.0.91':
-    resolution: {integrity: sha512-w0qAUeqOM0Qgppb1+QACNCz+LQnbHTWcyhEg4NtcCPtGzdE6/4yWjJV4faeigW+YltiB/kjPfJjF/fX3nr3BsA==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      zod: 4.4.3
-
-  '@ai-sdk/langchain@1.0.190':
-    resolution: {integrity: sha512-FLz/uGXSJEsF1IRHDqE9Lf8QcSpDnr38/ANPY1c0Odaa2Z9Yzz5+WsrnLO0/cR/+h8U4anrQz6LiLw1dKfelIg==}
-    engines: {node: '>=18'}
-
-  '@ai-sdk/provider-utils@3.0.25':
-    resolution: {integrity: sha512-CvsRu+32Y8a167s+lrIBtsybvgTHp8j9y+6BeTvLeoW3Q+okw/b4CnNUFOLIXsRaKHQKAH+IHNJPYWywfpw0LA==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      zod: 4.4.3
-
-  '@ai-sdk/provider@2.0.3':
-    resolution: {integrity: sha512-h88OPkavHTiN9tMn2l5awAznGB0lXzjcLhgR1/rvjB2zlLprsNxbM2tt6OJsHUxduLC3klq0/eqaSf6fX5XVww==}
-    engines: {node: '>=18'}
 
   '@alcalzone/ansi-tokenize@0.1.3':
     resolution: {integrity: sha512-3yWxPTq3UQ/FY9p1ErPxIyfT64elWaMvM9lIHnaqpyft63tkxodF5aUElYHrdisWve5cETkh1+KBw1yJuW0aRw==}
@@ -12672,6 +12653,7 @@ packages:
   '@mswjs/http-middleware@0.10.3':
     resolution: {integrity: sha512-6CoX9IivDF7hggORdA4vX6uz+pkY1urGQMhmviHmYya/0b4EXwmhaXlGLQG3G29heqb3qdjp61V0+E2xRtyR5A==}
     engines: {node: '>=18'}
+    deprecated: This package has been deprecated in favor of @msw/serve.
     peerDependencies:
       msw: '>=2.0.0'
 
@@ -12936,10 +12918,6 @@ packages:
 
   '@opentelemetry/api-logs@0.222.0':
     resolution: {integrity: sha512-9mb1If+IF6u0ZVXkHQ6ogEae5HwA6ajIVUgpSDQyRASxft6BSXHvBvPooRle3yFN/fKnCdSOnuu0OC3PLcF6+g==}
-    engines: {node: '>=8.0.0'}
-
-  '@opentelemetry/api@1.9.0':
-    resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
     engines: {node: '>=8.0.0'}
 
   '@opentelemetry/api@1.9.1':
@@ -15803,10 +15781,6 @@ packages:
   '@ungap/structured-clone@1.4.0':
     resolution: {integrity: sha512-1mEZtMKPM09vDmQt5y7YvmN2+DFTP7Tg0EWXdic8/C6VRnpb33e4ghisCIE3WZjsE2N8mf+QV1Zqh7ZFYLWInQ==}
 
-  '@vercel/oidc@3.1.0':
-    resolution: {integrity: sha512-Fw28YZpRnA3cAHHDlkt7xQHiJ0fcL+NRcIqsocZQUSmbzeIKRpwttJjik5ZGanXP+vlA4SbTg+AbA3bP363l+w==}
-    engines: {node: '>= 20'}
-
   '@vitest/expect@2.0.5':
     resolution: {integrity: sha512-yHZtwuP7JZivj65Gxoi8upUN2OzHTi3zVfjwdpu2WrvCZPLwsJ2Ey5ILIPccoW23dd/zQBlJ4/dhi7DWNyXCpA==}
 
@@ -16056,12 +16030,6 @@ packages:
   aggregate-error@3.1.0:
     resolution: {integrity: sha512-4I7Td01quW/RpocfNayFdFVk1qSuoh0E7JrbRJ16nH01HhKFQ88INq9Sd+nd72zqRySlr9BmDA8xlEJ6vJMrYA==}
     engines: {node: '>=8'}
-
-  ai@5.0.190:
-    resolution: {integrity: sha512-aDaixi6U7TgJoGYjefO35hxGkym9mbTrAY9b+xSq/DE7LonwNCHUuCFl1EwaZdt/eo8rCa5Td7kKga4p1LqL8Q==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      zod: 4.4.3
 
   ajv-draft-04@1.0.0:
     resolution: {integrity: sha512-mv00Te6nmYbRp5DCwclxtt7yV/joXJPGS7nM+97GdxvuttCOfgI3K4U25zboyeX0O+myI8ERluxQe5wljMmVIw==}
@@ -21959,9 +21927,9 @@ packages:
     resolution: {integrity: sha512-X75ZN8DCLftGM5iKwoYLA3rjnrAEs97MkzvSd4q2746Tgpg8b8XWiBGiBG4ZpgcAqBgtgPHTiAc8ZMCvZuikDw==}
     engines: {node: '>=10'}
 
-  nodemailer@9.0.4:
-    resolution: {integrity: sha512-LmJNRVRtfSCULxcZpy0Cpg4WWenlUZ9+zbmTO+S7v9wD6XreYLjXRFtDjtV/4F0HT5p1GyZfA0Ux/myxHb18CQ==}
-    engines: {node: '>=6.0.0'}
+  nodemailer@10.0.10:
+    resolution: {integrity: sha512-He9XskOFms62SyAKkLu8CcGcYHAo+BSHSsORI8s4PJH8qZgZY4L4lDfvyN0twvmbpyG+eGrxpyBlskj9d9rJ8A==}
+    engines: {node: '>=20.0.0'}
 
   nopt@4.0.3:
     resolution: {integrity: sha512-CvaGwVMztSMJLOeXPrez7fyfObdZqNUK1cPAEzLHrTybIua9pMdmmPR5YwtfNftIOMv3DPUhFaxsZMNTQO20Kg==}
@@ -24847,11 +24815,6 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
-  swr@2.3.3:
-    resolution: {integrity: sha512-dshNvs3ExOqtZ6kJBaAsabhPdHyeY4P2cKwRCniDVifBMoG/SVI7tfLWqPXriVspf2Rg4tPzXJTnwaihIeFw2A==}
-    peerDependencies:
-      react: ^16.11.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-
   symbol-observable@4.0.0:
     resolution: {integrity: sha512-b19dMThMV4HVFynSAM1++gBHAbk2Tc/osgLIBZMKsyqh34jb2e8Os7T6ZW/Bt3pJFdBTd2JwAnAAEQV7rSNvcQ==}
     engines: {node: '>=0.10'}
@@ -26358,30 +26321,6 @@ snapshots:
   '@actions/io@2.0.0': {}
 
   '@adobe/css-tools@4.5.0': {}
-
-  '@ai-sdk/gateway@2.0.91(zod@4.4.3)':
-    dependencies:
-      '@ai-sdk/provider': 2.0.3
-      '@ai-sdk/provider-utils': 3.0.25(zod@4.4.3)
-      '@vercel/oidc': 3.1.0
-      zod: 4.4.3
-
-  '@ai-sdk/langchain@1.0.190(zod@4.4.3)':
-    dependencies:
-      ai: 5.0.190(zod@4.4.3)
-    transitivePeerDependencies:
-      - zod
-
-  '@ai-sdk/provider-utils@3.0.25(zod@4.4.3)':
-    dependencies:
-      '@ai-sdk/provider': 2.0.3
-      '@standard-schema/spec': 1.1.0
-      eventsource-parser: 3.0.6
-      zod: 4.4.3
-
-  '@ai-sdk/provider@2.0.3':
-    dependencies:
-      json-schema: 0.4.0
 
   '@alcalzone/ansi-tokenize@0.1.3':
     dependencies:
@@ -30257,8 +30196,6 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.1
 
-  '@opentelemetry/api@1.9.0': {}
-
   '@opentelemetry/api@1.9.1': {}
 
   '@opentelemetry/configuration@0.222.0(@opentelemetry/api@1.9.1)':
@@ -33348,8 +33285,6 @@ snapshots:
 
   '@ungap/structured-clone@1.4.0': {}
 
-  '@vercel/oidc@3.1.0': {}
-
   '@vitest/expect@2.0.5':
     dependencies:
       '@vitest/spy': 2.0.5
@@ -33655,14 +33590,6 @@ snapshots:
     dependencies:
       clean-stack: 2.2.0
       indent-string: 4.0.0
-
-  ai@5.0.190(zod@4.4.3):
-    dependencies:
-      '@ai-sdk/gateway': 2.0.91(zod@4.4.3)
-      '@ai-sdk/provider': 2.0.3
-      '@ai-sdk/provider-utils': 3.0.25(zod@4.4.3)
-      '@opentelemetry/api': 1.9.0
-      zod: 4.4.3
 
   ajv-draft-04@1.0.0(ajv@8.20.0):
     optionalDependencies:
@@ -40884,7 +40811,7 @@ snapshots:
       util: 0.12.5
       vm-browserify: 1.1.2
 
-  nodemailer@9.0.4: {}
+  nodemailer@10.0.10: {}
 
   nopt@4.0.3:
     dependencies:
@@ -44300,12 +44227,6 @@ snapshots:
       csso: 5.0.5
       picocolors: 1.1.1
       sax: 1.6.1
-
-  swr@2.3.3(react@18.2.0):
-    dependencies:
-      dequal: 2.0.3
-      react: 18.2.0
-      use-sync-external-store: 1.7.0(react@18.2.0)
 
   symbol-observable@4.0.0: {}
 

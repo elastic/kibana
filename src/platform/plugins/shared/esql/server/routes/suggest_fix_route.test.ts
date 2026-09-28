@@ -146,7 +146,9 @@ describe('registerSuggestFixRoute', () => {
     };
     await handler(requestHandlerContext, request, response);
 
-    expect(generateEsql).toHaveBeenCalledWith(expect.objectContaining({ execute: 'none' }));
+    expect(generateEsql).toHaveBeenCalledWith(
+      expect.objectContaining({ execute: 'none', includeViews: true })
+    );
     expect(response.ok).toHaveBeenCalledWith({
       body: { content: 'FROM kibana_sample_data_flights | SORT avg DESC' },
     });
@@ -165,6 +167,8 @@ describe('registerSuggestFixRoute', () => {
     request.body = { queryString: 'FROM wrong_index', errorMessage: 'Unknown index' };
     await handler(requestHandlerContext, request, response);
 
-    expect(generateEsql).toHaveBeenCalledWith(expect.objectContaining({ includeDatasets: true }));
+    expect(generateEsql).toHaveBeenCalledWith(
+      expect.objectContaining({ includeDatasets: true, includeViews: true })
+    );
   });
 });

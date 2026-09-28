@@ -130,6 +130,9 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     if (params.workflowRuntime.getWorkflowExecution().status !== ExecutionStatus.RUNNING) {
       // onCancel cleanup runs in the `finally` block (which covers both this
       // short-circuit and the monitor-threw path), so it is not invoked here.
+      // Stop the cursor too: a non-RUNNING status with an executing cursor would
+      // otherwise spin executionFlowLoop on already-resolved promises and starve the event loop.
+      workflowExecutionCursor.stop();
       nodeSpan?.setOutcome('unknown');
       nodeSpan?.end();
       return;

@@ -263,10 +263,12 @@ describe('detection rule workflows', () => {
         'propose_query',
         'propose_risk_score',
         'propose_exception',
+        'propose_threshold',
+        'propose_schedule',
         'propose_manual',
       ]);
 
-      const [entry, action, settings, exception, manual] = proposals;
+      const [entry, action, settings, exception, threshold, schedule, manual] = proposals;
       const entryInputs = entry.with?.inputs as Record<string, unknown>;
       const actionInputs = action.with?.inputs as Record<string, unknown>;
       const settingsInputs = settings.with?.inputs as Record<string, unknown>;
@@ -325,17 +327,26 @@ describe('detection rule workflows', () => {
         'query',
         'risk_score',
         'exception',
+        'threshold',
+        'schedule',
       ]);
       expect(
         (fork.cases ?? []).map(({ steps: armSteps }) => armSteps.map(({ name }) => name))
-      ).toEqual([['propose_query'], ['propose_risk_score'], ['propose_exception']]);
+      ).toEqual([
+        ['propose_query'],
+        ['propose_risk_score'],
+        ['propose_exception'],
+        ['incomplete_threshold_output', 'propose_threshold'],
+        ['propose_schedule'],
+      ]);
       // The manual proposal is the default arm, so an unrecognised change type
       // still reaches the analyst.
       expect((fork.default ?? []).map(({ name }) => name)).toEqual(['propose_manual']);
 
       expect(entry.if).toContain('steps.create_investigation.output.conversation_id != null');
-      // The switch already guards the arms.
-      for (const proposal of [action, settings, exception, manual]) {
+      // The switch already guards the arms; propose_threshold also has a step-level
+      // guard (incomplete_threshold_output) verified by the case-arm assertion above.
+      for (const proposal of [action, settings, exception, threshold, schedule, manual]) {
         expect(proposal).not.toHaveProperty('if');
       }
       for (const proposal of proposals) {
@@ -355,18 +366,34 @@ describe('detection rule workflows', () => {
       expect(settingsInputs.impact).toBe('low');
     });
 
-    // The review parks in WAITING_FOR_CHILD while the gate holds the decision for up
-    // to 72h (80h with the gate's own margin); the engine's default 6h workflow
-    // timeout would cancel it under the analyst.
-    it('outlives the proposal gate it waits on', () => {
+    // The review parks in WAITING_FOR_CHILD while the gate holds the decision,
+    // and the engine's default 6h workflow timeout would cancel it under the
+    // analyst. What it has to outlive is the *deadline* its own proposals get,
+    // not the gate workflow's `settings.timeout` — that is a sentinel meaning
+    // "never", so comparing against it would only ever assert that this
+    // workflow's timeout is longer than a year.
+    it('outlives the decision deadline its own proposals get', () => {
       const review = parse(
         getManagedYaml(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID)
       ) as WorkflowYaml;
-      const gate = parse(getManagedYaml(CREATE_PROPOSAL_WORKFLOW_ID)) as WorkflowYaml;
       const hours = (timeout: unknown) => Number(String(timeout).replace(/h$/, ''));
 
+      // None of this workflow's gates passes `expiresIn`, so each takes the
+      // gate's 72h default. A gate that starts asking for its own deadline has
+      // to be checked against the ceiling here.
+      //
+      // Flattened, not top-level: only `propose_entry` sits at the top, and
+      // the other six hang off `propose_tuning`'s switch cases and default.
+      const proposals = flattenSteps(review.steps as NestedStep[]).filter(
+        (step) => step.with?.['workflow-id'] === CREATE_PROPOSAL_WORKFLOW_ID
+      );
+      expect(proposals.length).toBe(7);
+      for (const proposal of proposals) {
+        expect((proposal.with?.inputs as Record<string, unknown>)?.expiresIn).toBeUndefined();
+      }
+
       expect(String(review.settings?.timeout)).toMatch(/^\d+h$/);
-      expect(hours(review.settings?.timeout)).toBeGreaterThan(hours(gate.settings?.timeout));
+      expect(hours(review.settings?.timeout)).toBeGreaterThan(72);
     });
 
     // The sweep has no ai.agent step; the diagnosing skill lives in the review child.
@@ -789,6 +816,8 @@ describe('detection rule workflows', () => {
           'propose_query',
           'propose_risk_score',
           'propose_exception',
+          'propose_threshold',
+          'propose_schedule',
           'propose_manual',
         ]);
         const [, previews] = children;
@@ -1201,6 +1230,21 @@ describe('detection rule workflows', () => {
         );
         expect(search.with?.size).toBe(50);
         expect(search['on-failure']).toEqual({ continue: true });
+      });
+
+      // All spaces share one indicator index. The sweep and the review filter on the same field.
+      it('scopes the sweep search and the review read to the current space', () => {
+        const spaceFilter = { term: { 'attributes.space_id': '{{ workflow.spaceId }}' } };
+        const sweepQuery = withOf('search_pending_indicators').query as {
+          bool: { filter: unknown[] };
+        };
+        const reviewRead = flattenSteps(review.steps as unknown as NestedStep[]).find(
+          ({ name }) => name === 'read_ki'
+        );
+        const reviewQuery = reviewRead?.with?.query as { bool?: { filter?: unknown[] } };
+
+        expect(sweepQuery.bool.filter).toContainEqual(spaceFilter);
+        expect(reviewQuery?.bool?.filter).toContainEqual(spaceFilter);
       });
 
       // Only `_id` reaches the review. An indicator's content can be 64 kB, so 50 hits
