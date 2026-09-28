@@ -1509,7 +1509,7 @@ describe('conversations utils', () => {
 
     describe('compaction summary', () => {
       const compactionSummary = {
-        summarized_up_to: { tool_call_id: 'call-1' },
+        summarized_up_to: { round_id: 'round-1', tool_call_id: 'call-1' },
         summarized_round_count: 0,
         covered_round_ids: [],
         created_at: T0,
