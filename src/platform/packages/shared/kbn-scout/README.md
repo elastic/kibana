@@ -344,6 +344,12 @@ Here we have logic to start Kibana and Elasticsearch servers using `kbn-test` fu
 
 Scout supports two distinct types of tests: UI and API, each with their own directory structure and import patterns:
 
+##### Auditing page object usage
+
+`node scripts/scout audit` prints, for every `pageObjects.<key>` in this package, how many files and which modules use it. It walks each `.ts` file under `test/scout*` and the solution Scout packages with the TypeScript compiler, so it counts property access and destructuring and ignores comments and strings. Import graph tools cannot do this because page objects are Proxy fixtures, not imports.
+
+Run it by hand when you add, move, or remove a page object, or when doing a quality pass over the package. Read the output against the placement policy above: a key with zero external consumers is a removal candidate, a key used from one plugin only may belong in that plugin, and a plugin-local class whose name also exists elsewhere is a duplicate. The command reports facts only, it does not decide.
+
 #### Setting up Test Directory
 
 To get started with Scout testing for your plugin, you need to create the appropriate directory structure in your plugin's root directory:

@@ -1,0 +1,95 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+ {{> disclaimer}}
+
+import type { ApiClientFixture, ApiClientOptions, ApiClientResponse } from '@kbn/scout';
+import { ELASTIC_HTTP_VERSION_HEADER, X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import { encodePathParams, replaceParams } from '@kbn/openapi-common/shared';
+import { stringify as stringifyQuery } from 'query-string';
+
+{{#each operations}}
+{{#if (or requestQuery requestParams requestBody response)}}
+import type {
+  {{~#if requestQuery}}{{operationId}}RequestQueryInput,{{/if}}
+  {{~#if requestParams}}{{operationId}}RequestParamsInput,{{/if}}
+  {{~#if requestBody}}{{operationId}}RequestBodyInput,{{/if}}
+  {{~#if response}}{{operationId}}Response,{{/if}}
+} from '{{replace sourcePath 'schema.yaml' 'gen'}}';
+{{/if}}
+{{/each}}
+
+export type ScoutResponseType = NonNullable<ApiClientOptions['responseType']>;
+
+/**
+ * Body the Scout `apiClient` yields for a given `responseType`: the OpenAPI response for 'json',
+ * a string for 'text' and a Buffer for 'buffer'.
+ */
+export type ScoutResponseBody<
+  TResponseType extends ScoutResponseType,
+  TJsonBody = ApiClientResponse['body']
+> = TResponseType extends 'text' ? string : TResponseType extends 'buffer' ? Buffer : TJsonBody;
+
+export interface ScoutApiRequestOptions<TResponseType extends ScoutResponseType = ScoutResponseType> {
+  /** Extra headers merged on top of the defaults, e.g. an API key or a SAML cookie for auth */
+  headers?: Record<string, string>;
+  /** Kibana space id the request targets. Omit or pass 'default' for the default space */
+  kibanaSpace?: string;
+  /**
+   * How the response body should be parsed. Defaults to 'json'.
+   * Use 'text' or 'buffer' for endpoints returning non-JSON payloads, e.g. NDJSON or CSV exports;
+   * the returned `body` is then typed as a string or a Buffer accordingly.
+   */
+  responseType?: TResponseType;
+  /**
+   * Raw request body for operations whose payload is not described by the OpenAPI request body,
+   * e.g. multipart/form-data imports. Ignored for operations with a typed request body.
+   */
+  body?: ApiClientOptions['body'];
+}
+
+const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => ({
+  {{#each operations}}
+    {{#if description}}
+    /**
+      * {{{description}}}
+      */
+    {{/if}}
+    async {{camelCase operationId}}<TResponseType extends ScoutResponseType = 'json'>({{#if (or requestQuery requestParams requestBody)}}props: {{operationId}}Props, {{/if}}options: ScoutApiRequestOptions<TResponseType> = {}): Promise<ApiClientResponse<ScoutResponseBody<TResponseType{{#if response}}, {{operationId}}Response{{/if}}>>> {
+      const basePath = options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+      const path = `${basePath}{{#if requestParams}}${replaceParams('{{path}}', encodePathParams(props.params))}{{else}}{{path}}{{/if}}`;
+
+      return apiClient.{{method}}<ScoutResponseBody<TResponseType{{#if response}}, {{operationId}}Response{{/if}}>>(
+        {{~#if requestQuery}}`${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`{{else}}path{{/if}},
+        {
+          headers: {
+            'kbn-xsrf': 'true',
+            [ELASTIC_HTTP_VERSION_HEADER]: '{{version}}',
+            [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+            ...options.headers,
+          },
+          body: {{#if requestBody}}props.body{{else}}options.body{{/if}},
+          responseType: options.responseType ?? 'json',
+        }
+      );
+    },
+  {{/each}}
+});
+
+export function SecuritySolutionScoutApiServiceProvider(apiClient: ApiClientFixture) {
+  return securitySolutionScoutApiServiceFactory(apiClient);
+}
+
+{{#each operations}}
+{{#if (or requestQuery requestParams requestBody)}}
+export interface {{operationId}}Props {
+  {{~#if requestQuery}}query: {{operationId}}RequestQueryInput;{{/if}}
+  {{~#if requestParams}}params: {{operationId}}RequestParamsInput;{{/if}}
+  {{~#if requestBody}}body: {{operationId}}RequestBodyInput;{{/if}}
+}
+{{/if}}
+{{/each}}

@@ -93,11 +93,13 @@ export {
   type InvestigationBlindSpot,
   type InvestigationRunStatus,
   type InvestigationState,
-  type TriggerFeedback,
   type InvestigationEvidence,
   type InvestigationEvidenceCode,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
+  SIGNIFICANT_EVENTS_ALERT_SOURCE,
+  SIGNIFICANT_EVENTS_SEVERITY_MAP,
+  SIGNIFICANT_EVENTS_STATUS_MAP,
   INVESTIGATION_PROGRESS_UI_EVENT,
   INVESTIGATE_STEP_ID,
   MAX_HYPOTHESIS_EVIDENCE,
@@ -105,14 +107,11 @@ export {
   MAX_IMPACT_ENTITIES,
   MAX_RECOMMENDATIONS,
   MAX_BLIND_SPOTS,
-  MAX_TRIGGER_FEEDBACK_EVIDENCE,
-  MAX_TRIGGER_FEEDBACK,
   investigationImpactEntitySchema,
   investigationImpactSchema,
   investigationHypothesisSchema,
   investigationRecommendationSchema,
   investigationBlindSpotSchema,
-  triggerFeedbackSchema,
   type BlastRadiusEntry,
   type CausalFeature,
   type SignalEntry,
@@ -136,6 +135,7 @@ export {
   investigationStateSchema,
   MAX_SHORT_STRING_LENGTH,
   MAX_MEDIUM_STRING_LENGTH,
+  MAX_ARRAY_LENGTH,
   MAX_ID_LENGTH,
   MAX_RULE_NAME_LENGTH,
   MAX_TEXT_LENGTH,
@@ -165,6 +165,9 @@ export { SignificantEventsWorkflowStatus } from './src/workflows';
 
 export {
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
+  SIGNIFICANT_EVENTS_DECISION_TREE_REINFORCE_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
@@ -172,5 +175,3 @@ export {
 } from './src/inference_feature_ids';
 
 export type { KnowledgeIndicatorClientContract } from './src/knowledge_indicator_client';
-
-export { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from './src/feature_flags';

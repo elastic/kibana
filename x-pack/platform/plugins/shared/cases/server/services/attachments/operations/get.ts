@@ -128,7 +128,8 @@ export class AttachmentGetter {
     return result;
   }
 
-  // Mixed until every attachment type is migrated; unmigrated types stay legacy-shaped.
+  // Leftover cases-comments documents fold via toUnifiedAttributes. Unknown
+  // persistable-state subtype ids stay legacy-shaped.
   private transformAndDecodeBulkGetResponse(
     merged: Array<MixSavedObjectResponse>
   ): BulkOptionalAttributes<AttachmentAttributesV2> {
@@ -497,7 +498,7 @@ export class AttachmentGetter {
         | SavedObject<UnifiedAttachmentAttributes>
         | SavedObject<AttachmentPersistedAttributes>;
 
-      // Try unified first; fall back to legacy on 404 to cover unmigrated rows.
+      // Try unified first; fall back to cases-comments on 404 for leftover rows.
       try {
         res = await this.context.unsecuredSavedObjectsClient.get<UnifiedAttachmentAttributes>(
           CASE_ATTACHMENT_SAVED_OBJECT,

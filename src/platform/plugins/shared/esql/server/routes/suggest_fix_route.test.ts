@@ -146,7 +146,7 @@ describe('registerSuggestFixRoute', () => {
     };
     await handler(requestHandlerContext, request, response);
 
-    expect(generateEsql).toHaveBeenCalledWith(expect.objectContaining({ executeQuery: false }));
+    expect(generateEsql).toHaveBeenCalledWith(expect.objectContaining({ execute: 'none' }));
     expect(response.ok).toHaveBeenCalledWith({
       body: { content: 'FROM kibana_sample_data_flights | SORT avg DESC' },
     });
