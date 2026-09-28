@@ -14,8 +14,8 @@ import type { Unmount } from '@kbn/management-plugin/public/types';
 import { serviceAccountsManagementApp } from './service_accounts_management_app';
 import type { ServiceAccountsAPIClient } from '../../service_accounts';
 
-jest.mock('./service_accounts_page', () => ({
-  ServiceAccountsPage: () => 'Service Accounts Page',
+jest.mock('./service_accounts_app', () => ({
+  ServiceAccountsApp: () => 'Service Accounts Page',
 }));
 
 const element = document.body.appendChild(document.createElement('div'));

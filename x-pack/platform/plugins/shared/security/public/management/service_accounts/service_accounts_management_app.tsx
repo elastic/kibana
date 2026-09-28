@@ -42,11 +42,16 @@ export const serviceAccountsManagementApp = Object.freeze({
       order: 35,
       title,
       async mount({ element, setBreadcrumbs, history }) {
-        const [[coreStart], { ServiceAccountsPage }] = await Promise.all([
+        const [[coreStart], { ServiceAccountsApp }, { RolesAPIClient }] = await Promise.all([
           getStartServices(),
-          import('./service_accounts_page'),
+          import('./service_accounts_app'),
+          import('../roles/roles_api_client'),
         ]);
         const canCreate = coreStart.security.serviceAccounts.canCreate();
+        const rolesAPIClient = new RolesAPIClient(coreStart.http);
+        const createRoleUrl = coreStart.application.capabilities.roles?.save
+          ? coreStart.application.getUrlForApp('management', { path: '/security/roles/edit' })
+          : undefined;
 
         render(
           coreStart.rendering.addContext(
@@ -56,10 +61,22 @@ export const serviceAccountsManagementApp = Object.freeze({
               onChange={createBreadcrumbsChangeHandler(coreStart.chrome, setBreadcrumbs)}
             >
               <Breadcrumb text={title} href="/">
-                <ServiceAccountsPage
+                <ServiceAccountsApp
                   canCreate={canCreate}
                   serviceAccountsAPIClient={serviceAccountsAPIClient}
-                  onCreateAccount={() => history.push('/create')}
+                  rolesAPIClient={rolesAPIClient}
+                  createRoleUrl={createRoleUrl}
+                  onCreated={({ name }) => {
+                    coreStart.notifications.toasts.addSuccess(
+                      i18n.translate(
+                        'xpack.security.management.serviceAccounts.create.successTitle',
+                        {
+                          defaultMessage: 'Created service account "{name}"',
+                          values: { name },
+                        }
+                      )
+                    );
+                  }}
                 />
               </Breadcrumb>
             </Providers>
