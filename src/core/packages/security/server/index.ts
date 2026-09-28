@@ -35,6 +35,7 @@ export type {
   BindServiceAccountWorkloadParams,
   ServiceAccountWorkloadRef,
   ServiceAccountWorkloadCoordinates,
+  ServiceAccountWorkloadRequestParams,
 } from '@kbn/core-security-common';
 export type {
   CoreSecurityDelegateContract,

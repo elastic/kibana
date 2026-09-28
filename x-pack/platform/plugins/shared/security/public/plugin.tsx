@@ -176,6 +176,7 @@ export class SecurityPlugin
         fatalErrors: core.fatalErrors,
         getStartServices: core.getStartServices,
         buildFlavor: this.buildFlavor,
+        serviceAccountsAPIClient: this.serviceAccountsApiClient,
       });
     }
 

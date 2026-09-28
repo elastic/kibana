@@ -71,6 +71,7 @@ describe('getDefaultSecurityImplementation', () => {
       await expect(
         implementation.serviceAccounts.create(httpServerMock.createKibanaRequest(), {
           name: 'my-service-account',
+          roles: ['viewer'],
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
     });
