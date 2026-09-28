@@ -56,7 +56,7 @@ describe('Options list popover', () => {
     overwriteState?: Partial<OptionsListDSLControlState>;
   }): Promise<{
     componentApi: DSLOptionsListComponentApi;
-    displaySettings: OptionsListDisplaySettings;
+    displaySettings: OptionsListDisplaySettings & { previewMode?: boolean };
   }> => {
     contextSpy.mockClear(); // ensures that we get the up-to-date context
 
@@ -345,6 +345,16 @@ describe('Options list popover', () => {
       const excludeButton = popover.getByTestId('optionsList__excludeResults');
       expect(includeButton).toHaveAttribute('aria-pressed', 'false');
       expect(excludeButton).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    test('should disable include/exclude toggle in preview mode', () => {
+      const contextMock = getOptionsListContextMock();
+      const popover = mountComponent({
+        componentApi: contextMock.componentApi,
+        displaySettings: { ...contextMock.displaySettings, previewMode: true },
+      });
+      const includeButton = popover.getByTestId('optionsList__includeResults');
+      expect(includeButton).toBeDisabled();
     });
   });
 

@@ -16,8 +16,25 @@ import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 import { hasSloGroupBy, SloOverviewPanelContent } from './slo_overview_panel_content';
 
 jest.mock('../../../hooks/use_fetch_slo_details');
+
+const mockSloOverview = jest.fn();
 jest.mock('./slo_overview', () => ({
-  SloOverview: () => <div data-test-subj="slo-overview">SloOverview</div>,
+  SloOverview: (props: Record<string, unknown>) => {
+    mockSloOverview(props);
+    // Reflect the click-disabled state that SloOverview applies internally in preview mode,
+    // so tests can assert on actual rendered behavior rather than only prop values.
+    return (
+      <div data-test-subj="slo-overview">
+        <button
+          data-test-subj="slo-overview-card"
+          onClick={props.previewMode ? undefined : () => {}}
+          disabled={Boolean(props.previewMode)}
+        >
+          SloOverview
+        </button>
+      </div>
+    );
+  },
 }));
 jest.mock('./slo_overview_grid', () => ({
   SloCardChartList: () => <div data-test-subj="slo-card-chart-list">SloCardChartList</div>,
@@ -186,5 +203,36 @@ describe('SloOverviewPanelContent', () => {
 
     expect(getByTestId(container, 'slo-overview')).toBeInTheDocument();
     expect(queryByTestId(container, 'sloSingleOverviewPanel')).not.toBeInTheDocument();
+  });
+
+  describe('previewMode', () => {
+    beforeEach(() => {
+      mockSloOverview.mockClear();
+      useFetchSloDetailsMock.mockReturnValue({
+        data: sloWithoutGroupBy,
+        isLoading: false,
+        isInitialLoading: false,
+        isRefetching: false,
+        isSuccess: true,
+        isError: false,
+        refetch: jest.fn(),
+      });
+    });
+
+    it('disables the SLO card interaction in preview mode', () => {
+      const { container } = render(
+        <SloOverviewPanelContent {...defaultProps} previewMode={true} />
+      );
+
+      expect(getByTestId(container, 'slo-overview-card')).toBeDisabled();
+    });
+
+    it('keeps the SLO card interactive when not in preview mode', () => {
+      const { container } = render(
+        <SloOverviewPanelContent {...defaultProps} previewMode={false} />
+      );
+
+      expect(getByTestId(container, 'slo-overview-card')).not.toBeDisabled();
+    });
   });
 });

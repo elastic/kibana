@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -37,7 +37,12 @@ const mockDiscoverGridEmbeddableProps = jest.fn();
 jest.mock('./saved_search_grid', () => ({
   DiscoverGridEmbeddable: (props: Record<string, unknown>) => {
     mockDiscoverGridEmbeddableProps(props);
-    return <div data-test-subj="mockedDiscoverGridEmbeddable" />;
+    return (
+      <div data-test-subj="mockedDiscoverGridEmbeddable">
+        {/* Mirror the real component's renderCustomToolbar suppression in preview mode */}
+        {!props.previewMode && <div data-test-subj="discoverGridToolbar">Toolbar</div>}
+      </div>
+    );
   },
 }));
 
@@ -387,6 +392,92 @@ describe('SearchEmbeddableGridComponent', () => {
       });
 
       expect(getLastFlyoutMenuTrailingActions()).toBeUndefined();
+    });
+  });
+
+  describe('previewMode', () => {
+    it('should pass previewMode=true to DiscoverGridEmbeddable when viewMode is preview', async () => {
+      const savedSearch = createSavedSearch(false);
+      const api = createApi(savedSearch);
+      const stateManager = createStateManager();
+      const docViewerRef = React.createRef<DocViewerApi>();
+      stateManager.rows.next(rows);
+      stateManager.totalHitCount.next(rows.length);
+
+      (api.viewMode$ as unknown as BehaviorSubject<ViewMode>).next('preview');
+
+      render(
+        <DiscoverTestProvider services={services}>
+          <SearchEmbeddableGridComponent
+            api={api}
+            dataView={dataViewMock}
+            stateManager={stateManager}
+            enableDocumentViewer={true}
+            inlineEditing={{
+              isActive: false,
+              hasPendingChanges: false,
+              onApply: jest.fn(),
+              onCancel: jest.fn(),
+            }}
+            docViewerRef={docViewerRef}
+            expandedDoc={undefined}
+            initialDocViewerTabId={undefined}
+          />
+        </DiscoverTestProvider>
+      );
+
+      await waitFor(() => {
+        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+      });
+
+      expect(getLastGridProps().previewMode).toBe(true);
+    });
+
+    it('should show grid toolbar controls when not in preview mode', async () => {
+      renderComponent({ isEsql: false });
+
+      await waitFor(() => {
+        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+      });
+
+      expect(screen.queryByTestId('discoverGridToolbar')).toBeInTheDocument();
+    });
+
+    it('should hide grid toolbar controls in preview mode', async () => {
+      const savedSearch = createSavedSearch(false);
+      const api = createApi(savedSearch);
+      const stateManager = createStateManager();
+      const docViewerRef = React.createRef<DocViewerApi>();
+      stateManager.rows.next(rows);
+      stateManager.totalHitCount.next(rows.length);
+
+      (api.viewMode$ as unknown as BehaviorSubject<ViewMode>).next('preview');
+
+      const { queryByTestId } = render(
+        <DiscoverTestProvider services={services}>
+          <SearchEmbeddableGridComponent
+            api={api}
+            dataView={dataViewMock}
+            stateManager={stateManager}
+            enableDocumentViewer={true}
+            inlineEditing={{
+              isActive: false,
+              hasPendingChanges: false,
+              onApply: jest.fn(),
+              onCancel: jest.fn(),
+            }}
+            docViewerRef={docViewerRef}
+            expandedDoc={undefined}
+            initialDocViewerTabId={undefined}
+          />
+        </DiscoverTestProvider>
+      );
+
+      await waitFor(() => {
+        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+      });
+
+      expect(queryByTestId('discoverGridToolbar')).not.toBeInTheDocument();
     });
   });
 });

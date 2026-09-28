@@ -122,4 +122,20 @@ describe('Options list sorting button', () => {
       .map((el) => el.textContent);
     expect(optionsText).toEqual(['By document count', 'Numerically']);
   });
+
+  test('when previewMode is true, disables the sorting button', () => {
+    const contextMock = getOptionsListContextMock();
+    const component = render(
+      <OptionsListControlContext.Provider
+        value={{
+          componentApi: contextMock.componentApi,
+          displaySettings: { ...contextMock.displaySettings, previewMode: true },
+        }}
+      >
+        <OptionsListPopoverSortingButton showOnlySelected={false} />
+      </OptionsListControlContext.Provider>
+    );
+    const sortButton = component.getByTestId('optionsListControl__sortingOptionsButton');
+    expect(sortButton).toBeDisabled();
+  });
 });
