@@ -10,6 +10,12 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Migration recommendation: MIXED. Delete the initial-value assertion because the field-editor
+ * Jest integration test already covers it. Move cancel and per-field isolation to that Jest
+ * integration surface; keep only the reload-persistence scenario in Scout because it validates a
+ * saved data view across an application reload.
+ */
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
@@ -41,12 +47,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Cancel saving the popularity change (we didn't make a change in this case, just checking the value)
     });
 
+    /**
+     * Migration recommendation: DELETE. data_view_field_editor/__jest__/client_integration/
+     * field_editor_flyout_content.test.ts already verifies the editor displays existing popularity.
+     */
     it('should update the popularity input', async function () {
       const popularity = await PageObjects.settings.getPopularity();
       log.debug('popularity = ' + popularity);
       expect(popularity).to.be('1');
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO JEST. Cancelling a field-editor change is local form
+     * state; add it to data_view_field_editor/__jest__/client_integration/
+     * field_editor_flyout_content.test.ts with its existing editor helpers.
+     */
     it('should be reset on cancel', async function () {
       // Cancel saving the popularity change
       await PageObjects.settings.closeIndexPatternFieldEditor();
@@ -57,6 +72,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(popularity).to.be('0');
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. Saving popularity and recovering it after a
+     * full reload verifies persisted data-view metadata through the real application.
+     */
     it('can be saved', async function () {
       // Saving the popularity change
       await PageObjects.settings.controlChangeSave();
@@ -67,6 +86,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(popularity).to.be('1');
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO JEST. Field-count isolation is data-view model and
+     * field-editor state behavior; add the two-field regression to data_views/common/data_views/
+     * data_view.test.ts, which already covers field counts.
+     */
     it('changing popularity for one field does not affect the other', async function () {
       expect(await PageObjects.settings.getPopularity()).to.be('1');
       await PageObjects.settings.setPopularity(5);
