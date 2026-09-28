@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBetaBadge,
   EuiButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -151,9 +152,20 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
           <div css={styles.header}>
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h1>{labels.connectors.title}</h1>
-                </EuiTitle>
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="l">
+                      <h1>{labels.connectors.title}</h1>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge
+                      label={labels.connectors.techPreviewBadgeLabel}
+                      tooltipContent={labels.connectors.techPreviewBadgeDescription}
+                      size="m"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
