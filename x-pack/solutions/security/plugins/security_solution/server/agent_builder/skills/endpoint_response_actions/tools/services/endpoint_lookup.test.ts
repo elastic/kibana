@@ -9,6 +9,7 @@ import { createEndpointLookupService, LOOKUP_PAGE_SIZE } from './endpoint_lookup
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { NotFoundError } from '../../../../../endpoint/errors';
 import { HostStatus } from '../../../../../../common/endpoint/types';
+import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 describe('createEndpointLookupService', () => {
   const spaceId = 'default';
@@ -18,6 +19,7 @@ describe('createEndpointLookupService', () => {
     ensureInCurrentSpace?: jest.Mock;
     scoped?: { isCpsRead: () => boolean };
     getHostMetadataList?: jest.Mock;
+    agentTypes?: ResponseActionAgentType[];
   }) => {
     const listAgents =
       overrides?.listAgents ??
@@ -40,7 +42,8 @@ describe('createEndpointLookupService', () => {
       lookup: createEndpointLookupService(
         endpointAppContextService,
         spaceId,
-        overrides?.scoped as never
+        overrides?.scoped as never,
+        overrides?.agentTypes ? { agentTypes: overrides.agentTypes } : undefined
       ),
       listAgents,
       ensureInCurrentSpace,
@@ -703,6 +706,102 @@ describe('createEndpointLookupService', () => {
         kind: 'found',
         endpoint: { agentId: 'agent-1', agentType: 'endpoint', packages: ['endpoint'] },
       });
+    });
+
+    it('reports the Fleet agent id for metadata candidates when the endpoint id differs', async () => {
+      // On current agents the endpoint's own `agent.id` and the Fleet agent id
+      // (`elastic.agent.id`) diverge. Candidates must carry the Fleet id — it
+      // is the identity actions and downstream Fleet-id-filtered reads key on.
+      const { lookup } = buildService({
+        listAgents: jest.fn().mockResolvedValue({ agents: [] }),
+        scoped: { isCpsRead: () => true },
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: { agent: { id: 'endpoint-9' }, elastic: { agent: { id: 'fleet-1' } } },
+              host_status: HostStatus.HEALTHY,
+            },
+          ],
+          total: 1,
+        }),
+      });
+
+      const result = await lookup.resolveByHostName('linked-host');
+
+      expect(result.kind).toBe('found');
+      expect(result).toHaveProperty('endpoint.agentId', 'fleet-1');
+    });
+
+    it('does not double-count a host whose Fleet id and endpoint id differ', async () => {
+      // Fleet returns the host under its Fleet id; the scoped metadata index
+      // returns the same host with a DIFFERENT endpoint `agent.id` but the
+      // same Fleet id in `elastic.agent.id`. Comparing across identities
+      // would report one live host as two candidates (false ambiguity).
+      const { lookup } = buildService({
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'agent-1', status: 'online', packages: ['endpoint'] }],
+        }),
+        scoped: { isCpsRead: () => true },
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: { agent: { id: 'endpoint-9' }, elastic: { agent: { id: 'agent-1' } } },
+              host_status: HostStatus.HEALTHY,
+            },
+          ],
+          total: 1,
+        }),
+      });
+
+      const result = await lookup.resolveByHostName('shared-host');
+
+      expect(result).toEqual({
+        kind: 'found',
+        endpoint: { agentId: 'agent-1', agentType: 'endpoint', packages: ['endpoint'] },
+      });
+    });
+  });
+
+  describe('agent-type scoping', () => {
+    it('excludes third-party EDR agents when the caller scopes the lookup to Defend', async () => {
+      // A tool whose follow-up read only covers Elastic Defend (e.g. a status
+      // read backed by the Defend metadata index) must not resolve a
+      // SentinelOne/CrowdStrike/MDE agent — the read can never find it, and
+      // the host would be misreported as not-found.
+      const { lookup } = buildService({
+        agentTypes: ['endpoint'],
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'agent-s1', status: 'online', packages: ['sentinel_one'] }],
+        }),
+      });
+
+      const result = await lookup.resolveByHostName('s1-host');
+
+      expect(result).toEqual({ kind: 'not_found' });
+    });
+
+    it('still resolves Defend agents when scoped to Defend', async () => {
+      const { lookup } = buildService({ agentTypes: ['endpoint'] });
+
+      const result = await lookup.resolveByHostName('defend-host');
+
+      expect(result).toEqual({
+        kind: 'found',
+        endpoint: { agentId: 'agent-1', agentType: 'endpoint', packages: ['endpoint'] },
+      });
+    });
+
+    it('excludes m365_defender-package agents when scoped to Defend', async () => {
+      const { lookup } = buildService({
+        agentTypes: ['endpoint'],
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'agent-mde', status: 'online', packages: ['m365_defender'] }],
+        }),
+      });
+
+      const result = await lookup.resolveByHostName('mde-host');
+
+      expect(result).toEqual({ kind: 'not_found' });
     });
   });
 });

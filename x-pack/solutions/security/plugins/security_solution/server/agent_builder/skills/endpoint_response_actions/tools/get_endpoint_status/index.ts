@@ -94,7 +94,15 @@ export const getEndpointStatusTool = (
           // Resolve hostname -> endpoint id + EDR vendor. The service handles
           // hostname escaping, space validation, and multi-vendor `agentType`
           // resolution in one place so every host-lookup tool behaves the same.
-          const lookup = createEndpointLookupService(endpointAppContextService, spaceId, scoped);
+          //
+          // Scoped to Elastic Defend (`agentTypes: ['endpoint']`): the status
+          // read below is backed by the Defend metadata index, so resolving a
+          // SentinelOne/CrowdStrike/MDE agent here would hand a valid agent id
+          // to a read that can never find it — reporting a live, healthy
+          // third-party host as not-found.
+          const lookup = createEndpointLookupService(endpointAppContextService, spaceId, scoped, {
+            agentTypes: ['endpoint'],
+          });
           const resolved = await lookup.resolveByHostName(hostName);
 
           if (resolved.kind === 'not_found') {
@@ -157,14 +165,21 @@ export const getEndpointStatusTool = (
         // id is a disambiguator within this hostname, not a bypass of it. The
         // query is still filtered to the policies visible in this space, so an
         // agent from another space stays invisible here as in `list_endpoints`.
+        // The id matches on EITHER identity: `united.agent.agent.id` is the
+        // Fleet agent id (what the lookup resolves and what `list_endpoints`-
+        // style Fleet flows hand over), while the united doc's top-level
+        // `agent.id` is the endpoint's own id (what metadata-backed surfaces
+        // and older callers carry). The two diverge on current agents, so
+        // filtering on only one silently reports the host as not-found when
+        // the caller holds the other.
         const metadataService = endpointAppContextService.getEndpointMetadataService(spaceId);
         const hostInfo = await metadataService.getHostMetadataList(
           {
             page: 0,
             pageSize: 1,
-            kuery: `agent.id: ${escapeKuery(
+            kuery: `(united.agent.agent.id: ${escapeKuery(agentId)} OR agent.id: ${escapeKuery(
               agentId
-            )} AND united.endpoint.host.hostname: ${escapeKuery(hostName)}`,
+            )}) AND united.endpoint.host.hostname: ${escapeKuery(hostName)}`,
           },
           scoped
         );

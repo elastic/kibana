@@ -93,19 +93,24 @@ interface CandidatePage<T> {
 
 /** Structural view of the metadata-index fields this lookup reads. */
 interface MetadataCandidate {
-  metadata?: { agent?: { id?: string } };
+  metadata?: {
+    /** Endpoint's own id — differs from the Fleet agent id. */
+    agent?: { id?: string };
+    /** Fleet agent id — the identity actions and Fleet candidates key on. */
+    elastic?: { agent?: { id?: string } };
+  };
   host_status?: string;
   /** HostInfo `last_checkin` — ISO timestamp used for the recency tiebreak. */
   last_checkin?: string;
 }
 
 /**
- * A metadata candidate with its agent id proven present. Narrowed with a
+ * A metadata candidate with some agent id proven present. Narrowed with a
  * plain boolean filter — a type predicate cannot express this, because the
  * predicate's type must be assignable to the (id-optional) mapped type.
  */
 interface MetadataCandidateWithAgent extends MetadataCandidate {
-  metadata: { agent: { id: string } };
+  metadata: { agent?: { id?: string }; elastic?: { agent?: { id?: string } } };
 }
 
 /**
@@ -207,9 +212,21 @@ function totalCandidatesOf(
 export function createEndpointLookupService(
   endpointAppContextService: EndpointAppContextService,
   spaceId: string,
-  scoped?: ScopedEndpointServices
+  scoped?: ScopedEndpointServices,
+  options?: {
+    /**
+     * Response-action agent types this lookup may resolve. Defaults to every
+     * type in `RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES`. Tools whose
+     * downstream read only covers Elastic Defend (e.g. a status read backed by
+     * the Defend metadata index) MUST pass `['endpoint']` — otherwise a
+     * SentinelOne/CrowdStrike/MDE agent can win resolution and the follow-up
+     * Defend-metadata read reports a live, healthy host as not-found.
+     */
+    agentTypes?: ResponseActionAgentType[];
+  }
 ): EndpointLookupService {
   const fleetServices = endpointAppContextService.getInternalFleetServices(spaceId);
+  const supportedAgentTypes = options?.agentTypes;
 
   interface NormalizedCandidate {
     agentId: string;
@@ -291,8 +308,16 @@ export function createEndpointLookupService(
     // merely share the hostname without a supported integration (e.g. an
     // auditing agent) must not surface as candidates — they would otherwise
     // inflate the ambiguity set or win the tiebreak over a real endpoint.
+    // When the caller scopes the lookup (`agentTypes`), the package set
+    // narrows accordingly.
     const supportedPackages = new Set(
-      Object.values(RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES).flat()
+      Object.entries(RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES)
+        .filter(
+          ([agentType]) =>
+            !supportedAgentTypes ||
+            supportedAgentTypes.includes(agentType as ResponseActionAgentType)
+        )
+        .flatMap(([, packageNames]) => packageNames)
     );
     const visible: NormalizedCandidate[] = items
       .filter((candidate) => (candidate.packages ?? []).some((p) => supportedPackages.has(p)))
@@ -351,9 +376,18 @@ export function createEndpointLookupService(
     });
 
     const candidates: NormalizedCandidate[] = items
-      .filter((entry): entry is MetadataCandidateWithAgent => Boolean(entry.metadata?.agent?.id))
+      .filter((entry): entry is MetadataCandidateWithAgent =>
+        Boolean(entry.metadata?.elastic?.agent?.id || entry.metadata?.agent?.id)
+      )
       .map((entry) => ({
-        agentId: entry.metadata.agent.id,
+        // Identity: report the FLEET agent id (`elastic.agent.id`), not the
+        // endpoint's own `agent.id`. Fleet candidates key on `candidate.id`
+        // (the Fleet id), so carrying the endpoint id here makes the same
+        // host appear as TWO distinct candidates when the ids differ (false
+        // ambiguity), and downstream reads filtering on the Fleet id miss the
+        // metadata doc. Fleet-id-first with the endpoint id as fallback
+        // mirrors `EndpointMetadataService.getEnrichedHostMetadata()`.
+        agentId: (entry.metadata.elastic?.agent?.id || entry.metadata.agent?.id) as string,
         // Metadata `host_status` is the HostStatus enum, not Fleet's
         // agent-level `online`. Only records that are definitively gone
         // (offline / inactive / unenrolled) count as not live; `updating` and
