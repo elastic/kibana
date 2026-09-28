@@ -16,6 +16,7 @@ import {
   hasConversationConverseAccess,
   hasConversationDeleteAccess,
   hasConversationOwnerAccess,
+  hasConversationPatchMetadataAccess,
   hasConversationRenameAccess,
   isConversationMember,
   isConversationOwner,
@@ -293,6 +294,42 @@ describe('conversation access control', () => {
           hasConversationDeleteAccess({ conversation: owned, user: userWithAdminStatus })
         ).toBe(true);
       }
+    });
+  });
+
+  describe('hasConversationPatchMetadataAccess', () => {
+    const publicConversation = conversation({
+      access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
+    });
+    const privateConversation = conversation();
+
+    it('allows the owner', () => {
+      const owned = conversation({ user: { id: user.id, username: user.username } });
+      expect(hasConversationPatchMetadataAccess({ conversation: owned, user })).toBe(true);
+    });
+
+    it('allows an admin on a public conversation they do not own', () => {
+      expect(
+        hasConversationPatchMetadataAccess({
+          conversation: publicConversation,
+          user: { ...user, isAdmin: true },
+        })
+      ).toBe(true);
+    });
+
+    it('denies an admin on a private conversation they do not own', () => {
+      expect(
+        hasConversationPatchMetadataAccess({
+          conversation: privateConversation,
+          user: { ...user, isAdmin: true },
+        })
+      ).toBe(false);
+    });
+
+    it('denies a non-admin non-owner even on a public conversation', () => {
+      expect(hasConversationPatchMetadataAccess({ conversation: publicConversation, user })).toBe(
+        false
+      );
     });
   });
 });

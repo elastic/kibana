@@ -38,9 +38,12 @@ export const updateConversationMetadataStepDefinition = ({
         const publicClient = createConversationPublicClient({ client, agentRegistry });
         const input = context.input as UpdateConversationMetadataStepInput;
 
+        // A workflow that resumes after a HITL gate can run under a different identity than
+        // the one that created the conversation, so owner-only access would reject it.
         const { conversation, changedFields } = await publicClient.patchMetadata(
           input.conversation_id,
-          input.updates
+          input.updates,
+          { access: 'patchMetadata' }
         );
 
         return {

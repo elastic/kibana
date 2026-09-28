@@ -1023,7 +1023,7 @@ class ConversationClientImpl implements ConversationClient {
 
     const result = await this.writeConversation({
       conversationId,
-      access: 'patchMetadata',
+      access,
       fields: (current) => {
         if (!current.template_id) {
           throw createBadRequestError(
@@ -1203,7 +1203,7 @@ class ConversationClientImpl implements ConversationClient {
         break;
 
       case 'patchMetadata':
-        allowed = hasConversationPatchMetadataAccess({ conversation, user: this.user });
+        allowed = hasConversationPatchMetadataAccess({ conversation, user: this.getUser() });
         break;
 
       case 'rename':
