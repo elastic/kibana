@@ -37,9 +37,14 @@ import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
 import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
 import type { SchemaEditorField } from '../schema_editor/types';
 import { isFieldUncommitted } from '../schema_editor/utils';
+import { AddStepButtons } from './add_step_buttons';
 import { EditModeToggle } from './edit_mode_toggle';
 import { SimulationPlayground } from './simulation_playground';
-import { stepUnderEditSelector } from './state_management/interactive_mode_machine/selectors';
+import {
+  selectHasSteps,
+  selectIsSuggestionVisible,
+  stepUnderEditSelector,
+} from './state_management/interactive_mode_machine/selectors';
 import { selectFieldsInSamples } from './state_management/simulation_state_machine/selectors';
 import {
   StreamEnrichmentContextProvider,
@@ -130,6 +135,7 @@ export function StreamDetailEnrichmentContentImpl() {
   const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
   const hasJsonModeRef = useStreamEnrichmentSelector((state) => Boolean(state.context.jsonModeRef));
   const showJsonEditor = hasJsonModeRef;
+  const hasSteps = useOptionalInteractiveModeSelector(selectHasSteps, false);
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
   const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
@@ -271,14 +277,13 @@ export function StreamDetailEnrichmentContentImpl() {
                 initialSize={40}
                 minSize="480px"
                 tabIndex={0}
-                paddingSize="none"
+                paddingSize="m"
                 css={[verticalFlexCss, fullHeightCss]}
               >
                 <EuiFlexGroup
                   direction="column"
                   gutterSize="m"
                   css={css`
-                    padding: ${euiTheme.size.l} ${euiTheme.size.l} ${euiTheme.size.l} 0;
                     height: 100%;
                   `}
                 >
@@ -319,6 +324,11 @@ export function StreamDetailEnrichmentContentImpl() {
                           </EuiToolTip>
                         </EuiFlexItem>
                       )}
+                      {hasSteps && (
+                        <EuiFlexItem grow={false}>
+                          <AddStepButtons />
+                        </EuiFlexItem>
+                      )}
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow style={{ minHeight: 0, overflow: 'auto' }}>
@@ -331,8 +341,15 @@ export function StreamDetailEnrichmentContentImpl() {
                 initialSize={60}
                 minSize="300px"
                 tabIndex={0}
-                paddingSize="l"
-                css={[verticalFlexCss, fullHeightCss]}
+                paddingSize="none"
+                css={[
+                  verticalFlexCss,
+                  fullHeightCss,
+                  // Reduced top padding compensates for the height of the playground tabs.
+                  css`
+                    padding: ${euiTheme.size.s} ${euiTheme.size.base} ${euiTheme.size.base};
+                  `,
+                ]}
               >
                 <MemoSimulationPlayground schemaEditorFields={schemaEditorFields} />
               </EuiResizablePanel>
@@ -384,13 +401,7 @@ export function StreamDetailEnrichmentFooter() {
   );
   const hasChanges = useStreamEnrichmentSelector((state) => state.context.hasChanges);
   const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
-  const isSuggestionVisible = useOptionalInteractiveModeSelector(
-    (snapshot) =>
-      snapshot.matches({ pipelineSuggestion: 'generatingSuggestion' }) ||
-      snapshot.matches({ pipelineSuggestion: 'viewingSuggestion' }) ||
-      snapshot.matches({ pipelineSuggestion: 'noSuggestionsFound' }),
-    false
-  );
+  const isSuggestionVisible = useOptionalInteractiveModeSelector(selectIsSuggestionVisible, false);
   const {
     isRequestPreviewFlyoutOpen,
     requestPreviewFlyoutCodeContent,

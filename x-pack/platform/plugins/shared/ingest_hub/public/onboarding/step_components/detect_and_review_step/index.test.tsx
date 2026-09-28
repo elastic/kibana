@@ -17,6 +17,12 @@ jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
 
 jest.mock('@kbn/fleet-plugin/public', () => ({
   useGetPackageInfoByKeyQuery: jest.fn(),
+  pagePathGetters: {
+    integration_details_policies: ({ pkgkey }: { pkgkey: string }) => [
+      '/app/integrations',
+      `/detail/${pkgkey}/policies`,
+    ],
+  },
 }));
 
 jest.mock('./use_service_data_detection', () => ({
@@ -48,7 +54,9 @@ jest.mock('./agent_setup_callout', () => ({
 }));
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({ services: {} }),
+  useKibana: () => ({
+    services: { http: { basePath: { prepend: (path: string) => `/base${path}` } } },
+  }),
 }));
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
@@ -166,6 +174,48 @@ describe('DetectAndReviewStep', () => {
       renderStep();
       const btn = screen.getByTestId('detectAndReviewStep-continueButton');
       expect(btn).not.toHaveAttribute('href');
+    });
+  });
+
+  describe('finish button', () => {
+    it('renders next to the continue button', () => {
+      setupMocks();
+      renderStep();
+      expect(screen.getByTestId('detectAndReviewStep-finishButton')).toHaveTextContent('Finish');
+      expect(screen.getByTestId('detectAndReviewStep-continueButton')).toBeInTheDocument();
+    });
+
+    it('links to the versionless AWS Policies tab before package info loads', () => {
+      setupMocks({ packageData: undefined });
+      renderStep();
+      expect(screen.getByTestId('detectAndReviewStep-finishButton')).toHaveAttribute(
+        'href',
+        '/base/app/integrations/detail/aws/policies'
+      );
+    });
+
+    it('keeps the versionless href when an older package version is installed', () => {
+      setupMocks({
+        packageData: {
+          item: {
+            version: '3.0.0',
+            installationInfo: { version: '2.5.0', installed_kibana: [], installed_es: [] },
+          },
+        },
+      });
+      renderStep();
+      expect(screen.getByTestId('detectAndReviewStep-finishButton')).toHaveAttribute(
+        'href',
+        '/base/app/integrations/detail/aws/policies'
+      );
+    });
+
+    it('calls onContinue when clicked', () => {
+      setupMocks();
+      const onContinue = jest.fn();
+      renderStep({ onContinue });
+      fireEvent.click(screen.getByTestId('detectAndReviewStep-finishButton'));
+      expect(onContinue).toHaveBeenCalledTimes(1);
     });
   });
 

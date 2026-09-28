@@ -10,10 +10,12 @@
 import type {
   EsWorkflowExecution,
   EsWorkflowStepExecution,
+  StackFrame,
   WorkflowStepTokenUsage,
   WorkflowTokenUsage,
 } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
+import { areParallelBranchesCompatible, getParallelBranchScopes } from './parallel_branch_scope';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { sumTokenUsage } from '../utils';
 
@@ -206,9 +208,31 @@ export class WorkflowExecutionState {
     return result;
   }
 
-  public getLatestStepExecution(stepId: string): StepExecutionMetadata | undefined {
+  /**
+   * Returns the most recent execution of `stepId`. When `stackFrames` are given, executions
+   * from a sibling `parallel` branch are skipped so concurrent branches never read each other.
+   */
+  public getLatestStepExecution(
+    stepId: string,
+    stackFrames?: readonly StackFrame[]
+  ): StepExecutionMetadata | undefined {
     const allExecutions = this.getStepExecutionsByStepId(stepId);
-    return allExecutions.length ? allExecutions[allExecutions.length - 1] : undefined;
+    const readerBranchScopes = stackFrames ? getParallelBranchScopes(stackFrames) : [];
+    if (readerBranchScopes.length === 0) {
+      return allExecutions.length ? allExecutions[allExecutions.length - 1] : undefined;
+    }
+    for (let index = allExecutions.length - 1; index >= 0; index--) {
+      const execution = allExecutions[index];
+      if (
+        areParallelBranchesCompatible(
+          readerBranchScopes,
+          getParallelBranchScopes(execution.scopeStack ?? [])
+        )
+      ) {
+        return execution;
+      }
+    }
+    return undefined;
   }
 
   /**
