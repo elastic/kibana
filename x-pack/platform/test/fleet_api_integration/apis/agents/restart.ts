@@ -90,6 +90,23 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
 
+    async function countRestartActionsInIndex() {
+      const res = await es.search({
+        index: AGENT_ACTIONS_INDEX,
+        query: { term: { type: 'RESTART' } },
+      });
+      return res.hits.total as { value: number };
+    }
+
+    async function createManagedPolicy() {
+      const res = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xx')
+        .send({ name: `Managed policy ${Date.now()}`, namespace: 'default', is_managed: true })
+        .expect(200);
+      return res.body.item;
+    }
+
     describe('single agent restart', () => {
       it('returns 400 for agent below minimum version', async () => {
         await createAgent('restart-old', UNSUPPORTED_VERSION);
@@ -98,6 +115,20 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/restart-old/restart`)
           .set('kbn-xsrf', 'xxx')
           .expect(400);
+      });
+
+      it('does not create a RESTART action document when returning 400', async () => {
+        await createAgent('restart-old-clean', UNSUPPORTED_VERSION);
+
+        const before = await countRestartActionsInIndex();
+
+        await supertest
+          .post(`/api/fleet/agents/restart-old-clean/restart`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(400);
+
+        const after = await countRestartActionsInIndex();
+        expect(after.value).to.eql(before.value);
       });
 
       it('creates RESTART action for supported agent', async () => {
@@ -113,6 +144,16 @@ export default function (providerContext: FtrProviderContext) {
         const action = await getLatestAction();
         expect(action.type).to.eql('RESTART');
         expect(action.agents).to.contain('restart-new');
+      });
+
+      it('returns 400 for agent in hosted/managed policy', async () => {
+        const managedPolicy = await createManagedPolicy();
+        await createAgent('restart-hosted', SUPPORTED_VERSION, managedPolicy.id);
+
+        await supertest
+          .post(`/api/fleet/agents/restart-hosted/restart`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(400);
       });
     });
 
@@ -181,6 +222,89 @@ export default function (providerContext: FtrProviderContext) {
         const actionStatus = statusBody.items.find((a: any) => a.actionId === body.actionId);
         expect(actionStatus).to.be.ok();
         expect(actionStatus.type).to.eql('RESTART');
+      });
+
+      it('creates action via kuery string for active agents', async () => {
+        await createAgent('kuery-supported-1', SUPPORTED_VERSION);
+        await createAgent('kuery-supported-2', SUPPORTED_VERSION);
+
+        const { body } = await supertest
+          .post(`/api/fleet/agents/bulk_restart`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ agents: `local_metadata.elastic.agent.version : "${SUPPORTED_VERSION}"` })
+          .expect(200);
+
+        expect(body.actionId).to.be.a('string');
+
+        const action = await getLatestAction();
+        expect(action.type).to.eql('RESTART');
+        expect(action.agents).to.contain('kuery-supported-1');
+        expect(action.agents).to.contain('kuery-supported-2');
+      });
+
+      it('kuery path with includeInactive:false excludes inactive agents', async () => {
+        await createAgent('kuery-active', SUPPORTED_VERSION);
+        // create inactive agent
+        await es.index({
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          id: 'kuery-inactive',
+          document: {
+            id: 'kuery-inactive',
+            type: 'PERMANENT',
+            active: false,
+            enrolled_at: new Date().toISOString(),
+            last_checkin: new Date().toISOString(),
+            policy_id: policy1.id,
+            policy_revision: 1,
+            policy_revision_idx: 1,
+            namespaces: ['default'],
+            agent: { id: 'kuery-inactive', version: SUPPORTED_VERSION },
+            local_metadata: {
+              host: { hostname: 'host-kuery-inactive' },
+              elastic: { agent: { version: SUPPORTED_VERSION } },
+            },
+          },
+        });
+
+        const { body } = await supertest
+          .post(`/api/fleet/agents/bulk_restart`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            agents: `local_metadata.elastic.agent.version : "${SUPPORTED_VERSION}"`,
+            includeInactive: false,
+          })
+          .expect(200);
+
+        const action = await getLatestAction();
+        expect(action.agents).to.contain('kuery-active');
+        expect(action.agents).not.to.contain('kuery-inactive');
+      });
+    });
+
+    describe('bulk restart — hosted policy restriction', () => {
+      it('writes error results for agents in managed policy, creates action only for eligible agents', async () => {
+        const managedPolicy = await createManagedPolicy();
+        await createAgent('hosted-agent', SUPPORTED_VERSION, managedPolicy.id);
+        await createAgent('free-agent', SUPPORTED_VERSION);
+
+        const { body } = await supertest
+          .post(`/api/fleet/agents/bulk_restart`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ agents: ['hosted-agent', 'free-agent'] })
+          .expect(200);
+
+        const actionId = body.actionId;
+
+        const action = await getLatestAction();
+        expect(action.type).to.eql('RESTART');
+        expect(action.agents).to.contain('free-agent');
+        expect(action.agents).not.to.contain('hosted-agent');
+
+        const errorResults = await getActionResultsForAction(actionId);
+        const hostedError = errorResults.find((r: any) => r.agent_id === 'hosted-agent');
+        expect(hostedError).to.be.ok();
+        expect(hostedError.error).to.match(/hosted agent policy/i);
       });
     });
   });
