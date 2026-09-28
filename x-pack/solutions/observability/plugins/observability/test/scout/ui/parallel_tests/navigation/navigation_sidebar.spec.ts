@@ -190,7 +190,7 @@ test.describe(
         await nav.openMoreMenu();
         await nav.navItemInMoreByDeepLinkId('observability-overview:cases').click();
         await page.testSubj.click('configure-case-button');
-        await expect(page.testSubj.locator('cases-redesign-settings-panel')).toBeVisible();
+        await expect(page.testSubj.locator('cases-settings-panel')).toBeVisible();
       });
     });
 

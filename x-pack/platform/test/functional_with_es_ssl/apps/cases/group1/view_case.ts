@@ -879,8 +879,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.singleCase.refresh();
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.existOrFail('case-view-participants-field-panel');
-        await testSubjects.existOrFail('case-user-profile-avatar-cases_all_user');
+        const participantsPanel = await testSubjects.find('case-view-participants-field-panel');
+        await participantsPanel.findByCssSelector(
+          '[data-test-subj="case-user-profile-avatar-cases_all_user"]'
+        );
       });
 
       it('should render assignees in the participants section', async () => {
@@ -891,12 +893,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.common.selectUserInAssigneesPopover('cases_all_user');
         await cases.singleCase.closeAssigneesPopover();
         await header.waitUntilLoadingHasFinished();
-        await retry.waitFor('assignee avatar to appear in the sidebar', async () => {
-          return testSubjects.exists('case-user-profile-avatar-cases_all_user');
+        await retry.waitFor('assignee avatar to appear in the participants panel', async () => {
+          const panel = await testSubjects.find('case-view-participants-field-panel');
+          return panel
+            .findByCssSelector('[data-test-subj="case-user-profile-avatar-cases_all_user"]')
+            .then(() => true)
+            .catch(() => false);
         });
-
-        await testSubjects.existOrFail('case-view-participants-field-panel');
-        await testSubjects.existOrFail('case-user-profile-avatar-cases_all_user');
       });
     });
 
