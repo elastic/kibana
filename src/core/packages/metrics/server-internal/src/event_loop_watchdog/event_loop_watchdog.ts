@@ -82,7 +82,16 @@ export class EventLoopWatchdog {
     );
     this.heartbeatTimer.unref();
 
-    this.spawnWorker(buffer);
+    try {
+      this.spawnWorker(buffer);
+    } catch (error) {
+      // roll back so that a later enable can retry from a clean state
+      this.running = false;
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = undefined;
+      this.discardWorker();
+      throw error;
+    }
     this.logger.info(
       `Event loop watchdog started (threshold ${this.params.options.thresholdMs}ms, heartbeat ${this.params.options.heartbeatIntervalMs}ms)`
     );
@@ -148,23 +157,43 @@ export class EventLoopWatchdog {
     if (!this.running || this.worker !== worker) return;
     this.worker = undefined;
     this.params.registry.setListener(undefined);
+    this.scheduleRestart(buffer, `exited unexpectedly (code ${code})`);
+  }
 
+  private scheduleRestart(buffer: SharedArrayBuffer, reason: string): void {
     if (this.restarts >= MAX_RESTARTS) {
       this.logger.error(
-        `Event loop watchdog worker exited (code ${code}) and exhausted ${MAX_RESTARTS} restarts; the watchdog stays inactive until it is disabled and re-enabled`
+        `Event loop watchdog worker ${reason} and exhausted ${MAX_RESTARTS} restarts; the watchdog stays inactive until it is disabled and re-enabled`
       );
       return;
     }
     const delay = RESTART_BASE_DELAY_MS * 2 ** this.restarts;
     this.restarts++;
     this.logger.warn(
-      `Event loop watchdog worker exited unexpectedly (code ${code}); restart ${this.restarts}/${MAX_RESTARTS} in ${delay}ms`
+      `Event loop watchdog worker ${reason}; restart ${this.restarts}/${MAX_RESTARTS} in ${delay}ms`
     );
     this.restartTimer = setTimeout(() => {
       this.restartTimer = undefined;
-      if (this.running) this.spawnWorker(buffer);
+      if (!this.running) return;
+      try {
+        this.spawnWorker(buffer);
+      } catch (error) {
+        // never let a restart failure escape a timer callback on the main thread
+        this.discardWorker();
+        this.scheduleRestart(buffer, `failed to start (${error.message})`);
+      }
     }, delay);
     this.restartTimer.unref();
+  }
+
+  private discardWorker(): void {
+    const { worker } = this;
+    this.worker = undefined;
+    this.params.registry.setListener(undefined);
+    if (worker) {
+      worker.removeAllListeners();
+      worker.terminate().catch(() => {});
+    }
   }
 
   private onWorkerMessage(message: WorkerToMainMessage): void {

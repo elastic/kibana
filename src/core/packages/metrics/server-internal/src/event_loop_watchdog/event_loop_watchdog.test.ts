@@ -36,6 +36,7 @@ describe('EventLoopWatchdog', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     MockWorker.instances = [];
+    MockWorker.failNextConstruction = 0;
     logger = loggerMock.create();
     registry = new ActivityRegistry();
     watchdog = new EventLoopWatchdog({
@@ -117,6 +118,31 @@ describe('EventLoopWatchdog', () => {
     lastWorker().emit('exit', 1);
     jest.advanceTimersByTime(RESTART_BASE_DELAY_MS);
     expect(MockWorker.instances).toHaveLength(count + 1);
+  });
+
+  it('rolls back when the worker cannot be created and can start again', () => {
+    MockWorker.failNextConstruction = 1;
+    expect(() => watchdog.start()).toThrow('cannot start worker');
+    expect(watchdog.isRunning).toBe(false);
+    expect(jest.getTimerCount()).toBe(0);
+
+    watchdog.start();
+    expect(watchdog.isRunning).toBe(true);
+    expect(MockWorker.instances).toHaveLength(1);
+  });
+
+  it('treats restart failures like crashes instead of throwing from the timer', () => {
+    watchdog.start();
+    MockWorker.failNextConstruction = 1;
+    lastWorker().emit('exit', 1);
+    expect(() => jest.advanceTimersByTime(RESTART_BASE_DELAY_MS)).not.toThrow();
+    expect(MockWorker.instances).toHaveLength(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringMatching(/failed to start.*restart 2\/3/)
+    );
+
+    jest.advanceTimersByTime(RESTART_BASE_DELAY_MS * 2);
+    expect(MockWorker.instances).toHaveLength(2);
   });
 
   it('logs reports and worker errors', () => {

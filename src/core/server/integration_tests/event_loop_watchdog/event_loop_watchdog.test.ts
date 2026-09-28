@@ -190,6 +190,24 @@ describe('EventLoopWatchdog (real worker)', () => {
     );
   });
 
+  it('keeps candidates of back-to-back blocks separate', async () => {
+    await startWatchdog({ maxCandidates: 5 });
+    for (const id of ['first', 'second', 'third']) {
+      const end = registry.observe({ type: 'task manager', name: `run test:${id}`, id });
+      deliberatelyBlockTheEventLoop(450);
+      end?.();
+      // yield just long enough for the heartbeat to resume before the next block
+      await sleep(60);
+    }
+
+    await nextReport(3);
+    expect(reports().map(({ candidates }) => candidates.map(({ id }) => id))).toEqual([
+      ['first'],
+      ['second'],
+      ['third'],
+    ]);
+  });
+
   it('stops detecting when stopped and detects again after restart', async () => {
     await startWatchdog();
     await watchdog?.stop();

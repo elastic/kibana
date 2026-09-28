@@ -11,6 +11,7 @@ import { EventEmitter } from 'node:events';
 
 export class MockWorker extends EventEmitter {
   static instances: MockWorker[] = [];
+  static failNextConstruction = 0;
   public readonly postMessage = jest.fn();
   public readonly unref = jest.fn();
   public readonly terminate = jest.fn(async () => {
@@ -19,6 +20,10 @@ export class MockWorker extends EventEmitter {
   });
   constructor(public readonly entry: string, public readonly workerOptions: object) {
     super();
+    if (MockWorker.failNextConstruction > 0) {
+      MockWorker.failNextConstruction--;
+      throw new Error('cannot start worker');
+    }
     MockWorker.instances.push(this);
   }
 }

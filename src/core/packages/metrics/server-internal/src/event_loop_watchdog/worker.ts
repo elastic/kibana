@@ -184,24 +184,40 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
     }
   };
 
-  const onBlockEnd = async (event: Extract<DetectorEvent, { type: 'block-end' }>) => {
+  // Only block-end reporting awaits the inspector. The ending block's state is detached
+  // synchronously so that a subsequent block cannot be confused with it while reports are queued.
+  let reports: Promise<void> = Promise.resolve();
+  const onBlockEnd = (event: Extract<DetectorEvent, { type: 'block-end' }>) => {
     const current = block;
     block = undefined;
     if (!current) return;
 
+    const endedAtUs = hrUs();
+    const endedAtMs = Date.now();
     const cpu = process.cpuUsage(current.cpuAtDetection);
-    const wallUs = hrUs() - current.detectedAtUs;
+    const wallUs = endedAtUs - current.detectedAtUs;
     const cpuRatio = wallUs > 0 ? Math.round(((cpu.user + cpu.system) / wallUs) * 100) / 100 : 0;
+    const toEpochMs = (us: number) => Math.round(endedAtMs - (endedAtUs - us) / 1000);
 
-    if (current.capture) {
-      await stopCapture(current.capture);
-      captureInFlight = false;
-    }
-    if (!event.report) return;
+    reports = reports
+      .then(async () => {
+        if (current.capture) {
+          await stopCapture(current.capture);
+          captureInFlight = false;
+        }
+        if (event.report)
+          post({ type: 'report', report: buildReport(current, event, cpuRatio, toEpochMs) });
+      })
+      .catch((error) => reportError('reporting failed', error));
+  };
 
-    const nowMs = Date.now();
-    const toEpochMs = (us: number) => Math.round(nowMs - (hrUs() - us) / 1000);
-    const report: BlockReport = {
+  const buildReport = (
+    current: Block,
+    event: Extract<DetectorEvent, { type: 'block-end' }>,
+    cpuRatio: number,
+    toEpochMs: (us: number) => number
+  ): BlockReport => {
+    return {
       blockedMs: Math.round(event.blockedMs),
       startedAt: toEpochMs(event.startedAt * 1000),
       endedAt: toEpochMs(event.endedAt * 1000),
@@ -213,7 +229,6 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
       omittedCandidates: current.omittedCandidates,
       profile: summarize(current, event.endedAt * 1000),
     };
-    post({ type: 'report', report });
   };
 
   const onLiveNotice = (event: Extract<DetectorEvent, { type: 'live-notice' }>) => {
@@ -230,9 +245,8 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
     });
   };
 
-  // Only block-end handling awaits the inspector; everything else is synchronous so that live
-  // notices are never queued behind inspector calls the blocked main thread cannot service.
-  let reports: Promise<void> = Promise.resolve();
+  // Event handling is synchronous so that live notices are never queued behind inspector calls
+  // the blocked main thread cannot service.
   const handle = (event: DetectorEvent) => {
     switch (event.type) {
       case 'block-start':
@@ -245,10 +259,7 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
         }
         return;
       case 'block-end':
-        reports = reports
-          .then(() => onBlockEnd(event))
-          .catch((error) => reportError('reporting failed', error));
-        return;
+        return onBlockEnd(event);
     }
   };
 
