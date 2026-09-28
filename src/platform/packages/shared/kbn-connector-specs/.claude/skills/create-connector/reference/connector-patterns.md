@@ -231,6 +231,68 @@ export const YourMcpConnector: ConnectorSpec = {
 - GitHub: `src/platform/packages/shared/kbn-connector-specs/src/specs/github/github.ts`
 - Tavily: `src/platform/packages/shared/kbn-connector-specs/src/specs/tavily/tavily.ts`
 
+## HTTP Response Handling in Handlers
+
+`ctx.request` is Axios-backed, and three of its defaults are wrong for a connector action. Each one
+produces a bug that type-checks, lints, and passes mocked unit tests — a mock returns whatever you tell
+it to, so none of these surface until a real service responds.
+
+### Do not let a request follow redirects when it carries a credential in a custom header
+
+Axios follows redirects by default and strips only the *standard* authorization headers on a cross-host
+redirect. A credential in a vendor-specific header (`x-functions-key`, `x-api-key`, `private-token`) is
+forwarded to whatever host the redirect names — a live credential leak to a third party.
+
+Set `maxRedirects: 0` on any request that sends a credential in a custom header, and return the 3xx with
+its `Location` intact so the caller can decide:
+
+```typescript
+const response = await ctx.request({
+  method,
+  url: `https://${host}/${path}`,
+  headers: { 'x-functions-key': input.functionKey },
+  maxRedirects: 0,
+});
+```
+
+`jenkins.ts` and `threatq.ts` already handle redirects this way. This is not theoretical: a function app
+that redirects to its identity provider forwards the key there.
+
+### Return the service's HTTP response as a result, not an exception
+
+Axios rejects any non-2xx status, so a service deliberately answering `400`, `409`, or `500` takes the
+`catch` path. An agent then sees a connector error instead of the response it needs to handle, and cannot
+read the status, headers, or error body.
+
+For any action that proxies a call whose non-2xx answers are meaningful, pass a `validateStatus`
+predicate and return `{ status, headers, body }`:
+
+```typescript
+validateStatus: () => true,
+```
+
+**Classify on evidence, not on the status code alone.** It is tempting to keep `401`/`403` exceptional on
+the grounds that they mean a bad credential — but a service whose own code enforces user authorization
+returns those statuses too, and the status cannot tell the two apart. Excluding them by number makes the
+service's intended authorization response unreadable. Prefer returning every HTTP status as a result and
+saying so in the action `description` and the `skill` text ("check the `status` field"); reserve
+exceptions for transport failures, which have no status at all.
+
+### Follow the vendor's pagination continuation links
+
+A list action that returns only the first page silently under-reports. An agent that asks "what apps do I
+have?" and acts on a partial inventory is worse off than one that gets an error. Check the vendor's
+response envelope for a continuation field (`nextLink`, `next`, `next_cursor`, a `Link` header) and
+follow it in a helper shared by every list action, including the connectivity `test` handler if it counts
+anything.
+
+Two details that are easy to get wrong:
+
+- A continuation URL is usually absolute and already carries the api-version and a skip token. Request it
+  as-is; re-applying your own `params` corrupts it.
+- Cap the number of pages followed, and report the cap in the result (e.g. `truncated: true`) so an agent
+  narrows its query rather than treating a capped list as complete.
+
 ## Schema UI Configuration
 
 Schema config fields define the "Connector settings" section of the creation form. Every field in the `schema` object **must** have `.meta()` with at least a `label`, or the field will render as an unlabeled input.
@@ -508,6 +570,17 @@ Every `isTool: true` action **must** include an explicit `scope` field. This is 
 
 **Decision rule**: if the action only sends GET requests (or equivalent read-only API calls), use `'read'`. If it creates new, distinct records without touching existing ones, use `'write'`. If it can overwrite, update, or remove, use `'destroy'`. When uncertain, prefer `'destroy'` — it's safer to over-classify than under-classify.
 
+**Classify on the HTTP method and the documented side effect, not on the action's name.** A vendor route
+whose name reads like a read can still mutate: `listSyncFunctionTriggers` is a `POST` that
+re-synchronizes an app's deployed trigger metadata, so it is `'destroy'`, not `'read'`. Go through every
+action and ask what the request *does* to the service; a `list`/`get`/`sync` prefix on a `POST` or
+`PATCH` is a signal to re-check, not a reason to trust the name.
+
+**When live testing disproves a vendor's documented behaviour, fix every place that encoded the old
+assumption.** Correcting only the `description` leaves the `scope`, the test mock, the auth `helpText`,
+the `skill` text, and the docs page still asserting something you now know is false. Grep the connector
+directory and the docs page for the disproven claim and change all of them in one pass.
+
 ```typescript
 // Read-only lookup
 listIssues: {
@@ -572,6 +645,22 @@ Every Zod parameter should have a `.describe()` call that gives the agent the co
   Bounding only the elements' string length still leaves an unbounded *number* of elements/entries as a DoS
   vector, and if the array is later joined into a query string, an oversized array also risks an oversized
   upstream request.
+- **Bound a free-form JSON body by its serialized size** — a field typed `z.unknown()`/`z.any()` (a
+  request body forwarded verbatim to the service) has no shape to constrain, but it still gets allocated
+  and serialized on the Kibana server. Bound it in a `.refine()` that serializes the value, and reject a
+  value that cannot be serialized at all (a cycle, a `BigInt`) there rather than letting it fail opaquely
+  inside the HTTP client.
+- **Measure a byte bound in bytes, not in `String.length`** — `JSON.stringify(value).length` counts
+  UTF-16 code units, so a limit advertised as "1 MiB" lets roughly 1 M CJK characters through and sends
+  roughly 3 MiB upstream. Use `Buffer.byteLength(serialized, 'utf8')` when the bound is stated in bytes,
+  and add a non-ASCII boundary test — an ASCII-only test passes either way and proves nothing.
+- **A path/route pattern must be checked in both directions** — a regex that constrains a value
+  interpolated into a URL has two jobs: accept every legitimate value and reject every escape. Test both
+  sets explicitly, because a pattern can fail at both at once. An allowlist like `[A-Za-z0-9._~/-]`
+  rejects a legitimately percent-encoded segment (`api/users/alice%40example.com`) *and* accepts
+  `//evil.com/x`, which a client reads as a protocol-relative URL to another host. Allow the RFC 3986
+  `pchar` set minus `:` plus `%XX` triplets, exclude a leading `//`, and pin the accept and reject cases
+  as table-driven tests. Dropping `:` is what stops `http://evil.com` parsing as a relative path.
 - **Require "at least one of" for optional-only update inputs** — if an action updates a resource and
   every field is `.optional()`, an empty/no-op call is a silent bug. Add `.refine((v) => v.fieldA !== undefined || v.fieldB !== undefined, { message: '...' })`
   to the schema.

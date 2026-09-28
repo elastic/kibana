@@ -160,12 +160,39 @@ research as having non-obvious update, serialization, or query-string-vs-body se
 asserts on the *exact* request shape sent (URL, method, body, and params/paramsSerializer) against what the
 docs say the vendor expects — not just that the handler resolves without throwing.
 
+A mock also goes stale. When live testing or vendor docs disprove a response shape you had assumed, the
+mock that encodes the old shape is a second place to fix — and a test that never asserts on the handler's
+return value will keep passing with the wrong mock in place. Assert the returned value, not just that the
+call resolved.
+
+**Write tests for the paths live testing will not reach.** Verifying a connector against one real account
+exercises the happy path and little else. The edges that review finds instead are predictable, so cover
+them with unit tests up front:
+
+- a non-2xx response from the service returned as a result, with its error body intact
+- a 3xx response, asserting both `maxRedirects: 0` and the returned `Location`
+- a multi-page list response, asserting every page is followed and that the page cap reports `truncated`
+- an over-sized input rejected at the schema boundary, including a **non-ASCII** case for any byte bound
+- every accept *and* reject case of a path/route regex, table-driven
+
 ### Self-review before handing off
 
 Before treating the connector as done, re-read the whole diff once, end to end, specifically hunting for:
 
 - Any `isTool: true` action missing a `scope` field — every tool action must have one
 - A `scope` that looks wrong: a "get"/"list"/"search" action marked `write` or `destroy`, or an update/delete/patch action marked `read`
+- A `scope: 'read'` on an action whose request is a `POST`/`PATCH` — check what the route does to the
+  service rather than trusting a read-sounding action name
+- Any request carrying a credential in a custom header (`x-api-key`, `x-functions-key`, `private-token`)
+  without `maxRedirects: 0` — axios forwards a custom header across a cross-host redirect
+- An action that proxies a call to caller-controlled code or a caller-named route, with no
+  `validateStatus` — a deliberate non-2xx answer becomes a connector error the agent cannot inspect
+- A status code used as the sole evidence for a classification (e.g. treating every 401/403 as a bad
+  credential) — the service's own authorization responses are indistinguishable by status
+- A list action that reads `response.data.value` (or equivalent) without following the vendor's
+  continuation link
+- A size bound measured with `.length` on a serialized string where the message says "bytes"
+- A regex guarding a URL path that has only been tested for what it accepts, never for what it must reject
 - Handlers still typed with implicit `any` (missing the `input: XInput` annotation)
 - `test.enabled` missing or set to `false`
 - Leftover schemas/constants from earlier iterations that are no longer referenced anywhere
@@ -214,6 +241,30 @@ This step requires documentation skills from https://github.com/elastic/elastic-
 
 1. Read 1-2 existing connector docs from `docs/reference/connectors-kibana/` as templates (for example, `zendesk-action-type.md`, `jira-cloud-action-type.md`). Follow the same structure.
 2. Write the new doc page. Use `docs-syntax-help` if unsure about MyST Markdown syntax.
+
+   Three things a template page will not teach you:
+
+   - **State what the connector can be used with.** A recent convention, because it is common for a
+     connector to work with only Agent Builder or only Workflows. A first-PR connector ships
+     `supportedFeatureIds: ['agentBuilder']` (see Step 2), so the page must say so rather than implying
+     workflow support — follow `gitlab-action-type.md`:
+
+     ```
+     ::::{note}
+     This connector is currently available in **Agent Builder** only. Workflow support is planned for a
+     future release.
+     ::::
+     ```
+
+     Check the opening sentence too: "a workflow or agent can..." promises the same thing in prose.
+   - **Do not use internal vocabulary.** "custom connector", "MCP-native", "connector spec" and
+     "stack connector" are our words for our implementation; a reader has no way to tell what a
+     *non*-custom connector would be. Describe what the connector does instead.
+   - **Do not interrupt a Markdown table.** A paragraph inserted between two rows ends the table, and
+     every row after it renders as raw pipe-delimited text with no header of its own. When you add a note
+     about an action, put it below the final row — then count the rendered rows against the number of
+     actions to confirm the table is still contiguous.
+
 3. Run these skills on the new file and fix any issues:
    - `frontmatter-description` — generate the `description` frontmatter field
    - `page-opening-optimizer` — verify H1 and opening paragraph
