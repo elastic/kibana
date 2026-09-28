@@ -2,11 +2,11 @@
 
 exports[`LoginForm login selector properly switches to login form -> login help and back: Login Help 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
   data-test-subj="loginHelp"
 >
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText emotion-euiText-s"
   >
     <p>
       <strong>
@@ -19,11 +19,11 @@ exports[`LoginForm login selector properly switches to login form -> login help 
 
 exports[`LoginForm login selector properly switches to login help: Login Help 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
   data-test-subj="loginHelp"
 >
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText emotion-euiText-s"
   >
     <p>
       <strong>
@@ -36,11 +36,11 @@ exports[`LoginForm login selector properly switches to login help: Login Help 1`
 
 exports[`LoginForm properly switches to login help: Login Help 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
   data-test-subj="loginHelp"
 >
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText emotion-euiText-s"
   >
     <p>
       <strong>
@@ -53,7 +53,7 @@ exports[`LoginForm properly switches to login help: Login Help 1`] = `
 
 exports[`LoginForm renders as expected 1`] = `
 <div
-  class="euiPanel euiPanel--transparent euiPanel--paddingMedium emotion-euiPanel-grow-m-m-transparent"
+  class="euiPanel euiPanel--transparent euiPanel--paddingMedium emotion-euiPanel-grow-m-m-transparent-hasBorder"
   data-test-subj="loginForm"
 >
   <form>
@@ -180,7 +180,7 @@ exports[`LoginForm renders as expected 1`] = `
         class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <button
-          class="euiButton emotion-euiButtonDisplay-m-fullWidth-defaultMinWidth-fill-primary"
+          class="euiButton emotion-euiButtonDisplay-m-fullWidth-fill-primary"
           data-test-subj="loginSubmit"
           type="submit"
         >
