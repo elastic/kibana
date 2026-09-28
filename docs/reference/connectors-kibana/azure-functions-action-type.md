@@ -50,7 +50,7 @@ The `invoke` action does not use the service principal token. It authenticates w
 
 | Action | Description |
 |--------|-------------|
-| `invoke` | Invoke an HTTP-triggered function and return its status, headers, and body. Any status the function returns is reported in the `status` field rather than raised as an error; only an authentication failure or a transport error throws. Parameters: `resourceGroupName`, `functionAppName`, `functionName` (all three required), `method`, `route`, `body`, `query`, `functionKey`. |
+| `invoke` | Invoke an HTTP-triggered function and return its status, headers, and body. Any status the function returns is reported in the `status` field rather than raised as an error; only a transport error throws. A 401 or 403 is reported too, because a function that enforces its own user authorization answers with those statuses and they cannot be distinguished from a missing or wrong key. Parameters: `resourceGroupName`, `functionAppName`, `functionName` (all three required), `method`, `route`, `body`, `query`, `functionKey`. |
 | `listFunctionKeys` | Read the function-level keys of one function, as a name-to-key map. Parameters: `resourceGroupName`, `functionAppName`, `functionName` (all three required). |
 | `getFunctionApp` | Get a function app's configuration and running state. Parameters: `resourceGroupName`, `functionAppName` (both required). |
 | `restartFunctionApp` | Restart a function app. Parameters: `resourceGroupName`, `functionAppName` (both required), `softRestart`, `synchronous`. |
