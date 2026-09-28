@@ -170,12 +170,14 @@ describe('AuthenticateAndDeployStep', () => {
       awsServicesMap: awsServicesMapWithMI,
       deploymentMethod: 'managed_integration',
       setDeploymentMethod: jest.fn(),
+      authenticateAndDeployStep: { authMethod: 'identity_federation', connectorId: null },
       detectAndReviewStep: {
         serviceStatuses: {},
         policyIdsByInstance: {},
         onboardingDeploymentId: undefined,
       },
       updateDetectAndReviewStep: jest.fn(),
+      removeDeployInstances: jest.fn(),
     });
     mockUseOnboardingSO.mockReturnValue({
       createDeployment: jest.fn().mockResolvedValue(null),
