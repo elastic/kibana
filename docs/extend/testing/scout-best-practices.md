@@ -548,7 +548,7 @@ test.beforeEach(async ({ browserAuth }) => {
 await browserAuth.loginAsViewer();
 
 // custom role for finer-grained control
-await browserAuth.loginWithCustomRole('logs_analyst', {
+await browserAuth.loginWithCustomRole({
   elasticsearch: {
     indices: [{ names: ['logs-*'], privileges: ['read'] }],
   },
