@@ -13,7 +13,7 @@
  */
 
 import React from 'react';
-import { render, act } from '@testing-library/react';
+import { render, act, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
@@ -44,14 +44,39 @@ jest.mock('../../common/lib/kibana', () => ({
 
 // QueriesField transitively pulls in QueryFlyout / PackQueriesTable via lazy
 // children — stub them out so we only render the uploader + field-array shell.
+// Capture flyout / table callbacks so edit-save and toggle+bulk-delete can
+// drive the field without mounting those trees.
+let capturedFlyoutOnSave: ((query: Record<string, unknown>) => Promise<void> | void) | null = null;
+let capturedTableProps: {
+  data: Array<Record<string, unknown>>;
+  onToggleEnabled?: (item: Record<string, unknown>, enabled: boolean) => void;
+  onEditClick?: (item: Record<string, unknown>) => void;
+  setSelectedItems?: (items: Array<Record<string, unknown>>) => void;
+} | null = null;
+
 jest.mock('../queries/query_flyout', () => ({
-  QueryFlyout: () => <div data-test-subj="query-flyout-stub" />,
+  QueryFlyout: ({
+    onSave,
+  }: {
+    onSave: (query: Record<string, unknown>) => Promise<void> | void;
+  }) => {
+    capturedFlyoutOnSave = onSave;
+
+    return <div data-test-subj="query-flyout-stub" />;
+  },
 }));
 
 jest.mock('../pack_queries_table', () => ({
-  PackQueriesTable: ({ data }: { data: unknown[] }) => (
-    <div data-test-subj="pack-queries-table">{`rows: ${data.length}`}</div>
-  ),
+  PackQueriesTable: (props: {
+    data: Array<Record<string, unknown>>;
+    onToggleEnabled?: (item: Record<string, unknown>, enabled: boolean) => void;
+    onEditClick?: (item: Record<string, unknown>) => void;
+    setSelectedItems?: (items: Array<Record<string, unknown>>) => void;
+  }) => {
+    capturedTableProps = props;
+
+    return <div data-test-subj="pack-queries-table">{`rows: ${props.data.length}`}</div>;
+  },
 }));
 
 // Capture the onChange callback from OsqueryPackUploader so we can trigger
@@ -69,10 +94,6 @@ jest.mock('./pack_uploader', () => ({
 
     return <div data-test-subj="osquery-pack-uploader">Upload</div>;
   },
-}));
-
-jest.mock('../pack_queries_table', () => ({
-  PackQueriesTable: () => <div data-test-subj="pack-queries-table">Table</div>,
 }));
 
 // ---------------------------------------------------------------------------
@@ -99,6 +120,8 @@ interface UploadedQueryState {
   interval?: string | number;
   timeout?: number;
   query?: string;
+  enabled?: boolean;
+  result_type?: string;
 }
 let capturedQueriesState: UploadedQueryState[] = [];
 const FormStateProbe: React.FC = () => {
@@ -110,11 +133,14 @@ const FormStateProbe: React.FC = () => {
 
 // Wrapper that provides FormProvider with a fresh useForm instance matching
 // the shape QueriesField reads via useWatch().
-const FormWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const FormWrapper: React.FC<{
+  children: React.ReactNode;
+  defaultQueries?: UploadedQueryState[];
+}> = ({ children, defaultQueries = [] }) => {
   const methods = useForm<Record<string, unknown>>({
     defaultValues: {
       name: '',
-      queries: [],
+      queries: defaultQueries,
       schedule_type: undefined,
       interval: undefined,
       rrule_schedule: undefined,
@@ -129,11 +155,11 @@ const FormWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   );
 };
 
-const renderQueriesField = () =>
+const renderQueriesField = (defaultQueries?: UploadedQueryState[]) =>
   render(
     <EuiProvider>
       <IntlProvider locale="en">
-        <FormWrapper>
+        <FormWrapper defaultQueries={defaultQueries}>
           <QueriesField euiFieldProps={{}} />
         </FormWrapper>
       </IntlProvider>
@@ -147,6 +173,8 @@ describe('QueriesField', () => {
   beforeEach(() => {
     capturedUploaderOnChange = null;
     capturedQueriesState = [];
+    capturedFlyoutOnSave = null;
+    capturedTableProps = null;
     jest.clearAllMocks();
   });
 
@@ -194,6 +222,85 @@ describe('QueriesField', () => {
       // populated from the uploaded content, not left empty.
       expect(byId['uptime-check'].query).toBe('select * from uptime;');
       expect(byId['fallback-query'].query).toBe('select 1;');
+    });
+  });
+
+  describe('toggle enabled and bulk delete', () => {
+    const seedQueries = [
+      { id: 'q1', query: 'select 1;', interval: 3600 },
+      { id: 'q2', query: 'select 2;', interval: 3600 },
+      { id: 'q3', query: 'select 3;', interval: 3600 },
+    ];
+
+    it('deletes the selected query after toggling enabled, not the last row', () => {
+      const { getByRole } = renderQueriesField(seedQueries);
+
+      expect(capturedTableProps).not.toBeNull();
+
+      // Select first, then toggle — `update()` replaces the row object so
+      // selection still holds the pre-toggle identity. Delete must resolve
+      // by `id`, otherwise `indexOf` is `-1` and RHF splices the last row.
+      act(() => {
+        capturedTableProps!.setSelectedItems?.([capturedTableProps!.data[0]]);
+      });
+      act(() => {
+        capturedTableProps!.onToggleEnabled?.(capturedTableProps!.data[0], false);
+      });
+
+      fireEvent.click(getByRole('button', { name: /Delete 1 query/ }));
+
+      expect(capturedQueriesState.map((query) => query.id)).toEqual(['q2', 'q3']);
+      expect(capturedQueriesState[0].enabled).toBeUndefined();
+    });
+  });
+
+  describe('edit-draft result_type and enabled', () => {
+    it('writes result_type and preserves enabled on edit save', async () => {
+      renderQueriesField([{ id: 'q1', query: 'select 1;', interval: 3600, enabled: false }]);
+
+      expect(capturedTableProps).not.toBeNull();
+      act(() => {
+        capturedTableProps!.onEditClick?.(capturedTableProps!.data[0]);
+      });
+
+      expect(capturedFlyoutOnSave).not.toBeNull();
+      await act(async () => {
+        await capturedFlyoutOnSave!({
+          id: 'q1',
+          query: 'select 1;',
+          interval: 3600,
+          result_type: 'differential',
+        });
+      });
+
+      expect(capturedQueriesState).toHaveLength(1);
+      expect(capturedQueriesState[0].result_type).toBe('differential');
+      expect(capturedQueriesState[0].enabled).toBe(false);
+    });
+
+    it('deletes result_type from the draft when the flyout omits it', async () => {
+      renderQueriesField([
+        {
+          id: 'q1',
+          query: 'select 1;',
+          interval: 3600,
+          result_type: 'differential',
+        },
+      ]);
+
+      act(() => {
+        capturedTableProps!.onEditClick?.(capturedTableProps!.data[0]);
+      });
+
+      await act(async () => {
+        await capturedFlyoutOnSave!({
+          id: 'q1',
+          query: 'select 1;',
+          interval: 3600,
+        });
+      });
+
+      expect(capturedQueriesState[0].result_type).toBeUndefined();
     });
   });
 });

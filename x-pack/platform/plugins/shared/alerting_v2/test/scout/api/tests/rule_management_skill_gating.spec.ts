@@ -7,6 +7,7 @@
 
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
@@ -21,10 +22,11 @@ const getSkillIds = (results: Array<{ id: string }>) => results.map((skill) => s
 
 /*
  * Alerting V2 Agent Builder skills (`rule-management` and
- * `action-policy-management`) are gated behind BOTH the agent builder
- * experimental-features advanced setting AND the `alerting:v2:enabled`
- * advanced setting. Both must be enabled for the skills to be listed, so this
- * suite exercises each gate independently as well as the combined case.
+ * `action-policy-management`) are gated behind the Agent Builder
+ * experimental-features advanced setting and `alerting:v2:enabled`. Both
+ * skills also share one additional, space-scoped gate:
+ * `alerting:v2:experimentalFeatures`. This suite exercises all gates before
+ * asserting either skill is listed.
  *
  * This is the canonical gating suite because the generic Scout config leaves
  * `alerting:v2:enabled` unpinned, so it can be flipped on and off at runtime.
@@ -38,6 +40,7 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
   // assertion throws.
   apiTest.afterEach(async ({ apiClient, kbnClient, requestAuth }) => {
     await kbnClient.uiSettings.unset(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+    await kbnClient.uiSettings.unset(ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID);
     const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
     await apiClient.delete(
       `${GLOBAL_SETTINGS_API}/${encodeURIComponent(ALERTING_V2_ENABLED_SETTING)}`,
@@ -117,11 +120,39 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
   );
 
   apiTest(
-    'lists the alerting V2 skills once both gates are enabled',
+    'does not list either Alerting V2 skill when its experimental gate is disabled',
     { tag: tags.stateful.classic },
     async ({ apiClient, kbnClient, requestAuth }) => {
       await kbnClient.uiSettings.update({
         [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
+      });
+
+      const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
+      const headers = { ...COMMON_HEADERS, ...apiKeyHeader };
+
+      const setResponse = await apiClient.post(
+        `${GLOBAL_SETTINGS_API}/${ALERTING_V2_ENABLED_SETTING}`,
+        { headers, body: { value: true }, responseType: 'json' }
+      );
+      expect(setResponse).toHaveStatusCode(200);
+
+      const response = await apiClient.get(SKILLS_API, { headers, responseType: 'json' });
+      expect(response).toHaveStatusCode(200);
+      expect(Array.isArray(response.body.results)).toBe(true);
+
+      const skillIds = getSkillIds(response.body.results);
+      expect(skillIds).not.toContain(RULE_MANAGEMENT_SKILL_ID);
+      expect(skillIds).not.toContain(ACTION_POLICY_MANAGEMENT_SKILL_ID);
+    }
+  );
+
+  apiTest(
+    'lists both Alerting V2 skills when all applicable gates are enabled',
+    { tag: tags.stateful.classic },
+    async ({ apiClient, kbnClient, requestAuth }) => {
+      await kbnClient.uiSettings.update({
+        [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
+        [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
       });
 
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();

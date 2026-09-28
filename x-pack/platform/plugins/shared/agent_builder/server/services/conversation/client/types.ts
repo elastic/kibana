@@ -26,7 +26,7 @@ import type {
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state';
-import type { TimelineEvent, UserIdAndName } from '@kbn/agent-builder-common';
+import type { ConversationEvent, TimelineEvent, UserIdAndName } from '@kbn/agent-builder-common';
 import type { ConversationWithoutRoundsWithPermissions } from '../../../../common/http_api/conversations';
 
 export type ConversationCreateRequest = Omit<
@@ -77,8 +77,8 @@ export interface GetEventsOptions {
 /** Appends timeline events onto a conversation.*/
 export interface AppendEventsRequest {
   id: string;
-  /** Timeline events to append; already materialized (ids, actor, created_at set). */
-  events: TimelineEvent[];
+  /** Events to append; must be fully materialized (id, actor, created_at set). */
+  events: ConversationEvent[];
   /** Generated title to persist in the same write (rides the END append). */
   title?: string;
   /** Round status to persist alongside the append. */

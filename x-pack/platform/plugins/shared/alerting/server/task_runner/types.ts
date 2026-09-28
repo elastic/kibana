@@ -14,7 +14,6 @@ import type {
   UiSettingsServiceStart,
 } from '@kbn/core/server';
 import type { ConcreteTaskInstance, DecoratedError } from '@kbn/task-manager-plugin/server';
-import type { ConvertUiamAPIKeysResponse } from '@kbn/core-security-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
@@ -105,6 +104,12 @@ export interface RunRuleParams<Params extends RuleTypeParams> {
    * to look at the raw `apiKey`/`uiamApiKey` fields again.
    */
   effectiveApiKey: string | null;
+  /**
+   * Id of the UIAM API key in `effectiveApiKey`, so the connector tasks the run enqueues record
+   * it and the API key invalidation task's in-use guard can find them. Undefined when the run
+   * did not resolve to the UIAM key.
+   */
+  uiamApiKeyId?: string;
   fakeRequest: KibanaRequest;
   rule: SanitizedRule<Params> & { snoozedInstances: RawRuleSnoozedInstance[] };
   validatedParams: Params;
@@ -239,11 +244,6 @@ export interface TaskRunnerContext {
   getEventLogClient: (request: KibanaRequest) => IEventLogClient;
   isServerless: boolean;
   shouldGrantUiam?: boolean;
-  /**
-   * Converts Elasticsearch API keys into UIAM ones. Used to re-grant a rule's UIAM API key when a
-   * run fails because UIAM no longer knows the stored key. Absent when UIAM is not configured.
-   */
-  uiamConvert?: (keys: string[]) => Promise<ConvertUiamAPIKeysResponse | null>;
 }
 
 export interface AsyncSearchClient<T extends AsyncSearchParams> {

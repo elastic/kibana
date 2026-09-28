@@ -9,12 +9,12 @@
 
 import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type {
+  DiscoverSessionApiEsqlTabBase,
+  DiscoverSessionApiTabBase,
+} from '@kbn/as-code-discover-schema';
+import type {
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableState,
-  DiscoverSessionEsqlTab,
-  DiscoverSessionTab,
-} from '../../server';
-import type {
   SearchEmbeddableByValueState,
   SearchEmbeddablePanelApiState,
   SearchEmbeddableState,
@@ -28,7 +28,9 @@ export function isDiscoverSessionEmbeddableByReferenceState(
   return 'ref_id' in state;
 }
 
-export function isDiscoverSessionEsqlTab(tab: DiscoverSessionTab): tab is DiscoverSessionEsqlTab {
+export function isDiscoverSessionEsqlTab(
+  tab: DiscoverSessionApiTabBase
+): tab is DiscoverSessionApiEsqlTabBase {
   return 'data_source' in tab && tab.data_source.type === AS_CODE_ESQL_DATA_SOURCE_TYPE;
 }
 

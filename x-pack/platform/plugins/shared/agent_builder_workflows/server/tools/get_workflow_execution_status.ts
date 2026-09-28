@@ -65,6 +65,7 @@ export const getWorkflowExecutionStatusTool = ({
           executionId,
           spaceId,
           workflowApi,
+          request,
         });
 
         if (execution) {

@@ -17,7 +17,7 @@ consts:
   actionMetadata:
     name: Isolate host
     description: Isolates Elastic Defend endpoints from the network. Only Elastic Defend retains connectivity.
-    category: contain
+    category: respond
     impact: high
     reversible: true
     approvalPolicy: always-gate

@@ -30,6 +30,7 @@
     "@kbn/core-di",
     "@kbn/core-di-browser",
     "@kbn/core-di-server",
+    "@kbn/esql",
     "@kbn/esql-utils",
     "@kbn/response-ops-retry-service",
     "@kbn/core-application-browser",
@@ -93,6 +94,7 @@
     "@kbn/expressions-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/field-formats-plugin",
+    "@kbn/flyout-template",
     "@kbn/charts-plugin",
     "@kbn/unified-data-table",
     "@kbn/unified-histogram",
@@ -105,6 +107,7 @@
     "@kbn/share-plugin",
     "@kbn/deeplinks-analytics",
     "@kbn/deeplinks-agent-builder",
+    "@kbn/deeplinks-observability",
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/core-user-profile-browser",
     "@kbn/datemath",
@@ -148,7 +151,10 @@
     "@kbn/security-authorization-core",
     "@kbn/security-plugin-types-server",
     "@kbn/core-test-helpers-model-versions",
-    "@kbn/content-list-common"
+    "@kbn/content-list-common",
+    "@kbn/core-ui-settings-server",
+    "@kbn/licensing-plugin",
+    "@kbn/licensing-types"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

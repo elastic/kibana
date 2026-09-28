@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AppDeepLink } from '@kbn/core/public';
+import type { AppDeepLink, Capabilities } from '@kbn/core/public';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 // Page-load critical: this module is reachable synchronously from `plugin.ts`, so it must not import
 // from `pages/**`. Every title it needs lives in the chrome translations module for that reason.
@@ -16,48 +16,56 @@ import * as i18n from './components/app_chrome/translations';
  *
  * Ids are `SecurityPageName` values so the solution navigation can reference the same registry the
  * rest of Security uses, via `alertZeroLink()`.
+ *
+ * @param capabilities Optional Kibana capabilities object. When absent (e.g. at setup time before
+ * capabilities are resolved) all links are included. When present, links guarded by a specific
+ * capability are omitted when that capability is false. The escalations link requires
+ * `capabilities.agenticInvestigations.showEscalations`.
  */
-export const getAlertZeroDeepLinks = (): AppDeepLink[] => [
-  {
-    id: SecurityPageName.alertZeroChats,
-    title: i18n.NAV_CHATS,
-    path: '/chats',
-    visibleIn: ['globalSearch', 'projectSideNav'],
-  },
-  {
-    id: SecurityPageName.alerts,
-    title: i18n.NAV_ALERTS,
-    path: '/alerts',
-    visibleIn: ['globalSearch', 'projectSideNav'],
-  },
-  {
-    id: SecurityPageName.attacks,
-    title: i18n.NAV_ATTACKS,
-    path: '/attacks',
-    visibleIn: ['globalSearch', 'projectSideNav'],
-  },
-  {
-    id: SecurityPageName.alertZeroRecords,
-    title: i18n.NAV_RECORDS,
-    path: '/records',
-    visibleIn: ['globalSearch', 'projectSideNav'],
-  },
-  {
-    id: SecurityPageName.alertZeroThreatHunt,
-    title: i18n.NAV_THREAT_HUNT,
-    path: '/threat-hunt',
-    visibleIn: ['globalSearch', 'projectSideNav'],
-  },
-  {
-    id: SecurityPageName.alertZeroStreams,
-    title: i18n.NAV_STREAMS,
-    path: '/streams',
-    visibleIn: ['globalSearch', 'projectSideNav'],
-  },
-  {
-    id: SecurityPageName.alertZeroWatches,
-    title: i18n.NAV_WATCHES,
-    path: '/watches',
-    visibleIn: ['globalSearch', 'projectSideNav'],
-  },
-];
+export const getAlertZeroDeepLinks = (capabilities?: Capabilities): AppDeepLink[] => {
+  const showEscalations =
+    capabilities === undefined || capabilities.agenticInvestigations?.showEscalations !== false;
+
+  return [
+    {
+      id: SecurityPageName.alerts,
+      title: i18n.NAV_ALERTS,
+      path: '/alerts',
+      visibleIn: ['globalSearch', 'projectSideNav'],
+    },
+    {
+      id: SecurityPageName.attacks,
+      title: i18n.NAV_ATTACKS,
+      path: '/attacks',
+      visibleIn: ['globalSearch', 'projectSideNav'],
+    },
+    {
+      id: SecurityPageName.alertZeroThreatHunt,
+      title: i18n.NAV_THREAT_HUNT,
+      path: '/threat-hunt',
+      visibleIn: ['globalSearch', 'projectSideNav'],
+    },
+    {
+      id: SecurityPageName.alertZeroStreams,
+      title: i18n.NAV_STREAMS,
+      path: '/streams',
+      visibleIn: ['globalSearch', 'projectSideNav'],
+    },
+    ...(showEscalations
+      ? [
+          {
+            id: SecurityPageName.alertZeroEscalations,
+            title: i18n.NAV_ESCALATIONS,
+            path: '/escalations',
+            visibleIn: ['globalSearch', 'projectSideNav'] as AppDeepLink['visibleIn'],
+          },
+        ]
+      : []),
+    {
+      id: SecurityPageName.alertZeroWatches,
+      title: i18n.NAV_WATCHES,
+      path: '/watches',
+      visibleIn: ['globalSearch', 'projectSideNav'],
+    },
+  ];
+};

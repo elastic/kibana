@@ -1,0 +1,512 @@
+{
+  "sha1": "52c53977285cce49042a26b1e58be799605dbd73",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "d7094cddc0c6f94-cb1e9e4209be320",
+      "title": "Escalation access control — private escalations and collaborators a collaborator (editor) can see the private escalation in their list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/access_control.spec.ts",
+        "line": 107,
+        "column": 10
+      }
+    },
+    {
+      "id": "d7094cddc0c6f94-8cbfae84dd6cb6f",
+      "title": "Escalation access control — private escalations and collaborators an unrelated user (viewer) cannot see the private escalation in their list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/access_control.spec.ts",
+        "line": 122,
+        "column": 7
+      }
+    },
+    {
+      "id": "d7094cddc0c6f94-a1846c3e5b72580",
+      "title": "Escalation access control — private escalations and collaborators PATCH title from a collaborator returns 404 — title update requires owner access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/access_control.spec.ts",
+        "line": 133,
+        "column": 30
+      }
+    },
+    {
+      "id": "404003fa1507e8e-565294cbf08d984",
+      "title": "POST /internal/investigations/escalations — create escalation creates a public escalation and returns 200",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/create.spec.ts",
+        "line": 54,
+        "column": 9
+      }
+    },
+    {
+      "id": "404003fa1507e8e-05eb4d5f0422214",
+      "title": "POST /internal/investigations/escalations — create escalation copies overlapping metadata from the investigation (severity, summary)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/create.spec.ts",
+        "line": 66,
+        "column": 11
+      }
+    },
+    {
+      "id": "404003fa1507e8e-e7666583e1ac46a",
+      "title": "POST /internal/investigations/escalations — create escalation does NOT copy workflow_execution_id — investigation-only field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/create.spec.ts",
+        "line": 83,
+        "column": 17
+      }
+    },
+    {
+      "id": "404003fa1507e8e-2304942fffc4100",
+      "title": "POST /internal/investigations/escalations — create escalation does NOT copy close_reason — escalation-lifecycle field, not inherited from investigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/create.spec.ts",
+        "line": 100,
+        "column": 32
+      }
+    },
+    {
+      "id": "404003fa1507e8e-590e6b5c079e2f2",
+      "title": "POST /internal/investigations/escalations — create escalation sets status to \"open\" regardless of the investigation status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/create.spec.ts",
+        "line": 118,
+        "column": 32
+      }
+    },
+    {
+      "id": "404003fa1507e8e-6617d71727a7cf0",
+      "title": "POST /internal/investigations/escalations — create escalation sets linked_investigations to [linked_investigation_id]",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/create.spec.ts",
+        "line": 132,
+        "column": 31
+      }
+    },
+    {
+      "id": "404003fa1507e8e-721506ee04e213f",
+      "title": "POST /internal/investigations/escalations — create escalation returns 400 when public + collaborators is provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/create.spec.ts",
+        "line": 150,
+        "column": 31
+      }
+    },
+    {
+      "id": "404003fa1507e8e-83705b51fb93f87",
+      "title": "POST /internal/investigations/escalations — create escalation returns 400 when private + no collaborators",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/create.spec.ts",
+        "line": 165,
+        "column": 14
+      }
+    },
+    {
+      "id": "404003fa1507e8e-620ae790349c294",
+      "title": "POST /internal/investigations/escalations — create escalation returns 400 when linked_investigation_id points at a non-investigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/create.spec.ts",
+        "line": 176,
+        "column": 10
+      }
+    },
+    {
+      "id": "404003fa1507e8e-488b7ae3bedacfc",
+      "title": "POST /internal/investigations/escalations — create escalation returns 403 for a caller without the manage_escalations privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/create.spec.ts",
+        "line": 207,
+        "column": 44
+      }
+    },
+    {
+      "id": "404003fa1507e8e-dd89d3d7ff13c4f",
+      "title": "POST /internal/investigations/escalations — create escalation returns 404 when linked_investigation_id does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/create.spec.ts",
+        "line": 217,
+        "column": 60
+      }
+    },
+    {
+      "id": "5af0373339972fa-d7e4d83b7adfa25",
+      "title": "GET /internal/investigations/escalations — list escalations returns 200 with a pagination envelope and results array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
+        "line": 115,
+        "column": 9
+      }
+    },
+    {
+      "id": "5af0373339972fa-2dfc221e2f5af98",
+      "title": "GET /internal/investigations/escalations — list escalations includes the open escalation in results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
+        "line": 136,
+        "column": 44
+      }
+    },
+    {
+      "id": "5af0373339972fa-a26a4ec22b65d8e",
+      "title": "GET /internal/investigations/escalations — list escalations excludes the closed escalation from results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
+        "line": 147,
+        "column": 81
+      }
+    },
+    {
+      "id": "5af0373339972fa-696db01db86cc35",
+      "title": "GET /internal/investigations/escalations — list escalations excludes investigations (wrong template) from results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
+        "line": 158,
+        "column": 13
+      }
+    },
+    {
+      "id": "5af0373339972fa-c9f3bddafe268dc",
+      "title": "GET /internal/investigations/escalations — list escalations excludes private escalations the caller is not a collaborator of",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
+        "line": 166,
+        "column": 19
+      }
+    },
+    {
+      "id": "5af0373339972fa-08cc6608e95a401",
+      "title": "GET /internal/investigations/escalations — list escalations results carry template_id: \"escalation\" (never \"investigation\")",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
+        "line": 176,
+        "column": 28
+      }
+    },
+    {
+      "id": "5af0373339972fa-56ccb82745351c4",
+      "title": "GET /internal/investigations/escalations — list escalations echoes page and per_page in the pagination envelope",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
+        "line": 187,
+        "column": 11
+      }
+    },
+    {
+      "id": "5af0373339972fa-c376f456e27cca0",
+      "title": "GET /internal/investigations/escalations — list escalations viewer (escalations_read via includeIn: read) can list escalations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
+        "line": 199,
+        "column": 60
+      }
+    },
+    {
+      "id": "5af0373339972fa-baffbc22c2dfd2f",
+      "title": "GET /internal/investigations/escalations — list escalations returns 400 when per_page is 0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
+        "line": 212,
+        "column": 18
+      }
+    },
+    {
+      "id": "5af0373339972fa-eaa6ca163de3f34",
+      "title": "GET /internal/investigations/escalations — list escalations returns 400 when page * per_page exceeds the result window (10 000)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/list.spec.ts",
+        "line": 222,
+        "column": 7
+      }
+    },
+    {
+      "id": "d6f4a31f6cd5184-d39c866b9ff0b6f",
+      "title": "Escalations are isolated per Space GET list in the default Space does not include an escalation from another Space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/space_isolation.spec.ts",
+        "line": 60,
+        "column": 7
+      }
+    },
+    {
+      "id": "d6f4a31f6cd5184-1be54cee8421499",
+      "title": "Escalations are isolated per Space GET list in the custom Space includes the space-scoped escalation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/space_isolation.spec.ts",
+        "line": 77,
+        "column": 14
+      }
+    },
+    {
+      "id": "d6f4a31f6cd5184-3d1e1754dacb302",
+      "title": "Escalations are isolated per Space POST create in the default Space rejects a cross-Space investigation id with 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/space_isolation.spec.ts",
+        "line": 87,
+        "column": 4
+      }
+    },
+    {
+      "id": "5c9f7152404e3b5-fa089fd4dec0345",
+      "title": "PATCH /internal/investigations/escalations/{id} — update escalation renames the escalation and returns 200",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/update.spec.ts",
+        "line": 71,
+        "column": 13
+      }
+    },
+    {
+      "id": "5c9f7152404e3b5-8702dd3a98ed627",
+      "title": "PATCH /internal/investigations/escalations/{id} — update escalation appends a second linked investigation (does not replace)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/update.spec.ts",
+        "line": 82,
+        "column": 24
+      }
+    },
+    {
+      "id": "5c9f7152404e3b5-0bf76b579c82c26",
+      "title": "PATCH /internal/investigations/escalations/{id} — update escalation deduplicates — appending the same id twice within one request produces no duplicate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/update.spec.ts",
+        "line": 94,
+        "column": 23
+      }
+    },
+    {
+      "id": "5c9f7152404e3b5-37a1b48e70dab0d",
+      "title": "PATCH /internal/investigations/escalations/{id} — update escalation returns 400 for an empty body",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/update.spec.ts",
+        "line": 110,
+        "column": 90
+      }
+    },
+    {
+      "id": "5c9f7152404e3b5-6c6d409cbc9de1a",
+      "title": "PATCH /internal/investigations/escalations/{id} — update escalation returns 400 for an empty linked_investigations array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/update.spec.ts",
+        "line": 123,
+        "column": 55
+      }
+    },
+    {
+      "id": "5c9f7152404e3b5-39c7575c16bb859",
+      "title": "PATCH /internal/investigations/escalations/{id} — update escalation returns 400 when both title and linked_investigations are supplied together",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/update.spec.ts",
+        "line": 133,
+        "column": 78
+      }
+    },
+    {
+      "id": "5c9f7152404e3b5-54c7643a9e21bd1",
+      "title": "PATCH /internal/investigations/escalations/{id} — update escalation returns 403 for a caller without the manage_escalations privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/update.spec.ts",
+        "line": 147,
+        "column": 9
+      }
+    },
+    {
+      "id": "5c9f7152404e3b5-ea5bf2fbdafcb3e",
+      "title": "PATCH /internal/investigations/escalations/{id} — update escalation returns 404 for a nonexistent escalation id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/update.spec.ts",
+        "line": 156,
+        "column": 6
+      }
+    },
+    {
+      "id": "5c9f7152404e3b5-135169f6d057de2",
+      "title": "PATCH /internal/investigations/escalations/{id} — update escalation returns 404 when linked_investigations contains a nonexistent id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/update.spec.ts",
+        "line": 165,
+        "column": 11
+      }
+    }
+  ]
+}

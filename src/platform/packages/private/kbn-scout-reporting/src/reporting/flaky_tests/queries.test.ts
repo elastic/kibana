@@ -7,16 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ESQL_ROW_LIMIT } from './esql';
 import {
   buildBranchStatsQuery,
   buildFailingFilesQuery,
+  buildBranchCountsQuery,
+  buildFilePipelineStatsQuery,
   buildTestMetadataQuery,
   buildTestStatsQuery,
   fetchBranchStats,
   fetchFailingFiles,
+  fetchBranchCounts,
+  fetchFilePipelineStats,
   fetchSampleFailures,
+  fetchTargetStats,
   fetchTestMetadata,
   fetchTestStats,
+  fileStatsKey,
+  buildTargetStatsQuery,
   type FlakyTestQueryScope,
 } from './queries';
 
@@ -112,7 +120,13 @@ describe('buildBranchStatsQuery', () => {
       'builds = COUNT_DISTINCT(CASE(is_execution == 1, buildkite.build.id, NULL))'
     );
     expect(query).toContain(
-      'latest_status = LAST(status, @timestamp), latest_at = MAX(@timestamp)'
+      'last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)), ' +
+        'last_failed_build_url = LAST(buildkite.build.url, @timestamp) WHERE failed == 1, ' +
+        'last_failed_job_id = LAST(buildkite.job_id, @timestamp) WHERE failed == 1, ' +
+        'latest_execution_at = MAX(CASE(is_execution == 1, @timestamp, NULL)), ' +
+        'latest_status = LAST(status, @timestamp), latest_at = MAX(@timestamp), ' +
+        'latest_build_url = LAST(buildkite.build.url, @timestamp), ' +
+        'latest_job_id = LAST(buildkite.job_id, @timestamp)'
     );
     expect(query).toContain('BY test.id, buildkite.branch');
     expect(query).toContain('RENAME test.id AS test_id, buildkite.branch AS branch');
@@ -141,7 +155,13 @@ describe('fetchBranchStats', () => {
 
   it('queries once per execution model and sorts branches by failed builds', async () => {
     const { client, esql } = mockEs([]);
-    const latest = (status: string | null, at: string | null, url: string | null = null) => ({
+    const latest = (
+      status: string | null,
+      at: string | null,
+      url: string | null = null,
+      executionAt: string | null = at
+    ) => ({
+      latest_execution_at: executionAt,
       latest_status: status,
       latest_at: at,
       latest_build_url: url,
@@ -153,7 +173,7 @@ describe('fetchBranchStats', () => {
         builds: 40,
         failed_builds: 2,
         last_failed_at: '2026-09-05T00:00:00.000Z',
-        ...latest('skipped', '2026-09-06T12:00:00.000Z', 'https://b/9'),
+        ...latest('skipped', '2026-09-06T12:00:00.000Z', 'https://b/9', '2026-09-05T00:00:00.000Z'),
       },
       {
         test_id: 'j1',
@@ -187,7 +207,10 @@ describe('fetchBranchStats', () => {
         builds: 10,
         failed_builds: 5,
         last_failed_at: '2026-09-06T00:00:00.000Z',
+        last_failed_build_url: 'https://b/1',
+        last_failed_job_id: 'job-1',
         ...latest('flaky', '2026-09-06T00:00:00.000Z', 'https://b/1'),
+        latest_job_id: 'job-1',
       },
     ];
     esql
@@ -215,6 +238,7 @@ describe('fetchBranchStats', () => {
         failedBuilds: 3,
         buildFailRate: 0.375,
         lastFailedAt: new Date('2026-09-06T00:00:00.000Z'),
+        latestExecutionAt: new Date('2026-09-06T06:00:00.000Z'),
         latestRun: {
           status: 'passed',
           timestamp: new Date('2026-09-06T06:00:00.000Z'),
@@ -227,6 +251,7 @@ describe('fetchBranchStats', () => {
         failedBuilds: 2,
         buildFailRate: 0.05,
         lastFailedAt: new Date('2026-09-05T00:00:00.000Z'),
+        latestExecutionAt: new Date('2026-09-05T00:00:00.000Z'),
         latestRun: {
           status: 'skipped',
           timestamp: new Date('2026-09-06T12:00:00.000Z'),
@@ -239,6 +264,7 @@ describe('fetchBranchStats', () => {
         failedBuilds: 0,
         buildFailRate: 0,
         lastFailedAt: undefined,
+        latestExecutionAt: undefined,
         latestRun: undefined,
       },
     ]);
@@ -249,14 +275,119 @@ describe('fetchBranchStats', () => {
         failedBuilds: 5,
         buildFailRate: 0.5,
         lastFailedAt: new Date('2026-09-06T00:00:00.000Z'),
+        lastFailedBuildUrl: 'https://b/1',
+        lastFailedJobId: 'job-1',
+        latestExecutionAt: new Date('2026-09-06T00:00:00.000Z'),
         latestRun: {
           status: 'flaky',
           timestamp: new Date('2026-09-06T00:00:00.000Z'),
           buildUrl: 'https://b/1',
+          jobId: 'job-1',
         },
       },
     ]);
     expect(stats.has('f1')).toBe(false);
+  });
+});
+
+const countThresholds = { minBuilds: 10, minFailedBuilds: 2 };
+
+describe('buildBranchCountsQuery', () => {
+  it('counts builds per test and branch for the given tests, keeping only branches that clear the count thresholds', () => {
+    const query = buildBranchCountsQuery(scope, ['jest', 'ftr'], ['j1', 'f1'], countThresholds);
+
+    expect(query).toContain('@timestamp >= "2026-08-31T00:00:00.000Z"');
+    expect(query).toContain('buildkite.pipeline.slug IN ("kibana-on-merge")');
+    expect(query).toContain(
+      '(event.action == "test-end" AND reporter.type IN ("jest", "ftr") AND test.status IN ("passed", "failed", "timedOut")) AND test.id IN ("j1", "f1")'
+    );
+    expect(query).toContain('EVAL failed = CASE(test.status IN ("failed", "timedOut"), 1, 0)');
+    expect(query).toContain(
+      'STATS builds = COUNT_DISTINCT(buildkite.build.id), ' +
+        'failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)) ' +
+        'BY test.id, buildkite.branch | WHERE builds >= 10 AND failed_builds >= 2'
+    );
+    expect(query).toContain('RENAME test.id AS test_id, buildkite.branch AS branch');
+    // no LAST: the latest run is left to the branch stats query
+    expect(query).not.toContain('LAST(');
+    expect(query).not.toContain('latest_execution_at');
+  });
+});
+
+describe('fetchBranchCounts', () => {
+  const tests = [
+    { testId: 'j1', framework: 'jest' as const },
+    { testId: 'p1', framework: 'playwright' as const },
+  ];
+
+  it('returns an empty map without a query when there are no tests', async () => {
+    const { client, esql } = mockEs([]);
+
+    expect(await fetchBranchCounts(client, scope, [], countThresholds)).toEqual(new Map());
+    expect(esql).not.toHaveBeenCalled();
+  });
+
+  it('queries once per execution model and keys the rows by test, most failed builds first', async () => {
+    const { client, esql } = mockEs([]);
+    esql
+      .mockReturnValueOnce({
+        toRecords: jest.fn().mockResolvedValue({
+          records: [
+            {
+              test_id: 'j1',
+              branch: '9.5',
+              builds: 100,
+              failed_builds: 8,
+            },
+            {
+              test_id: 'j1',
+              branch: 'main',
+              builds: 500,
+              failed_builds: 10,
+            },
+            // no branch: ignored
+            { test_id: 'j1', branch: null, builds: 1, failed_builds: 1 },
+          ],
+        }),
+      })
+      .mockReturnValueOnce({ toRecords: jest.fn().mockResolvedValue({ records: [] }) });
+
+    const counts = await fetchBranchCounts(client, scope, tests, countThresholds);
+
+    expect(esql).toHaveBeenCalledTimes(2);
+    const queries = esql.mock.calls.map(([{ query }]) => query as string);
+    expect(queries[0]).toContain('test.id IN ("j1")');
+    expect(queries[1]).toContain('test.id IN ("p1")');
+
+    expect(counts.get('j1')).toEqual([
+      {
+        branch: 'main',
+        builds: 500,
+        failedBuilds: 10,
+      },
+      {
+        branch: '9.5',
+        builds: 100,
+        failedBuilds: 8,
+      },
+    ]);
+    // a test without any row is absent
+    expect(counts.has('p1')).toBe(false);
+  });
+
+  it('fails when the result hits the row limit, as the cut-off tests would pass for disqualified', async () => {
+    const { client } = mockEs(
+      Array.from({ length: ESQL_ROW_LIMIT }, () => ({
+        test_id: 'j1',
+        branch: 'main',
+        builds: 20,
+        failed_builds: 2,
+      }))
+    );
+
+    await expect(
+      fetchBranchCounts(client, scope, tests.slice(0, 1), countThresholds)
+    ).rejects.toThrow(`Per-branch counts query hit the ${ESQL_ROW_LIMIT} row limit`);
   });
 });
 
@@ -266,6 +397,8 @@ describe('buildTestMetadataQuery', () => {
 
     expect(query).toContain('test.status IN ("failed", "timedOut")');
     expect(query).toContain('title = MAX(test.title.keyword)');
+    expect(query).toContain('config_category = MAX(test_run.config.category)');
+    expect(query).toContain('suite_title = MAX(suite.title.keyword)');
     expect(query).toContain('owners = VALUES(test.file.owner)');
     expect(query).toContain('BY test.id');
   });
@@ -331,12 +464,23 @@ describe('fetchTestMetadata', () => {
       {
         test_id: 't1',
         title: 'does a thing',
+        suite_title: 'my suite',
         file_path: 'a.ts',
         config_path: 'a.config.ts',
+        config_category: 'api-test',
         owners: 'elastic/team-a',
         areas: ['platform', 'security'],
       },
-      { test_id: 't2', title: null, file_path: null, config_path: null, owners: null, areas: null },
+      {
+        test_id: 't2',
+        title: null,
+        suite_title: null,
+        file_path: null,
+        config_path: null,
+        config_category: null,
+        owners: null,
+        areas: null,
+      },
     ]);
 
     const metadata = await fetchTestMetadata(client, scope, ['jest']);
@@ -344,19 +488,41 @@ describe('fetchTestMetadata', () => {
     expect(metadata.get('t1')).toEqual({
       testId: 't1',
       title: 'does a thing',
+      suiteTitle: 'my suite',
       filePath: 'a.ts',
       configPath: 'a.config.ts',
+      configCategory: 'api-test',
       owners: ['elastic/team-a'],
       areas: ['platform', 'security'],
     });
     expect(metadata.get('t2')).toEqual({
       testId: 't2',
       title: undefined,
+      suiteTitle: undefined,
       filePath: undefined,
       configPath: undefined,
+      configCategory: undefined,
       owners: [],
       areas: [],
     });
+  });
+
+  it('treats the suite title the Jest reporter writes for tests outside any describe block as absent', async () => {
+    const { client } = mockEs([
+      {
+        test_id: 't1',
+        title: 'top-level test',
+        suite_title: 'unknown',
+        file_path: 'a.test.ts',
+        config_path: null,
+        owners: null,
+        areas: null,
+      },
+    ]);
+
+    const metadata = await fetchTestMetadata(client, scope, ['jest']);
+
+    expect(metadata.get('t1')?.suiteTitle).toBeUndefined();
   });
 });
 
@@ -384,7 +550,11 @@ describe('fetchSampleFailures', () => {
                       _source: {
                         '@timestamp': '2026-09-02T00:00:00.000Z',
                         event: { error: { message: '  boom  ' } },
-                        buildkite: { build: { url: 'https://buildkite.com/b/1' } },
+                        buildkite: {
+                          build: { url: 'https://buildkite.com/b/1' },
+                          job_id: 'job-1',
+                          step: { label: 'FTR Configs #3' },
+                        },
                       },
                     },
                     { _source: { '@timestamp': '2026-09-01T00:00:00.000Z', event: { error: {} } } },
@@ -403,6 +573,8 @@ describe('fetchSampleFailures', () => {
       {
         message: 'boom',
         buildUrl: 'https://buildkite.com/b/1',
+        jobId: 'job-1',
+        stepLabel: 'FTR Configs #3',
         timestamp: new Date('2026-09-02T00:00:00.000Z'),
       },
     ]);
@@ -419,5 +591,278 @@ describe('fetchSampleFailures', () => {
     );
     expect(request.aggs.by_test.terms.size).toBe(2);
     expect(request.aggs.by_test.aggs.latest.top_hits.size).toBe(3);
+    expect(request.aggs.by_test.aggs.latest.top_hits._source).toEqual([
+      '@timestamp',
+      'event.error.message',
+      'buildkite.build.url',
+      'buildkite.job_id',
+      'buildkite.step.label',
+    ]);
+  });
+});
+
+describe('buildTargetStatsQuery', () => {
+  it('counts builds per test and target for the given tests, within the report scope', () => {
+    const query = buildTargetStatsQuery(scope, ['jest', 'ftr'], ['t1', 't2']);
+
+    expect(query).toContain('buildkite.pipeline.slug IN ("kibana-on-merge")');
+    expect(query).toContain(
+      '(event.action == "test-end" AND reporter.type IN ("jest", "ftr") AND test.status IN ("passed", "failed", "timedOut")) AND test.id IN ("t1", "t2")'
+    );
+    // a document missing the target fields is grouped with the `unknown` target the reporters write
+    expect(query).toContain(
+      'target_mode = COALESCE(test_run.target.mode, "unknown"), ' +
+        'target_type = COALESCE(test_run.target.type, "unknown")'
+    );
+    expect(query).toContain(
+      'STATS builds = COUNT_DISTINCT(buildkite.build.id), ' +
+        'failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)), ' +
+        'last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)), ' +
+        'last_failed_build_url = LAST(buildkite.build.url, @timestamp) WHERE failed == 1, ' +
+        'last_failed_job_id = LAST(buildkite.job_id, @timestamp) WHERE failed == 1 ' +
+        'BY test.id, target_mode, target_type'
+    );
+    expect(query).toContain('RENAME test.id AS test_id');
+  });
+});
+
+describe('fetchTargetStats', () => {
+  it('returns an empty map without a query when there are no tests', async () => {
+    const { client, esql } = mockEs([]);
+
+    expect(await fetchTargetStats(client, scope, [])).toEqual(new Map());
+    expect(esql).not.toHaveBeenCalled();
+  });
+
+  it('queries once per execution model and keys the rows by test, most failed builds first', async () => {
+    const { client, esql } = mockEs([]);
+    esql
+      .mockReturnValueOnce({
+        toRecords: jest.fn().mockResolvedValue({
+          records: [
+            {
+              test_id: 'j1',
+              target_mode: 'unknown',
+              target_type: 'local',
+              builds: 40,
+              failed_builds: 2,
+              last_failed_at: '2026-09-05T00:00:00.000Z',
+            },
+          ],
+        }),
+      })
+      .mockReturnValueOnce({
+        toRecords: jest.fn().mockResolvedValue({
+          records: [
+            {
+              test_id: 'p1',
+              target_mode: 'stateful-classic',
+              target_type: 'local',
+              builds: 30,
+              failed_builds: 0,
+              last_failed_at: null,
+            },
+            {
+              test_id: 'p1',
+              target_mode: 'serverless-security_complete',
+              target_type: 'local',
+              builds: 20,
+              failed_builds: 5,
+              last_failed_at: '2026-09-06T00:00:00.000Z',
+              last_failed_build_url: 'https://b/7',
+              last_failed_job_id: 'job-7',
+            },
+          ],
+        }),
+      });
+
+    const stats = await fetchTargetStats(client, scope, [
+      { testId: 'j1', framework: 'jest' },
+      { testId: 'p1', framework: 'playwright' },
+    ]);
+
+    expect(esql).toHaveBeenCalledTimes(2);
+    const queries = esql.mock.calls.map(([{ query }]) => query as string);
+    expect(queries[0]).toContain('reporter.type IN ("jest")');
+    expect(queries[0]).toContain('test.id IN ("j1")');
+    expect(queries[1]).toContain('reporter.type IN ("playwright")');
+    expect(queries[1]).toContain('test.id IN ("p1")');
+
+    expect(stats.get('j1')).toEqual([
+      {
+        mode: 'unknown',
+        type: 'local',
+        builds: 40,
+        failedBuilds: 2,
+        buildFailRate: 0.05,
+        lastFailedAt: new Date('2026-09-05T00:00:00.000Z'),
+      },
+    ]);
+    expect(stats.get('p1')).toEqual([
+      {
+        mode: 'serverless-security_complete',
+        type: 'local',
+        builds: 20,
+        failedBuilds: 5,
+        buildFailRate: 0.25,
+        lastFailedAt: new Date('2026-09-06T00:00:00.000Z'),
+        lastFailedBuildUrl: 'https://b/7',
+        lastFailedJobId: 'job-7',
+      },
+      {
+        mode: 'stateful-classic',
+        type: 'local',
+        builds: 30,
+        failedBuilds: 0,
+        buildFailRate: 0,
+        lastFailedAt: undefined,
+      },
+    ]);
+  });
+});
+
+describe('buildFilePipelineStatsQuery', () => {
+  it('groups by file and pipeline across every pipeline and branch of the window', () => {
+    const query = buildFilePipelineStatsQuery(scope, ['jest', 'ftr'], ['j1']);
+
+    expect(query).toContain('@timestamp >= "2026-08-31T00:00:00.000Z"');
+    expect(query).not.toContain('buildkite.pipeline.slug IN');
+    expect(query).not.toContain('buildkite.branch IN');
+    expect(query).toContain('test.id IN ("j1")');
+    expect(query).toContain(
+      'failed_branches = COUNT_DISTINCT(CASE(failed == 1, buildkite.branch, NULL)), ' +
+        'failed_branch_names = VALUES(CASE(failed == 1, buildkite.branch, NULL)), ' +
+        'last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)), ' +
+        'last_failed_build_url = LAST(buildkite.build.url, @timestamp) WHERE failed == 1, ' +
+        'last_failed_job_id = LAST(buildkite.job_id, @timestamp) WHERE failed == 1, ' +
+        'last_failed_step_label = LAST(buildkite.step.label, @timestamp) WHERE failed == 1 ' +
+        'BY test.file.path, reporter.type, buildkite.pipeline.slug'
+    );
+    expect(query).toContain('WHERE failed_builds > 0');
+    expect(query).toContain(
+      'RENAME test.file.path AS file_path, reporter.type AS framework, buildkite.pipeline.slug AS pipeline'
+    );
+  });
+});
+
+describe('fetchFilePipelineStats', () => {
+  it('returns an empty map without a query when there are no tests', async () => {
+    const { client, esql } = mockEs([]);
+
+    expect(await fetchFilePipelineStats(client, scope, [])).toEqual(new Map());
+    expect(esql).not.toHaveBeenCalled();
+  });
+
+  it('keys pipeline rows by framework and file, most failed builds first, with the last failed build and job', async () => {
+    const { client } = mockEs([
+      {
+        file_path: 'a.test.ts',
+        framework: 'jest',
+        pipeline: 'kibana-pull-request',
+        builds: 700,
+        failed_builds: 140,
+        failed_branches: 100,
+        failed_branch_names: ['someone:fix-it', 'main', 'else:feature'],
+        last_failed_at: '2026-09-06T08:00:00.000Z',
+        last_failed_build_url: 'https://buildkite.com/elastic/kibana-pull-request/builds/499472',
+        last_failed_job_id: 'job-1',
+        last_failed_step_label: 'Jest Tests #3',
+      },
+      {
+        file_path: 'a.test.ts',
+        framework: 'jest',
+        pipeline: 'kibana-on-merge',
+        builds: 500,
+        failed_builds: 98,
+        failed_branches: 1,
+        failed_branch_names: 'main',
+        last_failed_at: '2026-09-06T09:00:00.000Z',
+        last_failed_build_url: null,
+        last_failed_job_id: null,
+        last_failed_step_label: null,
+      },
+      {
+        file_path: null,
+        framework: 'jest',
+        pipeline: 'x',
+        builds: 1,
+        failed_builds: 1,
+        failed_branches: 1,
+      },
+    ]);
+
+    const stats = await fetchFilePipelineStats(client, scope, [
+      { testId: 'j1', framework: 'jest' },
+    ]);
+
+    expect([...stats.keys()]).toEqual([fileStatsKey('jest', 'a.test.ts')]);
+    expect(stats.get(fileStatsKey('jest', 'a.test.ts'))).toEqual([
+      {
+        pipeline: 'kibana-pull-request',
+        builds: 700,
+        failedBuilds: 140,
+        buildFailRate: 0.2,
+        failedBranches: 100,
+        failedBranchNames: ['else:feature', 'main', 'someone:fix-it'],
+        lastFailedAt: new Date('2026-09-06T08:00:00.000Z'),
+        lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-pull-request/builds/499472',
+        lastFailedJobId: 'job-1',
+        lastFailedStepLabel: 'Jest Tests #3',
+      },
+      {
+        pipeline: 'kibana-on-merge',
+        builds: 500,
+        failedBuilds: 98,
+        buildFailRate: 0.196,
+        failedBranches: 1,
+        failedBranchNames: ['main'],
+        lastFailedAt: new Date('2026-09-06T09:00:00.000Z'),
+        lastFailedBuildUrl: undefined,
+        lastFailedJobId: undefined,
+        lastFailedStepLabel: undefined,
+      },
+    ]);
+  });
+
+  it('keeps the frameworks apart when they share a file path, within and across execution models', async () => {
+    const row = (framework: string, failedBuilds: number) => ({
+      file_path: 'shared.ts',
+      framework,
+      pipeline: 'kibana-on-merge',
+      builds: 100,
+      failed_builds: failedBuilds,
+      failed_branches: 1,
+      failed_branch_names: null,
+      last_failed_at: null,
+      last_failed_build_url: null,
+      last_failed_job_id: null,
+      last_failed_step_label: null,
+    });
+    const { client, esql } = mockEs([]);
+    esql
+      // jest and ftr share one query; each gets its own row for the path
+      .mockReturnValueOnce({
+        toRecords: jest.fn().mockResolvedValue({ records: [row('jest', 5), row('ftr', 7)] }),
+      })
+      .mockReturnValueOnce({
+        toRecords: jest.fn().mockResolvedValue({ records: [row('playwright', 9)] }),
+      });
+
+    const stats = await fetchFilePipelineStats(client, scope, [
+      { testId: 'j1', framework: 'jest' },
+      { testId: 'f1', framework: 'ftr' },
+      { testId: 'p1', framework: 'playwright' },
+    ]);
+
+    expect([...stats.keys()]).toEqual([
+      fileStatsKey('jest', 'shared.ts'),
+      fileStatsKey('ftr', 'shared.ts'),
+      fileStatsKey('playwright', 'shared.ts'),
+    ]);
+    expect(stats.get(fileStatsKey('jest', 'shared.ts'))?.map((s) => s.failedBuilds)).toEqual([5]);
+    expect(stats.get(fileStatsKey('ftr', 'shared.ts'))?.map((s) => s.failedBuilds)).toEqual([7]);
+    expect(stats.get(fileStatsKey('playwright', 'shared.ts'))?.map((s) => s.failedBuilds)).toEqual([
+      9,
+    ]);
   });
 });

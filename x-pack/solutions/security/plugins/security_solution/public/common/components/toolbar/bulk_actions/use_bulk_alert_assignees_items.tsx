@@ -16,6 +16,7 @@ import type {
 } from '@kbn/response-ops-alerts-table/types';
 
 import { isEmpty } from 'lodash/fp';
+import { ALERT_ASSIGNEE_ACTION_IDS } from '../../../constants/action_ids';
 import { useLicense } from '../../../hooks/use_license';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { ASSIGNEES_PANEL_WIDTH } from '../../assignees/constants';
@@ -23,11 +24,6 @@ import type { BulkAlertAssigneesPanelComponentProps } from './alert_bulk_assigne
 import { BulkAlertAssigneesPanel } from './alert_bulk_assignees';
 import * as i18n from './translations';
 import { useSetAlertAssignees } from './use_set_alert_assignees';
-
-export const ALERT_ASSIGNEE_ACTION_IDS = {
-  assign: 'manage-alert-assignees',
-  unassignAll: 'remove-all-alert-assignees',
-} as const;
 
 export interface UseBulkAlertAssigneesItemsProps {
   onAssigneesUpdate?: () => void;

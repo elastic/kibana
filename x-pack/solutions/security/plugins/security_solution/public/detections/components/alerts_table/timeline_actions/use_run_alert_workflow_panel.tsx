@@ -18,6 +18,7 @@ import type { WorkflowListItemDto } from '@kbn/workflows';
 import type { WorkflowSelectorVisibility } from '@kbn/workflows-ui';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
+import { RUN_ALERT_WORKFLOW_ACTION_ID } from '../../../../common/constants/action_ids';
 import * as i18n from '../translations';
 
 // Server-side: include managed workflows tagged for the rule_action selector (e.g. the alert
@@ -72,8 +73,6 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
 export const RUN_WORKFLOW_PANEL_ID = 'RUN_WORKFLOW_PANEL_ID';
 export const RUN_WORKFLOW_BULK_PANEL_ID = 'BULK_RUN_WORKFLOW_PANEL_ID';
 export const RUN_WORKFLOWS_PANEL_WIDTH = 400;
-export const RUN_ALERT_WORKFLOW_ACTION_ID = 'run-workflow-action';
-
 export interface UseRunAlertWorkflowPanelProps {
   /** ECS document for the selected alert row. */
   ecsRowData: Ecs;
