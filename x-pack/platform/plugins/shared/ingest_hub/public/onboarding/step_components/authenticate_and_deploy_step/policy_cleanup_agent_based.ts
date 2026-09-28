@@ -100,7 +100,7 @@ export async function updateAgentBasedPolicy(
   let existingNamespace: string | undefined;
   let existingVersion: string | undefined;
   let existingPolicyIds: string[] | undefined;
-  let existingVarValues: Record<string, string> = {};
+  const existingVarValues: Record<string, string> = {};
   try {
     const existing = await sendGetOnePackagePolicy(policyId);
     if (existing.error) throw existing.error;

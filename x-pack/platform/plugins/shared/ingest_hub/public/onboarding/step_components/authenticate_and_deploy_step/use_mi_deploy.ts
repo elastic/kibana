@@ -441,7 +441,9 @@ export function useMiDeploy({
           updateDetectAndReviewStep({
             isDeploying: false,
             ...(soWriteSucceeded ? { pendingCleanupPolicyIds: {} } : {}),
-            ...(dirtyUpdateApplied && soWriteSucceeded ? { isDirty: false, isAuthDirty: false } : {}),
+            ...(dirtyUpdateApplied && soWriteSucceeded
+              ? { isDirty: false, isAuthDirty: false }
+              : {}),
           });
           await persistPendingIacTemplate();
           return { cleanupFailed: false };
