@@ -56,6 +56,11 @@ describe('getResponseActionStatusTool', () => {
     service = createMockEndpointAppContext().service;
   });
 
+  it('accepts a non-UUID caller-supplied action ID (HTTP details route allows any nonempty ID up to 256 chars)', () => {
+    const tool = getResponseActionStatusTool(service);
+    expect(() => tool.schema.parse({ actionId: 'my-custom-action-id-001' })).not.toThrow();
+  });
+
   it('returns a valid read-only builtin tool definition', () => {
     const tool = getResponseActionStatusTool(service);
     expect(tool.type).toBe(ToolType.builtin);

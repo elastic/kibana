@@ -27,7 +27,8 @@ import {
 const getResponseActionStatusSchema = z.object({
   actionId: z
     .string()
-    .uuid()
+    .min(1)
+    .max(256)
     .describe(
       'Any known response-action ID — from a prior action mentioned in this conversation or from Response Actions history in the UI.'
     ),
