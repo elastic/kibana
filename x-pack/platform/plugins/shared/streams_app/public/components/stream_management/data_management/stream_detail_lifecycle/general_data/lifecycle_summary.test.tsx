@@ -772,6 +772,27 @@ describe('LifecycleSummary', () => {
       expect(screen.getByTestId('dataLifecycleSummary-stats-loaded')).toBeInTheDocument();
     });
 
+    it('reports the stats readiness signal as loaded when the stats fetch failed', () => {
+      // A failed refetch keeps holding the previous definition's stats with `loading: false`. No
+      // stats are coming for the current definition, so the signal has to settle - staying loading
+      // would strand the preview hold, which is released on the loading true->false transition.
+      mockUseStreamsAppFetch.mockReturnValue({
+        value: {
+          definition: createIlmDefinition(),
+          stats: {
+            phases: { hot: { name: 'hot', min_age: '0ms', size_in_bytes: 1000, rollover: {} } },
+          },
+        },
+        loading: false,
+        error: new Error('stats fetch failed'),
+        refresh: jest.fn(),
+      });
+
+      renderWithSync(<LifecycleSummary definition={createIlmDefinition()} isMetricsStream />);
+
+      expect(screen.getByTestId('dataLifecycleSummary-stats-loaded')).toBeInTheDocument();
+    });
+
     it('should open edit policy modal when removing an ILM phase with affected resources', async () => {
       const policies = [
         {

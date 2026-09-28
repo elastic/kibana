@@ -160,6 +160,7 @@ export const useIlmLifecycleSummary = ({
   const {
     value: ilmStatsResult,
     loading: ilmStatsLoading,
+    error: ilmStatsError,
     refresh: refreshIlmStats,
   } = useStreamsAppFetch(
     ({ signal: fetchSignal }) => {
@@ -180,8 +181,12 @@ export const useIlmLifecycleSummary = ({
   // The fetch hook only flips `loading` once its effect runs, so the first render carrying a new
   // definition still reports "settled" while holding the previous definition's stats. Report that
   // window as loading too, otherwise the summary's readiness signal claims stale stats are current.
+  // A failed fetch is settled: no stats are coming, and staying "loading" would strand the hold.
   const ilmLoading =
-    ilmStatsLoading || (ilmStatsResult !== undefined && ilmStatsResult.definition !== definition);
+    ilmStatsLoading ||
+    (ilmStatsError === undefined &&
+      ilmStatsResult !== undefined &&
+      ilmStatsResult.definition !== definition);
 
   const applyOverwrite = async (context: DeleteContext) => {
     if (!isIlm) {
