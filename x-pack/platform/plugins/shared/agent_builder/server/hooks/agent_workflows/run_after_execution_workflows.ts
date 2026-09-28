@@ -12,6 +12,7 @@ import {
   type ToolCallStep,
 } from '@kbn/agent-builder-common';
 import { WORKFLOWS_UI_SETTING_ID, ExecutionStatus } from '@kbn/workflows';
+import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import type { Logger } from '@kbn/logging';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
@@ -54,6 +55,9 @@ export const runAfterExecutionWorkflows = async ({
 
   const spaceId = getCurrentSpaceId({ request: context.request, spaces });
   const { round } = context;
+  const roundConnectorId = round.model_usage?.connector_id?.trim();
+  const usableRoundConnectorId =
+    roundConnectorId && roundConnectorId !== 'unknown' ? roundConnectorId : undefined;
 
   const toolCalls = round.steps.filter(isToolCallStep).map((step: ToolCallStep) => ({
     tool_id: step.tool_id,
@@ -71,9 +75,39 @@ export const runAfterExecutionWorkflows = async ({
   };
 
   for (const workflowId of workflowIds) {
+    let currentWorkflowParams = workflowParams;
+
+    if (usableRoundConnectorId) {
+      try {
+        const workflow = await workflowApi.getWorkflow(workflowId, spaceId, context.request);
+        if (!workflow?.definition) {
+          logger.error(
+            `Post-execution workflow "${workflowId}" could not be read; skipping execution`
+          );
+          continue;
+        }
+
+        const workflowInputs = getInputsFromDefinition(workflow.definition);
+        if (
+          workflowInputs?.properties &&
+          Object.prototype.hasOwnProperty.call(workflowInputs.properties, 'round_connector_id')
+        ) {
+          currentWorkflowParams = {
+            ...workflowParams,
+            round_connector_id: usableRoundConnectorId,
+          };
+        }
+      } catch (error) {
+        logger.error(
+          `Post-execution workflow "${workflowId}" could not be read; skipping execution: ${error}`
+        );
+        continue;
+      }
+    }
+
     const result = await executeWorkflow({
       workflowId,
-      workflowParams: workflowParams as unknown as Record<string, unknown>,
+      workflowParams: currentWorkflowParams as unknown as Record<string, unknown>,
       request: context.request,
       spaceId,
       workflowApi,

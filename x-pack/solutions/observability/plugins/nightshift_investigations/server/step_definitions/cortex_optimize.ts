@@ -8,9 +8,9 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, CoreStart, Logger } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import { MAX_KEYWORD_LENGTH } from '../../common';
 import { runCortexOptimize } from '../cortex/register_cortex';
 import { withTimeout } from './with_timeout';
 
@@ -24,12 +24,14 @@ const OPTIMIZE_TIMEOUT_MS = 120_000;
 
 export const cortexOptimizeStepDefinition = ({
   getInference,
-  getSearchInferenceEndpoints,
+  getSavedObjects,
+  getUiSettings,
   analytics,
   logger,
 }: {
   getInference: () => InferenceServerStart | undefined;
-  getSearchInferenceEndpoints: () => SearchInferenceEndpointsPluginStart | undefined;
+  getSavedObjects: () => CoreStart['savedObjects'] | undefined;
+  getUiSettings: () => CoreStart['uiSettings'] | undefined;
   analytics: AnalyticsServiceSetup;
   logger: Logger;
 }) =>
@@ -60,6 +62,8 @@ export const cortexOptimizeStepDefinition = ({
         .max(1024)
         .optional()
         .describe('Id of the completed round. Recorded on the edit telemetry events.'),
+      connector_id: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+      round_connector_id: z.string().max(MAX_KEYWORD_LENGTH).optional(),
     }),
     outputSchema: z.object({
       status: z.literal('ok').describe('The optimizer finished without throwing.'),
@@ -80,9 +84,12 @@ export const cortexOptimizeStepDefinition = ({
             analytics,
             conversationId: context.input.conversation_id,
             roundId: context.input.round_id,
+            requestedConnectorId: context.input.connector_id,
+            roundConnectorId: context.input.round_connector_id,
             logger,
             getInference,
-            getSearchInferenceEndpoints,
+            getSavedObjects,
+            getUiSettings,
           }),
         OPTIMIZE_TIMEOUT_MS,
         `Cortex optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`

@@ -20,7 +20,8 @@ describe('cortexOptimizeStepDefinition', () => {
   const getScopedEsClient = jest.fn().mockReturnValue(esClient);
   const getFakeRequest = jest.fn().mockReturnValue(request);
   const getInference = jest.fn();
-  const getSearchInferenceEndpoints = jest.fn();
+  const getSavedObjects = jest.fn();
+  const getUiSettings = jest.fn();
   const analytics = coreMock.createSetup().analytics;
 
   const createContext = (input: {
@@ -29,6 +30,8 @@ describe('cortexOptimizeStepDefinition', () => {
     agent_id?: string;
     conversation_id?: string;
     round_id?: string;
+    connector_id?: string;
+    round_connector_id?: string;
   }) =>
     ({
       input,
@@ -52,7 +55,8 @@ describe('cortexOptimizeStepDefinition', () => {
   it('optimizes with the request-scoped ES client', async () => {
     const definition = cortexOptimizeStepDefinition({
       getInference,
-      getSearchInferenceEndpoints,
+      getSavedObjects,
+      getUiSettings,
       analytics,
       logger: loggerMock.create(),
     });
@@ -64,6 +68,8 @@ describe('cortexOptimizeStepDefinition', () => {
         agent_id: 'nightshift.investigation',
         conversation_id: 'conv-1',
         round_id: 'round-1',
+        connector_id: 'manual-model',
+        round_connector_id: 'round-model',
       })
     );
 
@@ -79,9 +85,12 @@ describe('cortexOptimizeStepDefinition', () => {
       analytics,
       conversationId: 'conv-1',
       roundId: 'round-1',
+      requestedConnectorId: 'manual-model',
+      roundConnectorId: 'round-model',
       logger: expect.anything(),
       getInference,
-      getSearchInferenceEndpoints,
+      getSavedObjects,
+      getUiSettings,
     });
     expect(result).toEqual({ output: { status: 'ok' } });
   });

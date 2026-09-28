@@ -40,12 +40,24 @@ triggers:
         concurrency_key:
           type: string
           description: Optional key for concurrency deduplication. Defaults to the workflow execution ID.
+        connector_id:
+          type: string
+          maxLength: 500
+          description: Optional chat model connector or inference endpoint id for this run.
       required:
         - message
         - title
       additionalProperties: false
 
 steps:
+  # Resolve before any persisted state or lifecycle event, so a bad or blocked model cannot leave
+  # a stale started investigation.
+  - name: resolve_model
+    type: nightshift.resolveModel
+    with:
+      step: investigation
+      connector_id: '{{ inputs.connector_id }}'
+
   # Investigation agents are per-space documents. Ensuring the agent here covers direct and manual
   # workflow executions as well as client starts; it is idempotent and preserves existing edits.
   # It runs before persistence and lifecycle emission so an unavailable agent leaves no stale run.
@@ -84,10 +96,7 @@ steps:
   - name: investigate
     type: ai.agent
     agent-id: nightshift.investigation
-    # Keep these inference identifiers in sync with @kbn/significant-events-schema
-    # inference_feature_ids.ts (SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID /
-    # SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
-    connector-id-by-feature: 'significant_events_investigation'
+    connector-id: '{{ steps.resolve_model.output.connector_id }}'
     plugin-id: 'significant_events_investigation'
     aggregate-by: 'significant_events'
     product-solution: 'observability'

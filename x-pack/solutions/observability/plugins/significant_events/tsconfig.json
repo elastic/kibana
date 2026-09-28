@@ -56,7 +56,6 @@
     "@kbn/es-types",
     "@kbn/core-saved-objects-api-server",
     "@kbn/storage-adapter",
-    "@kbn/search-inference-endpoints",
     "@kbn/core-analytics-server",
     "@kbn/server-route-repository",
     "@kbn/server-route-repository-client",

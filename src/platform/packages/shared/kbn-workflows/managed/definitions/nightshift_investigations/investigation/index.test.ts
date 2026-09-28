@@ -17,7 +17,14 @@ interface WorkflowStep {
   'plugin-id'?: string;
   'product-solution'?: string;
   'product-feature'?: string;
-  with?: { method?: string; path?: string; message?: string; body?: Record<string, unknown> };
+  'connector-id'?: string;
+  'connector-id-by-feature'?: string;
+  with?: Record<string, unknown> & {
+    method?: string;
+    path?: string;
+    message?: string;
+    body?: Record<string, unknown>;
+  };
   'on-failure'?: unknown;
   steps?: WorkflowStep[];
   else?: WorkflowStep[];
@@ -25,6 +32,9 @@ interface WorkflowStep {
 
 const investigation = parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml) as {
   name: string;
+  triggers: Array<{
+    inputs: { properties: Record<string, { type: string; maxLength?: number }> };
+  }>;
   steps: WorkflowStep[];
 };
 
@@ -53,6 +63,7 @@ describe('Nightshift investigation workflow', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(1);
     expect(investigation.name).toBe('Nightshift Investigation');
     expect(investigation.steps.map((step) => step.name)).toEqual([
+      'resolve_model',
       'ensure_investigation_agent',
       'persist_investigation_started',
       'emit_investigation_started',
@@ -82,6 +93,25 @@ describe('Nightshift investigation workflow', () => {
       })
     );
     expect(requireStep('investigate').with?.message).toContain('{{ inputs.context | json }}');
+  });
+
+  it('resolves the requested model before persistence and passes it to the agent', () => {
+    expect(investigation.triggers[0].inputs.properties.connector_id).toEqual(
+      expect.objectContaining({ type: 'string', maxLength: 500 })
+    );
+    expect(investigation.steps[0]).toMatchObject({
+      name: 'resolve_model',
+      type: 'nightshift.resolveModel',
+      with: {
+        step: 'investigation',
+        connector_id: '{{ inputs.connector_id }}',
+      },
+    });
+    expect(requireStep('resolve_model')).toBe(investigation.steps[0]);
+    expect(requireStep('investigate')['connector-id']).toBe(
+      '{{ steps.resolve_model.output.connector_id }}'
+    );
+    expect(requireStep('investigate')['connector-id-by-feature']).toBeUndefined();
   });
 
   it('attributes agent calls to Nightshift under the shared investigation id', () => {

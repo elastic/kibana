@@ -26,6 +26,7 @@ export interface AfterExecutionWorkflowParams {
   response: string;
   conversation_id?: string;
   round_id: string;
+  round_connector_id?: string;
   agent_id?: string;
   tool_calls: Array<{
     tool_id: string;

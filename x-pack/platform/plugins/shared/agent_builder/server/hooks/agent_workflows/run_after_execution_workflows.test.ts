@@ -33,6 +33,31 @@ const getCurrentSpaceIdMock = jest.mocked(getCurrentSpaceId);
 type RunAfterExecutionWorkflowsParams = Parameters<typeof runAfterExecutionWorkflows>[0];
 type WorkflowApi = RunAfterExecutionWorkflowsParams['workflowApi'];
 type GetInternalServices = RunAfterExecutionWorkflowsParams['getInternalServices'];
+type Workflow = NonNullable<Awaited<ReturnType<WorkflowApi['getWorkflow']>>>;
+
+const makeWorkflow = (inputs?: Record<string, unknown>): Workflow =>
+  ({
+    definition: {
+      triggers: [
+        {
+          type: 'manual',
+          ...(inputs ? { inputs } : {}),
+        },
+      ],
+    },
+  } as unknown as Workflow);
+
+const existingWorkflowInputs = {
+  additionalProperties: false,
+  properties: {
+    prompt: { type: 'string' },
+    response: { type: 'string' },
+    conversation_id: { type: 'string' },
+    round_id: { type: 'string' },
+    agent_id: { type: 'string' },
+    tool_calls: { type: 'array' },
+  },
+};
 
 const makeRound = (overrides: Partial<ConversationRound> = {}): ConversationRound => ({
   id: 'round-1',
@@ -59,9 +84,12 @@ describe('runAfterExecutionWorkflows', () => {
     const soClient = savedObjects.createInternalRepository();
     savedObjects.getScopedClient.mockReturnValue(soClient);
     uiSettings.asScopedToClient.mockReturnValue(uiSettingsClient);
+    const getWorkflowMock = jest.fn() as jest.MockedFunction<WorkflowApi['getWorkflow']>;
+    getWorkflowMock.mockResolvedValue(makeWorkflow(existingWorkflowInputs));
 
     return {
-      workflowApi: {} as WorkflowApi,
+      workflowApi: { getWorkflow: getWorkflowMock } as unknown as WorkflowApi,
+      getWorkflowMock,
       getInternalServices: jest.fn(() => ({
         spaces: {},
         uiSettings,
@@ -155,7 +183,7 @@ describe('runAfterExecutionWorkflows', () => {
   });
 
   describe('workflow params', () => {
-    it('passes prompt, response, round_id, agent_id, conversation_id, and tool_calls', async () => {
+    it('preserves the existing params for a strict workflow without round_connector_id', async () => {
       const { workflowApi, getInternalServices } = createDeps();
       const round = makeRound({
         input: { message: 'my question' },
@@ -168,17 +196,80 @@ describe('runAfterExecutionWorkflows', () => {
       expect(executeWorkflowMock).toHaveBeenCalledWith(
         expect.objectContaining({
           workflowId: 'wf-1',
-          workflowParams: expect.objectContaining({
+          workflowParams: {
             prompt: 'my question',
             response: 'my answer',
             round_id: 'round-1',
             agent_id: 'ag-1',
             conversation_id: 'cv-1',
             tool_calls: [],
+          },
+        })
+      );
+    });
+
+    it('passes the in-memory round connector id to a workflow that declares it', async () => {
+      const { workflowApi, getWorkflowMock, getInternalServices } = createDeps();
+      getWorkflowMock.mockResolvedValue(
+        makeWorkflow({
+          additionalProperties: false,
+          properties: {
+            ...existingWorkflowInputs.properties,
+            round_connector_id: { type: 'string' },
+          },
+        })
+      );
+      const context = createContext({
+        round: makeRound({
+          model_usage: {
+            connector_id: 'round-connector',
+            llm_calls: 1,
+            input_tokens: 10,
+            output_tokens: 5,
+          },
+        }),
+      });
+
+      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
+
+      expect(getWorkflowMock).toHaveBeenCalledWith('wf-1', 'default', request);
+      expect(executeWorkflowMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowParams: expect.objectContaining({
+            round_connector_id: 'round-connector',
           }),
         })
       );
     });
+
+    it.each([undefined, '', '   ', 'unknown', ' unknown '])(
+      'omits an unusable round connector id %p without looking up the workflow',
+      async (connectorId) => {
+        const { workflowApi, getWorkflowMock, getInternalServices } = createDeps();
+        const context = createContext({
+          round: makeRound({
+            model_usage:
+              connectorId === undefined
+                ? undefined
+                : {
+                    connector_id: connectorId,
+                    llm_calls: 1,
+                    input_tokens: 10,
+                    output_tokens: 5,
+                  },
+          }),
+        });
+
+        await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
+
+        expect(getWorkflowMock).not.toHaveBeenCalled();
+        const params = executeWorkflowMock.mock.calls[0][0].workflowParams as Record<
+          string,
+          unknown
+        >;
+        expect(params).not.toHaveProperty('round_connector_id');
+      }
+    );
 
     it('omits agent_id and conversation_id when undefined', async () => {
       const { workflowApi, getInternalServices } = createDeps();
@@ -222,6 +313,88 @@ describe('runAfterExecutionWorkflows', () => {
   });
 
   describe('error handling (non-throwing — fire-and-forget)', () => {
+    it('logs and skips the workflow when its lookup throws', async () => {
+      const { workflowApi, getWorkflowMock, getInternalServices } = createDeps();
+      getWorkflowMock.mockRejectedValue(new Error('lookup failed'));
+
+      await expect(
+        runAfterExecutionWorkflows({
+          context: createContext(),
+          workflowApi,
+          getInternalServices,
+          logger,
+        })
+      ).resolves.toBeUndefined();
+
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('wf-1'));
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('lookup failed'));
+      expect(executeWorkflowMock).not.toHaveBeenCalled();
+    });
+
+    it('logs and skips the workflow when the lookup returns no workflow', async () => {
+      const { workflowApi, getWorkflowMock, getInternalServices } = createDeps();
+      getWorkflowMock.mockResolvedValue(null);
+
+      await expect(
+        runAfterExecutionWorkflows({
+          context: createContext(),
+          workflowApi,
+          getInternalServices,
+          logger,
+        })
+      ).resolves.toBeUndefined();
+
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('wf-1'));
+      expect(executeWorkflowMock).not.toHaveBeenCalled();
+    });
+
+    it('logs and skips the workflow when its definition is unreadable', async () => {
+      const { workflowApi, getWorkflowMock, getInternalServices } = createDeps();
+      getWorkflowMock.mockResolvedValue({
+        ...makeWorkflow(existingWorkflowInputs),
+        definition: null,
+      });
+
+      await expect(
+        runAfterExecutionWorkflows({
+          context: createContext(),
+          workflowApi,
+          getInternalServices,
+          logger,
+        })
+      ).resolves.toBeUndefined();
+
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('wf-1'));
+      expect(executeWorkflowMock).not.toHaveBeenCalled();
+    });
+
+    it('executes a later workflow after an earlier workflow lookup fails', async () => {
+      const { workflowApi, getWorkflowMock, getInternalServices } = createDeps();
+      getWorkflowMock.mockRejectedValueOnce(new Error('lookup failed')).mockResolvedValueOnce(
+        makeWorkflow({
+          properties: {
+            round_connector_id: { type: 'string' },
+          },
+        })
+      );
+      const context = createContext({
+        agentConfiguration: { tools: [], post_execution_workflow_ids: ['wf-1', 'wf-2'] },
+      });
+
+      await expect(
+        runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger })
+      ).resolves.toBeUndefined();
+
+      expect(getWorkflowMock).toHaveBeenCalledTimes(2);
+      expect(executeWorkflowMock).toHaveBeenCalledTimes(1);
+      expect(executeWorkflowMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowId: 'wf-2',
+          workflowParams: expect.objectContaining({ round_connector_id: 'connector-1' }),
+        })
+      );
+    });
+
     it('logs an error and continues when executeWorkflow returns success: false', async () => {
       const { workflowApi, getInternalServices } = createDeps();
       executeWorkflowMock.mockResolvedValueOnce({ success: false, error: 'Network error' });

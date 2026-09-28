@@ -18,7 +18,6 @@
       "inference",
       "ruleRegistry",
       "sandbox",
-      "searchInferenceEndpoints",
       "spaces",
       "workflowsExtensions",
       "workflowsManagement",

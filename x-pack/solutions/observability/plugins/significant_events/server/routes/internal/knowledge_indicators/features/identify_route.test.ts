@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { NightshiftModelNotFoundError } from '@kbn/significant-events-schema';
 import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
 import {
   MAX_INFERENCE_DOCUMENT_BYTES,
@@ -23,6 +24,9 @@ const mockGetStreamTypeFromDefinition = jest.fn();
 const mockIdentifyInferredFeatures = jest.fn();
 const mockIdentifyComputedFeatures = jest.fn();
 const mockShouldIdentifyFeatures = jest.fn();
+const mockResolveSignificantEventsModelForRequest = jest.fn(
+  async ({ requestedId }: { requestedId?: string }) => requestedId ?? 'default-connector'
+);
 
 jest.mock('@kbn/streams-schema', () => ({
   getStreamSamplingSource: (...args: unknown[]) => mockGetStreamSamplingSource(...args),
@@ -43,6 +47,11 @@ jest.mock('../../../../lib/significant_events/features', () => ({
 
 jest.mock('../../../../lib/significant_events/features/should_identify_features', () => ({
   shouldIdentifyFeatures: (...args: unknown[]) => mockShouldIdentifyFeatures(...args),
+}));
+
+jest.mock('../../../../model_resolution', () => ({
+  resolveSignificantEventsModelForRequest: (options: { requestedId?: string }) =>
+    mockResolveSignificantEventsModelForRequest(options),
 }));
 
 jest.mock(
@@ -113,8 +122,9 @@ const makeInferredHandlerParams = ({
   const kiClient = {};
   const agentBuilder = {};
   const server = {
-    searchInferenceEndpoints: {},
     agentBuilder,
+    inference: {},
+    core: { savedObjects: {}, uiSettings: {} },
   };
   const licensing = {};
   const maintenanceService = makeMaintenanceService();
@@ -415,6 +425,19 @@ describe('inferred feature identification route', () => {
     expect(routeLogger.warn).toHaveBeenCalledWith(
       'Failed to ensure KI sync workflow is enabled: workflow unavailable'
     );
+  });
+
+  it('maps an unknown connector override to a 400 response', async () => {
+    const { handlerParams } = makeInferredHandlerParams();
+    mockResolveSignificantEventsModelForRequest.mockRejectedValueOnce(
+      new NightshiftModelNotFoundError('missing-model')
+    );
+    handlerParams.params.body.connectorId = 'missing-model';
+
+    await expect(inferredRoute.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 400 },
+    });
+    expect(mockIdentifyInferredFeatures).not.toHaveBeenCalled();
   });
 });
 

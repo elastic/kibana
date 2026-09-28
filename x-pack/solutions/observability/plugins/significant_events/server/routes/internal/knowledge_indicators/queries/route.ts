@@ -51,6 +51,7 @@ import type {
 import { cleanupStaleEvents } from '../../../../lib/significant_events/events/cleanup_stale_events';
 import { QueryNotFoundError } from '../../../../lib/errors/query_not_found_error';
 import { validateEsqlQueryForStreamOrThrow } from '../../../../lib/significant_events/validate_esql_query';
+import { resolveSignificantEventsModelForRequest } from '../../../../model_resolution';
 
 const RECONCILE_STREAM_CONCURRENCY = 3;
 // Manual repair endpoint: keep each request small so operators batch large migrations explicitly.
@@ -621,7 +622,7 @@ const generateQueriesRoute = createServerRoute({
           .max(MAX_ID_LENGTH)
           .optional()
           .describe(
-            'Optional connector ID override. When omitted the connector is resolved via the Inference Feature Registry.'
+            'Optional chat model connector or inference endpoint ID. When omitted the Significant Events default is used.'
           ),
         runId: z.string().trim().min(1).max(MAX_ID_LENGTH).optional(),
       })
@@ -672,7 +673,15 @@ const generateQueriesRoute = createServerRoute({
         streamsClient,
         kiClient,
         agentBuilder: server.agentBuilder,
-        searchInferenceEndpoints: server.searchInferenceEndpoints,
+        resolveModel: (requestedId) =>
+          resolveSignificantEventsModelForRequest({
+            request,
+            inference: server.inference,
+            savedObjects: server.core.savedObjects,
+            uiSettings: server.core.uiSettings,
+            step: 'kiQueryGeneration',
+            requestedId,
+          }),
         request,
         logger: logger.get('significant_events_queries_generation'),
         signal: getRequestAbortSignal(request),

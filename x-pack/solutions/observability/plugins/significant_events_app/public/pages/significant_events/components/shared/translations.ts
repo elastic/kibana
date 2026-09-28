@@ -139,17 +139,46 @@ export const MODEL_SELECTION_PANEL_TITLE = i18n.translate(
   }
 );
 
-export const MODEL_SETTINGS_LABEL = i18n.translate(
-  'xpack.significantEventsApp.streamsView.modelSettingsLabel',
-  {
-    defaultMessage: 'Model settings',
-  }
-);
-
 export const DEFAULT_MODEL_BADGE_LABEL = i18n.translate(
   'xpack.significantEventsApp.streamsView.defaultModelBadgeLabel',
   {
     defaultMessage: 'Default',
+  }
+);
+
+export const MISSING_DEFAULT_MODEL_LABEL = i18n.translate(
+  'xpack.significantEventsApp.streamsView.missingDefaultModelLabel',
+  {
+    defaultMessage: 'Default model unavailable',
+  }
+);
+
+export const MISSING_SELECTED_MODEL_LABEL = i18n.translate(
+  'xpack.significantEventsApp.streamsView.missingSelectedModelLabel',
+  {
+    defaultMessage: 'Selected model unavailable',
+  }
+);
+
+export const SELECT_MODEL_LABEL = i18n.translate(
+  'xpack.significantEventsApp.streamsView.selectModelLabel',
+  {
+    defaultMessage: 'Select a model',
+  }
+);
+
+export const DEFAULT_CONNECTOR_ONLY_CALLOUT_TITLE = i18n.translate(
+  'xpack.significantEventsApp.streamsView.defaultConnectorOnlyCalloutTitle',
+  {
+    defaultMessage: 'Default connector only',
+  }
+);
+
+export const DEFAULT_CONNECTOR_ONLY_CALLOUT_DESCRIPTION = i18n.translate(
+  'xpack.significantEventsApp.streamsView.defaultConnectorOnlyCalloutDescription',
+  {
+    defaultMessage:
+      'This setting is enabled. Generation succeeds only with the configured default connector.',
   }
 );
 

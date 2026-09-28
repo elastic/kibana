@@ -30,6 +30,14 @@ triggers:
         agent_id:
           type: string
           description: Agent id that produced the round.
+        connector_id:
+          type: string
+          maxLength: 500
+          description: Optional strict model override for a direct workflow run.
+        round_connector_id:
+          type: string
+          maxLength: 500
+          description: Model used by the investigation round that triggered this workflow.
         tool_calls:
           type: array
           description: >
@@ -54,6 +62,14 @@ steps:
       # and JSON.parse in preprocess falls back to [], so every round distills from scratch.
       tool_calls: '${{ inputs.tool_calls }}'
 
+  - name: resolve_model
+    type: nightshift.resolveModel
+    if: '${{ steps.prepare_turn.output.skipped == false }}'
+    with:
+      step: investigation
+      connector_id: '{{ inputs.connector_id }}'
+      round_connector_id: '{{ inputs.round_connector_id }}'
+
   # Nothing else installs this agent: the investigation workflow only ensures the investigator,
   # and this workflow is the sole caller of the reinforcement agent.
   - name: ensure_reinforcement_agent
@@ -67,7 +83,7 @@ steps:
   - name: reinforce_decision_trees
     type: ai.agent
     agent-id: significant-events.decision-tree-reinforcement
-    connector-id-by-feature: 'significant_events_investigation'
+    connector-id: '{{ steps.resolve_model.output.connector_id }}'
     plugin-id: 'significant_events_decision_tree_reinforce'
     aggregate-by: 'significant_events'
     product-solution: 'observability'
