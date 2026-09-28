@@ -126,8 +126,11 @@ async function startTransformWithRetry(
       await esClient.transform.startTransform({ transform_id: transformId });
       return;
     } catch (err) {
-      // 409: transform already started — not an error
-      if (err.statusCode === 409) {
+      // 409: transform already started. A concurrent start can instead return
+      // resource_already_exists_exception for the persistent task. Either way the
+      // transform is running.
+      const errorType = err.body?.error?.type ?? err.meta?.body?.error?.type;
+      if (err.statusCode === 409 || errorType === 'resource_already_exists_exception') {
         return;
       }
 
