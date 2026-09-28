@@ -174,7 +174,7 @@ describe('collapseLegacyRuleShape', () => {
           },
         }).state_transition
       ).toEqual({
-        pending: { count: 3, timeframe: '5m', operator: 'AND' },
+        pending: { count: 3, timeframe: '5m', operator: 'and' },
         recovering: { count: 2 },
       });
     });

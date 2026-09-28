@@ -86,7 +86,8 @@ const noDataSchema = schema.oneOf([
   }),
 ]);
 
-const operator = schema.maybe(schema.oneOf([schema.literal('AND'), schema.literal('OR')]));
+const operator = schema.maybe(schema.oneOf([schema.literal('and'), schema.literal('or')]));
+const legacyOperator = schema.maybe(schema.oneOf([schema.literal('AND'), schema.literal('OR')]));
 
 const stateTransitionPhaseSchema = schema.object({
   count: schema.maybe(schema.number()),
@@ -97,10 +98,10 @@ const stateTransitionPhaseSchema = schema.object({
 const stateTransitionSchema = schema.object({
   pending: schema.maybe(stateTransitionPhaseSchema),
   recovering: schema.maybe(stateTransitionPhaseSchema),
-  pending_operator: operator,
+  pending_operator: legacyOperator,
   pending_count: schema.maybe(schema.number()),
   pending_timeframe: schema.maybe(schema.string()),
-  recovering_operator: operator,
+  recovering_operator: legacyOperator,
   recovering_count: schema.maybe(schema.number()),
   recovering_timeframe: schema.maybe(schema.string()),
 });

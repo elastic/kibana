@@ -12,20 +12,19 @@ import type {
   Recovery,
   RuleKind,
   StateTransition,
-  StateTransitionOperator,
 } from '@kbn/alerting-v2-schemas';
 import { composeEsqlQuery, hasBreachCondition } from '@kbn/alerting-v2-schemas';
 import type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';
 
 /**
- * `state_transition` as stored. The API renamed `operator` to `and` / `or`, but
- * the saved object keeps the uppercase literals so that rename needs no
- * migration — {@link toApiStateTransition} maps them on the way out and
- * `rules_client/utils` maps them back on the way in.
+ * `state_transition` as stored. The nested phases hold the operator exactly as
+ * the API spells it, so nothing maps between the two. The flat scalars keep the
+ * uppercase literals they were written with — model version 6 still reads them
+ * during the rollback window.
  */
 type StoredStateTransition = NonNullable<RuleSavedObjectAttributes['state_transition']>;
 type StoredPhase = NonNullable<StoredStateTransition['pending']>;
-type StoredOperator = NonNullable<StoredPhase['operator']>;
+type LegacyOperator = NonNullable<StoredStateTransition['pending_operator']>;
 
 /** The pre-collapse `query`, which encoded the same rule two different ways. */
 export type LegacyQuery =
@@ -48,10 +47,10 @@ export type LegacyNoDataStrategy = 'last_known_status' | 'emit' | 'recover' | 'n
 
 /** The pre-nesting `state_transition`, which held six flat scalars. */
 export interface LegacyStateTransition {
-  pending_operator?: StoredOperator;
+  pending_operator?: LegacyOperator;
   pending_count?: number;
   pending_timeframe?: string;
-  recovering_operator?: StoredOperator;
+  recovering_operator?: LegacyOperator;
   recovering_count?: number;
   recovering_timeframe?: string;
 }
@@ -131,12 +130,14 @@ const toNoData = (query: LegacyQuery, strategy?: LegacyNoDataStrategy): NoData =
 const toPhase = (
   count?: number,
   timeframe?: string,
-  operator?: StoredOperator
+  operator?: LegacyOperator
 ): StoredPhase | undefined =>
   omitEmpty({
     ...(count != null ? { count } : {}),
     ...(timeframe != null ? { timeframe } : {}),
-    ...(count != null && timeframe != null && operator != null ? { operator } : {}),
+    ...(count != null && timeframe != null && operator != null
+      ? { operator: operator === 'AND' ? ('and' as const) : ('or' as const) }
+      : {}),
   });
 
 const toStateTransition = (
@@ -203,32 +204,13 @@ export const toApiQuery = (query: ReadableQuery): Query => ({
   ...(hasBreachCondition(query.breach) ? { breach: { segment: query.breach.segment } } : {}),
 });
 
-/** Lowercases a stored `operator` onto the value the API publishes. */
-const toApiOperator = (operator?: StoredOperator): StateTransitionOperator | undefined => {
-  if (operator == null) return undefined;
-  return operator === 'AND' ? 'and' : 'or';
-};
-
-const toApiPhase = ({
-  operator,
-  ...phase
-}: StoredPhase): NonNullable<StateTransition['pending']> => {
-  const apiOperator = toApiOperator(operator);
-  return { ...phase, ...(apiOperator ? { operator: apiOperator } : {}) };
-};
-
-/**
- * Projects a stored `state_transition` onto the public shape, dropping the flat
- * scalars and lowercasing the operator the saved object keeps uppercase.
- */
+/** Projects a stored `state_transition` onto the public shape, dropping the flat scalars. */
 export const toApiStateTransition = (
   stateTransition?: StoredStateTransition | null
 ): StateTransition | undefined =>
   stateTransition == null
     ? undefined
     : omitEmpty({
-        ...(stateTransition.pending ? { pending: toApiPhase(stateTransition.pending) } : {}),
-        ...(stateTransition.recovering
-          ? { recovering: toApiPhase(stateTransition.recovering) }
-          : {}),
+        ...(stateTransition.pending ? { pending: stateTransition.pending } : {}),
+        ...(stateTransition.recovering ? { recovering: stateTransition.recovering } : {}),
       });

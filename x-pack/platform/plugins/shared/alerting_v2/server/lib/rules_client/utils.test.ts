@@ -163,7 +163,7 @@ describe('utils', () => {
       const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
 
       expect(result.state_transition).toEqual({
-        pending: { count: 3, timeframe: '5m', operator: 'AND' },
+        pending: { count: 3, timeframe: '5m', operator: 'and' },
       });
     });
   });

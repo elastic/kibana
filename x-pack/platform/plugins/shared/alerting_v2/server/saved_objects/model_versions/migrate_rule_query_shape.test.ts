@@ -217,8 +217,8 @@ describe('migrateRuleQueryShape', () => {
       });
 
       expect(stateTransition).toMatchObject({
-        pending: { count: 3, timeframe: '5m', operator: 'AND' },
-        recovering: { count: 2, timeframe: '10m', operator: 'OR' },
+        pending: { count: 3, timeframe: '5m', operator: 'and' },
+        recovering: { count: 2, timeframe: '10m', operator: 'or' },
       });
     });
 
@@ -316,7 +316,7 @@ describe('migrateRuleQueryShape', () => {
         pending_count: 3,
         pending_timeframe: '5m',
         pending_operator: 'AND',
-        pending: { count: 3, timeframe: '5m', operator: 'AND' },
+        pending: { count: 3, timeframe: '5m', operator: 'and' },
       });
     });
   });

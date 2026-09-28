@@ -202,39 +202,6 @@ const toStoredLifecycle = (
 ): Pick<RuleSavedObjectAttributes, 'recovery' | 'no_data'> =>
   data.kind === 'alert' ? { recovery: data.recovery, no_data: data.no_data } : {};
 
-type StoredStateTransition = RuleSavedObjectAttributes['state_transition'];
-type ApiStateTransition = RuleResponse['state_transition'];
-type StoredPhase = NonNullable<NonNullable<StoredStateTransition>['pending']>;
-type ApiPhase = NonNullable<NonNullable<ApiStateTransition>['pending']>;
-
-const toStoredOperator = (operator: ApiPhase['operator']): StoredPhase['operator'] => {
-  if (operator === undefined) return undefined;
-  return operator === 'and' ? 'AND' : 'OR';
-};
-
-const toStoredPhase = (phase: ApiPhase): StoredPhase => ({
-  ...phase,
-  operator: toStoredOperator(phase.operator),
-});
-
-/**
- * The API uses lowercase `and`/`or` for the phase `operator`; the SO schema
- * keeps the legacy uppercase literals so this rename doesn't require a
- * saved-object migration. `toApiStateTransition` is the inverse. `null` is
- * accepted on the wire as "no gating" and normalised to absent.
- */
-const toStoredStateTransition = (
-  stateTransition: ApiStateTransition | null
-): StoredStateTransition =>
-  stateTransition
-    ? {
-        ...(stateTransition.pending ? { pending: toStoredPhase(stateTransition.pending) } : {}),
-        ...(stateTransition.recovering
-          ? { recovering: toStoredPhase(stateTransition.recovering) }
-          : {}),
-      }
-    : undefined;
-
 /**
  * Converts a create-rule API body into saved object attributes.
  */
@@ -266,7 +233,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     },
     query: data.query,
     ...toStoredLifecycle(data),
-    state_transition: toStoredStateTransition(data.state_transition),
+    state_transition: data.state_transition ?? undefined,
     grouping: data.grouping,
     artifacts: data.artifacts,
     ...restServerFields,
@@ -345,12 +312,8 @@ export function buildUpdateRuleAttributes(
     query: updateData.query ?? existingAttrs.query,
     recovery: updateData.recovery ?? existingAttrs.recovery,
     no_data: updateData.no_data ?? existingAttrs.no_data,
-    // `null` → clear, stored as absent rather than `null`. Omitted = preserved,
-    // and the stored value already carries the stored operator casing.
-    state_transition:
-      updateData.state_transition === undefined
-        ? existingAttrs.state_transition
-        : toStoredStateTransition(updateData.state_transition),
+    // `null` → clear. Stored as absent, never as `null`.
+    state_transition: nullToUndefined(updateData.state_transition, existingAttrs.state_transition),
     // `null` → clear (undefined). SO schema uses `maybe()` without `nullable()`.
     grouping: nullToUndefined(updateData.grouping, existingAttrs.grouping),
     artifacts: nullToEmptyArray(updateData.artifacts, existingAttrs.artifacts),

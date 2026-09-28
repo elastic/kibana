@@ -236,12 +236,12 @@
         "pending": {
           "count": 3,
           "timeframe": "5m",
-          "operator": "AND"
+          "operator": "and"
         },
         "recovering": {
           "count": 2,
           "timeframe": "10m",
-          "operator": "OR"
+          "operator": "or"
         }
       },
       "grouping": {
