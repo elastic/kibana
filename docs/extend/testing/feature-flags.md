@@ -29,9 +29,9 @@ Feature flag overrides are **server-wide**: they apply to the entire Kibana inst
 The `@kbn/eslint/scout_no_core_settings_in_space_test` ESLint rule warns when `apiServices.core.settings(...)` is called inside `spaceTest` scope (directly, in `spaceTest.describe`/`beforeAll`/`afterAll`/`step`, etc.), since that scope runs in parallel across spaces sharing the same server.
 ::::::
 
-The examples below assume the setting had no configured value before setup, either in static configuration (such as `kibana.yml`) or in dynamic overrides. Set that key to `null` in teardown to remove it; for `feature_flags.overrides`, this allows the feature-flag provider to evaluate the flag again. Setting it to `false` forces a value instead.
+The examples below assume the previous configured value was `false`, so teardown restores it to `false`. This keeps the flag explicitly disabled; it does not resume feature-flag provider evaluation.
 
-`null` removes the key from the merged configuration; it does not undo the last change or automatically restore a static value. If the setting was already configured, preserve and restore its previous value instead. Preserve unrelated overrides, and coordinate access so other suites do not change the same server-wide setting during the test.
+If the test introduced an override for a flag that had no override in static configuration or dynamic overrides, setting that flag's key to `null` is another option: it removes the override and allows the provider to evaluate the flag again. `null` removes the key from the merged configuration; it does not restore a previous value. Preserve any existing configured value and unrelated overrides, and coordinate access to shared server-wide settings.
 
 ### In a global setup hook (recommended for parallel suites) [scout-feature-flags-global-setup]
 
@@ -59,7 +59,7 @@ globalTeardownHook('Revert feature flags', async ({ apiServices, log }) => {
   log.info('[teardown] Reverting my-feature-flag...');
   await apiServices.core.settings({
     'feature_flags.overrides': {
-      'my-plugin.my-feature-flag': null,
+      'my-plugin.my-feature-flag': false,
     },
   });
 });
@@ -82,7 +82,7 @@ test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
 
   test.afterAll(async ({ apiServices }) => {
     await apiServices.core.settings({
-      'xpack.fleet.experimentalFeatures': { newBrowseIntegrationUx: null },
+      'xpack.fleet.experimentalFeatures': { newBrowseIntegrationUx: false },
     });
   });
 
