@@ -96,3 +96,10 @@ export {
   type RuleSnapshot,
   type RuleLifecycleEvent,
 } from './schemas';
+
+export {
+  AlertStatusChangedTriggerId,
+  alertStatusChangedEventSchema,
+  alertStatusChangedCommonDefinition,
+} from './alert_status_changed';
+export type { AlertStatusChangedPayload } from './alert_status_changed';

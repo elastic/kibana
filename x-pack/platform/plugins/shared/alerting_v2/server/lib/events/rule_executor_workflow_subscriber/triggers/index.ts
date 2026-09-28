@@ -7,11 +7,13 @@
 
 import { ruleEventsGeneratedTrigger } from './rule_events_generated';
 import { ruleExecutionFailedTrigger } from './rule_execution_failed';
+import { alertStatusChangedTrigger } from './alert_status_changed';
 import type { RuleExecutorWorkflowTriggerBinding } from './types';
 
 export type { RuleExecutorWorkflowTriggerBinding } from './types';
 export { RuleEventsGeneratedTriggerId, ruleEventsGeneratedTrigger } from './rule_events_generated';
 export { RuleExecutionFailedTriggerId, ruleExecutionFailedTrigger } from './rule_execution_failed';
+export { AlertStatusChangedTriggerId, alertStatusChangedTrigger } from './alert_status_changed';
 
 /**
  * Catalog of every rule-executor → workflow-trigger mapping owned by `alerting_v2`.
@@ -34,4 +36,5 @@ export { RuleExecutionFailedTriggerId, ruleExecutionFailedTrigger } from './rule
 export const RULE_EXECUTOR_WORKFLOW_TRIGGERS: ReadonlyArray<RuleExecutorWorkflowTriggerBinding> = [
   ruleEventsGeneratedTrigger,
   ruleExecutionFailedTrigger,
+  alertStatusChangedTrigger,
 ];

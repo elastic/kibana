@@ -82,10 +82,13 @@ export type {
   RuleExecutionSucceededPayload,
   RuleExecutionFailedEvent,
   RuleExecutionFailedPayload,
+  AlertStatusChangedBusEvent,
+  AlertStatusChangedBusPayload,
 } from '../rule_executor_event_publisher/events';
 export {
   RULE_EXECUTION_SUCCEEDED_EVENT_TYPE,
   RULE_EXECUTION_FAILED_EVENT_TYPE,
+  ALERT_STATUS_CHANGED_BUS_EVENT_TYPE,
 } from '../rule_executor_event_publisher/events';
 
 /**

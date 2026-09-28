@@ -49,8 +49,25 @@ interface ResolveEpisodeIdResult {
   readonly isNew: boolean;
 }
 
+/**
+ * Records a single episode status change produced by a director run.
+ *
+ * Only included when the episode status actually changed from the previous run
+ * (`previousStatus !== status`). User-locked episodes are excluded because their
+ * status is held by a user action, not by the rule execution.
+ */
+export interface AlertStatusTransition {
+  readonly groupHash: string;
+  readonly episodeId: string;
+  readonly source: string;
+  readonly status: AlertEpisodeStatus;
+  readonly previousStatus: AlertEpisodeStatus | null;
+}
+
 export interface DirectorRunStats {
   readonly newEpisodeIds: readonly string[];
+  /** Every episode whose status changed during this run (user-locked episodes excluded). */
+  readonly statusTransitions: readonly AlertStatusTransition[];
 }
 
 export interface DirectorRunResult {
@@ -74,7 +91,7 @@ export class DirectorService {
     spaceId,
   }: RunDirectorParams): Promise<DirectorRunResult> {
     if (alertEvents.length === 0) {
-      return { alertEvents: [], stats: { newEpisodeIds: [] } };
+      return { alertEvents: [], stats: { newEpisodeIds: [], statusTransitions: [] } };
     }
 
     const logger = this.logger.forSubsystem('director').withLabels({
@@ -109,23 +126,30 @@ export class DirectorService {
       executionContext.throwIfAborted();
 
       const newEpisodeIds: string[] = [];
+      const statusTransitions: AlertStatusTransition[] = [];
       const processed = alertEvents.map((currentAlertEvent) => {
-        const { alertEvent, isNewEpisode } = this.getAlertEventWithNextEpisode({
-          rule,
-          currentAlertEvent,
-          previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
-          strategy,
-          logger,
-        });
+        const previousAlertEvent = alertStateByGroupHash.get(currentAlertEvent.group_hash);
+        const { alertEvent, isNewEpisode, statusTransition } =
+          this.getAlertEventWithNextEpisode({
+            rule,
+            currentAlertEvent,
+            previousAlertEvent,
+            strategy,
+            logger,
+          });
 
         if (isNewEpisode && alertEvent.episode) {
           newEpisodeIds.push(alertEvent.episode.id);
         }
 
+        if (statusTransition) {
+          statusTransitions.push(statusTransition);
+        }
+
         return alertEvent;
       });
 
-      return { alertEvents: processed, stats: { newEpisodeIds } };
+      return { alertEvents: processed, stats: { newEpisodeIds, statusTransitions } };
     } finally {
       try {
         await scope.disposeAll();
@@ -163,7 +187,11 @@ export class DirectorService {
     previousAlertEvent,
     strategy,
     logger,
-  }: CalculateNextStateParams): { alertEvent: AlertEvent; isNewEpisode: boolean } {
+  }: CalculateNextStateParams): {
+    alertEvent: AlertEvent;
+    isNewEpisode: boolean;
+    statusTransition: AlertStatusTransition | null;
+  } {
     // User lock: once a user hits `activate` on a group, the episode
     // stays `active` regardless of what the strategy computes, until
     // the user hits `deactivate` (which flips the lifecycle marker
@@ -172,6 +200,9 @@ export class DirectorService {
     // analytics keep the raw engine signal. Only `episode.status` is
     // forced. `episode.status_count` is dropped to mirror how the
     // strategies emit any → active transitions.
+    //
+    // User-locked episodes are excluded from status transition events:
+    // the status change is user-driven, not the result of a rule execution.
     if (this.isUserLocked(previousAlertEvent)) {
       return {
         alertEvent: {
@@ -183,10 +214,11 @@ export class DirectorService {
           },
         },
         isNewEpisode: false,
+        statusTransition: null,
       };
     }
 
-    const currentStatus = previousAlertEvent?.last_episode_status;
+    const currentStatus = previousAlertEvent?.last_episode_status ?? null;
 
     const result: StateTransitionResult = strategy.getNextState({
       rule,
@@ -199,7 +231,9 @@ export class DirectorService {
       nextStatus: result.status,
     });
 
-    if (currentStatus !== result.status) {
+    const didTransition = currentStatus !== result.status;
+
+    if (didTransition) {
       logger.debug({
         message: 'Episode status transition',
         labels: {
@@ -220,6 +254,15 @@ export class DirectorService {
         },
       },
       isNewEpisode: isNew,
+      statusTransition: didTransition
+        ? {
+            groupHash: currentAlertEvent.group_hash,
+            episodeId,
+            source: currentAlertEvent.source,
+            status: result.status,
+            previousStatus: currentStatus,
+          }
+        : null,
     };
   }
 
