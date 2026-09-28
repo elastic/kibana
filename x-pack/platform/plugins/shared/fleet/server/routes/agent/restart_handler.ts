@@ -8,6 +8,7 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import { isAgentRestartSupported } from '../../../common/services';
 import type { PostAgentRestartResponse } from '../../../common/types';
 import type { PostAgentRestartRequestSchema, PostBulkAgentRestartRequestSchema } from '../../types';
 import { getAgentById } from '../../services/agents';
@@ -23,7 +24,15 @@ export const restartAgentHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
   try {
-    await getAgentById(esClient, soClient, request.params.agentId);
+    const agent = await getAgentById(esClient, soClient, request.params.agentId);
+    if (!isAgentRestartSupported(agent)) {
+      return response.customError({
+        statusCode: 400,
+        body: {
+          message: `Agent ${request.params.agentId} does not support the restart action.`,
+        },
+      });
+    }
     const result = await AgentService.restartAgent(esClient, soClient, request.params.agentId);
     const body: PostAgentRestartResponse = { actionId: result.actionId };
     return response.ok({ body });

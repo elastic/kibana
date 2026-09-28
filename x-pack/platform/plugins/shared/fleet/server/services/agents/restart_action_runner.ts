@@ -9,8 +9,9 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
-import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import { HostedAgentPolicyRestrictionRelatedError, FleetError } from '../../errors';
 import { appContextService } from '../app_context';
+import { isAgentRestartSupported, MINIMUM_RESTART_AGENT_VERSION } from '../../../common/services';
 
 import { ActionRunner } from './action_runner';
 import { createAgentAction, createErrorActionResults } from './actions';
@@ -54,6 +55,10 @@ export async function restartBatch(
     if (isHostedAgent(hostedPolicies, agent)) {
       errors[agent.id] = new HostedAgentPolicyRestrictionRelatedError(
         `Cannot restart agent in hosted agent policy ${agent.policy_id}`
+      );
+    } else if (!isAgentRestartSupported(agent)) {
+      errors[agent.id] = new FleetError(
+        `Agent ${agent.id} does not support the restart action (requires >= ${MINIMUM_RESTART_AGENT_VERSION}).`
       );
     } else {
       eligibleAgents.push(agent);

@@ -19,6 +19,7 @@ import {
 import { getAgentById } from '../../services/agents';
 import * as AgentService from '../../services/agents';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import * as commonServices from '../../../common/services';
 
 import { restartAgentHandler, bulkRestartAgentsHandler } from './restart_handler';
 
@@ -26,6 +27,11 @@ jest.mock('../../services/agents', () => ({
   getAgentById: jest.fn(),
   restartAgent: jest.fn(),
   bulkRestartAgents: jest.fn(),
+}));
+
+jest.mock('../../../common/services', () => ({
+  ...jest.requireActual('../../../common/services'),
+  isAgentRestartSupported: jest.fn(),
 }));
 
 jest.mock('../../errors', () => ({
@@ -41,6 +47,10 @@ describe('restart handlers', () => {
   let mockContext: any;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
 
+  const mockIsAgentRestartSupported = commonServices.isAgentRestartSupported as jest.MockedFunction<
+    typeof commonServices.isAgentRestartSupported
+  >;
+
   beforeEach(() => {
     jest.clearAllMocks();
     esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -52,6 +62,7 @@ describe('restart handlers', () => {
       }),
     };
     mockResponse = httpServerMock.createResponseFactory();
+    mockIsAgentRestartSupported.mockReturnValue(true);
   });
 
   describe('restartAgentHandler', () => {
@@ -82,6 +93,22 @@ describe('restart handlers', () => {
       );
 
       expect(mockResponse.ok).not.toHaveBeenCalled();
+    });
+
+    it('returns 400 when agent version does not support restart', async () => {
+      (getAgentById as jest.Mock).mockResolvedValue({ id: 'agent-1' });
+      mockIsAgentRestartSupported.mockReturnValue(false);
+
+      await restartAgentHandler(
+        mockContext,
+        { params: { agentId: 'agent-1' } } as any,
+        mockResponse
+      );
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 400 })
+      );
+      expect(AgentService.restartAgent).not.toHaveBeenCalled();
     });
   });
 
