@@ -285,9 +285,9 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
                 ...Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).filter(
                   (id) => activeInstanceIds.has(id) && !cleanedLiveStale.includes(id)
                 ),
-                ...targetsToDeploy.flatMap((g) => g.instanceIds).filter(
-                  (id) => !alreadyDeployedIds.has(id)
-                ),
+                ...targetsToDeploy
+                  .flatMap((g) => g.instanceIds)
+                  .filter((id) => !alreadyDeployedIds.has(id)),
               ];
               const errorMsg =
                 'Failed to update package policy with new settings. Click Retry to try again.';
@@ -310,10 +310,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           // When cleanup partially failed (remainingPending non-empty), fall through to
           // the cleanup-only path so isDirty is cleared without writing an incomplete
           // post-cleanup state to the SO (4123049389).
-          if (
-            targetsToDeploy.length === 0 &&
-            Object.keys(remainingPending).length === 0
-          ) {
+          if (targetsToDeploy.length === 0 && Object.keys(remainingPending).length === 0) {
             if (onboardingDeploymentId) {
               const postCleanupIds = Object.fromEntries(
                 Object.entries(detectAndReviewStep.policyIdsByInstance ?? {}).filter(

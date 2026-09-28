@@ -606,7 +606,9 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
           await route.fulfill({
             status: 200,
             contentType: 'application/json',
-            body: JSON.stringify({ item: makeSoItem(DEP_ID, { connectorId: null, authMethod: 'static_keys' }) }),
+            body: JSON.stringify({
+              item: makeSoItem(DEP_ID, { connectorId: null, authMethod: 'static_keys' }),
+            }),
           });
         } else {
           await route.continue();
@@ -887,15 +889,18 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     // isDirty cleared → session reflects the new state. The step may navigate away after
     // a successful deploy (unmounting the callout), so assert on session state rather than
     // UI element visibility to avoid a vacuously-true assertion (4123330463).
-    const isDirtyAfter = await page.evaluate(({ key }) => {
-      const raw = sessionStorage.getItem(key);
-      if (!raw) return null;
-      try {
-        return (JSON.parse(raw) as Record<string, unknown>).isDirty ?? null;
-      } catch {
-        return null;
-      }
-    }, { key: DETECT_AND_REVIEW_SESSION_KEY });
+    const isDirtyAfter = await page.evaluate(
+      ({ key }) => {
+        const raw = sessionStorage.getItem(key);
+        if (!raw) return null;
+        try {
+          return (JSON.parse(raw) as Record<string, unknown>).isDirty ?? null;
+        } catch {
+          return null;
+        }
+      },
+      { key: DETECT_AND_REVIEW_SESSION_KEY }
+    );
     expect(isDirtyAfter).toBeFalsy();
   });
 });

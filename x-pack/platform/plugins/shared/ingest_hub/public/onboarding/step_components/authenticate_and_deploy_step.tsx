@@ -194,9 +194,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           const selected = new Set(selectedAgentPolicyIds ?? []);
           if (selected.size === 0) return false; // no selection yet — not in agent edit mode
           const deployed = new Set(item.agentPolicyIds ?? []);
-          return (
-            selected.size !== deployed.size || [...selected].some((id) => !deployed.has(id))
-          );
+          return selected.size !== deployed.size || [...selected].some((id) => !deployed.has(id));
         })();
         const dirty = dirtyVarIds.length > 0 || authDirty || agentPoliciesDirty;
         driftDirtyRef.current = dirty;
@@ -221,7 +219,14 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     // edits. Only auth mutations (connector swap, authMethod change) happen in this component's
     // lifetime and need to re-trigger the check; adding them to deps is sufficient.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onboardingDeploymentId, awsServicesMap, authMethod, connectorId, selectedAgentPoliciesKey, driftRetryKey]);
+  }, [
+    onboardingDeploymentId,
+    awsServicesMap,
+    authMethod,
+    connectorId,
+    selectedAgentPoliciesKey,
+    driftRetryKey,
+  ]);
 
   // Called by ManagedIntegrationsSection when the static-key replace form becomes ready or is
   // cancelled. Merges the form's own dirty with the SO-derived drift so that cancelling the
