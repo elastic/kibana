@@ -167,13 +167,21 @@ call resolved.
 
 **Write tests for the paths live testing will not reach.** Verifying a connector against one real account
 exercises the happy path and little else. The edges that review finds instead are predictable, so cover
-them with unit tests up front:
+them with unit tests up front — each one only if your connector has the thing it tests:
 
-- a non-2xx response from the service returned as a result, with its error body intact
-- a 3xx response, asserting both `maxRedirects: 0` and the returned `Location`
-- a multi-page list response, asserting every page is followed and that the page cap reports `truncated`
-- an over-sized input rejected at the schema boundary, including a **non-ASCII** case for any byte bound
-- every accept *and* reject case of a path/route regex, table-driven
+- **if an action proxies a call whose non-2xx answers are meaningful** — that non-2xx returned as a
+  result, with its error body intact. An ordinary `GET` that 404s is an error and stays one; do not add
+  this test by turning a real error into a result.
+- **if a request sends a credential in a custom header** — a 3xx response, asserting both
+  `maxRedirects: 0` and the returned `Location`
+- **if a list action follows a continuation link** — a multi-page response, asserting every page is
+  followed and that the page cap reports `truncated`
+- **if an input carries a size or byte bound** — an over-sized input rejected at the schema boundary,
+  including a **non-ASCII** case for a byte bound
+- **if a regex constrains a URL path** — every accept *and* reject case, table-driven
+
+A connector with none of these (an MCP-only spec, or one whose actions are plain `GET` reads) owes none
+of them. Write the tests its own surface needs instead.
 
 ### Self-review before handing off
 
@@ -192,8 +200,9 @@ Before treating the connector as done, re-read the whole diff once, end to end, 
 - A status code used as the sole evidence for a classification (e.g. treating every 401/403 as a bad
   credential) — the service's own authorization responses are indistinguishable by status
 - A list action that reads `response.data.value` (or equivalent) without following the vendor's
-  continuation link, or that follows an absolute continuation URL with `ctx.client` without checking its
-  origin first — that sends the connector's credentials to whatever host the link names
+  continuation link, or that follows a continuation URL with `ctx.client` without resolving it against
+  `ctx.client.getUri()` and checking its origin first — that sends the connector's credentials to
+  whatever host the link names
 - A size bound measured with `.length` on a serialized string where the message says "bytes"
 - A regex guarding a URL path that has only been tested for what it accepts, never for what it must reject
 - Handlers still typed with implicit `any` (missing the `input: XInput` annotation)

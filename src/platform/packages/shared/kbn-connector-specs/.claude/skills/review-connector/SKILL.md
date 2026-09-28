@@ -332,11 +332,22 @@ Report documentation issues alongside code issues.
   asserting on the returned value: it passes with a wrong mock in place, so a regression that re-promises
   the obsolete shape goes unnoticed.
 - **Edges live testing cannot reach**: A `## Validated` table proves the happy path against one real
-  account; it does not cover the paths review keeps finding. Flag a test suite with no case for: a non-2xx
-  response returned as a result with its error body, a 3xx with `maxRedirects: 0` and the returned
-  `Location`, a multi-page list response plus the page-cap `truncated` flag, an over-sized input rejected
-  at the schema boundary **including a non-ASCII case** for any byte bound, and both the accept and the
-  reject cases of any URL path regex.
+  account; it does not cover the paths review keeps finding. Each edge below is owed only when the
+  connector has the thing it tests — read the left column first and skip the row if the answer is no. A
+  connector with none of them (an MCP-only spec, or one with plain `GET` reads) owes none of these, and
+  asking anyway invites an author to invent a test for behaviour the connector does not have.
+
+  | Only if the spec has | Flag a suite with no case for |
+  | --- | --- |
+  | an action that proxies a call whose non-2xx answers are meaningful | that non-2xx returned as a result, with its error body |
+  | a request sending a credential in a custom header | a 3xx, asserting `maxRedirects: 0` and the returned `Location` |
+  | a list action following a continuation link | a multi-page response, and the page cap reporting `truncated` |
+  | an input with a size or byte bound | an over-sized input rejected at the schema boundary, **including a non-ASCII case** for a byte bound |
+  | a regex constraining a URL path | both the accept and the reject cases, table-driven |
+
+  Do not read the first row as a reason to make every error a result. An ordinary `GET` that 404s or 500s
+  is an error, and should stay one; the row applies to an action whose non-2xx answer is part of what the
+  caller asked for.
 
 ### Security
 
