@@ -25,6 +25,8 @@ import {
 } from '../../../../common/field_maps/field_names';
 import {
   AGENT_STATUS_FIELD_NAME,
+  CUSTOM_YARA_SIGNATURE_ENTRY_NAME_FIELD_NAME,
+  CUSTOM_YARA_SIGNATURE_RULE_IDENTIFIER_FIELD_NAME,
   EVENT_SOURCE_FIELD_NAME,
   QUARANTINED_PATH_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
@@ -77,6 +79,8 @@ export const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'Endpoint.policy.applied.artifacts.global.channel' },
   ...USER_EUID_FIELDS,
   { id: 'rule.name' },
+  { id: CUSTOM_YARA_SIGNATURE_ENTRY_NAME_FIELD_NAME },
+  { id: CUSTOM_YARA_SIGNATURE_RULE_IDENTIFIER_FIELD_NAME },
   { id: 'cloud.provider' },
   { id: 'cloud.region' },
   { id: 'orchestrator.cluster.id' },

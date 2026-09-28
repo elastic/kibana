@@ -1,0 +1,298 @@
+openapi: 3.0.0
+info:
+  title: AlertZero Hunt component schemas
+  version: '1'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    HuntTechnology:
+      type: string
+      enum: [aws_iam, fortigate]
+      description: >-
+        Supported technologies. Extend only alongside a TECHNOLOGY_INDEX_MAP entry.
+
+    IndexScopeStatus:
+      type: string
+      enum: [ok, degraded, blocked]
+      description: >-
+        `ok`: every required/optional pattern resolved. `degraded`: every
+        required pattern resolved but an optional one did not. `blocked`: a
+        required pattern resolved to nothing; the hunt must not run.
+
+    HuntIncompleteReason:
+      type: string
+      enum:
+        - search_partial
+        - index_unavailable
+        - generation_failed
+        - execute_failed
+        - generation_budget
+        - query_out_of_scope
+        - query_ungrounded
+        - quote_ungrounded
+        - unknown_technique_id
+        - rows_unclassifiable
+        - refs_unavailable
+        - nothing_searched
+        - input_truncated
+      description: >-
+        Why a hunt could not corroborate part of what it was asked to look at, or
+        could not show what it found. Seven are transient, named rather than
+        counted so this list stays honest as reasons are added:
+        `search_partial`, `index_unavailable`, `generation_failed`,
+        `execute_failed`, and the three that mean a model's output was refused —
+        `query_out_of_scope`, `query_ungrounded`, `quote_ungrounded`. Those three
+        are transient because generation and extraction vary between runs, so a
+        technique refused once is still unsearched and a later run may produce a
+        usable query or quote. The rest are deterministic: repeating the run
+        produces the same gap, so retrying only re-spends it. `input_truncated`
+        means the report carried more IOCs, techniques or text than a hunt
+        accepts, so only a prefix of it was hunted.
+
+    HuntIncompleteness:
+      type: object
+      required: [reason, detail]
+      description: >-
+        One gap in a hunt's coverage. A run reporting no gaps searched everything
+        it was asked to; a run reporting gaps has not, whatever its hit count says.
+      properties:
+        reason:
+          $ref: '#/components/schemas/HuntIncompleteReason'
+        detail:
+          type: string
+          description: What was not covered, in a form a human reading the run can act on.
+        technique_id:
+          type: string
+          description: >-
+            Set when the gap is scoped to one technique rather than to the whole
+            search.
+
+    HuntCompleteness:
+      type: string
+      enum: [complete, incomplete_retryable, incomplete_final]
+      description: >-
+        Whether the run covered what it was asked to, and if not, whether
+        repeating it could change that. `complete`: every requested search ran, so
+        a zero-hit run is a statement about the environment. `incomplete_retryable`:
+        something transient stopped part of the search, so the report must stay
+        eligible for a later run. `incomplete_final`: part of the search
+        deterministically cannot run, so the report can be retired, but the run is
+        not a statement that the environment is clean.
+
+    IndexScopeWindow:
+      type: object
+      required: [from, to]
+      properties:
+        from:
+          type: string
+          description: ISO 8601 start of the search window, inclusive.
+        to:
+          type: string
+          description: ISO 8601 end of the search window, exclusive.
+
+    ResolvedIndexScope:
+      type: object
+      required: [technology, status, required, optional, missing, window, row_limit]
+      description: >-
+        `required`/`optional` list every pattern checked for the technology;
+        `missing` lists every pattern from either list that resolved to zero indices.
+      properties:
+        technology:
+          $ref: '#/components/schemas/HuntTechnology'
+        status:
+          $ref: '#/components/schemas/IndexScopeStatus'
+        required:
+          type: array
+          items:
+            type: string
+        optional:
+          type: array
+          items:
+            type: string
+        missing:
+          type: array
+          items:
+            type: string
+        window:
+          $ref: '#/components/schemas/IndexScopeWindow'
+        row_limit:
+          type: integer
+
+    HuntIocType:
+      type: string
+      enum: [ip, email, domain, url, hash]
+      description: IOC kinds Tier 1 knows how to map to ECS fields.
+
+    HuntIoc:
+      type: object
+      required: [type, value]
+      properties:
+        type:
+          $ref: '#/components/schemas/HuntIocType'
+        value:
+          type: string
+          minLength: 1
+          maxLength: 2048
+
+    HuntForThreatStatus:
+      type: string
+      enum: [scope_blocked, no_searchable_terms, no_environment_hits, environment_hits_found]
+      description: >-
+        Tier 1 raw hunt statuses. The hit/clean collapse for
+        evidence[].last_hunt_status happens in the managed-workflow evidence step.
+        `scope_blocked` means no required index existed, so the hunt never ran; it is
+        a failed run, never clean.
+
+    AffectedAsset:
+      type: object
+      required: [name, hit_count]
+      properties:
+        name:
+          type: string
+        hit_count:
+          type: integer
+
+    # Shared Discover ref for Tier 1 `hits[]` and Tier 2 behavior `hits[]`.
+    # Full `_source` is not returned; consumers refetch by id + index when needed.
+    HuntForThreatHit:
+      type: object
+      required: [id, index]
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          maxLength: 512
+        index:
+          type: string
+          maxLength: 512
+        timestamp:
+          type: string
+          maxLength: 64
+          description: Document `@timestamp` when present on the hit.
+        matched:
+          type: object
+          description: >-
+            Which IOC and/or ATT&CK technique produced this hit. Tier 1 fills
+            this by post-matching returned documents against the searched IOC
+            values and `kibana.alert.rule.threat.technique` ids. Technique
+            attribution only applies to alerts already tagged with that MITRE
+            id (not raw telemetry matched by behavior). Used by the SSE mapper
+            to scope Tier 1 `events[]` onto technique-specific attachments.
+            Tier 2 behavior `hits` omit this (technique is implied by the
+            parent behavior).
+          properties:
+            ioc:
+              type: object
+              properties:
+                type:
+                  type: string
+                value:
+                  type: string
+            technique_id:
+              type: string
+            field:
+              type: string
+
+    HuntForThreatResult:
+      type: object
+      required:
+        - status
+        - has_confirmed_hit
+        - searched_iocs
+        - searched_techniques
+        - resolved_iocs
+        - resolved_techniques
+        - time_range
+        - counts
+        - hits
+        - affected_assets
+        - per_index
+      properties:
+        status:
+          $ref: '#/components/schemas/HuntForThreatStatus'
+        has_confirmed_hit:
+          type: boolean
+          description: >-
+            A confirmed event match in a required index inside the window.
+            Never set by an optional-index or out-of-window match.
+        incomplete:
+          type: array
+          description: >-
+            Gaps in what the search actually covered. Absent or empty means the
+            search ran over the whole scope, so `status: no_environment_hits` is a
+            statement about the environment. Present means it is not: shards failed,
+            the search timed out, or a required pattern resolved to no index.
+          items:
+            $ref: '#/components/schemas/HuntIncompleteness'
+        searched_iocs:
+          type: integer
+        searched_techniques:
+          type: integer
+        resolved_iocs:
+          type: array
+          items:
+            $ref: '#/components/schemas/HuntIoc'
+        resolved_techniques:
+          type: array
+          items:
+            type: string
+        time_range:
+          type: object
+          required: [from, to]
+          properties:
+            from:
+              type: string
+            to:
+              type: string
+        counts:
+          type: object
+          required: [total_hits, returned_hits, affected_hosts, affected_users]
+          properties:
+            total_hits:
+              type: integer
+            returned_hits:
+              type: integer
+            affected_hosts:
+              type: integer
+            affected_users:
+              type: integer
+        hits:
+          type: array
+          items:
+            $ref: '#/components/schemas/HuntForThreatHit'
+        affected_assets:
+          type: object
+          required: [hosts, users, services]
+          properties:
+            hosts:
+              type: array
+              items:
+                $ref: '#/components/schemas/AffectedAsset'
+            users:
+              type: array
+              items:
+                $ref: '#/components/schemas/AffectedAsset'
+            services:
+              type: array
+              items:
+                $ref: '#/components/schemas/AffectedAsset'
+        per_index:
+          type: array
+          items:
+            type: object
+            required: [index, hit_count, required]
+            properties:
+              index:
+                type: string
+              hit_count:
+                type: integer
+              required:
+                type: boolean
+                description: >-
+                  Regex match of this concrete `_index` bucket against the
+                  resolved technology's required index patterns (e.g.
+                  `logs-aws.*`), computed once by Tier 1, not re-derived
+                  downstream.
+        message:
+          type: string

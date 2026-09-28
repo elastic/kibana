@@ -78,8 +78,8 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     expect(response.body.group_by).toStrictEqual(['service.name', 'environment']);
     expect(response.body.throttle).toStrictEqual({ interval: '5m' });
     expect(new Date(response.body.updated_at).toISOString()).toBe(response.body.updated_at);
-    // The API key is server-side only and must never be exposed over the wire.
-    expect(response.body.auth.apiKey).toBeUndefined();
+    // API key ownership is server-side only and must never be exposed over the wire.
+    expect(response.body.auth).toBeUndefined();
   });
 
   apiTest(

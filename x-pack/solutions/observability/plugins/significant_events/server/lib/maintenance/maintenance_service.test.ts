@@ -13,7 +13,7 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../types';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import {
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
@@ -101,7 +101,12 @@ function makeManagementApi(options?: {
   );
 
   return {
-    api: { getWorkflow, updateWorkflow, cancelAllActiveWorkflowExecutions },
+    api: {
+      getWorkflow,
+      updateWorkflow,
+      cancelAllActiveWorkflowExecutions,
+      getClient: jest.fn(() => ({ getWorkflow })),
+    },
     getWorkflow,
     updateWorkflow,
     cancelAllActiveWorkflowExecutions,
@@ -213,7 +218,7 @@ function makeService(params?: {
         })),
       },
     },
-  } as unknown as StreamsServer;
+  } as unknown as SignificantEventsServer;
 
   const getScopedClients = jest.fn(async () => ({
     getKnowledgeIndicatorClient: async () => ({ getRuleBackedQueryLinks }),
@@ -377,6 +382,7 @@ describe('SignificantEventsMaintenanceService', () => {
         }
       );
       const api = {
+        getClient: jest.fn(() => ({ getWorkflow })),
         getWorkflow,
         updateWorkflow,
         cancelAllActiveWorkflowExecutions: jest.fn(),

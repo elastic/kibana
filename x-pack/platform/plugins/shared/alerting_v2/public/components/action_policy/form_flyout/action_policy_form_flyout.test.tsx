@@ -267,14 +267,10 @@ describe('ActionPolicyFormFlyout', () => {
       throttle: { strategy: 'time_interval', interval: '5m' },
       snoozed_until: null,
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
-      created_by: 'elastic',
+      created_by: { profile_uid: 'elastic' },
       created_at: '2026-03-01T10:00:00.000Z',
-      updated_by: 'elastic',
+      updated_by: { profile_uid: 'elastic' },
       updated_at: '2026-03-01T10:00:00.000Z',
-      auth: {
-        owner: 'elastic',
-        created_by_user: true,
-      },
     };
 
     renderFlyout({ onClose: jest.fn(), onUpdate, initialValues });
