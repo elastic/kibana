@@ -566,7 +566,7 @@ export async function eventsWriteBulkHandler({
       ...candidate.input,
       severity: getCalibratedSeverity({
         source,
-        latestEvent: latestByEventId.get(candidate.eventId),
+        latestEvent: latestLegacyByEventId.get(candidate.eventId),
         proposedSeverity: candidate.input.severity,
         proposedStatus: candidate.input.status,
         proposedSignals: candidate.input.signals,
@@ -577,7 +577,7 @@ export async function eventsWriteBulkHandler({
     if (
       candidate.mode === 'snapshot' &&
       shouldSkipAsNoOp(
-        latestByEventId.get(candidate.eventId),
+        latestLegacyByEventId.get(candidate.eventId),
         candidate,
         priorDocsByEventId.get(candidate.eventId) ?? []
       )

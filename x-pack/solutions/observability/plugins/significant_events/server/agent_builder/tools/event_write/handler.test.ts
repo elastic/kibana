@@ -1311,6 +1311,38 @@ describe('eventsWriteBulkHandler — eventSearchClient (flag-aware read path)', 
     );
   });
 
+  it('does not suppress a dismissed→closed write when eventSearchClient maps dismissed to closed', async () => {
+    // RuleEventsClient maps both 'dismissed' and 'closed' to 'closed', so a genuine
+    // dismissed→closed transition would appear as closed==closed in the read store
+    // and be wrongly skipped as unchanged_outcome. shouldSkipAsNoOp must use the
+    // canonical predecessor (latestLegacyByEventId) from eventClient, which preserves
+    // the real 'dismissed' status.
+    const eventId = 'checkout__dismissed-event';
+    const canonicalPredecessor = makeStoredEvent(eventId, { status: 'dismissed' });
+    // RuleEventsClient exposes 'closed' for 'dismissed'
+    const readStorePredecessor = makeStoredEvent(eventId, { status: 'closed' });
+
+    const eventSearchClient: jest.Mocked<SignificantEventsReadClient> = {
+      findLatestPaginated: jest.fn(),
+      findLatestByCurrentStatePaginated: jest.fn(),
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+      findByEventId: jest.fn().mockResolvedValue({ hits: [readStorePredecessor] }),
+    };
+    const eventClient = makeEventClient({
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+      findByEventId: jest.fn().mockResolvedValue({ hits: [canonicalPredecessor] }),
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventClient,
+      eventSearchClient,
+      inputs: [{ ...baseInput, event_id: eventId, status: 'closed', severity: '60-high' }],
+    });
+
+    expect(results[0]).toMatchObject({ written: true });
+    expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
+  });
+
   it('falls back to eventClient for reads when eventSearchClient is omitted', async () => {
     const eventClient = makeEventClient({
       findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
