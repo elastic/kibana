@@ -115,4 +115,19 @@ describe('FeedbackBody', () => {
 
     expect(mockProps.onEmailValidationChange).toHaveBeenCalled();
   });
+
+  it('should prevent default form submission (no page navigation) on submit', async () => {
+    await act(async () => {
+      renderWithI18n(
+        <FeedbackBody {...mockProps} allowEmailContact={true} email="capybara@elastic.co" />
+      );
+    });
+
+    const form = screen.getByTestId('feedbackEmailInput').closest('form') as HTMLFormElement;
+    expect(form).not.toBeNull();
+    // fireEvent.submit returns false when the event's default was prevented.
+    // Without the form's onSubmit preventDefault this returns true and the browser
+    // would perform a full-page navigation on implicit Enter submission.
+    expect(fireEvent.submit(form)).toBe(false);
+  });
 });
