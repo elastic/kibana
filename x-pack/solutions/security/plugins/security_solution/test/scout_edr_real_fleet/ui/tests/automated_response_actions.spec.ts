@@ -57,6 +57,7 @@ test.describe('Automated response actions', { tag: ['@local-stateful-classic'] }
       seededRule.name,
       ALERT_TIMEOUT_MS
     );
+    await pageObjects.documentFlyout.waitForAlertFlyout();
     await pageObjects.alertResponse.openResponseDetails();
 
     // Cypress parity: isolate/kill-process can still be pending when the flyout opens.
