@@ -35,7 +35,6 @@ export const WatchDetailPage: React.FC = () => {
   const { watchId } = useParams<{ watchId: string }>();
   const canWrite = useCanWriteAlertZero();
   const { euiTheme } = useEuiTheme();
-  const canWrite = useCanWriteAlertZero();
   const { data, isLoading, error, refetch } = useWatch(watchId);
   const {
     data: workersData,
