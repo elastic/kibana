@@ -103,9 +103,17 @@ apiTest.describe(
       expect(typeof response.body.total).toBe('number');
     });
 
-    apiTest('validation: accepts an outcome array filter', async ({ apiClient }) => {
+    apiTest('validation: accepts a `to` upper bound', async ({ apiClient }) => {
       const response = await apiClient.get(
-        getListExecutionHistoryUrl({ outcome: ['dispatched', 'throttled'] }),
+        getListExecutionHistoryUrl({ to: '2026-01-02T00:00:00.000Z' }),
+        { headers: readerHeaders }
+      );
+      expect(response).toHaveStatusCode(200);
+    });
+
+    apiTest('validation: accepts an outcomes array filter', async ({ apiClient }) => {
+      const response = await apiClient.get(
+        getListExecutionHistoryUrl({ outcomes: ['success', 'throttled'] }),
         { headers: readerHeaders }
       );
       expect(response).toHaveStatusCode(200);
@@ -113,7 +121,7 @@ apiTest.describe(
 
     apiTest('validation: rejects an unknown outcome value', async ({ apiClient }) => {
       const response = await apiClient.get(
-        `${ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH}?outcome=nope`,
+        `${ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH}?outcomes=nope`,
         { headers: readerHeaders }
       );
       expect(response).toHaveStatusCode(400);

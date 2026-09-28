@@ -10,13 +10,12 @@
 import INVESTIGATION_WORKFLOW_YAML from './investigation_workflow.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
 
-export const SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID =
-  'system-significant-events-investigation';
+export const NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID = 'system-nightshift-investigation';
 
-export const SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW = {
-  id: SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
+export const NIGHTSHIFT_INVESTIGATION_WORKFLOW = {
+  id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 11,
+  version: 1,
   billable: false,
   yaml: INVESTIGATION_WORKFLOW_YAML,
   management: {

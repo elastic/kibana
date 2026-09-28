@@ -8,6 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RouteDependencies } from '../register_routes';
+import { createRouteContextMock } from '../route_context.mock';
 import { registerGetClosedProposalsRoute } from './get_closed_proposals';
 
 const makeDeps = (conversationProposalsService: unknown) => {
@@ -40,13 +41,30 @@ const makeDeps = (conversationProposalsService: unknown) => {
 };
 
 describe('registerGetClosedProposalsRoute', () => {
+  it('returns 404 when the per-space setting is off', async () => {
+    const listClosed = jest.fn();
+    const { handler } = makeDeps({ listClosed });
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(
+      createRouteContextMock({ settingEnabled: false }),
+      httpServerMock.createKibanaRequest({
+        query: { size: '25', from: '0' },
+      }),
+      response
+    );
+
+    expect(response.notFound).toHaveBeenCalled();
+    expect(listClosed).not.toHaveBeenCalled();
+  });
+
   it('delegates to listClosed with the correct size, from, and spaceId', async () => {
     const listClosed = jest.fn().mockResolvedValue({ proposals: [], total: 0 });
     const { handler } = makeDeps({ listClosed });
     const response = httpServerMock.createResponseFactory();
 
     await handler(
-      {},
+      createRouteContextMock(),
       httpServerMock.createKibanaRequest({
         path: '/internal/alertzero/proposals/closed',
         query: { size: '25', from: '0' },
@@ -73,7 +91,7 @@ describe('registerGetClosedProposalsRoute', () => {
     const response = httpServerMock.createResponseFactory();
 
     await handler(
-      {},
+      createRouteContextMock(),
       httpServerMock.createKibanaRequest({ query: { size: 0, from: 0 } }),
       response
     );
@@ -94,7 +112,7 @@ describe('registerGetClosedProposalsRoute', () => {
     const response = httpServerMock.createResponseFactory();
 
     await handler(
-      {},
+      createRouteContextMock(),
       httpServerMock.createKibanaRequest({
         query: { size: '25', from: '0' },
       }),

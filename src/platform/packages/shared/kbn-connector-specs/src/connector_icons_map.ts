@@ -402,4 +402,12 @@ export const ConnectorIconsMap: Map<
     '.threatq',
     lazy(() => import(/* webpackChunkName: "connectorIconThreatQ" */ './specs/threatq/icon')),
   ],
+
+  [
+    '.elasticsearch',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconelasticsearch" */ './specs/elasticsearch/icon')
+    ),
+  ],
 ]);

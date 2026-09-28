@@ -41,6 +41,7 @@ describe('resolveKiVerifierChain', () => {
       parent: args.parent,
       spaceId,
       workflowsManagement: { getWorkflowExecution },
+      request,
     });
 
   it('is just the current workflow when nothing led here', async () => {
@@ -66,8 +67,8 @@ describe('resolveKiVerifierChain', () => {
     await expect(
       resolve({ parent: { workflowId: 'dad', executionId: 'dad-exec' } })
     ).resolves.toEqual(['root', 'grand', 'dad', 'me']);
-    expect(getWorkflowExecution).toHaveBeenNthCalledWith(1, 'dad-exec', spaceId);
-    expect(getWorkflowExecution).toHaveBeenNthCalledWith(2, 'grand-exec', spaceId);
+    expect(getWorkflowExecution).toHaveBeenNthCalledWith(1, 'dad-exec', spaceId, { request });
+    expect(getWorkflowExecution).toHaveBeenNthCalledWith(2, 'grand-exec', spaceId, { request });
   });
 
   it('throws when a parent workflow run record cannot be found', async () => {
@@ -183,7 +184,7 @@ describe('createWorkflowVerifier', () => {
 
       await makeVerifier().verify(ki, context);
 
-      expect(workflowsManagement.getWorkflow).toHaveBeenCalledWith('my-verifier', spaceId);
+      expect(workflowsManagement.getWorkflow).toHaveBeenCalledWith('my-verifier', spaceId, request);
       expect(workflowsManagement.runWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'my-verifier' }),
         spaceId,
@@ -194,6 +195,7 @@ describe('createWorkflowVerifier', () => {
       );
       expect(workflowsManagement.getWorkflowExecution).toHaveBeenCalledWith(executionId, spaceId, {
         includeOutput: true,
+        request,
       });
     });
 
