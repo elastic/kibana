@@ -329,7 +329,7 @@ describe('ESQLEditor', () => {
     expect(await screen.findByRole('tooltip')).toHaveTextContent('Query error');
   });
 
-  it('keeps the error panel while a failed preview reloads', async () => {
+  it('shows the loading state instead of the stale error while a failed preview reloads', async () => {
     renderEditor();
     await waitFor(() => expect(capturedOnSubmit).toBeDefined());
 
@@ -354,11 +354,10 @@ describe('ESQLEditor', () => {
       );
     });
 
+    await waitFor(() => expect(within(results).getByText('Loading')).toBeInTheDocument());
     expect(within(results).queryByTestId('ESQLQueryResultsRefreshing')).not.toBeInTheDocument();
-    expect(within(results).getByTestId('ESQLQueryResultsEmpty')).toHaveTextContent(
-      'The query returned an error. See the errors in the query editor above.'
-    );
-    expect(within(results).getByTestId('ESQLQueryResultsErrorIcon')).toBeInTheDocument();
+    expect(within(results).queryByTestId('ESQLQueryResultsEmpty')).not.toBeInTheDocument();
+    expect(within(results).queryByTestId('ESQLQueryResultsErrorIcon')).not.toBeInTheDocument();
   });
 
   it('does not show the error icon when the first preview returns nothing without an error', async () => {

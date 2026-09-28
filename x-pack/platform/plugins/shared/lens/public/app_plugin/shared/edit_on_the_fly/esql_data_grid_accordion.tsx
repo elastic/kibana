@@ -47,21 +47,27 @@ export const ESQLDataGridAccordion = ({
   onToggle,
 }: ESQLDataGridAccordionProps) => {
   const styles = useMemoCss(componentStyles);
-  const showQueryError = isAccordionOpen && !dataGridAttrs && hasQueryError;
   const fillsAvailableSpace = isAccordionOpen && Boolean(dataGridAttrs);
   const queryErrorLabel = i18n.translate('xpack.lens.config.ESQLQueryResultsErrorLabel', {
     defaultMessage: 'Query error',
   });
 
+  const isAccordionLoading = !dataGridAttrs && isLoading;
+  const showQueryError = hasQueryError && !dataGridAttrs && !isLoading;
+
   return (
     <EuiFlexItem
       grow={fillsAvailableSpace ? 1 : false}
       data-test-subj="ESQLQueryResults"
-      css={[styles.wrapper, fillsAvailableSpace ? styles.expanded : styles.collapsed]}
+      css={[
+        styles.wrapper,
+        isAccordionLoading && styles.loading,
+        fillsAvailableSpace ? styles.expanded : styles.collapsed,
+      ]}
     >
       <EuiAccordion
         id="esql-results"
-        css={dataGridAttrs ? styles.gridFill : undefined}
+        css={styles.stableHorizontalScrollbar}
         buttonContent={
           <EuiTitle size="xxs" css={styles.title}>
             <h5>
@@ -71,9 +77,7 @@ export const ESQLDataGridAccordion = ({
             </h5>
           </EuiTitle>
         }
-        buttonProps={{
-          paddingSize: 'm',
-        }}
+        buttonProps={{ paddingSize: 'm' }}
         initialIsOpen={isAccordionOpen}
         forceState={isAccordionOpen ? 'open' : 'closed'}
         onToggle={onToggle}
@@ -82,7 +86,7 @@ export const ESQLDataGridAccordion = ({
             <EuiNotificationBadge size="m" color="subdued">
               {dataGridAttrs.rows.length}
             </EuiNotificationBadge>
-          ) : hasQueryError ? (
+          ) : showQueryError ? (
             <EuiIconTip
               type="error"
               color="danger"
@@ -94,10 +98,8 @@ export const ESQLDataGridAccordion = ({
             />
           ) : undefined
         }
-        isLoading={isLoading && !showQueryError}
-        // The accordion loader is only for a first load. A reload keeps the
-        // error panel in place; the editor already shows that a run is in flight.
-        isLoadingMessage={!dataGridAttrs && !showQueryError}
+        isLoading={isAccordionLoading}
+        isLoadingMessage
       >
         {showQueryError && (
           <EuiPanel
@@ -116,7 +118,7 @@ export const ESQLDataGridAccordion = ({
             </EuiText>
           </EuiPanel>
         )}
-        {isAccordionOpen && dataGridAttrs && (
+        {dataGridAttrs && (
           <div css={styles.gridContainer}>
             {isLoading && dataGridAttrs.rows.length > 0 && (
               <EuiProgress
@@ -153,37 +155,32 @@ const componentStyles = {
     }),
   // EuiAccordion exposes no API for a content area that grows with its container,
   // so the internal class name is the only way to hand it the remaining space.
-  expanded: css({ '.euiAccordion__childWrapper': { flex: 1 } }),
-  collapsed: css({ '.euiAccordion__childWrapper': { flex: 'none' } }),
-  /**
-   * Escape hatches into EuiAccordion and EuiDataGrid internals, applied only while the
-   * grid is rendered so EuiAccordion's own loading message keeps its default layout.
-   */
-  gridFill: css(
-    {
+  expanded: css({
+    '.euiAccordion__childWrapper': { flex: 1 },
+  }),
+  collapsed: css({
+    '.euiAccordion__childWrapper': { flex: 'none' },
+  }),
+  // EuiAccordion's paddingSize also pads the top, which pushes the loading message
+  // away from the header, so the loading content is padded through its class instead.
+  loading: ({ euiTheme }: UseEuiTheme) =>
+    css({
       '.euiAccordion__children': {
-        display: 'flex',
-        flexDirection: 'column',
-        blockSize: '100%',
+        padding: `0 ${euiTheme.size.base} ${euiTheme.size.base}`,
       },
-    },
-    // Prevents the horizontal scrollbar from toggling on/off as the accordion's
-    // height-animating ancestor resizes, which otherwise feeds back into EUI's
-    // column-width/ResizeObserver calculation and can hang the tab. Raw CSS because
-    // csstype declares overflow-x as a closed union, which rejects `!important`.
-    css`
-      .euiDataGrid__virtualized {
-        overflow-x: scroll !important;
-      }
-    `
-  ),
-  // EuiAccordion's loading style centres its children while refreshing; stretch ours so the
-  // grid keeps the full width. The top padding gives the refreshing bar its own band above
-  // the grid toolbar.
-  gridContainer: ({ euiTheme }: UseEuiTheme) =>
+    }),
+  // Prevents the horizontal scrollbar from toggling on/off as the accordion's
+  // height-animating ancestor resizes, which otherwise feeds back into EUI's
+  // column-width/ResizeObserver calculation and can hang the tab. Raw CSS because
+  // csstype declares overflow-x as a closed union, which rejects `!important`.
+  stableHorizontalScrollbar: css`
+    .euiDataGrid__virtualized {
+      overflow-x: scroll !important;
+    }
+  `,
+  gridContainer: () =>
     css({
       position: 'relative',
-      paddingBlockStart: euiTheme.size.xxs,
       display: 'flex',
       flexDirection: 'column',
       flexGrow: 1,

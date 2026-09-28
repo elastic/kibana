@@ -8,7 +8,7 @@
  */
 
 import React, { lazy } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiText, useEuiTheme } from '@elastic/eui';
 import type { ESQLRow } from '@kbn/es-types';
 import type { AggregateQuery } from '@kbn/es-query';
 import { withSuspense } from '@kbn/shared-ux-utility';
@@ -17,6 +17,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { untilPluginStartServicesReady } from './kibana_services';
 
 interface ESQLDataGridProps {
@@ -36,7 +37,33 @@ interface ESQLDataGridProps {
   isApproximate?: boolean;
 }
 
-const DataGridLazy = withSuspense(lazy(() => import('./data_grid')));
+const Loader = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <div
+      css={{
+        display: 'flex',
+        padding: `0  ${euiTheme.size.base} 0`,
+        alignItems: 'center',
+      }}
+    >
+      <EuiLoadingSpinner css={{ marginInlineEnd: euiTheme.size.xs }} />
+      <EuiText size="s">
+        <p>
+          {i18n.translate('esqlDataGrid.loadingDescription', {
+            defaultMessage: 'Loading',
+          })}
+        </p>
+      </EuiText>
+    </div>
+  );
+};
+
+const DataGridLazy = withSuspense(
+  lazy(() => import('./data_grid')),
+  <Loader />
+);
 
 export const ESQLDataGrid = (props: ESQLDataGridProps) => {
   const { loading, value } = useAsync(() => {
@@ -49,7 +76,7 @@ export const ESQLDataGrid = (props: ESQLDataGridProps) => {
   };
 
   const deps = value?.[0];
-  if (loading || !deps) return <EuiLoadingSpinner />;
+  if (loading || !deps) return <Loader />;
 
   return (
     <KibanaContextProvider
