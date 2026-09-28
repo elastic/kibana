@@ -611,4 +611,168 @@ describe('Data streams initialize function', () => {
       expect(dataStream.generation).toEqual(1);
     });
   });
+
+  describe('rollover mappings update strategy', () => {
+    const v1Mappings = {
+      properties: {
+        '@timestamp': mappings.date(),
+        mappedField: mappings.keyword(),
+      },
+    } satisfies MappingsDefinition;
+
+    // Breaking change rejected by putMapping: `mappedField` becomes an alias of `renamedField`.
+    const v2Mappings = {
+      properties: {
+        '@timestamp': mappings.date(),
+        renamedField: mappings.keyword(),
+        mappedField: { type: 'alias', path: 'renamedField' },
+      },
+    } satisfies MappingsDefinition;
+
+    const v2Definition: DataStreamDefinition<typeof v2Mappings> = {
+      name: testDataStream.name,
+      version: 2,
+      mappingsUpdateStrategy: 'rollover',
+      template: { mappings: v2Mappings },
+    };
+
+    const getDataStream = async () => {
+      const {
+        data_streams: [dataStream],
+      } = await esServer.getClient().indices.getDataStream({ name: testDataStream.name });
+      return dataStream;
+    };
+
+    const getIndexMappings = async (index: string) => {
+      const {
+        [index]: { mappings: indexMappings },
+      } = await esServer.getClient().indices.getMapping({ index });
+      return indexMappings;
+    };
+
+    it('rolls over lazily instead of updating existing backing indices when the version is incremented', async () => {
+      const esClient = esServer.getClient();
+
+      // Data stream created before the rollover strategy was enabled: its indices are not stamped.
+      const v1Definition: DataStreamDefinition<typeof v1Mappings> = {
+        name: testDataStream.name,
+        version: 1,
+        template: { mappings: v1Mappings },
+      };
+      await initialize({
+        logger,
+        elasticsearchClient: esClient,
+        dataStream: v1Definition,
+        lazyCreation: false,
+      });
+      await esClient.index({
+        index: testDataStream.name,
+        document: { '@timestamp': new Date().toISOString(), mappedField: 'v1' },
+        refresh: true,
+      });
+      const {
+        indices: [{ index_name: firstBackingIndex }],
+      } = await getDataStream();
+
+      const result = await initialize({
+        logger,
+        elasticsearchClient: esClient,
+        dataStream: v2Definition,
+        lazyCreation: false,
+      });
+      expect(result.dataStreamReady).toBe(true);
+
+      const {
+        index_templates: [indexTemplate],
+      } = await esClient.indices.getIndexTemplate({ name: testDataStream.name });
+      expect(indexTemplate.index_template._meta?.version).toEqual(2);
+      expect(indexTemplate.index_template.template?.mappings?._meta).toEqual({ version: 2 });
+
+      // Existing backing indices are left untouched until the next write rolls the data stream over.
+      const upgradedDataStream = await getDataStream();
+      expect(upgradedDataStream.generation).toEqual(1);
+      expect(upgradedDataStream.rollover_on_write).toBe(true);
+      const firstBackingIndexMappings = await getIndexMappings(firstBackingIndex);
+      expect(firstBackingIndexMappings.properties?.mappedField).toHaveProperty('type', 'keyword');
+      expect(firstBackingIndexMappings.properties?.renamedField).toBeUndefined();
+
+      await esClient.index({
+        index: testDataStream.name,
+        document: { '@timestamp': new Date().toISOString(), renamedField: 'v2' },
+        refresh: true,
+      });
+
+      const rolledOverDataStream = await getDataStream();
+      expect(rolledOverDataStream.generation).toEqual(2);
+      expect(rolledOverDataStream.rollover_on_write).toBe(false);
+      const writeIndexMappings = await getIndexMappings(
+        rolledOverDataStream.indices[rolledOverDataStream.indices.length - 1].index_name
+      );
+      expect(writeIndexMappings._meta).toEqual({ version: 2 });
+      expect(writeIndexMappings.properties?.mappedField).toEqual({
+        type: 'alias',
+        path: 'renamedField',
+      });
+
+      // The old field name resolves to the real field in old indices and to the alias in new ones.
+      const { hits } = await esClient.search({
+        index: testDataStream.name,
+        query: { terms: { mappedField: ['v1', 'v2'] } },
+      });
+      expect(hits.hits).toHaveLength(2);
+
+      // Restarting with the same definition does not schedule another rollover.
+      await initialize({
+        logger,
+        elasticsearchClient: esClient,
+        dataStream: v2Definition,
+        lazyCreation: false,
+      });
+      const restartedDataStream = await getDataStream();
+      expect(restartedDataStream.generation).toEqual(2);
+      expect(restartedDataStream.rollover_on_write).toBe(false);
+    });
+
+    it('completes an upgrade interrupted between the index template update and the rollover', async () => {
+      const esClient = esServer.getClient();
+
+      const v1Definition: DataStreamDefinition<typeof v1Mappings> = {
+        name: testDataStream.name,
+        version: 1,
+        mappingsUpdateStrategy: 'rollover',
+        template: { mappings: v1Mappings },
+      };
+      await initialize({
+        logger,
+        elasticsearchClient: esClient,
+        dataStream: v1Definition,
+        lazyCreation: false,
+      });
+      const {
+        indices: [{ index_name: firstBackingIndex }],
+      } = await getDataStream();
+      expect((await getIndexMappings(firstBackingIndex))._meta).toEqual({ version: 1 });
+
+      // A previous start installed the v2 index template but did not roll over.
+      await esClient.indices.putIndexTemplate({
+        name: testDataStream.name,
+        index_patterns: [`${testDataStream.name}*`],
+        data_stream: { hidden: true },
+        priority: 100,
+        template: { mappings: { ...v2Mappings, _meta: { version: 2 } } },
+        _meta: { version: 2, previousVersions: [1] },
+      });
+
+      await initialize({
+        logger,
+        elasticsearchClient: esClient,
+        dataStream: v2Definition,
+        lazyCreation: false,
+      });
+
+      const dataStream = await getDataStream();
+      expect(dataStream.generation).toEqual(1);
+      expect(dataStream.rollover_on_write).toBe(true);
+    });
+  });
 });

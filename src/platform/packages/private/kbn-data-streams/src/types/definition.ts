@@ -13,6 +13,17 @@ import type { BaseSearchRuntimeMappings } from './runtime';
 
 export type AnyDataStreamDefinition = DataStreamDefinition<any, any, any>;
 
+/**
+ * How an incremented `version` is applied to an existing data stream.
+ *
+ * - `put_mapping`: the updated mappings are applied to the current write index. Only backwards
+ *   compatible mapping changes are supported.
+ * - `rollover`: existing backing indices are left untouched and the data stream is lazily rolled
+ *   over, so the next write creates a new backing index from the updated template. Supports
+ *   breaking mapping changes (e.g. converting a field to an `alias`).
+ */
+export type MappingsUpdateStrategy = 'put_mapping' | 'rollover';
+
 export interface DataStreamDefinition<
   Mappings extends MappingsDefinition,
   FullMappings extends GetFieldsOf<Mappings> = GetFieldsOf<Mappings>,
@@ -37,6 +48,14 @@ export interface DataStreamDefinition<
    * @remark Must be greater than 0
    */
   version: number;
+
+  /**
+   * @remark With `rollover`, the template mappings are stamped with `_meta.version` and every
+   *         initialization rolls over a write index whose stamp is older than the template's, so an
+   *         interrupted upgrade is completed on the next start.
+   * @default 'put_mapping'
+   */
+  mappingsUpdateStrategy?: MappingsUpdateStrategy;
 
   /**
    * The index template definition for the data stream.

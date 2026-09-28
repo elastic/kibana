@@ -87,13 +87,14 @@ export class DataStreamClient<
    * Elasticsearch on the first write.
    *
    * If a data stream already exists when this is called (e.g. on a deploy that bumps `version`),
-   * mapping changes are applied to the current write index — same contract as
-   * {@link DataStreamClient.initialize}, minus the data stream creation step.
+   * mapping changes are applied according to `mappingsUpdateStrategy` (to the current write index,
+   * or by lazily rolling the data stream over) — same contract as {@link DataStreamClient.initialize},
+   * minus the data stream creation step.
    *
    * Use {@link DataStreamClient.fromDefinition} to obtain a client at runtime.
    *
    * @remark Idempotent: subsequent calls with the same definition are no-ops; calls with a higher
-   *         `version` will update the template and migrate mappings on the existing write index.
+   *         `version` will update the template and apply the new mappings to the existing data stream.
    */
   public static async initializeTemplate(args: {
     dataStream: AnyDataStreamDefinition;
@@ -121,9 +122,10 @@ export class DataStreamClient<
       skipCreation: false,
     });
 
-    // Apply mapping migrations to the existing write index when present. The pre-update
+    // Apply mapping migrations to the existing data stream when present. The pre-update
     // `existingIndexTemplate` reference is intentional: it lets `initializeDataStream` detect
-    // a version bump and run `simulateIndexTemplate` + `putMapping` against the write index.
+    // a version bump and run `simulateIndexTemplate` + `putMapping` against the write index
+    // (or a lazy rollover with the `rollover` strategy).
     // When no data stream exists yet, this is a no-op thanks to the `skipCreation` guard.
     await initializeDataStream({
       logger,

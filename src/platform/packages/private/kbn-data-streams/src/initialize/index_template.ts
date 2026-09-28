@@ -14,6 +14,7 @@ import type { Logger } from '@kbn/logging';
 import { retryEs } from '../retry_es';
 import type { AnyDataStreamDefinition } from '../types';
 import { applyDefaults } from './defaults';
+import { withMappingsVersion } from './rollover';
 
 /**
  * https://www.elastic.co/docs/manage-data/data-store/data-streams/set-up-data-stream
@@ -81,7 +82,10 @@ export async function initializeIndexTemplate({
         },
         template: {
           aliases: dataStream.template.aliases,
-          mappings: dataStream.template.mappings,
+          mappings:
+            dataStream.mappingsUpdateStrategy === 'rollover'
+              ? withMappingsVersion(dataStream.template.mappings, version)
+              : dataStream.template.mappings,
           lifecycle: dataStream.template.lifecycle,
           settings: dataStream.template.settings,
         },
