@@ -120,10 +120,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
           buildCreateRuleData({
             metadata: { name: 'executor-shape-one-event-per-row' },
             query: {
-              format: 'standalone',
-              breach: {
-                query: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-breach-1", "host-breach-2") | STATS count = COUNT(*) BY host.name`,
-              },
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-breach-1", "host-breach-2") | STATS count = COUNT(*) BY host.name`,
             },
           })
         );
@@ -162,10 +159,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
             buildCreateRuleData({
               metadata: { name: 'executor-shape-data-field' },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-data-1", "host-data-2") | STATS count = COUNT(*) BY host.name`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-data-1", "host-data-2") | STATS count = COUNT(*) BY host.name`,
               },
             })
           );
@@ -215,10 +209,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
               metadata: { name: 'executor-date-epoch-millis' },
               grouping: undefined,
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-date-epoch-millis" | KEEP host.name, event.created`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-date-epoch-millis" | KEEP host.name, event.created`,
               },
             })
           );
@@ -258,10 +249,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
             buildCreateRuleData({
               metadata: { name: 'executor-shape-rule-fields' },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-shape-fields" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-shape-fields" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             })
           );
@@ -318,10 +306,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
           buildCreateRuleData({
             metadata: { name: 'executor-grouping-one-per-group' },
             query: {
-              format: 'standalone',
-              breach: {
-                query: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-grouping-a", "host-grouping-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-              },
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-grouping-a", "host-grouping-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           })
         );
@@ -378,10 +363,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
             buildCreateRuleData({
               metadata: { name: 'executor-grouping-multiple-docs-per-group' },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-multi-1", "host-multi-2") | STATS count = COUNT(*) BY host.name`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-multi-1", "host-multi-2") | STATS count = COUNT(*) BY host.name`,
               },
             })
           );
@@ -429,10 +411,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
             buildCreateRuleData({
               metadata: { name: 'executor-grouping-stable-hash' },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-grouping-stable" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-grouping-stable" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             })
           );
@@ -494,10 +473,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
             buildCreateRuleData({
               metadata: { name: 'executor-grouping-fallback' },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-grouping-fallback-a", "host-grouping-fallback-b") | KEEP host.name, severity, value`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-grouping-fallback-a", "host-grouping-fallback-b") | KEEP host.name, severity, value`,
               },
               grouping: undefined,
             })
@@ -575,10 +551,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
             buildCreateRuleData({
               metadata: { name: 'executor-severity-extraction' },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-severity-supported", "host-severity-uppercase", "host-severity-unknown") | KEEP host.name, severity, value`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-severity-supported", "host-severity-uppercase", "host-severity-unknown") | KEEP host.name, severity, value`,
               },
             })
           );
@@ -638,10 +611,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
             buildCreateRuleData({
               metadata: { name: 'executor-lookback-included' },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-lookback-included" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-lookback-included" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             })
           );
@@ -679,10 +649,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
           buildCreateRuleData({
             metadata: { name: 'executor-lookback-excluded' },
             query: {
-              format: 'standalone',
-              breach: {
-                query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-lookback-excluded" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-              },
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-lookback-excluded" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           })
         );
@@ -721,10 +688,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
               metadata: { name: 'executor-lookback-default' },
               schedule: { every: SCHEDULE_INTERVAL },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-lookback-default" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-lookback-default" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             })
           );
@@ -774,10 +738,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
               metadata: { name: 'executor-time-field-custom' },
               time_field: 'event.created',
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-time-field-in", "host-time-field-out") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-time-field-in", "host-time-field-out") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             })
           );
@@ -823,10 +784,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
             buildCreateRuleData({
               metadata: { name: 'executor-esql-reserved-params' },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-esql-reserved-params" AND @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-esql-reserved-params" AND @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             })
           );
@@ -866,10 +824,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
             buildCreateRuleData({
               metadata: { name: 'executor-recovery-no-breach' },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-no-breach" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-no-breach" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             })
           );
@@ -922,15 +877,11 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
               kind: 'signal',
               metadata: { name: 'executor-signal-no-recovery' },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-signal-no-recovery" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-signal-no-recovery" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
-              // Signal rules cannot configure recovery, so omit it. They must
-              // also opt out of state_transition (schema forbids it for "signal").
               state_transition: undefined,
-              recovery_strategy: undefined,
+              recovery: undefined,
+              no_data: undefined,
             })
           );
 
@@ -957,7 +908,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
       );
 
       apiTest(
-        'does not emit recovery events for alert rules created without query.recovery',
+        'does not emit recovery events for alert rules with recovery.strategy "manual"',
         async ({ apiServices }) => {
           await apiServices.alertingV2.sourceIndex.indexDocs({
             index: SOURCE_INDEX,
@@ -975,12 +926,9 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
             buildCreateRuleData({
               kind: 'alert',
               metadata: { name: 'executor-alert-no-recovery-query' },
-              recovery_strategy: 'none',
+              recovery: { strategy: 'manual' },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-alert-no-recovery-query" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-alert-no-recovery-query" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             })
           );
@@ -1027,15 +975,12 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
         const rule = await apiServices.alertingV2.rules.create(
           buildCreateRuleData({
             metadata: { name: 'executor-recovery-query' },
-            recovery_strategy: 'query',
+            recovery: {
+              strategy: 'query',
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
             query: {
-              format: 'standalone',
-              breach: {
-                query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-              },
-              recovery: {
-                query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-              },
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           })
         );
@@ -1108,15 +1053,12 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
           const rule = await apiServices.alertingV2.rules.create(
             buildCreateRuleData({
               metadata: { name: 'executor-recovery-query-multi' },
-              recovery_strategy: 'query',
+              recovery: {
+                strategy: 'query',
+                query: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-recovery-query-multi-a", "host-recovery-query-multi-b") AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+              },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-recovery-query-multi-a", "host-recovery-query-multi-b") AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
-                recovery: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-recovery-query-multi-a", "host-recovery-query-multi-b") AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-recovery-query-multi-a", "host-recovery-query-multi-b") AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             })
           );
@@ -1202,15 +1144,12 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
           const rule = await apiServices.alertingV2.rules.create(
             buildCreateRuleData({
               metadata: { name: 'executor-recovery-query-no-match' },
-              recovery_strategy: 'query',
+              recovery: {
+                strategy: 'query',
+                query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query-other-host" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+              },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query-no-match" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
-                recovery: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query-other-host" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query-no-match" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             })
           );
@@ -1277,15 +1216,12 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
           const rule = await apiServices.alertingV2.rules.create(
             buildCreateRuleData({
               metadata: { name: 'executor-recovery-query-empty' },
-              recovery_strategy: 'query',
+              recovery: {
+                strategy: 'query',
+                query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query-empty" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+              },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query-empty" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
-                recovery: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query-empty" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query-empty" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             })
           );
@@ -1323,7 +1259,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
       );
 
       apiTest(
-        "recovery_strategy 'query' keeps breaching when data is present but neither breach nor recovery matches",
+        "recovery.strategy 'query' keeps breaching when data is present but neither breach nor recovery matches",
         async ({ apiServices }) => {
           const HOST = 'host-query-gap';
 
@@ -1344,19 +1280,16 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
           const rule = await apiServices.alertingV2.rules.create(
             buildCreateRuleData({
               metadata: { name: 'executor-query-gap' },
-              recovery_strategy: 'query',
-              no_data_strategy: 'last_known_status',
+              recovery: {
+                strategy: 'query',
+                query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+              },
+              no_data: {
+                strategy: 'keep_last',
+                query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name`,
+              },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
-                recovery: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
-                no_data: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             })
           );
@@ -1422,7 +1355,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
       );
 
       apiTest(
-        "recovery_strategy 'no_breach' recovers absent groups with data and emits no_data for absent groups without data",
+        "recovery.strategy 'no_breach' recovers absent groups with data and emits no_data for absent groups without data",
         async ({ apiServices }) => {
           const HOST_RECOVER = 'host-no-breach-recover';
           const HOST_NO_DATA = 'host-no-breach-no-data';
@@ -1448,16 +1381,13 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
           const rule = await apiServices.alertingV2.rules.create(
             buildCreateRuleData({
               metadata: { name: 'executor-no-breach-data-presence' },
-              recovery_strategy: 'no_breach',
-              no_data_strategy: 'last_known_status',
+              recovery: { strategy: 'no_breach' },
+              no_data: {
+                strategy: 'keep_last',
+                query: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("${HOST_RECOVER}", "${HOST_NO_DATA}") | STATS count = COUNT(*) BY host.name`,
+              },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("${HOST_RECOVER}", "${HOST_NO_DATA}") AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
-                no_data: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("${HOST_RECOVER}", "${HOST_NO_DATA}") | STATS count = COUNT(*) BY host.name`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("${HOST_RECOVER}", "${HOST_NO_DATA}") AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             })
           );
@@ -1525,7 +1455,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
       );
 
       apiTest(
-        "recovery_strategy 'query' emits no_data for an absent group that has no data",
+        "recovery.strategy 'query' emits no_data for an absent group that has no data",
         async ({ apiServices }) => {
           const HOST = 'host-query-no-data';
 
@@ -1546,19 +1476,16 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
           const rule = await apiServices.alertingV2.rules.create(
             buildCreateRuleData({
               metadata: { name: 'executor-query-no-data' },
-              recovery_strategy: 'query',
-              no_data_strategy: 'last_known_status',
+              recovery: {
+                strategy: 'query',
+                query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+              },
+              no_data: {
+                strategy: 'keep_last',
+                query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name`,
+              },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
-                recovery: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
-                no_data: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             })
           );
@@ -1596,7 +1523,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
       );
 
       apiTest(
-        "recovery_strategy 'query' keeps a group breached when the breach and recovery queries both match it",
+        "recovery.strategy 'query' keeps a group breached when the breach and recovery queries both match it",
         async ({ apiServices }) => {
           const HOST = 'host-breach-beats-recovery';
 
@@ -1615,15 +1542,12 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
           const rule = await apiServices.alertingV2.rules.create(
             buildCreateRuleData({
               metadata: { name: 'executor-breach-beats-recovery' },
-              recovery_strategy: 'query',
+              recovery: {
+                strategy: 'query',
+                query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+              },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
-                recovery: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             })
           );
@@ -1692,10 +1616,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
             buildCreateRuleData({
               metadata: { name: 'executor-partial-recovery' },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-partial-recovery-a", "host-partial-recovery-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-partial-recovery-a", "host-partial-recovery-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             })
           );
@@ -1805,10 +1726,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
             buildCreateRuleData({
               metadata: { name: 'executor-mixed-execution' },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-mixed-execution-a", "host-mixed-execution-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-mixed-execution-a", "host-mixed-execution-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             })
           );
@@ -1875,7 +1793,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
       );
 
       apiTest(
-        'executes the concatenated base+breach block query for composed format rules',
+        'executes the concatenated base+breach query when the rule has a breach segment',
         async ({ apiServices }) => {
           await apiServices.alertingV2.sourceIndex.indexDocs({
             index: SOURCE_INDEX,
@@ -1901,7 +1819,6 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
             buildCreateRuleData({
               metadata: { name: 'executor-composed-breach' },
               query: {
-                format: 'composed',
                 base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-composed-breach-only", "host-composed-no-breach") | STATS max_val = MAX(value) BY host.name`,
                 breach: { segment: `WHERE max_val >= 10` },
               },
@@ -1943,16 +1860,14 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
           });
 
           // base query returns max value per host; the breach and recover blocks each
-          // append a WHERE clause — the composed format shares the FROM/STATS between them.
+          // append a WHERE clause, sharing the FROM/STATS in `base`.
           const rule = await apiServices.alertingV2.rules.create(
             buildCreateRuleData({
               metadata: { name: 'executor-composed-recover' },
-              recovery_strategy: 'query',
+              recovery: { strategy: 'condition', segment: `WHERE max_val < 5` },
               query: {
-                format: 'composed',
                 base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-composed-recover" | STATS max_val = MAX(value) BY host.name`,
                 breach: { segment: `WHERE max_val >= 10` },
-                recovery: { segment: `WHERE max_val < 5` },
               },
             })
           );
@@ -2015,10 +1930,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
             buildCreateRuleData({
               metadata: { name: 'executor-no-breach-strategy' },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-no-breach-strategy" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-no-breach-strategy" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             })
           );
@@ -2050,10 +1962,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
             buildCreateRuleData({
               metadata: { name: 'executor-no-breach-empty-query' },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-no-breach-never-indexed" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-no-breach-never-indexed" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             })
           );
@@ -2085,10 +1994,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
           buildCreateRuleData({
             metadata: { name: 'executor-halt-disabled' },
             query: {
-              format: 'standalone',
-              breach: {
-                query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-halt-disabled" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-              },
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-halt-disabled" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           })
         );
@@ -2145,10 +2051,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
             buildCreateRuleData({
               metadata: { name: 'executor-resume-reenabled' },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-reenabled" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-reenabled" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             })
           );
@@ -2206,7 +2109,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
       );
 
       apiTest(
-        "no_data_strategy 'last_known_status' writes a no_data rule event",
+        "no_data.strategy 'keep_last' writes a no_data rule event",
         async ({ apiServices }) => {
           const HOST = 'host-no-data-last-known';
 
@@ -2226,17 +2129,14 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
             buildCreateRuleData({
               metadata: { name: 'executor-no-data-last-known' },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
-                no_data: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
-              // Use recovery_strategy 'none' so the recovery step never fires.
-              recovery_strategy: 'none',
-              no_data_strategy: 'last_known_status',
+              // Use recovery.strategy 'manual' so the recovery step never fires.
+              recovery: { strategy: 'manual' },
+              no_data: {
+                strategy: 'keep_last',
+                query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name`,
+              },
             })
           );
 
@@ -2265,7 +2165,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
         }
       );
 
-      apiTest("no_data_strategy 'recover' writes a no_data rule event", async ({ apiServices }) => {
+      apiTest("no_data.strategy 'resolve' writes a no_data rule event", async ({ apiServices }) => {
         const HOST = 'host-no-data-recover';
 
         await apiServices.alertingV2.sourceIndex.indexDocs({
@@ -2284,20 +2184,17 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
           buildCreateRuleData({
             metadata: { name: 'executor-no-data-recover' },
             query: {
-              format: 'standalone',
-              breach: {
-                query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-              },
-              no_data: {
-                query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name`,
-              },
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
-            // Pair 'recover' no-data strategy with recovery_strategy 'none' so
+            // Pair 'recover' no-data strategy with recovery.strategy 'manual' so
             // the recovery step does not emit a recovered event for the group —
             // confirming the no_data event comes from the no-data step and the
             // director drives the episode toward recovery.
-            recovery_strategy: 'none',
-            no_data_strategy: 'recover',
+            recovery: { strategy: 'manual' },
+            no_data: {
+              strategy: 'resolve',
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name`,
+            },
           })
         );
 
@@ -2330,53 +2227,57 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
         expect(recoveredEvents).toHaveLength(0);
       });
 
-      apiTest("no_data_strategy 'none' does not write no_data events", async ({ apiServices }) => {
-        const HOST = 'host-no-data-none';
+      apiTest(
+        "no_data.strategy 'ignore' does not write no_data events",
+        async ({ apiServices }) => {
+          const HOST = 'host-no-data-none';
 
-        await apiServices.alertingV2.sourceIndex.indexDocs({
-          index: SOURCE_INDEX,
-          docs: [
-            {
-              '@timestamp': new Date().toISOString(),
-              'host.name': HOST,
-              severity: 'high',
-              value: 1,
-            },
-          ],
-        });
-
-        const rule = await apiServices.alertingV2.rules.create(
-          buildCreateRuleData({
-            metadata: { name: 'executor-no-data-none' },
-            query: {
-              format: 'standalone',
-              breach: {
-                query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          await apiServices.alertingV2.sourceIndex.indexDocs({
+            index: SOURCE_INDEX,
+            docs: [
+              {
+                '@timestamp': new Date().toISOString(),
+                'host.name': HOST,
+                severity: 'high',
+                value: 1,
               },
-            },
-            // Default no_data_strategy is 'none'; spell it out so the test
-            // intent is unambiguous.
-            no_data_strategy: 'none',
-          })
-        );
+            ],
+          });
 
-        await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
+          const rule = await apiServices.alertingV2.rules.create(
+            buildCreateRuleData({
+              metadata: { name: 'executor-no-data-none' },
+              query: {
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+              },
+              // Default no_data.strategy is 'ignore'; spell it out so the test
+              // intent is unambiguous.
+              no_data: { strategy: 'ignore' },
+            })
+          );
 
-        await apiServices.alertingV2.sourceIndex.deleteDocs({
-          index: SOURCE_INDEX,
-          query: { term: { 'host.name': HOST } },
-        });
+          await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+            status: 'breached',
+          });
 
-        // Recovery is still on by default ('no_breach'), so we wait for the
-        // recovery side of the lifecycle as the positive signal that the
-        // executor processed the absence — then assert no no_data events.
-        await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'recovered' });
+          await apiServices.alertingV2.sourceIndex.deleteDocs({
+            index: SOURCE_INDEX,
+            query: { term: { 'host.name': HOST } },
+          });
 
-        const noDataEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
-          status: 'no_data',
-        });
-        expect(noDataEvents).toHaveLength(0);
-      });
+          // Recovery is still on by default ('no_breach'), so we wait for the
+          // recovery side of the lifecycle as the positive signal that the
+          // executor processed the absence — then assert no no_data events.
+          await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+            status: 'recovered',
+          });
+
+          const noDataEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+            status: 'no_data',
+          });
+          expect(noDataEvents).toHaveLength(0);
+        }
+      );
 
       apiTest('a deleted rule writes no new events', async ({ apiServices }) => {
         await apiServices.alertingV2.sourceIndex.indexDocs({
@@ -2395,10 +2296,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
           buildCreateRuleData({
             metadata: { name: 'executor-halt-deleted' },
             query: {
-              format: 'standalone',
-              breach: {
-                query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-halt-deleted" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-              },
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-halt-deleted" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           })
         );
@@ -2443,11 +2341,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
           buildCreateRuleData({
             metadata: { name: 'executor-invalid-query' },
             query: {
-              format: 'standalone',
-              breach: {
-                query:
-                  'FROM nonexistent-index-rule-executor-spec-zzz | STATS count = COUNT(*) | WHERE count >= 1',
-              },
+              base: 'FROM nonexistent-index-rule-executor-spec-zzz | STATS count = COUNT(*) | WHERE count >= 1',
             },
           })
         );
