@@ -6,7 +6,7 @@
  */
 
 import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { NETWORK_CONNECTION_TYPE, SERVICE_NAME } from '../../../common/es_fields/apm';
+import { ERROR_TYPE, NETWORK_CONNECTION_TYPE, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
@@ -16,6 +16,7 @@ export async function getNCT({
   kuery,
   apmEventClient,
   serviceName,
+  errorType,
   environment,
   start,
   end,
@@ -25,16 +26,19 @@ export async function getNCT({
   apmEventClient: APMEventClient;
   serviceName: string;
   transactionType?: string;
+  errorType?: 'crash';
   environment: string;
   start: number;
   end: number;
   size: number;
 }) {
+  const isCrash = errorType === 'crash';
+
   return await apmEventClient.search('get_mobile_nct', {
     apm: {
       sources: [
         {
-          documentType: ApmDocumentType.SpanEvent,
+          documentType: isCrash ? ApmDocumentType.ErrorEvent : ApmDocumentType.SpanEvent,
           rollupInterval: RollupInterval.None,
         },
       ],
@@ -45,6 +49,7 @@ export async function getNCT({
       bool: {
         filter: [
           ...termQuery(SERVICE_NAME, serviceName),
+          ...(isCrash ? termQuery(ERROR_TYPE, 'crash') : []),
           ...rangeQuery(start, end),
           ...environmentQuery(environment),
           ...kqlQuery(kuery),

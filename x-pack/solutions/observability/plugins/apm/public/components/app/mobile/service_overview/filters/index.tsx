@@ -66,6 +66,7 @@ export function MobileFilters() {
       osVersion,
       appVersion,
       transactionType,
+      mobileErrorTabId,
     },
   } = useAnyOfApmParams(
     '/mobile-services/{serviceName}/overview',
@@ -77,16 +78,20 @@ export function MobileFilters() {
   const filters = { netConnectionType, device, osVersion, appVersion };
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
+  // On the crashes tab, scope the filter dropdown options to crash documents so
+  // they only list values that appear in actual crashes (not transactions/spans).
+  const errorType = mobileErrorTabId === 'crashes' ? ('crash' as const) : undefined;
+
   const { data = { mobileFilters: [] }, status } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/services/{serviceName}/mobile/filters', {
         params: {
           path: { serviceName },
-          query: { start, end, environment, kuery, transactionType },
+          query: { start, end, environment, kuery, transactionType, errorType },
         },
       });
     },
-    [start, end, environment, kuery, serviceName, transactionType]
+    [start, end, environment, kuery, serviceName, transactionType, errorType]
   );
 
   function toSelectOptions(items?: string[]) {
