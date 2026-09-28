@@ -317,8 +317,11 @@ export const significantSecurityEventAttachmentDataSchema = alertZeroAttachmentD
   capability: z.string().min(1).max(256),
   run_id: z.string().min(1).max(256),
   // Trimmed like `title`: a whitespace-only id passes `min(1)` but renders blank provenance
-  // and builds a threat-report lookup for an empty id.
-  report_id: z.string().trim().min(1).max(256),
+  // and builds a threat-report lookup for an empty id. 512 is the report id length the hunt
+  // routes accept and `threat_attachment_schema` stores; a shorter cap here would reject an
+  // attachment for a report the hunt was legitimately asked to run, and truncating to fit
+  // would store an id that resolves to nothing.
+  report_id: z.string().trim().min(1).max(512),
   security_knowledge_indicators: z.array(securityKnowledgeIndicatorSchema).max(50),
   entities: z.array(entityRefSchema).max(50),
   alerts: z.array(alertRefSchema).max(50).optional(),

@@ -187,18 +187,57 @@ const buildSecurityKnowledgeIndicators = (
   return indicators.slice(0, MAX_INDICATORS);
 };
 
-const pushUniqueEntity = (
-  entities: SseEntityRef[],
-  seen: Set<string>,
-  field: SseEntityRef['field'],
-  value: string
-): void => {
-  if (entities.length >= MAX_ENTITIES) return;
-  const key = `${field}|${value}`;
-  if (seen.has(key)) return;
-  seen.add(key);
-  entities.push({ field, value });
+/**
+ * Fills one capped array from a report-wide Tier 1 list and a (usually
+ * technique-scoped) Tier 2 list without letting the first starve the second:
+ * take alternately, so whichever list is shorter survives whole. Tier 1 can fill
+ * any of these caps on its own — 50 affected hosts and a 100-row hit sample are
+ * both within budget — and its rows are the report's, while Tier 2's are the
+ * evidence for the technique this entry is about.
+ *
+ * Duplicates are dropped by `keyOf` before the cap applies, so `originalCount`
+ * counts what could have been shown rather than what was offered: a host Tier 1
+ * and Tier 2 both name is one entity, not a truncated pair.
+ */
+const takeAlternating = <T>(
+  tier1: readonly T[],
+  tier2: readonly T[],
+  limit: number,
+  keyOf: (item: T) => string
+): { taken: T[]; tier1Count: number; truncated: boolean; originalCount: number } => {
+  const seen = new Set<string>();
+  const unique = [tier1, tier2].map((pool) =>
+    pool.filter((item) => {
+      const key = keyOf(item);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+  );
+
+  const taken: T[] = [];
+  let tier1Count = 0;
+  const cursors = [0, 0];
+  while (taken.length < limit && cursors.some((cursor, pool) => cursor < unique[pool].length)) {
+    for (const pool of [0, 1]) {
+      if (taken.length >= limit || cursors[pool] >= unique[pool].length) continue;
+      taken.push(unique[pool][cursors[pool]]);
+      cursors[pool] += 1;
+      if (pool === 0) tier1Count += 1;
+    }
+  }
+
+  const originalCount = unique[0].length + unique[1].length;
+  return { taken, tier1Count, truncated: originalCount > taken.length, originalCount };
 };
+
+const scopedBehaviors = (
+  result: HuntCoordinatorResult,
+  onlyTechniqueId?: string
+): CoordinatorBehavior[] =>
+  (result.tier2?.behaviors ?? []).filter(
+    (behavior) => !onlyTechniqueId || behavior.technique_id === onlyTechniqueId
+  );
 
 /**
  * Union Tier 1 affected assets with Tier 2 execute hosts/users (technique-scoped
@@ -208,43 +247,33 @@ const buildEntities = (
   result: HuntCoordinatorResult,
   onlyTechniqueId?: string
 ): { entities: SseEntityRef[]; truncated: boolean; originalCount: number } => {
-  const entities: SseEntityRef[] = [];
-  const seen = new Set<string>();
-  let originalCount = 0;
+  const { hosts, users, services } = result.tier1.affected_assets;
+  const tier1Entities: SseEntityRef[] = [
+    ...hosts.map((host): SseEntityRef => ({ field: 'host.name', value: host.name })),
+    ...users.map((user): SseEntityRef => ({ field: 'user.name', value: user.name })),
+    // Assumed-role / service-principal identities stay out of user.name.
+    ...services.map((service): SseEntityRef => ({ field: 'service.name', value: service.name })),
+  ];
 
-  const countAndPush = (field: SseEntityRef['field'], value: string) => {
-    originalCount += 1;
-    pushUniqueEntity(entities, seen, field, value);
-  };
-
-  for (const host of result.tier1.affected_assets.hosts) {
-    countAndPush('host.name', host.name);
-  }
-  for (const user of result.tier1.affected_assets.users) {
-    countAndPush('user.name', user.name);
-  }
-  // Assumed-role / service-principal identities stay out of user.name.
-  for (const service of result.tier1.affected_assets.services) {
-    countAndPush('service.name', service.name);
-  }
-
-  const behaviors = (result.tier2?.behaviors ?? []).filter(
-    (behavior) => !onlyTechniqueId || behavior.technique_id === onlyTechniqueId
+  const tier2Entities = scopedBehaviors(result, onlyTechniqueId).flatMap(
+    (behavior): SseEntityRef[] => [
+      ...(behavior.affected_hosts ?? []).map(
+        (host): SseEntityRef => ({ field: 'host.name', value: host })
+      ),
+      ...(behavior.affected_users ?? []).map(
+        (user): SseEntityRef => ({ field: 'user.name', value: user })
+      ),
+    ]
   );
-  for (const behavior of behaviors) {
-    for (const host of behavior.affected_hosts ?? []) {
-      countAndPush('host.name', host);
-    }
-    for (const user of behavior.affected_users ?? []) {
-      countAndPush('user.name', user);
-    }
-  }
 
-  return {
-    entities,
-    truncated: originalCount > entities.length,
-    originalCount,
-  };
+  const { taken, truncated, originalCount } = takeAlternating(
+    tier1Entities,
+    tier2Entities,
+    MAX_ENTITIES,
+    (entity) => `${entity.field}|${entity.value}`
+  );
+
+  return { entities: taken, truncated, originalCount };
 };
 
 const DATA_STREAM_BACKING_PREFIX = '.ds-';
@@ -327,44 +356,22 @@ const splitHits = (
   return { events, alerts };
 };
 
-const mergeTierHitRefs = ({
-  events: tier1Events,
-  alerts: tier1Alerts,
-  result,
-  onlyTechniqueId,
-}: {
-  events: SseEventRef[];
-  alerts: SseAlertRef[];
-  result: HuntCoordinatorResult;
-  onlyTechniqueId?: string;
-}): { events: SseEventRef[]; alerts: SseAlertRef[]; tier1RefCount: number } => {
-  const events = [...tier1Events];
-  const alerts = [...tier1Alerts];
-  const tier1RefCount = events.length + alerts.length;
-  const seen = new Set([
-    ...events.map((e) => `${e.source_index}|${e.event_id}`),
-    ...alerts.map((a) => `${a.index}|${a.alert_id}`),
-  ]);
-
-  const behaviors = (result.tier2?.behaviors ?? []).filter(
-    (behavior) => !onlyTechniqueId || behavior.technique_id === onlyTechniqueId
-  );
-
+/** Tier 2 execute hits as refs, split the same way Tier 1's are. */
+const behaviorHitRefs = (
+  behaviors: CoordinatorBehavior[]
+): { events: SseEventRef[]; alerts: SseAlertRef[] } => {
+  const events: SseEventRef[] = [];
+  const alerts: SseAlertRef[] = [];
   for (const behavior of behaviors) {
     for (const ref of behavior.hits ?? []) {
-      const key = `${ref.index}|${ref.id}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
       const timestamp = hitTimestamp(ref);
       if (isAlertsIndex(ref.index)) {
-        if (alerts.length >= MAX_HIT_REFS) continue;
         alerts.push({
           alert_id: ref.id,
           index: ref.index,
           ...(timestamp ? { timestamp } : {}),
         });
       } else {
-        if (events.length >= MAX_HIT_REFS) continue;
         events.push({
           event_id: ref.id,
           source_index: ref.index,
@@ -377,11 +384,45 @@ const mergeTierHitRefs = ({
       }
     }
   }
+  return { events, alerts };
+};
+
+/**
+ * Both ref arrays hold Tier 1's sample and the scoped Tier 2 hits under one cap.
+ * Tier 1 returns up to the coordinator's `size: 100`, so appending Tier 2 after it
+ * could drop every ref to the behavior that confirmed the technique, leaving its
+ * SSE with no navigable evidence of its own hit. `tier1RefCount` counts the Tier 1
+ * refs the entry ends up carrying, not the ones offered.
+ */
+const mergeTierHitRefs = ({
+  result,
+  onlyTechniqueId,
+}: {
+  result: HuntCoordinatorResult;
+  onlyTechniqueId?: string;
+}): { events: SseEventRef[]; alerts: SseAlertRef[]; tier1RefCount: number } => {
+  const { events: tier1Events, alerts: tier1Alerts } = splitHits(result, onlyTechniqueId);
+  const { events: tier2Events, alerts: tier2Alerts } = behaviorHitRefs(
+    scopedBehaviors(result, onlyTechniqueId)
+  );
+
+  const events = takeAlternating(
+    tier1Events,
+    tier2Events,
+    MAX_HIT_REFS,
+    (event) => `${event.source_index}|${event.event_id}`
+  );
+  const alerts = takeAlternating(
+    tier1Alerts,
+    tier2Alerts,
+    MAX_HIT_REFS,
+    (alert) => `${alert.index}|${alert.alert_id}`
+  );
 
   return {
-    events: events.slice(0, MAX_HIT_REFS),
-    alerts: alerts.slice(0, MAX_HIT_REFS),
-    tier1RefCount,
+    events: events.taken,
+    alerts: alerts.taken,
+    tier1RefCount: events.tier1Count + alerts.tier1Count,
   };
 };
 
@@ -434,10 +475,9 @@ const resolveHitSources = ({
     sources.push('tier1');
   }
 
-  const behaviors = (result.tier2?.behaviors ?? []).filter(
-    (behavior) => !onlyTechniqueId || behavior.technique_id === onlyTechniqueId
+  const tier2Source = scopedBehaviors(result, onlyTechniqueId).some(
+    (behavior) => behavior.execution?.hit === true
   );
-  const tier2Source = behaviors.some((behavior) => behavior.execution?.hit === true);
   if (tier2Source) {
     sources.push('tier2');
   }
@@ -503,9 +543,7 @@ const buildHuntResult = (
     tier2: tier2
       ? {
           status: tier2.status,
-          behaviors: tier2.behaviors
-            .filter((behavior) => !onlyTechniqueId || behavior.technique_id === onlyTechniqueId)
-            .map(mapBehavior),
+          behaviors: scopedBehaviors(result, onlyTechniqueId).map(mapBehavior),
         }
       : undefined,
   };
@@ -682,7 +720,6 @@ const buildEntry = ({
   forceNow: Date;
 }): SseEntry => {
   const { events, alerts, tier1RefCount } = mergeTierHitRefs({
-    ...splitHits(result, techniqueId),
     result,
     onlyTechniqueId: techniqueId,
   });

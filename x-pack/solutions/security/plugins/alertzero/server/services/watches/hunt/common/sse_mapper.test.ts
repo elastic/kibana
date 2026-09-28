@@ -162,6 +162,75 @@ const runCoordinator = (
 ): ReturnType<typeof huntCoordinator> =>
   huntCoordinator({ esClient, reportsEsClient: esClient }, mockModel, logger, params);
 
+type TestBehavior = NonNullable<HuntCoordinatorResult['tier2']>['behaviors'][number];
+
+/** A coordinator result the coordinator itself considers valid, Tier 1 only. */
+const tier1Result = (over: Partial<HuntCoordinatorResult['tier1']>): HuntCoordinatorResult => ({
+  status: 'tier1_only',
+  run_id: 'run-1',
+  technologies: ['aws_iam'],
+  has_confirmed_hit: true,
+  completeness: 'complete',
+  completed_successfully: true,
+  message: '',
+  next_step: '',
+  tier1: {
+    tier: 1,
+    status: 'environment_hits_found',
+    has_confirmed_hit: true,
+    searched_iocs: 1,
+    searched_techniques: 0,
+    resolved_iocs: [{ type: 'hash', value: 'abc' }],
+    resolved_techniques: [],
+    time_range: { from: '2026-07-30T13:00:00.000Z', to: '2026-07-30T15:00:00.000Z' },
+    counts: { total_hits: 1, returned_hits: 1, affected_hosts: 0, affected_users: 0 },
+    hits: [],
+    affected_assets: { hosts: [], users: [], services: [] },
+    per_index: [{ index: 'logs-aws.cloudtrail-default', hit_count: 1, required: true }],
+    ...over,
+  },
+});
+
+const behaviorFixture = (over: Partial<TestBehavior> = {}): TestBehavior => ({
+  technique_id: 'T1078.004',
+  evidence_quote: 'AssumeRole into OrgAdminBoundary',
+  llm_confidence: 0.9,
+  confidence: 0.9,
+  technique_name: 'Valid Accounts: Cloud Accounts',
+  reference: 'https://attack.mitre.org/techniques/T1078/004/',
+  tactic_ids: ['TA0001'],
+  proposed_esql_rule: 'FROM logs-aws.cloudtrail-default | WHERE true',
+  rule_name: 'AssumeRole into high-risk policy boundary',
+  severity: 'high',
+  risk_score: 73,
+  execution: { executed: true, row_count: 1, hit: true },
+  ...over,
+});
+
+const withBehaviors = (
+  result: HuntCoordinatorResult,
+  behaviors: TestBehavior[]
+): HuntCoordinatorResult => ({
+  ...result,
+  status: 'tier1_and_tier2',
+  tier2: {
+    tier: 2,
+    status: 'behaviors_proposed',
+    behaviors,
+    indexed_behaviors: [],
+    has_hit: behaviors.some((behavior) => behavior.execution?.hit === true),
+    next_step: 'n/a',
+  },
+});
+
+const schemaIssues = (result: HuntCoordinatorResult): string[] => {
+  const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
+  const parsed = significantSecurityEventAttachmentDataSchema.safeParse(entry.data);
+  return parsed.success
+    ? []
+    : parsed.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`);
+};
+
 describe('buildSseAttachmentId', () => {
   it('is deterministic and technique-scoped', () => {
     const withTechnique = buildSseAttachmentId({
@@ -468,24 +537,19 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     techniqueId: string;
     ruleName: string;
     hit: boolean;
-  }) => ({
-    technique_id: techniqueId,
-    evidence_quote: `report quote for ${techniqueId}`,
-    llm_confidence: 0.82,
-    confidence: 0.82,
-    technique_name: `Technique ${techniqueId}`,
-    reference: `https://attack.mitre.org/techniques/${techniqueId}/`,
-    tactic_ids: ['TA0001'],
-    proposed_esql_rule: 'FROM logs-aws.cloudtrail-default | WHERE true',
-    rule_name: ruleName,
-    severity: 'high' as const,
-    risk_score: 73,
-    execution: { executed: true, row_count: hit ? 2 : 0, hit },
-  });
+  }): TestBehavior =>
+    behaviorFixture({
+      technique_id: techniqueId,
+      technique_name: `Technique ${techniqueId}`,
+      reference: `https://attack.mitre.org/techniques/${techniqueId}/`,
+      evidence_quote: `report quote for ${techniqueId}`,
+      rule_name: ruleName,
+      execution: { executed: true, row_count: hit ? 2 : 0, hit },
+    });
 
   const run = async (
     tier1: RawTier1,
-    behaviors: Array<ReturnType<typeof proposedBehavior>>
+    behaviors: TestBehavior[]
   ): Promise<HuntCoordinatorResult> => {
     const { huntForThreat } = jest.requireMock('../tier1/hunt_for_threat');
     const { huntBehavior } = jest.requireMock('../tier2/hunt_behavior');
@@ -494,7 +558,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
       status: 'behaviors_proposed',
       behaviors,
       indexed_behaviors: [],
-      has_hit: behaviors.some((behavior) => behavior.execution.hit),
+      has_hit: behaviors.some((behavior) => behavior.execution?.hit === true),
       next_step: 'Review the proposed rules.',
     });
     return runCoordinator({
@@ -754,40 +818,6 @@ describe('buildSseData output parses against the SSE attachment schema', () => {
  * attachment the schema accepts, or `ai.attachment.add` fails at demo time.
  */
 describe('buildSseData holds coordinator output to the SSE schema bounds', () => {
-  const tier1Result = (over: Partial<HuntCoordinatorResult['tier1']>): HuntCoordinatorResult => ({
-    status: 'tier1_only',
-    run_id: 'run-1',
-    technologies: ['aws_iam'],
-    has_confirmed_hit: true,
-    completeness: 'complete',
-    completed_successfully: true,
-    message: '',
-    next_step: '',
-    tier1: {
-      tier: 1,
-      status: 'environment_hits_found',
-      has_confirmed_hit: true,
-      searched_iocs: 1,
-      searched_techniques: 0,
-      resolved_iocs: [{ type: 'hash', value: 'abc' }],
-      resolved_techniques: [],
-      time_range: { from: '2026-07-30T13:00:00.000Z', to: '2026-07-30T15:00:00.000Z' },
-      counts: { total_hits: 1, returned_hits: 1, affected_hosts: 0, affected_users: 0 },
-      hits: [],
-      affected_assets: { hosts: [], users: [], services: [] },
-      per_index: [{ index: 'logs-aws.cloudtrail-default', hit_count: 1, required: true }],
-      ...over,
-    },
-  });
-
-  const schemaIssues = (result: HuntCoordinatorResult): string[] => {
-    const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
-    const parsed = significantSecurityEventAttachmentDataSchema.safeParse(entry.data);
-    return parsed.success
-      ? []
-      : parsed.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`);
-  };
-
   it('resolves a date-math window to ISO instants', () => {
     const [entry] = buildSseData(
       tier1Result({ time_range: { from: 'now-24h', to: 'now' } }),
@@ -872,6 +902,107 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
         (indicator) => indicator.type === 'technique' && indicator.technique_id === 'T1078.004'
       )
     ).toBe(true);
+  });
+
+  it('shares the event cap between the tiers instead of letting Tier 1 fill it', () => {
+    // Tier 1 returns up to the coordinator's `size: 100`, and `events` caps at 50, so
+    // appending Tier 2 after Tier 1 drops every ref to the behavior that confirmed
+    // the technique — the SSE keeps the report's sample and loses its own evidence.
+    const hits = Array.from({ length: 50 }, (_, i) => ({
+      id: `tier1-evt-${i}`,
+      index: 'logs-aws.cloudtrail-default',
+      timestamp: '2026-07-30T13:05:00.000Z',
+    }));
+    const result = withBehaviors(
+      tier1Result({
+        hits,
+        counts: { total_hits: 50, returned_hits: 50, affected_hosts: 0, affected_users: 0 },
+        per_index: [{ index: 'logs-aws.cloudtrail-default', hit_count: 50, required: true }],
+      }),
+      [
+        behaviorFixture({
+          hits: [
+            {
+              id: 't2-evt-1',
+              index: 'logs-aws.cloudtrail-default',
+              timestamp: '2026-07-30T14:00:00.000Z',
+            },
+          ],
+        }),
+      ]
+    );
+
+    expect(schemaIssues(result)).toEqual([]);
+    const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
+
+    expect(entry.data.events).toHaveLength(50);
+    expect(entry.data.events).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          event_id: 't2-evt-1',
+          matched: { technique_id: 'T1078.004', field: '_id' },
+        }),
+      ])
+    );
+    // The Tier 1 count quoted to the reader is the refs the entry carries, not the
+    // ones it was offered.
+    expect(entry.data.evidence_for).toContain(
+      'Tier 1 confirmed 50 hit(s) for this report in the hunt window, 49 of which are referenced here (see hunt_result.tier1.per_index).'
+    );
+  });
+
+  it('shares the entity cap between the tiers instead of letting Tier 1 fill it', () => {
+    // 50 Tier 1 affected hosts are within the default `maxAssets`, and `entities` caps
+    // at 50, so the technique's own host and user are the ones that fall off.
+    const hosts = Array.from({ length: 50 }, (_, i) => ({
+      name: `tier1-host-${i}`,
+      hit_count: 1,
+    }));
+    const result = withBehaviors(
+      tier1Result({
+        affected_assets: { hosts, users: [], services: [] },
+        counts: { total_hits: 1, returned_hits: 1, affected_hosts: 50, affected_users: 0 },
+      }),
+      [
+        behaviorFixture({
+          affected_hosts: ['ci-deploy-runner-07'],
+          affected_users: ['svc-deploy-bot'],
+        }),
+      ]
+    );
+
+    expect(schemaIssues(result)).toEqual([]);
+    const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
+
+    expect(entry.data.entities).toHaveLength(50);
+    expect(entry.data.entities).toEqual(
+      expect.arrayContaining([
+        { field: 'host.name', value: 'ci-deploy-runner-07' },
+        { field: 'user.name', value: 'svc-deploy-bot' },
+      ])
+    );
+    expect(entry.data.truncated).toBe(true);
+    expect(entry.data.truncated_original_count).toBe(52);
+  });
+
+  it('does not call an entry truncated because both tiers named the same host', () => {
+    const result = withBehaviors(
+      tier1Result({
+        affected_assets: {
+          hosts: [{ name: 'ci-deploy-runner-07', hit_count: 1 }],
+          users: [],
+          services: [],
+        },
+        counts: { total_hits: 1, returned_hits: 1, affected_hosts: 1, affected_users: 0 },
+      }),
+      [behaviorFixture({ affected_hosts: ['ci-deploy-runner-07'] })]
+    );
+
+    const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
+
+    expect(entry.data.entities).toEqual([{ field: 'host.name', value: 'ci-deploy-runner-07' }]);
+    expect(entry.data.truncated).toBeUndefined();
+    expect(entry.data.truncated_original_count).toBeUndefined();
   });
 
   it('normalizes offset and epoch hit timestamps to ISO and drops unparseable ones', () => {
