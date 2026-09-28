@@ -9,7 +9,7 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
-import { openLazySystemFlyout } from '@kbn/presentation-util';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type { VegaEmbeddableApi } from './vega_embeddable';
 
 export const openVegaEditor = ({
@@ -29,7 +29,7 @@ export const openVegaEditor = ({
 }) => {
   let closed = false;
 
-  const flyoutRef = openLazySystemFlyout({
+  const flyoutRef = openLazyFlyout({
     core,
     parentApi,
     returnFocus,

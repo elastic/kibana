@@ -8,14 +8,14 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { openLazySystemFlyout } from '@kbn/presentation-util';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { openVegaEditor } from './open_vega_editor';
 
 jest.mock('@kbn/presentation-util', () => ({
-  openLazySystemFlyout: jest.fn(() => ({ onClose: new Promise(() => {}), close: jest.fn() })),
+  openLazyFlyout: jest.fn(() => ({ onClose: new Promise(() => {}), close: jest.fn() })),
 }));
 
-const mockOpenLazySystemFlyout = jest.mocked(openLazySystemFlyout);
+const mockOpenLazyFlyout = jest.mocked(openLazyFlyout);
 
 describe('openVegaEditor', () => {
   it('opens a flyout that does not close on outside clicks', () => {
@@ -25,7 +25,7 @@ describe('openVegaEditor', () => {
       loadApi: jest.fn(),
     });
 
-    expect(mockOpenLazySystemFlyout).toHaveBeenCalledWith(
+    expect(mockOpenLazyFlyout).toHaveBeenCalledWith(
       expect.objectContaining({
         flyoutProps: expect.objectContaining({
           focusedPanelId: 'vega-panel',
