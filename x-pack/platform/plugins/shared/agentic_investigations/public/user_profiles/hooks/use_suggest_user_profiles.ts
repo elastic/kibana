@@ -11,47 +11,56 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import useDebounce from 'react-use/lib/useDebounce';
+import { i18n } from '@kbn/i18n';
 import { ESCALATIONS_SUGGEST_USERS_URL } from '../../../common/escalations/constants';
+import { userProfileQueryKeys } from '../query_keys';
 
 const DEFAULT_SIZE = 10;
 const DEBOUNCE_MS = 250;
 
-/**
- * Suggests user profiles for the private-escalation collaborator picker.
- *
- * Uses `core.userProfile.suggest` rather than a raw HTTP call. That client method is the
- * sanctioned pattern for internal suggest routes (see `examples/user_profile_examples`), and
- * suggest routes are deliberately unversioned — the core client sends no `elastic-api-version`
- * header, so the route must not require one either.
- *
- * The backing route (`ESCALATIONS_SUGGEST_USERS_URL`) is owned by this plugin and requires
- * only `ESCALATIONS_API_PRIVILEGE_MANAGE`, so a user with `escalations_all` does not need a
- * separate Agent Builder read privilege to fetch collaborator suggestions.
- */
-export const useSuggestUserProfiles = (searchTerm: string) => {
-  const { services } = useKibana<CoreStart>();
-  const [debouncedTerm, setDebouncedTerm] = useState(searchTerm);
+const SUGGEST_ERROR_TITLE = i18n.translate(
+  'xpack.agenticInvestigations.userProfiles.suggestErrorTitle',
+  { defaultMessage: 'Could not load user suggestions' }
+);
 
+/**
+ * Suggests user profiles matching a search term. Used by both the escalation assignee
+ * popover (queue) and the collaborator picker (create-escalation modal).
+ *
+ * Uses `core.userProfile.suggest` against the plugin-owned route
+ * (`ESCALATIONS_SUGGEST_USERS_URL`), which requires only `ESCALATIONS_API_PRIVILEGE_MANAGE`.
+ * This avoids the Agent Builder read-privilege dependency.
+ *
+ * Pass `enabled: false` to suppress the request when the caller lacks the privilege
+ * (e.g. SHOW-only analysts viewing the queue), preventing a 403 toast on page load.
+ */
+export const useSuggestUserProfiles = (
+  searchTerm: string,
+  opts?: { size?: number; enabled?: boolean }
+) => {
+  const { services } = useKibana<CoreStart>();
+  const size = opts?.size ?? DEFAULT_SIZE;
+  const callerEnabled = opts?.enabled !== false;
+
+  const [debouncedTerm, setDebouncedTerm] = useState(searchTerm);
   useDebounce(() => setDebouncedTerm(searchTerm), DEBOUNCE_MS, [searchTerm]);
 
   return useQuery<UserProfileWithAvatar[]>({
-    queryKey: ['suggestUserProfiles', debouncedTerm],
-    // Guard: core.userProfile is only available when the security plugin is present.
-    enabled: Boolean(services.userProfile),
+    queryKey: userProfileQueryKeys.suggest(debouncedTerm, size),
+    enabled: callerEnabled && Boolean(services.userProfile),
     queryFn: async () => {
       if (!services.userProfile) return [];
       return services.userProfile.suggest<UserProfileWithAvatar['data']>(
         ESCALATIONS_SUGGEST_USERS_URL,
-        { name: debouncedTerm, size: DEFAULT_SIZE, dataPath: 'avatar' }
+        { name: debouncedTerm, size, dataPath: 'avatar' }
       ) as Promise<UserProfileWithAvatar[]>;
     },
     keepPreviousData: true,
     staleTime: 60_000,
     onError: (error: unknown) => {
-      // Surface 403/network failures so the analyst sees why the picker is empty.
       services.notifications?.toasts.addError(
         error instanceof Error ? error : new Error(String(error)),
-        { title: 'Could not load collaborator suggestions' }
+        { title: SUGGEST_ERROR_TITLE }
       );
     },
   });

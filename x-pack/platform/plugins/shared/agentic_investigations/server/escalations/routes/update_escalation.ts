@@ -24,7 +24,7 @@ export const registerUpdateEscalationRoute = ({
       path: ESCALATION_BY_ID_URL,
       access: 'internal',
       security: { authz: { requiredPrivileges: [ESCALATIONS_API_PRIVILEGE_MANAGE] } },
-      summary: 'Update an escalation title or linked investigations',
+      summary: 'Update an escalation title, linked investigations, or status',
     })
     .addVersion(
       {

@@ -45,5 +45,7 @@ steps:
       prompt: '{{ inputs.prompt }}'
       response: '{{ inputs.response }}'
       agent_id: '{{ inputs.agent_id }}'
+      conversation_id: '{{ inputs.conversation_id }}'
+      round_id: '{{ inputs.round_id }}'
     on-failure:
       continue: true

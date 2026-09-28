@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ESSearchRequest } from '@kbn/es-types';
-import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryFields, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import type { estypes } from '@elastic/elasticsearch';
@@ -17,6 +17,7 @@ import type {
 import { parseFilterQuery } from '../../../../utils/serialized_query';
 import { createMetricAggregations } from './create_metric_aggregations';
 import type { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
+import { getInventoryRuleSchema } from '../../../../../common/inventory/get_inventory_rule_schema';
 import { createBucketSelector } from './create_bucket_selector';
 import { KUBERNETES_POD_UID, NUMBER_OF_DOCUMENTS, termsAggField } from '../../common/utils';
 
@@ -55,12 +56,14 @@ export const createRequest = async (
   customMetric?: SnapshotCustomMetricInput,
   fieldsExisted?: Record<string, boolean> | null,
   schema?: DataSchemaFormat
-) => {
+): Promise<ESSearchRequest> => {
   const inventoryModels = findInventoryModel(nodeType);
+  const effectiveSchema = getInventoryRuleSchema(nodeType, schema);
+  const inventoryFields = findInventoryFields(nodeType, effectiveSchema);
 
   const composite: estypes.AggregationsCompositeAggregation = {
     size: compositeSize,
-    sources: [{ node: { terms: { field: inventoryModels.fields.id } } }],
+    sources: [{ node: { terms: { field: inventoryFields.id } } }],
     ...(afterKey ? { after: afterKey } : {}),
   };
 
@@ -69,10 +72,12 @@ export const createRequest = async (
     nodeType,
     metric,
     customMetric,
-    schema
+    effectiveSchema
   );
   const bucketSelector = createBucketSelector(metric, condition, customMetric);
 
+  // Container context stays on the ECS pod uid (`kubernetes.pod.uid` → `container.id`).
+  // SemConv pod documents do not populate it.
   const containerContextAgg: Record<string, estypes.AggregationsAggregationContainer> | undefined =
     nodeType === 'pod' && fieldsExisted && fieldsExisted[termsAggField[KUBERNETES_POD_UID]]
       ? {
@@ -104,14 +109,14 @@ export const createRequest = async (
       top_hits: {
         size: 1,
         _source:
-          schema === 'semconv'
+          effectiveSchema === 'semconv'
             ? false
             : {
                 includes: allowList,
                 excludes: ADDITIONAL_CONTEXT_BLOCKED_LIST,
               },
         // otel docs don't support _source to select fields, so we use docvalue_fields
-        docvalue_fields: schema === 'semconv' ? allowList : [],
+        docvalue_fields: effectiveSchema === 'semconv' ? allowList : [],
       },
     },
   };
@@ -131,7 +136,9 @@ export const createRequest = async (
               : [parsedFilters]
             : []),
           ...rangeQuery(timerange.from, timerange.to),
-          ...(schema ? inventoryModels.nodeFilter?.({ schema }) ?? [] : []),
+          ...(effectiveSchema
+            ? inventoryModels.nodeFilter?.({ schema: effectiveSchema }) ?? []
+            : []),
         ],
       },
     },

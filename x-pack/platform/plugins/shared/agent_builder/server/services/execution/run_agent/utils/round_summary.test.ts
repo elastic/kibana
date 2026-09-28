@@ -66,11 +66,12 @@ const trackerFor = (seed: RunSeed) => {
   tracker.seed(seed);
   return {
     tracker,
-    ran: (updates: RunStepUpdate[]) =>
+    ran: (updates: RunStepUpdate[], pendingToolCallIds: string[] = []) =>
       tracker.observeGraphEvent(
         createRootStateChunkEvent('g', {
           steps: applyStepUpdates(seed.steps, updates),
           toolRenderState: seed.toolRenderState ?? {},
+          pendingToolCallIds,
         })
       ),
   };
@@ -231,5 +232,65 @@ describe('buildInterruptedRound', () => {
       }),
       reasoning('after'),
     ]);
+  });
+
+  describe('interrupted tool calls', () => {
+    const build = (tracker: RunTracker) =>
+      buildInterruptedRound({
+        tracker,
+        startTime,
+        endTime,
+        modelProvider: modelProvider(),
+        mainConnectorId: 'main',
+      }).steps;
+
+    it('marks exactly the projected calls in the latest snapshot pendingToolCallIds (mid-tool interruption marks the group)', () => {
+      const { tracker, ran } = freshTracker();
+      ran(
+        [stepUpdates.appendToolCall(toolCall('a')), stepUpdates.appendToolCall(toolCall('b'))],
+        ['a', 'b']
+      );
+
+      const steps = build(tracker);
+
+      expect(steps.map((step) => (step as ToolCallStep).interrupted)).toEqual([true, true]);
+    });
+
+    it('a mid-LLM interruption marks nothing', () => {
+      const { tracker, ran } = freshTracker();
+      ran([stepUpdates.appendToolCall(toolCall('a', [result('a')]))], []);
+
+      const steps = build(tracker);
+
+      expect((steps[0] as ToolCallStep).interrupted).toBeUndefined();
+    });
+
+    it('a resume interrupted before the first super-step marks the inherited pending calls from the seed', () => {
+      const { tracker } = trackerFor({
+        steps: [toolCall('a')],
+        inherited: { steps: [toolCall('a')], pendingToolCallIds: ['a'] },
+      });
+
+      const steps = build(tracker);
+
+      expect(steps).toHaveLength(1);
+      expect((steps[0] as ToolCallStep).interrupted).toBe(true);
+    });
+
+    it('marks only the pending call of a partially completed group', () => {
+      const { tracker, ran } = freshTracker();
+      ran(
+        [
+          stepUpdates.appendToolCall(toolCall('a', [result('a')])),
+          stepUpdates.appendToolCall(toolCall('b')),
+        ],
+        ['b']
+      );
+
+      const steps = build(tracker);
+
+      expect((steps[0] as ToolCallStep).interrupted).toBeUndefined();
+      expect((steps[1] as ToolCallStep).interrupted).toBe(true);
+    });
   });
 });

@@ -9,8 +9,11 @@
     "server/**/*"
   ],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/config-schema",
     "@kbn/core",
+    "@kbn/esql-types",
+    "@kbn/esql-utils",
     "@kbn/features-plugin",
     "@kbn/i18n",
     "@kbn/management-plugin"

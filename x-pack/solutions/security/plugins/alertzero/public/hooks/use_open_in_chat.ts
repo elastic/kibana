@@ -19,12 +19,16 @@ import type { CoreStart } from '@kbn/core/public';
  * The agent-scoped route is built inline because Agent Builder's own `appPaths` helper is private
  * to that plugin; this mirrors what its `openFullscreenConversation` does.
  */
-const conversationPath = (conversationId: string, agentId?: string): string =>
-  agentId
+const OPEN_DETAILS_PARAM = 'openConversationDetails=true';
+
+const conversationPath = (conversationId: string, agentId?: string): string => {
+  const base = agentId
     ? `/agents/${encodeURIComponent(agentId)}/conversations/${encodeURIComponent(conversationId)}`
     : // Without an agent id, Agent Builder's legacy route resolves the conversation's own agent
       // and redirects to the canonical URL.
       `/conversations/${encodeURIComponent(conversationId)}`;
+  return `${base}?${OPEN_DETAILS_PARAM}`;
+};
 
 export interface OpenInChat {
   /** `undefined` when there is no conversation to link to, so callers can omit the href. */
