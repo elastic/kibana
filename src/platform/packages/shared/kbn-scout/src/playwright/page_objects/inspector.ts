@@ -10,7 +10,6 @@
 import type { Locator } from '@playwright/test';
 import type { ScoutPage } from '..';
 import { AppMenu } from './app_menu';
-import { KibanaCodeEditorWrapper } from '../ui_components';
 
 export type InspectorView = 'Requests' | 'Data';
 
@@ -21,8 +20,6 @@ const VIEW_CHOOSER_TEST_SUBJECTS: Record<InspectorView, string> = {
 
 export class InspectorPage {
   private readonly appMenu: AppMenu;
-  private readonly codeEditor: KibanaCodeEditorWrapper;
-
   public readonly panel: Locator;
   public readonly closeButton: Locator;
   public readonly viewChooser: Locator;
@@ -41,8 +38,6 @@ export class InspectorPage {
 
   constructor(private readonly page: ScoutPage) {
     this.appMenu = new AppMenu(page);
-    this.codeEditor = new KibanaCodeEditorWrapper(page);
-
     this.panel = page.testSubj.locator('inspectorPanel');
     this.closeButton = page.testSubj.locator('euiFlyoutCloseButton');
     this.viewChooser = page.testSubj.locator('inspectorViewChooser');
@@ -60,31 +55,12 @@ export class InspectorPage {
     };
   }
 
-  async open(openButtonTestSubj: string = 'openInspectorButton'): Promise<void> {
+  async open(openButtonTestSubj: string = 'openInspectorButton') {
     await this.appMenu.clickItem(openButtonTestSubj);
     await this.panel.waitFor({ state: 'visible' });
   }
 
-  async close(): Promise<void> {
-    await this.closeButton.click();
-    await this.panel.waitFor({ state: 'hidden' });
-  }
-
-  async openInspectorView(view: InspectorView): Promise<void> {
-    await this.panel.waitFor({ state: 'visible' });
-    await this.viewChooser.click();
-    await this.page.testSubj.click(VIEW_CHOOSER_TEST_SUBJECTS[view]);
-  }
-
-  async openInspectorRequestsView(): Promise<void> {
-    await this.openInspectorView('Requests');
-  }
-
-  async openRequestsStatisticsTab(): Promise<void> {
-    await this.requests.statisticsTab.click();
-  }
-
-  async setTablePageSize(size: number): Promise<void> {
+  async setTablePageSize(size: number) {
     await this.tablePaginationPopoverButton.click();
     const option = this.page.testSubj.locator(`tablePagination-${size}-rows`);
     await option.click();
@@ -93,7 +69,7 @@ export class InspectorPage {
   }
 
   /** Switches the inspector table to the given 0-based page and waits until it is current. */
-  async goToTablePage(pageIndex: number): Promise<void> {
+  async goToTablePage(pageIndex: number) {
     const pageButton = this.page.testSubj.locator(`pagination-button-${pageIndex}`);
     await pageButton.click();
     await this.page
@@ -101,9 +77,24 @@ export class InspectorPage {
       .waitFor({ state: 'visible' });
   }
 
+  async close() {
+    await this.closeButton.click();
+    await this.panel.waitFor({ state: 'hidden' });
+  }
+
   async getRequestTimestamp(): Promise<string> {
     await this.panel.waitFor({ state: 'visible' });
     return this.requests.timestamp.innerText();
+  }
+
+  async openInspectorView(view: InspectorView) {
+    await this.panel.waitFor({ state: 'visible' });
+    await this.viewChooser.click();
+    await this.page.testSubj.click(VIEW_CHOOSER_TEST_SUBJECTS[view]);
+  }
+
+  async openInspectorRequestsView() {
+    await this.openInspectorView('Requests');
   }
 
   /**
@@ -123,7 +114,8 @@ export class InspectorPage {
 
   /**
    * The names of the requests listed by the open inspector's request chooser,
-   * in the order they are offered. Leaves the chooser closed.
+   * in the order they are offered. Leaves the chooser closed, since its open
+   * list covers the request detail tabs.
    */
   async getRequestNames(): Promise<string[]> {
     const names = await this.page.components
@@ -140,6 +132,10 @@ export class InspectorPage {
     return parseFloat((await badge.innerText()).replace('ms', ''));
   }
 
+  async openRequestsStatisticsTab() {
+    await this.requests.statisticsTab.click();
+  }
+
   async getTableData(): Promise<string[][]> {
     await this.panel.locator('tbody').waitFor({ state: 'visible' });
     const tableRows = this.panel.locator('tbody tr');
@@ -152,16 +148,5 @@ export class InspectorPage {
         })
       )
     );
-  }
-
-  /**
-   * Clicks the Response tab, reads the Monaco editor content, and returns the
-   * parsed JSON response object.
-   */
-  async getResponse(): Promise<Record<string, any>> {
-    await this.page.testSubj.locator('inspectorRequestDetailResponse').click();
-    await this.codeEditor.waitCodeEditorReady('inspectorRequestCodeViewerContainer');
-    const responseString = await this.codeEditor.getCodeEditorValue();
-    return JSON.parse(responseString);
   }
 }
