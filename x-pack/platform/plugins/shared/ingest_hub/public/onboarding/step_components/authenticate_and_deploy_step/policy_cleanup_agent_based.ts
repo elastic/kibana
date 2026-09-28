@@ -95,11 +95,12 @@ export async function updateAgentBasedPolicy(
 
   const packageName = members[0].service.packageName;
 
-  // Fetch existing package policy to preserve its name and namespace.
+  // Fetch existing package policy to preserve its name, namespace, and credential vars.
   let existingName: string | undefined;
   let existingNamespace: string | undefined;
   let existingVersion: string | undefined;
   let existingPolicyIds: string[] | undefined;
+  let existingVarValues: Record<string, string> = {};
   try {
     const existing = await sendGetOnePackagePolicy(policyId);
     if (existing.error) throw existing.error;
@@ -107,6 +108,14 @@ export async function updateAgentBasedPolicy(
     existingNamespace = existing.data?.item?.namespace;
     existingVersion = existing.data?.item?.package?.version;
     existingPolicyIds = existing.data?.item?.policy_ids;
+    // Extract plain-string var values so they can be merged with newly built vars.
+    // Access/temporary keys are memory-only and lost after Back/Next; preserving them here
+    // prevents a service-var-only dirty redeploy from silently clearing credential vars.
+    for (const [key, entry] of Object.entries(
+      (existing.data?.item?.vars ?? {}) as Record<string, { value: unknown }>
+    )) {
+      if (typeof entry?.value === 'string') existingVarValues[key] = entry.value;
+    }
   } catch {
     throw new Error(
       `Cannot safely update agent-based policy ${policyId}: failed to fetch existing metadata.`
@@ -146,7 +155,12 @@ export async function updateAgentBasedPolicy(
 
   const { staticKeys } = authenticateAndDeployStep;
   const pkgVarNames = getPackageVarNames(pkgInfo as { vars?: Array<{ name: string }> });
-  const vars = buildPackageVars(globalRegion, staticKeys, pkgVarNames, agentCredentials);
+  const builtVars = buildPackageVars(globalRegion, staticKeys, pkgVarNames, agentCredentials);
+  // Merge existing var values (base) with newly built vars (override). This preserves
+  // memory-only credential vars (access/temp keys) that are unavailable after page reload
+  // so a service-var-only dirty redeploy does not silently clear them from the policy.
+  const mergedVars = { ...existingVarValues, ...(builtVars ?? {}) };
+  const vars = Object.keys(mergedVars).length > 0 ? mergedVars : undefined;
 
   const policyName = existingName ?? `${packageName.replace(/[^a-zA-Z0-9_-]/g, '_')}-${Date.now()}`;
   const policyNamespace = existingNamespace ?? namespace;

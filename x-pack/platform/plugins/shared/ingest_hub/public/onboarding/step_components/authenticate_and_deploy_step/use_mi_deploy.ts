@@ -56,6 +56,8 @@ export interface UseMiDeployParams {
   policyIdsByInstance: Record<string, string>;
   pendingCleanupPolicyIds: Record<string, string> | undefined;
   isDirty: boolean;
+  /** True when auth method or connector specifically changed. Only pass overrideCloudConnector when true. */
+  isAuthDirty: boolean;
 }
 
 // ── Module-level planning helpers ────────────────────────────────────────────
@@ -236,6 +238,7 @@ export function useMiDeploy({
   policyIdsByInstance,
   pendingCleanupPolicyIds,
   isDirty,
+  isAuthDirty,
 }: UseMiDeployParams): (instanceIds?: string[]) => Promise<{ cleanupFailed: boolean }> {
   return useCallback(
     async (instanceIds?: string[]) => {
@@ -304,8 +307,12 @@ export function useMiDeploy({
                   namespace,
                   authenticateAndDeployStep,
                   servicesMap: servicesMap ?? new Map(),
-                  // Pass the current wizard connector so identity / static-key switches are applied.
-                  overrideCloudConnector: authenticateAndDeployStep.connectorId ?? null,
+                  // Only override the connector when auth actually changed. Without this gate a
+                  // service-var-only redeploy would silently re-attach the wizard's connector over
+                  // one reassigned by an operator since the wizard last ran.
+                  ...(isAuthDirty
+                    ? { overrideCloudConnector: authenticateAndDeployStep.connectorId ?? null }
+                    : {}),
                 })
               )
             );
@@ -354,7 +361,7 @@ export function useMiDeploy({
               }
             }
             setIsDeploying(false);
-            updateDetectAndReviewStep({ isDeploying: false, isDirty: false });
+            updateDetectAndReviewStep({ isDeploying: false, isDirty: false, isAuthDirty: false });
             await persistPendingIacTemplate();
             return { cleanupFailed: false };
           }
@@ -434,7 +441,7 @@ export function useMiDeploy({
           updateDetectAndReviewStep({
             isDeploying: false,
             ...(soWriteSucceeded ? { pendingCleanupPolicyIds: {} } : {}),
-            ...(dirtyUpdateApplied && soWriteSucceeded ? { isDirty: false } : {}),
+            ...(dirtyUpdateApplied && soWriteSucceeded ? { isDirty: false, isAuthDirty: false } : {}),
           });
           await persistPendingIacTemplate();
           return { cleanupFailed: false };
@@ -503,7 +510,9 @@ export function useMiDeploy({
                   namespace,
                   authenticateAndDeployStep,
                   servicesMap: servicesMap ?? new Map(),
-                  overrideCloudConnector: authenticateAndDeployStep.connectorId ?? null,
+                  ...(isAuthDirty
+                    ? { overrideCloudConnector: authenticateAndDeployStep.connectorId ?? null }
+                    : {}),
                 })
               )
             );
@@ -642,7 +651,7 @@ export function useMiDeploy({
         // Clear drift flag only when the SO write confirmed the new state — if the SO PUT failed
         // the drift settings were not persisted, so isDirty must remain true to force a retry.
         ...(dirtyUpdateApplied && mergedFailed.length === 0 && soWriteSucceeded
-          ? { isDirty: false }
+          ? { isDirty: false, isAuthDirty: false }
           : {}),
       });
       return { cleanupFailed: false };
