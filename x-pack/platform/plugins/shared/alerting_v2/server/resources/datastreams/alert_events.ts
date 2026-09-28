@@ -12,7 +12,7 @@ import { alertEventSeveritySchema } from '@kbn/alerting-v2-schemas';
 import type { ResourceDefinition } from './types';
 
 // v7: renames episode.* → alert.* and adds episode.* as alias fields for query compatibility.
-// Clusters with pre-v7 data streams are wiped on startup (see DatastreamInitializer).
+// Existing data streams are rolled over on the next write (see DatastreamInitializer).
 export const ALERT_EVENTS_DATA_STREAM_VERSION = 7;
 export const ALERT_EVENTS_BACKING_INDEX = '.ds-.rule-events-*';
 
@@ -36,7 +36,9 @@ const mappings: MappingsDefinition = {
     type: { type: 'keyword' }, // signal | alert
     // Renamed from `episode` in v7. New documents are written with `alert.*`.
     // The `episode.*` aliases allow existing ES|QL queries to keep using the old names
-    // during the transition; they resolve to `alert.*` at query time.
+    // during the transition; they resolve to `alert.*` at query time. Backing indices
+    // created before v7 keep `episode.*` as real fields, so reads must use `episode.*`
+    // to span all backing indices.
     alert: {
       type: 'object',
       properties: {
@@ -123,5 +125,4 @@ export const getAlertEventsResourceDefinition = (): ResourceDefinition => ({
   version: ALERT_EVENTS_DATA_STREAM_VERSION,
   mappings,
   lifecycle: {},
-  episodeToAlertMigration: true,
 });

@@ -15,7 +15,6 @@ export function createMockResourceManager() {
     waitUntilReady: jest.fn(),
     isReady: jest.fn(),
     ensureResourceReady: jest.fn(),
-    retryResource: jest.fn(),
   } satisfies ResourceManagerMock;
 
   return resourceManager;
