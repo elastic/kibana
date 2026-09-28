@@ -54,7 +54,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/user-profile-components",
     "@kbn/shared-ux-error-boundary",
-    "@kbn/react-kibana-mount",
     "@kbn/proposals-common",
     "@kbn/proposals-plugin",
     "@kbn/security-mitre-attack-server",

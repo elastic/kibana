@@ -34,7 +34,7 @@ interface ExpectedWorkerSettings {
   /**
    * Watch-owned settings the YAML renders flat into `worker_settings` rather than nesting them
    * under `extras`. Alert Triage diverges from Rule Tuning's shape here: the settings API uses
-   * `extras` for both, only the rendered YAML differs. Recorded in FOLLOW_UPS.md.
+   * `extras` for both, only the rendered YAML differs.
    */
   flatSettings?: Record<string, unknown>;
   triggerTypes: string[];
