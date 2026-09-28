@@ -19,6 +19,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { logEntityAccessControl } from '@kbn/entity-access-control';
 import {
   ExecutionStatus,
   getWorkflowPermissions,
@@ -1582,6 +1583,13 @@ export class WorkflowsExecutionEnginePlugin
             const spaceId = spaceIdFor(item);
             const state = executionStates.get(`${spaceId}:${item.workflow.id}`);
             if (state && !getWorkflowPermissions(state, profileId).execute) {
+              logEntityAccessControl(coreStart, request, {
+                entityType: 'workflow',
+                entityId: item.workflow.id,
+                spaceId,
+                action: 'denied',
+                operation: 'execute',
+              });
               throw new Error('You do not have permission to execute this workflow.');
             }
             if (!state?.enabled) {

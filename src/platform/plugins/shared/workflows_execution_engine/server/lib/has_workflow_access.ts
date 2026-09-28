@@ -8,14 +8,15 @@
  */
 
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import { logEntityAccessControl } from '@kbn/entity-access-control';
 import { getWorkflowPermissions } from '@kbn/workflows';
 import type { WorkflowAccessSubject } from '@kbn/workflows';
 import { getWorkflowOriginalRequest } from '../service_account_execution';
 
 export const hasWorkflowAccess = async (
-  workflow: WorkflowAccessSubject,
+  workflow: WorkflowAccessSubject & { id?: string; spaceId?: string },
   request: KibanaRequest,
-  core: Pick<CoreStart, 'userProfile'>,
+  core: Pick<CoreStart, 'userProfile' | 'security'>,
   operation: 'execute' | 'edit' = 'execute'
 ): Promise<boolean> => {
   const profileId =
@@ -24,5 +25,15 @@ export const hasWorkflowAccess = async (
           request: getWorkflowOriginalRequest(request),
         })) ?? undefined
       : undefined;
-  return getWorkflowPermissions(workflow, profileId)[operation];
+  const allowed = getWorkflowPermissions(workflow, profileId)[operation];
+  if (!allowed) {
+    logEntityAccessControl(core, getWorkflowOriginalRequest(request), {
+      entityType: 'workflow',
+      entityId: workflow.id,
+      spaceId: workflow.spaceId,
+      action: 'denied',
+      operation,
+    });
+  }
+  return allowed;
 };

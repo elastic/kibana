@@ -398,7 +398,6 @@ export class WorkflowsManagementApi {
     const workflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!workflow) throw new WorkflowNotFoundError(id);
     const access = await this.workflowsService.getAccessControl();
-    await access.assertAccess(workflow, 'manage', request);
     const result = await access.update(id, spaceId, input, request);
     if (input.access_mode === 'private') {
       // Finish earlier public writes before removing their search entries.
@@ -1093,7 +1092,7 @@ export class WorkflowsManagementApi {
       const workflow = await this.workflowsService.getWorkflow(params.workflowId, spaceId, {
         includeDeleted: true,
       });
-      if (workflow && !(await access.permissions(workflow, params.request)).read) {
+      if (workflow && !(await access.checkAccess(workflow, 'read', params.request))) {
         accessControlFilter = { match_none: {} };
       }
     } else {
@@ -1135,7 +1134,7 @@ export class WorkflowsManagementApi {
     });
     if (workflow) {
       const access = await this.workflowsService.getAccessControl();
-      if (!(await access.permissions(workflow, options?.request)).read) return null;
+      if (!(await access.checkAccess(workflow, 'read', options?.request))) return null;
     }
     return execution;
   }
@@ -1157,10 +1156,10 @@ export class WorkflowsManagementApi {
     );
     const access = await this.workflowsService.getAccessControl();
     const permissions = await Promise.all(
-      workflows.map((workflow) => access.permissions(workflow, request))
+      workflows.map((workflow) => access.checkAccess(workflow, 'read', request))
     );
     const hiddenIds = new Set(
-      workflows.filter((_, index) => !permissions[index].read).map(({ id }) => id)
+      workflows.filter((_, index) => !permissions[index]).map(({ id }) => id)
     );
     return children.filter(({ workflowId }) => !hiddenIds.has(workflowId));
   }

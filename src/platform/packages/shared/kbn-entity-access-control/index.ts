@@ -11,6 +11,7 @@ import { z } from '@kbn/zod/v4';
 import type { estypes } from '@elastic/elasticsearch';
 
 export { isEntityAccessControlAdmin } from './is_entity_access_control_admin';
+export { logEntityAccessControl } from './audit';
 
 export class InvalidAccessControlError extends Error {}
 

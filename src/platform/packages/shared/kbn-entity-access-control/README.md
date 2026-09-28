@@ -29,19 +29,15 @@ can add that restriction without changing the stored shape.
 
 ## Administrator access
 
-On the server, use `isEntityAccessControlAdmin(core, request)` to check whether
-the authenticated caller has the exact `superuser` role. It uses Core Security's
-`authc.getCurrentUser` API. Custom roles with equivalent privileges do not grant
-the override. API keys and requests without an authenticated user do not grant it.
-Routes must use full authentication to make the caller's roles available.
+`isEntityAccessControlAdmin(core, request)` uses Core Security to check for the
+exact `superuser` role. Routes must use full authentication. API keys, custom roles
+with equivalent privileges, and unauthenticated requests do not get the override.
 
-Pass the result as `isAdmin` to `hasEntityAccess` and `buildEntityReadAccessQuery`.
-Administrators can access private entities and perform owner-only operations.
-Consumers can omit `isAdmin` for operations that still require an explicit grant,
-such as execution.
-The override does not change the owner or stored ACL. Never accept `isAdmin` from
-request input or an ACL entry. Feature and space checks still apply, including
-to queries where the ACL filter returns `match_all`.
+Pass the result as `isAdmin` to `hasEntityAccess` and `buildEntityReadAccessQuery`
+to allow private access and owner-only operations. Omit it for operations that
+require an ACL grant, such as execution. The owner and stored ACL stay unchanged.
+Never accept `isAdmin` from request input or an ACL entry. Feature and space checks
+still apply when the ACL filter returns `match_all`.
 
 ```ts
 const isAdmin = isEntityAccessControlAdmin(core, request);
@@ -53,3 +49,16 @@ const canManage = hasEntityAccess({
   isAdmin,
 });
 ```
+
+## Audit logging
+
+Call `logEntityAccessControl(core, request, params)` at the server authorization or
+storage boundary. Use `denied` for a failed ACL check, `admin_override` only when
+access needs the override, and `update` after an ACL write succeeds. Pass the
+entity type, ID, and operation. For updates, pass the previous and current owner
+and ACL. The helper records these fields, not the entity contents. Core Security
+adds the caller and request context when a request is provided.
+
+Actions use `<entityType>_access_control_<action>` and respect the existing Kibana
+audit configuration and ignore filters. An override event records an authorization
+decision, not successful completion of the requested operation.

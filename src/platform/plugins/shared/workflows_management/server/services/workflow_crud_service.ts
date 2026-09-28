@@ -942,7 +942,12 @@ export class WorkflowCrudService {
       request,
       getOptions: { includeDeleted: true, includeGlobal: true },
       mutate: (existingSource: WorkflowProperties) => {
-        assertWorkflowOperation(existingSource, 'edit', profileId, isAdmin);
+        assertWorkflowOperation(existingSource, 'edit', profileId, isAdmin, {
+          core: this.deps.getCoreStart(),
+          request,
+          id,
+          spaceId,
+        });
         let updatedData: Partial<WorkflowProperties> = {
           lastUpdatedBy: authenticatedUser,
           updated_at: now.toISOString(),
@@ -1107,7 +1112,7 @@ export class WorkflowCrudService {
       ? (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined
       : undefined;
     const isAdmin = isEntityAccessControlAdmin(this.deps.getCoreStart(), request);
-    const deletionOptions = { ...options, profileId, isAdmin };
+    const deletionOptions = { ...options, profileId, isAdmin, request };
     const bindings = this.deps.getServiceAccountBindings?.();
     if (!bindings) return this.deleteWorkflowDocuments(ids, spaceId, deletionOptions);
     const result: DeleteWorkflowsResponse = {
@@ -1157,7 +1162,8 @@ export class WorkflowCrudService {
             ? 'manage'
             : 'edit',
           profileId,
-          isAdmin
+          isAdmin,
+          { core: this.deps.getCoreStart(), request, id, spaceId }
         );
         const accountId = versioned.source.definition?.settings?.run_as;
         if (batch && !accountId && !options?.force) {
@@ -1258,6 +1264,7 @@ export class WorkflowCrudService {
       acknowledgeAclLoss?: boolean;
       profileId?: string;
       isAdmin?: boolean;
+      request?: KibanaRequest;
     },
     versionedWorkflow?: VersionedWorkflowDocument,
     guardedBatch?: OccWorkflowHit[],
@@ -1289,12 +1296,13 @@ export class WorkflowCrudService {
         : {}),
       force: options?.force ?? false,
       acknowledgeAclLoss: options?.acknowledgeAclLoss ?? false,
-      assertCanDelete: (workflow) =>
+      assertCanDelete: (workflow, id) =>
         assertWorkflowOperation(
           workflow,
           options?.force && workflow.access_control?.access_mode === 'private' ? 'manage' : 'edit',
           options?.profileId,
-          options?.isAdmin
+          options?.isAdmin,
+          { core: this.deps.getCoreStart(), request: options?.request, id, spaceId }
         ),
       storage: this.deps.workflowStorage,
       workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
@@ -1336,8 +1344,13 @@ export class WorkflowCrudService {
               accessControlField: 'access_control',
               includeMissing: true,
             }),
-            assertCanEdit: (workflow: WorkflowProperties) =>
-              assertWorkflowOperation(workflow, 'edit', profileId, isAdmin),
+            assertCanEdit: (workflow: WorkflowProperties, id: string) =>
+              assertWorkflowOperation(workflow, 'edit', profileId, isAdmin, {
+                core: this.deps.getCoreStart(),
+                request,
+                id,
+                spaceId,
+              }),
           }
         : {}),
       storage: this.deps.workflowStorage,
@@ -1579,7 +1592,12 @@ export class WorkflowCrudService {
             request: params.request,
             mutate: (existing) => {
               previousVersion = existing.version;
-              assertWorkflowOperation(existing, 'edit', profileId, isAdmin);
+              assertWorkflowOperation(existing, 'edit', profileId, isAdmin, {
+                core: this.deps.getCoreStart(),
+                request: params.request,
+                id: entry.id,
+                spaceId,
+              });
               return this.buildBulkOverwriteDocument(prepared, existing);
             },
           });
@@ -1605,7 +1623,12 @@ export class WorkflowCrudService {
     if (crossSpaceOverwriteEntries.length > 0) {
       for (const { entry, occHit } of crossSpaceOverwriteEntries) {
         try {
-          assertWorkflowOperation(occHit._source, 'edit', profileId, isAdmin);
+          assertWorkflowOperation(occHit._source, 'edit', profileId, isAdmin, {
+            core: this.deps.getCoreStart(),
+            request: params.request,
+            id: entry.id,
+            spaceId: occHit._source.spaceId,
+          });
           const document = await this.writeWorkflowDocumentWithOcc(entry.id, spaceId, {
             previousDocument: occHit._source,
             request: params.request,

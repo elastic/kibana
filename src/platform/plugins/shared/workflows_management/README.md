@@ -433,6 +433,14 @@ else, a superuser must add themselves as Executor or Editor. Draft and step test
 require Editor. The access dialog shows a notice when a superuser edits another
 user's ACL. Background execution keeps its normal ACL checks.
 
+With Kibana audit logging enabled, `workflow_access_control_update` records the
+previous and stored owner, visibility, and grants. `workflow_access_control_denied`
+records failed ACL checks, including execution checks. `workflow_access_control_admin_override`
+records use of the superuser override. Search overrides are recorded at query
+level. Filtered search results do not produce one denial event per hidden workflow.
+Override events confirm authorization only. Existing operation events report the
+operation outcome. ACL events do not contain workflow YAML or execution data.
+
 The owner and administrators can request user suggestions, which require
 Workflows Read in that space. New grants and permission increases require the recipient's current RBAC:
 Viewer requires Read, Executor also requires Execute, and Editor also requires

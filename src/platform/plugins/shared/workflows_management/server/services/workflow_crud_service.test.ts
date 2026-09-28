@@ -3190,21 +3190,7 @@ describe('WorkflowCrudService administrator writes', () => {
         expect(client.index).not.toHaveBeenCalled();
       }
       const imported = await service.bulkCreateWorkflows(
-        [
-          {
-            id: 'private-workflow',
-            yaml: `name: Updated
-enabled: false
-triggers:
-  - type: manual
-steps:
-  - name: step
-    type: console
-    with:
-      message: updated
-`,
-          },
-        ],
+        [{ id: 'private-workflow', yaml: lightweightWorkflowYaml }],
         'default',
         request,
         { overwrite: true }
@@ -3212,6 +3198,16 @@ steps:
       expect(imported.created).toHaveLength(isAdmin ? 1 : 0);
       expect(imported.failed).toHaveLength(isAdmin ? 0 : 1);
       if (isAdmin) expect(imported.created[0].owner_id).toBe('owner');
+      expect(core.security.audit.asScoped(request).log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: isAdmin
+              ? 'workflow_access_control_admin_override'
+              : 'workflow_access_control_denied',
+          }),
+          message: expect.stringContaining('"entityId":"private-workflow"'),
+        })
+      );
     }
   );
 
@@ -3237,7 +3233,8 @@ steps:
               makeSource({
                 owner_id: 'owner',
                 access_control: { access_mode: 'private', entries: [] },
-              })
+              }),
+              'private-workflow'
             );
           if (isAdmin) expect(check).not.toThrow();
           else expect(check).toThrow();

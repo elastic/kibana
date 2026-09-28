@@ -133,6 +133,16 @@ describe('workflow service account execution', () => {
       );
 
       expect(allowed).toBe(profileId === 'owner');
+      const audit = core.security.audit.asScoped(request).log;
+      expect(audit).toHaveBeenCalledTimes(profileId === 'owner' ? 0 : 1);
+      if (profileId !== 'owner') {
+        expect(core.security.audit.asScoped).not.toHaveBeenCalledWith(scopedRequest);
+        expect(audit).toHaveBeenCalledWith(
+          expect.objectContaining({
+            event: expect.objectContaining({ action: 'workflow_access_control_denied' }),
+          })
+        );
+      }
       expect(core.security.authc.getCurrentUser).not.toHaveBeenCalledWith(scopedRequest);
       expect(core.userProfile.getCurrentProfileId).toHaveBeenCalledWith({ request });
     }

@@ -64,6 +64,103 @@ describe('WorkflowAccessControlService', () => {
     service = new WorkflowAccessControlService(core, crud, authz);
   });
 
+  describe('audit logging', () => {
+    it.each(['read', 'edit', 'execute', 'manage'] as const)(
+      'records denied %s access',
+      async (operation) => {
+        core.userProfile.getCurrentProfileId.mockResolvedValue('outsider');
+        await expect(
+          service.assertAccess({ ...document, id: 'id' }, operation, request)
+        ).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+        expect(core.security.audit.asScoped(request).log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: expect.stringContaining(`"operation":"${operation}"`),
+            event: expect.objectContaining({
+              action: 'workflow_access_control_denied',
+              outcome: 'failure',
+            }),
+            kibana: { space_id: 'default' },
+          })
+        );
+      }
+    );
+
+    it('audits a hidden document without exposing its contents', async () => {
+      core.userProfile.getCurrentProfileId.mockResolvedValue('outsider');
+      const result = await service.toDto({ ...document, id: 'id' }, request);
+      expect(result.permissions.read).toBe(false);
+      expect(core.security.audit.asScoped(request).log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.stringContaining('"entityId":"id","operation":"read"'),
+          event: expect.objectContaining({ action: 'workflow_access_control_denied' }),
+        })
+      );
+    });
+
+    it('records the stored grant change and preserves the owner', async () => {
+      await service.update(
+        'id',
+        'default',
+        {
+          access_mode: 'private',
+          entries: [{ type: 'user', id: 'reader', role: 'viewer' }],
+        },
+        request
+      );
+      const audit = core.security.audit.asScoped(request).log;
+      expect(audit).toHaveBeenCalledTimes(1);
+      expect(audit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'workflow_access_control_update',
+            outcome: 'success',
+          }),
+        })
+      );
+      const message = jest.mocked(audit).mock.calls[0][0]?.message;
+      expect(message).toContain(
+        '"previous":{"owner_id":"owner","access_control":{"access_mode":"private","entries":[]}}'
+      );
+      expect(message).toContain(
+        '"current":{"owner_id":"owner","access_control":{"access_mode":"private","entries":[{"type":"user","id":"reader","role":"viewer"'
+      );
+    });
+
+    it('does not report an access change when storage rejects the write', async () => {
+      jest
+        .mocked(crud.writeWorkflowDocumentWithOcc)
+        .mockRejectedValue(new WorkflowConflictError('conflict', 'id'));
+      await expect(
+        service.update('id', 'default', { access_mode: 'public' }, request)
+      ).rejects.toThrow('conflict');
+      expect(core.security.audit.asScoped(request).log).not.toHaveBeenCalled();
+    });
+
+    it.each([false, true])(
+      'records an override only when the admin needs it (owner=%s)',
+      async (isOwner) => {
+        core.userProfile.getCurrentProfileId.mockResolvedValue(isOwner ? 'owner' : 'admin');
+        jest
+          .spyOn(core.security.authc, 'getCurrentUser')
+          .mockReturnValue(
+            securityServiceMock.createMockAuthenticatedUser({ roles: ['superuser'] })
+          );
+        await service.assertAccess({ ...document, id: 'id' }, 'manage', request);
+        const audit = core.security.audit.asScoped(request).log;
+        expect(audit).toHaveBeenCalledTimes(isOwner ? 0 : 1);
+        if (!isOwner)
+          expect(audit).toHaveBeenCalledWith(
+            expect.objectContaining({
+              event: expect.objectContaining({
+                action: 'workflow_access_control_admin_override',
+                outcome: 'success',
+              }),
+            })
+          );
+      }
+    );
+  });
+
   describe('administrator override', () => {
     beforeEach(() => {
       core.userProfile.getCurrentProfileId.mockResolvedValue('admin');

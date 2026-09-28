@@ -76,18 +76,21 @@ describe('WorkflowsManagementApi', () => {
     mockWorkflowsExecutionEngine.bulkScheduleWorkflow.mockResolvedValue([]);
     mockPreprocessAlertInputs.mockImplementation(async (inputs) => inputs);
 
+    const access = new WorkflowAccessControlService(coreMock.createStart(), {
+      getWorkflowDocumentWithVersion: jest.fn(),
+      writeWorkflowDocumentWithOcc: jest.fn(),
+    });
+    jest
+      .spyOn(access, 'permissions')
+      .mockResolvedValue({ read: true, execute: true, edit: true, manage: false });
+    jest.spyOn(access, 'update').mockImplementation(jest.fn());
+    jest.spyOn(access, 'assertAccess').mockResolvedValue();
+    jest.spyOn(access, 'checkAccess').mockResolvedValue(true);
+    jest.spyOn(access, 'readFilter').mockResolvedValue({ match_all: {} });
+    jest.spyOn(access, 'getProfileId').mockResolvedValue('test-profile');
+    jest.spyOn(access, 'executionFilter').mockResolvedValue({ match_all: {} });
     mockWorkflowsService = {
-      getAccessControl: jest.fn().mockResolvedValue({
-        permissions: jest
-          .fn()
-          .mockResolvedValue({ read: true, execute: true, edit: true, manage: false }),
-        toDto: WorkflowAccessControlService.prototype.toDto,
-        update: jest.fn(),
-        assertAccess: jest.fn(),
-        readFilter: jest.fn().mockResolvedValue({ match_all: {} }),
-        getProfileId: jest.fn().mockResolvedValue('test-profile'),
-        executionFilter: jest.fn().mockResolvedValue({ match_all: {} }),
-      }),
+      getAccessControl: jest.fn().mockResolvedValue(access),
       getWorkflow: jest.fn().mockResolvedValue({
         id: 'workflow-123',
         name: 'Test workflow',
@@ -458,12 +461,9 @@ describe('WorkflowsManagementApi', () => {
       },
     ]);
     const access = await mockWorkflowsService.getAccessControl();
-    jest.mocked(access.permissions).mockImplementation(async ({ access_control }) => ({
-      read: access_control?.access_mode !== 'private',
-      execute: false,
-      edit: false,
-      manage: false,
-    }));
+    jest
+      .mocked(access.checkAccess)
+      .mockImplementation(async ({ access_control }) => access_control?.access_mode !== 'private');
 
     const result = await api.getChildWorkflowExecutions('parent', 'default', mockRequest);
 
