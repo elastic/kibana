@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import dateMath from '@kbn/datemath';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { significantSecurityEventAttachmentDataSchema } from '../../../../../common/significant_security_event_schema';
 import { huntCoordinator } from '../hunt_coordinator';
@@ -65,6 +66,20 @@ const HIT_TIER1_RESULT = {
     { index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001', hit_count: 3, required: true },
     { index: '.alerts-security.alerts-default', hit_count: 1, required: false },
   ],
+};
+
+const CLEAN_TIER1_RESULT = {
+  status: 'no_environment_hits' as const,
+  has_confirmed_hit: false,
+  searched_iocs: 0,
+  searched_techniques: 0,
+  resolved_iocs: [],
+  resolved_techniques: [],
+  time_range: { from: '2026-07-30T13:00:00.000Z', to: '2026-07-30T15:00:00.000Z' },
+  counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
+  hits: [],
+  affected_assets: { hosts: [], users: [], services: [] },
+  per_index: [],
 };
 
 const HIT_TIER2_RESULT_TWO_BEHAVIORS = {
@@ -170,7 +185,7 @@ describe('buildSseData', () => {
     jest.clearAllMocks();
   });
 
-  it('returns one SSE entry per confirmed technique on a tier1_and_tier2 hit', async () => {
+  it('returns one SSE entry per corroborated technique on a tier1_and_tier2 hit', async () => {
     const { huntForThreat } = jest.requireMock('../tier1/hunt_for_threat');
     const { huntBehavior } = jest.requireMock('../tier2/hunt_behavior');
     huntForThreat.mockResolvedValue(HIT_TIER1_RESULT);
@@ -191,7 +206,7 @@ describe('buildSseData', () => {
       spaceId: 'default',
     });
 
-    // One entry per confirmed technique (Tier 2 produced two behaviors here).
+    // Both behaviors executed and hit, so both earn an entry.
     expect(entries).toHaveLength(2);
     expect(entries.map((e) => e.attachment_id)).toEqual([
       buildSseAttachmentId({
@@ -344,19 +359,7 @@ describe('buildSseData', () => {
   it('emits a Tier 2-only hit with tier2 hit_sources and Tier 2 entities', async () => {
     const { huntForThreat } = jest.requireMock('../tier1/hunt_for_threat');
     const { huntBehavior } = jest.requireMock('../tier2/hunt_behavior');
-    huntForThreat.mockResolvedValue({
-      status: 'no_environment_hits',
-      has_confirmed_hit: false,
-      searched_iocs: 0,
-      searched_techniques: 0,
-      resolved_iocs: [],
-      resolved_techniques: [],
-      time_range: { from: '2026-07-30T13:00:00.000Z', to: '2026-07-30T15:00:00.000Z' },
-      counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
-      hits: [],
-      affected_assets: { hosts: [], users: [], services: [] },
-      per_index: [],
-    });
+    huntForThreat.mockResolvedValue(CLEAN_TIER1_RESULT);
     huntBehavior.mockResolvedValue({
       status: 'behaviors_proposed',
       behaviors: [
@@ -417,19 +420,7 @@ describe('buildSseData', () => {
   it('returns a single report-scoped entry for a tier1_only clean result', async () => {
     const { huntForThreat } = jest.requireMock('../tier1/hunt_for_threat');
     const { huntBehavior } = jest.requireMock('../tier2/hunt_behavior');
-    huntForThreat.mockResolvedValue({
-      status: 'no_environment_hits',
-      has_confirmed_hit: false,
-      searched_iocs: 0,
-      searched_techniques: 0,
-      resolved_iocs: [],
-      resolved_techniques: [],
-      time_range: { from: '2026-07-30T13:00:00.000Z', to: '2026-07-30T15:00:00.000Z' },
-      counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
-      hits: [],
-      affected_assets: { hosts: [], users: [], services: [] },
-      per_index: [],
-    });
+    huntForThreat.mockResolvedValue(CLEAN_TIER1_RESULT);
     huntBehavior.mockResolvedValue({
       status: 'no_behaviors_found',
       behaviors: [],
@@ -457,6 +448,265 @@ describe('buildSseData', () => {
     expect(entries[0].data.entities).toEqual([]);
     expect(entries[0].data.events).toEqual([]);
     expect(entries[0].data.alerts).toEqual([]);
+  });
+});
+
+/**
+ * An SSE is a finding, so a technique earns one only when this run corroborated
+ * it. Fanning out over every *proposed* technique opens a rule-named,
+ * model-severity, `status: open` event for each behavior Tier 2 guessed at, on
+ * the strength of one unrelated technique clearing the hit bar.
+ */
+describe('buildSseData publishes an entry only for a corroborated technique', () => {
+  type RawTier1 = Omit<HuntCoordinatorResult['tier1'], 'tier'>;
+
+  const proposedBehavior = ({
+    techniqueId,
+    ruleName,
+    hit,
+  }: {
+    techniqueId: string;
+    ruleName: string;
+    hit: boolean;
+  }) => ({
+    technique_id: techniqueId,
+    evidence_quote: `report quote for ${techniqueId}`,
+    llm_confidence: 0.82,
+    confidence: 0.82,
+    technique_name: `Technique ${techniqueId}`,
+    reference: `https://attack.mitre.org/techniques/${techniqueId}/`,
+    tactic_ids: ['TA0001'],
+    proposed_esql_rule: 'FROM logs-aws.cloudtrail-default | WHERE true',
+    rule_name: ruleName,
+    severity: 'high' as const,
+    risk_score: 73,
+    execution: { executed: true, row_count: hit ? 2 : 0, hit },
+  });
+
+  const run = async (
+    tier1: RawTier1,
+    behaviors: Array<ReturnType<typeof proposedBehavior>>
+  ): Promise<HuntCoordinatorResult> => {
+    const { huntForThreat } = jest.requireMock('../tier1/hunt_for_threat');
+    const { huntBehavior } = jest.requireMock('../tier2/hunt_behavior');
+    huntForThreat.mockResolvedValue(tier1);
+    huntBehavior.mockResolvedValue({
+      status: 'behaviors_proposed',
+      behaviors,
+      indexed_behaviors: [],
+      has_hit: behaviors.some((behavior) => behavior.execution.hit),
+      next_step: 'Review the proposed rules.',
+    });
+    return runCoordinator({
+      report_id: 'tr-corroboration',
+      spaceId: 'default',
+      text: 'candidate behaviors',
+      trigger: 'scheduled',
+      run_id: 'run-corroboration',
+      tier2_when: 'always',
+    });
+  };
+
+  const entriesFor = (result: HuntCoordinatorResult) =>
+    buildSseData(result, 'tr-corroboration', { spaceId: 'default' });
+
+  const idFor = (techniqueId?: string) =>
+    buildSseAttachmentId({ spaceId: 'default', reportId: 'tr-corroboration', techniqueId });
+
+  it('leaves out a technique that executed and found nothing', async () => {
+    const result = await run(CLEAN_TIER1_RESULT, [
+      proposedBehavior({
+        techniqueId: 'T1078.004',
+        ruleName: 'AssumeRole into high-risk policy boundary',
+        hit: true,
+      }),
+      proposedBehavior({
+        techniqueId: 'T1552.001',
+        ruleName: 'Credential file read on CI runner',
+        hit: false,
+      }),
+    ]);
+
+    // The route publishes on the report-wide flag, which the one hitting technique sets.
+    expect(result.has_confirmed_hit).toBe(true);
+
+    const entries = entriesFor(result);
+
+    expect(entries).toHaveLength(1);
+    expect(entries[0].attachment_id).toEqual(idFor('T1078.004'));
+    expect(entries[0].data.title).toBe('AssumeRole into high-risk policy boundary');
+    expect(huntResultOf(entries[0]).tier2?.behaviors.map((b) => b.technique_id)).toEqual([
+      'T1078.004',
+    ]);
+  });
+
+  it('falls back to one report-scoped entry when Tier 1 hit and no technique did', async () => {
+    // `HIT_TIER1_RESULT`'s hits carry no `matched.technique_id`, so they are shared
+    // context for the report rather than corroboration of either proposal.
+    const result = await run(HIT_TIER1_RESULT, [
+      proposedBehavior({
+        techniqueId: 'T1078.004',
+        ruleName: 'AssumeRole into high-risk policy boundary',
+        hit: false,
+      }),
+      proposedBehavior({
+        techniqueId: 'T1552.001',
+        ruleName: 'Credential file read on CI runner',
+        hit: false,
+      }),
+    ]);
+
+    const entries = entriesFor(result);
+
+    expect(entries).toHaveLength(1);
+    expect(entries[0].attachment_id).toEqual(idFor());
+    expect(entries[0].data.title).toBe('Hunt confirmed for tr-corroboration');
+    expect(huntResultOf(entries[0]).hit_sources).toEqual(['tier1']);
+    // The proposals are not lost: the report-scoped entry carries all of them, and
+    // the ones that executed clean are stated as evidence against.
+    expect(huntResultOf(entries[0]).tier2?.behaviors.map((b) => b.technique_id)).toEqual([
+      'T1078.004',
+      'T1552.001',
+    ]);
+    expect(entries[0].data.evidence_against).toEqual([
+      'Tier 2 executed 2 proposed technique(s) with no required-index rows: T1078.004, T1552.001.',
+    ]);
+    expect(significantSecurityEventAttachmentDataSchema.safeParse(entries[0].data).success).toBe(
+      true
+    );
+  });
+
+  it('does not let a Tier 1 hit attributed to another technique corroborate this one', async () => {
+    const result = await run(
+      {
+        ...HIT_TIER1_RESULT,
+        counts: { total_hits: 1, returned_hits: 1, affected_hosts: 1, affected_users: 1 },
+        hits: [
+          {
+            index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+            id: 'evt-other-technique',
+            timestamp: '2026-07-30T13:05:00.000Z',
+            matched: { field: 'file.hash.md5', technique_id: 'T1003.001' },
+          },
+        ],
+        per_index: [
+          {
+            index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+            hit_count: 1,
+            required: true,
+          },
+        ],
+      },
+      [
+        proposedBehavior({
+          techniqueId: 'T1552.001',
+          ruleName: 'Credential file read on CI runner',
+          hit: false,
+        }),
+      ]
+    );
+
+    const entries = entriesFor(result);
+
+    expect(entries).toHaveLength(1);
+    expect(entries[0].attachment_id).toEqual(idFor());
+  });
+
+  it('publishes a technique entry for a technique a Tier 1 hit was attributed to', async () => {
+    const result = await run(
+      {
+        ...HIT_TIER1_RESULT,
+        counts: { total_hits: 1, returned_hits: 1, affected_hosts: 1, affected_users: 1 },
+        hits: [
+          {
+            index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+            id: 'evt-attributed',
+            timestamp: '2026-07-30T13:05:00.000Z',
+            matched: { field: 'file.hash.md5', technique_id: 'T1552.001' },
+          },
+        ],
+        per_index: [
+          {
+            index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+            hit_count: 1,
+            required: true,
+          },
+        ],
+      },
+      [
+        proposedBehavior({
+          techniqueId: 'T1552.001',
+          ruleName: 'Credential file read on CI runner',
+          hit: false,
+        }),
+      ]
+    );
+
+    const entries = entriesFor(result);
+
+    expect(entries).toHaveLength(1);
+    expect(entries[0].attachment_id).toEqual(idFor('T1552.001'));
+    expect(huntResultOf(entries[0]).hit_sources).toEqual(['tier1']);
+    // `counts.total_hits` is the report's total. On a technique-scoped entry it has
+    // to say so, beside the share of it this entry actually carries.
+    expect(entries[0].data.evidence_for).toContain(
+      'Tier 1 confirmed 1 hit(s) for this report in the hunt window, 1 of which are referenced here (see hunt_result.tier1.per_index).'
+    );
+  });
+
+  it('publishes one entry for a technique proposed twice', async () => {
+    const result = await run(CLEAN_TIER1_RESULT, [
+      proposedBehavior({
+        techniqueId: 'T1078.004',
+        ruleName: 'AssumeRole into high-risk policy boundary',
+        hit: true,
+      }),
+      proposedBehavior({
+        techniqueId: 'T1078.004',
+        ruleName: 'AssumeRole from an unused identity',
+        hit: true,
+      }),
+    ]);
+
+    const entries = entriesFor(result);
+
+    // Two entries would share one `attachment_id`, so the second `ai.attachment.add`
+    // would overwrite the first.
+    expect(entries).toHaveLength(1);
+    expect(entries[0].attachment_id).toEqual(idFor('T1078.004'));
+    expect(huntResultOf(entries[0]).tier2?.behaviors.map((b) => b.rule_name)).toEqual([
+      'AssumeRole into high-risk policy boundary',
+      'AssumeRole from an unused identity',
+    ]);
+  });
+
+  it('resolves the window once per run, not once per entry', async () => {
+    const result = await run(
+      { ...CLEAN_TIER1_RESULT, time_range: { from: 'now-24h', to: 'now' } },
+      [
+        proposedBehavior({
+          techniqueId: 'T1078.004',
+          ruleName: 'AssumeRole into high-risk policy boundary',
+          hit: true,
+        }),
+        proposedBehavior({
+          techniqueId: 'T1552.001',
+          ruleName: 'Credential file read on CI runner',
+          hit: true,
+        }),
+      ]
+    );
+
+    const parseSpy = jest.spyOn(dateMath, 'parse');
+    const entries = entriesFor(result);
+    expect(entries).toHaveLength(2);
+
+    // A `now` taken per entry lets sibling findings from one hunt report different
+    // windows, so the clock has to be one object shared by the whole run.
+    const clocks = new Set(parseSpy.mock.calls.map(([, options]) => options?.forceNow));
+    expect(clocks.size).toBe(1);
+    expect(huntResultOf(entries[0]).time_range).toEqual(huntResultOf(entries[1]).time_range);
+    parseSpy.mockRestore();
   });
 });
 

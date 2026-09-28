@@ -9,8 +9,8 @@
  * Maps the hunt coordinator's raw Tier 1 / Tier 2 output into the
  * `security.significant_security_event` attachment data shape.
  *
- * `buildSseData` returns one SSE entry per confirmed technique (a single
- * report-scoped entry when Tier 2 produced none), each carrying its own
+ * `buildSseData` returns one SSE entry per technique this run corroborated (a
+ * single report-scoped entry when none did), each carrying its own
  * computed `attachment_id`. The caller attaches every entry to the
  * Investigation with `ai.attachment.add`. The payload is schema-complete
  * (title, severity, evidence, …) so attach validates without a second fill
@@ -98,7 +98,14 @@ const toIsoInstant = (value: string | undefined): string | undefined => {
 /**
  * `time_range` is a required datetime pair on the schema, so an unparseable bound
  * cannot be dropped the way an optional hit timestamp can. Both bounds resolve
- * against one `now`, matching `assertHuntWindow`.
+ * against one `now` for the whole run, matching `assertHuntWindow`.
+ *
+ * That `now` is mapping time, which is after the hunt ran: Tier 1 and each Tier 2
+ * execute hand the date math to Elasticsearch, which resolves it itself, so no
+ * component reports the instants it actually searched. Closing that gap means
+ * resolving the window once in the coordinator before Tier 1 and carrying
+ * absolute bounds through both tiers; until then a relative window drifts by
+ * roughly the duration of the run.
  */
 const toIsoTimeRange = (
   range: { from: string; to: string },
@@ -116,8 +123,8 @@ const toIsoTimeRange = (
 
 /**
  * Subject-stable SSE attachment id: `sse-{sha256(space|reportId[|technique])}`.
- * Omitting `technique` gives the report-scoped fallback id used when Tier 2
- * produced no behaviors.
+ * Omitting `technique` gives the report-scoped fallback id used when no
+ * technique was corroborated.
  */
 export const buildSseAttachmentId = ({
   spaceId,
@@ -518,6 +525,7 @@ const buildChrome = ({
   behavior,
   events,
   alerts,
+  tier1RefCount,
 }: {
   reportId: string;
   runId: string;
@@ -525,6 +533,8 @@ const buildChrome = ({
   behavior?: CoordinatorBehavior;
   events: SseEventRef[];
   alerts: SseAlertRef[];
+  /** Tier 1 refs this entry carries, which is not the report's Tier 1 total. */
+  tier1RefCount: number;
 }): Pick<
   SseAttachmentData,
   | 'title'
@@ -556,8 +566,13 @@ const buildChrome = ({
 
   const evidenceFor: string[] = [];
   if (huntResult.hit_sources.includes('tier1')) {
+    // `counts.total_hits` is the report's Tier 1 total, not this technique's, so a
+    // technique-scoped entry has to say whose count it is quoting and how much of
+    // it it actually carries.
     evidenceFor.push(
-      `Tier 1 confirmed ${huntResult.tier1.counts.total_hits} hit(s) in the hunt window (see hunt_result.tier1.per_index).`
+      behavior
+        ? `Tier 1 confirmed ${huntResult.tier1.counts.total_hits} hit(s) for this report in the hunt window, ${tier1RefCount} of which are referenced here (see hunt_result.tier1.per_index).`
+        : `Tier 1 confirmed ${huntResult.tier1.counts.total_hits} hit(s) in the hunt window (see hunt_result.tier1.per_index).`
     );
   }
   if (huntResult.hit_sources.includes('tier2') && behavior?.execution?.hit) {
@@ -570,6 +585,25 @@ const buildChrome = ({
   }
   if (evidenceFor.length === 0 && huntResult.has_confirmed_hit) {
     evidenceFor.push('Environment hit confirmed; see hunt_result for structured detail.');
+  }
+
+  // The report-scoped entry carries every proposed behavior, including the ones
+  // that executed and found nothing. Naming them is the difference between "not
+  // investigated" and "investigated and absent".
+  const evidenceAgainst: string[] = [];
+  const executedClean = behavior
+    ? []
+    : (huntResult.tier2?.behaviors ?? []).filter(
+        (proposed) => proposed.execution?.executed === true && proposed.execution.hit !== true
+      );
+  if (executedClean.length > 0) {
+    evidenceAgainst.push(
+      `Tier 2 executed ${
+        executedClean.length
+      } proposed technique(s) with no required-index rows: ${executedClean
+        .map((proposed) => proposed.technique_id)
+        .join(', ')}.`.slice(0, 2000)
+    );
   }
 
   const timeline: SseAttachmentData['timeline'] = [];
@@ -600,9 +634,34 @@ const buildChrome = ({
     timeline,
     hypothesis_tested: hypothesisTested,
     evidence_for: evidenceFor.slice(0, MAX_EVIDENCE),
-    evidence_against: [],
+    evidence_against: evidenceAgainst.slice(0, MAX_EVIDENCE),
     evaluation_record_ref: evalRef,
   };
+};
+
+/**
+ * Whether this run corroborated the technique itself, which is what earns it an
+ * SSE of its own: its ES|QL executed and returned required-index rows, or a
+ * Tier 1 hit was attributed to it. A Tier 1 hit with no `matched.technique_id`
+ * is shared context for every technique, so it cannot single one out — counting
+ * it would publish an open, rule-named finding for every behavior the model
+ * proposed as soon as Tier 1 found anything at all.
+ */
+const isCorroborated = (result: HuntCoordinatorResult, techniqueId: string): boolean => {
+  const behaviors = result.tier2?.behaviors ?? [];
+  if (
+    behaviors.some(
+      (behavior) => behavior.technique_id === techniqueId && behavior.execution?.hit === true
+    )
+  ) {
+    return true;
+  }
+  return (
+    result.tier1.has_confirmed_hit &&
+    result.tier1.hits.some(
+      (hit) => hit.matched?.technique_id?.toUpperCase() === techniqueId.toUpperCase()
+    )
+  );
 };
 
 const buildEntry = ({
@@ -610,15 +669,18 @@ const buildEntry = ({
   reportId,
   spaceId,
   techniqueId,
+  forceNow,
 }: {
   result: HuntCoordinatorResult;
   reportId: string;
   spaceId: string;
   techniqueId?: string;
+  /**
+   * The run's clock, for both window bounds, matching `assertHuntWindow`.
+   * Document timestamps are absolute instants and do not use it.
+   */
+  forceNow: Date;
 }): SseEntry => {
-  // One clock for both window bounds, matching `assertHuntWindow`. Document
-  // timestamps are absolute instants and do not use it.
-  const forceNow = new Date();
   const { events, alerts, tier1RefCount } = mergeTierHitRefs({
     ...splitHits(result, techniqueId),
     result,
@@ -640,6 +702,7 @@ const buildEntry = ({
     behavior,
     events,
     alerts,
+    tier1RefCount,
   });
 
   return {
@@ -661,11 +724,19 @@ const buildEntry = ({
 };
 
 /**
- * Pure function: coordinator output in, one SSE entry per confirmed
- * technique out (report-scoped single entry when Tier 2 produced none). No
- * I/O, no ES calls. The hunt child workflow's step calls this after
- * `hunt_coordinator` returns and fans out over the result with
+ * Pure function: coordinator output in, one SSE entry per corroborated
+ * technique out. No I/O, no ES calls. The hunt child workflow's step calls this
+ * after `hunt_coordinator` returns and fans out over the result with
  * `ai.attachment.add`, one call per entry.
+ *
+ * A technique the run only *proposed* gets no entry of its own: an SSE is a
+ * finding, and publishing one per proposal would open a rule-named,
+ * model-severity event for every behavior Tier 2 guessed at. When no technique
+ * is corroborated the single report-scoped entry carries all of them in
+ * `hunt_result.tier2.behaviors`, with the executed-and-clean ones named in
+ * `evidence_against`. When some are, the uncorroborated proposals are left to
+ * the coordinator response, which is where a caller that wants every proposal
+ * should read them.
  *
  * Each technique-scoped entry's `security_knowledge_indicators`,
  * `hunt_result.tier2.behaviors`, Tier 2 `hits`, and Tier 2 entities are
@@ -677,13 +748,22 @@ export const buildSseData = (
   reportId: string,
   options: SseMapperOptions
 ): SseEntry[] => {
-  const techniqueIds = result.tier2?.behaviors.map((behavior) => behavior.technique_id) ?? [];
+  // One clock for the whole run, so sibling entries from a single hunt cannot
+  // disagree about the window they report.
+  const forceNow = new Date();
+  const corroborated = [
+    ...new Set(
+      (result.tier2?.behaviors ?? [])
+        .map((behavior) => behavior.technique_id)
+        .filter((techniqueId) => isCorroborated(result, techniqueId))
+    ),
+  ];
 
-  if (techniqueIds.length === 0) {
-    return [buildEntry({ result, reportId, spaceId: options.spaceId })];
+  if (corroborated.length === 0) {
+    return [buildEntry({ result, reportId, spaceId: options.spaceId, forceNow })];
   }
 
-  return techniqueIds.map((techniqueId) =>
-    buildEntry({ result, reportId, spaceId: options.spaceId, techniqueId })
+  return corroborated.map((techniqueId) =>
+    buildEntry({ result, reportId, spaceId: options.spaceId, techniqueId, forceNow })
   );
 };
