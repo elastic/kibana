@@ -477,7 +477,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
             onFiltersChange={setEntityFilters}
             spaceId={spaceId}
             view={viewBy}
-            esFilter={esFilter}
+            esFilter={combineFilters([esFilter, cardFilter])}
             watchlistNames={watchlistNames}
           />
           <EuiSpacer size="m" />
