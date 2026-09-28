@@ -274,6 +274,62 @@ describe('runBeforeAgentWorkflows', () => {
     await expect(
       runBeforeAgentWorkflows({ context, workflowApi, getInternalServices, logger })
     ).resolves.toBeUndefined();
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Ignoring malformed workflow context from workflow wf-1'
+    );
+  });
+
+  it.each([
+    [
+      'too many namespaces',
+      Object.fromEntries(
+        Array.from({ length: 1000 }, (_, i) => [`namespace-${i}`, { version: 1, data: {} }])
+      ),
+    ],
+    [
+      'oversized array',
+      {
+        ns: { version: 1, data: { entries: new Array(WORKFLOW_CONTEXT_MAX_BYTES + 1).fill('x') } },
+      },
+    ],
+  ])('rejects %s without accepting truncated context', async (_label, workflowContext) => {
+    const context = createContext();
+    const { workflowApi, getInternalServices } = createDeps();
+    executeWorkflowMock.mockResolvedValue({
+      success: true,
+      execution: {
+        execution_id: 'exec-bounded-context',
+        status: ExecutionStatus.COMPLETED,
+        workflow_id: 'wf-1',
+        started_at: '2026-01-01T00:00:00.000Z',
+        output: { workflow_context: workflowContext },
+      },
+    });
+
+    await expect(
+      runBeforeAgentWorkflows({ context, workflowApi, getInternalServices, logger })
+    ).resolves.toBeUndefined();
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Ignoring malformed workflow context from workflow wf-1'
+    );
+  });
+
+  it('does not warn when a workflow omits workflow_context', async () => {
+    const context = createContext();
+    const { workflowApi, getInternalServices } = createDeps();
+    executeWorkflowMock.mockResolvedValue({
+      success: true,
+      execution: {
+        execution_id: 'exec-no-context',
+        status: ExecutionStatus.COMPLETED,
+        workflow_id: 'wf-1',
+        started_at: '2026-01-01T00:00:00.000Z',
+        output: {},
+      },
+    });
+
+    await runBeforeAgentWorkflows({ context, workflowApi, getInternalServices, logger });
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('shallow-merges independent namespaces and replaces repeated namespaces', async () => {
@@ -435,9 +491,33 @@ describe('runBeforeAgentWorkflows', () => {
         workflowId: 'wf-1',
         workflowParams: {
           prompt: 'hello',
+          round_execution_index: 0,
           conversation_id: 'conv-42',
           agent_id: 'agent-1',
         },
+      })
+    );
+  });
+
+  it('forwards the resume index to configured workflows', async () => {
+    const context = { ...createContext(), roundExecutionIndex: 2 };
+    const { workflowApi, getInternalServices } = createDeps();
+    executeWorkflowMock.mockResolvedValue({
+      success: true,
+      execution: {
+        execution_id: 'exec-resume',
+        status: ExecutionStatus.COMPLETED,
+        workflow_id: 'wf-1',
+        started_at: '2026-01-01T00:00:00.000Z',
+        output: {},
+      },
+    });
+
+    await runBeforeAgentWorkflows({ context, workflowApi, getInternalServices, logger });
+
+    expect(executeWorkflowMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowParams: expect.objectContaining({ round_execution_index: 2 }),
       })
     );
   });
@@ -468,6 +548,7 @@ describe('runBeforeAgentWorkflows', () => {
       expect.objectContaining({
         workflowParams: {
           prompt: 'hello',
+          round_execution_index: 0,
         },
       })
     );

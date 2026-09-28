@@ -60,6 +60,7 @@ import { compactConversation } from './utils/conversation_compactor';
 import { legacyEligibleRoundIds } from './utils/compaction_coverage';
 import { createSummarizationTransformer } from './utils/tool_summarization';
 import { sourceEvents } from '../../conversation/client/source_events';
+import { nextResumeIndex } from '../../conversation/client/rounds_to_events';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import { RunTracker } from './run_tracker';
@@ -220,18 +221,23 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // recorded from here on is made by tools during the round.
   const chatInputChanges = context.attachmentStateManager.drainChanges();
 
-  let preExecutionWorkflow: PreExecutionWorkflowStepData | undefined;
-  if (!pendingTurn) {
-    const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
-      request,
-      abortSignal,
-      nextInput: processedConversation.nextInput,
-      agentId,
-      conversationId: conversation?.id,
-    });
-    processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
-    preExecutionWorkflow = beforeHookResult.preExecutionWorkflow;
-  }
+  const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
+    request,
+    abortSignal,
+    nextInput: processedConversation.nextInput,
+    agentId,
+    conversationId: conversation?.id,
+    // Use raw persisted executions: the model-context timeline folds multiple resumes into one.
+    // Legacy rounds cannot recover exact history, but a pending turn is at least the first resume.
+    roundExecutionIndex: pendingTurn
+      ? Math.max(1, nextResumeIndex({ events: conversation?.events }, pendingTurn.id))
+      : 0,
+  });
+  processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
+  // Only the first execution owns the round's workflow context step.
+  const preExecutionWorkflow: PreExecutionWorkflowStepData | undefined = pendingTurn
+    ? undefined
+    : beforeHookResult.preExecutionWorkflow;
 
   const relevantSkillsSelectionPromise: Promise<RelevantSkillSelection> | undefined =
     relevantSkillsEnabled && !pendingTurn

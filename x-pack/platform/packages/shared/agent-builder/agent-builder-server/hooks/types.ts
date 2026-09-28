@@ -27,6 +27,8 @@ interface AgentHookContextBase {
 
 export interface BeforeAgentHookContext extends AgentHookContextBase {
   nextInput: ProcessedRoundInput;
+  /** 0 for the initial execution, 1+ for a resume (legacy history may not retain exact counts). */
+  roundExecutionIndex?: number;
   /** Accumulated output of the pre-execution workflows that already ran for this round. */
   preExecutionWorkflow?: PreExecutionWorkflowStepData;
   /**

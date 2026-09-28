@@ -699,8 +699,12 @@ describe('runDefaultAgentMode', () => {
       model_context: '<system_update>initial context</system_update>',
     } as const;
 
-    it('resumes with the initial workflow step without rerunning beforeAgent hooks', async () => {
+    it('runs beforeAgent on resume without replacing the initial workflow step', async () => {
       const { context, streamEvents } = setup();
+      (context.hooks.run as jest.Mock).mockImplementation(async (_lifecycle, hookContext) => ({
+        ...hookContext,
+        preExecutionWorkflow: { model_context: 'must not be seeded on resume' },
+      }));
       const conversation = createEmptyConversation({
         rounds: [
           createRound({
@@ -756,11 +760,44 @@ describe('runDefaultAgentMode', () => {
       expect(createPreExecutionStepsMock).toHaveBeenCalledWith(
         expect.not.objectContaining({ preExecutionWorkflow: expect.anything() })
       );
-      expect(context.hooks.run).not.toHaveBeenCalledWith(
+      expect(context.hooks.run).toHaveBeenCalledWith(
         HookLifecycle.beforeAgent,
-        expect.anything()
+        expect.objectContaining({ roundExecutionIndex: 1 })
       );
       expect(context.attachmentStateManager.clearAccessTracking).not.toHaveBeenCalled();
+    });
+
+    it('lets a blocking beforeAgent hook abort a resumed round', async () => {
+      const { context } = setup();
+      const conversation = createEmptyConversation({
+        rounds: [
+          createRound({
+            id: 'round-1',
+            status: ConversationRoundStatus.awaitingPrompt,
+            steps: [pausedCall],
+            pending_prompts: [
+              { id: 'p1', type: AgentPromptType.confirmation, title: 't', message: 'm' },
+            ],
+          }),
+        ],
+      });
+      getPendingTurnMock.mockImplementation(realGetPendingTurn);
+      (context.hooks.run as jest.Mock).mockRejectedValue(new Error('blocked on resume'));
+
+      await expect(
+        runDefaultAgentMode(
+          {
+            nextInput: { prompts: { p1: { allow: true } } },
+            agentConfiguration: { tools: [] } as any,
+            conversation,
+          },
+          context
+        )
+      ).rejects.toThrow('blocked on resume');
+      expect(context.hooks.run).toHaveBeenCalledWith(
+        HookLifecycle.beforeAgent,
+        expect.objectContaining({ roundExecutionIndex: 1 })
+      );
     });
 
     it('appends the compaction step to a resumed turn as a step owned by the resume execution', async () => {

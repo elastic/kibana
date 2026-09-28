@@ -73,17 +73,49 @@ const normalizeModelContext = (value: unknown): string | undefined => {
   return normalized ? normalized.slice(0, MODEL_CONTEXT_MAX_LENGTH) : undefined;
 };
 
-const isJsonValueWithinDepth = (value: unknown, depth: number): boolean => {
-  if (value === null || ['string', 'number', 'boolean'].includes(typeof value)) {
-    return typeof value !== 'number' || Number.isFinite(value);
+// Each visited property, array element, and string character consumes from the same budget.
+// The final serialized-byte check remains authoritative for UTF-8 and JSON escaping.
+const isJsonValueWithinDepth = (
+  value: unknown,
+  depth: number,
+  budget: { remaining: number }
+): boolean => {
+  if (budget.remaining-- <= 0) {
+    return false;
+  }
+  if (typeof value === 'string') {
+    budget.remaining -= value.length;
+    return budget.remaining >= 0;
+  }
+  if (value === null || typeof value === 'boolean') {
+    return true;
+  }
+  if (typeof value === 'number') {
+    return Number.isFinite(value);
   }
   if (depth >= WORKFLOW_CONTEXT_MAX_DEPTH || typeof value !== 'object') {
     return false;
   }
   if (Array.isArray(value)) {
-    return value.every((item) => isJsonValueWithinDepth(item, depth + 1));
+    if (value.length > budget.remaining) {
+      return false;
+    }
+    for (const item of value) {
+      if (!isJsonValueWithinDepth(item, depth + 1, budget)) {
+        return false;
+      }
+    }
+    return true;
   }
-  return Object.values(value).every((item) => isJsonValueWithinDepth(item, depth + 1));
+  for (const key in value) {
+    if (Object.prototype.hasOwnProperty.call(value, key)) {
+      budget.remaining -= key.length;
+      if (!isJsonValueWithinDepth((value as Record<string, unknown>)[key], depth + 1, budget)) {
+        return false;
+      }
+    }
+  }
+  return budget.remaining >= 0;
 };
 
 const normalizeWorkflowContext = (value: unknown): WorkflowContext | undefined => {
@@ -91,12 +123,22 @@ const normalizeWorkflowContext = (value: unknown): WorkflowContext | undefined =
     return undefined;
   }
 
-  const entries = Object.entries(value).slice(0, WORKFLOW_CONTEXT_MAX_NAMESPACES);
   const context: WorkflowContext = {};
-  for (const [namespace, rawEnvelope] of entries) {
+  const budget = { remaining: WORKFLOW_CONTEXT_MAX_BYTES };
+  let namespaceCount = 0;
+  for (const namespace in value) {
+    if (!Object.prototype.hasOwnProperty.call(value, namespace)) {
+      continue;
+    }
+    if (++namespaceCount > WORKFLOW_CONTEXT_MAX_NAMESPACES) {
+      return undefined;
+    }
+    budget.remaining -= namespace.length;
+    const rawEnvelope = (value as Record<string, unknown>)[namespace];
     if (
       namespace.length === 0 ||
       namespace.length > WORKFLOW_CONTEXT_NAMESPACE_MAX_LENGTH ||
+      budget.remaining < 0 ||
       typeof rawEnvelope !== 'object' ||
       rawEnvelope === null ||
       Array.isArray(rawEnvelope)
@@ -110,7 +152,7 @@ const normalizeWorkflowContext = (value: unknown): WorkflowContext | undefined =
       typeof envelope.data !== 'object' ||
       envelope.data === null ||
       Array.isArray(envelope.data) ||
-      !isJsonValueWithinDepth(envelope.data, 0)
+      !isJsonValueWithinDepth(envelope.data, 0, budget)
     ) {
       return undefined;
     }
@@ -167,6 +209,7 @@ export async function runBeforeAgentWorkflows({
       workflowId,
       workflowParams: {
         prompt: currentNextInput.message ?? '',
+        round_execution_index: context.roundExecutionIndex ?? 0,
         ...(context.conversationId ? { conversation_id: context.conversationId } : {}),
         ...(context.agentId ? { agent_id: context.agentId } : {}),
       },
@@ -217,6 +260,9 @@ export async function runBeforeAgentWorkflows({
     }
 
     const workflowContext = normalizeWorkflowContext(output.workflow_context);
+    if (output.workflow_context !== undefined && !workflowContext) {
+      logger.warn(`Ignoring malformed workflow context from workflow ${execution.workflow_id}`);
+    }
     if (workflowContext) {
       const mergedWorkflowContext = mergeWorkflowContexts(
         preExecutionWorkflow?.workflow_context,
@@ -227,6 +273,10 @@ export async function runBeforeAgentWorkflows({
           ...preExecutionWorkflow,
           workflow_context: mergedWorkflowContext,
         };
+      } else {
+        logger.warn(
+          `Ignoring workflow context from workflow ${execution.workflow_id}: combined context exceeds limits`
+        );
       }
     }
 
