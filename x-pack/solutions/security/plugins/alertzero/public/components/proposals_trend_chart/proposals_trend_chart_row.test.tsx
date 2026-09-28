@@ -26,15 +26,18 @@ jest.mock('./trend_sparkline', () => ({
     series,
     panelId,
     bucketMinutes,
+    yMax,
   }: {
     series: Array<{ x: number; y: number }>;
     panelId: string;
     bucketMinutes: number;
+    yMax: number;
   }) => (
     <div
       data-test-subj={`sparkline-${panelId}`}
       data-series={JSON.stringify(series)}
       data-bucket-minutes={bucketMinutes}
+      data-y-max={yMax}
     />
   ),
 }));
@@ -87,6 +90,14 @@ describe('ProposalsTrendChartRow', () => {
     expect(screen.getByTestId('alertZeroProposalsTrendChartCount-configure')).toHaveTextContent(
       '2'
     );
+  });
+
+  it('should give every sparkline the same peak, taken across all panels and buckets', () => {
+    setup();
+    // respond peaks at 5 in the last bucket; configure and investigate never exceed it.
+    for (const id of ['respond', 'investigate', 'configure']) {
+      expect(screen.getByTestId(`sparkline-${id}`)).toHaveAttribute('data-y-max', '5');
+    }
   });
 
   it('should pass the whole window to each sparkline, oldest bucket first', () => {

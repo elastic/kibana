@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiSkeletonRectangle,
   EuiSkeletonTitle,
-  EuiSpacer,
   EuiText,
   EuiTitle,
   useEuiTheme,
@@ -32,8 +32,15 @@ interface ProposalsTrendChartCardProps {
   /** The window the series was fetched for; labels and tooltips read from it. */
   windowHours: number;
   bucketMinutes: number;
+  /** Peak shared across the row so the three sparklines sit on one scale. */
+  yMax: number;
 }
 
+/**
+ * One trend tile: quiet label, the current count, a sparkline over the window, and the
+ * window bounds as a footer. Label and figure stay small so the row reads as a summary
+ * strip above the queue rather than a dashboard of KPIs.
+ */
 export const ProposalsTrendChartCard: React.FC<ProposalsTrendChartCardProps> = ({
   id,
   label,
@@ -43,9 +50,9 @@ export const ProposalsTrendChartCard: React.FC<ProposalsTrendChartCardProps> = (
   isLoading,
   windowHours,
   bucketMinutes,
+  yMax,
 }) => {
   const { euiTheme } = useEuiTheme();
-
   // @elastic/charts needs a real colour value, not an EUI token name, and the
   // `vis` palette rather than the status colours: visualization colours are
   // curated for charts and stay correct as the palette evolves.
@@ -58,27 +65,36 @@ export const ProposalsTrendChartCard: React.FC<ProposalsTrendChartCardProps> = (
   const resolvedColor = colorMap[color];
   const sparklineHeight = euiTheme.size[SPARKLINE_HEIGHT_SIZE];
 
+  const cardStyles = css`
+    display: flex;
+    flex-direction: column;
+    gap: ${euiTheme.size.s};
+    height: 100%;
+    min-width: 0;
+    border-radius: ${euiTheme.border.radius.medium};
+  `;
+
   return (
     <EuiPanel
       hasBorder
+      hasShadow={false}
       paddingSize="m"
-      css={{ borderRadius: euiTheme.size.s }}
+      css={cardStyles}
       data-test-subj={`alertZeroProposalsTrendChartCard-${id}`}
     >
-      <EuiTitle size="xxs">
-        <h3 css={{ fontWeight: euiTheme.font.weight.semiBold }}>{label}</h3>
+      <EuiTitle size="xxxs" css={{ color: euiTheme.colors.textSubdued }}>
+        <h3>{label}</h3>
       </EuiTitle>
       {isLoading ? (
         <EuiSkeletonTitle
-          size="l"
+          size="s"
           data-test-subj={`alertZeroProposalsTrendChartCountLoading-${id}`}
         />
       ) : (
-        <EuiTitle size="l">
+        <EuiTitle size="s">
           <p data-test-subj={`alertZeroProposalsTrendChartCount-${id}`}>{count}</p>
         </EuiTitle>
       )}
-      <EuiSpacer size="s" />
       {isLoading ? (
         <EuiSkeletonRectangle
           width="100%"
@@ -94,10 +110,15 @@ export const ProposalsTrendChartCard: React.FC<ProposalsTrendChartCardProps> = (
           panelId={id}
           seriesName={CHART_SERIES_NAME(label)}
           bucketMinutes={bucketMinutes}
+          yMax={yMax}
         />
       )}
-      <EuiSpacer size="xs" />
-      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        alignItems="center"
+        gutterSize="none"
+        responsive={false}
+      >
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
             {HOURS_AGO(windowHours)}
