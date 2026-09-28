@@ -11,7 +11,6 @@ import type { ApprovalProposal } from '@kbn/proposals-ui';
 import type { Investigation } from '../../types';
 import type { CardActionType } from '../actions/base_actions';
 import type { EscalationModalMode } from './escalation_modal/types';
-import { AssignActionModal } from './assign_action_modal';
 import { BaseActionModal } from './base_action_modal';
 import { MODAL_TRANSLATIONS } from './translations';
 
@@ -100,7 +99,6 @@ export interface InvestigationActionModalsProps<
 export const InvestigationActionModals = <TProposal extends ApprovalProposal = ApprovalProposal>({
   action,
   recordId,
-  initialAssignee,
   investigation,
   approvalProposal,
   onCloseAction,
@@ -128,16 +126,6 @@ export const InvestigationActionModals = <TProposal extends ApprovalProposal = A
         onDismiss={onDismissApproval ? () => onDismissApproval(approvalProposal) : undefined}
         isSubmitting={isSubmitting}
         currentActorName={currentActorName}
-      />
-    ) : null}
-
-    {action === 'assign' && recordId ? (
-      <AssignActionModal
-        recordId={recordId}
-        initialAssignee={initialAssignee}
-        onClose={onCloseAction}
-        // TODO: use assign action API call hook
-        onAssign={onCloseAction}
       />
     ) : null}
 

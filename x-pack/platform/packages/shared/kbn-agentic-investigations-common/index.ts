@@ -110,7 +110,6 @@ export {
 } from './src/components/filters/impact';
 
 export { BaseActionModal } from './src/components/modals/base_action_modal';
-export { AssignActionModal } from './src/components/modals/assign_action_modal';
 export { MODAL_TRANSLATIONS } from './src/components/modals/translations';
 export {
   InvestigationActionModals,
