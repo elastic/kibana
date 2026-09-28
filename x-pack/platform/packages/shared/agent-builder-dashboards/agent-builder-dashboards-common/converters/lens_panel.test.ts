@@ -118,31 +118,11 @@ describe('Lens dashboard panel conversion — panel-level settings', () => {
     };
 
     expect(dashboardPanel.type).toBe(LENS_EMBEDDABLE_TYPE);
-    expect(dashboardPanel.config).toEqual(
-      expect.objectContaining({
-        title: 'Panel title edited',
-        description: 'Panel description edited',
-        hide_title: true,
-        hide_border: true,
-        drilldowns: [{ id: 'd1' }],
-        attributes: expect.objectContaining({
-          visualizationType: expect.any(String),
-        }),
-      })
-    );
+    expect(dashboardPanel.config).toEqual(attachmentPanel.config);
 
     const roundTripped = dashboardStateToAttachmentData(dashboardState);
     const roundTrippedPanel = roundTripped.panels[0] as { config: Record<string, unknown> };
 
-    expect(roundTrippedPanel.config).toEqual(
-      expect.objectContaining({
-        title: 'Panel title edited',
-        description: 'Panel description edited',
-        hide_title: true,
-        hide_border: true,
-        drilldowns: [{ id: 'd1' }],
-        type: 'metric',
-      })
-    );
+    expect(roundTrippedPanel.config).toEqual(attachmentPanel.config);
   });
 });
