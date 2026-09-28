@@ -202,7 +202,7 @@ matcher: { tags?: string[] | null, expression?: string | null }
 
 Matches if the episode's rule has **at least one** of the listed tags (OR / any-of).
 Exact string match: case-sensitive, no wildcards, no prefix matching.
-Max 50 tags, up to 256 characters each.
+Max 50 tags, up to 128 characters each.
 
 > **Important**: \`matcher.tags\` is matched against the **rule**'s tags, not the
 > policy's own name or metadata.
@@ -470,7 +470,7 @@ exports[`schema_to_skill_docs generateRuleSchemaDoc matches the snapshot 1`] = `
 |---|---|---|---|
 | \`kind\` | \\"alert\\" \\\\| \\"signal\\" | required | Whether the rule creates alerts (\`alert\`) or only stores matching events (\`signal\`). |
 | \`metadata\` | object | required | Rule metadata. |
-| \`time_field\` | string | required | Document field used as the event time when applying the lookback window. Defaults to \`@timestamp\`. (min length: 1, max length: 128, default: \\"@timestamp\\") |
+| \`time_field\` | string | required | Document field used as the event time when applying the lookback window. Defaults to \`@timestamp\`. (min length: 1, max length: 256, default: \\"@timestamp\\") |
 | \`schedule\` | object | required | Execution schedule configuration. |
 | \`query\` | { format: \\"composed\\", ... } \\\\| { format: \\"standalone\\", ... } | required | Detection query configuration. |
 | \`recovery_strategy\` | \\"no_breach\\" \\\\| \\"query\\" \\\\| \\"none\\" | optional | The condition that marks an alert recovered. If omitted or set to \`none\`, recovery is disabled: the alert stays \`active\` even after the breach query stops returning matches, and \`state_transition.recovering_count\` / \`recovering_timeframe\` are not allowed. Set to \`no_breach\` to recover when the breach query stops returning matches. Set to \`query\` only when you also provide \`query.recovery\`. |

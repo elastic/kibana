@@ -688,7 +688,7 @@ export class RulesClient {
     const persisted = await this.persistPreparedRules(prepared);
     errors.push(...persisted.errors);
 
-    const rules: RuleResponse[] = [];
+    const items: RuleResponse[] = [];
     const createdRules: EventRule[] = [];
     for (const doc of persisted.created) {
       const rule = this.toInternalRule({
@@ -696,13 +696,13 @@ export class RulesClient {
         attrs: doc.attributes,
         references: doc.references,
       });
-      rules.push(toRuleApiResponse(rule));
+      items.push(toRuleApiResponse(rule));
       createdRules.push({ ruleId: rule.id, spaceId, rule });
     }
 
     this.ruleEventPublisher.emitRuleCreated(this.request, createdRules);
 
-    return { rules, errors };
+    return { items, errors };
   }
 
   @withApm
@@ -868,6 +868,11 @@ export class RulesClient {
     ]);
   }
 
+  /**
+   * Brings the rule's next run forward. Task Manager reschedules rather than
+   * executes, so this resolves before the rule has run, and calls that land
+   * before the run starts collapse into a single run.
+   */
   @withApm
   public async runRuleNow({ id }: { id: string }): Promise<void> {
     const { spaceId } = this.getSpaceContext();

@@ -87,20 +87,22 @@ export const selectHasUnsavedChanges = (
 
     // Ensure the persisted tab accounts for default app state values when comparing,
     // otherwise initializing a tab could automatically trigger unsaved changes.
+    const initialAppState = getInitialAppState({
+      initialUrlState: fromSavedObjectTabToAppState({ tab: persistedTab }),
+      persistedTab,
+      dataView: getSerializedSearchSourceDataViewDetails(
+        persistedTab.serializedSearchSource,
+        state.savedDataViews
+      ),
+      services,
+      defaultProfileEsqlQuery: state.defaultProfileEsqlQuery,
+    });
+
     const persistedTabWithDefaults = fromTabStateToSavedObjectTab({
       tab: fromSavedObjectTabToTabState({
         tab: persistedTab,
         profileStateRegistry: services.profileStateRegistry,
-        initialAppState: getInitialAppState({
-          initialUrlState: fromSavedObjectTabToAppState({ tab: persistedTab }),
-          persistedTab,
-          dataView: getSerializedSearchSourceDataViewDetails(
-            persistedTab.serializedSearchSource,
-            state.savedDataViews
-          ),
-          services,
-          defaultProfileEsqlQuery: state.defaultProfileEsqlQuery,
-        }),
+        initialAppState,
       }),
       overridenTimeRestore: Boolean(persistedTab.timeRestore),
       services,
@@ -114,6 +116,17 @@ export const selectHasUnsavedChanges = (
       services,
       tabType,
     });
+
+    if (persistedTab.serializedSearchSource.query === undefined) {
+      // API-created sessions can have no query. Filling in an empty one in the UI
+      // shouldn't trigger "Unsaved changes".
+      for (const tab of [persistedTabWithDefaults, normalizedTab]) {
+        tab.serializedSearchSource = {
+          ...tab.serializedSearchSource,
+          query: tab.serializedSearchSource.query ?? initialAppState.query,
+        };
+      }
+    }
 
     for (const stringKey of Object.keys(TAB_COMPARATORS)) {
       const key = stringKey as keyof DiscoverSessionTab;

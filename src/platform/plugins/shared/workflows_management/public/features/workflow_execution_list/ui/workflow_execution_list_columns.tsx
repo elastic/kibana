@@ -280,7 +280,7 @@ export const getExecutionHistoryColumns = (
     {
       field: 'executedBy',
       name: i18n.translate('workflows.workflowExecutionList.column.executedBy', {
-        defaultMessage: 'Executed by',
+        defaultMessage: 'Triggered by',
       }),
       // Flexible far-right column. truncateText gives the cell max-width/overflow so
       // EuiTextTruncate can measure a real width (width 0 renders an empty visible label).

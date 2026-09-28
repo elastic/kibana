@@ -192,7 +192,7 @@ describe('RuleSummaryFlyout', () => {
       expect(mockUseFetchRuleExecutions).toHaveBeenCalledWith({
         ruleIds: ['rule-1'],
         perPage: 1,
-        sort: 'startedAt',
+        sortField: 'startedAt',
         sortOrder: 'desc',
         enabled: true,
       });

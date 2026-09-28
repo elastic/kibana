@@ -88,7 +88,7 @@ export const BULK_CREATE_RULES_REQUEST: BulkCreateRulesParams = {
 };
 
 export const BULK_CREATE_RULES_RESPONSE: BulkCreateRulesResponse = {
-  rules: [
+  items: [
     RULE_RESPONSE,
     {
       ...RULE_RESPONSE,

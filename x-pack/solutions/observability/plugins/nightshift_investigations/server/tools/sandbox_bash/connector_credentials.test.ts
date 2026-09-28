@@ -103,6 +103,33 @@ describe('buildConnectorEnv', () => {
     expect(secretValues).toContain(apiKey);
   });
 
+  it('copies an ApiKey header when secretHeaders is a JSON string', () => {
+    const apiKey = 'IYMYxKABgjRzD6vCgZ3Ktestkey';
+    const { env, secretValues } = buildConnectorEnv({
+      connectorId: 'elasticsearch-telemetry',
+      actionTypeId: '.http',
+      config: { url: 'https://es.example.com' },
+      secrets: { secretHeaders: JSON.stringify({ Authorization: `ApiKey ${apiKey}` }) },
+    });
+
+    expect(env.CONNECTOR_SECRET_SECRETHEADERS).toBe(
+      JSON.stringify({ Authorization: `ApiKey ${apiKey}` })
+    );
+    expect(env.CONNECTOR_SECRET_PASSWORD).toBe(apiKey);
+    expect(secretValues).toContain(apiKey);
+  });
+
+  it('leaves CONNECTOR_SECRET_PASSWORD unset when secretHeaders is not an ApiKey header', () => {
+    const { env } = buildConnectorEnv({
+      connectorId: 'elasticsearch-telemetry',
+      actionTypeId: '.http',
+      config: { url: 'https://es.example.com' },
+      secrets: { secretHeaders: 'not-json' },
+    });
+
+    expect(env.CONNECTOR_SECRET_PASSWORD).toBeUndefined();
+  });
+
   it('does not overwrite an existing CONNECTOR_SECRET_PASSWORD', () => {
     const password = 'existing-password-value';
     const { env, secretValues } = buildConnectorEnv({

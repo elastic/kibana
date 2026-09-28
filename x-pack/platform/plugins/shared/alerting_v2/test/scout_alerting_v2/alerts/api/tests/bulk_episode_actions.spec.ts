@@ -12,6 +12,7 @@ import {
   ALERTING_V2_ALERTS_READ_ROLE,
   apiTest,
   buildAlertEvent,
+  buildGroupHash,
   BULK_ACK_EPISODE_ACTION_URL,
   BULK_ACTIVATE_EPISODE_ACTION_URL,
   BULK_ASSIGN_EPISODE_ACTION_URL,
@@ -465,14 +466,14 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       await apiServices.alertingV2.ruleEvents.seed([
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
-          group_hash: 'bulk-skip-deactivate-ok-group',
+          group_hash: buildGroupHash('bulk-skip-deactivate-ok-group'),
           status: 'breached',
           type: 'alert',
           episode: { id: episodeIdOk, status: 'active' },
         }),
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
-          group_hash: 'bulk-skip-deactivate-inactive-group',
+          group_hash: buildGroupHash('bulk-skip-deactivate-inactive-group'),
           status: 'recovered',
           type: 'alert',
           episode: { id: episodeIdInactive, status: 'inactive' },
@@ -719,7 +720,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
     // resolved server-side, so sending it is an unrecognized key.
     const response = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
       headers: writerHeaders,
-      body: { items: [{ episode_id: 'any-episode', group_hash: 'any-group' }] },
+      body: { items: [{ episode_id: 'any-episode', group_hash: buildGroupHash('any-group') }] },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -731,7 +732,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
     // so a series-style group_hash key is rejected by the strict schema.
     const response = await apiClient.post(BULK_TAG_EPISODE_ACTION_URL, {
       headers: writerHeaders,
-      body: { items: [{ group_hash: 'any-group', tags: ['x'] }] },
+      body: { items: [{ group_hash: buildGroupHash('any-group'), tags: ['x'] }] },
     });
 
     expect(response).toHaveStatusCode(400);
