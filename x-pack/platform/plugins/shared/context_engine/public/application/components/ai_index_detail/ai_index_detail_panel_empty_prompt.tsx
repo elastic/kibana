@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IconType } from '@elastic/eui';
+import type { EuiEmptyPromptProps, IconType } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiIcon, EuiText } from '@elastic/eui';
 import React, { type ReactNode } from 'react';
 
@@ -13,14 +13,17 @@ interface AiIndexDetailPanelEmptyPromptProps {
   iconType: IconType;
   dataTestSubj: string;
   title: ReactNode;
+  paddingSize?: EuiEmptyPromptProps['paddingSize'];
 }
 
 export const AiIndexDetailPanelEmptyPrompt = ({
   iconType,
   dataTestSubj,
   title,
+  paddingSize,
 }: AiIndexDetailPanelEmptyPromptProps) => (
   <EuiEmptyPrompt
+    paddingSize={paddingSize}
     icon={<EuiIcon type={iconType} size="xl" aria-hidden={true} color="subdued" />}
     data-test-subj={dataTestSubj}
     body={

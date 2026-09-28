@@ -56,7 +56,7 @@ const renderWithProviders = (
 const EMPTY_FALLBACK = /No agent traces yet/;
 const EMPTY_FALLBACK_MANAGED = /No agent traces configured/;
 const EMPTY_HEADER_DESCRIPTION =
-  /Add agent traces so Knowledge Indicators tune against the questions agents actually ask/;
+  /Add traces to identify gaps in the context agents retrieve from this AI index/;
 
 describe('TracesPanel', () => {
   beforeEach(() => {

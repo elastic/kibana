@@ -109,11 +109,11 @@ export const AutomationsPanel = ({
             {!isLoading && !hasAutomations
               ? i18n.translate('xpack.contextEngine.aiIndexDetail.automations.descriptionEmpty', {
                   defaultMessage:
-                    "Create an automation to extract and refresh Knowledge Indicators from this index's sources.",
+                    'Create a Workflow to generate and refresh Knowledge Indicators from source data.',
                 })
               : i18n.translate('xpack.contextEngine.aiIndexDetail.automations.description', {
                   defaultMessage:
-                    "Automations extract and refresh this AI index's Knowledge Indicators from its sources.",
+                    'Workflows that generate and refresh Knowledge Indicators from source data.',
                 })}
           </AiIndexDetailPanelDescription>
         </EuiFlexItem>

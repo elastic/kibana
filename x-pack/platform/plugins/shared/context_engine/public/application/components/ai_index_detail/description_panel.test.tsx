@@ -47,7 +47,8 @@ const renderWithProviders = (
 };
 
 const EMPTY_FALLBACK = /No description yet/;
-const ADD_ONE_HINT = /Add one to help agents understand this AI index/;
+const ADD_ONE_HINT =
+  /Add a description to shape suggested automations and help agents decide when this AI index is relevant/;
 
 describe('DescriptionPanel', () => {
   it('renders the provided description when not loading', () => {

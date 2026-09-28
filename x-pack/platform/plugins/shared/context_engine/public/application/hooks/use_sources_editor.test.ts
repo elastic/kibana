@@ -110,4 +110,38 @@ describe('useSourcesEditor', () => {
 
     expect(result.current.editing).toBeUndefined();
   });
+
+  it('does not clear a newer session when a stale save resolves', async () => {
+    let resolveSave: (value: boolean) => void = () => {};
+    mockSaveSources.mockReturnValueOnce(
+      new Promise<boolean>((resolve) => {
+        resolveSave = resolve;
+      })
+    );
+
+    const { result, rerender } = renderEditor();
+
+    act(() => result.current.startEditing());
+    act(() =>
+      result.current.editing?.setSelectedSources([
+        { type: 'esql', id: 'FROM stale', label: 'FROM stale', value: 'FROM stale' },
+      ])
+    );
+
+    let savePromise: Promise<void> | undefined;
+    act(() => {
+      savePromise = result.current.editing?.save();
+    });
+
+    rerender({ aiIndex: { ...aiIndex, id: 'another-ai-index' } });
+    act(() => result.current.startEditing());
+    const newerSelected = result.current.editing?.selectedSources;
+
+    resolveSave(true);
+    await act(async () => {
+      await savePromise;
+    });
+
+    expect(result.current.editing?.selectedSources).toEqual(newerSelected);
+  });
 });

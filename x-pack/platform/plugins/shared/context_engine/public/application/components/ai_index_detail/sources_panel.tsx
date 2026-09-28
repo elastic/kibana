@@ -68,12 +68,12 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
             {!isLoading && !hasSources ? (
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.sources.descriptionEmpty"
-                defaultMessage="Add a source to start building context for this AI index."
+                defaultMessage="Add the data that automations should analyze when generating Knowledge Indicators."
               />
             ) : (
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.sources.description"
-                defaultMessage="Data feeding this AI index. Context and suggestions refresh as sources change."
+                defaultMessage="Data that automations should analyze when generating Knowledge Indicators."
               />
             )}
           </AiIndexDetailPanelDescription>

@@ -124,7 +124,9 @@ describe('SourcesPanel', () => {
     expect(screen.getByTestId('contextAddSourcesButton')).toBeInTheDocument();
     expect(screen.queryByTestId('contextEditSourcesButton')).not.toBeInTheDocument();
     expect(
-      screen.getByText('Add a source to start building context for this AI index.')
+      screen.getByText(
+        'Add the data that automations should analyze when generating Knowledge Indicators.'
+      )
     ).toBeInTheDocument();
   });
 

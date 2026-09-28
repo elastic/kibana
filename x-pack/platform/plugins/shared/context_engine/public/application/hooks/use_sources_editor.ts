@@ -67,9 +67,10 @@ export const useSourcesEditor = ({
     if (!session || !aiIndex) {
       return;
     }
+    const startedSession = session;
     const saved = await saveSources(aiIndex, session.selectedSources);
     if (saved) {
-      setSession(undefined);
+      setSession((current) => (current === startedSession ? undefined : current));
       onSaved();
     }
   }, [aiIndex, onSaved, saveSources, session]);

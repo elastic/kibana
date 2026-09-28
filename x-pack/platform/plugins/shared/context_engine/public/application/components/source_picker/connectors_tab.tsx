@@ -27,6 +27,7 @@ import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { contextEngineQueryKeys } from '../../hooks/query_keys';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
 import { useKibana } from '../../hooks/use_kibana';
+import { AiIndexDetailPanelEmptyPrompt } from '../ai_index_detail/ai_index_detail_panel_empty_prompt';
 interface ConnectorsTabProps {
   selectedConnectorIds: string[];
   onToggle: (params: { id: string; name: string; checked: boolean }) => void;
@@ -81,40 +82,6 @@ const ConnectorsTabContent = ({
     );
   }
 
-  if (showEmptyPrompt) {
-    return (
-      <EuiEmptyPrompt
-        iconType="plugs"
-        titleSize="xs"
-        data-test-subj="contextConnectorsEmpty"
-        title={
-          <h3>
-            <FormattedMessage
-              id="xpack.contextEngine.sourcePicker.connectors.emptyTitle"
-              defaultMessage="No connectors yet"
-            />
-          </h3>
-        }
-        body={
-          <p>
-            {canCreateConnector ? (
-              <FormattedMessage
-                id="xpack.contextEngine.sourcePicker.connectors.emptyBody"
-                defaultMessage="Create a connector to use it as a source."
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.contextEngine.sourcePicker.connectors.emptyBodyNoAccess"
-                defaultMessage="Ask your administrator to create a connector."
-              />
-            )}
-          </p>
-        }
-        actions={createConnectorButton}
-      />
-    );
-  }
-
   return (
     <div data-test-subj="contextConnectorsTab">
       <EuiFormRow
@@ -138,6 +105,7 @@ const ConnectorsTabContent = ({
           sortMatchesBy="startsWith"
           selectedOptions={[]}
           isClearable={false}
+          noSuggestions={showEmptyPrompt}
           aria-label={i18n.translate('xpack.contextEngine.sourcePicker.connectors.comboAriaLabel', {
             defaultMessage: 'Select a connector',
           })}
@@ -156,11 +124,29 @@ const ConnectorsTabContent = ({
         />
       </EuiFormRow>
       {createConnectorButton && (
-        <>
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
-            <EuiFlexItem grow={false}>{createConnectorButton}</EuiFlexItem>
-          </EuiFlexGroup>
-        </>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+          <EuiFlexItem grow={false}>{createConnectorButton}</EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      {showEmptyPrompt && (
+        <AiIndexDetailPanelEmptyPrompt
+          paddingSize="none"
+          iconType="plugs"
+          dataTestSubj="contextConnectorsEmpty"
+            title={
+              canCreateConnector ? (
+                <FormattedMessage
+                  id="xpack.contextEngine.sourcePicker.connectors.emptyBody"
+                  defaultMessage="No connectors yet. Create one to use it as a source."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.contextEngine.sourcePicker.connectors.emptyBodyNoAccess"
+                  defaultMessage="No connectors yet. Ask your administrator to create one."
+                />
+              )
+            }
+        />
       )}
     </div>
   );

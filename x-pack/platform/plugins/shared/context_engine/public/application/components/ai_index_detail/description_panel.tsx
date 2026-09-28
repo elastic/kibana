@@ -88,7 +88,7 @@ export const DescriptionPanel = ({
               ) : (
                 <FormattedMessage
                   id="xpack.contextEngine.aiIndexDetail.description.descriptionEmpty"
-                  defaultMessage="Add one to help agents understand this AI index."
+                  defaultMessage="Add a description to shape suggested automations and help agents decide when this AI index is relevant."
                 />
               )}
             </AiIndexDetailPanelDescription>

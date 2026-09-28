@@ -236,9 +236,11 @@ describe('ConnectorsTab', () => {
     focusConnectorComboBox();
 
     expect(
-      await screen.findByText('Ask your administrator to create a connector.')
+      await screen.findByText('No connectors yet. Ask your administrator to create one.')
     ).toBeInTheDocument();
-    expect(screen.queryByText('Create a connector to use it as a source.')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('No connectors yet. Create one to use it as a source.')
+    ).not.toBeInTheDocument();
   });
 
   it('hides the create button footer when the user cannot save connectors', async () => {

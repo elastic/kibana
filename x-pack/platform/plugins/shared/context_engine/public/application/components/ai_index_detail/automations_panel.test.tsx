@@ -160,7 +160,7 @@ describe('AutomationsPanel', () => {
     expect(screen.getByText('No automations yet')).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Create an automation to extract and refresh Knowledge Indicators from this index's sources."
+        'Create a Workflow to generate and refresh Knowledge Indicators from source data.'
       )
     ).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexAutomationRow')).not.toBeInTheDocument();

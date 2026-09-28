@@ -56,12 +56,12 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
             {!isLoading && !hasTrace ? (
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.traces.descriptionEmpty"
-                defaultMessage="Add agent traces so Knowledge Indicators tune against the questions agents actually ask."
+                defaultMessage="Add traces to identify gaps in the context agents retrieve from this AI index."
               />
             ) : (
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.traces.description"
-                defaultMessage="Traces this AI index learns from. Knowledge Indicators are tuned against the questions agents actually ask."
+                defaultMessage="Traces used to identify gaps in the context agents retrieve from this AI index."
               />
             )}
           </AiIndexDetailPanelDescription>
