@@ -50,6 +50,7 @@ const fetchHistoricalSummaryResponseSchema = z.array(
   })
 );
 
+type FetchHistoricalSummaryInput = z.input<typeof fetchHistoricalSummaryParamsSchema.shape.body>;
 type FetchHistoricalSummaryParams = z.output<typeof fetchHistoricalSummaryParamsSchema.shape.body>;
 type FetchHistoricalSummaryResponse = z.input<typeof fetchHistoricalSummaryResponseSchema>;
 type HistoricalSummaryResponse = z.input<typeof historicalSummarySchema>;
@@ -60,6 +61,7 @@ export {
   historicalSummarySchema,
 };
 export type {
+  FetchHistoricalSummaryInput,
   FetchHistoricalSummaryParams,
   FetchHistoricalSummaryResponse,
   HistoricalSummaryResponse,
