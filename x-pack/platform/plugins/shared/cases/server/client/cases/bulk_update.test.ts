@@ -893,7 +893,7 @@ describe('update', () => {
 
     it('rejects when the applied template belongs to a different owner', async () => {
       clientArgs.services.templatesService.getTemplate.mockResolvedValue({
-        attributes: { name: 'Other Template', owner: OBSERVABILITY_OWNER },
+        attributes: { name: 'Other Template', owner: OBSERVABILITY_OWNER, templateId: 'tmpl-other-owner' },
       } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
 
       await expect(
