@@ -697,8 +697,92 @@ describe('scheduleBackfill()', () => {
         expect(actionsAuthorization.ensureAuthorized).not.toHaveBeenCalled();
       });
 
+      test.each([
+        [true, false],
+        [false, true],
+        [undefined, false],
+      ])(
+        'should check connector-execute authorization when the same rule is requested with runActions %s and %s',
+        async (firstRunActions, secondRunActions) => {
+          mockCreatePointInTimeFinderAsInternalUser({ saved_objects: [ruleWithActions] });
+          rulesClientParams.getActionsClient.mockResolvedValue(mockActionsClient);
+          rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
+
+          const mockData = [
+            getMockData({ ruleId: '1', runActions: firstRunActions }),
+            getMockData({ ruleId: '1', runActions: secondRunActions }),
+          ];
+
+          await rulesClient.scheduleBackfill(mockData);
+
+          expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({
+            operation: 'execute',
+          });
+        }
+      );
+
+      test('should NOT check connector-execute authorization when every request for a rule has runActions false', async () => {
+        mockCreatePointInTimeFinderAsInternalUser({ saved_objects: [ruleWithActions] });
+        rulesClientParams.getActionsClient.mockResolvedValue(mockActionsClient);
+        rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
+
+        const mockData = [
+          getMockData({ ruleId: '1', runActions: false }),
+          getMockData({ ruleId: '1', runActions: false }),
+        ];
+
+        await rulesClient.scheduleBackfill(mockData);
+
+        expect(actionsAuthorization.ensureAuthorized).not.toHaveBeenCalled();
+      });
+
+      test('should check connector-execute authorization when rule has only system actions', async () => {
+        const ruleWithSystemActions = {
+          ...existingDecryptedRule1,
+          attributes: {
+            ...existingDecryptedRule1.attributes,
+            enabled: true,
+            actions: [
+              {
+                uuid: 'system-action-uuid-1',
+                actionRef: 'system_action:system-connector-1',
+                actionTypeId: '.cases',
+                params: {},
+              },
+            ],
+          },
+          references: [],
+        } as typeof existingDecryptedRule1;
+        mockCreatePointInTimeFinderAsInternalUser({ saved_objects: [ruleWithSystemActions] });
+        mockActionsClient.isSystemAction.mockImplementation(
+          (connectorId: string) => connectorId === 'system-connector-1'
+        );
+        rulesClientParams.getActionsClient.mockResolvedValue(mockActionsClient);
+        rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
+
+        const mockData = [getMockData({ ruleId: '1', runActions: true })];
+
+        await rulesClient.scheduleBackfill(mockData);
+
+        expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({
+          operation: 'execute',
+        });
+        expect(backfillClient.bulkQueue).toHaveBeenCalledWith(
+          expect.objectContaining({
+            rules: [
+              expect.objectContaining({
+                id: '1',
+                actions: [],
+                systemActions: [expect.objectContaining({ id: 'system-connector-1' })],
+              }),
+            ],
+          })
+        );
+      });
+
       test('should throw and audit log when caller lacks connector-execute privilege', async () => {
         mockCreatePointInTimeFinderAsInternalUser({ saved_objects: [ruleWithActions] });
+        rulesClientParams.getActionsClient.mockResolvedValue(mockActionsClient);
         actionsAuthorization.ensureAuthorized.mockRejectedValueOnce(
           new Error('Unauthorized to execute actions')
         );

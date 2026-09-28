@@ -143,16 +143,35 @@ export async function scheduleBackfill(
     rulesToSchedule = [...response.saved_objects];
   }
 
+  const actionsClient = await context.getActionsClient();
+  const rules = rulesToSchedule.map(({ id, attributes, references }) => {
+    const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
+    return transformRuleAttributesToRuleDomain(
+      attributes,
+      {
+        id,
+        logger: context.logger,
+        ruleType,
+        references,
+      },
+      (connectorId: string) => actionsClient.isSystemAction(connectorId)
+    );
+  });
+
   // if any rule being scheduled has actions that will run,
   // the caller must hold the connector-execute privilege on their own credentials.
   // Without this, a low-privileged user with only "Manual rule run" sub-feature could
   // trigger another user's connectors under that owner's stored API key.
-  const paramsRunActionsMap = new Map(params.map((p) => [p.ruleId, p.runActions]));
-  const anyRuleHasActionsToRun = rulesToSchedule.some((rule) => {
-    if (!rule.attributes.actions?.length) return false;
-    const runActions = paramsRunActionsMap.get(rule.id);
-    return runActions !== false;
-  });
+  // Check every param rather than unique ruleIds: bulkQueue schedules each param independently,
+  // so duplicate ruleIds with mixed runActions values must not skip the check.
+  const ruleIdsWithActions = new Set(
+    rules
+      .filter(({ actions, systemActions }) => actions.length > 0 || Boolean(systemActions?.length))
+      .map(({ id }) => id)
+  );
+  const anyRuleHasActionsToRun = params.some(
+    ({ ruleId, runActions }) => runActions !== false && ruleIdsWithActions.has(ruleId)
+  );
 
   if (anyRuleHasActionsToRun) {
     try {
@@ -168,24 +187,11 @@ export async function scheduleBackfill(
     }
   }
 
-  const actionsClient = await context.getActionsClient();
   return await context.backfillClient.bulkQueue({
     actionsClient,
     auditLogger: context.auditLogger,
     params,
-    rules: rulesToSchedule.map(({ id, attributes, references }) => {
-      const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
-      return transformRuleAttributesToRuleDomain(
-        attributes,
-        {
-          id,
-          logger: context.logger,
-          ruleType,
-          references,
-        },
-        (connectorId: string) => actionsClient.isSystemAction(connectorId)
-      );
-    }),
+    rules,
     gaps,
     ruleTypeRegistry: context.ruleTypeRegistry,
     spaceId: context.spaceId,
