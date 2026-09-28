@@ -696,12 +696,38 @@ export const bulkUpdate = async (
       )
     );
 
+    // Pre-fetch unique templates (deduplicate by id@version so N cases switching to the
+    // same template version issue exactly one SO search, not one per case).
+    const prefetchedTemplates = new Map<
+      string,
+      Promise<Awaited<ReturnType<typeof templatesService.getTemplate>>>
+    >();
+    for (const { updateReq } of casesToUpdate) {
+      if (updateReq.template != null && updateReq.template.id) {
+        const { id, version } = updateReq.template;
+        const key = `${id}@${version}`;
+        if (!prefetchedTemplates.has(key)) {
+          prefetchedTemplates.set(key, templatesService.getTemplate(id, String(version)));
+        }
+      }
+    }
+
     // Owner/existence check must complete before field validation: a foreign or deleted
     // template can leak schema details through the field-validation error path.
     await Promise.all(
-      casesToUpdate.map(({ updateReq, originalCase }) =>
-        validateTemplateInRequest({ updateReq, originalCase, templatesService })
-      )
+      casesToUpdate.map(async ({ updateReq, originalCase }) => {
+        const { template } = updateReq;
+        const prefetchedTemplate =
+          template != null && template.id
+            ? await prefetchedTemplates.get(`${template.id}@${template.version}`)
+            : undefined;
+        return validateTemplateInRequest({
+          updateReq,
+          originalCase,
+          templatesService,
+          prefetchedTemplate,
+        });
+      })
     );
     await Promise.all(
       casesToUpdate.map(({ updateReq, originalCase }) =>

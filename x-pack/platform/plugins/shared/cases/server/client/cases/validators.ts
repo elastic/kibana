@@ -470,10 +470,13 @@ export const validateTemplateInRequest = async ({
   updateReq,
   originalCase,
   templatesService,
+  prefetchedTemplate,
 }: {
   updateReq: CasePatchRequest;
   originalCase: CaseSavedObjectTransformed;
   templatesService: TemplatesService;
+  /** Pre-fetched template SO — when provided, the SO fetch is skipped (bulk deduplication). */
+  prefetchedTemplate?: Awaited<ReturnType<TemplatesService['getTemplate']>>;
 }): Promise<void> => {
   // null = clear; undefined = no change — both are valid without further checks.
   if (updateReq.template == null) return;
@@ -486,7 +489,10 @@ export const validateTemplateInRequest = async ({
     throw Boom.badRequest(`Template id must not be empty`);
   }
 
-  const templateSO = await templatesService.getTemplate(id, String(version));
+  const templateSO =
+    prefetchedTemplate !== undefined
+      ? prefetchedTemplate
+      : await templatesService.getTemplate(id, String(version));
 
   // Return the same "not found" error for both missing, id-mismatch, and cross-owner cases
   // to avoid leaking the existence of another owner's templates (matches resolveTemplateForCreate).

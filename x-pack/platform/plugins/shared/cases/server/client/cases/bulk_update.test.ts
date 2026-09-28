@@ -893,7 +893,11 @@ describe('update', () => {
 
     it('rejects when the applied template belongs to a different owner', async () => {
       clientArgs.services.templatesService.getTemplate.mockResolvedValue({
-        attributes: { name: 'Other Template', owner: OBSERVABILITY_OWNER, templateId: 'tmpl-other-owner' },
+        attributes: {
+          name: 'Other Template',
+          owner: OBSERVABILITY_OWNER,
+          templateId: 'tmpl-other-owner',
+        },
       } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
 
       await expect(
@@ -929,6 +933,43 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow('Template id must not be empty');
+    });
+
+    it('issues one getTemplate search when multiple cases switch to the same template version', async () => {
+      const secondCase = { ...mockCases[0], id: 'mock-id-2' };
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [mockCases[0], secondCase],
+      });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [mockCases[0], secondCase],
+      });
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        attributes: { name: 'My Template', owner: SECURITY_SOLUTION_OWNER, templateId: 'tmpl-1' },
+      } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+            {
+              id: secondCase.id,
+              version: secondCase.version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      // Both cases share the same template id+version — validation issues one search (not one
+      // per case), and the name-lookup for buildUserActions issues one more = 2 total, not 4.
+      expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledTimes(2);
+      expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledWith('tmpl-1', '3');
     });
 
     it('rejects when the fetched template id does not match the requested id', async () => {
