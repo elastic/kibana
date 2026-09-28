@@ -394,9 +394,28 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
-
+  [
+    '.gitlab',
+    lazy(() => import(/* webpackChunkName: "connectorIconGitlab" */ './specs/gitlab/icon')),
+  ],
   [
     '.threatq',
     lazy(() => import(/* webpackChunkName: "connectorIconThreatQ" */ './specs/threatq/icon')),
+  ],
+
+  [
+    '.elasticsearch',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconelasticsearch" */ './specs/elasticsearch/icon')
+    ),
+  ],
+
+  [
+    '.azure_functions',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconazurefunctions" */ './specs/azure_functions/icon')
+    ),
   ],
 ]);
