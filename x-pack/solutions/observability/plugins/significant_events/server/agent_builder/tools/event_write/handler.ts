@@ -361,7 +361,9 @@ const fetchPriorDocsByEventId = async (
           hits = result.hits;
           readClientIsCanonical = true;
         }
-        const legacyResult = readClientIsCanonical ? null : await eventClient.findByEventId(c.eventId);
+        const legacyResult = readClientIsCanonical
+          ? null
+          : await eventClient.findByEventId(c.eventId);
         const legacyHits = legacyResult ? legacyResult.hits : hits;
         priorDocsByEventId.set(c.eventId, hits);
         const latest = hits.at(-1);
@@ -544,9 +546,7 @@ export async function eventsWriteBulkHandler({
   // dual-write to `.rule-events` is fire-and-forget with no matching refresh guarantee — a scan
   // of `.rule-events` alone can miss a recently written event and produce a permanent duplicate.
   const canonicalActiveEvents =
-    client !== eventClient
-      ? await fetchActiveEventsForDedup(eventClient, dedupCandidates)
-      : [];
+    client !== eventClient ? await fetchActiveEventsForDedup(eventClient, dedupCandidates) : [];
   // Canonical takes precedence: if the same event_id appears in both stores, use the canonical
   // version to prevent a stale .rule-events active entry from suppressing a valid new-event write.
   const canonicalEventIds = new Set(
@@ -636,7 +636,12 @@ export async function eventsWriteBulkHandler({
     emitSignificantEventWriteTriggers({
       eventClient,
       significantEvent: document,
-      priorSignificantEvent: latestByEventId.get(candidate.eventId),
+      // Use the canonical predecessor (legacy write store) rather than the read-store view:
+      // .rule-events is dual-written fire-and-forget (no refresh guarantee), so it may lag and
+      // yield undefined — emitting a spurious eventCreated for an existing event. The read-store
+      // client also decodes dismissed → closed, corrupting the status comparison used to decide
+      // whether to emit eventStatusChanged.
+      priorSignificantEvent: latestLegacyByEventId.get(candidate.eventId),
     });
     if (alertEventsClient && dualWriteLimit) {
       return [
