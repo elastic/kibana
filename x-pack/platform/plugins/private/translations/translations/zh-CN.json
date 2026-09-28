@@ -42200,7 +42200,6 @@
     "xpack.securitySolution.detectionEngine.components.importRuleModal.overwriteExceptionLabel": "覆盖具有冲突“list_id”的现有例外列表",
     "xpack.securitySolution.detectionEngine.components.importRuleModal.selectRuleDescription": "选择要导入的规则。可以包括关联的规则操作和例外。",
     "xpack.securitySolution.detectionEngine.components.importRuleModal.successfullyImportedRulesTitle": "已成功导入 {totalRules} 个规则",
-    "xpack.securitySolution.detectionEngine.createRule.ariaLabel": "使用代理或通过规则创建表单手动创建规则",
     "xpack.securitySolution.detectionEngine.createRule.backToRulesButton": "规则",
     "xpack.securitySolution.detectionEngine.createRule.cancelButtonLabel": "取消",
     "xpack.securitySolution.detectionEngine.createRule.contextMenu.aiRuleCreation": "AI 规则创建",

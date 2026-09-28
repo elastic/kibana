@@ -42059,7 +42059,6 @@
     "xpack.securitySolution.detectionEngine.components.importRuleModal.overwriteExceptionLabel": "Vorhandene Ausnahmelisten mit widersprüchlicher „list_id“ überschreiben",
     "xpack.securitySolution.detectionEngine.components.importRuleModal.selectRuleDescription": "Wählen Sie Regeln zum Importieren aus. Zugeordnete Regelaktionen und Ausnahmen können eingeschlossen werden.",
     "xpack.securitySolution.detectionEngine.components.importRuleModal.successfullyImportedRulesTitle": "{totalRules} {totalRules, plural, =1 {rule} other {Regeln}} wurden erfolgreich importiert",
-    "xpack.securitySolution.detectionEngine.createRule.ariaLabel": "Erstellen Sie eine Regel entweder über den Agenten oder manuell mit dem Regelerstellungsformular",
     "xpack.securitySolution.detectionEngine.createRule.backToRulesButton": "Regeln",
     "xpack.securitySolution.detectionEngine.createRule.cancelButtonLabel": "Abbrechen",
     "xpack.securitySolution.detectionEngine.createRule.contextMenu.aiRuleCreation": "KI-Regelerstellung",

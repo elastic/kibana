@@ -42166,7 +42166,6 @@
     "xpack.securitySolution.detectionEngine.components.importRuleModal.overwriteExceptionLabel": "Substituir listas de exceções existentes com \"list_id\" conflitante",
     "xpack.securitySolution.detectionEngine.components.importRuleModal.selectRuleDescription": "Selecione as regras para importar. Ações e exceções relacionadas à regra podem ser incluídas.",
     "xpack.securitySolution.detectionEngine.components.importRuleModal.successfullyImportedRulesTitle": "{totalRules} {totalRules, plural, =1 {rule} other {regras}} importadas com sucesso",
-    "xpack.securitySolution.detectionEngine.createRule.ariaLabel": "Crie uma regra usando o agente ou manualmente com o formulário de criação de regras",
     "xpack.securitySolution.detectionEngine.createRule.backToRulesButton": "Regras",
     "xpack.securitySolution.detectionEngine.createRule.cancelButtonLabel": "Cancelar",
     "xpack.securitySolution.detectionEngine.createRule.contextMenu.aiRuleCreation": "Criação de regras de IA",
