@@ -51,13 +51,17 @@ describe('useAttackDiscoveryAttachment', () => {
   });
 
   it('describes the attachment with the de-anonymized title', () => {
-    renderHook(() => useAttackDiscoveryAttachment(attackDiscovery, replacements));
+    const anonymizedHost = '3d241119-f77a-454e-8ee3-d36e05a8714f';
+
+    renderHook(() =>
+      useAttackDiscoveryAttachment(
+        { ...attackDiscovery, title: `Attack on ${anonymizedHost}` },
+        { [anonymizedHost]: 'SRVMAC08' }
+      )
+    );
 
     expect(mockUseAgentBuilderAttachment).toHaveBeenCalledWith(
-      expect.objectContaining({
-        attachmentDescription: getAttackDiscoveryAttachmentData({ attackDiscovery, replacements })
-          .title,
-      })
+      expect.objectContaining({ attachmentDescription: 'Attack on SRVMAC08' })
     );
   });
 

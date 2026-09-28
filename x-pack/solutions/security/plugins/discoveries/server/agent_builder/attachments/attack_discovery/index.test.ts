@@ -22,6 +22,8 @@ import { ATTACK_DISCOVERY_ATTACHMENT_TOOL_IDS, createAttackDiscoveryAttachmentTy
 
 const logger = loggingSystemMock.createLogger();
 
+const HOST_UUID = '3d241119-f77a-454e-8ee3-d36e05a8714f';
+
 const validData = {
   alert_ids: ['alert-1', 'alert-2'],
   details_markdown: '## Details\nThe attacker did a thing.',
@@ -152,6 +154,48 @@ describe('createAttackDiscoveryAttachmentType', () => {
       expect(result).toEqual({ data, valid: true });
     });
 
+    it('accepts the replacements sent by "Add to chat"', () => {
+      const data = { ...validData, replacements: { [HOST_UUID]: 'SRVWIN04' } };
+
+      const result = createAttackDiscoveryAttachmentType(defaultDeps()).validate(data);
+
+      expect(result).toEqual({ data, valid: true });
+    });
+
+    it('returns invalid when a replacement key is not a UUID', () => {
+      const result = createAttackDiscoveryAttachmentType(defaultDeps()).validate({
+        ...validData,
+        replacements: { h: 'SRVWIN04' },
+      });
+
+      expect(result).toMatchObject({ valid: false });
+    });
+
+    it('returns invalid when a replacement value exceeds the 1024 character bound', () => {
+      const result = createAttackDiscoveryAttachmentType(defaultDeps()).validate({
+        ...validData,
+        replacements: { [HOST_UUID]: 'a'.repeat(1025) },
+      });
+
+      expect(result).toMatchObject({ valid: false });
+    });
+
+    it('returns invalid when there are more than 1000 replacements', () => {
+      const replacements = Object.fromEntries(
+        Array.from({ length: 1001 }, (_, index) => [
+          `00000000-0000-4000-8000-${String(index).padStart(12, '0')}`,
+          'value',
+        ])
+      );
+
+      const result = createAttackDiscoveryAttachmentType(defaultDeps()).validate({
+        ...validData,
+        replacements,
+      });
+
+      expect(result).toMatchObject({ valid: false });
+    });
+
     it('returns invalid when mitre_attack_tactics exceeds the 64 entry bound', () => {
       const result = createAttackDiscoveryAttachmentType(defaultDeps()).validate({
         ...validData,
@@ -276,6 +320,58 @@ describe('createAttackDiscoveryAttachmentType', () => {
       expect(representation).toMatchObject({
         value: expect.not.stringContaining('## Attack Chain'),
       });
+    });
+
+    it('inserts the original values from the replacements', () => {
+      const representation = format({
+        ...validData,
+        entity_summary_markdown: `Host {{ host.name ${HOST_UUID} }}`,
+        replacements: { [HOST_UUID]: 'SRVWIN04' },
+        summary_markdown: `Activity on {{ host.name ${HOST_UUID} }}`,
+        title: `Attack on ${HOST_UUID}`,
+      }).getRepresentation?.();
+
+      expect(representation).toMatchObject({
+        value: expect.stringMatching(
+          /^# Attack on SRVWIN04\n[\s\S]*## Entity Summary\nHost `SRVWIN04`[\s\S]*## Summary\nActivity on `SRVWIN04`/
+        ),
+      });
+    });
+
+    // Tokens are rendered before the original value is inserted, so a value with `}}` survives.
+    it('keeps an original value that contains `}}` intact', () => {
+      const representation = format({
+        ...validData,
+        details_markdown: `Ran {{ process.command_line ${HOST_UUID} }}`,
+        replacements: { [HOST_UUID]: 'cmd /c "echo }} done"' },
+      }).getRepresentation?.();
+
+      expect(representation).toMatchObject({
+        value: expect.stringContaining('## Details\nRan `cmd /c "echo }} done"`'),
+      });
+    });
+
+    it('keeps the anonymized values when there are no replacements', () => {
+      const representation = format({
+        ...validData,
+        summary_markdown: `Activity on {{ host.name ${HOST_UUID} }}`,
+      }).getRepresentation?.();
+
+      expect(representation).toMatchObject({
+        value: expect.stringContaining(`## Summary\nActivity on \`${HOST_UUID}\``),
+      });
+    });
+
+    // A long run of whitespace after an unclosed token used to block the server.
+    it('renders worst-case markdown at the 50k details bound quickly', async () => {
+      const start = process.hrtime.bigint();
+
+      await format({
+        ...validData,
+        details_markdown: `{{ a ${' '.repeat(49_995)}`,
+      }).getRepresentation?.();
+
+      expect(Number(process.hrtime.bigint() - start) / 1e6).toBeLessThan(500);
     });
 
     it('returns a text representation', () => {

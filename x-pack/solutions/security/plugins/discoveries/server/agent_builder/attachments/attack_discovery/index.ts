@@ -13,12 +13,13 @@ import type {
   AttachmentResolveContext,
   AttachmentTypeDefinition,
 } from '@kbn/agent-builder-server/attachments';
-import { getMarkdownFields, getTacticMetadata } from '@kbn/elastic-assistant-common';
+import { getTacticMetadata } from '@kbn/elastic-assistant-common';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { z } from '@kbn/zod/v4';
 
 import { ATTACK_DISCOVERY_ATTACHMENT_TYPE } from '../../../../common/constants';
 import { transformSearchResponseToAlerts } from '../../../routes/post/validate/helpers/transform_search_response_to_alerts';
+import { getPlainText } from './get_plain_text';
 import { getResolveSearchRequest } from './get_resolve_search_request';
 
 /**
@@ -37,21 +38,39 @@ export const ATTACK_DISCOVERY_ATTACHMENT_TOOL_IDS = [
   platformCoreTools.productDocumentation,
 ] as const;
 
+const MAX_TITLE_LENGTH = 1024;
+const MAX_SUMMARY_LENGTH = 8000;
+const MAX_DETAILS_LENGTH = 50_000;
+const MAX_ENTITY_SUMMARY_LENGTH = 8000;
+const MAX_REPLACEMENTS = 1000;
+
+/** Anonymized values are UUIDs, which keeps the replacements' keys, and their count, bounded. */
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /**
  * The resolved content of an Attack Discovery attachment.
  *
  * Deliberately a projection of the persisted document rather than the whole of it:
  * this is what an analyst and the agent need to understand the attack, and the
  * bounds keep a single attachment from dominating the conversation's context.
+ *
+ * The title and markdown are the persisted, anonymized text. When `replacements` is present,
+ * the attachment's view and the agent both insert the original values from it, one source.
  */
 export const attackDiscoveryAttachmentDataSchema = z.object({
   alert_ids: z.array(z.string().max(512)).max(1000),
-  details_markdown: z.string().max(50_000),
-  entity_summary_markdown: z.string().max(8000).optional(),
+  details_markdown: z.string().max(MAX_DETAILS_LENGTH),
+  entity_summary_markdown: z.string().max(MAX_ENTITY_SUMMARY_LENGTH).optional(),
   id: z.string().max(512),
   mitre_attack_tactics: z.array(z.string().max(256)).max(64).optional(),
-  summary_markdown: z.string().max(8000),
-  title: z.string().max(1024),
+  replacements: z
+    .record(z.string().regex(UUID), z.string().max(1024))
+    .refine((replacements) => Object.keys(replacements).length <= MAX_REPLACEMENTS, {
+      message: `Too many replacements; at most ${MAX_REPLACEMENTS} are allowed`,
+    })
+    .optional(),
+  summary_markdown: z.string().max(MAX_SUMMARY_LENGTH),
+  title: z.string().max(MAX_TITLE_LENGTH),
 });
 
 export type AttackDiscoveryAttachmentData = z.infer<typeof attackDiscoveryAttachmentDataSchema>;
@@ -69,24 +88,33 @@ const getAttackChainLines = (mitreAttackTactics: string[] | undefined): string[]
 };
 
 // The stored markdown keeps the `{{ field value }}` syntax the UI draws as pills; the agent
-// gets the plain values instead.
-const formatAttackDiscovery = (data: AttackDiscoveryAttachmentData): string =>
-  [
-    `# ${getMarkdownFields(data.title)}`,
+// gets the plain values instead, with the original values from `replacements` inserted.
+const formatAttackDiscovery = (data: AttackDiscoveryAttachmentData): string => {
+  const { replacements } = data;
+  const entitySummary =
+    data.entity_summary_markdown != null
+      ? getPlainText({
+          markdown: data.entity_summary_markdown,
+          maxLength: MAX_ENTITY_SUMMARY_LENGTH,
+          replacements,
+        })
+      : '';
+
+  return [
+    `# ${getPlainText({ markdown: data.title, maxLength: MAX_TITLE_LENGTH, replacements })}`,
     '',
     `Attack Discovery id: ${data.id}`,
     `Correlated detection alerts: ${data.alert_ids.length}`,
-    ...(data.entity_summary_markdown != null && data.entity_summary_markdown.length > 0
-      ? ['', '## Entity Summary', getMarkdownFields(data.entity_summary_markdown)]
-      : []),
+    ...(entitySummary.length > 0 ? ['', '## Entity Summary', entitySummary] : []),
     '',
     '## Summary',
-    getMarkdownFields(data.summary_markdown),
+    getPlainText({ markdown: data.summary_markdown, maxLength: MAX_SUMMARY_LENGTH, replacements }),
     '',
     '## Details',
-    getMarkdownFields(data.details_markdown),
+    getPlainText({ markdown: data.details_markdown, maxLength: MAX_DETAILS_LENGTH, replacements }),
     ...getAttackChainLines(data.mitre_attack_tactics),
   ].join('\n');
+};
 
 /**
  * Creates the server-side definition for the `security.attack_discovery` attachment type.
@@ -94,11 +122,11 @@ const formatAttackDiscovery = (data: AttackDiscoveryAttachmentData): string =>
  * Added two ways:
  * - By reference: the Attack Discovery review workflow adds it with an `origin` and no
  *   `data`, and `resolve` reads the persisted document once at add time.
- * - By value: Security Solution's "Add to chat" sends the data it already holds, plus the
- *   `origin` it came from, so `resolve` is not called.
+ * - By value: Security Solution's "Add to chat" sends the data it already holds, so `resolve`
+ *   is not called.
  *
- * The two differ in anonymization: by-reference data keeps the persisted, anonymized
- * markdown, while "Add to chat" sends values de-anonymized for the analyst.
+ * Both store the persisted, anonymized text. Only "Add to chat" also sends the discovery's
+ * `replacements`, so its attachment shows the original values to the analyst and the agent.
  */
 export const createAttackDiscoveryAttachmentType = ({
   adhocAttackDiscoveryDataClient,

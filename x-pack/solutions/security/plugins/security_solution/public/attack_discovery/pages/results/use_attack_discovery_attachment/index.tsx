@@ -6,7 +6,11 @@
  */
 
 import { useMemo } from 'react';
-import type { AttackDiscoveryAlert, Replacements } from '@kbn/elastic-assistant-common';
+import {
+  type AttackDiscoveryAlert,
+  replaceAnonymizedValuesWithOriginalValues,
+  type Replacements,
+} from '@kbn/elastic-assistant-common';
 import { noop } from 'lodash/fp';
 import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 import { ATTACK_DISCOVERY_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
@@ -30,7 +34,13 @@ export const useAttackDiscoveryAttachment = (
     return {
       attachmentData: attachmentData != null ? { ...attachmentData } : {},
       // Shown to the agent and in the conversation timeline instead of the generated id.
-      attachmentDescription: attachmentData?.title,
+      attachmentDescription:
+        attachmentData != null
+          ? replaceAnonymizedValuesWithOriginalValues({
+              messageContent: attachmentData.title,
+              replacements: attachmentData.replacements,
+            })
+          : undefined,
       attachmentPrompt: ATTACK_DISCOVERY_ATTACHMENT_PROMPT,
       attachmentType: SecurityAgentBuilderAttachments.attackDiscovery,
     };
