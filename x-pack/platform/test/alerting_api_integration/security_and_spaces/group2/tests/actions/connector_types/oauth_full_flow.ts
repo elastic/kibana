@@ -13,7 +13,13 @@ import {
   getExternalServiceSimulatorPath,
 } from '@kbn/actions-simulators-plugin/server/plugin';
 import { SHORT_EXPIRY_AUTH_CODE } from '@kbn/actions-simulators-plugin/server/servicenow_oauth_simulation';
-import { Space1AllAtSpace1, GlobalReadAtSpace1 } from '../../../../scenarios';
+import {
+  Space1AllAtSpace1,
+  GlobalReadAtSpace1,
+  Space1AllAlertingNoneActionsAtSpace1,
+  SuperuserAtSpace1,
+  Space2,
+} from '../../../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { login, performOAuthFlow } from './oauth_test_helpers';
@@ -283,5 +289,181 @@ export default function oauthFullFlowTests({ getService }: FtrProviderContext) {
         expect(executeBody.data.receivedAuth).to.match(SIMULATOR_REFRESHED_ACCESS_TOKEN_AUTH);
       });
     }); // end Execution with Token Attachment
+
+    describe('OAuth credential handoff', () => {
+      const objectRemover = new ObjectRemover(supertest);
+      const space = Space1AllAtSpace1.space;
+      let connectorId: string;
+      let proxyServer: httpProxy | undefined;
+      let sessionCookie: string;
+      let unauthorizedCookie: string;
+      let superuserCookie: string;
+      let tokenUrl: string;
+      let apiUrl: string;
+
+      const credentialsPath = (id: string, spaceId = space.id) =>
+        `${getUrlPrefix(spaceId)}/api/alerts_fixture/${id}/_test_get_connector_credentials`;
+
+      before(async () => {
+        proxyServer = await getHttpProxyServer(
+          kibanaServer.resolveUrl('/'),
+          configService.get('kbnTestServer.serverArgs'),
+          () => {}
+        );
+
+        sessionCookie = await login(supertestWithoutAuth, Space1AllAtSpace1.user);
+        unauthorizedCookie = await login(
+          supertestWithoutAuth,
+          Space1AllAlertingNoneActionsAtSpace1.user
+        );
+        superuserCookie = await login(supertestWithoutAuth, SuperuserAtSpace1.user);
+
+        const simulatorBaseRaw = kibanaServer.resolveUrl(
+          getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
+        );
+        tokenUrl = `${simulatorBaseRaw}/oauth_token.do`;
+        apiUrl = `${stripUrlCredentials(simulatorBaseRaw)}/echo`;
+
+        const { body: connector } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'OAuth credential handoff v2 connector',
+            connector_type_id: 'test.single_file_connector',
+            config: { apiUrl },
+            secrets: {
+              authType: 'oauth_authorization_code',
+              clientId: 'test-client-id',
+              clientSecret: 'test-client-secret',
+              tokenUrl,
+              authorizationUrl: 'https://localhost:5601/oauth/authorize',
+            },
+          })
+          .expect(200);
+
+        connectorId = connector.id;
+        objectRemover.add(space.id, connectorId, 'connector', 'actions');
+
+        await performOAuthFlow(supertestWithoutAuth, {
+          spaceId: space.id,
+          connectorId,
+          sessionCookie,
+        });
+      });
+
+      after(async () => {
+        await objectRemover.removeAll();
+        if (proxyServer) {
+          proxyServer.close();
+        }
+      });
+
+      it('returns a valid access-token header and positive TTL after PKCE', async () => {
+        const { body } = await supertestWithoutAuth
+          .post(credentialsPath(connectorId))
+          .set('Cookie', sessionCookie)
+          .set('kbn-xsrf', 'foo')
+          .send({})
+          .expect(200);
+
+        expect(body.connectorId).to.be(connectorId);
+        expect(body.actionTypeId).to.be('test.single_file_connector');
+        expect(body.config.apiUrl).to.be(apiUrl);
+        expect(body.headers.Authorization).to.match(SIMULATOR_INITIAL_ACCESS_TOKEN_AUTH);
+        expect(body.expiresInSeconds).to.be.greaterThan(0);
+        expect(Date.parse(body.expiresAt)).to.be.greaterThan(Date.now());
+        expect(body).to.not.have.property('secrets');
+        expect(JSON.stringify(body)).to.not.contain('test-client-secret');
+        expect(JSON.stringify(body)).to.not.contain('sim-oauth-refresh-');
+      });
+
+      it('force-refreshes through the framework method and renews TTL', async () => {
+        const { body: initial } = await supertestWithoutAuth
+          .post(credentialsPath(connectorId))
+          .set('Cookie', sessionCookie)
+          .set('kbn-xsrf', 'foo')
+          .send({})
+          .expect(200);
+
+        const { body: refreshed } = await supertestWithoutAuth
+          .post(credentialsPath(connectorId))
+          .set('Cookie', sessionCookie)
+          .set('kbn-xsrf', 'foo')
+          .send({ forceRefresh: true })
+          .expect(200);
+
+        expect(refreshed.headers.Authorization).to.match(SIMULATOR_REFRESHED_ACCESS_TOKEN_AUTH);
+        expect(refreshed.headers.Authorization).to.not.be(initial.headers.Authorization);
+        expect(refreshed.expiresInSeconds).to.be.greaterThan(0);
+        expect(Date.parse(refreshed.expiresAt)).to.be.greaterThan(Date.now());
+        expect(JSON.stringify(refreshed)).to.not.contain('test-client-secret');
+        expect(JSON.stringify(refreshed)).to.not.contain('sim-oauth-refresh-');
+      });
+
+      it('proactively refreshes when remaining validity is below the requested minimum', async () => {
+        const { body: shortLivedConnector } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'OAuth credential handoff short-lived connector',
+            connector_type_id: 'test.single_file_connector',
+            config: { apiUrl },
+            secrets: {
+              authType: 'oauth_authorization_code',
+              clientId: 'test-client-id',
+              clientSecret: 'test-client-secret',
+              tokenUrl,
+              authorizationUrl: 'https://localhost:5601/oauth/authorize',
+            },
+          })
+          .expect(200);
+
+        objectRemover.add(space.id, shortLivedConnector.id, 'connector', 'actions');
+
+        await performOAuthFlow(supertestWithoutAuth, {
+          spaceId: space.id,
+          connectorId: shortLivedConnector.id,
+          sessionCookie,
+          authCode: SHORT_EXPIRY_AUTH_CODE,
+        });
+
+        // Simulator returns `expires_in: 1` for SHORT_EXPIRY_AUTH_CODE; wait so remaining TTL is below 600s.
+        await new Promise((r) => setTimeout(r, 1500));
+
+        const { body } = await supertestWithoutAuth
+          .post(credentialsPath(shortLivedConnector.id))
+          .set('Cookie', sessionCookie)
+          .set('kbn-xsrf', 'foo')
+          .send({ minimumValiditySeconds: 600 })
+          .expect(200);
+
+        expect(body.headers.Authorization).to.match(SIMULATOR_REFRESHED_ACCESS_TOKEN_AUTH);
+        expect(body.expiresInSeconds).to.be.greaterThan(600);
+        expect(JSON.stringify(body)).to.not.contain('test-client-secret');
+      });
+
+      it('denies callers without connector execute privileges', async () => {
+        const { body } = await supertestWithoutAuth
+          .post(credentialsPath(connectorId))
+          .set('Cookie', unauthorizedCookie)
+          .set('kbn-xsrf', 'foo')
+          .send({})
+          .expect(403);
+
+        expect(body.statusCode).to.be(403);
+        expect(body.message).to.contain('Unauthorized to execute');
+      });
+
+      it('denies cross-space access to a connector in another space', async () => {
+        const { body } = await supertestWithoutAuth
+          .post(credentialsPath(connectorId, Space2.id))
+          .set('Cookie', superuserCookie)
+          .set('kbn-xsrf', 'foo')
+          .send({})
+          .expect(404);
+
+        expect(body.message).to.contain(`Saved object [action/${connectorId}] not found`);
+      });
+    }); // end OAuth credential handoff
   }); // end OAuth Authorization Code
 }

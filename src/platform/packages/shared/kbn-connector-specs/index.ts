@@ -104,6 +104,7 @@ export type {
   ConnectorNetworkSettings,
   ConnectorResponseSettings,
   CredentialAccessor,
+  GetAuthHeadersOptions,
   ClientRegistry,
   ClientTypeId,
   ClientTypeSpecs,

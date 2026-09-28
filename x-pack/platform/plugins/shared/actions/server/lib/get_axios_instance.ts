@@ -17,6 +17,7 @@ import type {
   AuthMode,
   AuthContext,
   CredentialAccessor,
+  GetAuthHeadersOptions,
   GetTokenOpts,
   NormalizedAuthType,
 } from '@kbn/connector-specs';
@@ -225,11 +226,11 @@ export const getCredentialWithAuth = ({
     );
 
     return {
-      getAuthHeaders: async () => {
+      getAuthHeaders: async (options?: GetAuthHeadersOptions) => {
         if (!authType.getAuthHeaders) {
           throw new UnsupportedAuthProducerError(authTypeId);
         }
-        return authType.getAuthHeaders(authCtx, secrets);
+        return authType.getAuthHeaders(authCtx, secrets, options);
       },
     };
   };

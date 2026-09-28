@@ -36,6 +36,11 @@ import { createMockInMemoryConnector } from '../../mocks';
 import { AuthTypeRegistry, registerAuthTypes } from '../../../../auth_types';
 import { UnsupportedAuthProducerError } from '../../../../lib/get_axios_instance';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../constants/saved_objects';
+import { requestOAuthRefreshToken } from '../../../../lib/request_oauth_refresh_token';
+
+jest.mock('../../../../lib/request_oauth_refresh_token', () => ({
+  requestOAuthRefreshToken: jest.fn(),
+}));
 
 const defaultConnectorTypeId = '.connector-type-id';
 const defaultConnectorId = 'connector-id';
@@ -383,11 +388,10 @@ describe('getConnectorCredentials()', () => {
         attributes: {
           ...connectorSavedObject.attributes,
           secrets: {
-            authType: 'oauth_authorization_code',
+            authType: 'oauth_client_credentials',
             clientId: 'client-id',
             clientSecret: 'client-secret',
             tokenUrl: 'https://example.com/token',
-            authorizationUrl: 'https://example.com/authorize',
           },
         },
       });
@@ -396,6 +400,143 @@ describe('getConnectorCredentials()', () => {
       await expect(
         actionsClient.getConnectorCredentials({ id: defaultConnectorId })
       ).rejects.toBeInstanceOf(UnsupportedAuthProducerError);
+    });
+  });
+
+  describe('oauth authorization code', () => {
+    const oauthSecrets = {
+      authType: 'oauth_authorization_code',
+      clientId: 'client-id',
+      clientSecret: 'oauth-client-secret',
+      tokenUrl: 'https://example.com/token',
+      authorizationUrl: 'https://example.com/authorize',
+    };
+    const expiresAt = new Date(Date.now() + 3600_000).toISOString();
+    const oauthToken = {
+      id: 'token-1',
+      profileUid: 'profile-1',
+      connectorId: defaultConnectorId,
+      credentialType: 'oauth',
+      credentials: {
+        accessToken: 'Bearer oauth-access-token',
+        refreshToken: 'oauth-refresh-token',
+      },
+      expiresAt,
+      refreshTokenExpiresAt: new Date(Date.now() + 7 * 24 * 3600_000).toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const mockOAuthConnector = () => {
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        ...connectorSavedObject,
+        attributes: {
+          ...connectorSavedObject.attributes,
+          authMode: 'per-user',
+          secrets: oauthSecrets,
+        },
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        attributes: {
+          actionTypeId: defaultConnectorTypeId,
+          authMode: 'per-user',
+          config: { apiUrl: 'https://example.com' },
+        },
+      } as SavedObject);
+      getCurrentUserProfileId.mockResolvedValue('profile-1');
+      connectorTokenClient.get.mockResolvedValue({
+        hasErrors: false,
+        connectorToken: oauthToken,
+      });
+    };
+
+    it('returns a positive TTL and the access-token header without client or refresh secrets', async () => {
+      mockOAuthConnector();
+
+      const result = await actionsClient.getConnectorCredentials({ id: defaultConnectorId });
+
+      expect(result.headers.Authorization).toBe('Bearer oauth-access-token');
+      expect(result.expiresAt).toBe(expiresAt);
+      expect(result.expiresInSeconds).toBeGreaterThan(0);
+      expect(JSON.stringify(result)).not.toContain('oauth-client-secret');
+      expect(JSON.stringify(result)).not.toContain('oauth-refresh-token');
+    });
+
+    it('refreshes when remaining validity is below the requested minimum', async () => {
+      mockOAuthConnector();
+      const nearExpiry = new Date(Date.now() + 30_000).toISOString();
+      const refreshedExpiry = new Date(Date.now() + 3600_000).toISOString();
+      connectorTokenClient.get
+        .mockResolvedValueOnce({
+          hasErrors: false,
+          connectorToken: { ...oauthToken, expiresAt: nearExpiry },
+        })
+        .mockResolvedValueOnce({
+          hasErrors: false,
+          connectorToken: { ...oauthToken, expiresAt: refreshedExpiry },
+        });
+      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce({
+        tokenType: 'Bearer',
+        accessToken: 'refreshed-access-token',
+        expiresIn: 3600,
+        refreshToken: 'new-refresh-token',
+        refreshTokenExpiresIn: 604800,
+      });
+
+      const result = await actionsClient.getConnectorCredentials({
+        id: defaultConnectorId,
+        minimumValiditySeconds: 600,
+      });
+
+      expect(requestOAuthRefreshToken).toHaveBeenCalled();
+      expect(result.headers.Authorization).toBe('Bearer refreshed-access-token');
+      expect(result.expiresAt).toBe(refreshedExpiry);
+    });
+
+    it('force-refreshes a still-valid token when requested', async () => {
+      mockOAuthConnector();
+      const refreshedExpiry = new Date(Date.now() + 3600_000).toISOString();
+      connectorTokenClient.get
+        .mockResolvedValueOnce({
+          hasErrors: false,
+          connectorToken: oauthToken,
+        })
+        .mockResolvedValueOnce({
+          hasErrors: false,
+          connectorToken: { ...oauthToken, expiresAt: refreshedExpiry },
+        });
+      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce({
+        tokenType: 'Bearer',
+        accessToken: 'forced-access-token',
+        expiresIn: 3600,
+        refreshToken: 'new-refresh-token',
+        refreshTokenExpiresIn: 604800,
+      });
+
+      const result = await actionsClient.getConnectorCredentials({
+        id: defaultConnectorId,
+        forceRefresh: true,
+      });
+
+      expect(requestOAuthRefreshToken).toHaveBeenCalled();
+      expect(result.headers.Authorization).toBe('Bearer forced-access-token');
+    });
+
+    it('rejects OAuth handoff when expiry metadata is missing', async () => {
+      mockOAuthConnector();
+      connectorTokenClient.get
+        .mockResolvedValueOnce({
+          hasErrors: false,
+          connectorToken: oauthToken,
+        })
+        .mockResolvedValueOnce({
+          hasErrors: false,
+          connectorToken: { ...oauthToken, expiresAt: undefined },
+        });
+
+      await expect(
+        actionsClient.getConnectorCredentials({ id: defaultConnectorId })
+      ).rejects.toThrow(/OAuth token expiry metadata is missing/);
     });
   });
 });

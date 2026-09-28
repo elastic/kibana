@@ -73,8 +73,13 @@ export interface PlatformServices {
   buildTlsOptions(targets: HostTarget[], logger: Logger): TlsConnectionOptions;
 }
 
+export interface GetAuthHeadersOptions {
+  minimumValiditySeconds?: number;
+  forceRefresh?: boolean;
+}
+
 export interface CredentialAccessor {
-  getAuthHeaders(): Promise<Record<string, string>>;
+  getAuthHeaders(options?: GetAuthHeadersOptions): Promise<Record<string, string>>;
 }
 
 export interface BuildContext {

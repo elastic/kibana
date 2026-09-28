@@ -40,6 +40,8 @@ const setup = ({
     actionTypeId: string;
     config: Record<string, unknown>;
     headers: Record<string, string>;
+    expiresAt?: string;
+    expiresInSeconds?: number;
   };
   withActions?: boolean;
   credentialsError?: Error;
@@ -83,7 +85,31 @@ describe('buildConnectorEnv', () => {
     expect(secretValues).toEqual([BEARER_AUTHORIZATION]);
   });
 
-  it('redacts basic-auth header values without exposing the password separately', () => {
+  it('maps OAuth access-token headers and TTL metadata without client or refresh secrets', () => {
+    const accessToken = 'Bearer oauth-access-token';
+    const { env, secretValues } = buildConnectorEnv({
+      connectorId: CONNECTOR_ID,
+      actionTypeId: '.slack',
+      config: { apiUrl: 'https://slack.com/api' },
+      headers: { Authorization: accessToken },
+      expiresAt: '2026-01-01T00:10:00.000Z',
+      expiresInSeconds: 600,
+    });
+
+    expect(env).toEqual({
+      CONNECTOR_ID,
+      CONNECTOR_TYPE: '.slack',
+      CONNECTOR_CONFIG_APIURL: 'https://slack.com/api',
+      CONNECTOR_HEADER_AUTHORIZATION: accessToken,
+      CONNECTOR_EXPIRES_AT: '2026-01-01T00:10:00.000Z',
+      CONNECTOR_EXPIRES_IN_SECONDS: '600',
+    });
+    expect(secretValues).toEqual([accessToken]);
+    expect(JSON.stringify(env)).not.toContain('client-secret');
+    expect(JSON.stringify(env)).not.toContain('refresh_token');
+  });
+
+  it('does not expose raw secret field names', () => {
     const { env, secretValues } = buildConnectorEnv({
       connectorId: CONNECTOR_ID,
       actionTypeId: '.http',
@@ -127,8 +153,57 @@ describe('createConnectorCredentialResolver', () => {
       },
       secretValues: [BEARER_AUTHORIZATION],
     });
-    expect(actionsClient.getConnectorCredentials).toHaveBeenCalledWith({ id: CONNECTOR_ID });
+    expect(actionsClient.getConnectorCredentials).toHaveBeenCalledWith({
+      id: CONNECTOR_ID,
+      minimumValiditySeconds: undefined,
+      forceRefresh: undefined,
+    });
     expect(actionsClient.get).not.toHaveBeenCalled();
+  });
+
+  it('injects OAuth access-token headers and TTL from the framework response', async () => {
+    const accessToken = 'Bearer oauth-access-token';
+    const { resolve } = setup({
+      credentials: {
+        connectorId: CONNECTOR_ID,
+        actionTypeId: '.slack',
+        config: { apiUrl: 'https://slack.com/api' },
+        headers: { Authorization: accessToken },
+        expiresAt: '2026-01-01T00:10:00.000Z',
+        expiresInSeconds: 600,
+      },
+    });
+
+    const result = await resolve(CONNECTOR_ID, createCallContext());
+
+    expect(result).toEqual({
+      env: {
+        CONNECTOR_ID,
+        CONNECTOR_TYPE: '.slack',
+        CONNECTOR_CONFIG_APIURL: 'https://slack.com/api',
+        CONNECTOR_HEADER_AUTHORIZATION: accessToken,
+        CONNECTOR_EXPIRES_AT: '2026-01-01T00:10:00.000Z',
+        CONNECTOR_EXPIRES_IN_SECONDS: '600',
+      },
+      secretValues: [accessToken],
+    });
+    expect(JSON.stringify(result)).not.toContain('client-secret');
+    expect(JSON.stringify(result)).not.toContain('refresh_token');
+  });
+
+  it('forwards minimum validity and force-refresh options to Actions', async () => {
+    const { resolve, actionsClient } = setup();
+
+    await resolve(CONNECTOR_ID, createCallContext(), {
+      minimumValiditySeconds: 600,
+      forceRefresh: true,
+    });
+
+    expect(actionsClient.getConnectorCredentials).toHaveBeenCalledWith({
+      id: CONNECTOR_ID,
+      minimumValiditySeconds: 600,
+      forceRefresh: true,
+    });
   });
 
   it('does not read in-memory connector storage', async () => {
