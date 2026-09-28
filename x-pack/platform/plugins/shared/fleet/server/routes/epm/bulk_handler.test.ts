@@ -218,4 +218,43 @@ describe('postBulkUninstallPackagesHandler — truncated policy list', () => {
     const secondCallBeingRemoved = mockCollectSpacesForUninstallClosure.mock.calls[1][3];
     expect(firstCallBeingRemoved).toBe(secondCallBeingRemoved);
   });
+
+  it('rejects and does not schedule when the combined closure includes an inaccessible shared dep space', async () => {
+    // Two packages (nginx, apache) share auto-installed dep-c in 'restricted-space'.
+    // collectSpacesForUninstallClosure returns that space on the second call (after both
+    // roots are in beingRemoved). assertUninstallAuthorizedForAffectedSpaces then rejects.
+    const INSTALLATION_B = {
+      name: 'apache',
+      version: '1.0.0',
+      installed_kibana_space_id: 'default',
+      additional_spaces_installed_kibana: {},
+    } as any;
+    mockGetInstallationsByName.mockResolvedValue([INSTALLATION, INSTALLATION_B]);
+
+    let callCount = 0;
+    mockCollectSpacesForUninstallClosure.mockImplementation(async () => {
+      callCount++;
+      // Second call (apache) reveals the shared dep space once nginx is in beingRemoved
+      const spaces =
+        callCount === 2 ? new Set(['default', 'restricted-space']) : new Set(['default']);
+      return { spaceIds: spaces, truncated: false };
+    });
+    mockAssertUninstallAuthorized.mockRejectedValue(
+      new FleetUnauthorizedError('Insufficient privileges')
+    );
+
+    const { mockRequest, context, response } = makeContext({
+      body: {
+        packages: [
+          { name: 'nginx', version: '3.2.2' },
+          { name: 'apache', version: '1.0.0' },
+        ],
+      },
+    });
+
+    await expect(postBulkUninstallPackagesHandler(context, mockRequest, response)).rejects.toThrow(
+      FleetUnauthorizedError
+    );
+    expect(mockScheduleBulkUninstall).not.toHaveBeenCalled();
+  });
 });

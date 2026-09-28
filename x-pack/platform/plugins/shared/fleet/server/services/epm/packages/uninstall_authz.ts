@@ -13,7 +13,7 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../cons
 import { FleetUnauthorizedError, PackageRemovalError } from '../../../errors';
 import { appContextService, packagePolicyService } from '../..';
 
-import { getInstallation } from '.';
+import { getInstallationObject } from '.';
 
 /**
  * Collects all space IDs that would be affected by uninstalling a package,
@@ -70,7 +70,14 @@ export async function collectSpacesForUninstallClosure(
     if (beingRemoved.has(dep.name)) {
       continue;
     }
-    const depInstallation = await getInstallation({ savedObjectsClient, pkgName: dep.name });
+    // Use failOnUnexpectedError so a transient read failure causes the preflight to
+    // fail closed rather than silently skipping a dep that cleanup will still remove.
+    const depSO = await getInstallationObject({
+      savedObjectsClient,
+      pkgName: dep.name,
+      failOnUnexpectedError: true,
+    });
+    const depInstallation = depSO?.attributes;
     if (!depInstallation) {
       continue;
     }

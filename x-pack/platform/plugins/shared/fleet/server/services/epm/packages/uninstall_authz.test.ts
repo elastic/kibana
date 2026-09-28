@@ -13,7 +13,7 @@ import { FleetUnauthorizedError } from '../../../errors';
 import { appContextService, packagePolicyService } from '../..';
 
 import { assertUninstallAuthorizedForAffectedSpaces } from './uninstall_authz';
-import { getInstallation } from '.';
+import { getInstallationObject } from '.';
 
 // Mutable fns closed over by the mock factory so individual tests can override them.
 const mockFns = {
@@ -32,17 +32,19 @@ jest.mock('../..', () => ({
   },
 }));
 
-// Mock getInstallation so the dependency walker in collectSpacesForUninstallClosure
+// Mock getInstallationObject so the dependency walker in collectSpacesForUninstallClosure
 // finds no dependencies (returns undefined for any dep lookup).
 jest.mock('.', () => ({
-  getInstallation: jest.fn().mockResolvedValue(undefined),
+  getInstallationObject: jest.fn().mockResolvedValue(undefined),
   kibanaSavedObjectTypes: [],
   getPackageInfo: jest.fn(),
 }));
 
 const mockGetSecurity = appContextService.getSecurity as jest.Mock;
 const mockGetExperimentalFeatures = appContextService.getExperimentalFeatures as jest.Mock;
-const mockGetInstallation = getInstallation as jest.MockedFunction<typeof getInstallation>;
+const mockGetInstallationObject = getInstallationObject as jest.MockedFunction<
+  typeof getInstallationObject
+>;
 
 /** Convenience: return a full security stub using the shared mockFns. */
 function makeSecurityStub() {
@@ -89,8 +91,8 @@ beforeEach(() => {
   mockGetSecurity.mockReturnValue(makeSecurityStub());
   // Dependency resolution disabled by default — walker exits early, tests are root-only.
   mockGetExperimentalFeatures.mockReturnValue({ enableResolveDependencies: false });
-  // getInstallation returns undefined — no dep installations to traverse.
-  mockGetInstallation.mockResolvedValue(undefined);
+  // getInstallationObject returns undefined — no dep installations to traverse.
+  mockGetInstallationObject.mockResolvedValue(undefined);
   // Return empty policy list so the dependency walker finds nothing to traverse.
   mockPackagePolicyList.mockResolvedValue({ items: [], total: 0, page: 1, perPage: 10000 });
 });
@@ -335,9 +337,9 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
       // dep-space is only reachable through the dependency; root is in default.
       // If the walker incorrectly traverses deps, it would add dep-space and could 403.
       mockGetExperimentalFeatures.mockReturnValue({ enableResolveDependencies: false });
-      mockGetInstallation.mockResolvedValue(
-        makeInstallation({ name: 'dep-pkg', installed_kibana_space_id: 'dep-space' })
-      );
+      mockGetInstallationObject.mockResolvedValue({
+        attributes: makeInstallation({ name: 'dep-pkg', installed_kibana_space_id: 'dep-space' }),
+      } as any);
 
       await assertUninstallAuthorizedForAffectedSpaces({
         request: mockRequest,
@@ -363,7 +365,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
         is_dependency_of: [{ name: 'nginx', version: '1.0.0' }],
         dependencies: [],
       });
-      mockGetInstallation.mockResolvedValue(depInstallation);
+      mockGetInstallationObject.mockResolvedValue({ attributes: depInstallation } as any);
       // Dep has no package policies
       mockPackagePolicyList.mockResolvedValue({ items: [], total: 0, page: 1, perPage: 10000 });
 
@@ -413,10 +415,10 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
         dependencies: [{ name: 'dep-c', version: '1.0.0' }],
       });
 
-      mockGetInstallation.mockImplementation(async ({ pkgName }: { pkgName: string }) => {
-        if (pkgName === 'dep-a') return depA;
-        if (pkgName === 'dep-b') return depB;
-        if (pkgName === 'dep-c') return depC;
+      mockGetInstallationObject.mockImplementation(async ({ pkgName }: { pkgName: string }) => {
+        if (pkgName === 'dep-a') return { attributes: depA } as any;
+        if (pkgName === 'dep-b') return { attributes: depB } as any;
+        if (pkgName === 'dep-c') return { attributes: depC } as any;
         return undefined;
       });
       mockPackagePolicyList.mockResolvedValue({ items: [], total: 0, page: 1, perPage: 10000 });
@@ -451,7 +453,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
         is_dependency_of: [{ name: 'nginx', version: '1.0.0' }],
         dependencies: [],
       });
-      mockGetInstallation.mockResolvedValue(depInstallation);
+      mockGetInstallationObject.mockResolvedValue({ attributes: depInstallation } as any);
       mockPackagePolicyList.mockResolvedValue({ items: [], total: 0, page: 1, perPage: 10000 });
 
       await expect(
