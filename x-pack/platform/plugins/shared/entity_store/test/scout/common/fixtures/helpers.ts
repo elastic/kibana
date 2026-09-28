@@ -42,19 +42,23 @@ export const normalizeKeywordList = (value: unknown): string[] => {
 /** Logs-compatible data stream used by extraction tests to seed source log events. */
 export const LOGS_TEST_INDEX = 'logs-entity-store-tests-default';
 const LOGS_TEST_TEMPLATE = 'entity-store-test-logs-override';
-const LOGS_TEST_INDEX_PATTERN = 'logs-entity-store-tests-*';
 
 export interface LogsTestDataStreamOptions {
   index?: string;
   template?: string;
+  /** Defaults to the exact stream name. Overlapping same-priority templates are rejected. */
   indexPattern?: string;
 }
 
 const resolveLogsTestDataStream = ({
   index = LOGS_TEST_INDEX,
   template = LOGS_TEST_TEMPLATE,
-  indexPattern = LOGS_TEST_INDEX_PATTERN,
-}: LogsTestDataStreamOptions = {}) => ({ index, template, indexPattern });
+  indexPattern,
+}: LogsTestDataStreamOptions = {}) => ({
+  index,
+  template,
+  indexPattern: indexPattern ?? index,
+});
 
 /** Non-logs data stream used by query translation tests. Avoids logs-* template quirks (null stripping, constant_keyword). */
 export const QUERY_TRANSLATION_TEST_INDEX = 'entity-store-tests-default';
@@ -118,6 +122,9 @@ export const ingestDoc = async (
  * The standard `logs` component template locks data_stream.dataset as constant_keyword
  * (one value per backing index). Our test archive has multiple dataset values, so we
  * override the mapping before the data stream is created.
+ *
+ * Each template matches only its stream name. Overlapping patterns at this
+ * priority are rejected by Elasticsearch.
  */
 export const setupLogsTestDataStream = async (
   esClient: EsClient,

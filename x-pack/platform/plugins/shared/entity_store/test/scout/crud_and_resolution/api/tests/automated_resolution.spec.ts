@@ -861,12 +861,12 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
   apiTest(
     'SID bridge links a local entity created by extraction to Active Directory',
     async ({ apiClient, esClient }) => {
-      // Own stream/template so teardown cannot clobber history_snapshot's shared
-      // logs-entity-store-tests-default if this config ever runs with workers > 1.
+      // Own stream/template, name outside logs-entity-store-tests-* so this
+      // cannot overlap history_snapshot's default template at the same priority
+      // (including a leftover wildcard from an older run).
       const sidExtractionLogs = {
-        index: 'logs-entity-store-tests-sid-extraction',
+        index: 'logs-entity-store-sid-extraction-default',
         template: 'entity-store-test-logs-override-sid-extraction',
-        indexPattern: 'logs-entity-store-tests-sid-extraction',
       };
       await setupLogsTestDataStream(esClient, sidExtractionLogs);
       try {
