@@ -818,5 +818,50 @@ describe('MetricsExperienceGrid', () => {
 
       expect(queryByTestId('metricsExperienceGridSettingsFlyout')).not.toBeInTheDocument();
     });
+
+    it('closes the metric insights flyout when the edit button is clicked', () => {
+      const onFlyoutStateChange = jest.fn();
+
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 0,
+        selectedDimensions: [],
+        onDimensionsChange: jest.fn(),
+        onPageChange: jest.fn(),
+        isFullscreen: false,
+        searchTerm: '',
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+        onExitFullscreen: jest.fn(),
+        flyoutState: {
+          gridPosition: 0,
+          metricUniqueKey: 'metrics-*:field1',
+          esqlQuery: 'TS metrics-*',
+          selectedTabId: 'overview',
+        },
+        onFlyoutStateChange,
+        onFlyoutSelectedTabChange: jest.fn(),
+        profileId: 'test-profile-id',
+        gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        recentlyExploredMetrics: [],
+        onGridSettingsChange: jest.fn(),
+        metricsSort: METRICS_GRID_SORT_DEFAULTS,
+        onMetricsSortChange: jest.fn(),
+      });
+
+      const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+        wrapper: ({ children }) => (
+          <TestWrapper externalServices={{ featureFlags: editGridSettingsEnabledFeatureFlags }}>
+            {children}
+          </TestWrapper>
+        ),
+      });
+
+      act(() => {
+        getByTestId('metricsExperienceEditGridButton').click();
+      });
+
+      expect(onFlyoutStateChange).toHaveBeenCalledWith(undefined);
+      expect(getByTestId('metricsExperienceGridSettingsFlyout')).toBeInTheDocument();
+    });
   });
 });

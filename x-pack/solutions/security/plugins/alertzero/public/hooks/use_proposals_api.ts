@@ -14,7 +14,7 @@ import {
   ALERTZERO_PROPOSALS_CATEGORY_URL,
   ALERTZERO_PROPOSALS_CLOSED_URL,
 } from '@kbn/alertzero-common';
-import { retryOnTransientError } from '@kbn/agentic-investigations-plugin/public';
+import { retryOnTransientError } from './retry_on_transient_error';
 import type { ProposalsPageResponse } from '../../common/proposals/list';
 import { MAX_QUEUE_REACH } from '../../common/proposals/list';
 import { queryKeys } from '../query_keys';
@@ -97,6 +97,13 @@ const useProposalsPages = (
 
   // Not `refetchInterval`, which replays every page the analyst has opened and grows
   // the steady-state request count with each Show more.
+  //
+  // Deliberately only this one, slow heartbeat — no faster poll while a row is settling. A
+  // faster poll here would refetch the very row `useDropDecidedProposal` just removed
+  // optimistically: search consistency for a just-written decision can lag behind the plain
+  // document GET `waitForDecision` confirms it with, so a refetch too soon after deciding reads
+  // the row as still pending and restores it (see that hook's own comment). The slow cadence
+  // gives that lag time to resolve before the next look; a faster one does not.
   const { refetch } = query;
   useEffect(() => {
     if (!enabled) {

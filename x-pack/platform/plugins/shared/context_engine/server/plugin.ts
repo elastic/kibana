@@ -49,6 +49,7 @@ import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
 import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
 import { createVerifyKiStepDefinition } from './step_types/verify_ki_step';
+import { createVerifyKi } from './step_types/verify_ki';
 import { registerStepDefinitions } from './step_types';
 import { ContextEngineAnalyticsService } from './telemetry';
 import { isContextEngineEnabledInSpace } from './utils/is_context_engine_enabled_in_space';
@@ -127,12 +128,21 @@ export class ContextEnginePlugin
       return hasAllRequested;
     };
 
-    setupDeps.workflowsExtensions.registerStepDefinition(
-      createVerifyKiStepDefinition(coreSetup, this.logger.get('context_steps'), analyticsService, {
+    const verifyKi = createVerifyKi({
+      getAuditLogger: async (request) => {
+        const [coreStart] = await coreSetup.getStartServices();
+        return coreStart.security.audit.asScoped(request);
+      },
+      workflowVerifierDeps: {
         getWorkflowsManagement: () => this.workflowsManagementApiPromise,
         checkExecutePrivilege: (request, spaceId) =>
           checkApiPrivileges(request, spaceId, WorkflowsManagementOperationPrivileges.execute),
-      })
+      },
+      analyticsService,
+      logger: this.logger.get('context_steps'),
+    });
+    setupDeps.workflowsExtensions.registerStepDefinition(
+      createVerifyKiStepDefinition(coreSetup, verifyKi)
     );
 
     coreSetup.uiSettings.registerGlobal({
@@ -255,6 +265,7 @@ export class ContextEnginePlugin
       getAiIndexService,
       isContextEngineEnabled,
       checkWritePrivilege,
+      verifyKi,
       feedbackAnalysis: {
         getAiIndexService,
         getImprovementsService,
@@ -302,6 +313,7 @@ export class ContextEnginePlugin
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
       logger: this.logger.get('routes'),
     });
+
 
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),

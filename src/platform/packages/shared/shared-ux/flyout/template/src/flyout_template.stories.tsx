@@ -468,9 +468,8 @@ export const HeaderCollapseOnScroll: Story = {
     numSections: 4,
     numSubsections: 2,
     numUnstructuredBlocks: 1,
-    // Fixed, not a control: the tab bar sits in the header's always-visible region, so the story
-    // is partly about watching it survive the collapse.
     numTabs: 3,
+    titleIcon: true,
     headerIsCollapsed: false,
   },
   render: HeaderCollapseOnScrollRender,
