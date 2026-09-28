@@ -27,7 +27,6 @@ const baseRuleData: RuleAttachmentData = {
     name: 'High CPU',
     description: 'CPU breach detection',
     tags: ['ops', 'cpu'],
-    owner: 'observability',
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '15m' },
@@ -36,9 +35,7 @@ const baseRuleData: RuleAttachmentData = {
     breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
   },
   state_transition: null,
-  created_by: 'elastic',
   created_at: '2026-04-01T00:00:00.000Z',
-  updated_by: 'elastic',
   updated_at: '2026-04-10T00:00:00.000Z',
 };
 
@@ -103,7 +100,7 @@ describe('createRuleAttachmentType', () => {
     it('returns valid for proposed rule (no id, no audit fields)', async () => {
       const proposed = {
         kind: 'alert',
-        metadata: { name: 'New', owner: 'observability' },
+        metadata: { name: 'New' },
         time_field: '@timestamp',
         schedule: { every: '1m' },
         query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
@@ -303,7 +300,7 @@ describe('createRuleAttachmentType', () => {
     it('omits description and tags lines when absent', async () => {
       const value = await formatValue({
         ...baseRuleData,
-        metadata: { name: 'Bare', owner: 'observability' },
+        metadata: { name: 'Bare' },
       });
       expect(value).not.toContain('Description:');
       expect(value).not.toContain('Tags:');

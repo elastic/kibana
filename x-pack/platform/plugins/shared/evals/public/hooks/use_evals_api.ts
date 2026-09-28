@@ -15,6 +15,7 @@ import {
   EVALS_EXPERIMENT_URL,
   EVALS_EXPERIMENT_SCORES_URL,
   EVALS_EXPERIMENT_DATASET_EXAMPLES_URL,
+  EVALS_EXPERIMENT_EXAMPLE_DETAILS_URL,
   EVALS_EXPERIMENTS_COMPARE_URL,
   EVALS_EXAMPLE_SCORES_URL,
   EVALS_TRACE_URL,
@@ -47,6 +48,7 @@ import {
   type GetEvaluationExperimentResponse,
   type GetEvaluationExperimentScoresResponse,
   type GetEvaluationExperimentDatasetExamplesResponse,
+  type GetEvaluationExperimentExampleDetailsResponse,
   type GetExampleScoresResponse,
   type GetTraceResponse,
   type GetTracingProjectsResponse,
@@ -588,6 +590,7 @@ export const useCompareExperiments = (
 };
 
 interface ExperimentDatasetExamplesOptions {
+  includePreviews?: boolean;
   refetchInterval?: number | false;
   staleTime?: number;
 }
@@ -599,17 +602,26 @@ export const useExperimentDatasetExamples = (
   options: ExperimentDatasetExamplesOptions = {}
 ) => {
   const { services } = useKibana();
+  const includePreviews = options.includePreviews ?? false;
 
   return useQuery({
-    queryKey: queryKeys.experiments.datasetExamples(experimentId, datasetId, executionId),
+    queryKey: queryKeys.experiments.datasetExamples(
+      experimentId,
+      datasetId,
+      executionId,
+      includePreviews
+    ),
     queryFn: async (): Promise<GetEvaluationExperimentDatasetExamplesResponse> => {
       const url = EVALS_EXPERIMENT_DATASET_EXAMPLES_URL.replace(
         '{experimentId}',
         encodeURIComponent(experimentId)
       ).replace('{datasetId}', encodeURIComponent(datasetId));
-      const query: Record<string, string> = {};
+      const query: Record<string, string | boolean> = {};
       if (executionId) {
         query.execution_id = executionId;
+      }
+      if (includePreviews) {
+        query.include_previews = true;
       }
       return services.http!.get<GetEvaluationExperimentDatasetExamplesResponse>(url, {
         query,
@@ -617,8 +629,57 @@ export const useExperimentDatasetExamples = (
       });
     },
     enabled: experimentId.length > 0 && datasetId.length > 0,
-    refetchInterval: options.refetchInterval,
-    staleTime: options.staleTime,
+    refetchInterval: includePreviews ? false : options.refetchInterval,
+    staleTime: includePreviews ? Infinity : options.staleTime,
+  });
+};
+
+interface ExperimentExampleDetailsOptions {
+  enabled?: boolean;
+}
+
+export const useExperimentExampleDetails = (
+  experimentId: string,
+  datasetId: string,
+  exampleId: string,
+  repetitionIndex: number,
+  executionId?: string,
+  options: ExperimentExampleDetailsOptions = {}
+) => {
+  const { services } = useKibana();
+
+  return useQuery({
+    queryKey: queryKeys.experiments.exampleDetails(
+      experimentId,
+      datasetId,
+      exampleId,
+      repetitionIndex,
+      executionId
+    ),
+    queryFn: async (): Promise<GetEvaluationExperimentExampleDetailsResponse> => {
+      const url = EVALS_EXPERIMENT_EXAMPLE_DETAILS_URL.replace(
+        '{experimentId}',
+        encodeURIComponent(experimentId)
+      )
+        .replace('{datasetId}', encodeURIComponent(datasetId))
+        .replace('{exampleId}', encodeURIComponent(exampleId))
+        .replace('{repetitionIndex}', String(repetitionIndex));
+      const query: Record<string, string> = {};
+      if (executionId) {
+        query.execution_id = executionId;
+      }
+      return services.http!.get<GetEvaluationExperimentExampleDetailsResponse>(url, {
+        query,
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+    enabled:
+      (options.enabled ?? false) &&
+      experimentId.length > 0 &&
+      datasetId.length > 0 &&
+      exampleId.length > 0,
+    staleTime: Infinity,
+    refetchInterval: false,
   });
 };
 

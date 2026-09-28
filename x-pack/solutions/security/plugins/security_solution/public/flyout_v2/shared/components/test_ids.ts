@@ -63,3 +63,6 @@ export const FLYOUT_HEADER_FLYOUT_TYPE_OVERLAY_OPTION_TEST_ID =
   `${PREFIX}HeaderFlyoutTypeOverlayOption` as const;
 export const FLYOUT_HEADER_FLYOUT_TYPE_PUSH_OPTION_TEST_ID =
   `${PREFIX}HeaderFlyoutTypePushOption` as const;
+export const FLYOUT_HEADER_FLYOUT_SIZE_TITLE_TEST_ID = `${PREFIX}HeaderFlyoutSizeTitle` as const;
+export const FLYOUT_HEADER_FLYOUT_SIZE_RESET_BUTTON_TEST_ID =
+  `${PREFIX}HeaderFlyoutSizeResetButton` as const;

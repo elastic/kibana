@@ -20,7 +20,7 @@ import { getEmptyCellValue } from '../empty_value';
 import { CaseDetailsLink } from '../links';
 import { TruncatedText } from '../truncated_text';
 import { SeverityHealth } from '../severity/config';
-import { useCasesColumnsConfiguration } from '../all_cases/use_cases_columns_configuration';
+import { useCasesColumnsConfiguration } from '../all_cases/hooks/use_cases_columns_configuration';
 import * as i18n from './translations';
 
 type SimilarCasesColumns =

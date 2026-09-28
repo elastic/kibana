@@ -89,6 +89,8 @@ describe('MaintenanceWindowClient - archive', () => {
         expirationDate: new Date().toISOString(),
         updatedAt: updatedMetadata.updatedAt,
         updatedBy: updatedMetadata.updatedBy,
+        // archive re-encodes via decode→transformScope; absent scope defaults to alertingEnabled:true, alerting:null
+        scope: { alertingEnabled: true, alerting: null },
       },
       { version: '123' }
     );
@@ -162,6 +164,7 @@ describe('MaintenanceWindowClient - archive', () => {
         expirationDate: moment.utc().add(1, 'year').toISOString(),
         updatedAt: updatedMetadata.updatedAt,
         updatedBy: updatedMetadata.updatedBy,
+        scope: { alertingEnabled: true, alerting: null },
       },
       { version: '123' }
     );

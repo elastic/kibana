@@ -18,14 +18,12 @@ import { addMonitor } from '../../../common/fixtures/monitors';
  * Black-box characterization of the `POST /api/synthetics/monitors` request
  * validation, pinning the HTTP contract before the io-ts → zod migration.
  *
- * The monitor-create path validates the body in the route *handler* today
- * (`schema.any()` body + io-ts `validateMonitor`). Phase 4 of the migration
- * moves this to route-level zod validation, so these tests assert the parts
- * that must not change: a malformed field yields `400` (never `500`) with an
- * error body, while the same payload with the field corrected is accepted.
- * Assertions stay on status codes and message presence — exact wording will
- * change when validation moves to the platform router and is intentionally not
- * pinned here (matching the SLO migration's approach).
+ * The monitor-create path validates the body at the route (`createMonitorRequestBody`)
+ * and again in the handler (`normalizeAPIConfig` + `validateMonitor`). These tests
+ * assert the parts that must not change: a malformed field yields `400` (never `500`)
+ * with an error body, while the same payload with the field corrected is accepted.
+ * Assertions stay on status codes and message presence — exact wording is not pinned
+ * (matching the SLO migration's approach).
  */
 apiTest.describe(
   'AddMonitorPublicAPI request validation',

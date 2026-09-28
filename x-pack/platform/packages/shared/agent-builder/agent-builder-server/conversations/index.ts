@@ -6,7 +6,8 @@
  */
 
 export type {
-  ConversationAddEventsRequest,
   ConversationCreatePublicRequest,
   ConversationPublicClient,
+  ConversationUpdatePublicRequest,
+  ConversationAddEventsRequest,
 } from './types';

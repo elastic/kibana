@@ -42,6 +42,15 @@ const baseParams = {
 };
 
 describe('buildWorkflowExecutionDocument', () => {
+  it('preserves saved-child classification during a test run', () => {
+    expect(
+      buildWorkflowExecutionDocument({
+        ...baseParams,
+        workflow: { ...baseWorkflow, isTestRun: true, isEphemeral: false },
+      })
+    ).toMatchObject({ isTestRun: true, isEphemeral: false });
+  });
+
   it('sets version when workflow has version', () => {
     const workflowExecution = buildWorkflowExecutionDocument({
       ...baseParams,

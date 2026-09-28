@@ -18,6 +18,11 @@ import {
  * Keep this focused — unit tests of the API validator should mock validateYaraRule.
  */
 describe('validateYaraRule (libyara WASM)', () => {
+  // Pay the one-time real-WASM instantiation in setup so it isn't charged to the first test's 5s budget.
+  beforeAll(async () => {
+    await loadYaraValidateModule();
+  }, 30_000);
+
   afterEach(() => {
     setYaraLogger(undefined);
   });

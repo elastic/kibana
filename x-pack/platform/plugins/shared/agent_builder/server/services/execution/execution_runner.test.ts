@@ -107,13 +107,14 @@ const createModelProviderMock = () => ({
 
 const createDeps = ({
   conversationClient,
-  getConversationRoundAuthor = jest.fn().mockResolvedValue(undefined),
+  analyticsService,
 }: {
   conversationClient: ReturnType<typeof createConversationClientMock>;
-  getConversationRoundAuthor?: jest.Mock;
+  analyticsService?: { reportRoundComplete?: jest.Mock; reportRoundError?: jest.Mock };
 }) =>
   ({
     logger: loggingSystemMock.createLogger(),
+    analyticsService,
     runAgent: jest.fn(),
     agentService: {
       getRegistry: jest
@@ -124,7 +125,7 @@ const createDeps = ({
       reportExecution: jest.fn().mockResolvedValue(undefined),
     },
     conversationService: {
-      getConversationRoundAuthor,
+      getScopedClientAsUser: jest.fn().mockResolvedValue(conversationClient),
     },
     uiSettings: {
       asScopedToClient: jest.fn().mockReturnValue({}),
@@ -203,7 +204,15 @@ const runHandle = ({
     execution: {
       executionId: 'execution-1',
       executionMode: AgentExecutionMode.conversation,
-      agentParams,
+      owner: { id: 'owner-1', username: 'owner' },
+      // what the execution service stores: the round it opened and how it resolved the conversation
+      agentParams: {
+        conversationId: 'conversation-1',
+        roundId: 'round-1',
+        conversationOperation: 'UPDATE',
+        receivedAt: '2024-01-01T00:00:00.000Z',
+        ...agentParams,
+      },
     } as never,
     deps: createDeps({ conversationClient }),
     request: { headers: {} } as never,
@@ -267,9 +276,13 @@ describe('handleAgentExecution', () => {
       execution: {
         executionId: 'execution-1',
         executionMode: AgentExecutionMode.conversation,
+        owner: { id: 'owner-1', username: 'owner' },
         agentParams: {
           agentId: 'test-agent',
           conversationId: 'conversation-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
+          receivedAt: '2024-01-01T00:00:00.000Z',
           nextInput: { message: 'Hello' },
         },
       } as never,
@@ -306,7 +319,7 @@ describe('handleAgentExecution', () => {
       origin,
     });
     const conversationClient = createConversationClientMock();
-    conversationClient.getByOrigin.mockResolvedValue(conversation);
+    conversationClient.get.mockResolvedValue(conversation);
     conversationClient.update.mockResolvedValue(conversation);
 
     const roundCompleteEvent: ChatEvent = {
@@ -330,8 +343,13 @@ describe('handleAgentExecution', () => {
     const execution = {
       executionId: 'execution-1',
       executionMode: AgentExecutionMode.conversation,
+      owner: { id: 'owner-1', username: 'owner' },
       agentParams: {
         agentId: 'test-agent',
+        conversationId: 'conversation-from-origin',
+        conversationOperation: 'UPDATE',
+        receivedAt: '2024-01-01T00:00:00.000Z',
+        roundId: 'round-1',
         origin,
         nextInput: {
           message: 'Continue this thread',
@@ -351,7 +369,7 @@ describe('handleAgentExecution', () => {
           reportExecution,
         },
         conversationService: {
-          getConversationRoundAuthor: jest.fn().mockResolvedValue(undefined),
+          getScopedClientAsUser: jest.fn().mockResolvedValue(conversationClient),
         },
         uiSettings: {
           asScopedToClient: jest.fn().mockReturnValue({}),
@@ -371,6 +389,95 @@ describe('handleAgentExecution', () => {
         conversationId: 'conversation-from-origin',
       })
     );
+  });
+
+  it('rejects a record written before the conversation was resolved on the request node', async () => {
+    const conversationClient = createConversationClientMock();
+    stubResolveServices(conversationClient);
+
+    await expect(
+      runHandle({
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: undefined,
+          roundId: undefined,
+          conversationOperation: undefined,
+          nextInput: { message: 'Hello' },
+        },
+        conversationClient,
+      })
+    ).rejects.toThrow('Execution is missing required conversation parameters');
+
+    // Nothing is written for a record it cannot run, so the request can simply be sent again.
+    expect(conversationClient.get).not.toHaveBeenCalled();
+    expect(conversationClient.create).not.toHaveBeenCalled();
+    expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+  });
+
+  it('rejects a record that does not say who it runs for', async () => {
+    const conversationClient = createConversationClientMock();
+    stubResolveServices(conversationClient);
+
+    await expect(
+      handleAgentExecution({
+        execution: {
+          executionId: 'execution-1',
+          executionMode: AgentExecutionMode.conversation,
+          agentParams: {
+            agentId: 'test-agent',
+            conversationId: 'conversation-1',
+            roundId: 'round-1',
+            conversationOperation: 'UPDATE',
+            receivedAt: '2024-01-01T00:00:00.000Z',
+            nextInput: { message: 'Hello' },
+          },
+        } as never,
+        deps: createDeps({ conversationClient }),
+        request: { headers: {} } as never,
+        abortSignal: new AbortController().signal,
+      })
+    ).rejects.toThrow('Execution is missing required conversation parameters');
+  });
+
+  it('acts as the recorded owner, without their admin rights', async () => {
+    const conversation = createEmptyConversation({
+      id: 'conversation-1',
+      agent_id: 'test-agent',
+    });
+    const conversationClient = createConversationClientMock();
+    conversationClient.get.mockResolvedValue(conversation);
+    conversationClient.replaceRoundEvents.mockResolvedValue(conversation);
+    mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()]);
+    stubResolveServices(conversationClient);
+
+    const deps = createDeps({ conversationClient });
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.conversation,
+        owner: { id: 'profile-alice', username: 'alice' },
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
+          receivedAt: '2024-01-01T00:00:00.000Z',
+          nextInput: { message: 'Hello' },
+        },
+      } as never,
+      deps,
+      request: { headers: {} } as never,
+      abortSignal: new AbortController().signal,
+    });
+    await lastValueFrom(events$.pipe(toArray()));
+
+    expect(
+      (deps as unknown as { conversationService: { getScopedClientAsUser: jest.Mock } })
+        .conversationService.getScopedClientAsUser
+    ).toHaveBeenCalledWith({
+      request: { headers: {} },
+      user: { id: 'profile-alice', username: 'alice', isAdmin: false },
+    });
   });
 
   describe('round origin attribution', () => {
@@ -415,10 +522,14 @@ describe('handleAgentExecution', () => {
         execution: {
           executionId: 'execution-1',
           executionMode: AgentExecutionMode.conversation,
+          owner: { id: 'owner-1', username: 'owner' },
           agentParams: {
             agentId: 'test-agent',
             origin: executionOrigin,
-            conversationId: executionOrigin ? undefined : 'conversation-from-origin',
+            conversationId: 'conversation-from-origin',
+            conversationOperation: 'UPDATE',
+            receivedAt: '2024-01-01T00:00:00.000Z',
+            roundId: 'round-1',
             nextInput: { message: 'Continue this thread' },
           },
         } as never,
@@ -430,7 +541,7 @@ describe('handleAgentExecution', () => {
       return lastValueFrom(events$.pipe(toArray()));
     };
 
-    it('resolves the conversation by external id only and forwards the full origin to the agent run', async () => {
+    it('reads the conversation the service resolved and forwards the full origin to the agent run', async () => {
       const { conversationClient, deps } = setup({
         roundCompleteEvent: {
           type: ChatEventType.roundComplete,
@@ -440,15 +551,14 @@ describe('handleAgentExecution', () => {
 
       await runExecution({ deps, executionOrigin: origin });
 
-      expect(conversationClient.getByOrigin).toHaveBeenCalledWith({
-        external_conversation_id: origin.external_conversation_id,
-      });
+      expect(conversationClient.get).toHaveBeenCalledWith('conversation-from-origin');
+      expect(conversationClient.getByOrigin).not.toHaveBeenCalled();
       expect(executeAgentMock).toHaveBeenCalledWith(expect.objectContaining({ origin }));
     });
   });
 
   describe('round author attribution', () => {
-    it('forwards the resolved round author to the agent run', async () => {
+    it('attributes the round to the user the execution was created for', async () => {
       const author = { id: 'test-user-id', username: 'test_user' };
       const conversation = createEmptyConversation({
         id: 'conversation-1',
@@ -457,6 +567,7 @@ describe('handleAgentExecution', () => {
       const conversationClient = createConversationClientMock();
       conversationClient.get.mockResolvedValue(conversation);
       conversationClient.update.mockResolvedValue(conversation);
+      conversationClient.getAuthor.mockReturnValue(author);
 
       executeAgentMock.mockReturnValue(
         of({
@@ -470,16 +581,19 @@ describe('handleAgentExecution', () => {
         modelProvider: createModelProviderMock(),
       } as never);
 
-      const getConversationRoundAuthor = jest.fn().mockResolvedValue(author);
-      const deps = createDeps({ conversationClient, getConversationRoundAuthor });
+      const deps = createDeps({ conversationClient });
 
       const events$ = await handleAgentExecution({
         execution: {
           executionId: 'execution-1',
           executionMode: AgentExecutionMode.conversation,
+          owner: author,
           agentParams: {
             agentId: 'test-agent',
             conversationId: 'conversation-1',
+            roundId: 'round-1',
+            conversationOperation: 'UPDATE',
+            receivedAt: '2024-01-01T00:00:00.000Z',
             nextInput: { message: 'Hello' },
           },
         } as never,
@@ -490,7 +604,6 @@ describe('handleAgentExecution', () => {
 
       await lastValueFrom(events$.pipe(toArray()));
 
-      expect(getConversationRoundAuthor).toHaveBeenCalledTimes(1);
       expect(executeAgentMock).toHaveBeenCalledWith(expect.objectContaining({ author }));
     });
   });
@@ -506,6 +619,7 @@ describe('handleAgentExecution', () => {
       const conversationClient = createConversationClientMock();
       conversationClient.get.mockResolvedValue(conversation);
       conversationClient.update.mockResolvedValue(conversation);
+      conversationClient.getAuthor.mockReturnValue(author);
 
       executeAgentMock.mockReturnValue(
         of({
@@ -523,16 +637,17 @@ describe('handleAgentExecution', () => {
         execution: {
           executionId: 'execution-1',
           executionMode: AgentExecutionMode.conversation,
+          owner: author,
           agentParams: {
             agentId: 'test-agent',
             conversationId: 'conversation-1',
+            roundId: 'round-1',
+            conversationOperation: 'UPDATE',
+            receivedAt: '2024-01-01T00:00:00.000Z',
             nextInput: { message: 'Hello' },
           },
         } as never,
-        deps: createDeps({
-          conversationClient,
-          getConversationRoundAuthor: jest.fn().mockResolvedValue(author),
-        }),
+        deps: createDeps({ conversationClient }),
         request: { headers: {} } as never,
         abortSignal: new AbortController().signal,
       });
@@ -545,7 +660,7 @@ describe('handleAgentExecution', () => {
       expect(mockSpanSetAttribute).not.toHaveBeenCalledWith(UserAttributes.UserId, 'owner-id');
     });
 
-    it('defers private CREATE identity until ConversationCreatedEvent', async () => {
+    it('reports the stored owner of a conversation this request created', async () => {
       const createdUser = { id: 'created-user-id', username: 'created_user' };
       const createdConversation = createEmptyConversation({
         id: 'new-conversation',
@@ -553,16 +668,31 @@ describe('handleAgentExecution', () => {
         user: createdUser,
       });
       const conversationClient = createConversationClientMock();
-      conversationClient.create.mockResolvedValue(createdConversation);
+      conversationClient.get.mockResolvedValue(createdConversation);
       conversationClient.appendEvents.mockResolvedValue(createdConversation);
       conversationClient.replaceRoundEvents.mockResolvedValue(createdConversation);
 
       mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()]);
       stubResolveServices(conversationClient);
 
-      const events$ = await runHandle({
-        agentParams: { agentId: 'test-agent', nextInput: { message: 'Hello' } },
-        conversationClient,
+      const events$ = await handleAgentExecution({
+        execution: {
+          executionId: 'execution-1',
+          executionMode: AgentExecutionMode.conversation,
+          // an API key caller with no profile id: the round carries no author
+          owner: { username: 'created_user' },
+          agentParams: {
+            agentId: 'test-agent',
+            conversationId: 'new-conversation',
+            roundId: 'round-1',
+            conversationOperation: 'CREATE',
+            receivedAt: '2024-01-01T00:00:00.000Z',
+            nextInput: { message: 'Hello' },
+          },
+        } as never,
+        deps: createDeps({ conversationClient }),
+        request: { headers: {} } as never,
+        abortSignal: new AbortController().signal,
       });
 
       await lastValueFrom(events$.pipe(toArray()));
@@ -573,64 +703,25 @@ describe('handleAgentExecution', () => {
       expect(mockSpanSetAttribute).toHaveBeenCalledWith(UserAttributes.UserName, 'created_user');
     });
 
-    it('persists readOnly on the conversation it creates', async () => {
+    it('reports no identity for a run whose conversation is never stored', async () => {
       const conversationClient = createConversationClientMock();
-      const createdConversation = createEmptyConversation({
-        id: 'new-conversation',
-        read_only: true,
-      });
-      conversationClient.create.mockResolvedValue(createdConversation);
-      conversationClient.appendEvents.mockResolvedValue(createdConversation);
-      conversationClient.replaceRoundEvents.mockResolvedValue(createdConversation);
-
       mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()]);
-      stubResolveServices(conversationClient);
-
-      const events$ = await runHandle({
-        agentParams: { agentId: 'test-agent', nextInput: { message: 'Hello' }, readOnly: true },
-        conversationClient,
-      });
-
-      await lastValueFrom(events$.pipe(toArray()));
-
-      expect(conversationClient.create).toHaveBeenCalledWith(
-        expect.objectContaining({ read_only: true })
-      );
-      expect(conversationClient.delete).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('receipt-time input persistence (two-phase)', () => {
-    it('appends the raw user_message before any agent event flows through the persistence stream', async () => {
-      const conversation = createEmptyConversation({
-        id: 'conversation-1',
-        agent_id: 'test-agent',
-      });
-      const conversationClient = createConversationClientMock();
-      conversationClient.get.mockResolvedValue(conversation);
-      conversationClient.appendEvents.mockResolvedValue(conversation);
-      conversationClient.replaceRoundEvents.mockResolvedValue(conversation);
-
-      mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()], 'asyncShared');
       stubResolveServices(conversationClient);
 
       const events$ = await runHandle({
         agentParams: {
           agentId: 'test-agent',
-          conversationId: 'conversation-1',
-          nextInput: { message: 'raw input' },
+          nextInput: { message: 'Hello' },
+          storeConversation: false,
         },
         conversationClient,
       });
 
       await lastValueFrom(events$.pipe(toArray()));
 
-      const [firstAppendCall] = conversationClient.appendEvents.mock.calls;
-      expect(firstAppendCall[0].events).toHaveLength(1);
-      expect(firstAppendCall[0].events[0]).toMatchObject({
-        id: 'round-1::user_message',
-        data: { message: 'raw input' },
-      });
+      // The placeholder owner is nobody, and no write will ever resolve one.
+      expect(mockSpanSetAttribute).not.toHaveBeenCalledWith(UserAttributes.UserId, 'unknown');
+      expect(mockSpanSetAttribute).not.toHaveBeenCalledWith(UserAttributes.UserName, 'unknown');
     });
   });
 
@@ -666,6 +757,9 @@ describe('handleAgentExecution', () => {
         agentParams: {
           agentId: 'test-agent',
           conversationId: 'conversation-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
+          receivedAt: '2024-01-01T00:00:00.000Z',
           nextInput: { message: 'Hello' },
         },
         conversationClient,
@@ -687,6 +781,33 @@ describe('handleAgentExecution', () => {
         execution_id: 'round-1::execution',
         trigger_event_id: 'round-1::user_message',
       });
+    });
+
+    it('resolves a placeholder when the run does not store its conversation', async () => {
+      const conversationClient = createConversationClientMock();
+      mockAgentStream(
+        [makeRoundStartedEvent('round-1'), makeRoundCompleteEvent('round-1')],
+        'asyncShared'
+      );
+      stubResolveServices(conversationClient);
+
+      const events$ = await runHandle({
+        agentParams: {
+          agentId: 'test-agent',
+          nextInput: { message: 'Hello' },
+          storeConversation: false,
+        },
+        conversationClient,
+      });
+
+      await lastValueFrom(events$.pipe(toArray()));
+
+      // Nothing was written for this run, so there is no stored document to read back.
+      expect(conversationClient.get).not.toHaveBeenCalled();
+      expect(conversationClient.create).not.toHaveBeenCalled();
+      expect(executeAgentMock).toHaveBeenCalledWith(
+        expect.objectContaining({ conversation: expect.objectContaining({ operation: 'CREATE' }) })
+      );
     });
 
     it('skips the SSE projection when storeConversation is false (async path only)', async () => {
@@ -731,6 +852,9 @@ describe('handleAgentExecution', () => {
         agentParams: {
           agentId: 'test-agent',
           conversationId: 'conversation-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
+          receivedAt: '2024-01-01T00:00:00.000Z',
           nextInput: { message: 'Hello' },
         },
         conversationClient,
@@ -739,8 +863,8 @@ describe('handleAgentExecution', () => {
       await expect(lastValueFrom(events$.pipe(toArray()))).rejects.toThrow();
       await flushMicrotasks();
 
-      // The receipt-time user_message write, then the interruption rewrite of the round; no delete.
-      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+      // The message was written before the run started, so the failure only rewrites the round.
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
       expect(conversationClient.replaceRoundEvents).toHaveBeenCalledTimes(1);
       expect(conversationClient.replaceRoundEvents.mock.calls[0][0].roundId).toBe('round-1');
       expect(conversationClient.delete).not.toHaveBeenCalled();
@@ -748,9 +872,7 @@ describe('handleAgentExecution', () => {
 
     it('keeps the conversation on CREATE when the first round fails before completing', async () => {
       const conversationClient = createConversationClientMock();
-      conversationClient.create.mockResolvedValue(
-        createEmptyConversation({ id: 'new-conversation' })
-      );
+      conversationClient.get.mockResolvedValue(createEmptyConversation({ id: 'new-conversation' }));
       conversationClient.appendEvents.mockResolvedValue(
         createEmptyConversation({ id: 'new-conversation' })
       );
@@ -759,7 +881,13 @@ describe('handleAgentExecution', () => {
       stubResolveServices(conversationClient);
 
       const events$ = await runHandle({
-        agentParams: { agentId: 'test-agent', nextInput: { message: 'Hello' } },
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'new-conversation',
+          conversationOperation: 'CREATE',
+          receivedAt: '2024-01-01T00:00:00.000Z',
+          nextInput: { message: 'Hello' },
+        },
         conversationClient,
       });
 
@@ -770,35 +898,6 @@ describe('handleAgentExecution', () => {
       // is recorded on it.
       expect(conversationClient.delete).not.toHaveBeenCalled();
       expect(conversationClient.replaceRoundEvents).toHaveBeenCalledTimes(1);
-    });
-
-    it('awaits the receipt write before the agent starts on CREATE (no tool can run before the input is stored)', async () => {
-      const conversationClient = createConversationClientMock();
-      let resolveReceipt!: (value: ReturnType<typeof createEmptyConversation>) => void;
-      conversationClient.create.mockReturnValue(
-        new Promise((resolve) => {
-          resolveReceipt = resolve;
-        })
-      );
-
-      mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()], 'asyncShared');
-      stubResolveServices(conversationClient);
-
-      // Kick off the handler without awaiting — the receipt write (create) is still pending.
-      const handlePromise = runHandle({
-        agentParams: { agentId: 'test-agent', nextInput: { message: 'Hello' } },
-        conversationClient,
-      });
-      await flushMicrotasks();
-
-      // The agent is not started until the receipt lands.
-      expect(conversationClient.create).toHaveBeenCalledTimes(1);
-      expect(executeAgentMock).not.toHaveBeenCalled();
-
-      resolveReceipt(createEmptyConversation({ id: 'new-conversation' }));
-      await handlePromise;
-
-      expect(executeAgentMock).toHaveBeenCalledTimes(1);
     });
   });
 });
@@ -869,6 +968,9 @@ describe('handleAgentExecution — interrupted executions', () => {
       agentParams: {
         agentId: 'test-agent',
         conversationId: 'conversation-1',
+        roundId: 'round-1',
+        conversationOperation: 'UPDATE',
+        receivedAt: '2024-01-01T00:00:00.000Z',
         nextInput: { message: 'Hello' },
       },
       conversationClient,
@@ -907,9 +1009,13 @@ describe('handleAgentExecution — interrupted executions', () => {
       execution: {
         executionId: 'execution-1',
         executionMode: AgentExecutionMode.conversation,
+        owner: { id: 'owner-1', username: 'owner' },
         agentParams: {
           agentId: 'test-agent',
           conversationId: 'conversation-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
+          receivedAt: '2024-01-01T00:00:00.000Z',
           nextInput: { message: 'Hello' },
         },
       } as never,
@@ -945,9 +1051,13 @@ describe('handleAgentExecution — interrupted executions', () => {
       execution: {
         executionId: 'execution-1',
         executionMode: AgentExecutionMode.conversation,
+        owner: { id: 'owner-1', username: 'owner' },
         agentParams: {
           agentId: 'test-agent',
           conversationId: 'conversation-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
+          receivedAt: '2024-01-01T00:00:00.000Z',
           nextInput: { message: 'Hello' },
         },
       } as never,
@@ -1007,6 +1117,9 @@ describe('handleAgentExecution — interrupted executions', () => {
       agentParams: {
         agentId: 'test-agent',
         conversationId: 'conversation-1',
+        roundId: 'round-1',
+        conversationOperation: 'UPDATE',
+        receivedAt: '2024-01-01T00:00:00.000Z',
         nextInput: { message: 'Hello' },
       },
       conversationClient,
@@ -1026,6 +1139,50 @@ describe('handleAgentExecution — interrupted executions', () => {
     expect(seen.map((event) => event.type)).toContain(TimelineEventType.executionFailed);
   });
 
+  it('a service/connector resolution failure is caught by the same guard as a later setup failure', async () => {
+    // resolveServices runs first in the runner, before the agent registry lookup covered above:
+    // it must be inside the same guard, or a rejection here leaves the receipt-time message with
+    // no failure terminal next to it.
+    const conversationClient = echoingClient();
+    mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()], 'asyncShared');
+    resolveServicesMock.mockRejectedValue(new Error('no connector available'));
+    const deps = createDeps({ conversationClient });
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.conversation,
+        owner: { id: 'owner-1', username: 'owner' },
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
+          receivedAt: '2024-01-01T00:00:00.000Z',
+          nextInput: { message: 'Hello' },
+        },
+      } as never,
+      deps: deps as never,
+      request: { headers: {} } as never,
+      abortSignal: new AbortController().signal,
+    });
+    const { seen, thrown } = await collect(events$);
+
+    expect(seen.map((event) => event.type)).toEqual([TimelineEventType.executionFailed]);
+    expect(thrown).toMatchObject({
+      code: AgentBuilderErrorCode.internalError,
+      message: 'Error executing agent: no connector available',
+    });
+
+    expect(conversationClient.replaceRoundEvents).toHaveBeenCalledTimes(1);
+    const [write] = conversationClient.replaceRoundEvents.mock.calls[0];
+    expect(write.events.map((event) => event.id)).toEqual([
+      'round-1::user_message',
+      'round-1::execution_started',
+      'round-1::execution_failed',
+    ]);
+  });
+
   it('setup failure after the receipt write: minimal execution_failed persisted, streamed, then the normalised error', async () => {
     const conversationClient = echoingClient();
     mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()], 'asyncShared');
@@ -1037,9 +1194,14 @@ describe('handleAgentExecution — interrupted executions', () => {
       execution: {
         executionId: 'execution-1',
         executionMode: AgentExecutionMode.conversation,
+        owner: { id: 'owner-1', username: 'owner' },
         agentParams: {
           agentId: 'test-agent',
           conversationId: 'conversation-1',
+          // The execution service opens the round and writes its message before dispatching.
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
+          receivedAt: '2024-01-01T00:00:00.000Z',
           nextInput: { message: 'Hello' },
         },
       } as never,
@@ -1056,8 +1218,8 @@ describe('handleAgentExecution — interrupted executions', () => {
       message: 'Error executing agent: registry down',
     });
 
-    // receipt write, then the minimal interruption projection
-    expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+    // only the minimal interruption projection: the message was written before the run
+    expect(conversationClient.appendEvents).not.toHaveBeenCalled();
     expect(conversationClient.replaceRoundEvents).toHaveBeenCalledTimes(1);
     const [write] = conversationClient.replaceRoundEvents.mock.calls[0];
     expect(write.events.map((event) => event.id)).toEqual([
@@ -1065,6 +1227,8 @@ describe('handleAgentExecution — interrupted executions', () => {
       'round-1::execution_started',
       'round-1::execution_failed',
     ]);
+    // the rebuilt message keeps the receipt time, not the time this run picked the record up
+    expect(write.events[0].created_at).toBe('2024-01-01T00:00:00.000Z');
   });
 
   it('setup-time abort carries the recorded abort reason into execution_aborted', async () => {
@@ -1082,9 +1246,13 @@ describe('handleAgentExecution — interrupted executions', () => {
       execution: {
         executionId: 'execution-1',
         executionMode: AgentExecutionMode.conversation,
+        owner: { id: 'owner-1', username: 'owner' },
         agentParams: {
           agentId: 'test-agent',
           conversationId: 'conversation-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
+          receivedAt: '2024-01-01T00:00:00.000Z',
           nextInput: { message: 'Hello' },
         },
       } as never,
@@ -1133,9 +1301,13 @@ describe('handleAgentExecution — interrupted executions', () => {
       execution: {
         executionId: 'execution-1',
         executionMode: AgentExecutionMode.conversation,
+        owner: { id: 'owner-1', username: 'owner' },
         agentParams: {
           agentId: 'test-agent',
           conversationId: 'conversation-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
+          receivedAt: '2024-01-01T00:00:00.000Z',
           nextInput: { prompts: {} },
         },
       } as never,
@@ -1155,7 +1327,101 @@ describe('handleAgentExecution — interrupted executions', () => {
       'round-1::execution::1::execution_started',
       'round-1::execution::1::execution_failed',
     ]);
-    expect(write).not.toHaveProperty('status');
+    // the interrupted resume consumed the prompt: the round no longer awaits it
+    expect(write.status).toBe(ConversationRoundStatus.completed);
+  });
+
+  it('failure on a HITL resume: the round error keeps the paused round origin the request omits', async () => {
+    const conversationClient = echoingClient();
+    const paused = {
+      ...createEmptyConversation({ id: 'conversation-1', agent_id: 'test-agent' }),
+      rounds: [
+        createRound({
+          id: 'round-1',
+          status: ConversationRoundStatus.awaitingPrompt,
+          origin: { type: ConversationOriginType.Slack },
+        }),
+      ],
+    };
+    conversationClient.get.mockResolvedValue(paused);
+    stubResolveServices(conversationClient);
+    mockAgentStream([makeRoundInterruptedEvent()], 'asyncShared', new Error('llm exploded'));
+
+    const reportRoundError = jest.fn();
+    const deps = createDeps({ conversationClient, analyticsService: { reportRoundError } });
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.conversation,
+        owner: { id: 'owner-1', username: 'owner' },
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
+          receivedAt: '2024-01-01T00:00:00.000Z',
+          nextInput: { prompts: {} },
+        },
+      } as never,
+      deps: deps as never,
+      request: { headers: {} } as never,
+      abortSignal: new AbortController().signal,
+    });
+    const { thrown } = await collect(events$);
+
+    expect(thrown).toMatchObject({ code: AgentBuilderErrorCode.internalError });
+    expect(reportRoundError).toHaveBeenCalledWith(
+      expect.objectContaining({ roundOrigin: ConversationOriginType.Slack })
+    );
+  });
+
+  it('failure on a fresh round: a completed round origin is not carried over to the new round', async () => {
+    const conversationClient = echoingClient();
+    const slackConversation = {
+      ...createEmptyConversation({ id: 'conversation-1', agent_id: 'test-agent' }),
+      rounds: [
+        createRound({
+          id: 'round-1',
+          status: ConversationRoundStatus.completed,
+          origin: { type: ConversationOriginType.Slack },
+        }),
+      ],
+    };
+    conversationClient.get.mockResolvedValue(slackConversation);
+    stubResolveServices(conversationClient);
+    mockAgentStream(
+      [makeRoundStartedEvent(), makeRoundInterruptedEvent()],
+      'asyncShared',
+      new Error('llm exploded')
+    );
+
+    const reportRoundError = jest.fn();
+    const deps = createDeps({ conversationClient, analyticsService: { reportRoundError } });
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.conversation,
+        owner: { id: 'owner-1', username: 'owner' },
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
+          receivedAt: '2024-01-01T00:00:00.000Z',
+          nextInput: { message: 'Hello' },
+        },
+      } as never,
+      deps: deps as never,
+      request: { headers: {} } as never,
+      abortSignal: new AbortController().signal,
+    });
+    await collect(events$);
+
+    expect(reportRoundError).toHaveBeenCalledWith(
+      expect.objectContaining({ roundOrigin: undefined })
+    );
   });
 
   it('storeConversation=false: nothing is written and the error surfaces unchanged in kind', async () => {

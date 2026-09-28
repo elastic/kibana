@@ -1,5 +1,5 @@
 {
-  "sha1": "ebb85a9c78b43996217d278c4181288b41c9d74c",
+  "sha1": "6faaff774dd19bb7720227747de552ce02d0989d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -52,6 +52,58 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_creation.spec.ts",
         "line": 71,
         "column": 15
+      }
+    },
+    {
+      "id": "3645667f9344597-81036eae32087b8",
+      "title": "Lens chart style settings creates a multi-axis bar chart, enables value labels, and overrides the left axis",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_style_settings.spec.ts",
+        "line": 16,
+        "column": 13
+      }
+    },
+    {
+      "id": "3645667f9344597-70bd3b624f04ce3",
+      "title": "Lens chart style settings filters an XY chart by clicking a legend item",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_style_settings.spec.ts",
+        "line": 72,
+        "column": 91
+      }
+    },
+    {
+      "id": "3645667f9344597-202124e515e5fcb",
+      "title": "Lens chart style settings filters a pie chart by clicking a legend item",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_style_settings.spec.ts",
+        "line": 97,
+        "column": 16
+      }
+    },
+    {
+      "id": "3645667f9344597-98e48ea5cbb5057",
+      "title": "Lens chart style settings toggles point visibility on a line chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_style_settings.spec.ts",
+        "line": 118,
+        "column": 16
       }
     },
     {
