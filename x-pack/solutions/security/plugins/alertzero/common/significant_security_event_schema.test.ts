@@ -488,5 +488,25 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
 
       expect(result.success).toBe(false);
     });
+
+    // The hunt routes accept a 512-character `report_id` and look it up unshortened, so a
+    // tighter cap here would reject the finding for a report the hunt was asked to run.
+    it('accepts the longest report_id the hunt routes accept', () => {
+      const result = significantSecurityEventAttachmentDataSchema.safeParse({
+        ...validPayload,
+        report_id: 'r'.repeat(512),
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a report_id longer than the hunt routes accept', () => {
+      const result = significantSecurityEventAttachmentDataSchema.safeParse({
+        ...validPayload,
+        report_id: 'r'.repeat(513),
+      });
+
+      expect(result.success).toBe(false);
+    });
   });
 });
