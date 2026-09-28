@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core/server/mocks';
+
 import type { Logger } from '@kbn/core/server';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 
 import { pollForWorkflowCompletion } from '.';
 
 import type { WorkflowsManagementApi } from '../invoke_alert_retrieval_workflow';
+
+const request = httpServerMock.createKibanaRequest();
 
 describe('pollForWorkflowCompletion', () => {
   const executionId = 'execution-123';
@@ -56,6 +60,7 @@ describe('pollForWorkflowCompletion', () => {
     };
 
     const result = await pollForWorkflowCompletion({
+      request,
       executionId,
       logger: mockLogger,
       spaceId,
@@ -74,6 +79,7 @@ describe('pollForWorkflowCompletion', () => {
     };
 
     await pollForWorkflowCompletion({
+      request,
       executionId,
       logger: mockLogger,
       spaceId,
@@ -82,6 +88,7 @@ describe('pollForWorkflowCompletion', () => {
 
     expect(workflowsManagementApi.getWorkflowExecution).toHaveBeenCalledWith(executionId, spaceId, {
       includeOutput: true,
+      request,
     });
   });
 
@@ -98,6 +105,7 @@ describe('pollForWorkflowCompletion', () => {
     };
 
     const promise = pollForWorkflowCompletion({
+      request,
       executionId,
       logger: mockLogger,
       pollIntervalMs: 500,
@@ -122,6 +130,7 @@ describe('pollForWorkflowCompletion', () => {
 
     await expect(
       pollForWorkflowCompletion({
+        request,
         executionId,
         logger: mockLogger,
         spaceId,
@@ -139,6 +148,7 @@ describe('pollForWorkflowCompletion', () => {
     };
 
     const promise = pollForWorkflowCompletion({
+      request,
       executionId,
       logger: mockLogger,
       maxWaitMs: 1000,
@@ -166,6 +176,7 @@ describe('pollForWorkflowCompletion', () => {
       };
 
       const result = await pollForWorkflowCompletion({
+        request,
         executionId,
         logger: mockLogger,
         spaceId,
@@ -196,6 +207,7 @@ describe('pollForWorkflowCompletion', () => {
         );
 
       const result = await pollForWorkflowCompletion({
+        request,
         executionId,
         isReady,
         logger: mockLogger,
@@ -232,6 +244,7 @@ describe('pollForWorkflowCompletion', () => {
         );
 
       const promise = pollForWorkflowCompletion({
+        request,
         executionId,
         isReady,
         logger: mockLogger,
@@ -261,6 +274,7 @@ describe('pollForWorkflowCompletion', () => {
       const isReady = (_exec: WorkflowExecutionDto): boolean => false;
 
       const promise = pollForWorkflowCompletion({
+        request,
         executionId,
         isReady,
         logger: mockLogger,
@@ -290,6 +304,7 @@ describe('pollForWorkflowCompletion', () => {
       const isReady = (_exec: WorkflowExecutionDto): boolean => false;
 
       const promise = pollForWorkflowCompletion({
+        request,
         executionId,
         isReady,
         logger: mockLogger,
@@ -323,6 +338,7 @@ describe('pollForWorkflowCompletion', () => {
         );
 
       const result = await pollForWorkflowCompletion({
+        request,
         executionId,
         isReady,
         logger: mockLogger,
@@ -359,6 +375,7 @@ describe('pollForWorkflowCompletion', () => {
         );
 
       const promise = pollForWorkflowCompletion({
+        request,
         executionId,
         isReady,
         logger: mockLogger,
@@ -394,6 +411,7 @@ describe('pollForWorkflowCompletion', () => {
       };
 
       const promise = pollForWorkflowCompletion({
+        request,
         executionId,
         logger: mockLogger,
         pollIntervalMs: 500,
@@ -408,6 +426,7 @@ describe('pollForWorkflowCompletion', () => {
       // While running, output is excluded from the read.
       expect(getWorkflowExecution).toHaveBeenNthCalledWith(1, executionId, spaceId, {
         includeOutput: false,
+        request,
       });
       // The full payload is fetched exactly once, after the terminal status is observed.
       const includeOutputTrueCalls = getWorkflowExecution.mock.calls.filter(
@@ -427,6 +446,7 @@ describe('pollForWorkflowCompletion', () => {
       };
 
       pollForWorkflowCompletion({
+        request,
         executionId,
         logger: mockLogger,
         maxPollIntervalMs: 3000,
