@@ -429,7 +429,7 @@ export const CaseTitle = lazySchema(() => z.string().max(160));
 export type CaseTitle = z.infer<typeof CaseTitle>;
 
 /**
-  * Case field values keyed by storage key (for example, `priority_as_keyword`). Keys are validated against the fields exposed by the case's active template and global field library. On update, provided keys are merged into the stored map; unlisted keys are left untouched. Requires the `xpack.cases.templates.enabled` setting (enabled by default). Use the get case fields API to discover valid keys.
+  * Case field values keyed by storage key (for example, `priority_as_keyword`). Keys are validated against the fields exposed by the case's active template and global field library. On update, provided keys are merged into the stored map; unlisted keys are left untouched. Template-linked fields require the `xpack.cases.templates.enabled` setting (enabled by default); global fields are always available. Use the get case fields API to discover valid keys.
 
   */
 export const CaseExtendedFields = lazySchema(() => z.object({}).catchall(z.string().max(30000)));
