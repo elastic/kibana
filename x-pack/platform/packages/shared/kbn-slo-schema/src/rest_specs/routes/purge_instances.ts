@@ -6,7 +6,6 @@
  */
 import { z } from '@kbn/zod';
 
-import { MAX_KEYWORD_LENGTH } from '../../schema/zod/limits';
 import { durationType } from '../../schema/zod/duration';
 import { sloIdSchema } from '../../schema/zod/slo';
 
@@ -27,7 +26,7 @@ type PurgeInstancesParams = z.output<typeof purgeInstancesParamsSchema.shape.bod
 
 const purgeInstancesStatusParamsSchema = z.object({
   path: z.object({
-    taskId: z.string().max(MAX_KEYWORD_LENGTH),
+    taskId: z.string(),
   }),
 });
 

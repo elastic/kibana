@@ -22,8 +22,8 @@ type PutSLOSettingsParams = z.output<typeof putSLOSettingsParamsSchema.shape.bod
 type PutServerlessSLOSettingsParams = z.output<
   typeof putSLOServerlessSettingsParamsSchema.shape.body
 >;
-type PutSLOSettingsResponse = z.output<typeof putSLOSettingsResponseSchema>;
-type GetSLOSettingsResponse = z.output<typeof sloSettingsSchema>;
+type PutSLOSettingsResponse = z.input<typeof putSLOSettingsResponseSchema>;
+type GetSLOSettingsResponse = z.input<typeof sloSettingsSchema>;
 
 export {
   putSLOServerlessSettingsParamsSchema,

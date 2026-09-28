@@ -7,6 +7,8 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { z } from '@kbn/zod';
+import { isSchema, safeParseResult } from '@kbn/zod-helpers';
 import {
   budgetingMethodSchemaZod,
   dashboardsWithIdSchemaZod,
@@ -99,6 +101,8 @@ export class DefaultSLOTemplateRepository implements SLOTemplateRepository {
     return aggs?.tagsAggs?.buckets?.map(({ key }) => key) ?? [];
   }
 
+  // isSchema keeps the stored value as-is; safeParseResult is needed for the fields holding
+  // durationType values stored as "1h" and decoded as Duration.
   private toSloTemplate(id: string, stored: StoredSLOTemplate): SLOTemplate {
     try {
       const template: SLOTemplate = { templateId: id };
@@ -113,61 +117,39 @@ export class DefaultSLOTemplateRepository implements SLOTemplateRepository {
       // TODO: Consider using individual indicator schemas based on indicator.type with fallback for the required fields
       // e.g. for 'sli.kql.custom' we can validate only against the custom indicator schema using
       // Object.assign({}, { filter: "", good: "", total: "", ... }, stored.indicator.params)
-      if (stored.indicator) {
-        const parsed = indicatorSchemaZod.safeParse(stored.indicator);
-        if (parsed.success) {
-          template.indicator = parsed.data;
-        }
+      if (stored.indicator && isSchema(indicatorSchemaZod, stored.indicator)) {
+        template.indicator = stored.indicator;
       }
 
-      if (stored.budgetingMethod) {
-        const parsed = budgetingMethodSchemaZod.safeParse(stored.budgetingMethod);
-        if (parsed.success) {
-          template.budgetingMethod = parsed.data;
-        }
+      if (stored.budgetingMethod && isSchema(budgetingMethodSchemaZod, stored.budgetingMethod)) {
+        template.budgetingMethod = stored.budgetingMethod;
       }
 
-      if (stored.objective) {
-        const parsed = objectiveSchemaZod.safeParse(stored.objective);
-        if (parsed.success) {
-          template.objective = parsed.data;
-        }
+      const objective = safeParseResult(stored.objective, objectiveSchemaZod);
+      if (objective) {
+        template.objective = objective;
       }
 
-      if (stored.timeWindow) {
-        const parsed = timeWindowSchemaZod.safeParse(stored.timeWindow);
-        if (parsed.success) {
-          template.timeWindow = parsed.data;
-        }
+      const timeWindow = safeParseResult(stored.timeWindow, timeWindowSchemaZod);
+      if (timeWindow) {
+        template.timeWindow = timeWindow;
       }
 
-      if (stored.tags) {
-        const parsed = tagsSchemaZod.safeParse(stored.tags);
-        if (parsed.success) {
-          template.tags = parsed.data;
-        }
+      if (stored.tags && isSchema(tagsSchemaZod, stored.tags)) {
+        template.tags = stored.tags;
       }
 
-      if (stored.settings) {
-        const parsed = optionalSettingsSchemaZod.safeParse(stored.settings);
-        if (parsed.success) {
-          template.settings = parsed.data;
-        }
+      const settings = safeParseResult(stored.settings, optionalSettingsSchemaZod);
+      if (settings) {
+        template.settings = settings;
       }
 
-      if (
-        stored.groupBy &&
-        Array.isArray(stored.groupBy) &&
-        (stored.groupBy as unknown[]).every((g) => typeof g === 'string')
-      ) {
-        template.groupBy = stored.groupBy as string[];
+      if (stored.groupBy && isSchema(z.array(z.string()), stored.groupBy)) {
+        template.groupBy = stored.groupBy;
       }
 
-      if (stored.artifacts) {
-        const parsed = dashboardsWithIdSchemaZod.safeParse(stored.artifacts);
-        if (parsed.success) {
-          template.artifacts = parsed.data;
-        }
+      if (stored.artifacts && isSchema(dashboardsWithIdSchemaZod, stored.artifacts)) {
+        template.artifacts = stored.artifacts;
       }
 
       return template;

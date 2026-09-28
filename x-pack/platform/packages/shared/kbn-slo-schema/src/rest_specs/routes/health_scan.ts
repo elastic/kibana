@@ -7,8 +7,7 @@
 import { BooleanFromString } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
 
-import { MAX_KEYWORD_LENGTH } from '../../schema/zod/limits';
-import { transformHealthSchema } from '../../schema/zod/health';
+import { sloHealthSchema } from '../../schema/zod/health';
 
 const postHealthScanParamsSchema = z.object({
   body: z
@@ -29,12 +28,12 @@ interface PostHealthScanResponse {
 
 const getHealthScanParamsSchema = z.object({
   path: z.object({
-    scanId: z.string().max(MAX_KEYWORD_LENGTH),
+    scanId: z.string(),
   }),
   query: z
     .object({
       size: z.coerce.number().optional(),
-      searchAfter: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+      searchAfter: z.string().optional(),
       problematic: BooleanFromString.optional(),
       allSpaces: BooleanFromString.optional(),
     })
@@ -71,14 +70,10 @@ const healthScanResultResponseSchema = z.object({
     revision: z.number(),
     enabled: z.boolean(),
   }),
-  health: z.object({
-    isProblematic: z.boolean(),
-    rollup: transformHealthSchema,
-    summary: transformHealthSchema,
-  }),
+  health: sloHealthSchema,
 });
 
-type HealthScanResultResponse = z.output<typeof healthScanResultResponseSchema>;
+type HealthScanResultResponse = z.input<typeof healthScanResultResponseSchema>;
 
 interface GetHealthScanResultsResponse {
   results: HealthScanResultResponse[];

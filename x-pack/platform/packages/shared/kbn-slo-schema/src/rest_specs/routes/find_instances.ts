@@ -6,15 +6,13 @@
  */
 import { z } from '@kbn/zod';
 
-import { MAX_KEYWORD_LENGTH } from '../../schema/zod/limits';
-
 const findSLOInstancesParamsSchema = z.object({
-  path: z.object({ id: z.string().max(MAX_KEYWORD_LENGTH) }),
+  path: z.object({ id: z.string() }),
   query: z
     .object({
-      search: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+      search: z.string().optional(),
       size: z.coerce.number().optional(),
-      searchAfter: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+      searchAfter: z.string().optional(),
       remoteName: z.string().optional(),
     })
     .optional(),

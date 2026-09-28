@@ -16,7 +16,7 @@ const getSLOSuggestionsResponseSchema = z.object({
   ),
 });
 
-type GetSLOSuggestionsResponse = z.output<typeof getSLOSuggestionsResponseSchema>;
+type GetSLOSuggestionsResponse = z.input<typeof getSLOSuggestionsResponseSchema>;
 
 export { getSLOSuggestionsResponseSchema };
 export type { GetSLOSuggestionsResponse };

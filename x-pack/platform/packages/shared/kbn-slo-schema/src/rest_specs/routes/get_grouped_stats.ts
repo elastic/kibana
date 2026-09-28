@@ -6,15 +6,14 @@
  */
 import { z } from '@kbn/zod';
 
-import { MAX_ARRAY_LENGTH, MAX_KEYWORD_LENGTH } from '../../schema/zod/limits';
-
 const apmBodyParamsSchema = z.object({
   type: z.literal('apm'),
+  // Number of buckets to return; Elasticsearch defaults to 10 when omitted.
   size: z.number().optional(),
-  serviceNames: z.array(z.string().max(MAX_KEYWORD_LENGTH)).max(MAX_ARRAY_LENGTH).optional(),
-  environment: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+  serviceNames: z.array(z.string()).optional(),
+  environment: z.string().optional(),
   kqlQuery: z.string().optional(),
-  statusFilters: z.array(z.string().max(MAX_KEYWORD_LENGTH)).max(MAX_ARRAY_LENGTH).optional(),
+  statusFilters: z.array(z.string()).optional(),
 });
 
 const getSLOGroupedStatsParamsSchema = z.object({

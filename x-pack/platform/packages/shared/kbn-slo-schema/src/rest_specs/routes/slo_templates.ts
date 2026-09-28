@@ -6,23 +6,21 @@
  */
 import { z } from '@kbn/zod';
 
-import { MAX_ARRAY_LENGTH, MAX_KEYWORD_LENGTH } from '../../schema/zod/limits';
 import type { sloTemplateSchema } from '../../schema/zod/slo_template';
 
 const getSLOTemplateParamsSchema = z.object({
   path: z.object({
-    templateId: z.string().max(MAX_KEYWORD_LENGTH),
+    templateId: z.string(),
   }),
 });
 
 const findSLOTemplatesParamsSchema = z.object({
   query: z
     .object({
-      search: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+      search: z.string().optional(),
       tags: z
         .string()
-        .transform((s) => s.split(',').map((t) => t.trim()))
-        .pipe(z.array(z.string()).max(MAX_ARRAY_LENGTH))
+        .transform((value) => value.split(','))
         .optional(),
       page: z.coerce.number().optional(),
       perPage: z.coerce.number().optional(),

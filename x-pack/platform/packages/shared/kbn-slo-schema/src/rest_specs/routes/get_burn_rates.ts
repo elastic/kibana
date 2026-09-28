@@ -6,7 +6,6 @@
  */
 import { z } from '@kbn/zod';
 
-import { MAX_KEYWORD_LENGTH } from '../../schema/zod/limits';
 import { durationType } from '../../schema/zod/duration';
 import { allOrAnyString } from '../../schema/zod/common';
 
@@ -21,12 +20,12 @@ const getSLOBurnRatesResponseSchema = z.object({
 });
 
 const getSLOBurnRatesParamsSchema = z.object({
-  path: z.object({ id: z.string().max(MAX_KEYWORD_LENGTH) }),
+  path: z.object({ id: z.string() }),
   body: z.object({
     instanceId: allOrAnyString,
     windows: z.array(
       z.object({
-        name: z.string().max(MAX_KEYWORD_LENGTH),
+        name: z.string(),
         duration: durationType,
       })
     ),

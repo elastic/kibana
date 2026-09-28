@@ -7,14 +7,13 @@
 import { BooleanFromString } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
 
-import { MAX_KEYWORD_LENGTH } from '../../schema/zod/limits';
-import { transformHealthSchema } from '../../schema/zod/health';
+import { sloHealthSchema } from '../../schema/zod/health';
 import { sloDefinitionSchema } from '../../schema/zod/slo';
 
 const findSloDefinitionsParamsSchema = z.object({
   query: z
     .object({
-      search: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+      search: z.string().optional(),
       includeOutdatedOnly: BooleanFromString.optional(),
       includeHealth: BooleanFromString.optional(),
       tags: z.string().optional(),
@@ -24,17 +23,9 @@ const findSloDefinitionsParamsSchema = z.object({
     .optional(),
 });
 
-const healthMetadataSchema = z.object({
-  health: z
-    .object({
-      isProblematic: z.boolean(),
-      rollup: transformHealthSchema,
-      summary: transformHealthSchema,
-    })
-    .optional(),
+const sloDefinitionResponseSchema = sloDefinitionSchema.extend({
+  health: sloHealthSchema.optional(),
 });
-
-const sloDefinitionResponseSchema = sloDefinitionSchema.merge(healthMetadataSchema);
 
 const findSloDefinitionsResponseSchema = z.object({
   page: z.number(),

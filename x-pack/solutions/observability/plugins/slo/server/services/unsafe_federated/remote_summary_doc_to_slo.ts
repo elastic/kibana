@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type { Indicator } from '@kbn/slo-schema';
 import { indicatorSchemaZod, sloDefinitionSchemaZod } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
+import { stringifyZodError } from '@kbn/zod-helpers';
 import type { SLODefinition } from '../../domain/models';
 import type { EsSummaryDocument } from '../summary_transform_generator/helpers/create_temp_summary';
 
@@ -49,7 +50,7 @@ export function fromRemoteSummaryDocumentToSloDefinition(
 
   if (!res.success) {
     logger.debug(`Invalid remote stored summary SLO with id [${summaryDoc.slo.id}]`);
-    logger.debug(res.error.message);
+    logger.debug(stringifyZodError(res.error));
 
     return undefined;
   }
@@ -67,7 +68,7 @@ function getIndicator(summaryDoc: EsSummaryDocument, logger: Logger): Indicator 
     logger.debug(
       `Invalid indicator from remote summary SLO id [${summaryDoc.slo.id}] - Fallback on dummy indicator`
     );
-    logger.debug(res.error.message);
+    logger.debug(stringifyZodError(res.error));
 
     return getDummyIndicator(summaryDoc);
   }

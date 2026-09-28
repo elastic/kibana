@@ -7,6 +7,13 @@
 
 import { z } from '@kbn/zod';
 
+/**
+ * IMPORTANT: Any changes to this file must be carefully checked against both usage
+ * from the SLO definitions API and the SLO Health API, as both depend on these shared types.
+ * One is a public API, the other is an internal API.
+ * If types need to diverge, they should be split into separate files.
+ */
+
 const transformHealthSchema = z.object({
   isProblematic: z.boolean(),
   missing: z.boolean(),
@@ -23,7 +30,10 @@ const transformHealthSchema = z.object({
   stateMatches: z.boolean().optional(),
 });
 
-type TransformHealthResponse = z.output<typeof transformHealthSchema>;
+const sloHealthSchema = z.object({
+  isProblematic: z.boolean(),
+  rollup: transformHealthSchema,
+  summary: transformHealthSchema,
+});
 
-export type { TransformHealthResponse };
-export { transformHealthSchema };
+export { sloHealthSchema, transformHealthSchema };

@@ -6,20 +6,20 @@
  */
 import { z } from '@kbn/zod';
 
-import { MAX_KEYWORD_LENGTH } from '../../schema/zod/limits';
-
 const searchSLODefinitionsParamsSchema = z.object({
   query: z
     .object({
-      search: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+      search: z.string().optional(),
       size: z.coerce.number().optional(),
-      searchAfter: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+      searchAfter: z.string().optional(),
       remoteName: z.string().optional(),
     })
     .optional(),
 });
 
-type SearchSLODefinitionsParams = z.output<typeof searchSLODefinitionsParamsSchema.shape.query>;
+type SearchSLODefinitionsParams = NonNullable<
+  z.output<typeof searchSLODefinitionsParamsSchema.shape.query>
+>;
 
 interface SearchSLODefinitionItem {
   id: string;

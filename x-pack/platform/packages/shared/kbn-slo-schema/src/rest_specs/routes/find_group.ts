@@ -6,7 +6,6 @@
  */
 import { z } from '@kbn/zod';
 
-import { MAX_KEYWORD_LENGTH } from '../../schema/zod/limits';
 import { groupSummarySchema } from '../../schema/zod/common';
 
 const groupBySchema = z.union([
@@ -25,9 +24,7 @@ const findSLOGroupsParamsSchema = z.object({
       page: z.string().optional(),
       perPage: z.string().optional(),
       groupBy: groupBySchema.optional(),
-      groupsFilter: z
-        .union([z.array(z.string().max(MAX_KEYWORD_LENGTH)), z.string().max(MAX_KEYWORD_LENGTH)])
-        .optional(),
+      groupsFilter: z.union([z.array(z.string()), z.string()]).optional(),
       kqlQuery: z.string().optional(),
       filters: z.string().optional(),
     })
@@ -48,7 +45,7 @@ const findSLOGroupsResponseSchema = z.object({
 });
 
 type FindSLOGroupsParams = NonNullable<z.output<typeof findSLOGroupsParamsSchema.shape.query>>;
-type FindSLOGroupsResponse = z.output<typeof findSLOGroupsResponseSchema>;
+type FindSLOGroupsResponse = z.input<typeof findSLOGroupsResponseSchema>;
 
 export {
   findSLOGroupsParamsSchema,

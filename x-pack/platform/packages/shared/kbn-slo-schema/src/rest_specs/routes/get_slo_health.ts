@@ -7,7 +7,7 @@
 import { z } from '@kbn/zod';
 
 import { sloIdSchema } from '../../schema/zod/slo';
-import { transformHealthSchema } from '../../schema/zod/health';
+import { sloHealthSchema } from '../../schema/zod/health';
 import { allOrAnyString } from '../../schema/zod/common';
 
 const fetchSLOHealthResponseSchema = z.array(
@@ -16,11 +16,7 @@ const fetchSLOHealthResponseSchema = z.array(
     instanceId: allOrAnyString,
     revision: z.number(),
     name: z.string(),
-    health: z.object({
-      isProblematic: z.boolean(),
-      rollup: transformHealthSchema,
-      summary: transformHealthSchema,
-    }),
+    health: sloHealthSchema,
   })
 );
 

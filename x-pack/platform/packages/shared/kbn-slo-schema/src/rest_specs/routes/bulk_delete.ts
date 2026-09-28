@@ -16,7 +16,7 @@ const bulkDeleteParamsSchema = z.object({
 
 const bulkDeleteStatusParamsSchema = z.object({
   path: z.object({
-    taskId: z.string().max(1024),
+    taskId: z.string(),
   }),
 });
 

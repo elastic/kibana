@@ -29,7 +29,7 @@ const getSLOStatsOverviewResponseSchema = z.object({
 type GetSLOStatsOverviewParams = NonNullable<
   z.output<typeof getSLOStatsOverviewParamsSchema.shape.query>
 >;
-type GetSLOStatsOverviewResponse = z.output<typeof getSLOStatsOverviewResponseSchema>;
+type GetSLOStatsOverviewResponse = z.input<typeof getSLOStatsOverviewResponseSchema>;
 
 export { getSLOStatsOverviewParamsSchema, getSLOStatsOverviewResponseSchema };
 export type { GetSLOStatsOverviewParams, GetSLOStatsOverviewResponse };

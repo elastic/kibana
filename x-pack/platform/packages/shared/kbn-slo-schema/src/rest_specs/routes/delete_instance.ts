@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod';
 
-import { MAX_KEYWORD_LENGTH } from '../../schema/zod/limits';
 import { sloIdSchema } from '../../schema/zod/slo';
 
 const deleteSLOInstancesParamsSchema = z.object({
@@ -15,7 +14,7 @@ const deleteSLOInstancesParamsSchema = z.object({
     list: z.array(
       z.object({
         sloId: sloIdSchema,
-        instanceId: z.string().max(MAX_KEYWORD_LENGTH),
+        instanceId: z.string(),
         excludeRollup: z.boolean().optional(),
       })
     ),

@@ -8,15 +8,12 @@ import { z } from '@kbn/zod';
 
 import { boundedProjectRoutingSchema, objectiveSchema } from '../../schema/zod/slo';
 import { indicatorSchema } from '../../schema/zod/indicators';
-import { dateType, groupingsSchema } from '../../schema/zod/common';
+import { dateRangeSchema, dateType, groupingsSchema } from '../../schema/zod/common';
 
 const getPreviewDataParamsSchema = z.object({
   body: z.object({
     indicator: indicatorSchema,
-    range: z.object({
-      from: dateType,
-      to: dateType,
-    }),
+    range: dateRangeSchema,
     objective: objectiveSchema.optional(),
     remoteName: z.string().optional(),
     groupings: groupingsSchema.optional(),

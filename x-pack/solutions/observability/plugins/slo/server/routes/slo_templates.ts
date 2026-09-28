@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import {
   findSLOTemplatesParamsSchema,
   getSLOTemplateParamsSchema,
@@ -38,7 +37,7 @@ export const getSLOTemplateRoute = createSloServerRoute({
     const { templateRepository } = await getScopedClients({ request, logger });
 
     const template = await templateRepository.findById(params.path.templateId);
-    return z.encode(sloTemplateSchemaZod, template as z.output<typeof sloTemplateSchemaZod>);
+    return sloTemplateSchemaZod.encode(template);
   },
 });
 
@@ -79,9 +78,7 @@ export const findSLOTemplatesRoute = createSloServerRoute({
 
     return {
       ...templatesPaginated,
-      results: templatesPaginated.results.map((template) =>
-        z.encode(sloTemplateSchemaZod, template as z.output<typeof sloTemplateSchemaZod>)
-      ),
+      results: templatesPaginated.results.map((template) => sloTemplateSchemaZod.encode(template)),
     };
   },
 });
