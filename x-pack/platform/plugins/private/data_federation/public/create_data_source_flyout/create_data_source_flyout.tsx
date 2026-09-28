@@ -323,13 +323,6 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               inputRef={descriptionField.ref}
             />
           </EuiFormRow>
-          {dataSourceType !== 's3' && (
-            <CreateDataSourceFlyoutTypeSettingsBlock
-              control={control}
-              dataSourceType={dataSourceType}
-              unregister={unregister}
-            />
-          )}
           <EuiHorizontalRule margin="m" />
           <CreateDataSourceFlyoutAuthenticationSelect
             authenticationMode={authenticationMode}
