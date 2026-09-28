@@ -6,15 +6,26 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
+import { useRouteMatch } from 'react-router-dom';
 import { ExecutionHistoryPage } from '../pages/execution_history_page/execution_history_page';
+import { RequireAlertingPrivilege } from '../components/require_alerting_privilege';
 
 export const ExecutionHistoryApp = () => {
+  const { path } = useRouteMatch();
   return (
-    <Routes>
-      <Route exact path="/">
-        <ExecutionHistoryPage />
-      </Route>
-    </Routes>
+    <RequireAlertingPrivilege
+      features={['executionHistory']}
+      pageName={i18n.translate('xpack.alertingV2.executionHistoryApp.pageName', {
+        defaultMessage: 'Execution history',
+      })}
+    >
+      <Routes>
+        <Route exact path={path}>
+          <ExecutionHistoryPage />
+        </Route>
+      </Routes>
+    </RequireAlertingPrivilege>
   );
 };

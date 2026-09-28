@@ -134,8 +134,6 @@ apiTest.describe('markdown - upsert', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toBe(
-      '[request body.content]: expected value of type [string] but got [undefined]'
-    );
+    expect(response.body.message).toContain('"content"');
   });
 });

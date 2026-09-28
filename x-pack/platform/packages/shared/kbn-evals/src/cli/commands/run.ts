@@ -5,58 +5,28 @@
  * 2.0.
  */
 
-import Path from 'path';
 import { spawn } from 'child_process';
-import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
-import type { ToolingLog } from '@kbn/tooling-log';
-import { resolveEvalSuites } from '../suites';
-import { promptForSuite, promptForConnector, isTTY } from '../prompts';
 import {
-  defaultExportProfile,
-  envFromDatasetsProfile,
-  envFromExportProfile,
-  stripTrailingSlash,
-  probeHttp,
-  isExportProfileImplicitLocal,
-} from '../profiles';
+  readSpaceIdsFlag,
+  resolveEvalSuite,
+  resolveEvaluationConnectorId,
+  resolveProfileEnvOverrides,
+} from '../run_helpers';
+import { buildPlaywrightArgs } from './playwright_args';
 
-const EXECUTORS = ['phoenix', 'kibana'] as const;
-type Executor = (typeof EXECUTORS)[number];
-
-const formatEnvPrefix = (overrides: Record<string, string>) =>
+const formatEnvPrefix = (overrides: Record<string, string>, redactedKeys: ReadonlySet<string>) =>
   Object.entries(overrides)
     .map(([key, value]) => {
       const isSensitive =
+        redactedKeys.has(key) ||
         key.includes('API_KEY') ||
         key.includes('CREDENTIALS') ||
         key.includes('TOKEN') ||
-        key === 'GCS_CREDENTIALS';
+        key === 'TRACING_EXPORTERS';
       return `${key}=${isSensitive ? '[redacted]' : value}`;
     })
     .join(' ');
-
-const ensureSuite = (suiteId: string, repoRoot: string, log: ToolingLog) => {
-  const suites = resolveEvalSuites(repoRoot, log);
-  const match = suites.find((suite) => suite.id === suiteId);
-
-  if (match) {
-    return match;
-  }
-
-  log.info(`Suite "${suiteId}" not found in metadata; refreshing discovery...`);
-  const refreshed = resolveEvalSuites(repoRoot, log, { refresh: true });
-  const refreshedMatch = refreshed.find((suite) => suite.id === suiteId);
-
-  if (refreshedMatch) {
-    return refreshedMatch;
-  }
-
-  const available = refreshed.map((suite) => suite.id).join(', ');
-  throw createFlagError(
-    `Unknown suite "${suiteId}". Available suites: ${available || 'none found'}`
-  );
-};
 
 export const runSuiteCmd: Command<void> = {
   name: 'run',
@@ -65,19 +35,21 @@ export const runSuiteCmd: Command<void> = {
 
   Examples:
     node scripts/evals run --suite agent-builder --judge bedrock-claude
-    node scripts/evals run --suite obs-ai-assistant --model azure-gpt4o --repetitions 3
     node scripts/evals run --suite agent-builder --grep "product documentation"
+    node scripts/evals run --suite significant-events --grep-invert "KI query generation"
     node scripts/evals run --suite streams --dry-run
+    node scripts/evals run --suite streams --space-ids marketing,sales
   `,
   flags: {
     string: [
       'suite',
       'config',
       'project',
-      'executor',
       'evaluation-connector-id',
       'repetitions',
+      'space-ids',
       'grep',
+      'grep-invert',
       'profile',
       'datasets-profile',
       'export-profile',
@@ -85,8 +57,6 @@ export const runSuiteCmd: Command<void> = {
       'trace-es-api-key',
       'evaluations-kbn-url',
       'evaluations-kbn-api-key',
-      'phoenix-base-url',
-      'phoenix-api-key',
     ],
     boolean: ['dry-run'],
     alias: { model: 'project', judge: 'evaluation-connector-id' },
@@ -94,88 +64,39 @@ export const runSuiteCmd: Command<void> = {
   },
   run: async ({ log, flagsReader }) => {
     const repoRoot = process.cwd();
-    let suiteId = flagsReader.string('suite');
-    const configPath = flagsReader.string('config');
-    const executor = flagsReader.enum('executor', EXECUTORS) as Executor | undefined;
 
-    if (!suiteId && !configPath) {
-      if (isTTY()) {
-        const selected = await promptForSuite(repoRoot, log);
-        suiteId = selected.id;
-      } else {
-        throw createFlagError('Missing --suite (or provide --config).');
-      }
-    }
+    const { suite, resolvedConfigPath } = await resolveEvalSuite(repoRoot, log, flagsReader);
 
-    if (suiteId && configPath) {
-      throw createFlagError('Use either --suite or --config, not both.');
-    }
-
-    const suite = suiteId ? ensureSuite(suiteId, repoRoot, log) : undefined;
-    const resolvedConfigPath = suite
-      ? suite.absoluteConfigPath
-      : Path.resolve(repoRoot, configPath as string);
-
-    let evaluationConnectorId =
-      flagsReader.string('evaluation-connector-id') ?? process.env.EVALUATION_CONNECTOR_ID;
-
-    if (!evaluationConnectorId) {
-      if (isTTY()) {
-        evaluationConnectorId = await promptForConnector(repoRoot, log);
-      } else {
-        throw createFlagError(
-          'EVALUATION_CONNECTOR_ID is required. Set --evaluation-connector-id or env.'
-        );
-      }
-    }
+    const evaluationConnectorId = await resolveEvaluationConnectorId(repoRoot, log, flagsReader);
 
     const envOverrides: Record<string, string> = {
-      EVALUATION_CONNECTOR_ID: evaluationConnectorId,
+      EVAL_CONNECTOR_ID: evaluationConnectorId,
     };
 
     if (suite) {
       envOverrides.EVAL_SUITE_ID = suite.id;
     }
 
-    const baseProfile = flagsReader.string('profile') ?? undefined;
-    const datasetsProfile = flagsReader.string('datasets-profile') ?? baseProfile;
-    const exportProfile =
-      flagsReader.string('export-profile') ?? baseProfile ?? defaultExportProfile(repoRoot);
-
-    Object.assign(envOverrides, envFromDatasetsProfile(repoRoot, datasetsProfile));
-    Object.assign(
-      envOverrides,
-      envFromExportProfile(repoRoot, exportProfile, {
-        defaultTracingExporters: exportProfile === 'local',
-      })
-    );
-
-    if (isExportProfileImplicitLocal(flagsReader, exportProfile)) {
-      const tracingEsUrl = envOverrides.TRACING_ES_URL;
-
-      const tracingReachable = tracingEsUrl
-        ? await probeHttp(stripTrailingSlash(tracingEsUrl))
-        : true;
-
-      if (!tracingReachable) {
-        log.warning(
-          `Export profile \"local\" was auto-selected but TRACING_ES_URL is not reachable (${tracingEsUrl}). ` +
-            'Continuing without external trace queries. To require export, pass --export-profile local.'
-        );
-        delete envOverrides.TRACING_ES_URL;
-        delete envOverrides.TRACING_ES_API_KEY;
-      }
-    }
+    const { datasetsProfile, exportProfile, profileEnvOverrides, suiteScoutEnv } =
+      await resolveProfileEnvOverrides({
+        repoRoot,
+        log,
+        flagsReader,
+        profile: flagsReader.string('profile') ?? undefined,
+        suite,
+      });
+    Object.assign(envOverrides, profileEnvOverrides, suiteScoutEnv);
 
     log.info(`Profiles: datasets=${datasetsProfile ?? 'config'} export=${exportProfile ?? 'none'}`);
 
-    if (executor === 'phoenix') {
-      envOverrides.KBN_EVALS_EXECUTOR = 'phoenix';
-    }
-
     const repetitions = flagsReader.string('repetitions');
     if (repetitions) {
-      envOverrides.EVALUATION_REPETITIONS = repetitions;
+      envOverrides.EVAL_REPETITIONS = repetitions;
+    }
+
+    const spaceIds = readSpaceIdsFlag(flagsReader);
+    if (spaceIds) {
+      envOverrides.EVAL_SPACE_IDS = spaceIds.join(',');
     }
 
     const traceEsUrl = flagsReader.string('trace-es-url');
@@ -190,41 +111,26 @@ export const runSuiteCmd: Command<void> = {
 
     const evaluationsKbnUrl = flagsReader.string('evaluations-kbn-url');
     if (evaluationsKbnUrl) {
-      envOverrides.EVALUATIONS_KBN_URL = evaluationsKbnUrl;
+      envOverrides.EVAL_KBN_URL = evaluationsKbnUrl;
     }
 
     const evaluationsKbnApiKey = flagsReader.string('evaluations-kbn-api-key');
     if (evaluationsKbnApiKey) {
-      envOverrides.EVALUATIONS_KBN_API_KEY = evaluationsKbnApiKey;
+      envOverrides.EVAL_KBN_API_KEY = evaluationsKbnApiKey;
     }
 
-    const phoenixBaseUrl = flagsReader.string('phoenix-base-url');
-    if (phoenixBaseUrl) {
-      envOverrides.PHOENIX_BASE_URL = phoenixBaseUrl;
-    }
+    const args = buildPlaywrightArgs({
+      configPath: resolvedConfigPath,
+      specFiles: flagsReader.getPositionals(),
+      project: flagsReader.string('project'),
+      grep: flagsReader.string('grep'),
+      grepInvert: flagsReader.string('grep-invert'),
+    });
 
-    const phoenixApiKey = flagsReader.string('phoenix-api-key');
-    if (phoenixApiKey) {
-      envOverrides.PHOENIX_API_KEY = phoenixApiKey;
-    }
-
-    const args = ['scripts/playwright', 'test', '--config', resolvedConfigPath];
-    const project = flagsReader.string('project');
-    if (project) {
-      args.push('--project', project);
-    }
-
-    const grep = flagsReader.string('grep');
-    if (grep) {
-      args.push('--grep', grep);
-    }
-
-    const positionals = flagsReader.getPositionals();
-    if (positionals.length > 0) {
-      args.push(...positionals);
-    }
-
-    const commandPreview = `${formatEnvPrefix(envOverrides)} node ${args.join(' ')}`.trim();
+    const commandPreview = `${formatEnvPrefix(
+      envOverrides,
+      new Set(Object.keys(suiteScoutEnv))
+    )} node ${args.join(' ')}`.trim();
     log.info(`Running: ${commandPreview}`);
 
     if (flagsReader.boolean('dry-run')) {

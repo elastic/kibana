@@ -5,14 +5,10 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
+import type { AgentLatestVersionsResponse } from '@kbn/apm-api-shared';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import type {
-  ElasticApmAgentLatestVersion,
-  OtelAgentLatestVersion,
-} from '../../../common/agent_explorer';
-import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { ErrorWithStatusCode } from './error_with_status_code';
 
 const MISSING_CONFIGURATION = i18n.translate(
@@ -21,13 +17,6 @@ const MISSING_CONFIGURATION = i18n.translate(
     defaultMessage: 'To use latest agent versions you must set xpack.apm.latestAgentVersionsUrl.',
   }
 );
-
-export interface AgentLatestVersionsResponse {
-  data: AgentLatestVersions;
-  error?: { message: string; type?: string; statusCode?: string };
-}
-
-type AgentLatestVersions = Record<AgentName, ElasticApmAgentLatestVersion | OtelAgentLatestVersion>;
 
 export const fetchAgentsLatestVersion = async (
   logger: Logger,
@@ -55,7 +44,7 @@ export const fetchAgentsLatestVersion = async (
     logger.warn(message);
 
     return {
-      data: {} as AgentLatestVersions,
+      data: {} as AgentLatestVersionsResponse['data'],
       error,
     };
   }

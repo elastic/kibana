@@ -7,6 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 
+/** Short form used where the surrounding panel already gives the context. */
+export const RELATED_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.related.shortTitle',
+  {
+    defaultMessage: 'Related',
+  }
+);
+
 export const RELATED_EPISODES_TITLE = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.related.title',
   {
@@ -75,5 +83,26 @@ export const RELATED_OTHER_GROUPS_EMPTY = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.related.otherGroupsEmpty',
   {
     defaultMessage: 'No other related episodes for this rule.',
+  }
+);
+
+/** Stands in for the rule name on a related episode whose rule is gone. */
+export const RELATED_EPISODE_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.related.episodeLabel',
+  {
+    defaultMessage: 'Episode',
+  }
+);
+
+export const getCopyEpisodeIdTooltip = (episodeId: string) =>
+  i18n.translate('xpack.alertingV2EpisodesUi.details.related.copyEpisodeIdTooltip', {
+    defaultMessage: 'Full episode ID: {episodeId}',
+    values: { episodeId },
+  });
+
+export const EPISODE_ID_COPIED = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.related.episodeIdCopied',
+  {
+    defaultMessage: 'Episode ID copied',
   }
 );

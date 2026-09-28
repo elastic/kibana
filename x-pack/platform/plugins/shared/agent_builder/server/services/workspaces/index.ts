@@ -8,3 +8,11 @@
 export { WorkspaceClient, type IWorkspaceClient } from './client/workspace_client';
 export { createStorage as createWorkspaceStorage, workspaceIndexName } from './client/storage';
 export type { WorkspaceFile, WorkspaceSnapshot } from './types';
+export { resolveWorkspaceFilePath, WORKSPACE_PREFIX } from './workspace_path';
+export {
+  createWorkspaceService,
+  type WorkspaceService,
+  type ScopedWorkspaceClient,
+  type WorkspaceServiceDeps,
+} from './workspace_service';
+export type { WorkspaceFileContent } from '@kbn/agent-builder-common';

@@ -63,6 +63,7 @@ export class OptionsListFetchCache {
         searchTechnique,
         ignoreValidations,
         fieldName,
+        projectRouting,
       } = request;
 
       return hash({
@@ -77,6 +78,7 @@ export class OptionsListFetchCache {
         searchString: searchString ?? '',
         fieldName,
         size,
+        projectRouting,
       });
     }
 
@@ -90,6 +92,7 @@ export class OptionsListFetchCache {
       ignoreValidations,
       selectedOptions,
       searchTechnique,
+      projectRouting,
     } = request;
 
     return hash({
@@ -103,6 +106,7 @@ export class OptionsListFetchCache {
       filter,
       ignoreValidations,
       selectedOptions: ignoreValidations ? undefined : selectedOptions,
+      projectRouting,
     });
   };
 

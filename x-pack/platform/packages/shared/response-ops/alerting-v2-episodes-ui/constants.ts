@@ -6,25 +6,31 @@
  */
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { MAX_PER_PAGE } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 
 export const EMPTY_VALUE = '—';
-export const ALERT_EVENTS_DATA_STREAM = '.rule-events';
-export const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
 export const LAST_EPISODE_TIMESTAMP_ESQL_VARIABLE = 'lastEpisodeTimestamp';
-export const PAGE_SIZE_ESQL_VARIABLE = 'pageSize';
 export const RELATED_ALERT_EPISODES_PAGE_SIZE = 5;
+/** Max episodes returned per list page (ESQL LIMIT). */
+export const ALERT_EPISODES_LIST_PAGE_SIZE = 1000;
+/**
+ * Rule ids resolved per find request. Bounded by the API's `per_page` ceiling, and
+ * well under it the id filter travels in the query string, where a single batch of
+ * every id on a full page would exceed Kibana's 64KB header limit.
+ */
+export const RULES_RESOLUTION_BATCH_SIZE = MAX_PER_PAGE;
+/** Source id used when settling the native v2 ES|QL episode fetches. */
+export const ALERTING_V2_EPISODE_SOURCE_ID = 'v2';
 export const QUERY_STALE_TIME = 30_000;
-export const TIME_FIELD = '@timestamp';
 /**
  * Fields produced by buildEpisodesHistogramQuery that are valid as breakdown dimensions.
  * Passed as esqlColumns to UnifiedBreakdownFieldSelector to restrict the picker to only
  * fields the episode pipeline actually fetches.
  */
 export const HISTOGRAM_BREAKDOWN_COLUMNS: DatatableColumn[] = [
-  // Effective status takes into account any resolved action being applied to the episode
   {
-    id: 'effective_status',
+    id: 'episode.status',
     name: i18n.translate('xpack.alertingV2.episodesUi.breakdownByStatus', {
       defaultMessage: 'Status',
     }),
@@ -52,19 +58,3 @@ export const HISTOGRAM_BREAKDOWN_COLUMNS: DatatableColumn[] = [
 ];
 export const HISTOGRAM_EPISODE_LIMIT = 10_000;
 export const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
-export const FLYOUT_FOOTER_OFFSET = 80;
-
-const ALERTING_V2_SECTION_ID = 'alertingV2';
-const ALERTING_V2_RULES_APP_ID = 'rules';
-const ALERTING_V2_EPISODES_APP_ID = 'episodes';
-
-// Ideally, these should be computed using the `paths` factory of the alerting-v2-plugin, which
-// shouldn't be imported in this package. Marking this for future improvement.
-export const ALERTING_V2_RULES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULES_APP_ID}`;
-export const ALERTING_V2_EPISODES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EPISODES_APP_ID}`;
-
-export const getAlertEpisodeDetailsPath = (episodeId: string) =>
-  `${ALERTING_V2_EPISODES_BASE_PATH}/${encodeURIComponent(episodeId)}`;
-
-export const getRuleDetailsPath = (ruleId: string) =>
-  `${ALERTING_V2_RULES_BASE_PATH}/${encodeURIComponent(ruleId)}`;

@@ -19,6 +19,8 @@ import type {
 } from './internal_contracts';
 import type { SecurityServiceConfigType, PKCS12ConfigType } from './utils';
 import { getDefaultSecurityImplementation, convertSecurityApi } from './utils';
+import { createCoreUiamService } from './uiam';
+import { WorkloadTypeRegistry } from './workload_type_registry';
 
 export class SecurityService
   implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>
@@ -26,6 +28,7 @@ export class SecurityService
   private readonly log: Logger;
   private securityApi?: CoreSecurityDelegateContract;
   private fakeRequestEnricherAcquired = false;
+  private readonly workloadTypes = new WorkloadTypeRegistry();
   private config$: Observable<Config>;
   private configSubscription?: Subscription;
   private config: Config | undefined;
@@ -70,20 +73,24 @@ export class SecurityService
 
         // Returned eagerly at setup but invoked at task-run time, by which point
         // the security delegate has been registered.
-        return (request, userProfileId) => {
+        return (request, user) => {
           if (!this.securityApi) {
             throw new Error(
               'Cannot enrich a fake request before the security delegate has been registered.'
             );
           }
-          this.securityApi.fakeRequestEnricher(request, userProfileId);
+          this.securityApi.fakeRequestEnricher(request, user);
         };
       },
       fips: {
         isEnabled: () => isFipsEnabled(securityConfig),
       },
+      serviceAccounts: {
+        registerWorkloadType: (pluginId, registration) =>
+          this.workloadTypes.register(pluginId, registration),
+      },
       uiam: securityConfig?.uiam?.enabled
-        ? Object.freeze({ sharedSecret: securityConfig.uiam.sharedSecret })
+        ? createCoreUiamService(securityConfig.uiam.sharedSecret)
         : null,
     };
   }
@@ -93,7 +100,7 @@ export class SecurityService
       this.log.warn('Security API was not registered, using default implementation');
     }
     const apiContract = this.securityApi ?? getDefaultSecurityImplementation();
-    return convertSecurityApi(apiContract);
+    return convertSecurityApi(apiContract, this.workloadTypes);
   }
 
   public stop() {

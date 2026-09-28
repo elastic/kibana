@@ -6,7 +6,9 @@
  */
 
 export {
+  UPLOAD_SAMPLES_MAX_LINE_LENGTH,
   UPLOAD_SAMPLES_MAX_LINES,
+  UPLOAD_SAMPLES_MAX_REQUEST_BYTES,
   normalizeLogSamplesFromFileContent,
   normalizeLogLinesForUpload,
 } from './upload_samples_limits';
@@ -84,3 +86,11 @@ export {
 } from './telemetry/types';
 
 export { MAX_STRING_LENGTH } from './constants';
+
+export {
+  DATA_STREAM_PHASES,
+  DATA_STREAM_PHASE_ORDER,
+  getDataStreamPhaseIndex,
+  getDataStreamPhaseProgress,
+} from './phases';
+export type { DataStreamPhase } from './phases';

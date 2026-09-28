@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { AttributionControl } from './attribution_control';
 import { getLayerList } from '../../../selectors/map_selectors';
 import { getIsFullScreen } from '../../../selectors/ui_selectors';

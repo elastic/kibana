@@ -79,6 +79,7 @@ components:
                   type: string
                   description: The shell command to execute on the endpoint.
                   minLength: 1
+                  maxLength: 8192
                 timeout:
                   type: integer
                   minimum: 1

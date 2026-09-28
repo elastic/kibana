@@ -25,8 +25,8 @@ const FLYOUT_TITLE_ID = 'ruleCreateOptionsFlyoutTitle';
 export interface RuleCreateOptionsFlyoutProps {
   onClose: () => void;
   onCreateEsqlRule: () => void;
-  onCreateWithAgent?: () => void;
-  onCreateThresholdAlert?: () => void;
+  onCreateWithAgent: () => void;
+  onCreateThresholdRule?: () => void;
   legacyRuleTypes?: LegacyRuleTypeItem[];
 }
 
@@ -34,7 +34,7 @@ export const RuleCreateOptionsFlyout = ({
   onClose,
   onCreateEsqlRule,
   onCreateWithAgent,
-  onCreateThresholdAlert,
+  onCreateThresholdRule,
   legacyRuleTypes,
 }: RuleCreateOptionsFlyoutProps) => {
   return (
@@ -84,7 +84,7 @@ export const RuleCreateOptionsFlyout = ({
           layout="vertical"
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
-          onCreateThresholdAlert={onCreateThresholdAlert}
+          onCreateThresholdRule={onCreateThresholdRule}
           legacyRuleTypes={legacyRuleTypes}
         />
       </EuiFlyoutBody>

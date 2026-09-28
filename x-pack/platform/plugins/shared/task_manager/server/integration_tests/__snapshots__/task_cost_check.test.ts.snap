@@ -150,5 +150,9 @@ Array [
     "cost": 10,
     "taskType": "alerting:siem.indicatorRule",
   },
+  Object {
+    "cost": 10,
+    "taskType": "entity_store:v2:legacy_security_assets_migration",
+  },
 ]
 `;

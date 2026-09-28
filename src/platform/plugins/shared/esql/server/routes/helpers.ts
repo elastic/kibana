@@ -10,7 +10,9 @@
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { FastInferenceEndpointsProvider } from '../types';
 
 export const createScopedModel = async ({
@@ -58,5 +60,15 @@ export const resolveConnectorId = async ({
     return connector?.connectorId;
   } catch {
     return undefined;
+  }
+};
+
+export const resolveIncludeDatasets = async (
+  uiSettingsClient: IUiSettingsClient
+): Promise<boolean> => {
+  try {
+    return await uiSettingsClient.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+  } catch {
+    return false;
   }
 };

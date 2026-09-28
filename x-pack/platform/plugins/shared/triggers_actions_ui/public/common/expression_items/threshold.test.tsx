@@ -174,4 +174,66 @@ describe('threshold expression', () => {
     expect(thresholdInput.value).toBe('0');
     expect(thresholdInput).not.toBeInvalid();
   });
+
+  it('does not open the popover by default', () => {
+    renderWithIntl(
+      <ThresholdExpression
+        thresholdComparator={'>'}
+        errors={{ threshold0: [], threshold1: [] }}
+        onChangeSelectedThreshold={jest.fn()}
+        onChangeSelectedThresholdComparator={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId('comparatorOptionsComboBox')).not.toBeInTheDocument();
+  });
+
+  it('opens the popover on mount when initialPopoverOpen is set', () => {
+    renderWithIntl(
+      <ThresholdExpression
+        thresholdComparator={'>'}
+        errors={{ threshold0: [], threshold1: [] }}
+        onChangeSelectedThreshold={jest.fn()}
+        onChangeSelectedThresholdComparator={jest.fn()}
+        initialPopoverOpen
+      />
+    );
+
+    expect(screen.getByTestId('comparatorOptionsComboBox')).toBeInTheDocument();
+  });
+
+  it('renders a badge inside the closed expression, next to the value', () => {
+    renderWithIntl(
+      <ThresholdExpression
+        thresholdComparator={'>'}
+        threshold={[10]}
+        errors={{ threshold0: [], threshold1: [] }}
+        onChangeSelectedThreshold={jest.fn()}
+        onChangeSelectedThresholdComparator={jest.fn()}
+        badge={<span data-test-subj="myBadge">Warning</span>}
+      />
+    );
+
+    const button = screen.getByTestId('thresholdPopover');
+    expect(button).toHaveTextContent('Is above 10Warning');
+    expect(screen.getByTestId('myBadge')).toBeInTheDocument();
+  });
+
+  it('shows an invalid border instead of the warning icon when a badge is present', () => {
+    renderWithIntl(
+      <ThresholdExpression
+        thresholdComparator={'>'}
+        errors={{ threshold0: ['Threshold is required.'], threshold1: [] }}
+        onChangeSelectedThreshold={jest.fn()}
+        onChangeSelectedThresholdComparator={jest.fn()}
+        badge={<span data-test-subj="myBadge">Warning</span>}
+      />
+    );
+
+    const button = screen.getByTestId('thresholdPopover');
+    // No collision-prone floating icon when there's a badge/remove-button in the way...
+    expect(button.querySelector('[data-euiicon-type="warning"]')).not.toBeInTheDocument();
+    // ...instead the border communicates the invalid state.
+    expect(button.style.border).toContain('solid');
+  });
 });

@@ -13,6 +13,9 @@ import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
 import { Route, Router } from '@kbn/shared-ux-router';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+
 import { API_BASE_PATH } from '../../common/constants';
 import { PipelinesCreate } from '../../public/application/sections/pipelines_create';
 import { getCreatePath, ROUTES } from '../../public/application/services/navigation';
@@ -67,8 +70,9 @@ describe('<PipelinesCreate />', () => {
   test('should render the correct page header', async () => {
     await renderPipelinesCreate(httpSetup);
 
-    expect(screen.getByTestId('pageTitle')).toHaveTextContent('Create pipeline');
-    expect(screen.getByTestId('documentationLink')).toHaveTextContent('Create pipeline docs');
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Create pipeline');
+    await openAppMenuOverflow();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
   });
 
   test('should toggle the version field', async () => {
@@ -142,6 +146,7 @@ describe('<PipelinesCreate />', () => {
           name: 'my_pipeline',
           description: 'pipeline description',
           _meta: metaData,
+          field_access_pattern: 'classic',
           processors: [],
         }),
       })
@@ -191,5 +196,52 @@ describe('<PipelinesCreate />', () => {
     await waitFor(() => expect(within(callout).queryByTestId('showErrorsButton')).toBeNull());
     expect(within(callout).getByTestId('hideErrorsButton')).toBeInTheDocument();
     expect(within(callout).getAllByRole('listitem')).toHaveLength(8);
+  });
+});
+
+describe('<PipelinesCreate /> field access pattern', () => {
+  const { httpSetup } = setupEnvironment();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should toggle the field access pattern', async () => {
+    await renderPipelinesCreate(httpSetup);
+
+    expect(screen.getByTestId('fieldAccessPatternToggle')).toHaveAttribute('aria-checked', 'false');
+    fireEvent.click(screen.getByTestId('fieldAccessPatternToggle'));
+    expect(screen.getByTestId('fieldAccessPatternToggle')).toHaveAttribute('aria-checked', 'true');
+  });
+
+  test('should send the flexible field access pattern when enabled', async () => {
+    const user = userEvent.setup();
+    await renderPipelinesCreate(httpSetup);
+
+    await user.type(getInput('nameField'), 'my_pipeline');
+
+    fireEvent.click(screen.getByTestId('fieldAccessPatternToggle'));
+
+    const postCallsBefore = httpSetup.post.mock.calls.length;
+    fireEvent.click(screen.getByTestId('submitButton'));
+
+    await waitFor(() => expect(httpSetup.post.mock.calls.length).toBeGreaterThan(postCallsBefore));
+    const createRequest = httpSetup.post.mock.results[postCallsBefore]?.value as
+      | Promise<unknown>
+      | undefined;
+    await waitFor(async () => {
+      await createRequest;
+    });
+
+    expect(httpSetup.post).toHaveBeenLastCalledWith(
+      API_BASE_PATH,
+      expect.objectContaining({
+        body: JSON.stringify({
+          name: 'my_pipeline',
+          field_access_pattern: 'flexible',
+          processors: [],
+        }),
+      })
+    );
   });
 });

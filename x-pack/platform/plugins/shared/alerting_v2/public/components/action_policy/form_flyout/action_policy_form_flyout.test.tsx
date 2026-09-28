@@ -12,11 +12,15 @@ import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ActionPolicyFormFlyout } from './action_policy_form_flyout';
 
+const mockGetUrlForApp = jest.fn(
+  (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
+);
+
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'application') {
       return {
-        getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+        getUrlForApp: mockGetUrlForApp,
       };
     }
     if (token === 'uiSettings') {
@@ -25,6 +29,42 @@ jest.mock('@kbn/core-di-browser', () => ({
     return {};
   },
   CoreStart: (key: string) => key,
+}));
+
+const INLINE_DEFS = [
+  {
+    id: 'email',
+    label: 'Email',
+    iconType: 'mail',
+    connectorTypeId: '.email',
+    paramsTemplate: 'to: ""\n',
+  },
+  {
+    id: 'slack',
+    label: 'Slack',
+    iconType: 'logoSlack',
+    connectorTypeId: '.slack',
+    paramsTemplate: 'message: ""\n',
+  },
+];
+
+jest.mock('@kbn/alerting-v2-rule-form', () => ({
+  INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
+  getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
+  isActionValid: () => true,
+  InlineWorkflowEditor: ({
+    value,
+    connectorCreationConfig,
+  }: {
+    value: { id: string };
+    connectorCreationConfig?: { mode: string; href?: string };
+  }) => (
+    <div
+      data-test-subj={`inlineWorkflowEditor-${value.id}`}
+      data-connector-creation-mode={connectorCreationConfig?.mode}
+      data-connector-creation-href={connectorCreationConfig?.href}
+    />
+  ),
 }));
 
 jest.mock('../form/components/matcher_input', () => ({
@@ -41,8 +81,8 @@ jest.mock('../form/components/matcher_input', () => ({
   ),
 }));
 
-jest.mock('../../../hooks/use_fetch_data_fields', () => ({
-  useFetchDataFields: (_matcher?: string) => ({ data: undefined, isLoading: false }),
+jest.mock('../../../hooks/use_fetch_rule_event_fields', () => ({
+  useFetchRuleEventFields: (_matcher?: string) => ({ data: undefined, isLoading: false }),
 }));
 
 jest.mock('../../../hooks/use_fetch_rules', () => ({
@@ -51,10 +91,6 @@ jest.mock('../../../hooks/use_fetch_rules', () => ({
 
 jest.mock('../../../hooks/use_fetch_rule_tags', () => ({
   useFetchRuleTags: () => ({ data: [], isLoading: false }),
-}));
-
-jest.mock('../../../hooks/use_fetch_tags', () => ({
-  useFetchTags: () => ({ data: [], isLoading: false }),
 }));
 
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
@@ -113,7 +149,7 @@ const renderFlyout = ({
 
 describe('ActionPolicyFormFlyout', () => {
   it('renders create mode and closes on cancel', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const onClose = jest.fn();
 
     renderFlyout({ onClose, onSave: jest.fn() });
@@ -125,8 +161,40 @@ describe('ActionPolicyFormFlyout', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('submits create payload and omits optional empty fields', async () => {
+  it('renders the inline simple workflow builder alongside the existing-workflow selector', () => {
+    renderFlyout({ onClose: jest.fn(), onSave: jest.fn() });
+
+    expect(screen.getByTestId('simpleWorkflowBuilder')).toBeInTheDocument();
+    expect(screen.getByTestId('destinationsInput')).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('actionPolicyFormSection-notificationControls'))
+        .getByText('Notification controls')
+        .closest('button')
+    ).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('opens connector creation in a new tab for inline workflows', async () => {
     const user = userEvent.setup();
+    renderFlyout({ onClose: jest.fn(), onSave: jest.fn() });
+
+    await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
+
+    expect(await screen.findByTestId(/inlineWorkflowEditor-/)).toHaveAttribute(
+      'data-connector-creation-mode',
+      'new-tab'
+    );
+    expect(screen.getByTestId(/inlineWorkflowEditor-/)).toHaveAttribute(
+      'data-connector-creation-href',
+      '/app/management/connectors'
+    );
+    expect(mockGetUrlForApp).toHaveBeenCalledWith('management', {
+      deepLinkId: 'triggersActionsConnectors',
+      path: '/connectors',
+    });
+  });
+
+  it('forwards the raw form state (not a payload) to onSave so the host can build it', async () => {
+    const user = userEvent.setup({ delay: null });
     const onSave = jest.fn();
 
     renderFlyout({ onClose: jest.fn(), onSave });
@@ -145,18 +213,47 @@ describe('ActionPolicyFormFlyout', () => {
     await waitFor(() => expect(saveButton).toBeEnabled());
     await user.click(saveButton);
 
-    expect(onSave).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
     expect(onSave).toHaveBeenCalledWith({
       name: 'Policy from test',
       description: 'Description from test',
+      matcher: null,
       groupingMode: 'per_episode',
-      throttle: { strategy: 'on_status_change', interval: null },
+      groupBy: [],
+      throttleStrategy: 'on_status_change',
+      throttleInterval: '',
       destinations: [{ type: 'workflow', id: 'wf-1' }],
+      inlineActions: [],
     });
   });
 
+  it('forwards inline "simple workflow" drafts to onSave instead of dropping them', async () => {
+    const user = userEvent.setup({ delay: null });
+    const onSave = jest.fn();
+
+    renderFlyout({ onClose: jest.fn(), onSave });
+
+    await user.type(screen.getByTestId(TEST_SUBJ.nameInput), 'Inline policy');
+    await user.tab();
+
+    // Add an inline Slack workflow draft (no existing destination selected).
+    await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
+
+    const saveButton = screen.getByTestId(TEST_SUBJ.submitButton);
+    await waitFor(() => expect(saveButton).toBeEnabled());
+    await user.click(saveButton);
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        destinations: [],
+        inlineActions: [expect.objectContaining({ source: 'inline', stepType: 'slack' })],
+      })
+    );
+  });
+
   it('renders edit mode and submits update payload with optional fields and version', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const onUpdate = jest.fn();
     const initialValues: ActionPolicyResponse = {
       id: 'policy-1',
@@ -164,21 +261,16 @@ describe('ActionPolicyFormFlyout', () => {
       name: 'Critical production alerts',
       description: 'Routes critical alerts',
       enabled: true,
-      matcher: 'data.severity : "critical"',
-      groupBy: ['host.name', 'service.name'],
-      tags: ['production'],
-      groupingMode: 'per_field',
+      matcher: { expression: 'data.severity : "critical"' },
+      group_by: ['host.name', 'service.name'],
+      grouping_mode: 'per_field',
       throttle: { strategy: 'time_interval', interval: '5m' },
-      snoozedUntil: null,
+      snoozed_until: null,
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
-      createdBy: 'elastic',
-      createdAt: '2026-03-01T10:00:00.000Z',
-      updatedBy: 'elastic',
-      updatedAt: '2026-03-01T10:00:00.000Z',
-      auth: {
-        owner: 'elastic',
-        createdByUser: true,
-      },
+      created_by: { profile_uid: 'elastic' },
+      created_at: '2026-03-01T10:00:00.000Z',
+      updated_by: { profile_uid: 'elastic' },
+      updated_at: '2026-03-01T10:00:00.000Z',
     };
 
     renderFlyout({ onClose: jest.fn(), onUpdate, initialValues });
@@ -195,17 +287,21 @@ describe('ActionPolicyFormFlyout', () => {
     await waitFor(() => expect(updateButton).toBeEnabled());
     await user.click(updateButton);
 
-    expect(onUpdate).toHaveBeenCalledTimes(1);
-    expect(onUpdate).toHaveBeenCalledWith('policy-1', {
-      version: 'WzEsMV0=',
-      name: 'Critical production alerts',
-      description: 'Routes critical alerts',
-      groupingMode: 'per_field',
-      tags: ['production'],
-      matcher: 'data.severity : "critical"',
-      groupBy: ['host.name', 'service.name'],
-      throttle: { strategy: 'time_interval', interval: '5m' },
-      destinations: [{ type: 'workflow', id: 'workflow-2' }],
-    });
+    await waitFor(() => expect(onUpdate).toHaveBeenCalledTimes(1));
+    expect(onUpdate).toHaveBeenCalledWith(
+      'policy-1',
+      {
+        name: 'Critical production alerts',
+        description: 'Routes critical alerts',
+        matcher: { expression: 'data.severity : "critical"' },
+        groupingMode: 'per_field',
+        groupBy: ['host.name', 'service.name'],
+        throttleStrategy: 'time_interval',
+        throttleInterval: '5m',
+        destinations: [{ type: 'workflow', id: 'workflow-2' }],
+        inlineActions: [],
+      },
+      'WzEsMV0='
+    );
   });
 });

@@ -26,7 +26,11 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LatencyAggregationType } from '@kbn/apm-types';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
-import { TRANSACTIONS_TABLE_EBT_ACTIONS, TRANSACTIONS_TABLE_EBT_ELEMENTS } from './ebt_constants';
+import {
+  TRANSACTIONS_TABLE_EBT_ACTIONS,
+  TRANSACTIONS_TABLE_EBT_DETAILS,
+  TRANSACTIONS_TABLE_EBT_ELEMENTS,
+} from './ebt_constants';
 import { asMillisecondDuration, asTransactionRate } from '../../utils/formatters/duration';
 import { asPercent } from '../../utils/formatters/numeric';
 import { Sparkline } from '../sparkline';
@@ -83,19 +87,22 @@ function MetricCell({
   color,
   comparisonColor,
   showSparkline,
+  isSparklineLoading = false,
 }: {
   valueLabel: string;
   series?: TransactionGroup['latency']['series'];
   color: string;
   comparisonColor: string;
   showSparkline: boolean;
+  isSparklineLoading?: boolean;
 }) {
-  if (!series || !showSparkline) {
+  if (!showSparkline || (!series && !isSparklineLoading)) {
     return <>{valueLabel}</>;
   }
 
   return (
     <EuiFlexGroup
+      data-test-subj="transactionSparklineChart"
       justifyContent="flexEnd"
       gutterSize="xs"
       alignItems="flexEnd"
@@ -113,6 +120,7 @@ function MetricCell({
           series={series?.value ?? null}
           comparisonSeries={series?.comparison}
           comparisonSeriesColor={comparisonColor}
+          isLoading={isSparklineLoading && !series}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -182,12 +190,14 @@ export function getBuiltInColumns({
   nameInteraction,
   alertsInteraction,
   showSparklines = true,
+  isSparklineLoading = false,
   remainingTransactionsCellTooltipContent,
 }: {
   latencyAggregationType?: LatencyAggregationType;
   nameInteraction?: TransactionGroupInteraction;
   alertsInteraction?: TransactionGroupInteraction;
   showSparklines?: boolean;
+  isSparklineLoading?: boolean;
   remainingTransactionsCellTooltipContent?: ReactNode;
 }): Record<ColumnId, EuiBasicTableColumn<TransactionGroup>> {
   return {
@@ -253,11 +263,13 @@ export function getBuiltInColumns({
           );
         }
         const nameHref = nameInteraction?.href?.(item);
-        const ebtNameProps = getEbtProps({
-          action: TRANSACTIONS_TABLE_EBT_ACTIONS.VIEW_TRANSACTION_GROUP,
-          element: nameInteraction?.ebt?.element ?? TRANSACTIONS_TABLE_EBT_ELEMENTS.ROW_NAME,
-        });
+        const ebtElement =
+          nameInteraction?.ebt?.element ?? TRANSACTIONS_TABLE_EBT_ELEMENTS.ROW_NAME;
         if (nameHref) {
+          const ebtNameProps = getEbtProps({
+            action: TRANSACTIONS_TABLE_EBT_ACTIONS.VIEW_TRANSACTION_GROUP,
+            element: ebtElement,
+          });
           return (
             <div style={outerStyle}>
               <EuiToolTip content={item.name} display="block">
@@ -269,18 +281,48 @@ export function getBuiltInColumns({
           );
         }
         if (nameInteraction?.onClick) {
+          const isExpanded = nameInteraction.isExpanded?.(item) ?? false;
+          const ebtNameProps = getEbtProps({
+            action: TRANSACTIONS_TABLE_EBT_ACTIONS.VIEW_TRANSACTION_GROUP,
+            element: ebtElement,
+            detail: isExpanded
+              ? TRANSACTIONS_TABLE_EBT_DETAILS.CLOSE
+              : TRANSACTIONS_TABLE_EBT_DETAILS.OPEN,
+          });
+          const expandLabel = isExpanded
+            ? i18n.translate('apmUiShared.transactionsTable.collapseTransactionAriaLabel', {
+                defaultMessage: 'Close transaction details',
+              })
+            : i18n.translate('apmUiShared.transactionsTable.expandTransactionAriaLabel', {
+                defaultMessage: 'Open transaction details',
+              });
           return (
-            <div style={outerStyle}>
-              <EuiToolTip content={item.name} display="block">
-                <EuiLink
-                  onClick={() => nameInteraction.onClick!(item)}
-                  {...ebtNameProps}
-                  style={truncationStyle}
-                >
-                  {item.name}
-                </EuiLink>
-              </EuiToolTip>
-            </div>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} style={outerStyle}>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={expandLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    data-test-subj="apmTransactionsTableExpandButton"
+                    iconType={isExpanded ? 'minimize' : 'maximize'}
+                    color={isExpanded ? 'primary' : 'text'}
+                    size="xs"
+                    aria-label={expandLabel}
+                    onClick={() => nameInteraction.onClick!(item)}
+                    {...ebtNameProps}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem style={{ minWidth: 0, overflow: 'hidden' }}>
+                <EuiToolTip content={item.name} display="block">
+                  <EuiLink
+                    onClick={() => nameInteraction.onClick!(item)}
+                    {...ebtNameProps}
+                    style={truncationStyle}
+                  >
+                    {item.name}
+                  </EuiLink>
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
         }
         return (
@@ -309,6 +351,7 @@ export function getBuiltInColumns({
           color={SPARKLINE_COLORS.latency.current}
           comparisonColor={SPARKLINE_COLORS.latency.comparison}
           showSparkline={showSparklines}
+          isSparklineLoading={isSparklineLoading}
         />
       ),
     },
@@ -329,6 +372,7 @@ export function getBuiltInColumns({
           color={SPARKLINE_COLORS.throughput.current}
           comparisonColor={SPARKLINE_COLORS.throughput.comparison}
           showSparkline={showSparklines}
+          isSparklineLoading={isSparklineLoading}
         />
       ),
     },
@@ -357,6 +401,7 @@ export function getBuiltInColumns({
           color={SPARKLINE_COLORS.errorRate.current}
           comparisonColor={SPARKLINE_COLORS.errorRate.comparison}
           showSparkline={showSparklines}
+          isSparklineLoading={isSparklineLoading}
         />
       ),
     },

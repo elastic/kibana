@@ -6,9 +6,17 @@
  */
 
 import * as rt from 'io-ts';
-import { paginationSchema } from '../../../schema';
-import { MAX_USER_ACTIONS_PER_PAGE } from '../../../constants';
+import { limitedArraySchema, limitedStringSchema, paginationSchema } from '../../../schema';
+import {
+  MAX_USER_ACTIONS_PER_PAGE,
+  MAX_USER_ACTION_SEARCH_LENGTH,
+  MAX_USER_ACTION_AUTHOR_LENGTH,
+  MAX_USER_ACTION_AUTHORS_FILTER_LENGTH,
+  MAX_USER_ACTION_SOURCES_FILTER_LENGTH,
+  NO_ACTION_SOURCE_FILTERING_KEYWORD,
+} from '../../../constants';
 import { UserActionTypes } from '../../domain/user_action/action/v1';
+import { ActionSourceTypeRt } from '../../domain/user_action/source/v1';
 import type { CaseUserActionInjectedIdsRt } from '../../domain/user_action/v1';
 import {
   CaseUserActionInjectedDeprecatedIdsRt,
@@ -71,6 +79,12 @@ const UserActionFindRequestTypes = {
 const UserActionFindRequestTypesRt = rt.keyof(UserActionFindRequestTypes);
 export type UserActionFindRequestTypes = rt.TypeOf<typeof UserActionFindRequestTypesRt>;
 
+const UserActionFindRequestSourcesRt = rt.union([
+  ActionSourceTypeRt,
+  rt.literal(NO_ACTION_SOURCE_FILTERING_KEYWORD),
+]);
+export type UserActionFindRequestSources = rt.TypeOf<typeof UserActionFindRequestSourcesRt>;
+
 export const UserActionFindRequestRt = rt.intersection([
   rt.exact(
     rt.partial({
@@ -82,6 +96,39 @@ export const UserActionFindRequestRt = rt.intersection([
 ]);
 
 export type UserActionFindRequest = rt.TypeOf<typeof UserActionFindRequestRt>;
+
+export const UserActionInternalFindRequestRt = rt.intersection([
+  rt.exact(
+    rt.partial({
+      types: rt.array(UserActionFindRequestTypesRt),
+      sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
+      authors: limitedArraySchema({
+        codec: limitedStringSchema({
+          fieldName: 'authors',
+          min: 1,
+          max: MAX_USER_ACTION_AUTHOR_LENGTH,
+        }),
+        fieldName: 'authors',
+        min: 0,
+        max: MAX_USER_ACTION_AUTHORS_FILTER_LENGTH,
+      }),
+      search: limitedStringSchema({
+        fieldName: 'search',
+        min: 1,
+        max: MAX_USER_ACTION_SEARCH_LENGTH,
+      }),
+      sources: limitedArraySchema({
+        codec: UserActionFindRequestSourcesRt,
+        fieldName: 'sources',
+        min: 0,
+        max: MAX_USER_ACTION_SOURCES_FILTER_LENGTH,
+      }),
+    })
+  ),
+  paginationSchema({ maxPerPage: MAX_USER_ACTIONS_PER_PAGE }),
+]);
+
+export type UserActionInternalFindRequest = rt.TypeOf<typeof UserActionInternalFindRequestRt>;
 
 export const UserActionFindResponseRt = rt.strict({
   userActions: UserActionsRt,

@@ -34,6 +34,7 @@ import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 import { getLogsFeature } from './features/logs_feature';
+import { getObservabilityAlertsFeature } from './features/alerts_feature';
 import type { ObservabilityConfig } from '.';
 import { OBSERVABILITY_TIERED_FEATURES, observabilityFeatureId } from '../common';
 import { AlertsLocatorDefinition } from '../common/locators/alerts';
@@ -104,10 +105,11 @@ export class ObservabilityPlugin
       plugins.features.registerKibanaFeature(getCasesFeature(casesCapabilities, casesApiTags));
       plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
       plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
-      plugins.cases.attachmentFramework.registerUnified(observabilityAlertAttachmentType);
+      plugins.cases.attachmentFramework.registerAttachment(observabilityAlertAttachmentType);
     }
 
     plugins.features.registerKibanaFeature(getLogsFeature());
+    plugins.features.registerKibanaFeature(getObservabilityAlertsFeature());
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
 

@@ -562,7 +562,7 @@ describe('TableListView', () => {
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
         'A-Z',
         'Z-A',
-        'Recent-Old. Checked option.',
+        'Recent-Old',
         'Old-Recent',
       ]);
     });
@@ -667,7 +667,7 @@ describe('TableListView', () => {
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
         'A-Z',
         'Z-A',
-        'Recent-Old. Checked option.', // checked
+        'Recent-Old', // checked
         'Old-Recent',
       ]);
 
@@ -706,7 +706,7 @@ describe('TableListView', () => {
 
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
         'A-Z',
-        'Z-A. Checked option.', // now this option is checked
+        'Z-A', // now this option is checked
         'Recent-Old',
         'Old-Recent',
       ]);
@@ -869,7 +869,7 @@ describe('TableListView', () => {
         'Z-A',
         'Type A-Z',
         'Type Z-A',
-        'Recent-Old. Checked option.',
+        'Recent-Old',
         'Old-Recent',
       ]);
 
@@ -913,7 +913,7 @@ describe('TableListView', () => {
         'A-Z',
         'Z-A',
         'Type A-Z',
-        'Type Z-A. Checked option.',
+        'Type Z-A',
         'Recent-Old',
         'Old-Recent',
       ]);
@@ -996,7 +996,7 @@ describe('TableListView', () => {
 
       expect(filterOptions.length).toBe(5);
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'Recently viewed. Checked option.Additional information',
+        'Recently viewedAdditional information',
         'A-Z',
         'Z-A',
         'Recent-Old',
@@ -1886,8 +1886,8 @@ describe('TableListView', () => {
 
       expect(firstCheckBox.props().disabled).toBe(false);
       expect(secondCheckBox.props().disabled).toBe(true);
-      // EUI changes the check "title" from "Select this row" to the reason to disable the checkbox
-      expect(secondCheckBox.props().title).toBe(reasonMessage);
+      // EUI changes the check "aria-label" from "Select this row" to the reason to disable the checkbox
+      expect(secondCheckBox.props()['aria-label']).toBe(reasonMessage);
     });
   });
 });

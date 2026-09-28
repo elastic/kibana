@@ -7,24 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PluginInitializerContext } from '@kbn/core/server';
+
 export { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
-
-export {
-  type MarkdownByReferenceState,
-  type MarkdownByValueState,
-  markdownByValueStateSchema,
-  markdownEmbeddableSchema,
-  type MarkdownEmbeddableState,
-} from './embeddable/schemas';
-
 export type {
   MarkdownCreateRequestBody,
   MarkdownCreateResponseBody,
   MarkdownReadResponseBody,
   MarkdownUpdateResponseBody,
 } from './api';
+export {
+  markdownByValueStateSchema,
+  markdownEmbeddableSchema,
+  type MarkdownByReferenceState,
+  type MarkdownByValueState,
+  type MarkdownEmbeddableState,
+} from './embeddable/schemas';
 
-export const plugin = async () => {
+export const plugin = async (initializerContext: PluginInitializerContext) => {
   const { MarkdownPlugin } = await import('./plugin');
-  return new MarkdownPlugin();
+  return new MarkdownPlugin(initializerContext);
 };

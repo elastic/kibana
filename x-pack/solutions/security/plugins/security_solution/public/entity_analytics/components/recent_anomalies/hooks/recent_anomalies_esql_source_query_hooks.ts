@@ -7,14 +7,33 @@
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
+import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { ML_ANOMALIES_INDEX } from '../../../../../common/constants';
 import { useIntervalForHeatmap } from '../anomaly_heatmap_interval';
 import type { AnomalyBand } from '../anomaly_bands';
 import { getHiddenBandsFilters } from '../hidden_bands_filter';
 import { getEntityIdsFilter } from '../entity_ids_filter';
+import { getJobIdsFilter } from '../job_ids_filter';
 
 export type ViewByMode = 'entity' | 'jobId';
+
+/**
+ * Base filter for ML anomaly records, matching the `result_type`/`is_interim`/
+ * `record_score` constraints the anomaly overview and summary APIs apply
+ * so this panel doesn't surface interim or sub-threshold records those APIs wouldn't.
+ */
+const BASE_RECORD_FILTER = `| WHERE result_type == "record" AND is_interim == false AND record_score >= 1`;
+
+/**
+ * Time-range filter applied inside the query text via ?_tstart/?_tend named
+ * params (populated by getESQLResults when given a timeRange) instead of the
+ * request-level `filter` DSL. A request-level filter that matches no data
+ * makes the FROM pattern resolve to zero indices, which trips an
+ * Elasticsearch bug in LOOKUP JOIN lookup-index resolution and fails the
+ * query with a misleading "Lookup Join requires a single lookup mode index"
+ * error instead of returning an empty result (elastic/kibana#277613).
+ */
+const TIME_RANGE_FILTER = `| WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend`;
 
 const ANOMALY_ENTITY_TYPES = ['user', 'host', 'service'] as const;
 
@@ -73,7 +92,7 @@ const getEuidEvaluationBlock = (euidApi: EntityStoreEuid) => {
  * Uses the entity store's entity.id field (EUID format).
  * Optionally filters by watchlist when watchlistId is provided.
  */
-const getEntityStoreJoinBlock = (spaceId: string, watchlistId?: string) => {
+const getEntityStoreJoinBlock = (entitiesIndexName: string, watchlistId?: string) => {
   // Filter ensures only entities that exist in the entity store are shown.
   // For watchlists, the watchlist filter implicitly achieves this.
   const entityFilter = watchlistId
@@ -83,7 +102,7 @@ const getEntityStoreJoinBlock = (spaceId: string, watchlistId?: string) => {
   return `
     | EVAL entity.id = entity_id
     | RENAME @timestamp AS event_timestamp
-    | LOOKUP JOIN ${getLatestEntitiesIndexName(spaceId)} ON entity.id
+    | LOOKUP JOIN ${entitiesIndexName} ON entity.id
     | RENAME event_timestamp AS @timestamp
     ${entityFilter}`;
 };
@@ -99,6 +118,12 @@ interface EsqlSourceParams {
    * filter (leave unconstrained).
    */
   entityIds?: string[];
+  /**
+   * Job IDs of the security ML jobs used to constrain anomalies to the same jobs the
+   * anomaly overview/summary APIs query. `undefined` means not yet resolved
+   * (leave unconstrained until the calling hook is ready).
+   */
+  jobIds?: string[];
 }
 
 export const useRecentAnomaliesTopRowsEsqlSource = ({
@@ -108,19 +133,26 @@ export const useRecentAnomaliesTopRowsEsqlSource = ({
   watchlistId,
   spaceId,
   entityIds,
+  jobIds,
 }: EsqlSourceParams & { rowsLimit: number }): string | undefined => {
   const euidApi = useEntityStoreEuidApi();
+  // LOOKUP JOIN needs the live concrete index name; on un-migrated deployments
+  // that is still the legacy `.entities.v2.latest.security_{space}` index.
+  const { data: resolvedIndex } = useResolvedLatestEntitiesIndexName(spaceId);
+  const entitiesIndexName = resolvedIndex?.indexName;
 
-  if (!euidApi || !spaceId) return undefined;
+  if (!euidApi || !spaceId || !entitiesIndexName) return undefined;
 
   if (viewBy === 'jobId') {
     return `SET unmapped_fields="nullify";
     FROM ${ML_ANOMALIES_INDEX}
-    | WHERE record_score IS NOT NULL
+    ${BASE_RECORD_FILTER}
+    ${TIME_RANGE_FILTER}
+    ${getJobIdsFilter(jobIds)}
     ${getEuidEvaluationBlock(euidApi.euid)}
     | WHERE entity_id IS NOT NULL
     ${getEntityIdsFilter(entityIds)}
-    ${getEntityStoreJoinBlock(spaceId, watchlistId)}
+    ${getEntityStoreJoinBlock(entitiesIndexName, watchlistId)}
     ${getHiddenBandsFilters(anomalyBands)}
     | STATS max_record_score = MAX(record_score) BY job_id
     | SORT max_record_score DESC
@@ -131,11 +163,13 @@ export const useRecentAnomaliesTopRowsEsqlSource = ({
   // Entity mode
   return `SET unmapped_fields="nullify";
     FROM ${ML_ANOMALIES_INDEX}
-    | WHERE record_score IS NOT NULL
+    ${BASE_RECORD_FILTER}
+    ${TIME_RANGE_FILTER}
+    ${getJobIdsFilter(jobIds)}
     ${getEuidEvaluationBlock(euidApi.euid)}
     | WHERE entity_id IS NOT NULL
     ${getEntityIdsFilter(entityIds)}
-    ${getEntityStoreJoinBlock(spaceId, watchlistId)}
+    ${getEntityStoreJoinBlock(entitiesIndexName, watchlistId)}
     ${getHiddenBandsFilters(anomalyBands)}
     | STATS max_record_score = MAX(record_score), entity_name = VALUES(entity_name), entity_type = VALUES(entity_type) BY entity_id
     | EVAL entity_name = MV_FIRST(entity_name), entity_type = MV_FIRST(entity_type)
@@ -151,22 +185,26 @@ export const useRecentAnomaliesDataEsqlSource = ({
   watchlistId,
   spaceId,
   entityIds,
+  jobIds,
   timeRange,
 }: EsqlSourceParams & { rowLabels?: string[]; timeRange?: { from: string; to: string } }) => {
   const euidApi = useEntityStoreEuidApi();
   const interval = useIntervalForHeatmap(timeRange);
+  const { data: resolvedIndex } = useResolvedLatestEntitiesIndexName(spaceId);
+  const entitiesIndexName = resolvedIndex?.indexName;
 
-  if (!euidApi || !spaceId || !rowLabels) return undefined;
+  if (!euidApi || !spaceId || !rowLabels || !entitiesIndexName) return undefined;
   const formattedLabels = rowLabels.map((each) => `"${each}"`).join(', ');
 
   if (viewBy === 'jobId') {
     return `SET unmapped_fields="nullify";
     FROM ${ML_ANOMALIES_INDEX}
-    | WHERE record_score IS NOT NULL AND job_id IN (${formattedLabels})
+    ${BASE_RECORD_FILTER} AND job_id IN (${formattedLabels})
+    ${TIME_RANGE_FILTER}
     ${getEuidEvaluationBlock(euidApi.euid)}
     | WHERE entity_id IS NOT NULL
     ${getEntityIdsFilter(entityIds)}
-    ${getEntityStoreJoinBlock(spaceId, watchlistId)}
+    ${getEntityStoreJoinBlock(entitiesIndexName, watchlistId)}
     ${getHiddenBandsFilters(anomalyBands)}
     | EVAL job_id_to_record_score = CONCAT(job_id, " : ", TO_STRING(record_score))
     | STATS job_id_to_record_score = VALUES(job_id_to_record_score) BY @timestamp = BUCKET(@timestamp, ${interval}h)
@@ -182,10 +220,12 @@ export const useRecentAnomaliesDataEsqlSource = ({
   // Entity mode
   return `SET unmapped_fields="nullify";
     FROM ${ML_ANOMALIES_INDEX}
-    | WHERE record_score IS NOT NULL
+    ${BASE_RECORD_FILTER}
+    ${TIME_RANGE_FILTER}
+    ${getJobIdsFilter(jobIds)}
     ${getEuidEvaluationBlock(euidApi.euid)}
     | WHERE entity_id IN (${formattedLabels})
-    ${getEntityStoreJoinBlock(spaceId, watchlistId)}
+    ${getEntityStoreJoinBlock(entitiesIndexName, watchlistId)}
     ${getHiddenBandsFilters(anomalyBands)}
     | EVAL entity_id_to_record_score = CONCAT(entity_id, " : ", TO_STRING(record_score))
     | STATS entity_id_to_record_score = VALUES(entity_id_to_record_score) BY @timestamp = BUCKET(@timestamp, ${interval}h)

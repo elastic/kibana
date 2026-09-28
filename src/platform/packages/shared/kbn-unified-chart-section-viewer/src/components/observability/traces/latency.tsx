@@ -39,12 +39,14 @@ const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyCha
     },
     color,
     seriesType,
+    customFunction: 'AVG',
     dimensions: breakdownField ? [{ name: breakdownField }] : [],
   });
 
   return (
     <Chart
       id="latency"
+      isSelected={false}
       esqlQuery={esqlQuery}
       size="s"
       discoverFetch$={discoverFetch$}
@@ -57,7 +59,6 @@ const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyCha
       chartLayers={chartLayers}
       legend={breakdownField ? BREAKDOWN_LEGEND_CONFIG : undefined}
       syncCursor
-      syncTooltips
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
       profileId={profileId}
     />

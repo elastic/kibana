@@ -1,0 +1,5 @@
+[
+  {"method": "GET",  "url": "https://localhost:5620/api/entity_analytics/entity_store/stats"},
+  {"method": "POST", "url": "https://localhost:5620/internal/risk_score/scores"},
+  {"method": "GET",  "url": "https://localhost:5620/api/security/me"}
+]

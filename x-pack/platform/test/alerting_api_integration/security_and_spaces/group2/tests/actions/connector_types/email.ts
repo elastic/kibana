@@ -232,7 +232,9 @@ export default function emailTest({ getService }: FtrProviderContext) {
         .then((resp: any) => {
           const { status, message } = resp.body;
           expect(status).to.eql('error');
-          expect(message).to.eql('HTML email can only be sent via notifications');
+          expect(message).to.eql(
+            'HTML email can only be sent when the connector is configured to allow HTML'
+          );
         });
     });
 

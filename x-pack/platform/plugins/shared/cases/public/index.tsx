@@ -30,11 +30,17 @@ export {
   useCaseViewParams,
 } from './common/navigation';
 export type {
+  RegisteredUnifiedAttachmentType,
+  UnifiedHybridAttachmentType,
   UnifiedReferenceAttachmentType,
   UnifiedValueAttachmentType,
-  CommonAttachmentTabViewProps,
+  CommonAttachmentListViewProps,
+  UnifiedHybridAttachmentViewProps,
   UnifiedReferenceAttachmentViewProps,
   UnifiedValueAttachmentViewProps,
+  AttachmentAction,
+  DocumentActionProps,
+  WorkflowActivityLabelProps,
 } from './client/attachment_framework/types';
 export { AttachmentActionType, defineAttachment } from './client/attachment_framework/types';
 export { useCasesContext } from './components/cases_context/use_cases_context';

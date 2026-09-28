@@ -11,6 +11,9 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from '@kbn/shared-ux-router';
 import { Route } from '@kbn/shared-ux-router';
 import { EuiButtonGroupTestHarness, EuiComboBoxTestHarness } from '@kbn/test-eui-helpers';
+import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { RouteComponentProps } from 'react-router-dom';
 
 import type { IndexDetailsTab, IndexDetailsTabId } from '../../../common/constants';
@@ -346,7 +349,7 @@ describe('<IndexDetailsPage />', () => {
 
   it('displays index name in the header', async () => {
     await renderPage();
-    const header = screen.getByTestId('indexDetailsHeader');
+    const header = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root);
     expect(within(header).getByRole('heading', { level: 1 })).toHaveTextContent(testIndexName);
   });
 
@@ -504,10 +507,11 @@ describe('<IndexDetailsPage />', () => {
           },
         },
       });
-      const header = screen.getByTestId('indexDetailsHeader');
-      expect(within(header).getByRole('heading', { level: 1 })).toHaveTextContent(
-        `${testIndexName} ${testBadges.join(' ')}`
-      );
+      const header = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root);
+      expect(within(header).getByRole('heading', { level: 1 })).toHaveTextContent(testIndexName);
+      testBadges.forEach((badge) => {
+        expect(within(header).getByText(badge)).toBeInTheDocument();
+      });
     });
 
     describe('extension service overview content', () => {
@@ -712,21 +716,26 @@ describe('<IndexDetailsPage />', () => {
   });
 
   describe('context menu', () => {
-    afterEach(async () => {
-      // Ensure the index actions popover doesn't stay open across tests.
-      if (screen.queryByTestId('indexContextMenu')) {
-        fireEvent.click(screen.getByTestId('indexActionsContextMenuButton'));
-        await waitFor(() => {
-          expect(screen.queryByTestId('indexContextMenu')).not.toBeInTheDocument();
-        });
+    // The "Manage index" actions live behind the app-menu overflow popover: open it, then open the
+    // manage-index submenu so the individual action buttons become queryable.
+    const openManageIndexMenu = async () => {
+      await openAppMenuOverflow();
+      fireEvent.click(await screen.findByTestId('indexActionsContextMenuButton'));
+    };
+
+    afterEach(() => {
+      // Close the app-menu overflow popover if a test left it open.
+      const overflowButton = screen.queryByTestId(APP_MENU_TEST_SUBJECTS.overflowButton);
+      if (overflowButton && screen.queryByTestId(APP_MENU_TEST_SUBJECTS.popover)) {
+        fireEvent.click(overflowButton);
       }
     });
 
-    it('opens an index context menu when "manage index" button is clicked', async () => {
+    it('opens the manage index menu when "manage index" button is clicked', async () => {
       await renderPage();
-      expect(screen.queryByTestId('indexContextMenu')).not.toBeInTheDocument();
-      fireEvent.click(screen.getByTestId('indexActionsContextMenuButton'));
-      await screen.findByTestId('indexContextMenu');
+      expect(screen.queryByTestId('deleteIndexMenuButton')).not.toBeInTheDocument();
+      await openManageIndexMenu();
+      await screen.findByTestId('deleteIndexMenuButton');
     });
 
     it('closes an index', async () => {
@@ -734,7 +743,7 @@ describe('<IndexDetailsPage />', () => {
       const getMock = jest.mocked(httpSetup.get);
       const requestsBefore = getMock.mock.calls.length;
 
-      fireEvent.click(screen.getByTestId('indexActionsContextMenuButton'));
+      await openManageIndexMenu();
       const closeButton = await screen.findByTestId('closeIndexMenuButton');
       fireEvent.click(closeButton);
 
@@ -758,7 +767,7 @@ describe('<IndexDetailsPage />', () => {
       const getMock = jest.mocked(httpSetup.get);
       const requestsBefore = getMock.mock.calls.length;
 
-      fireEvent.click(screen.getByTestId('indexActionsContextMenuButton'));
+      await openManageIndexMenu();
       const openButton = await screen.findByTestId('openIndexMenuButton');
       fireEvent.click(openButton);
 
@@ -776,7 +785,7 @@ describe('<IndexDetailsPage />', () => {
       const getMock = jest.mocked(httpSetup.get);
       const requestsBefore = getMock.mock.calls.length;
 
-      fireEvent.click(screen.getByTestId('indexActionsContextMenuButton'));
+      await openManageIndexMenu();
       const forcemergeButton = await screen.findByTestId('forcemergeIndexMenuButton');
       fireEvent.click(forcemergeButton);
 
@@ -799,7 +808,7 @@ describe('<IndexDetailsPage />', () => {
       const getMock = jest.mocked(httpSetup.get);
       const requestsBefore = getMock.mock.calls.length;
 
-      fireEvent.click(screen.getByTestId('indexActionsContextMenuButton'));
+      await openManageIndexMenu();
       const refreshButton = await screen.findByTestId('refreshIndexMenuButton');
       fireEvent.click(refreshButton);
 
@@ -818,7 +827,7 @@ describe('<IndexDetailsPage />', () => {
       const getMock = jest.mocked(httpSetup.get);
       const requestsBefore = getMock.mock.calls.length;
 
-      fireEvent.click(screen.getByTestId('indexActionsContextMenuButton'));
+      await openManageIndexMenu();
       const clearCacheButton = await screen.findByTestId('clearCacheIndexMenuButton');
       fireEvent.click(clearCacheButton);
 
@@ -837,7 +846,7 @@ describe('<IndexDetailsPage />', () => {
       const getMock = jest.mocked(httpSetup.get);
       const requestsBefore = getMock.mock.calls.length;
 
-      fireEvent.click(screen.getByTestId('indexActionsContextMenuButton'));
+      await openManageIndexMenu();
       const flushButton = await screen.findByTestId('flushIndexMenuButton');
       fireEvent.click(flushButton);
 
@@ -854,7 +863,7 @@ describe('<IndexDetailsPage />', () => {
     it(`deletes an index`, async () => {
       await renderPage();
 
-      fireEvent.click(screen.getByTestId('indexActionsContextMenuButton'));
+      await openManageIndexMenu();
       const deleteButton = await screen.findByTestId('deleteIndexMenuButton');
       fireEvent.click(deleteButton);
 
@@ -1102,18 +1111,33 @@ describe('<IndexDetailsPage />', () => {
       },
     };
 
-    it('semantic text banner is visible if there is no semantic_text field in the mapping', async () => {
+    const platinumLicenseDeps = {
+      plugins: {
+        licensing: {
+          license$: {
+            subscribe: jest.fn((callback) => {
+              callback({ isActive: true, hasAtLeast: jest.fn(() => true) });
+              return { unsubscribe: jest.fn() };
+            }),
+          },
+        },
+      },
+    };
+
+    const openMappingsTab = async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0, delay: null });
+      await user.click(screen.getByTestId('indexDetailsTab-mappings'));
+      await screen.findByTestId('fieldsList');
+    };
+
+    it('semantic text banner is visible below a platinum license if there is no semantic_text field in the mapping', async () => {
       httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
         mappings: mockIndexMappingResponseWithoutSemanticText,
       });
 
-      await renderPage(undefined, {
-        core: { application: { capabilities: { ml: { canGetTrainedModels: true } } } },
-      });
-
-      const user = userEvent.setup({ pointerEventsCheck: 0, delay: null });
-      await user.click(screen.getByTestId('indexDetailsTab-mappings'));
-      await screen.findByTestId('fieldsList');
+      // No licensing plugin is provided, so the license is treated as below platinum.
+      await renderPage();
+      await openMappingsTab();
 
       expect(screen.getByTestId('indexDetailsMappingsSemanticTextBanner')).toBeInTheDocument();
     });
@@ -1123,13 +1147,34 @@ describe('<IndexDetailsPage />', () => {
         mappings: mockIndexMappingResponseWithSemanticText,
       });
 
-      await renderPage(undefined, {
-        core: { application: { capabilities: { ml: { canGetTrainedModels: true } } } },
+      await renderPage();
+      await openMappingsTab();
+
+      expect(
+        screen.queryByTestId('indexDetailsMappingsSemanticTextBanner')
+      ).not.toBeInTheDocument();
+    });
+
+    it('semantic text banner is not visible with a platinum license', async () => {
+      httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+        mappings: mockIndexMappingResponseWithoutSemanticText,
       });
 
-      const user = userEvent.setup({ pointerEventsCheck: 0, delay: null });
-      await user.click(screen.getByTestId('indexDetailsTab-mappings'));
-      await screen.findByTestId('fieldsList');
+      await renderPage(undefined, platinumLicenseDeps);
+      await openMappingsTab();
+
+      expect(
+        screen.queryByTestId('indexDetailsMappingsSemanticTextBanner')
+      ).not.toBeInTheDocument();
+    });
+
+    it('semantic text banner is not visible when semantic text is disabled by config', async () => {
+      httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+        mappings: mockIndexMappingResponseWithoutSemanticText,
+      });
+
+      await renderPage(undefined, { config: { enableSemanticText: false } });
+      await openMappingsTab();
 
       expect(
         screen.queryByTestId('indexDetailsMappingsSemanticTextBanner')
@@ -1546,7 +1591,11 @@ describe('<IndexDetailsPage />', () => {
         hasAtLeast: jest.fn(() => true),
       };
 
-      beforeEach(async () => {
+      const setupAddSemanticTextField = async ({
+        hasMLPermissions,
+      }: {
+        hasMLPermissions: boolean;
+      }) => {
         httpRequestsMockHelpers.setInferenceModels({
           data: [
             {
@@ -1571,13 +1620,19 @@ describe('<IndexDetailsPage />', () => {
               },
             },
           },
-          core: { application: { capabilities: { ml: { canGetTrainedModels: true } } } },
+          core: {
+            application: { capabilities: { ml: { canGetTrainedModels: hasMLPermissions } } },
+          },
           plugins: {
             share: {
               url: {
                 locators: {
+                  // The share mock's `url` is a singleton shared with the top-level `url` dependency,
+                  // so this locator must also satisfy consumers that call `getUrl`/`navigate`.
                   get: jest.fn(() => ({
                     useUrl: jest.fn().mockReturnValue('https://redirect.me/to/inference_endpoints'),
+                    getUrl: jest.fn(),
+                    navigate: jest.fn(),
                   })),
                 },
               },
@@ -1596,7 +1651,24 @@ describe('<IndexDetailsPage />', () => {
         await clickMappingsTab();
         await user.click(screen.getByTestId('indexDetailsMappingsAddField'));
         await screen.findByTestId('createFieldForm');
-      });
+      };
+
+      const selectSemanticTextType = async (fieldName: string) => {
+        const nameInput = screen.getByTestId('nameParameterInput');
+        fireEvent.change(nameInput, { target: { value: fieldName } });
+
+        const typeComboBox = new EuiComboBoxTestHarness('fieldType');
+        await typeComboBox.select(getTypeLabel('semantic_text'));
+        await typeComboBox.close();
+
+        await screen.findByTestId('referenceFieldSelect');
+
+        // The inference id selection is part of the semantic text flow.
+        await screen.findByTestId('selectInferenceId');
+        await screen.findByTestId('inferenceIdButton');
+
+        return typeComboBox;
+      };
 
       afterEach(async () => {
         if (!screen.queryByTestId('indexDetailsMappingsPendingBlock')) return;
@@ -1619,18 +1691,8 @@ describe('<IndexDetailsPage />', () => {
       });
 
       it('can select semantic_text field', async () => {
-        const nameInput = screen.getByTestId('nameParameterInput');
-        fireEvent.change(nameInput, { target: { value: 'semantic_text_name' } });
-
-        const typeComboBox = new EuiComboBoxTestHarness('fieldType');
-        await typeComboBox.select(getTypeLabel('semantic_text'));
-        await typeComboBox.close();
-
-        await screen.findByTestId('referenceFieldSelect');
-
-        // The inference id selection is part of the semantic text flow.
-        await screen.findByTestId('selectInferenceId');
-        await screen.findByTestId('inferenceIdButton');
+        await setupAddSemanticTextField({ hasMLPermissions: true });
+        await selectSemanticTextType('semantic_text_name');
 
         await user.click(screen.getByTestId('inferenceIdButton'));
         await screen.findByTestId(`custom-inference_${customInferenceModel}`);
@@ -1638,6 +1700,42 @@ describe('<IndexDetailsPage />', () => {
         // can cancel new field
         const cancelButton = await screen.findByTestId('cancelButton');
         await user.click(cancelButton);
+      }, 20000);
+
+      it('can save a semantic_text field without ML permissions', async () => {
+        await setupAddSemanticTextField({ hasMLPermissions: false });
+        const typeComboBox = await selectSemanticTextType('semantic_text_name');
+
+        // The default inference endpoint is auto-selected once endpoints have loaded.
+        await waitFor(() =>
+          expect(screen.getByTestId('inferenceIdButton')).toHaveTextContent(
+            defaultInferenceEndpoints.ELSER
+          )
+        );
+
+        await user.click(screen.getByTestId('addButton'));
+        // The create-field submit handler focuses the field type input after async validation,
+        // which can re-open the combobox popover. Close it deterministically.
+        await typeComboBox.close();
+
+        await waitFor(() =>
+          expect(screen.getByTestId('indexDetailsMappingsSaveMappings')).not.toBeDisabled()
+        );
+
+        await user.click(screen.getByTestId('indexDetailsMappingsSaveMappings'));
+
+        await waitFor(() => {
+          expect(httpSetup.put).toHaveBeenCalledWith(`${API_BASE_PATH}/mapping/${testIndexName}`, {
+            body: JSON.stringify({
+              semantic_text_name: {
+                type: 'semantic_text',
+                inference_id: defaultInferenceEndpoints.ELSER,
+              },
+            }),
+          });
+        });
+
+        expect(screen.queryByTestId('indexDetailsSaveMappingsError')).not.toBeInTheDocument();
       }, 20000);
     });
 
@@ -1689,31 +1787,29 @@ describe('<IndexDetailsPage />', () => {
   });
 
   describe('navigates back to the indices list', () => {
+    // The back button is an internal app link; the global redirectAppLinks wrapper (absent in tests)
+    // turns the click into SPA navigation, so we assert the href the link carries instead.
     it('without indices list params', async () => {
-      const { history } = await renderPage();
-      fireEvent.click(screen.getByTestId('indexDetailsBackToIndicesButton'));
-
-      await waitFor(() => {
-        expect(history.location.pathname).toBe('/indices');
-        expect(history.location.search).toBe('');
-      });
+      await renderPage();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
+        'href',
+        '/app/management/data/index_management/indices'
+      );
     });
 
     it('with indices list params', async () => {
       const filter = 'isFollower:true';
-      const { history } = await renderPage(
+      await renderPage(
         `/indices/index_details?indexName=${testIndexName}&filter=${encodeURIComponent(
           filter
         )}&includeHiddenIndices=true`
       );
-      fireEvent.click(screen.getByTestId('indexDetailsBackToIndicesButton'));
-
-      await waitFor(() => {
-        expect(history.location.pathname).toBe('/indices');
-        expect(history.location.search).toBe(
-          `?filter=${encodeURIComponent(filter)}&includeHiddenIndices=true`
-        );
-      });
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
+        'href',
+        `/app/management/data/index_management/indices?filter=${encodeURIComponent(
+          filter
+        )}&includeHiddenIndices=true`
+      );
     });
   });
 });

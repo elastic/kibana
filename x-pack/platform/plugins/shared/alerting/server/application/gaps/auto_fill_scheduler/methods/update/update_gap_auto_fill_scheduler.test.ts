@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -30,8 +31,6 @@ import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../../saved_
 import type { GapAutoFillSchedulerSO } from '../../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 import { backfillClientMock } from '../../../../../backfill_client/backfill_client.mock';
 import type { UpdateGapAutoFillSchedulerParams } from './types';
-import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
-
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -47,6 +46,7 @@ const eventLogClient = eventLogClientMock.create();
 const backfillClient = backfillClientMock.create();
 
 const rulesClientParamsBase: jest.Mocked<ConstructorOptions> = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -75,7 +75,6 @@ const rulesClientParamsBase: jest.Mocked<ConstructorOptions> = {
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   eventLogger,
-  featureFlags: coreFeatureFlagsMock.createStart(),
   isServerless: false,
 };
 

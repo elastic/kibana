@@ -19,10 +19,8 @@ import { emptyTitleText } from '@kbn/visualization-ui-components';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { DraggingIdentifier, DropType } from '@kbn/dom-drag-drop';
-import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import type {
   LensDocument,
-  DateRange,
   Datasource,
   DatasourceMap,
   Visualization,
@@ -65,21 +63,6 @@ export function getAbsoluteDateRange(timefilter: TimefilterContract) {
     to,
   });
   return { fromDate: min?.toISOString() || from, toDate: max?.toISOString() || to };
-}
-
-export function convertToAbsoluteDateRange(dateRange: DateRange, now: Date) {
-  const absRange = getAbsoluteTimeRange(
-    {
-      from: dateRange.fromDate as string,
-      to: dateRange.toDate as string,
-    },
-    { forceNow: now }
-  );
-
-  return {
-    fromDate: absRange.from,
-    toDate: absRange.to,
-  };
 }
 
 export function containsDynamicMath(dateMathString: string) {
@@ -288,7 +271,7 @@ export function inferTimeField(datatableUtilities: DatatableUtilitiesService, ev
         .map(({ table, column }) => {
           const tableColumn = table.columns[column];
           const hasTimeRange = Boolean(
-            tableColumn && datatableUtilities.getDateHistogramMeta(tableColumn)?.timeRange
+            tableColumn && datatableUtilities.getColumnTimeRange(tableColumn)
           );
           if (hasTimeRange) {
             return tableColumn.meta.field;

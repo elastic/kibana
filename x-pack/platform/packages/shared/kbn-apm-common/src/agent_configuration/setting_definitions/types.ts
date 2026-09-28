@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import type * as t from 'io-ts';
+import type { z } from '@kbn/zod/v4';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 
-// TODO: is it possible to get rid of `any`?
-export type SettingValidation = t.Type<any, string, unknown>;
+/**
+ * zod validation for a setting. `ZodTypeAny` (not `ZodType<string>`) so
+ * enum-output schemas assign cleanly; every validator here still only accepts
+ * and returns strings.
+ */
+export type SettingValidation = z.ZodTypeAny;
 
 interface BaseSetting {
   /**

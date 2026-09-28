@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { usePageReady, type Meta } from '@kbn/ebt-tools';
 import { initialLoadReported, selectOverviewStatus } from '../state/overview_status';
 

@@ -956,7 +956,7 @@ describe('SearchSource', () => {
       searchSource.onRequestStart(fn);
       const options = {};
       await firstValueFrom(searchSource.fetch$(options));
-      expect(fn).toBeCalledWith(searchSource, options);
+      expect(fn).toHaveBeenCalledWith(searchSource, options);
     });
 
     test('should not be called on parent searchSource', async () => {
@@ -970,8 +970,8 @@ describe('SearchSource', () => {
       const options = {};
       await firstValueFrom(searchSource.fetch$(options));
 
-      expect(fn).toBeCalledWith(searchSource, options);
-      expect(parentFn).not.toBeCalled();
+      expect(fn).toHaveBeenCalledWith(searchSource, options);
+      expect(parentFn).not.toHaveBeenCalled();
     });
 
     test('should be called on parent searchSource if callParentStartHandlers is true', async () => {
@@ -990,8 +990,8 @@ describe('SearchSource', () => {
       const options = {};
       await firstValueFrom(searchSource.fetch$(options));
 
-      expect(fn).toBeCalledWith(searchSource, options);
-      expect(parentFn).toBeCalledWith(searchSource, options);
+      expect(fn).toHaveBeenCalledWith(searchSource, options);
+      expect(parentFn).toHaveBeenCalledWith(searchSource, options);
     });
   });
 
@@ -1199,9 +1199,9 @@ describe('SearchSource', () => {
         res$.subscribe({ next, complete });
         await firstValueFrom(res$);
 
-        expect(next).toBeCalledTimes(2);
-        expect(complete).toBeCalledTimes(1);
-        expect(searchSourceDependencies.onResponse).toBeCalledTimes(1);
+        expect(next).toHaveBeenCalledTimes(2);
+        expect(complete).toHaveBeenCalledTimes(1);
+        expect(searchSourceDependencies.onResponse).toHaveBeenCalledTimes(1);
         expect(next.mock.calls[0]).toMatchObject([
           { isPartial: true, isRunning: true, rawResponse: { test: 1 } },
         ]);
@@ -1223,10 +1223,10 @@ describe('SearchSource', () => {
         res$.subscribe({ next: next2, complete: complete2 });
         await firstValueFrom(res$);
 
-        expect(next).toBeCalledTimes(2);
-        expect(next2).toBeCalledTimes(2);
-        expect(complete).toBeCalledTimes(1);
-        expect(complete2).toBeCalledTimes(1);
+        expect(next).toHaveBeenCalledTimes(2);
+        expect(next2).toHaveBeenCalledTimes(2);
+        expect(complete).toHaveBeenCalledTimes(1);
+        expect(complete2).toHaveBeenCalledTimes(1);
         expect(searchSourceDependencies.search).toHaveBeenCalledTimes(1);
       });
     });
@@ -1256,12 +1256,12 @@ describe('SearchSource', () => {
         searchSource.setField('index', indexPattern);
         await firstValueFrom(searchSource.fetch$(options));
 
-        expect(options.inspector?.adapter?.start).toBeCalledTimes(1);
-        expect(requestResponder.error).not.toBeCalled();
-        expect(requestResponder.json).toBeCalledTimes(1);
-        expect(requestResponder.ok).toBeCalledTimes(1);
+        expect(options.inspector?.adapter?.start).toHaveBeenCalledTimes(1);
+        expect(requestResponder.error).not.toHaveBeenCalled();
+        expect(requestResponder.json).toHaveBeenCalledTimes(1);
+        expect(requestResponder.ok).toHaveBeenCalledTimes(1);
         // First and last
-        expect(requestResponder.stats).toBeCalledTimes(2);
+        expect(requestResponder.stats).toHaveBeenCalledTimes(2);
       });
 
       test('calls inspector only once, with multiple subs (shareReplay)', async () => {
@@ -1290,9 +1290,9 @@ describe('SearchSource', () => {
 
         await firstValueFrom(res$);
 
-        expect(complete1).toBeCalledTimes(1);
-        expect(complete2).toBeCalledTimes(1);
-        expect(options.inspector?.adapter?.start).toBeCalledTimes(1);
+        expect(complete1).toHaveBeenCalledTimes(1);
+        expect(complete2).toHaveBeenCalledTimes(1);
+        expect(options.inspector?.adapter?.start).toHaveBeenCalledTimes(1);
       });
 
       test('calls error on inspector', async () => {
@@ -1313,11 +1313,11 @@ describe('SearchSource', () => {
         searchSource.setField('index', indexPattern);
         await firstValueFrom(searchSource.fetch$(options)).catch(() => {});
 
-        expect(options.inspector?.adapter?.start).toBeCalledTimes(1);
-        expect(requestResponder.json).toBeCalledTimes(1);
-        expect(requestResponder.error).toBeCalledTimes(1);
-        expect(requestResponder.ok).toBeCalledTimes(0);
-        expect(requestResponder.stats).toBeCalledTimes(0);
+        expect(options.inspector?.adapter?.start).toHaveBeenCalledTimes(1);
+        expect(requestResponder.json).toHaveBeenCalledTimes(1);
+        expect(requestResponder.error).toHaveBeenCalledTimes(1);
+        expect(requestResponder.ok).toHaveBeenCalledTimes(0);
+        expect(requestResponder.stats).toHaveBeenCalledTimes(0);
       });
     });
 
@@ -1364,7 +1364,7 @@ describe('SearchSource', () => {
         expect(fetchSub.next).toHaveBeenCalledTimes(2);
         expect(fetchSub.complete).toHaveBeenCalledTimes(1);
         expect(fetchSub.error).toHaveBeenCalledTimes(0);
-        expect(searchSourceDependencies.onResponse).toBeCalledTimes(1);
+        expect(searchSourceDependencies.onResponse).toHaveBeenCalledTimes(1);
 
         expect(typesRegistry.get('avg')!.postFlightRequest).toHaveBeenCalledTimes(0);
       });
@@ -1435,7 +1435,7 @@ describe('SearchSource', () => {
 
         const resp = await lastValueFrom(fetch$);
 
-        expect(searchSourceDependencies.onResponse).toBeCalledTimes(1);
+        expect(searchSourceDependencies.onResponse).toHaveBeenCalledTimes(1);
         expect(fetchSub.next).toHaveBeenCalledTimes(2);
         expect(fetchSub.complete).toHaveBeenCalledTimes(1);
         expect(fetchSub.error).toHaveBeenCalledTimes(0);
@@ -1486,7 +1486,7 @@ describe('SearchSource', () => {
 
         const resp = await lastValueFrom(fetch$);
 
-        expect(searchSourceDependencies.onResponse).toBeCalledTimes(1);
+        expect(searchSourceDependencies.onResponse).toHaveBeenCalledTimes(1);
         expect(fetchSub.next).toHaveBeenCalledTimes(3);
         expect(fetchSub.complete).toHaveBeenCalledTimes(1);
         expect(fetchSub.error).toHaveBeenCalledTimes(0);

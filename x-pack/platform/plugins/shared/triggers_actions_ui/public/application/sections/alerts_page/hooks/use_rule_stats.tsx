@@ -25,9 +25,10 @@ const Divider = styled.div`
 interface Props {
   ruleTypeIds?: string[];
   consumers?: string[];
+  enabled?: boolean;
 }
 
-export const useRuleStats = ({ ruleTypeIds, consumers }: Props = {}) => {
+export const useRuleStats = ({ ruleTypeIds, consumers, enabled = true }: Props = {}) => {
   const {
     http,
     notifications: { toasts },
@@ -81,10 +82,16 @@ export const useRuleStats = ({ ruleTypeIds, consumers }: Props = {}) => {
   }, [consumers, http, ruleTypeIds, toasts]);
 
   useEffect(() => {
-    loadRuleStats();
-  }, [loadRuleStats]);
+    if (enabled) {
+      loadRuleStats();
+    }
+  }, [enabled, loadRuleStats]);
 
   return useMemo(() => {
+    if (!enabled) {
+      return [];
+    }
+
     const disabledStatsComponent = (
       <Stat
         title={stats.disabled}
@@ -149,6 +156,7 @@ export const useRuleStats = ({ ruleTypeIds, consumers }: Props = {}) => {
       </EuiButtonEmpty>,
     ].reverse();
   }, [
+    enabled,
     loading,
     manageRulesHref,
     stats.disabled,

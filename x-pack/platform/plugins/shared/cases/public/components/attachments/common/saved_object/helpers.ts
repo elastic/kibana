@@ -11,6 +11,8 @@ import {
   DASHBOARD_SO_TYPE,
   DISCOVER_SESSION_ATTACHMENT_TYPE,
   DISCOVER_SESSION_SO_TYPE,
+  LENS_ATTACHMENT_TYPE,
+  LENS_SO_TYPE,
   MAP_ATTACHMENT_TYPE,
   MAP_SO_TYPE,
 } from '../../../../../common/constants/attachments';
@@ -21,6 +23,8 @@ import type {
   SavedObjectAttachmentUI,
 } from './types';
 
+const MAX_SNAPSHOT_BYTES = 200_000;
+
 /**
  * Maps each attachment-type id that represents a saved-object attachment to
  * its SO type name as understood by the `_find` API and in-app URLs. Single
@@ -30,6 +34,7 @@ import type {
 export const ATTACHMENT_TYPE_TO_SO_TYPE = {
   [DASHBOARD_ATTACHMENT_TYPE]: DASHBOARD_SO_TYPE,
   [DISCOVER_SESSION_ATTACHMENT_TYPE]: DISCOVER_SESSION_SO_TYPE,
+  [LENS_ATTACHMENT_TYPE]: LENS_SO_TYPE,
   [MAP_ATTACHMENT_TYPE]: MAP_SO_TYPE,
 } as const satisfies Record<string, string>;
 
@@ -95,6 +100,14 @@ export const getSavedObjectAttachmentAttributes = (
 
 export const getSavedObjectKey = (soType: SupportedSavedObjectType, id: string): string =>
   `${soType}:${id}`;
+
+export const fitsSnapshotBudget = (snapshot: unknown): boolean => {
+  try {
+    return JSON.stringify(snapshot).length <= MAX_SNAPSHOT_BYTES;
+  } catch {
+    return false;
+  }
+};
 
 /**
  * Walks `caseData.comments` once to collect the foreign SO keys of every

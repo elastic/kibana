@@ -62,6 +62,7 @@ export function createSiemReadinessCriteriaEvaluator({
   return {
     name: 'SIEM Readiness Criteria',
     kind: 'LLM' as const,
+    direction: 'maximize',
     evaluate: async ({ expected, ...rest }) => {
       const exampleCriteria: string[] =
         (expected as SiemReadinessDatasetExample['output'])?.criteria ?? [];
@@ -113,7 +114,13 @@ export function createEvaluateSiemReadinessDataset({
           };
         },
       },
-      [createSiemReadinessCriteriaEvaluator({ evaluators })]
+      [
+        createSiemReadinessCriteriaEvaluator({ evaluators }),
+        // Non-functional trace-based metrics (tool calls, latency, token usage).
+        // These are derived from the run's OTel trace and add no extra LLM cost,
+        // so always measure them alongside the quality criteria.
+        ...Object.values(evaluators.traceBasedEvaluators),
+      ]
     );
   };
 }

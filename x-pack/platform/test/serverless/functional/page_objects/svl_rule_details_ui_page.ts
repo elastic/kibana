@@ -16,7 +16,7 @@ export function SvlRuleDetailsPageProvider({ getService }: FtrProviderContext) {
 
   return {
     async getHeadingText() {
-      return await testSubjects.getVisibleText('ruleDetailsTitle');
+      return await testSubjects.getVisibleText('appHeaderTitle');
     },
     async getRuleType() {
       return await testSubjects.getVisibleText('ruleSummaryRuleType');

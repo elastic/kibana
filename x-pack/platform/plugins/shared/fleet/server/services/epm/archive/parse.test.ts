@@ -466,7 +466,7 @@ describe('parseAndVerifyArchive', () => {
   it('should throw on more than one top level dirs', () => {
     expect(() =>
       parseAndVerifyArchive(['input_only-0.1.0/manifest.yml', 'dummy/manifest.yml'], {})
-    ).toThrowError(
+    ).toThrow(
       new PackageInvalidArchiveError(
         'Package contains more than one top-level directory; top-level directory found: input_only-0.1.0; filePath: dummy/manifest.yml'
       )
@@ -474,7 +474,7 @@ describe('parseAndVerifyArchive', () => {
   });
 
   it('should throw on missing manifest file', () => {
-    expect(() => parseAndVerifyArchive(['input_only-0.1.0/test/manifest.yml'], {})).toThrowError(
+    expect(() => parseAndVerifyArchive(['input_only-0.1.0/test/manifest.yml'], {})).toThrow(
       new PackageInvalidArchiveError(
         'Manifest file input_only-0.1.0/manifest.yml not found in paths.'
       )
@@ -488,7 +488,7 @@ describe('parseAndVerifyArchive', () => {
       parseAndVerifyArchive(['input_only-0.1.0/manifest.yml'], {
         'input_only-0.1.0/manifest.yml': buf,
       })
-    ).toThrowError(
+    ).toThrow(
       'Could not parse top-level package manifest at top-level directory input_only-0.1.0: Manifest must be a valid YAML object'
     );
   });
@@ -510,7 +510,7 @@ version: 0.1.0
       parseAndVerifyArchive(['input_only-0.1.0/manifest.yml'], {
         'input_only-0.1.0/manifest.yml': buf,
       })
-    ).toThrowError(
+    ).toThrow(
       'Invalid top-level package manifest at top-level directory input_only-0.1.0 (package name: input_only): one or more fields missing of '
     );
   });
@@ -534,7 +534,7 @@ owner:
       parseAndVerifyArchive(['input_only-0.1.0/manifest.yml'], {
         'input_only-0.1.0/manifest.yml': buf,
       })
-    ).toThrowError(
+    ).toThrow(
       'Name input_only and version 0.2.0 do not match top-level directory input_only-0.1.0'
     );
   });
@@ -623,7 +623,7 @@ describe('parseAndVerifyDataStreams', () => {
         pkgVersion: '0.1.0',
         assetsMap: {},
       })
-    ).toThrowError("No manifest.yml file found for data stream 'stream1'");
+    ).toThrow("No manifest.yml file found for data stream 'stream1'");
   });
 
   it('should throw when data stream manifest has invalid yaml', async () => {
@@ -636,7 +636,7 @@ describe('parseAndVerifyDataStreams', () => {
           'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.alloc(1),
         },
       })
-    ).toThrowError(
+    ).toThrow(
       "Could not parse package manifest for data stream 'stream1': Manifest must be a valid YAML object"
     );
   });
@@ -655,7 +655,7 @@ describe('parseAndVerifyDataStreams', () => {
           ),
         },
       })
-    ).toThrowError(
+    ).toThrow(
       "Invalid manifest for data stream 'stream1': one or more fields missing of 'title', 'type'"
     );
   });
@@ -822,7 +822,7 @@ describe('parseAndVerifyStreams', () => {
         ],
         'input-only-0.1.0/data_stream/stream1'
       )
-    ).toThrowError(
+    ).toThrow(
       'Invalid manifest for data stream input-only-0.1.0/data_stream/stream1: stream is missing one or more fields of: input, title'
     );
   });
@@ -873,7 +873,7 @@ describe('parseAndVerifyVars', () => {
         ],
         'input-only-0.1.0/data_stream/stream1/var1'
       )
-    ).toThrowError(
+    ).toThrow(
       'Invalid var definition for input-only-0.1.0/data_stream/stream1/var1: one of mandatory fields \'name\' and \'type\' missing in var: {"name":"var1"}'
     );
   });
@@ -911,7 +911,7 @@ describe('parseAndVerifyPolicyTemplates', () => {
           },
         ],
       } as any)
-    ).toThrowError(
+    ).toThrow(
       'Invalid top-level manifest: one of mandatory fields \'name\', \'title\', \'description\' is missing in policy template: {"name":"template1","title":"Template"}'
     );
   });
@@ -954,7 +954,7 @@ describe('parseAndVerifyPolicyTemplates', () => {
           },
         ],
       } as any)
-    ).toThrowError(
+    ).toThrow(
       /Invalid policy template: for input packages, either 'type' is required or 'dynamic_signal_types' must be true/
     );
   });
@@ -973,7 +973,7 @@ describe('parseAndVerifyPolicyTemplates', () => {
           },
         ],
       } as any)
-    ).toThrowError(
+    ).toThrow(
       /Invalid policy template: for input packages, either 'type' is required or 'dynamic_signal_types' must be true/
     );
   });
@@ -990,7 +990,7 @@ describe('parseAndVerifyInputs', () => {
         ],
         ''
       )
-    ).toThrowError(
+    ).toThrow(
       'Invalid top-level manifest: one of mandatory fields \'type\', \'title\' missing in input: {"type":"logs"}'
     );
   });
@@ -1021,5 +1021,69 @@ describe('parseAndVerifyReadme', () => {
     expect(
       parseAndVerifyReadme(['input-only-0.1.0/docs/README.md'], 'input-only', '0.1.0')
     ).toEqual('/package/input-only/0.1.0/docs/README.md');
+  });
+});
+
+describe('provider_permissions passthrough (package-spec 3.7.0+)', () => {
+  const AWS_PERMS = [{ provider: 'aws', permissions: ['s3:GetObject'], roles: ['SecurityAudit'] }];
+
+  describe('parseAndVerifyPolicyTemplates', () => {
+    it('preserves provider_permissions on a policy template', () => {
+      const result = parseAndVerifyPolicyTemplates({
+        policy_templates: [
+          {
+            name: 'cloudtrail',
+            title: 'CloudTrail',
+            description: 'CloudTrail logs',
+            inputs: [],
+            provider_permissions: AWS_PERMS,
+          },
+        ],
+      } as any);
+
+      expect(result[0]).toMatchObject({ provider_permissions: AWS_PERMS });
+    });
+
+    it('does not include provider_permissions when not declared', () => {
+      const result = parseAndVerifyPolicyTemplates({
+        policy_templates: [
+          {
+            name: 'cloudtrail',
+            title: 'CloudTrail',
+            description: 'CloudTrail logs',
+            inputs: [],
+          },
+        ],
+      } as any);
+
+      expect(result[0]).not.toHaveProperty('provider_permissions');
+    });
+  });
+
+  describe('parseAndVerifyInputs', () => {
+    it('preserves provider_permissions on an input', () => {
+      const result = parseAndVerifyInputs(
+        [
+          {
+            type: 'aws-s3',
+            title: 'S3',
+            description: 'S3 input',
+            provider_permissions: AWS_PERMS,
+          },
+        ],
+        'manifest.yml'
+      );
+
+      expect(result[0]).toMatchObject({ provider_permissions: AWS_PERMS });
+    });
+
+    it('does not include provider_permissions when not declared on an input', () => {
+      const result = parseAndVerifyInputs(
+        [{ type: 'aws-s3', title: 'S3', description: 'S3 input' }],
+        'manifest.yml'
+      );
+
+      expect(result[0]).not.toHaveProperty('provider_permissions');
+    });
   });
 });

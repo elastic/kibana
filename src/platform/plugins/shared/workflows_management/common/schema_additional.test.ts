@@ -21,6 +21,7 @@ import {
   getAllConnectorsWithDynamic,
   getCachedAllConnectorsMap,
   getCachedDynamicConnectorTypes,
+  getCachedInferenceConnectorInstances,
   getDeprecatedStepMetadataMap,
   getWorkflowZodSchema,
 } from './schema';
@@ -28,7 +29,7 @@ import { EmailParamsSchema } from './stack_connectors_schema/email';
 import { stepSchemas } from './step_schemas';
 
 describe('schema - additional coverage', () => {
-  describe('EmailParamsSchema attachments', () => {
+  describe('EmailParamsSchema', () => {
     const baseEmailParams = {
       to: ['ops@example.com'],
       subject: 'Daily CSV report',
@@ -102,6 +103,35 @@ describe('schema - additional coverage', () => {
 
     it('accepts a workflow YAML email step with attachments', () => {
       expect(() => createWorkflowEmailSchema().parse(createWorkflowWithEmailStep())).not.toThrow();
+    });
+
+    it('accepts email params with HTML message bodies', () => {
+      expect(() =>
+        EmailParamsSchema.parse({
+          ...baseEmailParams,
+          messageHTML: '<html><body>Daily report</body></html>',
+        })
+      ).not.toThrow();
+    });
+
+    it('accepts a workflow YAML email step with an HTML message body', () => {
+      expect(() =>
+        createWorkflowEmailSchema().parse({
+          name: 'email html workflow',
+          triggers: [{ type: 'manual' }],
+          steps: [
+            {
+              name: 'send-html-email',
+              type: 'email',
+              'connector-id': 'stakeholder-email',
+              with: {
+                ...baseEmailParams,
+                messageHTML: '<html><body>Daily report</body></html>',
+              },
+            },
+          ],
+        })
+      ).not.toThrow();
     });
 
     it('rejects attachments missing required filename', () => {
@@ -280,6 +310,17 @@ describe('schema - additional coverage', () => {
       expect(dynamicContracts.every((contract) => contract.displayName === 'Inference')).toBe(true);
     });
 
+    it('should skip inbound-only connector types so they are not step types', () => {
+      const types = {
+        '.inboundWebhook': createMockConnectorTypeInfo({
+          actionTypeId: '.inboundWebhook',
+          displayName: 'Inbound Webhook',
+        }),
+      };
+
+      expect(convertDynamicConnectorsToContracts(types)).toEqual([]);
+    });
+
     it('should skip disabled connectors', () => {
       const types = {
         '.disabled': createMockConnectorTypeInfo({
@@ -448,6 +489,22 @@ describe('schema - additional coverage', () => {
       const secondMap = getCachedAllConnectorsMap();
 
       expect(firstMap).toBe(secondMap);
+    });
+
+    it('should refresh inference connector instances when types have not changed', () => {
+      const dynamicTypes = {
+        '.stable-inference-test': createMockConnectorTypeInfo({
+          actionTypeId: '.stable-inference-test',
+        }),
+      };
+      const inferenceConnectors = new Map([
+        ['feature-id', [createMockConnectorInstance({ id: 'inference-endpoint-id' })]],
+      ]);
+
+      addDynamicConnectorsToCache(dynamicTypes);
+      addDynamicConnectorsToCache(dynamicTypes, inferenceConnectors);
+
+      expect(getCachedInferenceConnectorInstances()).toBe(inferenceConnectors);
     });
 
     it('should rebuild cache when enabled flag changes', () => {

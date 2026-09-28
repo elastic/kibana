@@ -16,7 +16,7 @@ const listIndicesSchema = z.object({
     .string()
     .default('*')
     .describe(
-      `Index pattern to match Elasticsearch indices, aliases and datastream names.
+      `Index pattern to match Elasticsearch indices, aliases, datastreams, and ES|QL view names.
       - Correct examples: '.logs-*', '*data*', 'metrics-prod-*', 'my-specific-index', '*'
       - Should only be used if you are certain of a specific index pattern to filter on. *Do not try to guess*.
       - Defaults to '*' to match all indices.`
@@ -27,24 +27,40 @@ export const listIndicesTool = (): BuiltinToolDefinition<typeof listIndicesSchem
   return {
     id: platformCoreTools.listIndices,
     type: ToolType.builtin,
-    description: `List the indices, aliases and datastreams from the Elasticsearch cluster.
+    description: `List the indices, aliases, datastreams, ES|QL views, and external ES|QL datasets from the Elasticsearch cluster.
 
 The 'pattern' optional parameter is an index pattern which can be used to filter resources.
 This parameter should only be used when you already know of a specific pattern to filter on,
-e.g. if the user provided one. Otherwise, do not try to invent or guess a pattern.`,
+e.g. if the user provided one. Otherwise, do not try to invent or guess a pattern.
+
+ES|QL views and datasets are not indices. They can only be queried with ES|QL ("FROM <name>");
+they do not support _search. A view name that is absent from the indices list can still be a
+valid ES|QL source — check the views list before reporting that a name was not found.`,
+    annotations: {
+      title: 'List Indices, aliases, datastreams, ES|QL views, and Data Sources',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: listIndicesSchema,
-    handler: async ({ pattern }, { esClient, logger }) => {
+    handler: async ({ pattern }, { esClient, experimentalFeatures, logger }) => {
       logger.debug(`list indices tool called with pattern: ${pattern}`);
+      const includeDatasets = experimentalFeatures.datasets;
       const {
         indices,
         data_streams: dataStreams,
         aliases,
+        datasets,
+        views,
         warnings,
       } = await listSearchSources({
         pattern,
         includeHidden: false,
         excludeIndicesRepresentedAsAlias: false,
         excludeIndicesRepresentedAsDatastream: true,
+        includeDatasets,
+        includeViews: true,
         esClient: esClient.asCurrentUser,
       });
 
@@ -56,6 +72,16 @@ e.g. if the user provided one. Otherwise, do not try to invent or guess a patter
               indices: indices.map((index) => ({ name: index.name })),
               aliases: aliases.map((alias) => ({ name: alias.name, indices: alias.indices })),
               data_streams: dataStreams.map((ds) => ({ name: ds.name, indices: ds.indices })),
+              datasets: datasets.map((dataset) => ({
+                name: dataset.name,
+                data_source: dataset.data_source,
+                resource: dataset.resource,
+              })),
+              views: views.map((view) => ({
+                name: view.name,
+                query: view.query,
+                ...(view.description ? { description: view.description } : {}),
+              })),
               warnings,
             },
           },

@@ -8,7 +8,7 @@
  */
 
 import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { UnifiedHistogramChartProps } from '../components/chart/chart';
 import type {
   UnifiedHistogramExternalVisContextStatus,
@@ -123,6 +123,12 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     dataView: fetchParams?.dataView,
     isPlainRecord: fetchParams?.isESQLQuery,
   });
+
+  useEffect(() => {
+    if (!isChartAvailable) {
+      api.setLensRequestAdapter(undefined);
+    }
+  }, [api, isChartAvailable]);
 
   const chartProps = useMemo<UnifiedHistogramPartialChartProps | undefined>(() => {
     return lensVisService && lensVisServiceState && fetchParams?.dataView

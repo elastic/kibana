@@ -50,6 +50,7 @@ import {
   hasWorkflowInputFields,
   isRacAlertsApiForbiddenError,
   isWorkflowTriggerTabDisabled,
+  omitUnchangedWorkflowInputDefaults,
   resolveInitialSelectedTrigger,
   type WorkflowTriggerTabAvailability,
 } from './workflow_execute_modal_helpers';
@@ -98,9 +99,14 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       [definition, yamlString]
     );
 
+    const includeHistoricalTrigger = Boolean(workflowId ?? initialExecutionId);
+
     const visibleTriggerTabs = useMemo(
-      () => getVisibleWorkflowTriggerTabs(definition),
-      [definition]
+      () =>
+        getVisibleWorkflowTriggerTabs(definition, {
+          includeHistorical: includeHistoricalTrigger,
+        }),
+      [definition, includeHistoricalTrigger]
     );
 
     const triggerTabAvailability = useMemo<WorkflowTriggerTabAvailability>(
@@ -119,7 +125,8 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         hasAlertRacAccess,
         canReadWorkflowExecution,
         normalizedInputs,
-        eventDrivenExecutionEnabled
+        eventDrivenExecutionEnabled,
+        { includeHistorical: includeHistoricalTrigger }
       )
     );
 
@@ -217,7 +224,11 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         return;
       }
       setExecutionInputErrors(null);
-      onSubmit(parsed, selectedTrigger);
+      const submittedInput =
+        selectedTrigger === 'manual'
+          ? omitUnchangedWorkflowInputDefaults(parsed, normalizedInputs)
+          : parsed;
+      onSubmit(submittedInput, selectedTrigger);
       onClose();
     }, [
       canExecuteWorkflow,
@@ -226,6 +237,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       onClose,
       executionInput,
       eventTriggerTableSelectionCount,
+      normalizedInputs,
     ]);
 
     const handleChangeTrigger = useCallback(

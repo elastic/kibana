@@ -71,7 +71,7 @@ describe('AnalyticsNoDataPage', () => {
   it('handles onTryESQL action when ES data exists but no data views', async () => {
     // Mock the services to simulate ES data exists but no user data views
     jest.spyOn(services, 'hasESData').mockResolvedValue(true);
-    jest.spyOn(services, 'hasUserDataView').mockResolvedValue(false);
+    jest.spyOn(services, 'hasDataView').mockResolvedValue(false);
 
     const onTryESQL = jest.fn();
 
@@ -101,7 +101,7 @@ describe('AnalyticsNoDataPage', () => {
   it('renders appropriately when no ES data exists', async () => {
     // Mock the services to simulate no ES data exists
     jest.spyOn(services, 'hasESData').mockResolvedValue(false);
-    jest.spyOn(services, 'hasUserDataView').mockResolvedValue(false);
+    jest.spyOn(services, 'hasDataView').mockResolvedValue(false);
 
     const { container } = render(
       <AnalyticsNoDataPageProvider {...services}>

@@ -18,8 +18,9 @@ import { APP_ID } from '../../../../../common/constants';
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import type { HapiReadableStream } from '../../../../types';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import type { ResolutionCsvUploadResponse } from '../csv_upload';
+import type { ResolutionCsvUploadResponse, CsvErrorCategory } from '../csv_upload';
 import { processResolutionCsvUpload } from '../csv_upload';
+import { ENTITY_STORE_RESOLUTION_CSV_UPLOAD_EVENT } from '../../../telemetry/event_based/events';
 
 export const entityResolutionCsvUploadRoute = ({
   router,
@@ -67,7 +68,7 @@ export const entityResolutionCsvUploadRoute = ({
             return denied;
           }
 
-          const [, startPlugins] = await getStartServices();
+          const [coreStart, startPlugins] = await getStartServices();
           const { entityStore: entityStoreStart } = startPlugins;
 
           const coreContext = await context.core;
@@ -82,18 +83,47 @@ export const entityResolutionCsvUploadRoute = ({
 
           logger.debug(`Parsing entity resolution CSV file ${fileStream.hapi.filename}`);
 
+          const startMs = Date.now();
           const result = await processResolutionCsvUpload(fileStream, {
             crudClient,
             resolutionClient,
             logger,
           });
+          const durationMs = Date.now() - startMs;
+
+          const { errorCounts, ...body } = result;
 
           logger.debug(
             () =>
               `Entity resolution CSV upload completed: ${result.successful} successful, ${result.failed} failed, ${result.unmatched} unmatched out of ${result.total} total`
           );
 
-          return response.ok({ body: result });
+          const errors = (Object.entries(errorCounts) as Array<[CsvErrorCategory, number]>).map(
+            ([errorCategory, count]) => ({
+              errorCategory,
+              count,
+            })
+          );
+
+          try {
+            coreStart.analytics.reportEvent(ENTITY_STORE_RESOLUTION_CSV_UPLOAD_EVENT.eventType, {
+              total: result.total,
+              successful: result.successful,
+              failed: result.failed,
+              unmatched: result.unmatched,
+              durationMs,
+              ...(errors.length > 0 ? { errors } : {}),
+              namespace,
+            });
+          } catch (err) {
+            logger.error(
+              `Failed to report entity resolution CSV upload telemetry: ${
+                err instanceof Error ? err.message : String(err)
+              }`
+            );
+          }
+
+          return response.ok({ body });
         } catch (e) {
           logger.error(`Error during entity resolution CSV upload: ${e}`);
           const error = transformError(e);

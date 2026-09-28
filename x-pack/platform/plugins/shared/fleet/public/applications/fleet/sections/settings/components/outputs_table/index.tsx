@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -20,6 +21,15 @@ import { i18n } from '@kbn/i18n';
 
 import { licenseService, useAuthz, useLink, useStartServices } from '../../../../hooks';
 import type { Output } from '../../../../types';
+import { SERVERLESS_PRIVATE_OUTPUT_ID } from '../../../../../../../common/constants';
+import { isBeatsOutput } from '../../../../../../../common/services/output_helpers';
+
+function getPrivateLinkProvider(urls: string[]): string {
+  const url = urls[0] ?? '';
+  if (url.includes('.azure.')) return 'Azure Private Link';
+  if (url.includes('.gcp.')) return 'GCP Private Service Connect';
+  return 'AWS PrivateLink';
+}
 
 import { OutputHealth } from '../edit_output_flyout/output_health';
 
@@ -72,7 +82,7 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
     return [
       {
         render: (output: Output) => (
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiFlexGroup alignItems="center" gutterSize="xs" wrap={false}>
             <NameFlexItemWithMaxWidth grow={false}>
               <p title={output.name} className={`eui-textTruncate`}>
                 {output.name}
@@ -90,9 +100,31 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
                 />
               </EuiFlexItem>
             )}
+            {output.id === SERVERLESS_PRIVATE_OUTPUT_ID && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.fleet.settings.outputsTable.privateLinkBadgeTooltip',
+                    {
+                      defaultMessage:
+                        'This output uses {provider} for private network connectivity.',
+                      values: {
+                        provider: getPrivateLinkProvider(
+                          isBeatsOutput(output) ? output.hosts ?? [] : []
+                        ),
+                      },
+                    }
+                  )}
+                >
+                  <EuiBadge tabIndex={0}>
+                    {getPrivateLinkProvider(isBeatsOutput(output) ? output.hosts ?? [] : [])}
+                  </EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         ),
-        width: '288px',
+        width: '380px',
         name: i18n.translate('xpack.fleet.settings.outputsTable.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
@@ -108,7 +140,7 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
         truncateText: true,
         render: (output: Output) => (
           <FlexGroupWithMinWidth direction="column" gutterSize="xs">
-            {(output.hosts || []).map((host) => (
+            {(isBeatsOutput(output) ? output.hosts ?? [] : []).map((host) => (
               <EuiFlexItem key={host}>
                 <p title={host} className={`eui-textTruncate`}>
                   {host}

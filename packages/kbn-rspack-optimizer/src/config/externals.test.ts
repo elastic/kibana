@@ -8,13 +8,25 @@
  */
 
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
-import { getExternals } from './externals';
+import { getExternals, isKeaReactReduxImport } from './externals';
 
 /**
  * Rspack-specific externals that are NOT in UiSharedDepsSrc.externals.
  * Any addition here must be intentional and documented.
+ *
+ * `mongodb` and `mongodb-connection-string-url` are excluded from the browser bundle
+ * because the mongodb driver uses Node.js TCP/TLS and must never run in the browser;
+ * kbn-optimizer's webpack config declares the same two packages locally for the same
+ * reason (see packages/kbn-optimizer/src/worker/webpack.config.ts), independently of
+ * UiSharedDepsSrc.externals, which only carries browser-safe shared singleton libs.
  */
-const RSPACK_ONLY_EXTERNALS = ['node:crypto'];
+const RSPACK_ONLY_EXTERNALS = [
+  'node:crypto',
+  'mongodb',
+  'mongodb-connection-string-url',
+  'mysql2',
+  'mysql2/promise',
+];
 
 describe('externals configuration', () => {
   const rspackExternals = getExternals();
@@ -43,6 +55,34 @@ describe('externals configuration', () => {
       );
 
       expect(rspackOnly.sort()).toEqual(RSPACK_ONLY_EXTERNALS.sort());
+    });
+  });
+
+  describe('isKeaReactReduxImport', () => {
+    it('returns true for react-redux imported from kea', () => {
+      expect(isKeaReactReduxImport('/path/to/node_modules/kea/lib', 'react-redux')).toBe(true);
+    });
+
+    it('returns true with backslash separators (Windows)', () => {
+      expect(isKeaReactReduxImport('C:\\project\\node_modules\\kea\\lib', 'react-redux')).toBe(
+        true
+      );
+    });
+
+    it('returns false for react-redux from non-kea context', () => {
+      expect(isKeaReactReduxImport('/path/to/node_modules/other-pkg', 'react-redux')).toBe(false);
+    });
+
+    it('returns false for non-react-redux request from kea context', () => {
+      expect(isKeaReactReduxImport('/path/to/node_modules/kea/lib', 'redux')).toBe(false);
+    });
+
+    it('returns false when context is undefined', () => {
+      expect(isKeaReactReduxImport(undefined, 'react-redux')).toBe(false);
+    });
+
+    it('returns false when request is undefined', () => {
+      expect(isKeaReactReduxImport('/path/to/node_modules/kea/lib', undefined)).toBe(false);
     });
   });
 

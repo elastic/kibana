@@ -14,17 +14,12 @@ const KIBANA_ROOT = findKibanaRoot();
 
 // Allowlist (most temporary) of files permitted to use non-FIPS algorithms.
 const ALLOWED_UNSAFE_HASHES = [
-  { path: 'packages/kbn-optimizer/src/common/dll_manifest.ts', algorithms: ['sha1'] },
   {
     path: 'src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts',
     algorithms: ['sha1'],
   },
   {
     path: 'x-pack/platform/test/cases_api_integration/common/plugins/cases/server/routes.ts',
-    algorithms: ['sha1'],
-  },
-  {
-    path: 'src/platform/packages/shared/kbn-babel-register/cache/lmdb_cache.js',
     algorithms: ['sha1'],
   },
 ];

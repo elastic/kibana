@@ -170,7 +170,6 @@ const HistoryComponent: React.FC<Props> = ({
     refetchFindAttackDiscoveries();
 
     // Dismiss all successful generations
-    // TODO: make this a bulk update:
     if (generationsData?.generations) {
       const dismissPromises = generationsData.generations
         .filter(({ status }) => status === 'succeeded')
@@ -232,8 +231,9 @@ const HistoryComponent: React.FC<Props> = ({
       <Generations
         aiConnectors={aiConnectors}
         data={generationsData}
-        refetchGenerations={refetchGenerations}
         localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
+        onRefresh={onRefresh}
+        refetchGenerations={refetchGenerations}
       />
 
       <EuiSpacer size="m" />

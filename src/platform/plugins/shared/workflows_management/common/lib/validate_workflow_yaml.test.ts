@@ -11,6 +11,7 @@
 
 import { readFileSync } from 'fs';
 import Path from 'path';
+import { isWorkflowValidationRuleId } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { validateWorkflowYaml } from './validate_workflow_yaml';
 import { getWorkflowZodSchema } from '../schema';
@@ -70,6 +71,27 @@ steps:
 
       expect(result.valid).toBe(false);
       expect(result.diagnostics.some((d) => d.source === 'schema')).toBe(true);
+    });
+
+    it('should provide an actionable message for an empty steps array', () => {
+      const yaml = `
+version: '1'
+name: Test
+triggers:
+  - type: manual
+steps: []
+`;
+      const result = validateWorkflowYaml(yaml, schema);
+
+      expect(result.valid).toBe(false);
+      expect(result.diagnostics).toEqual([
+        expect.objectContaining({
+          message: 'No steps found. Add at least one step.',
+          path: ['steps'],
+          ruleId: 'schemaViolation',
+          source: 'schema',
+        }),
+      ]);
     });
 
     it('should detect invalid step type', () => {
@@ -173,7 +195,11 @@ steps:
       const result = validateWorkflowYaml(yaml, schema);
 
       expect(result.valid).toBe(false);
-      expect(result.diagnostics.some((d) => d.source === 'liquid')).toBe(true);
+      expect(result.diagnostics).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ source: 'liquid', ruleId: 'liquidSyntaxError' }),
+        ])
+      );
     });
 
     it('should not flag valid liquid templates', () => {
@@ -302,6 +328,9 @@ steps:
       expect(result.valid).toBe(false);
       const triggerErrors = result.diagnostics.filter((d) => d.source === 'trigger');
       expect(triggerErrors.length).toBeGreaterThan(0);
+      expect(triggerErrors).toEqual(
+        expect.arrayContaining([expect.objectContaining({ ruleId: 'invalidTriggerCondition' })])
+      );
     });
 
     it('should skip trigger validation when no triggerDefinitions are provided', () => {
@@ -340,6 +369,139 @@ steps:
 
       expect(result.valid).toBe(true);
       expect(result.diagnostics.filter((d) => d.source === 'trigger')).toHaveLength(0);
+    });
+  });
+
+  describe('connector-id on requiresConnectorId triggers', () => {
+    const connectorEventTriggerId = 'example.connector_event';
+    const schemaRequiringConnectorId = getWorkflowZodSchema({}, [
+      { id: connectorEventTriggerId, requiresConnectorId: true },
+    ]);
+
+    const workflowYaml = (triggerBlock: string) => `
+version: '1'
+name: Connector Event Trigger
+triggers:
+  - ${triggerBlock}
+steps:
+  - name: step1
+    type: console
+    with:
+      message: hello
+`;
+
+    it('should pass when connector-id is present', () => {
+      const result = validateWorkflowYaml(
+        workflowYaml(`type: ${connectorEventTriggerId}\n    connector-id: webhook-1`),
+        schemaRequiringConnectorId
+      );
+
+      expect(result.valid).toBe(true);
+    });
+
+    it('should fail when connector-id is missing', () => {
+      const result = validateWorkflowYaml(
+        workflowYaml(`type: ${connectorEventTriggerId}`),
+        schemaRequiringConnectorId
+      );
+
+      expect(result.valid).toBe(false);
+      expect(result.diagnostics.some((d) => d.source === 'schema')).toBe(true);
+      expect(result.diagnostics.some((d) => d.message.includes('connector-id'))).toBe(true);
+    });
+
+    it('should fail when connector-id is empty', () => {
+      const result = validateWorkflowYaml(
+        workflowYaml(`type: ${connectorEventTriggerId}\n    connector-id: ""`),
+        schemaRequiringConnectorId
+      );
+
+      expect(result.valid).toBe(false);
+      expect(result.diagnostics.some((d) => d.source === 'schema')).toBe(true);
+    });
+  });
+
+  describe('graph build validation', () => {
+    it('rejects nested flow-control inside a parallel branch (nested parallel)', () => {
+      // The schema accepts this, but compiling to an execution graph fails because
+      // a parallel branch body must be straight-line. Without graph validation the
+      // workflow would pass as valid and crash the run task later.
+      const yaml = `
+version: '1'
+name: Nested Parallel
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: outer
+    type: parallel
+    foreach: "{{ [1,2] }}"
+    steps:
+      - name: inner
+        type: parallel
+        foreach: "{{ [3,4] }}"
+        steps:
+          - name: leaf
+            type: console
+            with:
+              message: leaf
+`;
+      const result = validateWorkflowYaml(yaml, schema);
+
+      expect(result.valid).toBe(false);
+      const graphErrors = result.diagnostics.filter((d) => d.source === 'graph');
+      expect(graphErrors.length).toBeGreaterThan(0);
+      expect(graphErrors[0].message).toMatch(/parallel/i);
+    });
+
+    it('rejects an if inside a parallel branch body', () => {
+      const yaml = `
+version: '1'
+name: If In Branch
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: fan_out
+    type: parallel
+    foreach: "{{ [1,2] }}"
+    steps:
+      - name: maybe
+        type: if
+        condition: "{{ true }}"
+        steps:
+          - name: yes_branch
+            type: console
+            with:
+              message: yes
+`;
+      const result = validateWorkflowYaml(yaml, schema);
+
+      expect(result.valid).toBe(false);
+      expect(result.diagnostics.some((d) => d.source === 'graph')).toBe(true);
+    });
+
+    it('accepts a straight-line parallel branch body', () => {
+      const yaml = `
+version: '1'
+name: Valid Parallel
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: fan_out
+    type: parallel
+    foreach: "{{ [1,2] }}"
+    steps:
+      - name: work
+        type: console
+        with:
+          message: "item {{ foreach.item }}"
+`;
+      const result = validateWorkflowYaml(yaml, schema);
+
+      expect(result.valid).toBe(true);
+      expect(result.diagnostics.filter((d) => d.source === 'graph')).toHaveLength(0);
     });
   });
 
@@ -399,6 +561,61 @@ steps:
         expect(typeof diag.message).toBe('string');
         expect(diag.message.length).toBeGreaterThan(0);
       }
+    });
+  });
+
+  describe('rule IDs', () => {
+    it('tags every diagnostic with a registered rule ID', () => {
+      const result = validateWorkflowYaml('not: valid: yaml: [[[', schema);
+
+      expect(result.diagnostics.length).toBeGreaterThan(0);
+      for (const diag of result.diagnostics) {
+        expect(isWorkflowValidationRuleId(diag.ruleId)).toBe(true);
+      }
+    });
+
+    it('identifies a syntax error by rule ID rather than by message', () => {
+      const result = validateWorkflowYaml('not: valid: yaml: [[[', schema);
+
+      expect(result.diagnostics.map((diag) => diag.ruleId)).toContain('yamlSyntaxError');
+    });
+
+    it('identifies a schema violation by rule ID', () => {
+      const result = validateWorkflowYaml(
+        `enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: first
+    type: console
+    with:
+      message: hello`,
+        schema
+      );
+
+      expect(result.valid).toBe(false);
+      expect(result.diagnostics.map((diag) => diag.ruleId)).toContain('schemaViolation');
+    });
+
+    it('identifies duplicate step names by rule ID', () => {
+      const result = validateWorkflowYaml(
+        `name: duplicate-steps
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: same
+    type: console
+    with:
+      message: one
+  - name: same
+    type: console
+    with:
+      message: two`,
+        schema
+      );
+
+      expect(result.diagnostics.map((diag) => diag.ruleId)).toContain('duplicateStepName');
     });
   });
 });

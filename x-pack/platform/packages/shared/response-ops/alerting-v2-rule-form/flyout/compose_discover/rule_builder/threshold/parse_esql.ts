@@ -20,10 +20,16 @@ import type {
   ESQLAstItem,
   ESQLSingleAstItem,
 } from '@elastic/esql/types';
+import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
+import { SEVERITY_LEVELS } from '@kbn/alerting-v2-schemas';
 import {
   Aggregation,
   Comparator,
   generateId,
+  isSeveritySupported,
+  reconcileAlertConditionMetrics,
+  DEFAULT_SINGLE_SEVERITY_LEVEL,
+  DEFAULT_THRESHOLD_FORM_VALUES,
   type ThresholdFormValues,
   type StatDefinition,
   type EvaluationDefinition,
@@ -31,6 +37,8 @@ import {
   type RecoveryCondition,
   type RecoveryConfig,
   type ConditionOperator,
+  type SeverityConfig,
+  type SeverityLevel,
 } from './form_types';
 
 const REVERSE_AGG: Record<string, Aggregation> = {
@@ -300,6 +308,79 @@ const flattenBooleanTree = (node: ESQLFunction, expectedOp: string): ESQLSingleA
   return result;
 };
 
+const SEVERITY_VALUES = new Set<string>(SEVERITY_LEVELS);
+const isSeverityValue = (value: string): value is AlertEventSeverity => SEVERITY_VALUES.has(value);
+
+const extractStringLiteral = (node: ESQLAstItem): string | null => {
+  const match = printExpr(node)
+    .trim()
+    .match(/^"(.*)"$/);
+  return match ? match[1] : null;
+};
+
+/** Detect an `EVAL severity = ...` command (emitted after the breach WHERE). */
+const isSeverityEval = (cmd: ESQLCommand): boolean => {
+  if (cmd.name !== 'eval' || cmd.args.length !== 1) return false;
+  const arg = cmd.args[0] as ESQLSingleAstItem;
+  if (!isFunctionExpression(arg)) return false;
+  const fn = arg as ESQLFunction;
+  if (fn.name !== '=' || fn.args.length !== 2) return false;
+  return getColumnName(fn.args[0] as ESQLAstItem) === 'severity';
+};
+
+/**
+ * Reconstruct the severity config from an `EVAL severity = ...` command. A bare string literal
+ * maps to single mode; a `CASE(...)` maps to multi mode. Severity is only representable for a
+ * single alert condition, and every multi-mode CASE branch must test that condition's exact
+ * metric and comparator (only the threshold varies per band) — otherwise the ES|QL is not
+ * builder-representable and this returns `null` so the query stays in ES|QL mode.
+ */
+const parseSeverityEval = (
+  cmd: ESQLCommand,
+  alertConditions: AlertCondition[]
+): SeverityConfig | null => {
+  // ES|QL generation only emits severity for a single condition.
+  if (!isSeveritySupported(alertConditions)) return null;
+  const [condition] = alertConditions;
+
+  const fn = cmd.args[0] as ESQLFunction;
+  const rhs = unwrapSingleItem(fn.args[1]);
+
+  // Single mode: EVAL severity = "high"
+  const singleLiteral = extractStringLiteral(rhs);
+  if (singleLiteral) {
+    if (!isSeverityValue(singleLiteral)) return null;
+    return { mode: 'single', singleLevelSeverity: singleLiteral, levels: [] };
+  }
+
+  // Multi mode: EVAL severity = CASE(cond, "lvl", ..., cond, "lvl")
+  if (!isFunctionExpression(rhs)) return null;
+  const caseFn = rhs as ESQLFunction;
+  if (caseFn.name.toUpperCase() !== 'CASE') return null;
+
+  const caseArgs = caseFn.args;
+  // Expect (condition, result) pairs with no trailing default (even length).
+  if (caseArgs.length < 2 || caseArgs.length % 2 !== 0) return null;
+
+  const bands: SeverityLevel[] = [];
+  for (let i = 0; i < caseArgs.length; i += 2) {
+    const leaf = parseConditionNode(unwrapSingleItem(caseArgs[i]));
+    const level = extractStringLiteral(caseArgs[i + 1]);
+    if (!leaf || !level || !isSeverityValue(level)) return null;
+    // Each band must test the same metric and comparator as the alert condition; otherwise
+    // generation would silently rewrite the branch against the condition's metric/comparator.
+    if (leaf.metric !== condition.metric || leaf.comparator !== condition.comparator) return null;
+    bands.push({ id: generateId(), severity: level, threshold: leaf.threshold[0] });
+  }
+
+  // CASE lists bands most-to-least severe; levels are stored least-to-most.
+  return {
+    mode: 'multi',
+    singleLevelSeverity: DEFAULT_SINGLE_SEVERITY_LEVEL,
+    levels: bands.reverse(),
+  };
+};
+
 export const parseRecoveryBlock = (
   recoveryBlock: string
 ): { conditions: RecoveryCondition[]; conditionOperator: ConditionOperator } | null => {
@@ -378,7 +459,6 @@ export const parseThresholdEsql = (
   if (!statsResult) return null;
   idx++;
 
-  // Optional EVAL commands
   const evaluations: EvaluationDefinition[] = [];
   while (idx < commands.length && commands[idx].name === 'eval') {
     const ev = parseEvalCommand(commands[idx]);
@@ -398,6 +478,15 @@ export const parseThresholdEsql = (
     if (!condResult) return null;
     alertConditions = condResult.conditions;
     conditionOperator = condResult.operator;
+    idx++;
+  }
+
+  // Optional trailing EVAL severity = ... (emitted after the breach WHERE)
+  let severity: SeverityConfig | undefined;
+  if (idx < commands.length && isSeverityEval(commands[idx])) {
+    const parsedSeverity = parseSeverityEval(commands[idx], alertConditions);
+    if (!parsedSeverity) return null;
+    severity = parsedSeverity;
     idx++;
   }
 
@@ -428,5 +517,62 @@ export const parseThresholdEsql = (
     conditionOperator,
     groupByFields: statsResult.groupByFields,
     ...(recovery ? { recovery } : {}),
+    ...(severity ? { severity } : {}),
+  };
+};
+
+/**
+ * Best-effort parser for Discover ES|QL queries that may not match the full
+ * threshold builder structure. Falls back through increasingly loose extraction:
+ *
+ * 1. `parseThresholdEsql` — full builder state for complete threshold queries
+ * 2. Loose FROM + WHERE extraction — index pattern and optional pre-STATS filter
+ * 3. `null` — nothing extractable (invalid ES|QL, no FROM, etc.)
+ */
+export const parseDiscoverQueryForBuilder = (query: string): ThresholdFormValues | null => {
+  const full = parseThresholdEsql(query);
+  if (full) {
+    return {
+      ...full,
+      alertConditions: reconcileAlertConditionMetrics(
+        full.alertConditions,
+        full.stats,
+        full.evaluations
+      ),
+    };
+  }
+
+  if (!query.trim()) return null;
+
+  const { root, errors } = Parser.parse(query);
+  if (errors.length > 0) return null;
+
+  const commands = root.commands;
+  if (commands.length === 0) return null;
+
+  const fromCmd = commands[0];
+  if (fromCmd.name !== 'from') return null;
+
+  const sourceArg = fromCmd.args.find((a) => isSource(a as ESQLSingleAstItem));
+  if (!sourceArg) return null;
+  const indexPattern = (sourceArg as ESQLSingleAstItem & { name: string }).name;
+  if (!indexPattern || typeof indexPattern !== 'string') return null;
+
+  let filterQuery: string | undefined;
+  if (commands.length > 1 && commands[1].name === 'where') {
+    filterQuery = commands[1].args.length > 0 ? printExpr(commands[1].args[0]) : undefined;
+  }
+
+  return {
+    ...DEFAULT_THRESHOLD_FORM_VALUES,
+    indexPattern,
+    filterQuery,
+    stats: DEFAULT_THRESHOLD_FORM_VALUES.stats.map((s) => ({ ...s, id: generateId() })),
+    evaluations: [],
+    alertConditions: DEFAULT_THRESHOLD_FORM_VALUES.alertConditions.map((c) => ({
+      ...c,
+      id: generateId(),
+    })),
+    groupByFields: [],
   };
 };

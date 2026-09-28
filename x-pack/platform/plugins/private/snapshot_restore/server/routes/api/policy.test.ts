@@ -110,7 +110,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     it('should throw if ES error', async () => {
       getClusterSettingsFn.mockRejectedValue(new Error()); // Get managed policyNames should silently fail
       getLifecycleFn.mockRejectedValue(new Error());
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
   });
 
@@ -159,7 +159,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
       getLifecycleFn.mockRejectedValueOnce(new Error('something unexpected'));
       getClusterSettingsFn.mockResolvedValueOnce({});
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
   });
 
@@ -192,7 +192,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     it('should throw if ES error', async () => {
       executeLifecycleFn.mockRejectedValue(new Error());
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
   });
 
@@ -301,7 +301,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
       getLifecycleFn.mockResolvedValue({});
       putLifecycleFn.mockRejectedValue(new Error());
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
   });
 
@@ -330,7 +330,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     it('should throw if ES error', async () => {
       getLifecycleFn.mockRejectedValue(new Error());
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
   });
 
@@ -387,7 +387,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     it('should throw if ES error', async () => {
       resolveIndicesFn.mockRejectedValueOnce(new Error());
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
 
     it('should not return system indices', async () => {
@@ -437,7 +437,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     it('should throw if ES error', async () => {
       putClusterSettingsFn.mockRejectedValue(new Error());
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
   });
 
@@ -458,7 +458,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     it('should throw if ES error', async () => {
       getStatusFn.mockRejectedValue(new Error());
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
   });
 });

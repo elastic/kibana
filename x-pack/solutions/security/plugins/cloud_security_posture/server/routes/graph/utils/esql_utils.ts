@@ -117,6 +117,29 @@ export const concatJsonObjectPropertyEsqlExprAsString = (
   return `CONCAT("\\"${propertyName}\\":\\"", ${escapeJsonStringValueEsql(esqlExpr)}, "\\"")`;
 };
 
+/**
+ * Builds a JSON *array of strings* property from a multi-value ES|QL expression, e.g.
+ * `,"sources":["okta","endpoint"]` — including the leading comma.
+ *
+ * Each value is escaped before being joined: these values come from event module/dataset
+ * data, so a quote or backslash would otherwise produce malformed JSON and make
+ * `parseDocumentsData` throw, failing the whole graph request.
+ *
+ * The leading separator is emitted *inside* the COALESCE rather than by the caller, so the
+ * comma and the property always appear together. Emitting the separator from an enclosing
+ * `CASE(field IS NOT NULL, CONCAT(SEPARATOR, <this>), "")` is unsafe: `MV_CONCAT` (and the
+ * `REPLACE` escaping around it) can still return null for a non-null multi-value field, and
+ * the comma would then be emitted with an empty value — producing `…,,"next"`, which fails
+ * JSON.parse and drops the whole document in `filterDocDataToIds`.
+ */
+export const concatJsonObjectPropertyEsqlExprAsStringArray = (
+  propertyName: string,
+  esqlExpr: string
+): string => {
+  const escaped = escapeJsonStringValueEsql(`TO_STRING(${esqlExpr})`);
+  return `COALESCE(CONCAT(",", "\\"${propertyName}\\":[\\"", MV_CONCAT(${escaped}, "\\",\\""), "\\"]"), "")`;
+};
+
 export const JSON_OBJECT_SEPARATOR = '","';
 export const JSON_OBJECT_START = '"{"';
 export const JSON_OBJECT_END = '"}"';
@@ -249,4 +272,29 @@ ${targetCases},
 export const buildSourceMetadataEvals = (): string => {
   return `| EVAL sourceIps = source.ip
 | EVAL sourceCountryCodes = source.geo.country_iso_code`;
+};
+
+/**
+ * Generates the `| EVAL pinned = ...` statement used by both the events and relationships
+ * queries. A pinned entity is isolated into its own graph node (never merged into a same-type
+ * group) whether it appears as an actor or a target. The `pinned` column is set to the first
+ * candidate column whose value is one of the pinned IDs, or null when none match — so pinned
+ * entities get a distinct group key downstream.
+ *
+ * `candidateColumns` is the ordered list of ES|QL columns to test against the pinned IDs
+ * (e.g. `['_id', 'actorEntityId', 'targetEntityId']` for events, `['actorId', 'targetId']` for
+ * relationships). The pinned IDs are passed as `?pinned_id{idx}` query params by the caller.
+ */
+export const buildPinnedEsql = (candidateColumns: string[], pinnedIds?: string[]): string => {
+  if (!pinnedIds || pinnedIds.length === 0) {
+    return '| EVAL pinned = TO_STRING(null)';
+  }
+  const pinnedParamsStr = pinnedIds.map((_id, idx) => `?pinned_id${idx}`).join(', ');
+  const arms = candidateColumns
+    .map((col) => `COALESCE(${col}, "") IN (${pinnedParamsStr}), ${col}`)
+    .join(',\n    ');
+  return `| EVAL pinned = CASE(
+    ${arms},
+    null
+  )`;
 };

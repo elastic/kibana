@@ -15,6 +15,10 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./comments/find_comments'));
     loadTestFile(require.resolve('./comments/get_comment'));
     loadTestFile(require.resolve('./comments/patch_comment'));
+    loadTestFile(require.resolve('./attachments/find_attachments'));
+    loadTestFile(require.resolve('./attachments/get_attachment'));
+    loadTestFile(require.resolve('./attachments/delete_attachment'));
+    loadTestFile(require.resolve('./attachments/delete_attachments'));
     loadTestFile(require.resolve('./files/post_file'));
     loadTestFile(require.resolve('./files/post_file_attachment'));
     loadTestFile(require.resolve('./alerts/get_cases'));
@@ -50,15 +54,8 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/replace_custom_field'));
     loadTestFile(require.resolve('./internal/find_user_actions.ts'));
 
-    /**
-     * Attachments framework
-     */
-
-    loadTestFile(require.resolve('./attachments_framework/external_references.ts'));
-    loadTestFile(require.resolve('./attachments_framework/persistable_state.ts'));
-    loadTestFile(require.resolve('./attachments_framework/osquery.ts'));
-    loadTestFile(require.resolve('./attachments_framework/endpoint.ts'));
-    loadTestFile(require.resolve('./attachments_framework/indicator.ts'));
+    // NOTE: The attachments-framework suites are flag-sensitive and run under
+    // their own configs with the feature flag pinned
 
     /**
      * Cases client

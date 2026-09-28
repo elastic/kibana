@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useConnectors } from '../../../hooks/api/use_connectors';
 
 export const ConnectorPrivilegesCallout: React.FC = () => {
@@ -20,17 +21,20 @@ export const ConnectorPrivilegesCallout: React.FC = () => {
   });
   return (
     <>
-      <EuiCallOut title={calloutTitle} color="warning" iconType="info">
-        {data.canReadConnectors
-          ? i18n.translate('xpack.serverlessSearch.connectors.noManagePrivileges', {
-              defaultMessage:
-                'You have read-only access to connectors. Contact your administrator for elevated privileges.',
-            })
-          : i18n.translate('xpack.serverlessSearch.connectors.noPrivileges', {
-              defaultMessage:
-                "You don't have access to connectors. Contact your administrator for access.",
-            })}
-      </EuiCallOut>
+      <KbnWarningCallout
+        title={calloutTitle}
+        text={
+          data.canReadConnectors
+            ? i18n.translate('xpack.serverlessSearch.connectors.noManagePrivileges', {
+                defaultMessage:
+                  'You have read-only access to connectors. Contact your administrator for elevated privileges.',
+              })
+            : i18n.translate('xpack.serverlessSearch.connectors.noPrivileges', {
+                defaultMessage:
+                  "You don't have access to connectors. Contact your administrator for access.",
+              })
+        }
+      />
       <EuiSpacer />
     </>
   );

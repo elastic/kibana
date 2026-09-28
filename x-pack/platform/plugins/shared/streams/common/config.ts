@@ -9,6 +9,28 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
+  canvas: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
+  /**
+   * Outbound client for streams-config-distributor (`PUT /v1/units/<unit-id>`
+   * and `POST /v1/validate`). A unit write requires `url`. When it is unset,
+   * validation and publish log an error and do not run, and the unit is not stored.
+   */
+  distributor: schema.object(
+    {
+      url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+      ssl: schema.object(
+        {
+          certificate: schema.maybe(schema.string({ maxLength: 4096 })),
+          key: schema.maybe(schema.string({ maxLength: 4096 })),
+          certificateAuthorities: schema.maybe(schema.string({ maxLength: 4096 })),
+        },
+        { defaultValue: {} }
+      ),
+    },
+    { defaultValue: { ssl: {} } }
+  ),
   preconfigured: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     stream_definitions: schema.arrayOf(schema.any(), { defaultValue: [] }),

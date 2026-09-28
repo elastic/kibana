@@ -9,6 +9,28 @@ import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 
 /**
+ * Returns the human-readable score range for a given severity threshold value,
+ * e.g. 75 → "75-100". Placed in common so UI code that only needs this pure
+ * helper doesn't transitively pull in the full SelectSeverity component tree.
+ */
+export const getSeverityRangeDisplay = (val: number): string => {
+  switch (val) {
+    case ML_ANOMALY_THRESHOLD.CRITICAL:
+      return '75-100';
+    case ML_ANOMALY_THRESHOLD.MAJOR:
+      return '50-75';
+    case ML_ANOMALY_THRESHOLD.MINOR:
+      return '25-50';
+    case ML_ANOMALY_THRESHOLD.WARNING:
+      return '3-25';
+    case ML_ANOMALY_THRESHOLD.LOW:
+      return '0-3';
+    default:
+      return val.toString();
+  }
+};
+
+/**
  * Returns the upper bound of a severity threshold, or `undefined` for the
  * open-ended `critical` band. `SeverityThreshold` is a discriminated union whose
  * `critical` member carries no `max`, so the bound must be read through an `in`
@@ -16,6 +38,92 @@ import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anoma
  */
 export const getSeverityThresholdMax = (threshold: SeverityThreshold): number | undefined =>
   'max' in threshold ? threshold.max : undefined;
+
+export const isOpenEndedSeverityThreshold = (
+  threshold: SeverityThreshold
+): threshold is { min: number } => !('max' in threshold);
+
+/**
+ * Canonical bands whose score range overlaps `[floor, 100]`.
+ * Agent-builder charts persist a single open-ended `{ min }` filter; the severity
+ * selector only understands canonical min/max bands, so this mapping is used to
+ * represent that floor in the control without changing the fetch threshold.
+ */
+export const getCanonicalBandsOverlappingFloor = (
+  floor: number,
+  canonicalBands: SeverityThreshold[]
+): SeverityThreshold[] =>
+  canonicalBands.filter((band) => {
+    const max = getSeverityThresholdMax(band);
+    return max === undefined || max > floor;
+  });
+
+const selectedBandsContinuouslyCoverFloorToMax = (
+  selectedBands: SeverityThreshold[],
+  floor: number
+): boolean => {
+  if (selectedBands.length === 0) {
+    return false;
+  }
+
+  const sorted = [...selectedBands].sort((left, right) => left.min - right.min);
+  const first = sorted[0];
+  const firstMax = getSeverityThresholdMax(first);
+  if (first.min > floor || (firstMax !== undefined && firstMax <= floor)) {
+    return false;
+  }
+
+  const last = sorted[sorted.length - 1];
+  if (!isOpenEndedSeverityThreshold(last)) {
+    return false;
+  }
+
+  for (let index = 0; index < sorted.length - 1; index++) {
+    const currentMax = getSeverityThresholdMax(sorted[index]);
+    if (currentMax === undefined || currentMax !== sorted[index + 1].min) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+/**
+ * When the current filter is a custom open-ended floor such as `{ min: 30 }`,
+ * keep that floor only while the remaining selection continuously covers
+ * floor-to-100. Partial first bands cannot be persisted (schema only allows
+ * canonical `{ min, max }` literals or open-ended `{ min }`), so they are
+ * dropped once a gap appears or the open-ended last band is removed.
+ * Selecting a band entirely below the floor expands the filter to canonical bands.
+ */
+export const applyCustomOpenEndedFloorToSelection = (
+  selectedBands: SeverityThreshold[],
+  original: SeverityThreshold[]
+): SeverityThreshold[] => {
+  if (original.length !== 1 || !isOpenEndedSeverityThreshold(original[0])) {
+    return selectedBands;
+  }
+
+  const floor = original[0].min;
+  const expandedBelowFloor = selectedBands.some((band) => {
+    const max = getSeverityThresholdMax(band);
+    return max !== undefined && max <= floor;
+  });
+  if (expandedBelowFloor) {
+    return selectedBands;
+  }
+
+  const stillHasPartialFirst = selectedBands.some((band) => {
+    const max = getSeverityThresholdMax(band);
+    return band.min < floor && (max === undefined || max > floor);
+  });
+
+  if (stillHasPartialFirst && selectedBandsContinuouslyCoverFloorToMax(selectedBands, floor)) {
+    return [{ min: floor }];
+  }
+
+  return selectedBands.filter((band) => band.min >= floor);
+};
 
 /**
  * Utility function to resolve severity format from old to new format

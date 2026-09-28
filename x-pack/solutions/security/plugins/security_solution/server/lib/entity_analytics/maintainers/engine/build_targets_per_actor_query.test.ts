@@ -70,7 +70,23 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
     expect(buildTargetsPerActorQuery(overrideConfig, 'default')).toBe(
       'SET unmapped_fields="nullify";\nFROM test | LIMIT 1'
     );
-    expect(override).toHaveBeenCalledWith('default');
+    expect(override).toHaveBeenCalledWith('default', undefined);
+  });
+
+  it('forwards the page actor values to esqlQueryOverride', () => {
+    const override = jest.fn().mockReturnValue('FROM test | LIMIT 1');
+    const overrideConfig: RelationshipIntegrationConfig = {
+      kind: 'override',
+      id: 'test_override',
+      name: 'Test Override',
+      indexPattern: (ns) => `logs-test-${ns}`,
+      relationshipKey: 'supervises',
+      targetEntityType: 'user',
+      scopeToPageActorValues: true,
+      esqlQueryOverride: override,
+    };
+    buildTargetsPerActorQuery(overrideConfig, 'default', ['bob@corp', '001']);
+    expect(override).toHaveBeenCalledWith('default', ['bob@corp', '001']);
   });
 
   it('prepends the engine preamble exactly once on the override path (overrides must not include their own SET)', () => {
@@ -309,6 +325,148 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
       // host-EUID gate is still present even though the actor is custom.
       expect(query).toContain(`AND (${HOST_ESQL_EXISTS})`);
       expect(query).not.toContain(`AND (${USER_ESQL_EXISTS})`);
+    });
+  });
+
+  describe('hostScopedUsersOnly', () => {
+    const hostScopedStandard: RelationshipIntegrationConfig = {
+      kind: 'standard',
+      id: 'system_auth',
+      name: 'System Auth',
+      indexPattern: (ns) => `logs-system.auth-${ns}`,
+      relationshipKey: 'communicates_with',
+      targetEntityType: 'host',
+      requireTargetEntityIdExists: true,
+      hostScopedUsersOnly: true,
+      customActor: { fields: ['user.email', 'user.name'] },
+      esqlWhereClause: `(MV_CONTAINS(TO_STRING(event.category), "authentication") OR MV_CONTAINS(TO_STRING(event.category), "session"))
+    AND event.action == "ssh_login"
+    AND event.outcome == "success"`,
+    };
+
+    const hostScopedBucketed: RelationshipIntegrationConfig = {
+      kind: 'bucketed',
+      id: 'system_auth',
+      name: 'System Auth',
+      indexPattern: (ns) => `logs-system.auth-${ns}`,
+      targetEntityType: 'host',
+      bucketTargetByThreshold: {
+        threshold: 4,
+        aboveThresholdRelationship: 'accesses_frequently',
+        belowThresholdRelationship: 'accesses_infrequently',
+      },
+      requireTargetEntityIdExists: true,
+      hostScopedUsersOnly: true,
+      customActor: { fields: ['user.email', 'user.name'] },
+      esqlWhereClause: `(MV_CONTAINS(TO_STRING(event.category), "authentication") OR MV_CONTAINS(TO_STRING(event.category), "session"))
+    AND event.action == "ssh_login"
+    AND event.outcome == "success"`,
+    };
+
+    it('does NOT include entity.namespace EVAL chain', () => {
+      const query = buildTargetsPerActorQuery(hostScopedStandard, 'default');
+      expect(query).not.toContain('entity.namespace');
+      expect(query).not.toContain('_src_entity_namespace');
+      expect(query).not.toContain('getFieldEvaluations');
+    });
+
+    it('hardcodes @local in the actorUserId EVAL expression', () => {
+      const query = buildTargetsPerActorQuery(hostScopedStandard, 'default');
+      expect(query).toContain('@local');
+      expect(query).toContain('actorUserId');
+    });
+
+    it('builds the actor EUID from user.name + host.id only', () => {
+      const query = buildTargetsPerActorQuery(hostScopedStandard, 'default');
+      expect(query).toContain(
+        'actorUserId = CONCAT("user:", TO_STRING(`user.name`), "@", TO_STRING(`host.id`), "@local")'
+      );
+    });
+
+    it('never references user.email — that field belongs to the IDP ranking branch', () => {
+      const query = buildTargetsPerActorQuery(hostScopedStandard, 'default');
+
+      // A document with user.email but no user.name is an IDP user that extraction
+      // indexed under a different EUID, so neither the gate nor the EUID may read it.
+      expect(query).not.toContain('user.email');
+    });
+
+    it('emits a single WHERE gate covering both the actor and host-target EUIDs', () => {
+      const query = buildTargetsPerActorQuery(hostScopedStandard, 'default');
+
+      // `host.id` is the only field either EUID reads, so the actor gate doubles as
+      // the target gate — a second host.id check would be dead weight per row.
+      expect(query).toContain(
+        '(`user.name` IS NOT NULL AND `user.name` != "") AND (`host.id` IS NOT NULL AND `host.id` != "")'
+      );
+      expect(query.match(/`host\.id` IS NOT NULL/g)).toHaveLength(1);
+    });
+
+    it('includes host.id IS NOT NULL gate (requireTargetEntityIdExists host-scoped equivalent)', () => {
+      const query = buildTargetsPerActorQuery(hostScopedStandard, 'default');
+      expect(query).toContain('`host.id` IS NOT NULL');
+      expect(query).toContain('`host.id` != ""');
+    });
+
+    it('ignores customActor.fields — the host-scoped user EUID comes from the entity definition', () => {
+      // Step 1 (composite agg) still uses customActor.fields as bucket sources, but this
+      // EUID must not be steerable per-config or it would stop matching the store.
+      const withOddActorFields: RelationshipIntegrationConfig = {
+        ...hostScopedStandard,
+        customActor: { fields: ['user.id'] },
+      };
+
+      expect(buildTargetsPerActorQuery(withOddActorFields, 'default')).toBe(
+        buildTargetsPerActorQuery(hostScopedStandard, 'default')
+      );
+    });
+
+    it('appends additionalTargetFilter (shared pipeline with the standard builder)', () => {
+      const withAdditionalFilter: RelationshipIntegrationConfig = {
+        ...hostScopedStandard,
+        additionalTargetFilter: 'AND targetEntityId != "host:excluded"',
+      };
+
+      const query = buildTargetsPerActorQuery(withAdditionalFilter, 'default');
+
+      expect(query).toContain('AND targetEntityId != "host:excluded"');
+      expect(query.indexOf('COALESCE(targetEntityId, "") != ""')).toBeLessThan(
+        query.indexOf('AND targetEntityId != "host:excluded"')
+      );
+    });
+
+    it('emits correct STATS column for standard kind', () => {
+      const query = buildTargetsPerActorQuery(hostScopedStandard, 'default');
+      expect(query).toContain('communicates_with = VALUES(targetEntityId)');
+    });
+
+    it('emits bucketed STATS block for bucketed kind', () => {
+      const query = buildTargetsPerActorQuery(hostScopedBucketed, 'default');
+      expect(query).toContain('accesses_frequently');
+      expect(query).toContain('accesses_infrequently');
+      expect(query).toContain('access_count = COUNT(*)');
+    });
+
+    it('still includes LIMIT', () => {
+      const query = buildTargetsPerActorQuery(hostScopedStandard, 'default');
+      expect(query).toContain('| LIMIT 3500');
+    });
+
+    it('still prepends the engine preamble exactly once', () => {
+      const query = buildTargetsPerActorQuery(hostScopedStandard, 'default');
+      const matches = query.match(/SET unmapped_fields="nullify";/g) ?? [];
+      expect(matches).toHaveLength(1);
+    });
+
+    it('uses the namespace-derived index pattern', () => {
+      expect(buildTargetsPerActorQuery(hostScopedStandard, 'prod')).toContain(
+        'logs-system.auth-prod'
+      );
+    });
+
+    it('does NOT emit entity.namespace or EUID chain for host-scoped bucketed', () => {
+      const query = buildTargetsPerActorQuery(hostScopedBucketed, 'default');
+      expect(query).not.toContain('entity.namespace');
     });
   });
 

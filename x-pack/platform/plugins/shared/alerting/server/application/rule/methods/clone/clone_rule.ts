@@ -14,7 +14,7 @@ import { withSpan } from '@kbn/apm-utils';
 import type { SanitizedRule, RawRule } from '../../../../types';
 import { getDefaultMonitoring } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
-import { parseDuration } from '../../../../../common/parse_duration';
+import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { getRuleExecutionStatusPendingAttributes } from '../../../../lib/rule_execution_status';
 import { isDetectionEngineAADRuleType } from '../../../../saved_objects/migrations/utils';
@@ -27,6 +27,8 @@ import { getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
 import { cloneRuleParamsSchema } from './schemas';
+import type { ValidateScheduleLimitResult } from '../get_schedule_frequency';
+import { validateScheduleLimit } from '../get_schedule_frequency';
 
 export async function cloneRule<Params extends RuleParams = never>(
   context: RulesClientContext,
@@ -69,6 +71,24 @@ export async function cloneRule<Params extends RuleParams = never>(
           savedObjectsClient: context.unsecuredSavedObjectsClient,
         });
       }
+    );
+  }
+
+  let validationPayload: ValidateScheduleLimitResult = null;
+  if (ruleSavedObject.attributes.enabled) {
+    validationPayload = await validateScheduleLimit({
+      context,
+      updatedInterval: ruleSavedObject.attributes.schedule.interval,
+    });
+  }
+  if (validationPayload) {
+    throw Boom.badRequest(
+      getRuleCircuitBreakerErrorMessage({
+        name: ruleSavedObject.attributes.name,
+        interval: validationPayload.interval,
+        intervalAvailable: validationPayload.intervalAvailable,
+        action: 'clone',
+      })
     );
   }
 

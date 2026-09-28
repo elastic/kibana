@@ -10,7 +10,6 @@ import { EuiSkeletonRectangle, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import type { ElasticAgentVersionInfo } from '../../../../../common/types';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { CommandSnippet } from '../command_snippet';
-import { type IngestionMode } from '../../shared/wired_streams_ingestion_selector';
 
 export interface KubernetesFlowData {
   apiKeyEncoded: string;
@@ -23,8 +22,6 @@ export interface KubernetesElasticAgentInstallStepProps {
   status: FETCH_STATUS;
   data?: KubernetesFlowData;
   isMonitoringStepActive: boolean;
-  ingestionMode: IngestionMode;
-  onIngestionModeChange: (mode: IngestionMode) => void;
   useInlineCopyOnly?: boolean;
   useColoredSyntax?: boolean;
 }
@@ -35,8 +32,6 @@ export const KubernetesElasticAgentInstallStep: React.FC<
   status,
   data,
   isMonitoringStepActive,
-  ingestionMode,
-  onIngestionModeChange,
   useInlineCopyOnly = false,
   useColoredSyntax = false,
 }) => {
@@ -56,8 +51,6 @@ export const KubernetesElasticAgentInstallStep: React.FC<
           elasticsearchUrl={data.elasticsearchUrl}
           elasticAgentVersionInfo={data.elasticAgentVersionInfo}
           isCopyPrimaryAction={!isMonitoringStepActive}
-          ingestionMode={ingestionMode}
-          onIngestionModeChange={onIngestionModeChange}
           useInlineCopyOnly={useInlineCopyOnly}
           useColoredSyntax={useColoredSyntax}
         />

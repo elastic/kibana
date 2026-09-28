@@ -19,6 +19,7 @@ import type {
   TabActionInjector,
   TabState,
 } from '../application/main/state_management/redux';
+import type { TabPersistableState } from '../application/main/state_management/utils/create_tab_persistable_state_observable';
 
 /**
  * Public interface exposed to external consumers (e.g. Security Timeline) via the customization framework.
@@ -48,9 +49,7 @@ export interface ExtendedDiscoverStateContainer {
   /**
    * Creates an observable of the current tab's main state (query, filters, time range, refresh interval, persistable attributes)
    */
-  createTabPersistableStateObservable: () => Observable<
-    Pick<TabState, 'appState' | 'globalState' | 'attributes'>
-  >;
+  createTabPersistableStateObservable: () => Observable<TabPersistableState>;
   /**
    * Get updated AppState when given a saved search
    */
@@ -70,7 +69,7 @@ export interface ExtendedDiscoverStateContainer {
     setAppState: typeof internalStateActions.setAppState;
     updateGlobalState: typeof internalStateActions.updateGlobalState;
     updateAppStateAndReplaceUrl: typeof internalStateActions.updateAppStateAndReplaceUrl;
-    resetAppState: typeof internalStateActions.resetAppState;
+    initializeTabState: typeof internalStateActions.initializeTabState;
     initializeAndSync: typeof internalStateActions.initializeAndSync;
     stopSyncing: typeof internalStateActions.stopSyncing;
     openDiscoverSession: typeof internalStateActions.openDiscoverSession;

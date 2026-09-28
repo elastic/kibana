@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { comment, actionComment, mockCases, mockCaseUnifiedAttachments } from '../../mocks';
+import { mockCases, mockCaseUnifiedAttachments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import {
   MAX_COMMENT_LENGTH,
@@ -24,6 +24,12 @@ import { commentAttachmentType } from '../../attachment_framework/attachments';
 describe('bulkCreate', () => {
   const caseId = 'test-case';
 
+  const comment = {
+    type: 'comment' as const,
+    data: { content: 'a comment' },
+    owner: SECURITY_SOLUTION_OWNER,
+  };
+
   const clientArgs = createCasesClientMockArgs();
   const userActionService = createUserActionServiceMock();
   const caseService = createCaseServiceMock();
@@ -32,6 +38,12 @@ describe('bulkCreate', () => {
   clientArgs.services.userActionService = userActionService;
   clientArgs.services.caseService = caseService;
   clientArgs.services.attachmentService = attachmentService;
+
+  const registerCommentType = () => {
+    if (!clientArgs.unifiedAttachmentTypeRegistry.has(commentAttachmentType.id)) {
+      clientArgs.unifiedAttachmentTypeRegistry.register(commentAttachmentType);
+    }
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -42,6 +54,15 @@ describe('bulkCreate', () => {
       // @ts-expect-error: excess attribute
       bulkCreate({ attachments: [{ ...comment, foo: 'bar' }], caseId }, clientArgs)
     ).rejects.toThrow('invalid keys "foo"');
+  });
+
+  it('rejects a legacy v1 body', async () => {
+    const v1Comment = { type: 'user', comment: 'a legacy comment', owner: SECURITY_SOLUTION_OWNER };
+
+    await expect(
+      // @ts-expect-error: legacy v1 shape is no longer accepted, client is unified-only
+      bulkCreate({ attachments: [v1Comment], caseId }, clientArgs)
+    ).rejects.toThrow();
   });
 
   it(`throws error when attachments are more than ${MAX_BULK_CREATE_ATTACHMENTS}`, async () => {
@@ -65,36 +86,10 @@ describe('bulkCreate', () => {
   });
 
   describe('comments', () => {
-    it('should throw an error if the comment length is too long', async () => {
-      const longComment = Array(MAX_COMMENT_LENGTH + 1)
-        .fill('x')
-        .toString();
-
-      await expect(
-        bulkCreate({ attachments: [{ ...comment, comment: longComment }], caseId }, clientArgs)
-      ).rejects.toThrow(
-        `Failed while bulk creating attachment to case id: test-case error: Error: The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH}.`
-      );
+    beforeEach(() => {
+      registerCommentType();
     });
 
-    it('should throw an error if the comment is an empty string', async () => {
-      await expect(
-        bulkCreate({ attachments: [{ ...comment, comment: '' }], caseId }, clientArgs)
-      ).rejects.toThrow(
-        'Failed while bulk creating attachment to case id: test-case error: Error: The comment field cannot be an empty string.'
-      );
-    });
-
-    it('should throw an error if the description is a string with empty characters', async () => {
-      await expect(
-        bulkCreate({ attachments: [{ ...comment, comment: '  ' }], caseId }, clientArgs)
-      ).rejects.toThrow(
-        'Failed while bulk creating attachment to case id: test-case error: Error: The comment field cannot be an empty string.'
-      );
-    });
-  });
-
-  describe('actions', () => {
     it('should throw an error if the comment length is too long', async () => {
       const longComment = Array(MAX_COMMENT_LENGTH + 1)
         .fill('x')
@@ -102,33 +97,27 @@ describe('bulkCreate', () => {
 
       await expect(
         bulkCreate(
-          { attachments: [{ ...actionComment, comment: longComment }], caseId },
+          { attachments: [{ ...comment, data: { content: longComment } }], caseId },
           clientArgs
         )
-      ).rejects.toThrow(
-        `Failed while bulk creating attachment to case id: test-case error: Error: The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH}.`
-      );
+      ).rejects.toThrow(/Comment content exceeds maximum length/);
     });
 
     it('should throw an error if the comment is an empty string', async () => {
       await expect(
-        bulkCreate({ attachments: [{ ...actionComment, comment: '' }], caseId }, clientArgs)
-      ).rejects.toThrow(
-        'Failed while bulk creating attachment to case id: test-case error: Error: The comment field cannot be an empty string.'
-      );
+        bulkCreate({ attachments: [{ ...comment, data: { content: '' } }], caseId }, clientArgs)
+      ).rejects.toThrow(/Comment content must be a non-empty string/);
     });
 
-    it('should throw an error if the description is a string with empty characters', async () => {
+    it('should throw an error if the comment is a string with empty characters', async () => {
       await expect(
-        bulkCreate({ attachments: [{ ...actionComment, comment: '  ' }], caseId }, clientArgs)
-      ).rejects.toThrow(
-        'Failed while bulk creating attachment to case id: test-case error: Error: The comment field cannot be an empty string.'
-      );
+        bulkCreate({ attachments: [{ ...comment, data: { content: '  ' } }], caseId }, clientArgs)
+      ).rejects.toThrow(/Comment content must be a non-empty string/);
     });
   });
 
-  it('accepts unified type (v2) attachments without owner and uses case owner', async () => {
-    clientArgs.unifiedAttachmentTypeRegistry.register(commentAttachmentType);
+  it('accepts unified comments', async () => {
+    registerCommentType();
     userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
 
     const theCase = { ...mockCases[0], id: caseId };

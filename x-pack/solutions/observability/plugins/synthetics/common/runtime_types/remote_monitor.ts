@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
+import type { SchemaOutput } from './schema_output';
 import { remoteMonitorInfoSchema } from './remote';
 import { ConfigKey } from './monitor_management/config_key';
 import { MonitorTypeCodec } from './monitor_management/monitor_configs';
 import { MonitorServiceLocationCodec } from './monitor_management/locations';
-import type { EncryptedSyntheticsSavedMonitor } from './monitor_management/monitor_types';
+// Type-only import; the runtime value edge is external_monitor -> remote_monitor.
+import type { SelectedSyntheticsMonitor } from './external_monitor';
 
 /**
- * Read-only projection of a Synthetics monitor that lives on a remote cluster
- * (CCS). Because the source-cluster's saved object is NOT accessible from
- * Kibana, this type is derived from remote-cluster heartbeat data via
- * Cross-Cluster Search of `${remoteName}:synthetics-*`.
+ * Read-only projection of a Synthetics monitor that has no local saved object.
+ * Used for CCS remotes (`${remoteName}:synthetics-*`) and CPS linked-project
+ * hits (same `_index` alias prefix, project alias instead of cluster name).
  *
  * This is intentionally a strict, narrow subset of
  * `EncryptedSyntheticsSavedMonitor`. Anything not listed here — enabled flag,
@@ -30,26 +31,19 @@ import type { EncryptedSyntheticsSavedMonitor } from './monitor_management/monit
  * {@link isRemoteSyntheticsMonitor} type guard to narrow.
  *
  * @see useSelectedMonitor — the public consumer
- * @see useRemoteMonitor — the hook that synthesizes values of this type from pings
+ * @see useExternalMonitor — the hook that synthesizes values of this type from pings
  */
-export const RemoteSyntheticsMonitorCodec = t.type({
-  [ConfigKey.CONFIG_ID]: t.string,
-  [ConfigKey.MONITOR_QUERY_ID]: t.string,
-  [ConfigKey.NAME]: t.string,
+export const RemoteSyntheticsMonitorCodec = z.looseObject({
+  [ConfigKey.CONFIG_ID]: z.string(),
+  [ConfigKey.MONITOR_QUERY_ID]: z.string(),
+  [ConfigKey.NAME]: z.string(),
   [ConfigKey.MONITOR_TYPE]: MonitorTypeCodec,
-  [ConfigKey.TAGS]: t.array(t.string),
-  [ConfigKey.LOCATIONS]: t.array(MonitorServiceLocationCodec),
+  [ConfigKey.TAGS]: z.array(z.string()),
+  [ConfigKey.LOCATIONS]: z.array(MonitorServiceLocationCodec),
   remote: remoteMonitorInfoSchema,
 });
 
-export type RemoteSyntheticsMonitor = t.TypeOf<typeof RemoteSyntheticsMonitorCodec>;
-
-/**
- * Union of the two shapes a "selected monitor" can take in the detail page:
- * a local saved object or a remote-derived projection. Consumers narrow via
- * {@link isRemoteSyntheticsMonitor}.
- */
-export type SelectedSyntheticsMonitor = EncryptedSyntheticsSavedMonitor | RemoteSyntheticsMonitor;
+export type RemoteSyntheticsMonitor = SchemaOutput<typeof RemoteSyntheticsMonitorCodec>;
 
 /**
  * Type guard distinguishing remote monitors from local saved objects.

@@ -42,6 +42,7 @@ const createDataStream = (overrides: Partial<DataStream> = {}): DataStream => ({
     delete_index: true,
     manage_data_stream_lifecycle: true,
     read_failure_store: true,
+    manage: true,
   },
   hidden: false,
   nextGenerationManagedBy: 'Data stream lifecycle',
@@ -73,7 +74,7 @@ describe('DataRetentionValue', () => {
 
     const link = screen.getByTestId('retentionValue');
     expect(link).toHaveTextContent('my_policy');
-    expect(link).toHaveAttribute('data-href', '/test/my_policy');
+    expect(link).toHaveAttribute('href', '/test/my_policy');
     expect(screen.getByText('ILM')).toBeInTheDocument();
 
     fireEvent.click(link);

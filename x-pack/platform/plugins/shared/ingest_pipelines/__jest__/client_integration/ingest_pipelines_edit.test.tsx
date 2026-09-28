@@ -14,6 +14,9 @@ import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
 import { Route, Router } from '@kbn/shared-ux-router';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+
 import { API_BASE_PATH } from '../../common/constants';
 import { PipelinesEdit } from '../../public/application/sections/pipelines_edit';
 import { getEditPath, ROUTES } from '../../public/application/services/navigation';
@@ -99,10 +102,11 @@ describe('<PipelinesEdit />', () => {
   test('should render the correct page header', async () => {
     await renderPipelinesEdit(httpSetup);
 
-    expect(screen.getByTestId('pageTitle')).toHaveTextContent(
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
       `Edit pipeline '${PIPELINE_TO_EDIT.name}'`
     );
-    expect(screen.getByTestId('documentationLink')).toHaveTextContent('Edit pipeline docs');
+    await openAppMenuOverflow();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
   });
 
   test('should disable the name field', async () => {
@@ -131,8 +135,9 @@ describe('<PipelinesEdit />', () => {
       `${API_BASE_PATH}/${name}`,
       expect.objectContaining({
         body: JSON.stringify({
-          ...omit(pipelineDefinition, 'deprecated'),
           description: UPDATED_DESCRIPTION,
+          field_access_pattern: 'classic',
+          ...omit(pipelineDefinition, 'deprecated', 'description'),
         }),
       })
     );

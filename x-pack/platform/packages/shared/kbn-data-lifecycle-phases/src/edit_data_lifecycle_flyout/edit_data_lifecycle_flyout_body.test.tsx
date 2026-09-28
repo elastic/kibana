@@ -70,6 +70,78 @@ describe('EditDataLifecycleFlyoutBody', () => {
     expect(onInspect).not.toHaveBeenCalled();
   });
 
+  it('disables the ILM method card when the user cannot manage ILM and there is no applied policy', () => {
+    renderWithTheme(
+      <EditDataLifecycleFlyoutBody
+        inherit={{ value: false, onChange: () => {} }}
+        method={{ value: 'dlm', onChange: () => {} }}
+        ilm={{
+          policies: [],
+          onSelect: () => {},
+          canManage: false,
+          hasExistingPolicy: false,
+        }}
+      />
+    );
+
+    expect(screen.getByRole('radio', { name: /ILM policy/i })).toBeDisabled();
+  });
+
+  it('shows the applied policy read-only when the user cannot manage ILM but a policy is applied', async () => {
+    const user = userEvent.setup();
+    const onSelect = jest.fn();
+    const onInspect = jest.fn();
+
+    renderWithTheme(
+      <EditDataLifecycleFlyoutBody
+        inherit={{ value: false, onChange: () => {} }}
+        method={{ value: 'ilm', onChange: () => {} }}
+        ilm={{
+          policies: [
+            {
+              name: POLICY_WITH_DOWNSAMPLE.name,
+              phases: POLICY_WITH_DOWNSAMPLE.phases,
+              serializedPolicy: POLICY_WITH_DOWNSAMPLE,
+            },
+          ],
+          selectedPolicyName: POLICY_WITH_DOWNSAMPLE.name,
+          onSelect,
+          onInspect,
+          canManage: false,
+          hasExistingPolicy: true,
+        }}
+      />
+    );
+
+    // The ILM card stays selectable, but the policy list is read-only.
+    expect(screen.getByRole('radio', { name: /ILM policy/i })).not.toBeDisabled();
+    expect(screen.queryByTestId('retentionSelectorSearchInput')).not.toBeInTheDocument();
+    expect(screen.queryByTestId(inspectTestSubj('.alerts-ilm-policy'))).not.toBeInTheDocument();
+    expect(screen.getByTestId(rowTestSubj('.alerts-ilm-policy'))).toBeInTheDocument();
+
+    await user.click(screen.getByTestId(rowTestSubj('.alerts-ilm-policy')));
+    expect(onSelect).not.toHaveBeenCalled();
+    expect(onInspect).not.toHaveBeenCalled();
+  });
+
+  it('synthesizes the applied policy row when it is not in the loaded policy list', () => {
+    renderWithTheme(
+      <EditDataLifecycleFlyoutBody
+        inherit={{ value: false, onChange: () => {} }}
+        method={{ value: 'ilm', onChange: () => {} }}
+        ilm={{
+          policies: [],
+          selectedPolicyName: 'unreadable-policy',
+          onSelect: () => {},
+          canManage: false,
+          hasExistingPolicy: true,
+        }}
+      />
+    );
+
+    expect(screen.getByTestId(rowTestSubj('unreadable-policy'))).toBeInTheDocument();
+  });
+
   it('renders the DLM content and allows the consumer to disable it when inheriting lifecycle', () => {
     const inheritLifecycle = true;
 
@@ -109,7 +181,7 @@ describe('EditDataLifecycleFlyoutBody', () => {
       />
     );
 
-    const listItems = screen.getAllByRole('listitem');
+    const listItems = screen.getAllByRole('option');
     const listItemText = listItems.map((el) => el.textContent ?? '');
     const policyAIdx = listItemText.findIndex((t) => t.includes('policy-a'));
     const policyBIdx = listItemText.findIndex((t) => t.includes('policy-b'));
@@ -157,7 +229,7 @@ describe('EditDataLifecycleFlyoutBody', () => {
       />
     );
 
-    const listItems = screen.getAllByRole('listitem');
+    const listItems = screen.getAllByRole('option');
     const listItemText = listItems.map((el) => el.textContent ?? '');
     const policyAIdx = listItemText.findIndex((t) => t.includes('policy-a'));
     const policyBIdx = listItemText.findIndex((t) => t.includes('policy-b'));

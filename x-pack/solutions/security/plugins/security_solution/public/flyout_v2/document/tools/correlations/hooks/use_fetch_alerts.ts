@@ -79,10 +79,23 @@ export const useFetchAlerts = ({
   );
 
   return useMemo(() => {
+    // When disabled (e.g. alertIds became empty after a date range change), react-query keeps
+    // returning the last cached `data` (because of `keepPreviousData`) even though no query ran
+    // for the current alertIds. Explicitly clear the result in that case so stale alerts don't
+    // linger in the table.
+    if (!isEnabled) {
+      return {
+        loading: false,
+        error: false,
+        data: [],
+        totalItemCount: 0,
+      };
+    }
+
     const total = data?.hits?.total;
 
     return {
-      loading: isEnabled && isLoading,
+      loading: isLoading,
       error: isError,
       data: data?.hits?.hits || [],
       totalItemCount: isNumber(total) ? total : 0 || 0,

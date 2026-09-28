@@ -33,6 +33,8 @@ export {
   type ChatCompleteAPIResponse,
   type ChatCompleteOptions,
   type ChatCompleteCompositeResponse,
+  type ChatCompletionReasoning,
+  type ChatCompletionReasoningEffort,
   type ChatCompletionTokenCountEvent,
   type ChatCompletionEvent,
   type ChatCompletionChunkEvent,
@@ -41,6 +43,7 @@ export {
   type ChatCompleteStreamResponse,
   type ChatCompleteResponse,
   type ChatCompleteRetryConfiguration,
+  type ChatCompleteCacheControl,
   type ChatCompletionTokenCount,
   type BoundChatCompleteAPI,
   type UnboundChatCompleteOptions,
@@ -132,7 +135,7 @@ export {
 
 export { Tokenizer, generateFakeToolCallId, ShortIdTable } from './src/utils';
 
-export { elasticModelDictionary } from './src/const';
+export { elasticModelDictionary, MAX_STREAM_DURATION_MS } from './src/const';
 
 export { truncateList } from './src/truncate_list';
 export {
@@ -155,9 +158,12 @@ export {
 } from './src/connectors';
 export {
   defaultInferenceEndpoints,
+  INFERENCE_ENDPOINT_INTERNAL_API_VERSION,
   InferenceEndpointProvider,
   elasticModelIds,
   type EisInferenceEndpointMetadata,
+  type CspRegion,
+  type InferenceEndpointRequestBody,
 } from './src/inference_endpoints';
 
 export {
@@ -165,6 +171,16 @@ export {
   type ApiInferenceConnector,
   type InferenceConnectorsApiResponseBody,
 } from './src/inference_connectors_api';
+
+export {
+  FieldType,
+  type ConfigValue,
+  SERVICE_SETTINGS,
+  TASK_SETTINGS,
+  type ConfigProperties,
+  type FieldsConfiguration,
+  type InferenceProvider,
+} from './src/inference_services_api';
 
 export { type Model, ModelFamily, ModelPlatform, ModelProvider } from './src/model_provider';
 

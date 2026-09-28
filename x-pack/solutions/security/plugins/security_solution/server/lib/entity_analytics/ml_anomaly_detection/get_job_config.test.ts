@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import { getJobConfig } from './get_job_config';
+import { resetResolveMitreBucketsCache } from '../../detection_engine/mitre/resolve_mitre_buckets';
 
 const soClient = savedObjectsClientMock.create();
+const request = httpServerMock.createKibanaRequest();
 let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 let mockJobsFn: jest.Mock;
+let mockListModulesFn: jest.Mock;
 let mockMl: MlPluginSetup;
 
 const makeJob = (overrides: Record<string, unknown> = {}) => ({
@@ -28,18 +32,26 @@ const makeJob = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
+const makeModuleJob = (id: string, customSettings: Record<string, unknown>) => ({
+  id,
+  config: { custom_settings: customSettings },
+});
+
 beforeEach(() => {
   jest.clearAllMocks();
+  resetResolveMitreBucketsCache();
   logger = loggingSystemMock.createLogger();
   mockJobsFn = jest.fn().mockResolvedValue({ jobs: [makeJob()] });
+  mockListModulesFn = jest.fn().mockResolvedValue([]);
   mockMl = {
     anomalyDetectorsProvider: jest.fn().mockReturnValue({ jobs: mockJobsFn }),
+    modulesProvider: jest.fn().mockReturnValue({ listModules: mockListModulesFn }),
   } as unknown as MlPluginSetup;
 });
 
 describe('getJobConfig', () => {
   it('returns an empty map when jobIds is empty', async () => {
-    const result = await getJobConfig({ jobIds: [], logger, ml: mockMl, soClient });
+    const result = await getJobConfig({ jobIds: [], logger, ml: mockMl, request, soClient });
 
     expect(result.size).toBe(0);
     expect(mockJobsFn).not.toHaveBeenCalled();
@@ -48,7 +60,7 @@ describe('getJobConfig', () => {
   it('calls the ML API once per job ID', async () => {
     mockJobsFn.mockResolvedValue({ jobs: [] });
 
-    await getJobConfig({ jobIds: ['job-a', 'job-b'], logger, ml: mockMl, soClient });
+    await getJobConfig({ jobIds: ['job-a', 'job-b'], logger, ml: mockMl, request, soClient });
 
     expect(mockJobsFn).toHaveBeenCalledTimes(2);
     expect(mockJobsFn).toHaveBeenCalledWith('job-a');
@@ -56,7 +68,13 @@ describe('getJobConfig', () => {
   });
 
   it('extracts baseline fields: sourceIndex, datafeedQuery, detectors, bucketSpanMs', async () => {
-    const result = await getJobConfig({ jobIds: ['test-job'], logger, ml: mockMl, soClient });
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
 
     expect(result.get('test-job')).toMatchObject({
       sourceIndex: ['logs-*'],
@@ -71,7 +89,13 @@ describe('getJobConfig', () => {
       jobs: [makeJob({ analysis_config: { detectors: [], bucket_span: '15m' } })],
     });
 
-    const result = await getJobConfig({ jobIds: ['test-job'], logger, ml: mockMl, soClient });
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
 
     expect(result.get('test-job')?.bucketSpanMs).toBe(900000);
   });
@@ -81,7 +105,13 @@ describe('getJobConfig', () => {
       jobs: [makeJob({ analysis_config: { detectors: [] } })],
     });
 
-    const result = await getJobConfig({ jobIds: ['test-job'], logger, ml: mockMl, soClient });
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
 
     expect(result.get('test-job')?.bucketSpanMs).toBe(3600000);
   });
@@ -91,7 +121,13 @@ describe('getJobConfig', () => {
       jobs: [makeJob({ analysis_config: { detectors: [], bucket_span: 'not-a-duration' } })],
     });
 
-    const result = await getJobConfig({ jobIds: ['test-job'], logger, ml: mockMl, soClient });
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
 
     expect(result.get('test-job')?.bucketSpanMs).toBe(3600000);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Invalid bucket_span'));
@@ -102,7 +138,13 @@ describe('getJobConfig', () => {
       jobs: [makeJob({ datafeed_config: { indices: ['logs-*'] } })],
     });
 
-    const result = await getJobConfig({ jobIds: ['test-job'], logger, ml: mockMl, soClient });
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
 
     expect(result.get('test-job')?.datafeedQuery).toEqual({ match_all: {} });
   });
@@ -121,7 +163,13 @@ describe('getJobConfig', () => {
       ],
     });
 
-    const result = await getJobConfig({ jobIds: ['test-job'], logger, ml: mockMl, soClient });
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
 
     expect(result.get('test-job')).toMatchObject({
       jobName: 'Spike in Logon Events',
@@ -130,10 +178,209 @@ describe('getJobConfig', () => {
     });
   });
 
+  it('does not query modules when the live job already has threat_tactics', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [
+        makeJob({
+          custom_settings: {
+            security_app_display_name: 'Custom Job',
+            threat_tactics: ['TA0006'],
+          },
+        }),
+      ],
+    });
+    mockListModulesFn.mockResolvedValueOnce([
+      { jobs: [makeModuleJob('test-job', { security_app_display_name: 'Stale Name' })] },
+    ]);
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
+
+    expect(result.get('test-job')?.jobName).toBe('Custom Job');
+    expect(mockListModulesFn).not.toHaveBeenCalled();
+  });
+
+  it('falls back to the module custom_settings when the live job has no threat_tactics', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [makeJob({ custom_settings: { security_app_display_name: 'Stale Name' } })],
+    });
+    mockListModulesFn.mockResolvedValueOnce([
+      {
+        jobs: [
+          makeModuleJob('test-job', {
+            security_app_display_name: 'Spike in Logon Events',
+            threat_tactics: ['TA0006'],
+            threat_techniques: ['T1110'],
+          }),
+        ],
+      },
+    ]);
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
+
+    expect(result.get('test-job')).toMatchObject({
+      jobName: 'Spike in Logon Events',
+      threatTactics: ['Credential Access'],
+      threatTechniques: ['Brute Force'],
+    });
+  });
+
+  it('falls back to the live job custom_settings when no module job matches', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [makeJob({ custom_settings: { security_app_display_name: 'Custom Job' } })],
+    });
+    mockListModulesFn.mockResolvedValueOnce([
+      { jobs: [makeModuleJob('other-job', { security_app_display_name: 'Other Job' })] },
+    ]);
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
+
+    expect(result.get('test-job')?.jobName).toBe('Custom Job');
+  });
+
+  it('logs a debug message and falls back to live job custom_settings when listModules fails', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [makeJob({ custom_settings: { security_app_display_name: 'Custom Job' } })],
+    });
+    mockListModulesFn.mockRejectedValueOnce(new Error('modules unavailable'));
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
+
+    expect(result.get('test-job')?.jobName).toBe('Custom Job');
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('modules unavailable'));
+  });
+
+  it('sets hasThreatTactics to true when custom_settings.threat_tactics is present', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [makeJob({ custom_settings: { threat_tactics: ['TA0006'] } })],
+    });
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
+
+    expect(result.get('test-job')?.hasThreatTactics).toBe(true);
+  });
+
+  it('sets hasThreatTactics to true when custom_settings.threat_tactics is an empty array', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [makeJob({ custom_settings: { threat_tactics: [] } })],
+    });
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
+
+    expect(result.get('test-job')?.hasThreatTactics).toBe(true);
+  });
+
+  it('sets hasThreatTactics to false when custom_settings.threat_tactics is absent', async () => {
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
+
+    expect(result.get('test-job')?.hasThreatTactics).toBe(false);
+  });
+
+  it('sets hasThreatTactics to false and threatTactics to [] when custom_settings.threat_tactics is not an array', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      // custom_settings is runtime ES data, so a job could have threat_tactics
+      // set to a non-array value (e.g. null) despite the declared type.
+      jobs: [makeJob({ custom_settings: { threat_tactics: null } })],
+    });
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
+
+    expect(result.get('test-job')?.hasThreatTactics).toBe(false);
+    expect(result.get('test-job')?.threatTactics).toEqual([]);
+  });
+
   it('sets jobName to null when security_app_display_name is absent', async () => {
-    const result = await getJobConfig({ jobIds: ['test-job'], logger, ml: mockMl, soClient });
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
 
     expect(result.get('test-job')?.jobName).toBeNull();
+  });
+
+  it('sources MITRE name maps from the managed client when mitreDataClient is provided', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [
+        makeJob({
+          custom_settings: {
+            // TA0099 / T9001 are NOT in the real blob; they exist only in the mock client.
+            threat_tactics: ['TA0099'],
+            threat_techniques: ['T9001'],
+          },
+        }),
+      ],
+    });
+
+    const mockList = jest.fn().mockResolvedValue({
+      framework: 'enterprise',
+      tactics: [{ id: 'TA0099', name: 'Managed Tactic' }],
+      techniques: [{ id: 'T9001', name: 'Managed Technique' }],
+      subtechniques: [],
+    });
+    const mitreDataClient: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+      mitreDataClient,
+    });
+
+    expect(mockList).toHaveBeenCalledTimes(1);
+    expect(result.get('test-job')?.threatTactics).toEqual(['Managed Tactic']);
+    expect(result.get('test-job')?.threatTechniques).toEqual(['Managed Technique']);
   });
 
   it('falls back to the raw ID when a tactic/technique ID is not in the MITRE map', async () => {
@@ -148,10 +395,95 @@ describe('getJobConfig', () => {
       ],
     });
 
-    const result = await getJobConfig({ jobIds: ['test-job'], logger, ml: mockMl, soClient });
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
 
     expect(result.get('test-job')?.threatTactics).toEqual(['UNKNOWN_TACTIC']);
     expect(result.get('test-job')?.threatTechniques).toEqual(['UNKNOWN_TECHNIQUE']);
+  });
+
+  it('still returns job configs when MITRE bucket resolution fails, falling back to raw IDs', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [
+        makeJob({
+          custom_settings: {
+            security_app_display_name: 'Auth Spike',
+            threat_tactics: ['TA0006'],
+            threat_techniques: ['T1110'],
+          },
+        }),
+      ],
+    });
+
+    const failingList = jest.fn().mockRejectedValue(new Error('mitre service unavailable'));
+    const mitreDataClient: MitreAttackDataClient = { list: failingList, getById: jest.fn() };
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+      mitreDataClient,
+    });
+
+    // Job config must still be present despite the MITRE failure.
+    expect(result.size).toBe(1);
+    expect(result.get('test-job')).toMatchObject({
+      jobName: 'Auth Spike',
+      // IDs are unresolved because the name maps are empty.
+      threatTactics: ['TA0006'],
+      threatTechniques: ['T1110'],
+    });
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('mitre service unavailable'));
+  });
+
+  it('still returns job configs with raw IDs when managed buckets are empty (population not yet complete)', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [
+        makeJob({
+          custom_settings: {
+            security_app_display_name: 'Auth Spike',
+            threat_tactics: ['TA0006'],
+            threat_techniques: ['T1110'],
+          },
+        }),
+      ],
+    });
+
+    // Simulates the state where the managed SO has not yet been populated.
+    const emptyList = jest.fn().mockResolvedValue({
+      framework: 'enterprise',
+      tactics: [],
+      techniques: [],
+      subtechniques: [],
+    });
+    const mitreDataClient: MitreAttackDataClient = { list: emptyList, getById: jest.fn() };
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+      mitreDataClient,
+    });
+
+    // Job config must still be present; IDs are unresolved because the name maps are empty.
+    expect(result.size).toBe(1);
+    expect(result.get('test-job')).toMatchObject({
+      jobName: 'Auth Spike',
+      threatTactics: ['TA0006'],
+      threatTechniques: ['T1110'],
+    });
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('Managed MITRE data is not initialized')
+    );
   });
 
   it('returns entries for multiple jobs', async () => {
@@ -163,6 +495,7 @@ describe('getJobConfig', () => {
       jobIds: ['job-a', 'job-b'],
       logger,
       ml: mockMl,
+      request,
       soClient,
     });
 
@@ -176,7 +509,13 @@ describe('getJobConfig', () => {
       .mockResolvedValueOnce({ jobs: [makeJob({ job_id: 'job-a' })] })
       .mockRejectedValueOnce(new Error('MLJobNotFound'));
 
-    const result = await getJobConfig({ jobIds: ['job-a', 'job-b'], logger, ml: mockMl, soClient });
+    const result = await getJobConfig({
+      jobIds: ['job-a', 'job-b'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
 
     expect(result.size).toBe(1);
     expect(result.has('job-a')).toBe(true);
@@ -185,9 +524,94 @@ describe('getJobConfig', () => {
   it('logs a debug message and returns empty map when all jobs fail', async () => {
     mockJobsFn.mockRejectedValue(new Error('cluster unavailable'));
 
-    const result = await getJobConfig({ jobIds: ['job-1'], logger, ml: mockMl, soClient });
+    const result = await getJobConfig({
+      jobIds: ['job-1'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
 
     expect(result.size).toBe(0);
     expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('cluster unavailable'));
+  });
+});
+
+describe('managed MITRE list caching', () => {
+  const makeMockList = (empty = false) =>
+    jest.fn().mockResolvedValue({
+      framework: 'enterprise',
+      tactics: empty ? [] : [{ id: 'TA0099', name: 'Cached Tactic' }],
+      techniques: empty ? [] : [{ id: 'T9001', name: 'Cached Technique' }],
+      subtechniques: [],
+    });
+
+  const makeJobWithCustomSettings = () =>
+    makeJob({ custom_settings: { threat_tactics: ['TA0099'], threat_techniques: ['T9001'] } });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    resetResolveMitreBucketsCache();
+    logger = loggingSystemMock.createLogger();
+    mockJobsFn = jest.fn().mockResolvedValue({ jobs: [makeJobWithCustomSettings()] });
+    mockListModulesFn = jest.fn().mockResolvedValue([]);
+    mockMl = {
+      anomalyDetectorsProvider: jest.fn().mockReturnValue({ jobs: mockJobsFn }),
+      modulesProvider: jest.fn().mockReturnValue({ listModules: mockListModulesFn }),
+    } as unknown as MlPluginSetup;
+  });
+
+  it('caches the managed result so list() is called only once across two requests', async () => {
+    const mockList = makeMockList();
+    const mitreDataClient: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
+
+    // First call — populates cache
+    await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+      mitreDataClient,
+    });
+    // Second call — should use cache
+    mockJobsFn.mockResolvedValue({ jobs: [makeJobWithCustomSettings()] });
+    await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+      mitreDataClient,
+    });
+
+    expect(mockList).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not cache an empty response and calls list() again on the next request', async () => {
+    const mockList = makeMockList(true /* empty */);
+    const mitreDataClient: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
+
+    // First call — empty result, must NOT be cached
+    await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+      mitreDataClient,
+    });
+    // Second call — should retry list() because the cache was not set
+    mockJobsFn.mockResolvedValue({ jobs: [makeJobWithCustomSettings()] });
+    await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+      mitreDataClient,
+    });
+
+    expect(mockList).toHaveBeenCalledTimes(2);
   });
 });

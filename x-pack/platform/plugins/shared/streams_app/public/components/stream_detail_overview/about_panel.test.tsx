@@ -255,23 +255,11 @@ describe('AboutPanel', () => {
     renderWithI18n(<AboutPanel />);
 
     await userEvent.click(screen.getByLabelText('Edit description'));
-    expect(screen.getByLabelText('Edit stream description')).toBeInTheDocument();
 
-    fireEvent.keyUp(window, { key: 'Escape' });
-    expect(screen.queryByLabelText('Edit stream description')).not.toBeInTheDocument();
-  });
+    const textarea = screen.getByLabelText('Edit stream description');
+    expect(textarea).toBeInTheDocument();
+    fireEvent.keyDown(textarea, { key: 'Escape' });
 
-  it('exits edit mode when Escape is pressed', async () => {
-    mockUseStreamDetail.mockReturnValue({
-      definition: wiredDefinitionWithDescription('Some description'),
-    });
-
-    renderWithI18n(<AboutPanel />);
-
-    await userEvent.click(screen.getByLabelText('Edit description'));
-    expect(screen.getByLabelText('Edit stream description')).toBeInTheDocument();
-
-    fireEvent.keyUp(window, { key: 'Escape' });
     expect(screen.queryByLabelText('Edit stream description')).not.toBeInTheDocument();
   });
 });

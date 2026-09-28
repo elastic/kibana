@@ -10,9 +10,12 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   ALERT_SEVERITY_CRITICAL,
+  ALERT_SEVERITY_MAJOR,
   ALERT_SEVERITY_HIGH,
   ALERT_SEVERITY_MEDIUM,
+  ALERT_SEVERITY_MINOR,
   ALERT_SEVERITY_LOW,
+  ALERT_SEVERITY_WARNING,
   ALERT_SEVERITY_INFO,
 } from '@kbn/rule-data-utils';
 import { EuiFieldText } from '@elastic/eui';
@@ -20,10 +23,12 @@ import { DataConditionPanel } from './data_condition_panel';
 import type { DataConditionEntry, DataConditionTypeDescriptor } from './types';
 import { DataConditionType } from './types';
 import {
-  fieldChangeDescriptor,
+  createFieldChangeDescriptor,
   severityChangeDescriptor,
   severityEqualsDescriptor,
 } from './built_in_data_conditions';
+
+const fieldChangeDescriptor = createFieldChangeDescriptor();
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -53,7 +58,7 @@ describe('DataConditionPanel', () => {
     expect(screen.getByTestId('confirmDataCondition-dc-1').closest('button')?.disabled).toBe(true);
   });
 
-  it('calls onChange with entry updates from the form fields', () => {
+  it('calls onChange with entry updates from the type dropdown', () => {
     render(<DataConditionPanel entry={createEntry()} onChange={onChangeMock} />, { wrapper });
 
     fireEvent.change(screen.getByTestId('dataConditionType-dc-1'), {
@@ -62,15 +67,6 @@ describe('DataConditionPanel', () => {
     expect(onChangeMock).toHaveBeenLastCalledWith(
       createEntry({
         type: DataConditionType.SEVERITY_EQUALS,
-      })
-    );
-
-    fireEvent.change(screen.getByTestId('dataConditionField-dc-1'), {
-      target: { value: 'severity' },
-    });
-    expect(onChangeMock).toHaveBeenLastCalledWith(
-      createEntry({
-        field: 'severity',
       })
     );
   });
@@ -315,7 +311,7 @@ describe('DataConditionPanel', () => {
   });
 
   describe('severity_equals dropdown', () => {
-    it('lists only the five primary severity levels in highest → lowest order', () => {
+    it('lists the full severity superset in highest → lowest order', () => {
       render(
         <DataConditionPanel
           entry={createEntry({ type: DataConditionType.SEVERITY_EQUALS, value: undefined })}
@@ -332,9 +328,12 @@ describe('DataConditionPanel', () => {
 
       expect(offered).toEqual([
         ALERT_SEVERITY_CRITICAL,
+        ALERT_SEVERITY_MAJOR,
         ALERT_SEVERITY_HIGH,
         ALERT_SEVERITY_MEDIUM,
+        ALERT_SEVERITY_MINOR,
         ALERT_SEVERITY_LOW,
+        ALERT_SEVERITY_WARNING,
         ALERT_SEVERITY_INFO,
       ]);
     });

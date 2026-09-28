@@ -23,6 +23,7 @@ import * as i18n from './translations';
 
 const EDIT_ACTIONS_REQUIRING_PRIOR_STATE: string[] = [
   RuleChangeTrackingAction.ruleUpdate,
+  SecurityRuleChangeTrackingAction.ruleUpgrade,
   SecurityRuleChangeTrackingAction.ruleImport,
   SecurityRuleChangeTrackingAction.ruleRevert,
 ];
@@ -38,7 +39,13 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
       return { oldSource: '', newSource: '', numOfChangedFields: 0, noDiffAvailable: true };
     }
 
-    const hasNoDiff = EDIT_ACTIONS_REQUIRING_PRIOR_STATE.includes(item.action) && !item.old_values;
+    const hasNoDiff =
+      EDIT_ACTIONS_REQUIRING_PRIOR_STATE.includes(item.action) &&
+      !item.old_values &&
+      // Rule imports can be both a new entry and an overwrite of an existing entry,
+      // the way to tell them apart is to check rule creation vs update time.
+      new Date(item.rule.created_at).getTime() !== new Date(item.rule.updated_at).getTime();
+
     const after = Object.fromEntries(
       Object.entries(item.rule).filter(([k]) => !IGNORED_DIFF_FIELDS.has(k))
     );
@@ -90,7 +97,7 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
     return (
       <EuiPanel hasBorder hasShadow={false} data-test-subj="ruleChangesHistoryNoChanges">
         <EuiEmptyPrompt
-          iconType="checkInCircleFilled"
+          iconType="checkCircleFill"
           title={<h2>{i18n.NO_VISIBLE_CHANGES_TITLE}</h2>}
         />
       </EuiPanel>

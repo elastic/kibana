@@ -1,0 +1,47 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        upgradeManagedIntegrationsRequestExample:
+          description: 'Bulk upgrade managed integrations to their installed package version'
+          value:
+            policyIds:
+              - d52a7812-5736-4fdc-aed8-72152afa1ffa
+              - aws-policy-12345
+responses:
+  200:
+    description: 'Indicates a successful response. Each item reports the per-policy upgrade outcome; inspect every item''s `success` flag. A missing id, or an id that is not a managed integration, is reported as a per-item failure (`success: false` + `statusCode`) without failing the batch.'
+    content:
+      application/json:
+        examples:
+          upgradeManagedIntegrationsResponseExample:
+            description: 'Example response where every policy was upgraded'
+            value:
+              - id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                name: ess_billing-1
+                success: true
+              - id: aws-policy-12345
+                name: cspm-aws-policy
+                success: true
+          upgradeManagedIntegrationsPartialFailureResponseExample:
+            description: 'Example response where one managed integration upgraded and another id was missing or not a managed integration (the batch still returns 200)'
+            value:
+              - id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                name: ess_billing-1
+                success: true
+              - id: aws-policy-12345
+                success: false
+                statusCode: 404
+                body:
+                  message: 'Agentless policy aws-policy-12345 not found'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

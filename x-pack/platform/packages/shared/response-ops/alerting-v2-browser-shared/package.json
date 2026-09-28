@@ -1,0 +1,8 @@
+{
+  "name": "@kbn/alerting-v2-browser-shared",
+  "description": "Shared React components for Alerting V2 browser applications",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0",
+  "sideEffects": false
+}

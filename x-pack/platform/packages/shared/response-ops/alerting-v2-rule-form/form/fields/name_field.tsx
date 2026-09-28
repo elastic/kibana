@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
+import { MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 import type { FormValues } from '../types';
 import { DEFAULT_RULE_NAME } from '../constants';
 import { useRuleFormMeta } from '../contexts';
@@ -35,6 +36,12 @@ export const NameField = () => {
               defaultMessage: 'Name is required.',
             });
           }
+          if (value.length > MAX_NAME_LENGTH) {
+            return i18n.translate('xpack.alertingV2.ruleForm.nameTooLongError', {
+              defaultMessage: 'Name cannot exceed {maxLength} characters.',
+              values: { maxLength: MAX_NAME_LENGTH },
+            });
+          }
           return true;
         },
       }}
@@ -50,6 +57,7 @@ export const NameField = () => {
         >
           <EuiFieldText
             {...field}
+            autoFocus
             value={field.value ?? ''}
             inputRef={ref}
             fullWidth

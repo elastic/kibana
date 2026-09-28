@@ -25,6 +25,14 @@ import { validation } from '../validation/validation';
 import type { BaseStream } from '../base';
 import type { IngestStreamSettings } from './settings';
 import { ingestStreamSettingsSchema } from './settings';
+import type {
+  ClassicIngestStreamProcessing,
+  ClassicIngestStreamProcessingUpsert,
+} from './processing';
+import {
+  classicIngestStreamProcessingSchema,
+  classicIngestStreamProcessingUpsertSchema,
+} from './processing';
 import type { ClassicFieldDefinition } from '../../fields';
 import { classicFieldDefinitionSchema } from '../../fields';
 import type { EffectiveFailureStore } from './failure_store';
@@ -44,10 +52,14 @@ const ingestClassicShape = {
   }),
 };
 
-export type ClassicIngest = IngestBase & IngestClassic;
+export type ClassicIngest = Omit<IngestBase, 'processing'> &
+  IngestClassic & {
+    processing: ClassicIngestStreamProcessing;
+  };
 
 const classicIngestSchemaObject = z.object({
   ...ingestBaseSchemaFields,
+  processing: classicIngestStreamProcessingSchema,
   ...ingestClassicShape,
 });
 
@@ -60,6 +72,7 @@ export type ClassicIngestUpsertRequest = IngestBaseUpsertRequest & IngestClassic
 
 const classicIngestUpsertSchemaObject = z.object({
   ...ingestBaseUpsertSchemaFields,
+  processing: classicIngestStreamProcessingUpsertSchema,
   ...ingestClassicShape,
 });
 
@@ -76,7 +89,7 @@ type OmitClassicStreamUpsertProps<
   }
 > = Omit<T, 'ingest'> & {
   ingest: Omit<ClassicIngest, 'processing'> & {
-    processing: Omit<ClassicIngest['processing'], 'updated_at'> & { updated_at?: never };
+    processing: ClassicIngestStreamProcessingUpsert;
   };
 };
 

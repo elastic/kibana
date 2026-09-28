@@ -176,6 +176,26 @@ describe('IndexUpdateService', () => {
     expect(rowsAfterDeletion[0].id).toEqual(expect.stringContaining(ROW_PLACEHOLDER_PREFIX));
   });
 
+  describe('updateDoc value parsing', () => {
+    it('keeps the raw text for string-typed fields so object-like values are not coerced', async () => {
+      const rows = await firstValueFrom(service.rows$);
+
+      service.updateDoc(rows[0].id, { asd4: '{}' }, { asd4: { type: 'string', esType: 'text' } });
+
+      const rowsAfterEdition = await firstValueFrom(service.rows$);
+      expect(rowsAfterEdition[0].raw).toEqual({ asd4: '{}' });
+    });
+
+    it('infers the value type when no field type is provided', async () => {
+      const rows = await firstValueFrom(service.rows$);
+
+      service.updateDoc(rows[0].id, { count: '42', enabled: 'true', meta: '{}' });
+
+      const rowsAfterEdition = await firstValueFrom(service.rows$);
+      expect(rowsAfterEdition[0].raw).toEqual({ count: 42, enabled: true, meta: {} });
+    });
+  });
+
   describe('flush operations', () => {
     it('should call telemetry on successful flush', async () => {
       (http.post as jest.Mock).mockResolvedValue({

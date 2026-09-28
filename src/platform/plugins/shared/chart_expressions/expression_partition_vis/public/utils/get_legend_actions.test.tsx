@@ -67,7 +67,11 @@ const esqlVisDataWithComputedColumn: Datatable = {
           isComputedColumn: true,
           meta: {
             ...col.meta,
-            sourceParams: { ...col.meta.sourceParams, sourceField: col.name },
+            sourceParams: {
+              ...col.meta.sourceParams,
+              sourceField: col.name,
+              isSourceFieldFilterable: false,
+            },
           },
         }
       : col
@@ -75,9 +79,9 @@ const esqlVisDataWithComputedColumn: Datatable = {
 };
 
 /**
- * ES|QL vis data where col-0-2 is a computed column produced by RENAME — the column
- * name differs from the source field name, so the underlying index field is still
- * addressable and filtering should be allowed (no warning, no disabled actions).
+ * ES|QL vis data where col-0-2 is a computed column produced by RENAME — isSourceFieldFilterable
+ * is true because the underlying index field is still addressable, so filtering should be
+ * allowed (no warning, no disabled actions).
  */
 const esqlVisDataWithRenamedComputedColumn: Datatable = {
   ...visData,
@@ -89,8 +93,37 @@ const esqlVisDataWithRenamedComputedColumn: Datatable = {
           isComputedColumn: true,
           meta: {
             ...col.meta,
-            // sourceField ('Carrier') differs from col.name ('Carrier: Descending') → filterable
-            sourceParams: { ...col.meta.sourceParams, sourceField: 'Carrier' },
+            sourceParams: {
+              ...col.meta.sourceParams,
+              sourceField: 'Carrier',
+              isSourceFieldFilterable: true,
+            },
+          },
+        }
+      : col
+  ),
+};
+
+/**
+ * ES|QL vis data where col-0-2 is a non-filterable computed date column. The warning text is
+ * suppressed for dates (product decision), but the actions must still be disabled and inert.
+ */
+const esqlVisDataWithComputedDateColumn: Datatable = {
+  ...visData,
+  meta: { type: ESQL_TABLE_TYPE },
+  columns: visData.columns.map((col) =>
+    col.id === 'col-0-2'
+      ? {
+          ...col,
+          isComputedColumn: true,
+          meta: {
+            ...col.meta,
+            type: 'date',
+            sourceParams: {
+              ...col.meta.sourceParams,
+              sourceField: col.name,
+              isSourceFieldFilterable: false,
+            },
           },
         }
       : col
@@ -187,6 +220,23 @@ describe('getLegendActions', () => {
       expect(warning).toHaveTextContent(
         `You can't apply a filter or drill down from this value because it relies on a field created at query time.`
       );
+    });
+
+    it('does not render an action button for a non-filterable computed date column with no other actions', () => {
+      // There's no warning message to show for a suppressed date column, and no other cell
+      // actions here, so showing disabled Filter for/out buttons with nothing to explain them
+      // would be confusing — omit the button entirely instead.
+      const Component = getLegendActions(
+        undefined,
+        makeGetFilterEventData(esqlVisDataWithComputedDateColumn),
+        jest.fn(),
+        [],
+        visParams,
+        esqlVisDataWithComputedDateColumn,
+        fieldFormatsMock as unknown as FieldFormatsStart
+      );
+      renderWithKibanaRenderContext(<Component {...seriesProps} />);
+      expect(screen.queryByRole('button', { name: /legend actions/i })).not.toBeInTheDocument();
     });
 
     it('does not disable filter actions or show a warning for a renamed computed column', async () => {

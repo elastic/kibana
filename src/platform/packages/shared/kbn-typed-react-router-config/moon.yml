@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/typed-react-router-config'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-presentation-team'
+  defaultOwner: '@elastic/obs-signals-traces-team'
 toolchains:
   default: node
 language: typescript
@@ -14,13 +14,14 @@ project:
   title: '@kbn/typed-react-router-config'
   description: Moon project for @kbn/typed-react-router-config
   channel: ''
-  owner: '@elastic/obs-presentation-team'
+  owner: '@elastic/obs-signals-traces-team'
   sourceRoot: src/platform/packages/shared/kbn-typed-react-router-config
 dependsOn:
   - '@kbn/io-ts-utils'
   - '@kbn/shared-ux-router'
   - '@kbn/core'
   - '@kbn/kibana-react-plugin'
+  - '@kbn/zod'
 tags:
   - shared-browser
   - package

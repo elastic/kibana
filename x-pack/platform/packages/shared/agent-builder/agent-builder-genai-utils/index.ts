@@ -30,6 +30,8 @@ export {
   type AliasSearchSource,
   type IndexSearchSource,
   type DataStreamSearchSource,
+  type DatasetSearchSource,
+  type ViewSearchSource,
   type EsSearchSource,
   type ListSourcesResponse,
 } from './tools/steps';
@@ -38,6 +40,7 @@ export {
   type IndexExplorerResponse,
   generateEsql,
   type GenerateEsqlResponse,
+  GenerateEsqlNoDataError,
   generateEsqlCompletion,
   type GenerateEsqlCompletionResponse,
   relevanceSearch,
@@ -46,6 +49,7 @@ export {
   type NaturalLanguageSearchResponse,
   runSearchTool,
   type TopSnippetsConfig,
+  setDefaultEsqlCacheKey,
 } from './tools';
 export {
   resolveResourceForEsqlWithSamplingStats,

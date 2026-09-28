@@ -20,13 +20,16 @@ import { registerInternalAttachments } from '../..';
 import { AttachSavedObjectModal } from './attach_saved_object_modal';
 import { useFindSavedObjects } from './use_find_saved_objects';
 import { useAttachSavedObject } from './use_attach_saved_object';
+import { useOpenLensForAttach } from '../../lens/lens_return/use_open_lens_for_attach';
 import type { FoundSavedObject } from './types';
 
 jest.mock('./use_find_saved_objects');
 jest.mock('./use_attach_saved_object');
+jest.mock('../../lens/lens_return/use_open_lens_for_attach');
 
 const useFindSavedObjectsMock = useFindSavedObjects as jest.Mock;
 const useAttachSavedObjectMock = useAttachSavedObject as jest.Mock;
+const useOpenLensForAttachMock = useOpenLensForAttach as jest.Mock;
 
 const sampleItems: FoundSavedObject[] = [
   {
@@ -38,6 +41,11 @@ const sampleItems: FoundSavedObject[] = [
     id: 'map-1',
     type: 'map',
     meta: { title: 'World map' },
+  },
+  {
+    id: 'lens-1',
+    type: 'lens',
+    meta: { title: 'Top hosts' },
   },
 ];
 
@@ -77,12 +85,18 @@ const caseWithSavedObjectAttachment = ({
 
 describe('AttachSavedObjectModal', () => {
   const attach = jest.fn();
+  const openLensForAttach = jest.fn().mockResolvedValue(undefined);
   const onClose = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useFindSavedObjectsMock.mockReturnValue({ items: sampleItems, total: 2, isLoading: false });
+    useFindSavedObjectsMock.mockReturnValue({
+      items: sampleItems,
+      total: sampleItems.length,
+      isLoading: false,
+    });
     useAttachSavedObjectMock.mockReturnValue({ attach, attachmentId: null, isAttaching: false });
+    useOpenLensForAttachMock.mockReturnValue(openLensForAttach);
   });
 
   // Opt in to dashboard/map registrations so the type filter exposes them.
@@ -195,5 +209,18 @@ describe('AttachSavedObjectModal', () => {
     const call = useAttachSavedObjectMock.mock.calls[0][0];
     expect(call.caseId).toBe(basicCase.id);
     expect(call.caseOwner).toBe(basicCase.owner);
+  });
+
+  it('renders lens rows with an "Open in Lens" action', () => {
+    renderModal();
+    expect(screen.getByTestId('cases-attach-so-button-lens-1')).toHaveTextContent('Open in Lens');
+  });
+
+  it('routes lens clicks through useOpenLensForAttach and closes the modal', async () => {
+    renderModal();
+    await userEvent.click(screen.getByTestId('cases-attach-so-button-lens-1'));
+    await waitFor(() => expect(openLensForAttach).toHaveBeenCalledWith(sampleItems[2]));
+    expect(attach).not.toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalled();
   });
 });

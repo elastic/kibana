@@ -15,7 +15,7 @@ import type {
 } from '@elastic/eui';
 import { copyToClipboard, EuiDataGrid, EuiEmptyPrompt, useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { usePager } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
@@ -28,8 +28,8 @@ import { TableFieldValue } from './table_field_value';
 import { appendKeyPath, flattenKeyPaths } from '../../lib/flatten_key_paths';
 import { useGetFormattedDateTime } from '../use_formatted_date';
 
-const MIN_NAME_COLUMN_WIDTH = 120;
-const MAX_NAME_COLUMN_WIDTH = 300;
+const MIN_NAME_COLUMN_WIDTH = 220;
+const MAX_NAME_COLUMN_WIDTH = 360;
 
 interface JSONDataTableRecord {
   field: string;
@@ -119,9 +119,20 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
 
     const { width: containerWidth } = useResizeObserver(containerRef.current);
     const { curPageIndex, pageSize, changePageIndex, changePageSize } = usePager({
-      initialPageSize: 20,
+      initialPageSize: 10,
       totalItems: filteredRecords.length,
     });
+
+    // Reset to first page whenever the search filter changes
+    useEffect(() => {
+      changePageIndex(0);
+    }, [searchTerm, changePageIndex]);
+
+    // Reset to page 0 when the data prop changes (e.g. switching between execution steps
+    // that have different row counts) so stale page indices don't go out of bounds.
+    useEffect(() => {
+      changePageIndex(0);
+    }, [data, changePageIndex]);
 
     const fieldCellActions = useMemo(() => {
       const cellActions: EuiDataGridColumnCellAction[] = [];
@@ -206,7 +217,7 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
 
     const pagination: EuiDataGridProps['pagination'] = useMemo(
       () => ({
-        pageSizeOptions: [20, 50, 100, 200],
+        pageSizeOptions: [10, 25, 50, 100],
         pageIndex: curPageIndex,
         pageSize,
         onChangeItemsPerPage: changePageSize,
@@ -274,9 +285,12 @@ const getCopyCellActionComponent = (
   React.memo(function CopyCellAction({ rowIndex, Component }) {
     const record = records[rowIndex];
     const copy = useCallback(() => {
+      if (!record) return;
       copyToClipboard(appendKeyPath(fieldPathPrefix, record.field));
       closePopover();
-    }, [record.field]);
+    }, [record]);
+
+    if (!record) return null;
 
     return (
       <Component onClick={copy} iconType="copy" aria-label={CopyFieldPathText}>

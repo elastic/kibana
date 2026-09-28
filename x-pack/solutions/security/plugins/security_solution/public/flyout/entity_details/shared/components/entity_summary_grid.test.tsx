@@ -25,7 +25,7 @@ const entityWithSource: Entity = {
   ...mockEntityRecord,
   entity: {
     ...mockEntityRecord.entity,
-    source: 'logs-endpoint',
+    source: ['logs-endpoint'],
   },
 } as Entity;
 
@@ -116,7 +116,7 @@ describe('EntitySummaryGrid', () => {
       </TestProviders>
     );
 
-    expect(container.querySelector('[data-euiicon-type="arrowDown"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-euiicon-type="chevronSingleDown"]')).toBeInTheDocument();
   });
 
   it('does not show arrow down icon when onCriticalitySave is not provided', () => {
@@ -126,7 +126,9 @@ describe('EntitySummaryGrid', () => {
       </TestProviders>
     );
 
-    expect(container.querySelector('[data-euiicon-type="arrowDown"]')).not.toBeInTheDocument();
+    expect(
+      container.querySelector('[data-euiicon-type="chevronSingleDown"]')
+    ).not.toBeInTheDocument();
   });
 
   it('opens criticality modal on click', () => {

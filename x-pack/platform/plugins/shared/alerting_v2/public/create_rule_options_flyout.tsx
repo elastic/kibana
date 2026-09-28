@@ -25,7 +25,6 @@ import type { ComposeDiscoverFlyoutProps } from '@kbn/alerting-v2-rule-form';
 import { Context } from '@kbn/core-di-browser';
 import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from './kibana_services';
 import { RuleCreateOptionsFlyout } from './components/rule_create_options/rule_create_options_flyout';
-import { getIsRuleManagementABSkillAvailable } from './hooks/use_is_rule_management_ab_skill_available';
 import { RulesApi } from './services/rules_api';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from './constants';
 
@@ -227,6 +226,9 @@ const CreateRuleOptionsFlyoutInner = ({
         size="s"
         ownFocus
         onClose={onClose}
+        aria-label={i18n.translate('xpack.alertingV2.createAlertFlyout.loadingFlyoutAriaLabel', {
+          defaultMessage: 'Create rule',
+        })}
         data-test-subj="createAlertFlyoutLoading"
       >
         <EuiFlyoutBody>
@@ -237,11 +239,6 @@ const CreateRuleOptionsFlyoutInner = ({
   }
 
   const { services, ComposeDiscoverFlyout } = value;
-
-  const isRuleManagementABSkillAvailable = getIsRuleManagementABSkillAvailable(
-    services.application,
-    services.uiSettings
-  );
 
   if (step.type === 'esql') {
     return (
@@ -271,6 +268,8 @@ const CreateRuleOptionsFlyoutInner = ({
           builderType="threshold"
           onCreateRule={handleCreateRule}
           isSaving={isSaving}
+          initialQuery={query}
+          esqlVariables={esqlVariables}
         />
       </Context.Provider>
     );
@@ -284,13 +283,15 @@ const CreateRuleOptionsFlyoutInner = ({
   }
 
   return (
-    <RuleCreateOptionsFlyout
-      onClose={onClose}
-      onCreateEsqlRule={() => setStep({ type: 'esql' })}
-      onCreateWithAgent={isRuleManagementABSkillAvailable ? navigateToAgentBuilder : undefined}
-      onCreateThresholdAlert={() => setStep({ type: 'threshold' })}
-      legacyRuleTypes={legacyPanelItems}
-    />
+    <Context.Provider value={services.container}>
+      <RuleCreateOptionsFlyout
+        onClose={onClose}
+        onCreateEsqlRule={() => setStep({ type: 'esql' })}
+        onCreateWithAgent={navigateToAgentBuilder}
+        onCreateThresholdRule={() => setStep({ type: 'threshold' })}
+        legacyRuleTypes={legacyPanelItems}
+      />
+    </Context.Provider>
   );
 };
 

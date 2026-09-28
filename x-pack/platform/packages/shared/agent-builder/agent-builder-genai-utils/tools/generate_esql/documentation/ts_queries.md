@@ -200,6 +200,7 @@ TS logs
 ## Guidelines
 
 - **Use `TS` for all aggregations on TSDB indices.**
+- **Match the function to the metric type.** For `ts_metric=counter` fields use a counter function (`RATE`, `IRATE`, `INCREASE`). For gauge / numeric fields use a gauge function (`AVG_OVER_TIME`, `SUM_OVER_TIME`, `MAX_OVER_TIME`, ...). Never apply a `*_OVER_TIME` gauge function to a counter field — it fails with `Invalid input types ... Received (counter_long)`.
 - **Use `SUM` as the outer function for counters.** 
   - Rates and increases are additive across time series that share a dimension (e.g. host). Use `AVG` or `MAX` for gauges.
 - **Do not nest time series functions.** `AVG_OVER_TIME(RATE(field))` is invalid. Use a standard aggregation as the  outer function.

@@ -71,7 +71,10 @@ export const getCsvReportParams: ReportParamsGetter<
     columns: sharingData.columns,
     searchSource: getSearchSource({
       addGlobalTimeFilter: true,
-      absoluteTime: !forShareUrl,
+      // Use absolute time only for immediate exports (useAbsoluteTime=true).
+      // Scheduled reports omit useAbsoluteTime so they store relative date math,
+      // which each run resolves anchored to its scheduled run time (forceNow).
+      absoluteTime: useAbsoluteTime && !forShareUrl,
     }),
   };
 };
@@ -83,6 +86,7 @@ export const getShareMenuItems =
   ({ apiClient, startServices$, csvConfig, isServerless = false }: ExportModalShareOpts) =>
   ({
     objectType,
+    objectTypeAlias,
     sharingData,
     shareableUrlLocatorParams,
   }: ShareContext<ReportingCSVSharingData>): Awaited<
@@ -187,6 +191,12 @@ export const getShareMenuItems =
       exportType: reportType,
       label: 'CSV',
       icon: 'table',
+      flyoutAriaLabel: i18n.translate('reporting.export.csv.exportFlyout.ariaLabel', {
+        defaultMessage: 'Export {objectType} as CSV',
+        values: {
+          objectType: objectTypeAlias ?? objectType.toLocaleLowerCase(),
+        },
+      }),
       supportsAbsoluteTime: true,
       generateAssetExport: generateReportingJobCSV,
       helpText: (

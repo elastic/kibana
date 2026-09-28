@@ -190,6 +190,9 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
               fullWidth={true}
               id="selectAgentLogLevel"
               data-test-subj="selectAgentLogLevel"
+              aria-label={i18n.translate('xpack.fleet.agentLogs.selectLogLevel.ariaLabel', {
+                defaultMessage: 'Agent log level',
+              })}
               value={selectedLogLevel}
               onChange={(event) => {
                 setSelectedLogLevel(event.target.value);

@@ -29,6 +29,7 @@ import type {
   RuntimeFields,
   SubType,
   SemanticTextField,
+  SemanticField,
 } from '../types';
 
 import {
@@ -695,6 +696,10 @@ export function isSemanticTextField(field: Partial<Field>): field is SemanticTex
   return field.type === 'semantic_text';
 }
 
+export function isSemanticField(field: Partial<Field>): field is SemanticField {
+  return field.type === 'semantic';
+}
+
 /**
  * Returns deep copy of state with `copy_to` added to text fields that are referenced by new semantic text fields
  * @param state
@@ -709,11 +714,12 @@ export function getStateWithCopyToFields(state: State): State {
       // Check fields already added to the list of to-update fields first
       // API will not accept reference_field so removing it now
       const { reference_field: referenceField, ...source } = field.source;
-      if (typeof referenceField !== 'string') {
-        // should never happen
-        throw new Error('Reference field is not a string');
-      }
       field.source = source;
+
+      if (typeof referenceField !== 'string') {
+        // reference_field was not set — nothing else to do for this field
+        continue;
+      }
 
       /*
         If no reference field is associated,
@@ -779,7 +785,8 @@ export function getStateWithCopyToFields(state: State): State {
           updatedState.fields.rootLevelFields.push(existingTextField.id);
         }
       } else {
-        throw new Error(`Semantic text field ${field.path.join('.')} has invalid reference field`);
+        // Reference field not found in the current or view fields, skip copy_to wiring.
+        // reference_field was already stripped above, so it won't reach ES.
       }
     }
   }

@@ -18,6 +18,8 @@ export interface StepInfo {
   lineEnd: number;
   propInfos: Record<string, StepPropInfo>;
   parentStepId?: string;
+  /** Which nested key under the parent this step belongs to ('steps', 'else', 'on-failure', …). */
+  branchKey?: NestedStepKey;
 }
 
 export interface StepPropInfo {
@@ -44,6 +46,10 @@ export function getValueFromValueNode(
 export interface WorkflowLookup {
   steps: Record<string, StepInfo>;
   triggersLineStart?: number;
+  /** Line where the last item in the triggers block ends; undefined when there are no triggers. */
+  triggersLineEnd?: number;
+  /** Line where the first recognised step starts; undefined when there are no steps. */
+  stepsLineStart?: number;
 }
 
 export function buildWorkflowLookup(
@@ -64,14 +70,21 @@ export function buildWorkflowLookup(
   }
 
   let triggersLineStart: number | undefined;
+  let triggersLineEnd: number | undefined;
   const triggersNode = (yamlDocument.contents as any).get('triggers');
   if (triggersNode?.range) {
     triggersLineStart = lineCounter.linePos(triggersNode.range[0]).line;
+    triggersLineEnd = lineCounter.linePos(triggersNode.range[2] - 1).line;
   }
+
+  const stepLineStarts = Object.values(steps).map((s) => s.lineStart);
+  const stepsLineStart = stepLineStarts.length > 0 ? Math.min(...stepLineStarts) : undefined;
 
   return {
     steps,
     triggersLineStart,
+    triggersLineEnd,
+    stepsLineStart,
   };
 }
 
@@ -92,7 +105,8 @@ export function isNestedStepKey(value: unknown): value is NestedStepKey {
 export function inspectStep(
   node: any,
   lineCounter: LineCounter,
-  parentStepId?: string
+  parentStepId?: string,
+  branchKey?: NestedStepKey
 ): Record<string, StepInfo> {
   const result: Record<string, StepInfo> = {};
 
@@ -113,21 +127,30 @@ export function inspectStep(
         const keyValue = YAML.isScalar(item.key) ? item.key.value : undefined;
         if (!isNestedStepKey(keyValue)) {
           const currentParentStepId = stepId ?? parentStepId;
-          Object.assign(result, inspectStep(item.value, lineCounter, currentParentStepId));
+          Object.assign(
+            result,
+            inspectStep(item.value, lineCounter, currentParentStepId, branchKey)
+          );
         }
       }
     });
 
     node.items.forEach((item) => {
       if (YAML.isPair(item) && YAML.isScalar(item.key)) {
-        if (isNestedStepKey(item.key.value)) {
-          Object.assign(result, inspectStep(item.value, lineCounter, stepId ?? parentStepId));
+        // Hoist to a local so the isNestedStepKey predicate narrows the type,
+        // exactly as the sibling forEach above already does with `keyValue`.
+        const nestedKeyValue = item.key.value;
+        if (isNestedStepKey(nestedKeyValue)) {
+          Object.assign(
+            result,
+            inspectStep(item.value, lineCounter, stepId ?? parentStepId, nestedKeyValue)
+          );
         }
       }
     });
   } else if (YAML.isSeq(node)) {
     node.items.forEach((subItem) => {
-      Object.assign(result, inspectStep(subItem, lineCounter, parentStepId));
+      Object.assign(result, inspectStep(subItem, lineCounter, parentStepId, branchKey));
     });
   }
 
@@ -150,6 +173,7 @@ export function inspectStep(
       lineEnd,
       propInfos: propNodes,
       parentStepId,
+      branchKey,
     };
   }
 

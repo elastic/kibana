@@ -10,7 +10,8 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import type { EuiTableSortingType, EuiSelectableOption } from '@elastic/eui';
-import { getRulesAppDetailsRoute } from '@kbn/rule-data-utils/src/routes/stack_rule_paths';
+import { rulesAppDetailsRoute } from '@kbn/rule-data-utils';
+import { useHistory } from 'react-router-dom';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -35,7 +36,6 @@ import {
 } from '@kbn/alerting-plugin/common';
 
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { useKibana } from '../../../../common/lib/kibana';
 
 import {
   SELECT_ALL_RULES,
@@ -107,6 +107,7 @@ interface ConvertRulesToTableItemsOpts {
 
 export interface RulesListTableProps {
   rulesListKey?: string;
+  ruleDetailsRoute?: string;
   rulesState: RuleState;
   items: RuleTableItem[];
   ruleTypesState: RuleTypeState;
@@ -206,6 +207,7 @@ const SNOOZE_RULE_NOTIFICATIONS = i18n.translate(
 export const RulesListTable = (props: RulesListTableProps) => {
   const {
     rulesListKey,
+    ruleDetailsRoute,
     rulesState,
     items = [],
     ruleTypesState,
@@ -250,9 +252,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
 
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const { euiTheme } = useEuiTheme();
-  const {
-    application: { getUrlForApp },
-  } = useKibana().services;
+  const history = useHistory();
 
   const ruleRowCss = css`
     min-width: ${euiTheme.breakpoint.xl}px;
@@ -422,8 +422,9 @@ export const RulesListTable = (props: RulesListTableProps) => {
         render: (name: string, rule: RuleTableItem) => {
           const ruleType = ruleTypesState.data.get(rule.ruleTypeId);
           const checkEnabledResult = checkRuleTypeEnabled(ruleType);
-          const pathToRuleDetails = getUrlForApp('rules', {
-            path: getRulesAppDetailsRoute(rule.id),
+          const detailsRoute = ruleDetailsRoute ?? rulesAppDetailsRoute;
+          const pathToRuleDetails = history.createHref({
+            pathname: detailsRoute.replace(':ruleId', rule.id),
           });
 
           const linkProps = getRouterLinkProps({
@@ -912,12 +913,13 @@ export const RulesListTable = (props: RulesListTableProps) => {
     renderPercentileColumnName,
     renderRuleError,
     renderRuleStatusDropdown,
+    ruleDetailsRoute,
     ruleTypesState.data,
     selectedPercentile,
     tagPopoverOpenIndex,
     ruleOutcomeColumnField,
     euiTheme,
-    getUrlForApp,
+    history,
   ]);
 
   const allRuleColumns = useMemo(() => getRulesTableColumns(), [getRulesTableColumns]);
@@ -970,9 +972,21 @@ export const RulesListTable = (props: RulesListTableProps) => {
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column">
-      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        gutterSize="none"
+        alignItems="center"
+        responsive={false}
+        wrap
+      >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center">
+          <EuiFlexGroup
+            justifyContent="flexStart"
+            gutterSize="s"
+            alignItems="center"
+            responsive={false}
+            wrap
+          >
             <EuiFlexItem grow={false}>
               {numberOfSelectedRules > 0 ? (
                 renderSelectAllDropdown?.()
@@ -1001,6 +1015,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
             </EuiFlexItem>
             {numberOfFilters > 0 && (
               <EuiFlexItem
+                grow={false}
                 css={{
                   borderLeft: euiTheme.border.thin,
                   paddingLeft: euiTheme.size.m,
@@ -1025,6 +1040,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         grow={true}
         css={css`
           overflow-x: auto;
+          min-width: 0;
         `}
       >
         <EuiBasicTable
@@ -1041,6 +1057,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           columns={[selectionColumn, ...rulesListColumns]}
           sorting={{ sort }}
           rowHeader="name"
+          responsiveBreakpoint={false}
           rowProps={rowProps}
           css={ruleRowCss}
           cellProps={(rule: RuleTableItem) => ({

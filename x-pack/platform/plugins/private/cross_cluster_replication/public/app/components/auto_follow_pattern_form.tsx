@@ -13,7 +13,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiComboBox,
   EuiDescribedFormGroup,
   EuiFieldText,
@@ -29,6 +28,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { ILLEGAL_CHARACTERS_VISIBLE } from '@kbn/data-views-plugin/public';
 
@@ -666,7 +666,7 @@ export class AutoFollowPatternForm extends PureComponent<Props, State> {
 
       return (
         <Fragment>
-          <EuiCallOut
+          <KbnDangerCallout
             role="alert"
             title={
               <FormattedMessage
@@ -674,8 +674,6 @@ export class AutoFollowPatternForm extends PureComponent<Props, State> {
                 defaultMessage="Fix errors before continuing."
               />
             }
-            color="danger"
-            iconType="cross"
             data-test-subj="formError"
           />
           <EuiSpacer size="l" />

@@ -14,9 +14,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../../../../../config/serverless/config.base.edr_workflows')
   );
 
-  const securitySolutionEnableExperimental: Array<keyof SecuritySolutionExperimentalFeatures> = [];
+  const securitySolutionEnableExperimental: Array<keyof SecuritySolutionExperimentalFeatures> = [
+    'customYaraSignaturesEnabled',
+  ];
   const fleetEnableExperimental: Partial<FleetExperimentalFeatures> = {
     useSpaceAwareness: true,
+    installIntegrationsKnowledge: false,
   };
 
   return {

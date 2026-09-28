@@ -8,8 +8,24 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { TestProviders } from '../../../../common/mock';
 import { MitreAttack } from './mitre_attack';
 import { MITRE_ATTACK_DETAILS_TEST_ID, MITRE_ATTACK_TITLE_TEST_ID } from './test_ids';
+
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
+
+jest.mock('../../../../common/hooks/mitre/use_mitre_configuration', () => ({
+  useMitreConfiguration: jest.fn().mockReturnValue({
+    tactics: [],
+    techniques: [],
+    subtechniques: [],
+    frameworkVersion: undefined,
+    isLoading: false,
+    isError: false,
+  }),
+}));
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
@@ -19,7 +35,12 @@ const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord
     isAnchor: false,
   } as DataTableRecord);
 
-const renderMitreAttack = (hit: DataTableRecord) => render(<MitreAttack hit={hit} />);
+const renderMitreAttack = (hit: DataTableRecord) =>
+  render(
+    <TestProviders>
+      <MitreAttack hit={hit} />
+    </TestProviders>
+  );
 
 describe('<MitreAttack />', () => {
   it('should render mitre attack information (in array form)', () => {
@@ -119,5 +140,30 @@ describe('<MitreAttack />', () => {
     const { container } = renderMitreAttack(hit);
 
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it('should still render when technique contains a null hole', () => {
+    const hit = createMockHit({
+      'kibana.alert.rule.parameters': [
+        {
+          threat: [
+            {
+              framework: 'MITRE ATT&CK',
+              tactic: {
+                id: 'TA0009',
+                name: 'Collection',
+                reference: 'https://attack.mitre.org/tactics/TA0009',
+              },
+              technique: [null],
+            },
+          ],
+        },
+      ],
+    });
+
+    const { getByTestId } = renderMitreAttack(hit);
+
+    expect(getByTestId(MITRE_ATTACK_TITLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(MITRE_ATTACK_DETAILS_TEST_ID)).toBeInTheDocument();
   });
 });

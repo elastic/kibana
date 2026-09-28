@@ -6,7 +6,7 @@
  */
 
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
-import { internalToPublicDefinition, resolveSkill } from './utils';
+import { internalToPublicDefinition, internalToPublicSummary, resolveSkill } from './utils';
 
 describe('internalToPublicDefinition', () => {
   const createMockInternalSkill = (
@@ -113,6 +113,20 @@ describe('internalToPublicDefinition', () => {
     expect(result).not.toHaveProperty('getInlineTools');
     expect(result).not.toHaveProperty('getRegistryTools');
   });
+
+  it('maps excludeFromElasticCapabilities to the public field', async () => {
+    const skill = createMockInternalSkill({ excludeFromElasticCapabilities: true });
+    const result = await internalToPublicDefinition(skill);
+
+    expect(result.exclude_from_elastic_capabilities).toBe(true);
+  });
+
+  it('maps excludeFromElasticCapabilities in the public summary', async () => {
+    const skill = createMockInternalSkill({ excludeFromElasticCapabilities: true });
+    const result = await internalToPublicSummary(skill);
+
+    expect(result.exclude_from_elastic_capabilities).toBe(true);
+  });
 });
 
 describe('resolveSkill', () => {
@@ -191,6 +205,40 @@ describe('resolveSkill', () => {
     it('trims surrounding whitespace', () => {
       const s = skill({ id: 'a', name: 'my-skill' });
       expect(resolveSkill('  my-skill  ', [s])).toEqual({ match: s });
+    });
+  });
+
+  describe('persisted skills (basePath with leading slash)', () => {
+    // Persisted skills store basePath as '/skills' (from MOUNT_POINTS.skills) rather
+    // than the 'skills' form that built-ins use. All path forms should still resolve.
+    const persistedSkill = skill({
+      id: 'p',
+      name: 'sourcerer-repo-discovery',
+      basePath: '/skills',
+    });
+
+    it('resolves by bare name', () => {
+      expect(resolveSkill('sourcerer-repo-discovery', [persistedSkill])).toEqual({
+        match: persistedSkill,
+      });
+    });
+
+    it('resolves by folder path without leading slash', () => {
+      expect(resolveSkill('skills/sourcerer-repo-discovery', [persistedSkill])).toEqual({
+        match: persistedSkill,
+      });
+    });
+
+    it('resolves by folder path with leading slash (as returned by load_skill)', () => {
+      expect(resolveSkill('/skills/sourcerer-repo-discovery', [persistedSkill])).toEqual({
+        match: persistedSkill,
+      });
+    });
+
+    it('resolves by SKILL.md path with leading slash (as returned by load_skill)', () => {
+      expect(resolveSkill('/skills/sourcerer-repo-discovery/SKILL.md', [persistedSkill])).toEqual({
+        match: persistedSkill,
+      });
     });
   });
 });

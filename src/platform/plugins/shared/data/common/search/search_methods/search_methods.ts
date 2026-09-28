@@ -70,7 +70,10 @@ export class SearchMethodsService implements ISearchMethods {
       searchSessionId: searchOptions?.sessionId,
     });
 
-    requestResponder?.json((request.params ?? {}) as Record<string, unknown>);
+    requestResponder?.json({
+      ...((request.params ?? {}) as Record<string, unknown>),
+      ...(options?.approximation !== undefined && { approximation: options.approximation }),
+    });
 
     try {
       const response = await this.executeSearch(request, searchOptions);
@@ -83,6 +86,7 @@ export class SearchMethodsService implements ISearchMethods {
 
       return {
         rawResponse: response.rawResponse,
+        warning: response.warning,
       };
     } catch (error) {
       requestResponder?.error({
@@ -347,6 +351,7 @@ export class SearchMethodsService implements ISearchMethods {
         locale: params.locale,
         dropNullColumns: options?.dropNullColumns,
         include_execution_metadata: options?.includeExecutionMetadata,
+        ...(options?.columnMetadata ? { settings: { column_metadata: true } } : {}),
       },
     };
   }
@@ -435,6 +440,7 @@ export class SearchMethodsService implements ISearchMethods {
       sessionId: options.sessionId,
       executionContext: options.executionContext,
       projectRouting: options.projectRouting,
+      approximation: options.approximation,
     };
   }
 }

@@ -38,6 +38,8 @@ export async function __kbnBootstrap__() {
     apmSystem.setup().catch(console.warn),
     i18n.getIsInitialized()
       ? Promise.resolve()
+      : injectedMetadata.i18n.translationsUrl === null
+      ? Promise.resolve(i18n.initDefault())
       : i18n.load(injectedMetadata.i18n.translationsUrl).catch((error) => {
           i18nError = error;
         }),
@@ -85,23 +87,24 @@ export async function __kbnBootstrap__() {
     err.style.fontFamily = 'Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif';
 
     const errorTitleEl = document.createElement('h1');
+    errorTitleEl.className = 'kbnBootstrapErrorTitle';
     errorTitleEl.innerText = errorTitle;
     errorTitleEl.style.margin = '20px';
-    errorTitleEl.style.color = '#1a1c21';
 
     const errorTextEl = document.createElement('p');
+    errorTextEl.className = 'kbnBootstrapErrorText';
     errorTextEl.innerText = errorText;
     errorTextEl.style.margin = '20px';
-    errorTextEl.style.color = '#343741';
 
     const errorReloadEl = document.createElement('button');
+    errorReloadEl.className = 'kbnBootstrapErrorButton';
     errorReloadEl.innerText = errorReload;
     errorReloadEl.onclick = function () {
       location.reload();
     };
     errorReloadEl.setAttribute(
       'style',
-      'cursor: pointer; padding-inline: 12px; block-size: 40px; font-size: 1rem; line-height: 1.4286rem; border-radius: 6px; min-inline-size: 112px; color: rgb(255, 255, 255); background-color: rgb(0, 119, 204); outline-color: rgb(0, 0, 0); border:none'
+      'cursor: pointer; padding-inline: 12px; block-size: 40px; font-size: 1rem; line-height: 1.4286rem; border-radius: 6px; min-inline-size: 112px; outline-color: rgb(0, 0, 0); border:none'
     );
 
     err.appendChild(errorTitleEl);

@@ -9,15 +9,8 @@ import React, { Fragment, useState, useCallback, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import { KibanaSavedObjectType } from '../../../../../../../../common/types/models';
 
@@ -38,8 +31,9 @@ import { SideBarColumn } from '../../../components/side_bar_column';
 
 import { useAlertingAssets } from '../../../../../hooks';
 
-import { AssetsAccordion } from '../assets/assets_accordion';
 import { DeferredAssetsAccordion } from '../assets/deferred_assets_accordion';
+
+import { AlertingAssetsAccordion } from './alerting_assets_accordion';
 
 import { ALERTING_ASSET_TYPES } from '.';
 
@@ -145,21 +139,21 @@ export const AlertingPage = ({ packageInfo, refetchPackageInfo }: AlertingPagePr
     content = <Loading />;
   } else if (!canReadPackageSettings) {
     content = (
-      <EuiCallOut
+      <KbnWarningCallout
         announceOnMount
-        color="warning"
         title={
           <FormattedMessage
             id="xpack.fleet.epm.packageDetails.alerting.permissionErrorTitle"
             defaultMessage="Permission error"
           />
         }
-      >
-        <FormattedMessage
-          id="xpack.fleet.epm.packageDetails.alerting.permissionError"
-          defaultMessage="You do not have permission to retrieve the alerting assets for this integration. Contact your administrator."
-        />
-      </EuiCallOut>
+        text={
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetails.alerting.permissionError"
+            defaultMessage="You do not have permission to retrieve the alerting assets for this integration. Contact your administrator."
+          />
+        }
+      />
     );
   } else if (alertingAssets.length === 0 && userCreatedRules.length === 0) {
     content = (
@@ -201,7 +195,7 @@ export const AlertingPage = ({ packageInfo, refetchPackageInfo }: AlertingPagePr
 
         return (
           <Fragment key={assetType}>
-            <AssetsAccordion savedObjects={sortedAssets} type={assetType} key={assetType} />
+            <AlertingAssetsAccordion savedObjects={sortedAssets} type={assetType} key={assetType} />
             <EuiSpacer size="l" />
           </Fragment>
         );
@@ -230,22 +224,21 @@ export const AlertingPage = ({ packageInfo, refetchPackageInfo }: AlertingPagePr
 
         {showInactivityCallout && (
           <>
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount
-              color="primary"
-              iconType="info"
               title={
                 <FormattedMessage
                   id="xpack.fleet.epm.packageDetails.alerting.missingInactivityTemplateTitle"
                   defaultMessage="Idle data streams alerting available"
                 />
               }
-            >
-              <FormattedMessage
-                id="xpack.fleet.epm.packageDetails.alerting.missingInactivityTemplateDescription"
-                defaultMessage="Reinstall alerting assets to add an alerting rule template for monitoring idle data streams."
-              />
-            </EuiCallOut>
+              text={
+                <FormattedMessage
+                  id="xpack.fleet.epm.packageDetails.alerting.missingInactivityTemplateDescription"
+                  defaultMessage="Reinstall alerting assets to add an alerting rule template for monitoring idle data streams."
+                />
+              }
+            />
             <EuiSpacer size="l" />
           </>
         )}

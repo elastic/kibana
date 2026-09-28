@@ -17,7 +17,7 @@ import {
 } from '@kbn/occ';
 
 import { extractBulkItemError } from './bulk_response_helpers';
-import { maybeApplyWorkflowVersion } from '../../lib/workflow_version';
+import { applyWorkflowVersion } from '../../lib/workflow_version';
 import type { WorkflowProperties, WorkflowStorage } from '../../storage/workflow_storage';
 
 export interface OccWorkflowHit {
@@ -71,20 +71,6 @@ const toOccHit = (hit: {
     primaryTerm: hit._primary_term,
   };
 };
-
-const buildBulkIndexOperations = (
-  hits: OccWorkflowHit[],
-  mutate: (source: WorkflowProperties) => WorkflowProperties,
-  versioningEnabled: boolean
-) =>
-  hits.map((hit) => ({
-    index: {
-      _id: hit._id,
-      if_seq_no: hit.seqNo,
-      if_primary_term: hit.primaryTerm,
-      document: maybeApplyWorkflowVersion(mutate(hit._source), hit._source, versioningEnabled),
-    },
-  }));
 
 const refreshOccHits = async (
   client: BulkOccIndexClient,
@@ -144,16 +130,16 @@ export const bulkIndexWithOccRetry = async ({
   maxRetries = DEFAULT_MAX_RETRIES,
   retryDelayMs = DEFAULT_RETRY_DELAY_MS,
   refresh = true,
-  versioningEnabled = false,
+  bumpVersion = false,
 }: {
   client: BulkOccIndexClient;
   hits: OccWorkflowHit[];
-  mutate: (source: WorkflowProperties) => WorkflowProperties;
+  mutate: (hit: OccWorkflowHit) => WorkflowProperties;
   logger?: Logger;
   maxRetries?: number;
   retryDelayMs?: number;
   refresh?: boolean;
-  versioningEnabled?: boolean;
+  bumpVersion?: boolean;
 }): Promise<{
   successIds: string[];
   successfulDocuments: Array<{ id: string; document: WorkflowProperties }>;
@@ -166,7 +152,30 @@ export const bulkIndexWithOccRetry = async ({
   const maxAttempts = 1 + maxRetries;
 
   for (let attempt = 1; attempt <= maxAttempts && pendingHits.length > 0; attempt++) {
-    const operations = buildBulkIndexOperations(pendingHits, mutate, versioningEnabled);
+    const operations = pendingHits.flatMap((hit) => {
+      try {
+        const document = mutate(hit);
+        return [
+          {
+            index: {
+              _id: hit._id,
+              if_seq_no: hit.seqNo,
+              if_primary_term: hit.primaryTerm,
+              document: bumpVersion ? applyWorkflowVersion(document, hit._source) : document,
+            },
+          },
+        ];
+      } catch (error) {
+        failures.push({
+          id: hit._id,
+          error: error instanceof Error ? error.message : String(error),
+        });
+        return [];
+      }
+    });
+    if (operations.length === 0) {
+      break;
+    }
     const bulkResponse = await client.bulk({
       operations,
       refresh,
@@ -177,19 +186,18 @@ export const bulkIndexWithOccRetry = async ({
     for (let itemIndex = 0; itemIndex < bulkResponse.items.length; itemIndex++) {
       const operation = getBulkIndexOperation(bulkResponse.items[itemIndex]);
       const bulkOperation = operations[itemIndex]?.index;
-      const hit = pendingHits[itemIndex];
 
-      if (operation && hit && bulkOperation?.document) {
+      if (operation && bulkOperation?.document) {
         if (!operation.error) {
           if (operation._id) {
             successIds.push(operation._id);
             successfulDocuments.push({ id: operation._id, document: bulkOperation.document });
           }
         } else if (operation.status === OCC_CONFLICT_STATUS_CODE && attempt < maxAttempts) {
-          conflictIds.push(hit._id);
+          conflictIds.push(bulkOperation._id);
         } else {
           failures.push({
-            id: operation._id ?? hit._id,
+            id: operation._id ?? bulkOperation._id,
             error: extractBulkItemError(operation.error),
           });
         }
@@ -228,5 +236,8 @@ export const bulkIndexWithOccRetry = async ({
 
   return { successIds, successfulDocuments, failures };
 };
+
+/** Batch-read workflow documents with seq_no/primary_term for OCC writes. */
+export const fetchOccHitsByIds = refreshOccHits;
 
 export { toOccHit };

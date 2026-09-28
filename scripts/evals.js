@@ -195,8 +195,7 @@ function runFastCiMap(repoRoot, args) {
       entries.push({
         label: labels[j],
         suiteId: suite.id,
-        command:
-          'EVALUATION_CONNECTOR_ID=<connector-id> node scripts/evals run --suite ' + suite.id,
+        command: 'EVAL_CONNECTOR_ID=<connector-id> node scripts/evals run --suite ' + suite.id,
       });
     }
   }
@@ -227,35 +226,20 @@ var ENV_DOCS = [
     example: 'TEST_RUN_ID=agent-builder-baseline',
   },
   {
-    name: 'EVALUATION_CONNECTOR_ID',
+    name: 'EVAL_CONNECTOR_ID',
     description: 'Connector used for LLM-as-a-judge evaluators (required).',
-    example: 'EVALUATION_CONNECTOR_ID=bedrock-claude',
+    example: 'EVAL_CONNECTOR_ID=bedrock-claude',
   },
   {
-    name: 'EVALUATION_REPETITIONS',
+    name: 'EVAL_REPETITIONS',
     description: 'Overrides configured repetition count for evals.',
-    example: 'EVALUATION_REPETITIONS=3',
-  },
-  {
-    name: 'KBN_EVALS_EXECUTOR',
-    description: 'Switch to the Phoenix-backed executor.',
-    example: 'KBN_EVALS_EXECUTOR=phoenix',
+    example: 'EVAL_REPETITIONS=3',
   },
   {
     name: 'KBN_EVALS_SKIP_CONNECTOR_SETUP',
     description:
       'Skip automatic connector setup/teardown. Use this option when evaluating with pre-defined connectors.',
     example: 'KBN_EVALS_SKIP_CONNECTOR_SETUP=true',
-  },
-  {
-    name: 'PHOENIX_BASE_URL',
-    description: 'Phoenix base URL used when KBN_EVALS_EXECUTOR=phoenix.',
-    example: 'PHOENIX_BASE_URL=http://localhost:6006',
-  },
-  {
-    name: 'PHOENIX_API_KEY',
-    description: 'Phoenix API key used when KBN_EVALS_EXECUTOR=phoenix.',
-    example: 'PHOENIX_API_KEY=...',
   },
   {
     name: 'TRACING_ES_URL',
@@ -274,15 +258,15 @@ var ENV_DOCS = [
     example: 'TRACING_EXPORTERS=\'[{"http":{"url":"https://ingest.example.com/v1/traces"}}]\'',
   },
   {
-    name: 'EVALUATIONS_KBN_URL',
+    name: 'EVAL_KBN_URL',
     description:
       'Kibana URL used for eval score ingestion and dataset operations when targeting a non-local cluster.',
-    example: 'EVALUATIONS_KBN_URL=http://elastic:changeme@localhost:5601',
+    example: 'EVAL_KBN_URL=http://elastic:changeme@localhost:5601',
   },
   {
-    name: 'EVALUATIONS_KBN_API_KEY',
-    description: 'API key for authenticating to EVALUATIONS_KBN_URL.',
-    example: 'EVALUATIONS_KBN_API_KEY=...',
+    name: 'EVAL_KBN_API_KEY',
+    description: 'API key for authenticating to EVAL_KBN_URL.',
+    example: 'EVAL_KBN_API_KEY=...',
   },
   {
     name: 'SELECTED_EVALUATORS',
@@ -290,14 +274,15 @@ var ENV_DOCS = [
     example: 'SELECTED_EVALUATORS="Factuality,Relevance"',
   },
   {
-    name: 'RAG_EVAL_K',
-    description: 'Overrides default k used by RAG evaluators.',
-    example: 'RAG_EVAL_K=5',
+    name: 'IR_EVAL_K',
+    description: 'Overrides default k used by IR evaluators (deprecated RAG_EVAL_K still read).',
+    example: 'IR_EVAL_K=5',
   },
   {
-    name: 'INDEX_FOCUSED_RAG_EVAL',
-    description: 'Restrict RAG evaluators to ground-truth indices.',
-    example: 'INDEX_FOCUSED_RAG_EVAL=true',
+    name: 'INDEX_FOCUSED_IR_EVAL',
+    description:
+      'Restrict IR evaluators to ground-truth indices (deprecated INDEX_FOCUSED_RAG_EVAL still read).',
+    example: 'INDEX_FOCUSED_IR_EVAL=true',
   },
 ];
 
@@ -351,6 +336,7 @@ function runFastHelp() {
   logInfo('  doctor                        Check local prerequisites');
   logInfo('  env                           List environment variables');
   logInfo('  ci-map [--json]               Output CI label mapping');
+  logInfo('  ext <command> [...]           Run the experimental evals extensions CLI');
   logInfo('');
   logInfo('Examples:');
   logInfo('  node scripts/evals init');
@@ -358,6 +344,7 @@ function runFastHelp() {
   logInfo('  node scripts/evals stop');
   logInfo('  node scripts/evals logs --service scout');
   logInfo('  node scripts/evals run --suite agent-builder --judge eis-gpt-4.1');
+  logInfo('  node scripts/evals ext red-team --suite agent-builder --dry-run');
   return true;
 }
 
@@ -368,6 +355,15 @@ function main() {
     command = null;
   }
   var repoRoot = process.cwd();
+
+  // Delegate the experimental extensions CLI: `node scripts/evals ext <command> [...]`.
+  if (command === 'ext') {
+    process.argv = [process.argv[0], process.argv[1]].concat(args.slice(1));
+    process.env.KBN_PEGGY_REQUIRE_HOOK_LOG ??= 'false';
+    require('@kbn/setup-node-env');
+    void require('@kbn/evals-extensions').cli.run();
+    return;
+  }
 
   var hasHelpFlag = hasFlag(args, '--help') || hasFlag(args, '-h');
 

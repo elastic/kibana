@@ -20,10 +20,12 @@ import type {
   DataTableRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import { formatFieldValueReact } from '@kbn/discover-utils';
+import { formatFieldValueReact, tryPrettyPrintJsonBlocks } from '@kbn/discover-utils';
+import { css } from '@emotion/react';
 import { UnifiedDataTableContext } from '../table_context';
-import type { CustomCellRenderer } from '../types';
+import type { CustomCellRenderer, JsonModeSettings, DocumentsDisplayMode } from '../types';
 import { SourceDocument } from '../components/source_document';
+import { SourceDocumentJsonMode } from '../components/source_document_json_mode';
 import SourcePopoverContent from '../components/source_popover_content';
 import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
 
@@ -42,6 +44,9 @@ export const getRenderCellValueFn = ({
   isPlainRecord,
   isCompressed = true,
   columnsMeta,
+  documentsDisplayMode,
+  jsonModeSettings,
+  selectedColumns,
 }: {
   dataView: DataView;
   rows: DataTableRecord[] | undefined;
@@ -53,6 +58,9 @@ export const getRenderCellValueFn = ({
   isPlainRecord?: boolean;
   isCompressed?: boolean;
   columnsMeta: DataTableColumnsMeta | undefined;
+  documentsDisplayMode: DocumentsDisplayMode;
+  jsonModeSettings?: JsonModeSettings;
+  selectedColumns?: string[];
 }) => {
   const UnifiedDataTableRenderCellValue = ({
     rowIndex,
@@ -128,6 +136,22 @@ export const getRenderCellValueFn = ({
       return <span className={CELL_CLASS}>-</span>;
     }
 
+    const isSourceColumn = field?.type === '_source' || (isPlainRecord && columnId === '_source');
+
+    if (isSourceColumn && documentsDisplayMode === 'json') {
+      return (
+        <SourceDocumentJsonMode
+          row={row}
+          dataView={dataView}
+          columnsMeta={columnsMeta}
+          shouldShowFieldHandler={shouldShowFieldHandler}
+          fieldFormats={fieldFormats}
+          jsonModeSettings={jsonModeSettings}
+          selectedColumns={selectedColumns}
+        />
+      );
+    }
+
     if (CustomCellRenderer) {
       return (
         <span className={CELL_CLASS}>
@@ -171,11 +195,7 @@ export const getRenderCellValueFn = ({
       });
     }
 
-    if (
-      field?.type === '_source' ||
-      useTopLevelObjectColumns ||
-      (isPlainRecord && columnId === '_source')
-    ) {
+    if (isSourceColumn || useTopLevelObjectColumns) {
       return (
         <SourceDocument
           useTopLevelObjectColumns={useTopLevelObjectColumns}
@@ -270,6 +290,13 @@ function renderPopoverContent({
     );
   }
 
+  const value = row.flattened[columnId];
+
+  const formattedValue =
+    field?.type === 'string' && typeof value === 'string'
+      ? tryPrettyPrintJsonBlocks(value) ?? value
+      : value;
+
   return (
     <EuiFlexGroup
       gutterSize="none"
@@ -279,15 +306,23 @@ function renderPopoverContent({
     >
       <EuiFlexItem>
         <DataTablePopoverCellValue>
-          <span>
+          <div
+            data-test-subj="dataTableExpandCellActionPopoverValue"
+            css={css`
+              white-space: pre-wrap;
+              max-height: 350px;
+              overflow: auto;
+            `}
+            tabIndex={0}
+          >
             {formatFieldValueReact({
-              value: row.flattened[columnId],
+              value: formattedValue,
               hit: row.raw,
               fieldFormats,
               dataView,
               field,
             })}
-          </span>
+          </div>
         </DataTablePopoverCellValue>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>

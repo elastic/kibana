@@ -10,7 +10,33 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { StreamsAppLocator } from '../../common/locators';
 
-type RemoteSearchType = 'cps' | 'ccs';
+export const REMOTE_SEARCH_TYPE = {
+  CPS: 'cps',
+  CCS: 'ccs',
+} as const;
+
+export type RemoteSearchType = (typeof REMOTE_SEARCH_TYPE)[keyof typeof REMOTE_SEARCH_TYPE];
+
+/**
+ * Resolves how a remote source should be labelled. Cross-project search (CPS)
+ * takes precedence over cross-cluster search (CCS); returns `undefined` when the
+ * source is neither, i.e. purely local.
+ */
+export function getRemoteSearchType({
+  cpsHasLinkedProjects,
+  ccsHasRemoteClusters,
+}: {
+  cpsHasLinkedProjects?: boolean;
+  ccsHasRemoteClusters?: boolean;
+}): RemoteSearchType | undefined {
+  if (cpsHasLinkedProjects) {
+    return REMOTE_SEARCH_TYPE.CPS;
+  }
+  if (ccsHasRemoteClusters) {
+    return REMOTE_SEARCH_TYPE.CCS;
+  }
+  return undefined;
+}
 
 export interface StreamLinkContentProps {
   name: string | undefined;
@@ -57,20 +83,20 @@ export const StreamLinkContent = ({
 };
 
 const REMOTE_LABELS: Record<RemoteSearchType, string> = {
-  cps: i18n.translate('xpack.streams.discoverFlyout.remoteProjectLabel', {
+  [REMOTE_SEARCH_TYPE.CPS]: i18n.translate('xpack.streams.discoverFlyout.remoteProjectLabel', {
     defaultMessage: 'Remote project',
   }),
-  ccs: i18n.translate('xpack.streams.discoverFlyout.remoteClusterLabel', {
+  [REMOTE_SEARCH_TYPE.CCS]: i18n.translate('xpack.streams.discoverFlyout.remoteClusterLabel', {
     defaultMessage: 'Remote cluster',
   }),
 };
 
 const WARNING_MESSAGES: Record<RemoteSearchType, string> = {
-  cps: i18n.translate('xpack.streams.discoverFlyout.cpsWarning', {
+  [REMOTE_SEARCH_TYPE.CPS]: i18n.translate('xpack.streams.discoverFlyout.cpsWarning', {
     defaultMessage:
       'Cross-project search is active. This document may come from a linked project and might not be available in Streams.',
   }),
-  ccs: i18n.translate('xpack.streams.discoverFlyout.ccsWarning', {
+  [REMOTE_SEARCH_TYPE.CCS]: i18n.translate('xpack.streams.discoverFlyout.ccsWarning', {
     defaultMessage:
       'Cross-cluster search is active. This document may come from a remote cluster and might not be available in Streams.',
   }),

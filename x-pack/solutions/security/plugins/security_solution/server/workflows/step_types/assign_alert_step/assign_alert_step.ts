@@ -6,9 +6,9 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { ExecutionError } from '@kbn/workflows/server';
 import { DETECTION_ENGINE_ALERT_ASSIGNEES_URL } from '../../../../common/constants';
 import { assignAlertStepCommonDefinition } from '../../../../common/workflows/step_types/assign_alert_step/assign_alert_step_common';
+import { toApiExecutionError } from '../../utils/to_api_execution_error';
 
 export const assignAlertStepDefinition = createServerStepDefinition({
   ...assignAlertStepCommonDefinition,
@@ -22,7 +22,7 @@ export const assignAlertStepDefinition = createServerStepDefinition({
     const signalIds = Array.isArray(alertIds) ? alertIds : [alertIds];
 
     try {
-      const { status: responseStatus, body } = await context.contextManager.callKibanaApi<{
+      await context.contextManager.callKibanaApi<{
         took?: number;
         errors?: boolean;
         items?: unknown[];
@@ -38,14 +38,6 @@ export const assignAlertStepDefinition = createServerStepDefinition({
         },
       });
 
-      if (responseStatus >= 400) {
-        throw new ExecutionError({
-          type: 'ApiError',
-          message: `Failed to assign alert: HTTP ${responseStatus}`,
-          details: { body },
-        });
-      }
-
       return {
         output: {
           success: true,
@@ -53,14 +45,7 @@ export const assignAlertStepDefinition = createServerStepDefinition({
         },
       };
     } catch (error) {
-      if (error instanceof ExecutionError) {
-        throw error;
-      }
-      throw new ExecutionError({
-        type: 'ApiError',
-        message: error instanceof Error ? error.message : 'Unknown error occurred',
-        details: { error },
-      });
+      throw toApiExecutionError(error, 'assign alert');
     }
   },
 });

@@ -38,6 +38,29 @@ export const workflowYamlDeclaresTopLevelEnabled = (yamlString: string): boolean
 };
 
 /**
+ * Reads `name`/`description`/`tags` straight off the YAML without requiring it to pass
+ * schema validation, so a workflow that fails strict validation still keeps its
+ * author-given metadata instead of collapsing to the "Untitled workflow" fallback.
+ */
+const extractLooseMetadataFields = (
+  yamlString: string
+): { name?: string; description?: string; tags?: string[] } => {
+  const parsed = parseYamlToJSONWithoutValidation(yamlString);
+  if (!parsed.success || parsed.json == null || typeof parsed.json !== 'object') {
+    return {};
+  }
+  const json = parsed.json as Record<string, unknown>;
+  return {
+    name: typeof json.name === 'string' && json.name.trim() !== '' ? json.name : undefined,
+    description: typeof json.description === 'string' ? json.description : undefined,
+    tags:
+      Array.isArray(json.tags) && json.tags.every((tag) => typeof tag === 'string')
+        ? (json.tags as string[])
+        : undefined,
+  };
+};
+
+/**
  * Validates YAML and builds a WorkflowProperties document ready for indexing.
  * Shared by user-created and managed workflow creation paths.
  */
@@ -49,7 +72,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
   now: Date;
   spaceId: string;
   triggerDefinitions?: Array<{ id: string; eventSchema: z.ZodType }>;
-  versioningEnabled?: boolean;
+  nameFallback?: string;
 }): { id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml } => {
   const {
     id: providedId,
@@ -59,14 +82,19 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     now,
     spaceId,
     triggerDefinitions,
-    versioningEnabled = false,
+    nameFallback,
   } = params;
 
+  const looseMetadata = extractLooseMetadataFields(yaml);
   let workflowToCreate: EsWorkflowCreate = {
-    name: 'Untitled workflow',
-    description: undefined,
+    // Prefer the YAML-embedded name so the stored name round-trips with the YAML.
+    // `nameFallback` is used only when the YAML cannot carry a `name` key (e.g. a
+    // schema-invalid workflow whose root is a scalar/sequence), so callers such as
+    // cloning can still name the document instead of collapsing to "Untitled workflow".
+    name: looseMetadata.name ?? nameFallback ?? 'Untitled workflow',
+    description: looseMetadata.description,
     enabled: false,
-    tags: [],
+    tags: looseMetadata.tags ?? [],
     definition: undefined,
     valid: false,
   };
@@ -100,7 +128,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     lifecycle: null,
     valid: workflowToCreate.valid,
     deleted_at: null,
-    ...(versioningEnabled ? { version: INITIAL_WORKFLOW_VERSION } : {}),
+    version: INITIAL_WORKFLOW_VERSION,
     created_at: now.toISOString(),
     updated_at: now.toISOString(),
   };
@@ -125,8 +153,19 @@ export const applyYamlUpdate = (params: {
   const validation = validateWorkflowYaml(workflowYaml, zodSchema, { triggerDefinitions });
 
   if (!validation.valid || !validation.parsedWorkflow) {
+    const looseMetadata = extractLooseMetadataFields(workflowYaml);
     return {
-      updatedDataPatch: { definition: null, enabled: false, valid: false, triggerTypes: [] },
+      updatedDataPatch: {
+        definition: null,
+        enabled: false,
+        valid: false,
+        triggerTypes: [],
+        ...(looseMetadata.name !== undefined ? { name: looseMetadata.name } : {}),
+        ...(looseMetadata.description !== undefined
+          ? { description: looseMetadata.description }
+          : {}),
+        ...(looseMetadata.tags !== undefined ? { tags: looseMetadata.tags } : {}),
+      },
       validationErrors: validation.diagnostics
         .filter((d) => d.severity === 'error')
         .map((d) => d.message),
@@ -198,6 +237,14 @@ export const applyFieldUpdates = (
       workflow,
       patch.enabled ?? existingSource.enabled
     );
+  }
+
+  // Keep definition.enabled in sync with the top-level enabled column so that
+  // any consumer of the parsed definition (e.g. export) always sees the current
+  // value.  The YAML-update path performs this same sync in workflow_crud_service;
+  // mirror it here for the field-only path.
+  if (patch.enabled !== undefined && existingSource?.definition) {
+    patch.definition = { ...existingSource.definition, enabled: patch.enabled };
   }
 
   return { patch, validationErrors };

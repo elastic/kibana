@@ -17,7 +17,7 @@ import type {
 } from '@kbn/data-plugin/public';
 import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Filter, FilterMeta, TimeRange } from '@kbn/es-query/src/filters';
-import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatParams, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 import type {
   Datatable,
@@ -36,6 +36,7 @@ import type {
   BrushTriggerEvent,
   ChartsPluginSetup,
   ClickTriggerEvent,
+  AnnotationClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { MutableRefObject, ReactElement } from 'react';
@@ -69,7 +70,6 @@ import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-p
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { NavigationPublicPluginStart, TopNavMenuData } from '@kbn/navigation-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
@@ -148,7 +148,6 @@ export interface LensAppServices extends StartServices {
   contentManagement: ContentManagementPublicStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   getOriginatingAppName: () => string | undefined;
-  presentationUtil: PresentationUtilPluginStart;
   spaces?: SpacesApi;
   charts: ChartsPluginSetup;
   share?: SharePluginStart;
@@ -209,6 +208,25 @@ export interface PersistableFilter extends Filter {
   meta: PersistableFilterMeta;
 }
 
+/**
+ * Column descriptor used by the `lens_map_to_columns` expression and the
+ * ES|QL conversion to map datatable columns back to Lens column definitions.
+ */
+export type OriginalColumn = {
+  id: string;
+  label: string;
+  variable?: string;
+  format?: SerializedFieldFormat;
+  dataType?: DataType;
+  customLabel?: boolean;
+  dropPartials?: boolean;
+} & (
+  | { operationType: 'date_histogram'; sourceField: string; interval: number }
+  | { operationType: string; sourceField?: string; interval: never }
+  // text-based ES|QL columns
+  | { operationType?: undefined; sourceField?: string }
+);
+
 export type SortingHint = string;
 
 export type ValueLabelConfig = 'hide' | 'show';
@@ -239,6 +257,7 @@ export interface PublicAPIProps<T> {
   state: T;
   layerId: string;
   indexPatterns: IndexPatternMap;
+  activeDataTable?: Datatable;
 }
 
 export type FieldOnlyDataType =
@@ -292,6 +311,8 @@ export interface OperationDescriptor extends Operation {
   hasTimeShift: boolean;
   hasReducedTimeRange: boolean;
   inMetricDimension?: boolean;
+  /** True when the user set a custom name on this column, as opposed to the default operation label. */
+  customLabel?: boolean;
 }
 
 export interface DataSourceInfo {
@@ -416,7 +437,22 @@ export interface LensDocument {
   state: {
     datasourceStates: Record<string, unknown>;
     visualization: unknown;
-    query: Query | AggregateQuery;
+    /**
+     * Chart-scoped KQL/Lucene filter only, or undefined.
+     *
+     * Authored via the query bar of the full-frame editor (not editable in
+     * the inline flyout), persisted with the visualization, and AND-ed with
+     * the dashboard query/filters at render time (see
+     * `getMergedSearchContext`). It narrows every form-based layer of the
+     * chart. Introduced by https://github.com/elastic/kibana/pull/43865.
+     *
+     * ES|QL queries live exclusively on the text-based datasource layers
+     * (`datasourceStates.textBased.layers[id].query`). Legacy documents were
+     * dual-written with an aggregate (ES|QL) copy in this slot; such values
+     * are dead data — ignored at read time (see `getChartScopedFilterQuery`)
+     * and never written again. Documents self-clean on next save.
+     */
+    query?: Query;
     globalPalette?: {
       activePaletteId: string;
       state?: unknown;
@@ -470,12 +506,6 @@ export interface IndexPatternServiceAPI {
     newState: Partial<DataViewsState>,
     options?: { applyImmediately: boolean }
   ) => void;
-}
-
-export interface PublicAPIProps<T> {
-  state: T;
-  layerId: string;
-  indexPatterns: IndexPatternMap;
 }
 
 export interface EditorFrameProps {
@@ -612,7 +642,7 @@ export interface InitializationOptions {
 export type VisualizeEditorContext<T extends LensConfiguration = LensConfiguration> = {
   savedObjectId?: string;
   embeddableId?: string;
-  vizEditorOriginatingAppUrl?: string;
+  visEditorOriginatingAppUrl?: string;
   legacyEditorOriginatingApp?: string;
   originatingApp?: string;
   originatingPath?: string;
@@ -632,6 +662,9 @@ export interface GetDropPropsArgs<T = unknown> {
   source?: DraggingIdentifier;
   target: DragDropOperation;
   indexPatterns: IndexPatternMap;
+  // Layer inspector tables. Lets datasources resolve column types against the
+  // Query Result Type overlay for drop decisions; datasources that don't need it can ignore it.
+  activeData?: TableInspectorAdapter;
 }
 
 export interface UserMessage {
@@ -700,6 +733,8 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
       visualizationGroups: VisualizationDimensionGroupConfig[];
       staticValue?: unknown;
       autoTimeField?: boolean;
+      /** Subtype-aware type id of the active visualization being initialized. */
+      activeVisualizationTypeId?: string;
     }
   ) => T;
 
@@ -986,6 +1021,8 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
       forceRender?: boolean;
     }
   >;
+  /** Subtype-aware type id of the visualization that owns this dimension. */
+  activeVisualizationTypeId?: string;
   core: Pick<
     CoreStart,
     | 'http'
@@ -1000,6 +1037,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   >;
   dateRange: DateRange;
   esqlVariables?: ESQLControlVariable[] | undefined;
+  isApproximate?: boolean | undefined;
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;
   isFullscreen: boolean;
@@ -1044,6 +1082,8 @@ export interface DatasourceDimensionDropHandlerProps<T> {
   source: DragDropIdentifier;
   dropType: DropType;
   indexPatterns: IndexPatternMap;
+  /** Subtype-aware type id of the active visualization receiving the drop. */
+  activeVisualizationTypeId?: string;
 }
 
 export interface VisualizationConfigProps<T = unknown> {
@@ -1300,6 +1340,7 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
     event:
       | ClickTriggerEvent
       | BrushTriggerEvent
+      | AnnotationClickTriggerEvent
       | LensEditEvent<LensEditSupportedActions>
       | LensTableRowContextMenuEvent
       | ChartSizeEvent

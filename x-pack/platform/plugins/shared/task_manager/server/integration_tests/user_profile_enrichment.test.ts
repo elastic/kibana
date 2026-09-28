@@ -12,6 +12,7 @@ import { TaskStatus, type RunContext } from '../task';
 import type { TaskClaimingOpts } from '../queries/task_claiming';
 import { TaskManagerPlugin, type TaskManagerStartContract } from '../plugin';
 import { injectTask, setupTestServers, retry } from './lib';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 interface CapturedRun {
   called: boolean;
@@ -105,6 +106,7 @@ describe('Task Manager user profile enrichment (integration)', () => {
 
   it('enriches the task fake request with the stored userProfileId so core getCurrentUser resolves it', async () => {
     const testProfileUid = 'test-user-profile-uid-integration';
+    const testUserName = 'integration-test-user';
     const id = uuidV4();
 
     await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
@@ -124,9 +126,10 @@ describe('Task Manager user profile enrichment (integration)', () => {
       apiKey: Buffer.from('integration-api-key-id:integration-api-key-value').toString('base64'),
       userScope: {
         apiKeyId: 'integration-api-key-id',
-        spaceId: 'default',
+        spaceId: asSpaceId('default'),
         apiKeyCreatedByUser: false,
         userProfileId: testProfileUid,
+        userName: testUserName,
       },
     });
     taskIdsToRemove.push(id);
@@ -137,6 +140,7 @@ describe('Task Manager user profile enrichment (integration)', () => {
 
     expect(mockCapturedRun.userFromTaskFakeRequest).not.toBeNull();
     expect(mockCapturedRun.userFromTaskFakeRequest?.profile_uid).toBe(testProfileUid);
+    expect(mockCapturedRun.userFromTaskFakeRequest?.username).toBe(testUserName);
 
     // Exposed whenever the task has a userProfileId so tasks can propagate it to
     // child fake requests. Propagation itself is covered by unit tests.

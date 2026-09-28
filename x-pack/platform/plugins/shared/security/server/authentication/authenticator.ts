@@ -805,8 +805,14 @@ export class Authenticator {
       );
     }
 
-    // Don't update session if request is "minimally" authenticated.
-    if (request.route.options.security?.authc?.enabled === 'minimal') {
+    const ownsSession =
+      existingSessionValue?.provider.name === provider.name &&
+      existingSessionValue?.provider.type === provider.type;
+    const isMinimalAuthentication = request.route.options.security?.authc?.enabled === 'minimal';
+
+    // Minimal authentication can persist provider state only for a session that provider already owns.
+    // A different username from the same provider still triggers normal session replacement below.
+    if (isMinimalAuthentication && !(ownsSession && authenticationResult.shouldUpdateState())) {
       this.logger.debug(
         'Session should not be changed for requests that require minimal authentication, skipping session update.'
       );
@@ -827,10 +833,6 @@ export class Authenticator {
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       return null;
     }
-
-    const ownsSession =
-      existingSessionValue?.provider.name === provider.name &&
-      existingSessionValue?.provider.type === provider.type;
 
     // If provider owned the session, but failed to authenticate anyway, that likely means that
     // session is not valid and we should clear it. Unexpected errors should not cause session
@@ -987,7 +989,7 @@ export class Authenticator {
         const { username } = authenticationResult.user;
         this.options.userActivity.trackUserAction({
           message: `User logged in via ${provider.type} provider "${provider.name}".`,
-          event: { action: 'log_in_user', type: 'start' },
+          event: { action: 'log_in_user', type: ['start'] },
           object: {
             id: userProfileId ?? username,
             name: username,
@@ -1001,13 +1003,11 @@ export class Authenticator {
         });
       }
     } else if (authenticationResult.shouldUpdateState()) {
-      newSessionValue = await this.session.update(request, {
-        ...existingSessionValue,
-        userProfileId,
-        state: authenticationResult.shouldUpdateState()
-          ? authenticationResult.state
-          : existingSessionValue.state,
-      });
+      newSessionValue = await this.session.update(
+        request,
+        { ...existingSessionValue, userProfileId, state: authenticationResult.state },
+        { extend: !isMinimalAuthentication }
+      );
     } else {
       newSessionValue = await this.session.extend(request, existingSessionValue);
     }
@@ -1037,7 +1037,7 @@ export class Authenticator {
 
       this.options.userActivity.trackUserAction({
         message: `User logged out via ${sessionValue.provider.type} provider "${sessionValue.provider.name}".`,
-        event: { action: 'log_out_user', type: 'end' },
+        event: { action: 'log_out_user', type: ['end'] },
         object: {
           id: sessionValue.userProfileId ?? sessionValue.username,
           name: sessionValue.username,

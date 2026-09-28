@@ -6,8 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { capitalize } from 'lodash';
 import path from 'node:path';
-import { editableToolTypes } from '@kbn/agent-builder-common';
+import { editableToolTypes, toAutoApprovedApis } from '@kbn/agent-builder-common';
+import type { ApiTarget } from '@kbn/agent-builder-common';
+import { isKnownApiSelector } from '@kbn/agent-builder-common/apis/known_apis';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { toDescriptor, toDescriptorWithSchema } from '../services/tools/utils/tool_conversion';
@@ -25,6 +28,31 @@ import { publicApiPath } from '../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, TOOLS_WRITE_SECURITY } from './route_security';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 import { asError } from '../utils/as_error';
+
+const apiSelectorArraySchema = (target: ApiTarget, exampleApi: string) => {
+  const targetLabel = capitalize(target);
+  const exampleNamespace = exampleApi.split('.')[0];
+  return schema.maybe(
+    schema.arrayOf(
+      schema.string({
+        maxLength: 256,
+        validate: (api) =>
+          isKnownApiSelector({ target, api })
+            ? undefined
+            : `Unknown api "${api}" for target "${target}".`,
+      }),
+      {
+        maxSize: 100,
+        meta: {
+          description:
+            `${targetLabel} APIs pre-approved for this run. Each entry is an exact identifier formed ` +
+            `from the namespace and name (for example \`${exampleApi}\`), a namespace wildcard ` +
+            `(for example \`${exampleNamespace}.*\`), or \`*\` for every ${targetLabel} API.`,
+        },
+      }
+    )
+  );
+};
 
 export function registerToolsRoutes({
   router,
@@ -164,6 +192,25 @@ export function registerToolsRoutes({
                   description: 'Tool-specific configuration parameters. See examples for details.',
                 },
               }),
+              confirmation: schema.maybe(
+                schema.object(
+                  {
+                    askUser: schema.maybe(
+                      schema.oneOf([
+                        schema.literal('once'),
+                        schema.literal('always'),
+                        schema.literal('never'),
+                      ])
+                    ),
+                  },
+                  {
+                    meta: {
+                      description:
+                        'Optional tool call policy to control tool call confirmation behavior',
+                    },
+                  }
+                )
+              ),
             }),
           },
         },
@@ -249,6 +296,25 @@ export function registerToolsRoutes({
                       'Updated tool-specific configuration parameters. See examples for details.',
                   },
                 })
+              ),
+              confirmation: schema.maybe(
+                schema.object(
+                  {
+                    askUser: schema.maybe(
+                      schema.oneOf([
+                        schema.literal('once'),
+                        schema.literal('always'),
+                        schema.literal('never'),
+                      ])
+                    ),
+                  },
+                  {
+                    meta: {
+                      description:
+                        'Updated tool call policy to control tool call confirmation behavior',
+                    },
+                  }
+                )
               ),
             }),
           },
@@ -420,6 +486,35 @@ export function registerToolsRoutes({
                   },
                 })
               ),
+              approvals: schema.maybe(
+                schema.object(
+                  {
+                    auto_approved_apis: schema.maybe(
+                      schema.object(
+                        {
+                          elasticsearch: apiSelectorArraySchema('elasticsearch', 'indices.create'),
+                          kibana: apiSelectorArraySchema(
+                            'kibana',
+                            'alerting.delete-alerting-rule-id'
+                          ),
+                        },
+                        {
+                          meta: {
+                            description:
+                              'Destructive Elasticsearch or Kibana APIs the tool may call without a user confirmation, keyed by backend. A tool run has no live user to answer the confirmation prompt, so a destructive API is refused unless it is listed here.',
+                          },
+                        }
+                      )
+                    ),
+                  },
+                  {
+                    meta: {
+                      description:
+                        'Actions the tool run may take that would otherwise need a live user to approve them. Applies to this run and any sub-agents it spawns.',
+                    },
+                  }
+                )
+              ),
             }),
           },
         },
@@ -432,6 +527,7 @@ export function registerToolsRoutes({
           tool_id: id,
           tool_params: toolParams,
           connector_id: defaultConnectorId,
+          approvals,
         } = request.body;
         const { tools: toolService } = getInternalServices();
         const registry = await toolService.getRegistry({ request });
@@ -451,6 +547,9 @@ export function registerToolsRoutes({
           toolParams,
           source: 'user',
           defaultConnectorId,
+          ...(approvals?.auto_approved_apis
+            ? { approvals: { autoApprovedApis: toAutoApprovedApis(approvals.auto_approved_apis) } }
+            : {}),
         });
 
         return response.ok({

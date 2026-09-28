@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -18,11 +18,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/code-editor';
-import type { RuleQuery } from './compose_form_types';
-import { getBreachQuery } from './compose_form_types';
+import { recoveryStrategy } from '@kbn/alerting-v2-schemas';
+import type { RuleQuery, RuleRecovery } from '../../form/types';
+import { getBreachQuery, getRecoverQuery } from '../../form/utils/query_helpers';
+import { useRuleFormServices } from '../../form/contexts/rule_form_context';
+import { useEsqlCallbacks } from '../../form/hooks/use_esql_callbacks';
 import type { QueryTab } from './types';
 import { QuerySandbox } from './query_sandbox';
 import type { QuerySandboxProps } from './query_sandbox';
+import { isAlertTabDisabled } from './compose_discover_tabs';
+import { validateTabQueries, type TabValidationError } from './validate_tab_queries';
 
 /**
  * Props for the Discover Sandbox flyout — a full-screen ES|QL editor with live
@@ -47,10 +52,14 @@ import type { QuerySandboxProps } from './query_sandbox';
  * `dateRange` persists across open/close cycles.
  */
 export interface QuerySandboxFlyoutProps {
-  /** The live query being edited. Shape drives the split-editor layout. */
+  /** The live query being edited. */
   query: RuleQuery;
   /** Called on every editor change. Absent → all query editors are read-only. */
   onQueryChange?: (q: RuleQuery) => void;
+  /** The live recovery block being edited — only read when the `recovery` tab is shown. */
+  recovery?: RuleRecovery;
+  /** Called on every recovery editor change. */
+  onRecoveryChange?: (recovery: RuleRecovery) => void;
   /**
    * Which tabs to show. Absent or [] → single editor, no tab bar.
    * ['base', 'alert'] → base-alert split; ['recovery'] → recovery tab only.
@@ -73,9 +82,16 @@ export interface QuerySandboxFlyoutProps {
   /** When provided an Apply button is shown. No-args: caller already holds current state. */
   onApply?: () => void;
   onClose: () => void;
+  /**
+   * Optional help text rendered above the editor — passed through to `QuerySandbox`.
+   * Callers are responsible for content and styling (e.g. wrapping in `<EuiText>`).
+   */
+  helpText?: React.ReactNode;
   title?: string;
   onAlertEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   onRecoveryEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
+  onBaseEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
+  onSingleEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
 }
 
 const QUERY_SANDBOX_TITLE_ID = 'composeDiscoverChildTitle';
@@ -83,6 +99,8 @@ const QUERY_SANDBOX_TITLE_ID = 'composeDiscoverChildTitle';
 export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   query,
   onQueryChange,
+  recovery,
+  onRecoveryChange,
   tabs,
   activeTab = 'alert',
   onTabChange,
@@ -94,56 +112,124 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   onDateRangeChange,
   onApply,
   onClose,
+  helpText,
   onAlertEditorMount,
   onRecoveryEditorMount,
+  onBaseEditorMount,
+  onSingleEditorMount,
   title = i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.defaultTitle', {
     defaultMessage: 'Query sandbox',
   }),
 }) => {
   const isReadOnly = !onQueryChange;
 
-  const queryFields = useMemo(
-    () =>
-      query.format === 'composed'
-        ? {
-            base: query.base,
-            breach: query.breach.segment,
-            recover: query.recovery?.segment ?? '',
-          }
-        : {
-            base: query.no_data?.query ?? '',
-            breach: query.breach.query,
-            recover: query.recovery?.query ?? '',
-          },
-    [query]
-  );
+  const recoveryBlock = recovery?.segment ?? '';
 
   const updateQuery = useCallback(
-    (patch: { base?: string; breach?: string; recover?: string }) => {
+    (patch: { base?: string; breach?: string }) => {
       if (!onQueryChange) return;
-      const next = { ...queryFields, ...patch };
-      onQueryChange(
-        query.format === 'composed'
-          ? {
-              format: 'composed',
-              base: next.base,
-              breach: { segment: next.breach },
-              ...(next.recover ? { recovery: { segment: next.recover } } : {}),
-            }
-          : {
-              format: 'standalone',
-              breach: { query: next.breach },
-              ...(next.base ? { no_data: { query: next.base } } : {}),
-              ...(next.recover ? { recovery: { query: next.recover } } : {}),
-            }
-      );
+      onQueryChange({
+        base: patch.base ?? query.base,
+        breach: { segment: patch.breach ?? query.breach.segment },
+      });
     },
-    [query, queryFields, onQueryChange]
+    [query, onQueryChange]
   );
 
-  const activeQuery = query.format === 'composed' ? getBreachQuery(query) : query.breach.query;
+  /* Preserves the current strategy so editing the block never rewrites the user's choice. */
+  const updateRecoveryBlock = useCallback(
+    (segment: string) => {
+      onRecoveryChange?.({ strategy: recoveryStrategy.condition, ...recovery, segment });
+    },
+    [recovery, onRecoveryChange]
+  );
 
-  const handleQueryChange = useCallback((v: string) => updateQuery({ breach: v }), [updateQuery]);
+  /*
+   * Run whichever pipeline the active tab represents. Unified mode (no tabs)
+   * has no per-tab concept — always run the full breach query.
+   */
+  const activeQuery = (() => {
+    if (!tabs?.length) return getBreachQuery(query);
+    switch (activeTab) {
+      case 'base':
+        return query.base;
+      case 'recovery':
+        return getRecoverQuery(query, recovery);
+      default:
+        return getBreachQuery(query);
+    }
+  })();
+
+  /*
+   * Apply is gated on static ES|QL validation of every tab — including ones the
+   * user hasn't switched to. Validation runs on the Apply click rather than on
+   * every keystroke, because the ES|QL callbacks issue real requests to
+   * Elasticsearch; a one-shot check on an explicit action keeps typing snappy.
+   * The Alert tab is skipped while it's disabled (base not yet defined): its
+   * segment isn't part of the active pipeline, so it shouldn't block Apply.
+   */
+  const services = useRuleFormServices();
+  const esqlCallbacks = useEsqlCallbacks({
+    application: services.application,
+    http: services.http,
+    search: services.data.search.search,
+  });
+
+  const validationQueries = useMemo(() => {
+    if (!tabs?.length) {
+      return { alert: getBreachQuery(query) };
+    }
+    return {
+      ...(tabs.includes('base') && { base: query.base }),
+      ...(tabs.includes('alert') &&
+        !isAlertTabDisabled(tabs, query) && { alert: getBreachQuery(query) }),
+      ...(tabs.includes('recovery') && { recovery: getRecoverQuery(query, recovery) }),
+    };
+  }, [tabs, query, recovery]);
+
+  const [isValidating, setIsValidating] = useState(false);
+  const [applyErrors, setApplyErrors] = useState<TabValidationError[]>([]);
+  const editingLocked = isReadOnly || isValidating;
+
+  const handleApply = useCallback(async () => {
+    if (!onApply) return;
+    setIsValidating(true);
+    try {
+      const errors = await validateTabQueries(validationQueries, esqlCallbacks);
+      setApplyErrors(errors);
+      if (errors.length === 0) {
+        onApply();
+        return;
+      }
+      const [firstError] = errors;
+      if (firstError.tab !== activeTab) {
+        onTabChange?.(firstError.tab);
+      }
+    } finally {
+      setIsValidating(false);
+    }
+  }, [onApply, validationQueries, esqlCallbacks, activeTab, onTabChange]);
+
+  /*
+   * Unified mode: the editor holds the whole pipeline, so write it to `base`
+   * with an empty `segment` and `getBreachQuery` returns it verbatim. Writing
+   * to `segment` would re-join base + segment and duplicate lines; the
+   * heuristic split runs on Apply, not here.
+   */
+  const handleQueryChange = useCallback(
+    (v: string) => updateQuery({ base: v, breach: '' }),
+    [updateQuery]
+  );
+
+  /*
+   * The active tab's own validation error, if any. handleApply already moved
+   * the user to the first offending tab, so at most one entry is ever
+   * relevant to what's currently on screen.
+   */
+  const activeValidationError = useMemo(
+    () => applyErrors.find((e) => e.tab === activeTab)?.messages,
+    [applyErrors, activeTab]
+  );
 
   const tabProps: QuerySandboxProps['tabProps'] = useMemo(() => {
     if (!tabs?.length) return undefined;
@@ -151,31 +237,36 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
       tabs,
       activeTab,
       onTabChange: onTabChange ?? (() => {}),
-      baseQuery: queryFields.base,
-      alertBlock: queryFields.breach,
-      recoveryBlock: queryFields.recover,
+      baseQuery: query.base,
+      alertBlock: query.breach.segment,
+      recoveryBlock,
       onBaseQueryChange: (v: string) => updateQuery({ base: v }),
       onAlertBlockChange: (v: string) => updateQuery({ breach: v }),
-      onRecoveryBlockChange: (v: string) => updateQuery({ recover: v }),
+      onRecoveryBlockChange: updateRecoveryBlock,
       onAlertEditorMount,
       onRecoveryEditorMount,
-      readOnly: isReadOnly,
+      onBaseEditorMount,
+      readOnly: editingLocked,
     };
   }, [
     tabs,
     activeTab,
     onTabChange,
-    queryFields,
+    query,
+    recoveryBlock,
     updateQuery,
+    updateRecoveryBlock,
     onAlertEditorMount,
     onRecoveryEditorMount,
-    isReadOnly,
+    onBaseEditorMount,
+    editingLocked,
   ]);
 
   return (
     <EuiFlyout
       type="overlay"
       size="fill"
+      minWidth={700}
       onClose={onClose}
       aria-labelledby={QUERY_SANDBOX_TITLE_ID}
       closeButtonProps={{ 'data-test-subj': 'querySandboxClose' }}
@@ -189,7 +280,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
       <EuiFlyoutBody>
         <QuerySandbox
           query={activeQuery}
-          onQueryChange={isReadOnly ? undefined : handleQueryChange}
+          onQueryChange={editingLocked ? undefined : handleQueryChange}
           timeField={timeField}
           onTimeFieldChange={onTimeFieldChange}
           timeFieldOptions={timeFieldOptions}
@@ -197,7 +288,10 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
           dateRange={dateRange}
           onDateRangeChange={onDateRangeChange}
           autoRun
+          helpText={helpText}
           tabProps={tabProps}
+          onSingleEditorMount={onSingleEditorMount}
+          validationError={activeValidationError}
         />
       </EuiFlyoutBody>
 
@@ -205,7 +299,12 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={onApply} data-test-subj="querySandboxApply">
+              <EuiButton
+                fill
+                onClick={handleApply}
+                isLoading={isValidating}
+                data-test-subj="querySandboxApply"
+              >
                 {i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.applyButtonLabel', {
                   defaultMessage: 'Apply changes',
                 })}

@@ -6,10 +6,11 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiCallOut, EuiConfirmModal, EuiLink, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiConfirmModal, EuiLink, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useGetUrlParams } from '../../../../hooks';
@@ -23,12 +24,14 @@ export const DeleteMonitor = ({
   configIds,
   isProjectMonitor,
   setMonitorPendingDeletion,
+  onCompleted,
 }: {
   configIds: string[];
   name: string;
   isProjectMonitor: boolean;
   reloadPage: () => void;
   setMonitorPendingDeletion: (val: string[]) => void;
+  onCompleted?: () => void;
 }) => {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const { spaceId } = useGetUrlParams();
@@ -93,6 +96,8 @@ export const DeleteMonitor = ({
     ) {
       setIsDeleting(false);
       setMonitorPendingDeletion([]);
+      // The delete ran (success or failure), so the selection is now stale.
+      onCompleted?.();
     }
   }, [
     setIsDeleting,
@@ -100,6 +105,7 @@ export const DeleteMonitor = ({
     reloadPage,
     monitorDeleteStatus,
     setMonitorPendingDeletion,
+    onCompleted,
     name,
     configIds.length,
   ]);
@@ -130,11 +136,11 @@ export const DeleteMonitor = ({
     >
       {isProjectMonitor && (
         <>
-          <EuiCallOut announceOnMount color="warning" title={PROJECT_MONITOR_TITLE}>
-            <p>
-              <ProjectMonitorDisclaimer />
-            </p>
-          </EuiCallOut>
+          <KbnWarningCallout
+            announceOnMount
+            title={PROJECT_MONITOR_TITLE}
+            text={<ProjectMonitorDisclaimer />}
+          />
           <EuiSpacer size="m" />
         </>
       )}

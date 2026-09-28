@@ -12,11 +12,11 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { FeedbackRegistryEntry } from '@kbn/ui-feedback';
-import { isNextChrome } from '@kbn/core-chrome-feature-flags';
+import type { AppDetails, FeedbackRegistryEntry } from '@kbn/ui-feedback';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
-import type { FeedbackFormData } from '../common';
+import type { Subscription } from 'rxjs';
+import type { FeedbackContext, FeedbackFormData, SetFeedbackContext } from '../common';
 import { getAppDetails } from './src/utils';
 
 interface FeedbackPluginSetupDependencies {
@@ -29,11 +29,13 @@ interface FeedbackPluginStartDependencies {
   spaces?: SpacesPluginStart;
 }
 
-const LazyFeedbackTriggerButton = lazy(() =>
-  import('@kbn/ui-feedback').then(({ FeedbackTriggerButton }) => ({
-    default: FeedbackTriggerButton,
-  }))
-);
+interface FeedbackDeps {
+  getQuestions: (appId: string) => Promise<FeedbackRegistryEntry[]>;
+  getAppDetails: () => AppDetails;
+  getCurrentUserEmail: () => Promise<string | undefined>;
+  sendFeedback: (data: FeedbackFormData) => Promise<void>;
+  showToast: (title: string, color: 'success' | 'error') => void;
+}
 
 const LazyFeedbackContainer = lazy(() =>
   import('@kbn/ui-feedback').then(({ FeedbackContainer }) => ({
@@ -41,8 +43,126 @@ const LazyFeedbackContainer = lazy(() =>
   }))
 );
 
+const feedbackModalCss = css`
+  overflow-y: auto;
+`;
+
+const RESEARCH_PANEL_SURVEY_URL = 'https://ela.st/user-interviews-opt-in';
+
+const createFeedbackDeps = (
+  core: CoreStart,
+  organizationId: string | undefined,
+  getContext: () => FeedbackContext | undefined,
+  getTitleOverride: () => string | undefined,
+  cloud?: CloudStart,
+  spaces?: SpacesPluginStart
+): FeedbackDeps => {
+  const getSolution = async (): Promise<string> => {
+    try {
+      const space = await spaces?.getActiveSpace();
+      return space?.solution || cloud?.serverless?.projectType || 'classic';
+    } catch {
+      return cloud?.serverless?.projectType || 'classic';
+    }
+  };
+
+  return {
+    getAppDetails: () => getAppDetails(core, getContext(), getTitleOverride()),
+    getQuestions: async (appId: string) => {
+      const { getFeedbackQuestionsForApp } = await import('@kbn/feedback-registry');
+      return getFeedbackQuestionsForApp(appId);
+    },
+    getCurrentUserEmail: async () => {
+      if (!core.security) return undefined;
+      try {
+        const user = await core.security.authc.getCurrentUser();
+        return user?.email;
+      } catch {
+        return;
+      }
+    },
+    sendFeedback: async (data: FeedbackFormData) => {
+      const solution = await getSolution();
+      await core.http.post('/internal/feedback/send', {
+        body: JSON.stringify({ ...data, solution, organization_id: organizationId }),
+      });
+    },
+    showToast: (title: string, color: 'success' | 'error') => {
+      if (color === 'success') {
+        void import('@kbn/ui-feedback').then(
+          ({
+            FeedbackSuccessToastTitle,
+            FeedbackSuccessToastBody,
+            FEEDBACK_SUCCESS_TOAST_LIFE_TIME_MS: toastLifeTimeMs,
+          }) => {
+            const toastRef: {
+              current: ReturnType<typeof core.notifications.toasts.add> | undefined;
+            } = { current: undefined };
+
+            toastRef.current = core.notifications.toasts.add({
+              color: 'success',
+              title: toMountPoint(core.rendering.addContext(<FeedbackSuccessToastTitle />), core),
+              text: toMountPoint(
+                core.rendering.addContext(
+                  <FeedbackSuccessToastBody
+                    surveyUrl={RESEARCH_PANEL_SURVEY_URL}
+                    onDismiss={() => {
+                      if (toastRef.current) {
+                        core.notifications.toasts.remove(toastRef.current);
+                      }
+                    }}
+                  />
+                ),
+                core
+              ),
+              toastLifeTimeMs,
+            });
+          }
+        );
+      }
+      if (color === 'error') {
+        core.notifications.toasts.addDanger({ title });
+      }
+    },
+  };
+};
+
+const openFeedbackModal = (core: CoreStart, deps: FeedbackDeps) => {
+  const modal = core.overlays.openModal(
+    toMountPoint(
+      core.rendering.addContext(
+        <EuiModal
+          onClose={() => modal.close()}
+          aria-label={i18n.translate('feedback.modal.ariaLabel', {
+            defaultMessage: 'Feedback form',
+          })}
+          css={feedbackModalCss}
+        >
+          <Suspense fallback={null}>
+            <LazyFeedbackContainer
+              getQuestions={deps.getQuestions}
+              getAppDetails={deps.getAppDetails}
+              getCurrentUserEmail={deps.getCurrentUserEmail}
+              sendFeedback={deps.sendFeedback}
+              showToast={deps.showToast}
+              hideFeedbackContainer={() => modal.close()}
+            />
+          </Suspense>
+        </EuiModal>
+      ),
+      core
+    )
+  );
+};
+
 export class FeedbackPlugin implements Plugin {
   private organizationId?: string;
+  private telemetryOptInSubscription?: Subscription;
+  private appIdSubscription?: Subscription;
+  private currentAppId?: string;
+  private contextAppId?: string;
+  private context?: FeedbackContext;
+  private titleOverride?: string;
 
   public setup(_core: CoreSetup, { cloud }: FeedbackPluginSetupDependencies) {
     this.organizationId = cloud?.organizationId;
@@ -50,124 +170,78 @@ export class FeedbackPlugin implements Plugin {
   }
 
   public start(core: CoreStart, { cloud, telemetry, spaces }: FeedbackPluginStartDependencies) {
-    const isFeedbackEnabled = core.notifications.feedback.isEnabled();
-    const isTelemetryEnabled = telemetry.telemetryService.canSendTelemetry();
-    const isOptedIn = telemetry.telemetryService.getIsOptedIn();
-
-    if (!isFeedbackEnabled || !isTelemetryEnabled || !isOptedIn) {
-      return {};
-    }
-
-    const organizationId = this.organizationId;
-
-    const getSolution = async (): Promise<string> => {
-      try {
-        const space = await spaces?.getActiveSpace();
-        return space?.solution || cloud?.serverless?.projectType || 'classic';
-      } catch {
-        return cloud?.serverless?.projectType || 'classic';
+    this.appIdSubscription = core.application.currentAppId$.subscribe((appId) => {
+      if (appId !== this.currentAppId) {
+        this.context = undefined;
+        this.contextAppId = undefined;
+        this.titleOverride = undefined;
       }
-    };
-
-    const getAppDetailsWrapper = () => getAppDetails(core);
-
-    const getQuestions = async (appId: string): Promise<FeedbackRegistryEntry[]> => {
-      const { getFeedbackQuestionsForApp } = await import('@kbn/feedback-registry');
-      return getFeedbackQuestionsForApp(appId);
-    };
-
-    const getCurrentUserEmail = async (): Promise<string | undefined> => {
-      if (!core.security) {
-        return undefined;
-      }
-      try {
-        const user = await core.security.authc.getCurrentUser();
-        return user?.email;
-      } catch {
-        return;
-      }
-    };
-
-    const sendFeedback = async (data: FeedbackFormData) => {
-      const solution = await getSolution();
-      await core.http.post('/internal/feedback/send', {
-        body: JSON.stringify({ ...data, solution, organization_id: organizationId }),
-      });
-    };
-
-    const showToast = (title: string, color: 'success' | 'error') => {
-      if (color === 'success') {
-        core.notifications.toasts.addSuccess({ title });
-      }
-      if (color === 'error') {
-        core.notifications.toasts.addDanger({ title });
-      }
-    };
-
-    const checkTelemetryOptIn = async (): Promise<boolean> => {
-      try {
-        const telemetryConfig = await core.http.get<{ optIn: boolean | null }>(
-          '/internal/telemetry/config',
-          { version: '2' }
-        );
-        return telemetryConfig.optIn === true;
-      } catch {
-        return false;
-      }
-    };
-
-    if (isNextChrome(core.featureFlags)) {
-      const modalCss = css`
-        overflow-y: auto;
-      `;
-
-      core.chrome.next.registerFeedbackHandler(() => {
-        const modal = core.overlays.openModal(
-          toMountPoint(
-            core.rendering.addContext(
-              <EuiModal
-                onClose={() => modal.close()}
-                aria-label={i18n.translate('feedback.modal.ariaLabel', {
-                  defaultMessage: 'Feedback form',
-                })}
-                css={modalCss}
-              >
-                <Suspense fallback={null}>
-                  <LazyFeedbackContainer
-                    getQuestions={getQuestions}
-                    getAppDetails={getAppDetailsWrapper}
-                    getCurrentUserEmail={getCurrentUserEmail}
-                    sendFeedback={sendFeedback}
-                    showToast={showToast}
-                    hideFeedbackContainer={() => modal.close()}
-                  />
-                </Suspense>
-              </EuiModal>
-            ),
-            core
-          )
-        );
-      });
-    }
-
-    core.chrome.navControls.registerRight({
-      order: 1001,
-      content: (
-        <Suspense fallback={null}>
-          <LazyFeedbackTriggerButton
-            getQuestions={getQuestions}
-            getAppDetails={getAppDetailsWrapper}
-            getCurrentUserEmail={getCurrentUserEmail}
-            sendFeedback={sendFeedback}
-            showToast={showToast}
-            checkTelemetryOptIn={checkTelemetryOptIn}
-          />
-        </Suspense>
-      ),
+      this.currentAppId = appId;
     });
 
-    return {};
+    /**
+     * Stores opaque feedback context for the current app.
+     * `options.title` fully replaces the derived app title in the feedback UI.
+     * No-ops unless `appId` matches `currentAppId`, so one app cannot pollute another.
+     */
+    const setContext: SetFeedbackContext = (appId, context, options) => {
+      if (appId !== this.currentAppId) {
+        return () => {};
+      }
+
+      this.contextAppId = appId;
+      this.context = context;
+      this.titleOverride = options?.title;
+      return () => {
+        if (this.contextAppId === appId) {
+          this.context = undefined;
+          this.contextAppId = undefined;
+          this.titleOverride = undefined;
+        }
+      };
+    };
+
+    const getContext = () => (this.contextAppId === this.currentAppId ? this.context : undefined);
+    const getTitleOverride = () =>
+      this.contextAppId === this.currentAppId ? this.titleOverride : undefined;
+
+    if (!core.notifications.feedback.isEnabled()) {
+      return { setContext };
+    }
+
+    const deps = createFeedbackDeps(
+      core,
+      this.organizationId,
+      getContext,
+      getTitleOverride,
+      cloud,
+      spaces
+    );
+    const { isOptedIn$ } = telemetry.telemetryService;
+
+    let unregisterFeedbackHandler: (() => void) | undefined;
+
+    this.telemetryOptInSubscription = isOptedIn$.subscribe((optIn) => {
+      unregisterFeedbackHandler?.();
+      unregisterFeedbackHandler = undefined;
+
+      if (optIn) {
+        unregisterFeedbackHandler = core.chrome.help.registerFeedbackHandler(() => {
+          openFeedbackModal(core, deps);
+        });
+      }
+    });
+
+    return { setContext };
   }
 
-  public stop() {}
+  public stop() {
+    this.telemetryOptInSubscription?.unsubscribe();
+    this.telemetryOptInSubscription = undefined;
+    this.appIdSubscription?.unsubscribe();
+    this.appIdSubscription = undefined;
+    this.context = undefined;
+    this.contextAppId = undefined;
+    this.titleOverride = undefined;
+  }
 }

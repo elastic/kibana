@@ -20,8 +20,10 @@ import chalk from 'chalk';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 import { cache } from './utils/cache';
+import { createDownloadProgressBar } from './utils/download_progress';
 import { resolveCustomSnapshotUrl } from './custom_snapshots';
 import { createCliError, isCliError } from './errors';
+import { shouldPreferCachedSnapshot } from './utils/find_local_cached_snapshot';
 
 const asyncPipeline = promisify(pipeline);
 const DAILY_SNAPSHOTS_BASE_URL = 'https://storage.googleapis.com/kibana-ci-es-snapshots-daily';
@@ -123,7 +125,16 @@ async function fetchSnapshotManifest(url: string, log: ToolingLog) {
   log.info('Downloading snapshot manifest from %s', chalk.bold(url));
 
   const abc = new AbortController();
-  const resp = await retry(log, async () => await fetch(url, { signal: abc.signal }));
+  const resp = await retry(log, async () => {
+    const response = await fetch(url, { signal: abc.signal });
+    // node-fetch resolves (does not reject) on 5xx, so a transient server error
+    // (e.g. a GCS 500 on the snapshot bucket) would otherwise escape retry and
+    // fail immediately. Throw here so retry() catches it and backs off.
+    if (response.status >= 500) {
+      throw new Error(`Unable to read snapshot manifest: ${response.statusText}`);
+    }
+    return response;
+  });
   const json = await resp.text();
 
   return { abc, resp, json };
@@ -232,16 +243,13 @@ export class Artifact {
       const cacheMeta = cache.readMeta(dest);
       const tmpPath = `${dest}.tmp`;
 
-      if (useCached || process.env.KBN_ES_SNAPSHOT_USE_CACHED === 'true') {
-        if (cacheMeta.exists) {
-          this.log.info(
-            'use-cached passed, forcing to use existing snapshot',
-            chalk.bold(cacheMeta.ts)
-          );
+      if (shouldPreferCachedSnapshot(useCached)) {
+        if (fs.existsSync(dest)) {
+          this.log.info('using locally cached snapshot %s', chalk.bold(dest));
           return;
-        } else {
-          this.log.info('use-cached passed but no cached snapshot found. Continuing to download');
         }
+
+        this.log.info('prefer-cached enabled but no cached snapshot found at %s', chalk.bold(dest));
       }
 
       const artifactResp = await this.fetchArtifact(tmpPath, cacheMeta.etag, cacheMeta.ts);
@@ -377,31 +385,44 @@ export class Artifact {
 
     fs.mkdirSync(path.dirname(tmpPath), { recursive: true });
 
-    await asyncPipeline(
-      resp.body,
-      new Transform({
-        transform(chunk, encoding, cb) {
-          contentLength += Buffer.byteLength(chunk);
+    // content-length reflects the on-the-wire byte count; when the response is
+    // content-encoded (compressed) node-fetch inflates the body as it streams,
+    // so chunk sizes wouldn't add up to the header value — fall back to a
+    // size-less progress bar in that case rather than showing a wrong total.
+    const expectedContentLength = resp.headers.get('content-length');
+    const contentEncoding = resp.headers.get('content-encoding');
+    const progressTotal =
+      !contentEncoding && expectedContentLength ? parseInt(expectedContentLength, 10) : undefined;
+    const progress = createDownloadProgressBar(progressTotal, (msg) => this.log.info(msg));
 
-          if (first500Bytes.length < 500) {
-            first500Bytes = Buffer.concat(
-              [first500Bytes, chunk],
-              first500Bytes.length + chunk.length
-            ).slice(0, 500);
-          }
+    try {
+      await asyncPipeline(
+        resp.body,
+        progress.meter,
+        new Transform({
+          transform(chunk, encoding, cb) {
+            contentLength += Buffer.byteLength(chunk);
 
-          hash.update(chunk, encoding);
-          cb(null, chunk);
-        },
-      }),
-      fs.createWriteStream(tmpPath)
-    );
+            if (first500Bytes.length < 500) {
+              first500Bytes = Buffer.concat(
+                [first500Bytes, chunk],
+                first500Bytes.length + chunk.length
+              ).slice(0, 500);
+            }
+
+            hash.update(chunk, encoding);
+            cb(null, chunk);
+          },
+        }),
+        fs.createWriteStream(tmpPath)
+      );
+    } finally {
+      progress.stop();
+    }
 
     // Detect truncated downloads that closed cleanly (e.g. the server reset
     // the connection after sending partial data). The checksum would also catch
     // this, but failing here gives a clearer error message.
-    const expectedContentLength = resp.headers.get('content-length');
-    const contentEncoding = resp.headers.get('content-encoding');
     if (
       !contentEncoding &&
       expectedContentLength &&

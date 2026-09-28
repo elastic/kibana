@@ -2,8 +2,8 @@
   "type": "plugin",
   "id": "@kbn/file-upload-plugin",
   "owner": [
-    "@elastic/kibana-presentation",
-    "@elastic/ml-ui"
+    "@elastic/kibana-dashboards",
+    "@elastic/search-ml-ux"
   ],
   "group": "platform",
   "visibility": "private",

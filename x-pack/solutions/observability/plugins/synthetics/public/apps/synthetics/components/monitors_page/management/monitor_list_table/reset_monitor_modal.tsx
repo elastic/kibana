@@ -8,24 +8,26 @@
 import React, { useCallback, useState } from 'react';
 import {
   EuiAccordion,
-  EuiCallOut,
   EuiConfirmModal,
   EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { kibanaService } from '../../../../../../utils/kibana_service';
 
 export const ResetMonitorModal = ({
   configIds,
   skippedMonitors = [],
   onClose,
+  onCompleted,
   resetMonitors,
 }: {
   configIds: string[];
   skippedMonitors?: Array<{ id: string; name: string }>;
   onClose: () => void;
+  onCompleted?: () => void;
   resetMonitors: (ids: string[]) => Promise<{ error?: Error }>;
 }) => {
   const [isResetting, setIsResetting] = useState(false);
@@ -52,8 +54,10 @@ export const ResetMonitorModal = ({
         toastLifeTimeMs: 5000,
       });
     }
+    // The action ran (success or failure), so the selection is now stale.
+    onCompleted?.();
     onClose();
-  }, [configIds, onClose, resetMonitors]);
+  }, [configIds, onClose, onCompleted, resetMonitors]);
 
   return (
     <EuiConfirmModal
@@ -82,24 +86,18 @@ export const ResetMonitorModal = ({
       {skippedMonitors.length > 0 && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut
-            color="warning"
-            iconType="warning"
+          <KbnWarningCallout
             announceOnMount={false}
             title={i18n.translate('xpack.synthetics.resetMonitorModal.skippedWarning.title', {
               defaultMessage:
                 '{count, plural, one {# monitor} other {# monitors}} will not be reset',
               values: { count: skippedMonitors.length },
             })}
+            text={i18n.translate('xpack.synthetics.resetMonitorModal.skippedWarning.description', {
+              defaultMessage:
+                'These monitors have issues that cannot be fixed by resetting. Check your Fleet agents.',
+            })}
           >
-            <EuiText size="s">
-              <p>
-                {i18n.translate('xpack.synthetics.resetMonitorModal.skippedWarning.description', {
-                  defaultMessage:
-                    'These monitors have issues that cannot be fixed by resetting. Check your Fleet agents.',
-                })}
-              </p>
-            </EuiText>
             <EuiAccordion
               id={skippedAccordionId}
               buttonContent={i18n.translate(
@@ -116,7 +114,7 @@ export const ResetMonitorModal = ({
                 </ul>
               </EuiText>
             </EuiAccordion>
-          </EuiCallOut>
+          </KbnWarningCallout>
         </>
       )}
     </EuiConfirmModal>

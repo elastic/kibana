@@ -6,7 +6,7 @@
  */
 
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
 
 /**
  * Multi-bound token for Agent Builder attachment type definitions. Each binding
@@ -15,6 +15,6 @@ import type { ServiceIdentifier } from 'inversify';
  * them with `agentBuilder.attachments` once the experimental features setting is
  * enabled.
  */
-export const AttachmentTypeToken = Symbol.for(
+export const AttachmentTypeToken = createToken<AttachmentTypeDefinition>(
   'alerting_v2.AgentBuilder.AttachmentType'
-) as ServiceIdentifier<AttachmentTypeDefinition>;
+);

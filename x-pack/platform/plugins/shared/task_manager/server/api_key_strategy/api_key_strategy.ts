@@ -14,11 +14,16 @@ import type {
 import type { ApiKeyType } from '../config';
 import type { ConcreteTaskInstance, TaskInstance, TaskUserScope } from '../task';
 import { INVALIDATE_API_KEY_SO_NAME } from '../saved_objects';
+import {
+  taskManagerUiamTelemetry,
+  type CredentialReason,
+  type CredentialType,
+} from '../otel/uiam_telemetry';
 
 export type { ApiKeyType } from '../config';
 
 export interface ApiKeySOFields {
-  apiKey: string;
+  apiKey?: string;
   uiamApiKey?: string;
   userScope: TaskUserScope;
 }
@@ -27,12 +32,31 @@ export interface ApiKeySOFields {
 export interface GrantApiKeysOpts {
   /** When true, grant only the Elasticsearch API key (skip UIAM). */
   onEsKey?: boolean;
+  /**
+   * When true, clone the caller's API key credentials instead of reusing them directly.
+   * See {@link ApiKeyOptions.cloneApiKey}.
+   */
+  cloneApiKey?: boolean;
+  /**
+   * Called as soon as Task Manager creates a credential, before the complete grant operation
+   * resolves. This lets callers clean up partial successes when a later grant fails.
+   */
+  onApiKeyCreated?: (target: InvalidationTarget) => void;
 }
 
 export interface InvalidationTarget {
   apiKeyId: string;
   uiamApiKey?: string;
 }
+
+/**
+ * The credential fields {@link ApiKeyStrategy.getApiKeyIdsForInvalidation} needs, so that both a
+ * stored task and a freshly granted key set that was never persisted can be passed to it.
+ */
+export type ApiKeyInvalidationSource = Pick<
+  ConcreteTaskInstance,
+  'apiKey' | 'uiamApiKey' | 'userScope'
+>;
 
 export interface ApiKeyStrategy {
   readonly shouldGrantUiam: boolean;
@@ -47,7 +71,7 @@ export interface ApiKeyStrategy {
 
   getApiKeyForFakeRequest(taskInstance: ConcreteTaskInstance): string | undefined;
 
-  getApiKeyIdsForInvalidation(taskInstance: ConcreteTaskInstance): InvalidationTarget[];
+  getApiKeyIdsForInvalidation(source: ApiKeyInvalidationSource): InvalidationTarget[];
 
   markForInvalidation(
     targets: InvalidationTarget[],
@@ -55,6 +79,23 @@ export interface ApiKeyStrategy {
     savedObjectsClient: SavedObjectsClientContract
   ): Promise<void>;
 }
+
+/**
+ * Returns a recorder for the `kibana.task_manager.task_run.count` OTel counter that
+ * only emits for user-scoped task runs — most background tasks never carry credentials
+ * and would otherwise flood the `none` series.
+ */
+export const recordTaskRunCredentialUsage = (taskInstance: ConcreteTaskInstance) => {
+  const isUserScoped =
+    Boolean(taskInstance.userScope) ||
+    Boolean(taskInstance.apiKey) ||
+    Boolean(taskInstance.uiamApiKey);
+  return (credentialType: CredentialType, credentialReason: CredentialReason): void => {
+    if (isUserScoped) {
+      taskManagerUiamTelemetry.recordTaskRun(credentialType, credentialReason);
+    }
+  };
+};
 
 export const markApiKeysForInvalidation = async (
   targets: InvalidationTarget[],

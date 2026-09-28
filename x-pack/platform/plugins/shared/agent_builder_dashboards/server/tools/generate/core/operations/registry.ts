@@ -7,9 +7,11 @@
 
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
+import { addControlsOperation } from './add_controls';
 import { addPanelsOperation } from './add_panels';
 import { addSectionOperation } from './add_section';
 import { editPanelsOperation } from './edit_panels';
+import { removeControlsOperation } from './remove_controls';
 import { removePanelsOperation } from './remove_panels';
 import { removeSectionOperation } from './remove_section';
 import { setMetadataOperation } from './set_metadata';
@@ -25,6 +27,8 @@ const operationDefinitions = [
   addSectionOperation,
   removeSectionOperation,
   removePanelsOperation,
+  addControlsOperation,
+  removeControlsOperation,
 ] as const;
 
 const schemas = operationDefinitions.map((definition) => definition.schema);
@@ -44,14 +48,20 @@ interface PrepareOperationExecutionParams {
   operations: DashboardOperation[];
   logger: OperationExecutionContext['logger'];
   failures: OperationExecutionContext['failures'];
+  panelAuthoringNotes: OperationExecutionContext['panelAuthoringNotes'];
   resolvePanelContent?: OperationExecutionContext['resolvePanelContent'];
+  resolveCustomContentTemplate?: OperationExecutionContext['resolveCustomContentTemplate'];
+  resolveAttachmentPanel?: OperationExecutionContext['resolveAttachmentPanel'];
 }
 
 export const prepareOperationExecution = async ({
   operations,
   logger,
   failures,
+  panelAuthoringNotes,
   resolvePanelContent,
+  resolveCustomContentTemplate,
+  resolveAttachmentPanel,
 }: PrepareOperationExecutionParams): Promise<OperationExecutionContext> => {
   const resolvedPanelCreationRequests = await resolvePanelCreationRequests({
     operations,
@@ -61,9 +71,39 @@ export const prepareOperationExecution = async ({
   return {
     logger,
     failures,
+    panelAuthoringNotes,
     resolvedPanelCreationRequests,
+    sectionIdsByKey: new Map(),
     resolvePanelContent,
+    resolveCustomContentTemplate,
+    resolveAttachmentPanel,
   };
+};
+
+const resolveSectionReferences = (
+  operation: DashboardOperation,
+  sectionIdsByKey: ReadonlyMap<string, string>
+): DashboardOperation => {
+  const resolveId = (id: string): string => sectionIdsByKey.get(id) ?? id;
+  const resolvePanelSections = <TPanel extends { sectionId?: string | null }>(
+    panels: TPanel[]
+  ): TPanel[] =>
+    panels.map((panel) =>
+      typeof panel.sectionId === 'string'
+        ? { ...panel, sectionId: resolveId(panel.sectionId) }
+        : panel
+    );
+
+  switch (operation.operation) {
+    case 'add_panels':
+      return { ...operation, panels: resolvePanelSections(operation.panels) };
+    case 'update_panel_layouts':
+      return { ...operation, panels: resolvePanelSections(operation.panels) };
+    case 'remove_section':
+      return { ...operation, id: resolveId(operation.id) };
+    default:
+      return operation;
+  }
 };
 
 export const executeOperationHandler = async ({
@@ -82,5 +122,10 @@ export const executeOperationHandler = async ({
     throw new Error(`No handler for ${operation.operation}`);
   }
 
-  return definition.handler({ dashboardData, operation, operationIndex, context });
+  return definition.handler({
+    dashboardData,
+    operation: resolveSectionReferences(operation, context.sectionIdsByKey),
+    operationIndex,
+    context,
+  });
 };

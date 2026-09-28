@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { QuerySandbox } from './query_sandbox';
 import type { QuerySandboxProps } from './query_sandbox';
 import type { QueryExecutionResult } from './use_query_execution';
+import type { QueryTab } from './types';
 
 const mockRun = jest.fn();
 
@@ -35,21 +36,35 @@ jest.mock('./use_query_execution', () => ({
 
 jest.mock('@kbn/esql-utils', () => ({
   ...jest.requireActual('@kbn/esql-utils'),
-  getESQLTimeFieldFromQuery: jest.fn().mockResolvedValue(undefined),
+  getESQLTimeField: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('../../form/hooks/use_data_fields', () => ({
-  useDataFields: () => ({ data: {}, isLoading: false }),
-}));
-
-jest.mock('../../form/contexts/rule_form_context', () => ({
-  useRuleFormServices: () => ({
-    http: {},
-    data: { search: { search: jest.fn() } },
-    dataViews: {},
-    lens: { EmbeddableComponent: () => null, stateHelperApi: jest.fn() },
+  useDataFields: () => ({
+    data: {
+      '@timestamp': { name: '@timestamp', type: 'date', searchable: true, aggregatable: true },
+    },
+    isLoading: false,
   }),
 }));
+
+jest.mock('@kbn/alerting-v2-browser-shared', () => ({
+  AlertingDateRangePicker: () => <div data-test-subj="querySandboxDatePicker" />,
+}));
+
+let mockRuleFormServices: Record<string, unknown> = {};
+
+jest.mock('../../form/contexts/rule_form_context', () => ({
+  useRuleFormServices: () => mockRuleFormServices,
+}));
+
+const buildBaseServices = () => ({
+  http: {},
+  data: { search: { search: jest.fn() } },
+  dataViews: {},
+  notifications: { toasts: { addDanger: jest.fn(), addWarning: jest.fn() } },
+  lens: { EmbeddableComponent: () => null, stateHelperApi: jest.fn() },
+});
 
 jest.mock('./compose_discover_chart', () => ({
   ComposeDiscoverChart: () => <div data-test-subj="mockComposeDiscoverChart" />,
@@ -64,7 +79,11 @@ jest.mock('./compose_discover_tabs', () => {
 });
 
 jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({ value }: { value: string }) => <pre data-test-subj="mockCodeEditor">{value}</pre>,
+  CodeEditor: ({ value, options }: { value: string; options?: { theme?: string } }) => (
+    <pre data-test-subj="mockCodeEditor" data-theme={options?.theme}>
+      {value}
+    </pre>
+  ),
   ESQL_LANG_ID: 'esql',
 }));
 
@@ -92,12 +111,149 @@ describe('QuerySandbox', () => {
   beforeEach(() => {
     mockRun.mockClear();
     mockExecutionResult = { ...defaultExecutionResult };
+    mockRuleFormServices = buildBaseServices();
     jest.clearAllMocks();
   });
 
   it('renders the sandbox container', () => {
     renderSandbox();
     expect(screen.getByTestId('querySandbox')).toBeInTheDocument();
+  });
+
+  it('renders the injected ES|QL menu with a named docs flyout size', () => {
+    mockRuleFormServices = {
+      ...buildBaseServices(),
+      esqlEditorActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      esqlMenu: ({ docsFlyoutSize }: { docsFlyoutSize?: string }) => (
+        <div data-test-subj="stubEsqlMenu" data-docs-flyout-size={docsFlyoutSize} />
+      ),
+    };
+    renderSandbox();
+    // The docs flyout opens as a child of the rule flyout, so a named size is required.
+    expect(screen.getByTestId('stubEsqlMenu')).toHaveAttribute('data-docs-flyout-size', 's');
+  });
+
+  it('renders no ES|QL menu when the host does not inject one', () => {
+    renderSandbox();
+    expect(screen.queryByTestId('stubEsqlMenu')).not.toBeInTheDocument();
+  });
+
+  it('wires recommended-query submit to onQueryChange + run in the single editor', async () => {
+    const onQueryChange = jest.fn();
+    mockRuleFormServices = {
+      ...buildBaseServices(),
+      esqlEditorActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      esqlMenu: () => <div data-test-subj="stubEsqlMenu" />,
+      esqlEditorActionsRegister: ({
+        currentQuery,
+        submitEsqlQuery,
+      }: {
+        currentQuery?: string;
+        submitEsqlQuery?: (q: string) => void;
+      }) => (
+        <button
+          type="button"
+          data-test-subj="stubRegister"
+          data-current-query={currentQuery}
+          onClick={() => submitEsqlQuery?.('FROM logs-* | LIMIT 10')}
+        />
+      ),
+    };
+    renderSandbox({ onQueryChange });
+
+    const register = screen.getByTestId('stubRegister');
+    expect(register).toHaveAttribute('data-current-query', defaultProps.query);
+
+    fireEvent.click(register);
+    expect(onQueryChange).toHaveBeenCalledWith('FROM logs-* | LIMIT 10');
+    // The run is deferred (setTimeout) so the editor content update flushes first.
+    await waitFor(() => expect(mockRun).toHaveBeenCalledTimes(1));
+  });
+
+  it('shows recommended queries (hideRecommendedQueries=false) for the wired single editor', () => {
+    mockRuleFormServices = {
+      ...buildBaseServices(),
+      esqlEditorActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      esqlEditorActionsRegister: () => null,
+      esqlMenu: ({ hideRecommendedQueries }: { hideRecommendedQueries?: boolean }) => (
+        <div
+          data-test-subj="stubEsqlMenu"
+          data-hide-recommended={String(Boolean(hideRecommendedQueries))}
+        />
+      ),
+    };
+    renderSandbox({ onQueryChange: jest.fn() });
+    expect(screen.getByTestId('stubEsqlMenu')).toHaveAttribute('data-hide-recommended', 'false');
+  });
+
+  const splitTabProps = (activeTab: QueryTab, onBaseQueryChange = jest.fn()) => ({
+    tabs: ['base', 'alert'] as QueryTab[],
+    activeTab,
+    onTabChange: jest.fn(),
+    baseQuery: 'FROM logs-*',
+    alertBlock: '| WHERE count > 100',
+    recoveryBlock: '',
+    onBaseQueryChange,
+    onAlertBlockChange: jest.fn(),
+    onRecoveryBlockChange: jest.fn(),
+  });
+
+  it('hides recommended queries on a split fragment (alert) tab', () => {
+    mockRuleFormServices = {
+      ...buildBaseServices(),
+      esqlEditorActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      esqlEditorActionsRegister: () => <div data-test-subj="stubRegister" />,
+      esqlMenu: ({ hideRecommendedQueries }: { hideRecommendedQueries?: boolean }) => (
+        <div
+          data-test-subj="stubEsqlMenu"
+          data-hide-recommended={String(Boolean(hideRecommendedQueries))}
+        />
+      ),
+    };
+    renderSandbox({ onQueryChange: jest.fn(), tabProps: splitTabProps('alert') });
+    expect(screen.getByTestId('stubEsqlMenu')).toHaveAttribute('data-hide-recommended', 'true');
+    // Not wired on a fragment tab → the register is not mounted.
+    expect(screen.queryByTestId('stubRegister')).not.toBeInTheDocument();
+  });
+
+  it('shows and wires recommended queries on the split base tab (via onBaseQueryChange)', async () => {
+    const onBaseQueryChange = jest.fn();
+    mockRuleFormServices = {
+      ...buildBaseServices(),
+      esqlEditorActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      esqlMenu: ({ hideRecommendedQueries }: { hideRecommendedQueries?: boolean }) => (
+        <div
+          data-test-subj="stubEsqlMenu"
+          data-hide-recommended={String(Boolean(hideRecommendedQueries))}
+        />
+      ),
+      esqlEditorActionsRegister: ({
+        submitEsqlQuery,
+      }: {
+        submitEsqlQuery?: (q: string) => void;
+      }) => (
+        <button
+          type="button"
+          data-test-subj="stubRegister"
+          onClick={() => submitEsqlQuery?.('FROM logs-* | LIMIT 10')}
+        />
+      ),
+    };
+    renderSandbox({ onQueryChange: jest.fn(), tabProps: splitTabProps('base', onBaseQueryChange) });
+
+    expect(screen.getByTestId('stubEsqlMenu')).toHaveAttribute('data-hide-recommended', 'false');
+
+    fireEvent.click(screen.getByTestId('stubRegister'));
+    // The base tab applies through onBaseQueryChange, not the top-level onQueryChange.
+    expect(onBaseQueryChange).toHaveBeenCalledWith('FROM logs-* | LIMIT 10');
+    await waitFor(() => expect(mockRun).toHaveBeenCalledTimes(1));
+  });
+
+  it('renders the editor and results panels', () => {
+    renderSandbox();
+    expect(screen.getByTestId('querySandboxEditorPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('querySandboxResultsPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('querySandboxEditorResizeHandle')).toBeInTheDocument();
   });
 
   it('renders the search button', () => {
@@ -116,6 +272,7 @@ describe('QuerySandbox', () => {
     expect(screen.getByTestId('mockCodeEditor')).toHaveTextContent(
       'FROM logs-* | STATS count() BY host.name'
     );
+    expect(screen.getByTestId('mockCodeEditor')).toHaveAttribute('data-theme', 'esql');
     expect(screen.queryByTestId('mockComposeDiscoverTabs')).not.toBeInTheDocument();
   });
 
@@ -173,7 +330,12 @@ describe('QuerySandbox', () => {
   });
 
   it('shows loading spinner when loading after a run', () => {
-    mockExecutionResult = { ...defaultExecutionResult, hasRun: true, isLoading: true };
+    mockExecutionResult = {
+      ...defaultExecutionResult,
+      hasRun: true,
+      isLoading: true,
+      lastExecutedQuery: defaultProps.query,
+    };
     renderSandbox();
     const spinners = screen.getAllByRole('progressbar');
     expect(spinners.length).toBeGreaterThanOrEqual(2);
@@ -185,14 +347,51 @@ describe('QuerySandbox', () => {
       hasRun: true,
       isError: true,
       error: 'Something went wrong',
+      lastExecutedQuery: defaultProps.query,
     };
     renderSandbox();
     expect(screen.getByText('Query error')).toBeInTheDocument();
     expect(screen.getByText('Something went wrong')).toBeInTheDocument();
   });
 
+  it('keeps showing an error after the query is edited, until the next run', () => {
+    mockExecutionResult = {
+      ...defaultExecutionResult,
+      hasRun: true,
+      isError: true,
+      error: 'Something went wrong',
+      /*
+       * The executed query differs from the current query prop, matching Discover's
+       * behavior of leaving the error up until the user re-runs the query.
+       */
+      lastExecutedQuery: 'FROM logs-* | STATS count() BY host.name (edited)',
+    };
+    renderSandbox();
+    expect(screen.getByText('Query error')).toBeInTheDocument();
+    expect(screen.queryByText('Run your query to see results')).not.toBeInTheDocument();
+  });
+
+  it('hides the stale execution error callout when a validation error is also showing', () => {
+    mockExecutionResult = {
+      ...defaultExecutionResult,
+      hasRun: true,
+      isError: true,
+      error: 'Something went wrong',
+      lastExecutedQuery: defaultProps.query,
+    };
+    renderSandbox({ validationError: ['bad query'] });
+    expect(screen.getByTestId('querySandboxValidationError')).toBeInTheDocument();
+    expect(screen.queryByText('Query error')).not.toBeInTheDocument();
+    expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument();
+  });
+
   it('shows "No results" when query returns empty rows', () => {
-    mockExecutionResult = { ...defaultExecutionResult, hasRun: true, rows: [] };
+    mockExecutionResult = {
+      ...defaultExecutionResult,
+      hasRun: true,
+      rows: [],
+      lastExecutedQuery: defaultProps.query,
+    };
     renderSandbox();
     expect(screen.getByText('No results')).toBeInTheDocument();
   });
@@ -204,7 +403,7 @@ describe('QuerySandbox', () => {
       columns: [{ id: 'host.name', displayAsText: 'host.name', esType: 'keyword' }],
       rows: [{ 'host.name': 'server-01' }],
       totalRowCount: 1,
-      lastExecutedQuery: 'FROM logs-*',
+      lastExecutedQuery: defaultProps.query,
     };
     renderSandbox();
     expect(screen.getByTestId('mockComposeDiscoverChart')).toBeInTheDocument();
@@ -218,7 +417,7 @@ describe('QuerySandbox', () => {
       columns: [{ id: 'host.name', displayAsText: 'host.name', esType: 'keyword' }],
       rows: [{ 'host.name': 'server-01' }, { 'host.name': 'server-02' }],
       totalRowCount: 2,
-      lastExecutedQuery: 'FROM logs-*',
+      lastExecutedQuery: defaultProps.query,
     };
     renderSandbox();
     expect(screen.getByText('2 results')).toBeInTheDocument();

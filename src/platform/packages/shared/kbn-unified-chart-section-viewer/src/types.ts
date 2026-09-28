@@ -11,13 +11,17 @@ import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { MetricsGridSettings, MetricsGridSort } from '@kbn/discover-utils';
+import type { ValuesType } from 'utility-types';
 import type { ExternalServices } from './context/external_services';
+import type { METRICS_SORT_BY, METRICS_SORT_DIRECTION } from './common/constants';
 
 interface ChartSectionActions {
   openInNewTab?: (params: {
     query?: Query | AggregateQuery;
     tabLabel?: string;
     timeRange?: TimeRange;
+    isApproximate?: boolean;
   }) => void;
   updateESQLQuery?: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
 }
@@ -42,6 +46,36 @@ export interface UnifiedMetricsGridProps extends ChartSectionProps {
    * cross-plugin features such as the Streams flyout field section and ErrorCallout.
    */
   externalServices?: ExternalServices;
+  /**
+   * Current aggregation, dimension, and search settings for the metrics grid.
+   * Falls back to `METRICS_GRID_SETTINGS_DEFAULTS` when not provided by the host.
+   */
+  gridSettings?: MetricsGridSettings;
+  /**
+   * Optional callback used to push grid setting changes back to the host
+   * (e.g. Discover's persistent profile state).
+   */
+  onGridSettingsChange?: (update: Partial<MetricsGridSettings>) => void;
+  /**
+   * Current grid sort selection, sourced from the host (e.g. Discover's
+   * persistent profile state). Falls back to `METRICS_GRID_SORT_DEFAULTS` when
+   * not provided.
+   */
+  metricsSort?: MetricsSort;
+  /**
+   * Callback used to push sort changes back to the host (e.g. Discover's
+   * persistent profile state, which is restored on page reload).
+   */
+  onMetricsSortChange?: (sort: MetricsSort) => void;
+  /**
+   * Loads the list of recently explored metrics, falls back to A->Z.
+   */
+  getRecentlyExploredMetrics?: () => readonly string[];
+  /**
+   * Records a metric as recently explored (host persists it), keyed by `getMetricUniqueKey`.
+   * Called when the user interacts with a metric chart. Recorded on click action, hover is ignored.
+   */
+  onMetricExplored?: (metricUniqueKey: string) => void;
 }
 
 export interface Dimension {
@@ -117,3 +151,7 @@ export interface Metric {
   readonly metricTypes: MappingTimeSeriesMetricType[];
   readonly fieldTypes: ES_FIELD_TYPES[];
 }
+
+export type MetricsSortBy = ValuesType<typeof METRICS_SORT_BY>;
+export type MetricsSortDirection = ValuesType<typeof METRICS_SORT_DIRECTION>;
+export type MetricsSort = MetricsGridSort;

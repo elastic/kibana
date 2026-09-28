@@ -1,0 +1,19 @@
+responses:
+  200:
+    description: 'An HTML confirmation page confirming that the response was received and the workflow execution was resumed.'
+    content:
+      text/html:
+        schema:
+          type: string
+        examples:
+          externalResumeSuccessExample:
+            description: 'Success page confirming the response was received'
+            value: '<!DOCTYPE html><html><body><h1>Thank you</h1><p>Your response was received. You can close this window.</p></body></html>'
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/steps/{stepId}/resume/external?token=${RESUME_TOKEN}&approved=true"
+  - lang: Console
+    source: |
+      GET kbn://api/workflows/executions/{executionId}/steps/{stepId}/resume/external?token={resumeToken}&approved=true

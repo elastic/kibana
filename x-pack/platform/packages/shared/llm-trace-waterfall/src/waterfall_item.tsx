@@ -9,6 +9,7 @@ import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { TraceSpan } from './types';
+import { getSpanBadge, getSpanCategory, SPAN_COLORS } from './get_span_category';
 
 interface SpanWithDepth extends TraceSpan {
   depth: number;
@@ -29,52 +30,6 @@ export const INDENT_PX = 16;
 const ROW_HEIGHT = 26;
 const BAR_HEIGHT = 18;
 const BAR_MIN_WIDTH = 2;
-
-export type SpanCategory = 'llm' | 'tool' | 'search' | 'http' | 'other';
-
-export const SPAN_COLORS: Record<SpanCategory, string> = {
-  llm: '#6DCCB1',
-  tool: '#79AAD9',
-  search: '#EE789D',
-  http: '#B9A888',
-  other: '#D6BF57',
-};
-
-export const getSpanCategory = (span: TraceSpan): SpanCategory => {
-  const name = span.name.toLowerCase();
-  const attrs = span.attributes;
-
-  if (attrs?.['gen_ai.system'] || attrs?.['gen_ai.operation.name'] || name.includes('chat')) {
-    return 'llm';
-  }
-  if (name.includes('tool') || attrs?.['gen_ai.tool.name']) {
-    return 'tool';
-  }
-  if (name.includes('retriev') || name.includes('search') || name.includes('esql')) {
-    return 'search';
-  }
-  if (name.startsWith('post') || name.startsWith('get') || name.includes('route')) {
-    return 'http';
-  }
-  return 'other';
-};
-
-const getSpanBadge = (span: TraceSpan): { label: string; color: string } | null => {
-  const attrs = span.attributes;
-  if (attrs?.['gen_ai.system'] || attrs?.['gen_ai.operation.name']) {
-    return { label: 'LLM', color: SPAN_COLORS.llm };
-  }
-  if (attrs?.['gen_ai.tool.name'] || span.name.toLowerCase().includes('tool')) {
-    return { label: 'TOOL', color: SPAN_COLORS.tool };
-  }
-  if (attrs?.['db.system']) {
-    return { label: 'DB', color: SPAN_COLORS.search };
-  }
-  if (attrs?.['http.method'] || attrs?.['http.request.method']) {
-    return { label: 'HTTP', color: SPAN_COLORS.http };
-  }
-  return null;
-};
 
 const getTokenSummary = (span: TraceSpan): string | null => {
   const attrs = span.attributes;

@@ -357,6 +357,11 @@ export class ProposalManager {
     return this.diffHunks.length > 0;
   }
 
+  /** Current content of the underlying editor model, or undefined if unavailable. */
+  getCurrentContent(): string | undefined {
+    return this.editor?.getModel()?.getValue();
+  }
+
   dispose(): void {
     this.isDisposing = true;
     this.rejectAll();

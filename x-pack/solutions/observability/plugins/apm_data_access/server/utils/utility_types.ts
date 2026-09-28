@@ -39,6 +39,11 @@ export const KNOWN_MULTI_VALUED_FIELDS = [
   APM_EVENT_FIELDS_MAP.OTEL_SPAN_LINKS_SPAN_ID,
   APM_EVENT_FIELDS_MAP.SPAN_LINKS_TRACE_ID,
   APM_EVENT_FIELDS_MAP.SPAN_LINKS_SPAN_ID,
+  // gen_ai messages arrive as one array element per message and finish_reasons
+  // as one element per choice — collapsing them to the first element loses data.
+  APM_EVENT_FIELDS_MAP.ATTRIBUTE_GEN_AI_INPUT_MESSAGES,
+  APM_EVENT_FIELDS_MAP.ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES,
+  APM_EVENT_FIELDS_MAP.ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS,
 ] as const;
 
 export type KnownField = ValuesType<typeof CONCRETE_FIELDS>;
@@ -65,6 +70,8 @@ interface TypeOverrideMap {
   [APM_EVENT_FIELDS_MAP.TRANSACTION_SAMPLED]: boolean;
   [APM_EVENT_FIELDS_MAP.PROCESSOR_NAME]: 'transaction' | 'metric' | 'error';
   [APM_EVENT_FIELDS_MAP.HTTP_RESPONSE_STATUS_CODE]: number;
+  [APM_EVENT_FIELDS_MAP.GEN_AI_USAGE_INPUT_TOKENS]: number;
+  [APM_EVENT_FIELDS_MAP.GEN_AI_USAGE_OUTPUT_TOKENS]: number;
   [APM_EVENT_FIELDS_MAP.PROCESS_PID]: number;
   [APM_EVENT_FIELDS_MAP.OBSERVER_VERSION_MAJOR]: number;
   [APM_EVENT_FIELDS_MAP.ERROR_EXC_HANDLED]: boolean;
@@ -94,15 +101,26 @@ export type FlattenedApmEvent = Record<KnownSingleValuedField | KnownMultiValued
 export type UnflattenedApmEvent = UnflattenedKnownFields<FlattenedApmEvent>;
 
 /**
- * Validates whether the field record object contains all required fields. Throws an error
- * if it does not.
+ * Returns the required fields that the field record object does not have a value for. A field
+ * counts as missing when it is absent, `null` or an empty array.
  */
-export function ensureRequiredApmFields(fields: Record<string, any>, required: string[]) {
-  const missingRequiredFields = required.filter((key) => {
+export function getMissingRequiredApmFields(
+  fields: Record<string, any>,
+  required: string[]
+): string[] {
+  return required.filter((key) => {
     const value = fields[key];
 
     return value == null || (Array.isArray(value) && value.length === 0);
   });
+}
+
+/**
+ * Validates whether the field record object contains all required fields. Throws an error
+ * if it does not.
+ */
+export function ensureRequiredApmFields(fields: Record<string, any>, required: string[]) {
+  const missingRequiredFields = getMissingRequiredApmFields(fields, required);
 
   if (missingRequiredFields.length) {
     throw new Error(`Missing required fields (${missingRequiredFields.join(', ')}) in event`);

@@ -141,21 +141,19 @@ test.describe(
       await test.step('search basics card opens console', async () => {
         await pageObjects.gettingStarted.clickTutorialCardAndScrollIntoView('search_basics');
 
-        const embeddedConsole = await pageObjects.gettingStarted.getEmbeddedConsole();
-        await expect(embeddedConsole).toBeVisible();
+        await expect(pageObjects.embeddedConsole.body).toBeVisible();
 
-        await pageObjects.gettingStarted.clickEmbeddedConsoleControlBar();
-        await expect(embeddedConsole).toBeHidden();
+        await pageObjects.embeddedConsole.toggle();
+        await expect(pageObjects.embeddedConsole.body).toBeHidden();
       });
 
       await test.step('semantic search card opens console', async () => {
         await pageObjects.gettingStarted.clickTutorialCardAndScrollIntoView('semantic_search');
 
-        const embeddedConsole = await pageObjects.gettingStarted.getEmbeddedConsole();
-        await expect(embeddedConsole).toBeVisible();
+        await expect(pageObjects.embeddedConsole.body).toBeVisible();
 
-        await pageObjects.gettingStarted.clickEmbeddedConsoleControlBar();
-        await expect(embeddedConsole).toBeHidden();
+        await pageObjects.embeddedConsole.toggle();
+        await expect(pageObjects.embeddedConsole.body).toBeHidden();
       });
     });
   }

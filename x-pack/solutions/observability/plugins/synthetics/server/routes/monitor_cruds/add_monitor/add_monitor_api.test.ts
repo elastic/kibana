@@ -5,12 +5,125 @@
  * 2.0.
  */
 
-import { AddEditMonitorAPI } from './add_monitor_api';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { AddEditMonitorAPI, isPackagePolicyConflictFailure } from './add_monitor_api';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsService } from '../../../synthetics_service/synthetics_service';
 import { syntheticsMonitorAttributes } from '../../../../common/types/saved_objects';
+import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
+import { DeleteMonitorAPI } from '../services/delete_monitor_api';
+
+describe('isPackagePolicyConflictFailure', () => {
+  it('matches Fleet bulkCreate saved-object 409 payloads', () => {
+    expect(
+      isPackagePolicyConflictFailure({
+        statusCode: 409,
+        error: 'Conflict',
+        message: 'Saved object [fleet-package-policies/mon-1-loc-1] conflict',
+      })
+    ).toBe(true);
+  });
+
+  it('matches decorated conflict Errors', () => {
+    expect(
+      isPackagePolicyConflictFailure(
+        SavedObjectsErrorHelpers.createConflictError('fleet-package-policies', 'mon-1-loc-1')
+      )
+    ).toBe(true);
+  });
+
+  it('ignores non-conflict failures', () => {
+    expect(isPackagePolicyConflictFailure(new Error('boom'))).toBe(false);
+    expect(isPackagePolicyConflictFailure({ statusCode: 500, error: 'Error' })).toBe(false);
+    expect(isPackagePolicyConflictFailure(undefined)).toBe(false);
+  });
+});
 
 describe('AddNewMonitorsPublicAPI', () => {
+  describe('revertMonitorIfCreated', () => {
+    const buildApi = (get: jest.Mock) =>
+      new AddEditMonitorAPI({
+        server: { logger: { error: jest.fn() } },
+        spaceId: 'default',
+        monitorConfigRepository: { get },
+      } as any);
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('does not delete policies when a conflicting existing monitor owns the id', async () => {
+      const bulkDelete = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkDelete')
+        .mockResolvedValue(undefined);
+      const api = buildApi(jest.fn().mockResolvedValue({ id: 'monitor-1' }));
+
+      await api.revertMonitorIfCreated({
+        newMonitorId: 'monitor-1',
+        packagePolicyIds: ['monitor-1-location-1'],
+        soCreated: false,
+      });
+
+      expect(bulkDelete).not.toHaveBeenCalled();
+    });
+
+    it('deletes deterministic orphan policies when no monitor owns the id', async () => {
+      const bulkDelete = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkDelete')
+        .mockResolvedValue(undefined);
+      const api = buildApi(jest.fn().mockResolvedValue(null));
+
+      await api.revertMonitorIfCreated({
+        newMonitorId: 'monitor-1',
+        packagePolicyIds: ['monitor-1-location-1'],
+        soCreated: false,
+      });
+
+      expect(bulkDelete).toHaveBeenCalledWith({
+        policyIdsToDelete: ['monitor-1-location-1'],
+        spaceId: 'default',
+      });
+    });
+
+    it('does not delete policies when the monitor SO was created and revert fails', async () => {
+      const bulkDelete = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkDelete')
+        .mockResolvedValue(undefined);
+      jest.spyOn(DeleteMonitorAPI.prototype, 'execute').mockRejectedValue(new Error('forbidden'));
+      const api = buildApi(jest.fn().mockResolvedValue({ id: 'monitor-1' }));
+
+      await api.revertMonitorIfCreated({
+        newMonitorId: 'monitor-1',
+        packagePolicyIds: ['monitor-1-location-1'],
+        soCreated: true,
+      });
+
+      expect(bulkDelete).not.toHaveBeenCalled();
+    });
+
+    it('deletes the monitor and its policies via DeleteMonitorAPI when the monitor SO was created', async () => {
+      const bulkDelete = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkDelete')
+        .mockResolvedValue(undefined);
+      const deleteMonitorExecute = jest
+        .spyOn(DeleteMonitorAPI.prototype, 'execute')
+        .mockResolvedValue(undefined as any);
+      const api = buildApi(jest.fn().mockResolvedValue({ id: 'monitor-1' }));
+
+      await api.revertMonitorIfCreated({
+        newMonitorId: 'monitor-1',
+        packagePolicyIds: ['monitor-1-location-1'],
+        soCreated: true,
+      });
+
+      // The full monitor delete (which tears down its Fleet package policies
+      // too) owns cleanup here; the direct package-policy bulkDelete path is
+      // only for orphan policies from a create that never reached the SO.
+      expect(deleteMonitorExecute).toHaveBeenCalledWith({ monitorIds: ['monitor-1'] });
+      expect(bulkDelete).not.toHaveBeenCalled();
+    });
+  });
+
   it('should normalize schedule', async function () {
     const syntheticsService = new SyntheticsService({
       config: {
@@ -232,6 +345,7 @@ describe('AddNewMonitorsPublicAPI', () => {
         hash: '',
         id: '',
         ignore_https_errors: false,
+        certificate_error_spki_allowlist: [],
         journey_id: '',
         locations: [],
         max_attempts: 2,
@@ -269,6 +383,77 @@ describe('AddNewMonitorsPublicAPI', () => {
         maintenance_windows: [],
         spaces: [],
       });
+    });
+  });
+
+  describe('normalizeMonitor - maintenance windows', () => {
+    const buildApi = (maintenanceWindows: Array<{ id: string; title: string }>) => {
+      const syntheticsService = new SyntheticsService({ config: {} } as any);
+      syntheticsService.getMaintenanceWindows = jest.fn().mockResolvedValue(maintenanceWindows);
+      return {
+        api: new AddEditMonitorAPI({
+          spaceId: 'default',
+          syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+          request: { body: {} },
+        } as any),
+        maintenanceWindows,
+        getMaintenanceWindows: syntheticsService.getMaintenanceWindows,
+      };
+    };
+
+    it('resolves maintenance window names to ids', async () => {
+      const { api, maintenanceWindows, getMaintenanceWindows } = buildApi([
+        { id: 'mw-1', title: 'Weekend window' },
+      ]);
+      const result = await api.normalizeMonitor(
+        { type: 'http', maintenance_windows: ['Weekend window'] } as any,
+        {} as any,
+        undefined,
+        maintenanceWindows as any
+      );
+      expect(result.maintenance_windows).toEqual(['mw-1']);
+      expect(getMaintenanceWindows).not.toHaveBeenCalled();
+    });
+
+    it('keeps valid maintenance window ids', async () => {
+      const { api, maintenanceWindows } = buildApi([{ id: 'mw-1', title: 'Weekend window' }]);
+      const result = await api.normalizeMonitor(
+        { type: 'http', maintenance_windows: ['mw-1'] } as any,
+        {} as any,
+        undefined,
+        maintenanceWindows as any
+      );
+      expect(result.maintenance_windows).toEqual(['mw-1']);
+    });
+
+    it('throws for an unresolved reference', async () => {
+      const { api, maintenanceWindows } = buildApi([{ id: 'mw-1', title: 'Weekend window' }]);
+      await expect(
+        api.normalizeMonitor(
+          { type: 'http', maintenance_windows: ['nope'] } as any,
+          {} as any,
+          undefined,
+          maintenanceWindows as any
+        )
+      ).rejects.toThrow(/nope/);
+    });
+
+    it('throws when maintenance windows are unavailable', async () => {
+      const { api, maintenanceWindows } = buildApi([]);
+      await expect(
+        api.normalizeMonitor(
+          { type: 'http', maintenance_windows: ['mw-1'] } as any,
+          {} as any,
+          undefined,
+          maintenanceWindows as any
+        )
+      ).rejects.toThrow(/mw-1/);
+    });
+
+    it('does not fetch maintenance windows when none are referenced', async () => {
+      const { api, getMaintenanceWindows } = buildApi([]);
+      await api.normalizeMonitor({ type: 'http' } as any, {} as any);
+      expect(getMaintenanceWindows).not.toHaveBeenCalled();
     });
   });
 

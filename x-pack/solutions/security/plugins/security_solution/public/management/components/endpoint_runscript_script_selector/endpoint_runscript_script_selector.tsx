@@ -115,7 +115,7 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
         let dropdownDisplay = (
           <div>
             <EuiToolTip content={endpointScript.name} disableScreenReaderOutput>
-              <div className="eui-textTruncate">
+              <div className="eui-textTruncate" tabIndex={0}>
                 <strong>{endpointScript.name}</strong>
               </div>
             </EuiToolTip>
@@ -157,7 +157,7 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
               <EuiFlexItem grow={false}>
                 <EuiToolTip content={CLEAR_SELECTION_LABEL} disableScreenReaderOutput>
                   <EuiButtonIcon
-                    iconType="crossInCircle"
+                    iconType="crossCircle"
                     color="text"
                     display="empty"
                     onClick={clearCurrentSelectionHandler}

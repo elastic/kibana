@@ -52,15 +52,15 @@ export const offsetRangeToMonacoRange = (
 
   // find the line and start column
   for (let i = 0; i <= expression.length; i++) {
-    if (i < expression.length && expression[i] === '\n') {
-      currentLine++;
-      startOfCurrentLine = i + 1;
-    }
-
     if (i === range.start) {
       startColumn = i + 1 - startOfCurrentLine;
       endColumn = startColumn + range.end - range.start;
       break;
+    }
+
+    if (i < expression.length && expression[i] === '\n') {
+      currentLine++;
+      startOfCurrentLine = i + 1;
     }
   }
 

@@ -15,7 +15,17 @@ const RESTORE_AND_EXECUTE = true;
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const toasts = getService('toasts');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
+
+  // Console consumes `load_from` once and then removes it from the URL. `navigateToApp` expects
+  // the final URL to still start with the requested one and reloads the page when it does not,
+  // and every reload appended the request again. Load the URL exactly once instead.
+  const loadFromDataUri = async (dataUri: string) => {
+    const { origin, pathname } = new URL(await browser.getCurrentUrl());
+    // `browser.get` adds a `_t` timestamp, which forces a full page load even when only the hash changes.
+    await browser.get(`${origin}${pathname}#/console/shell?load_from=${dataUri}`);
+  };
 
   describe('text input', function testTextInput() {
     before(async () => {
@@ -34,9 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.enterText(`GET _search`);
         await PageObjects.console.sleepForDebouncePeriod(1000);
 
-        await PageObjects.common.navigateToApp('console', {
-          hash: '#/console/shell?load_from=data:text/plain,BYUwNmD2Q', // "hello" compressed
-        });
+        await loadFromDataUri('data:text/plain,BYUwNmD2Q'); // "hello" compressed
 
         await retry.try(async () => {
           const actualRequest = await PageObjects.console.getEditorText();
@@ -47,9 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('with invalid data', () => {
         it('shows a toast error', async () => {
-          await PageObjects.common.navigateToApp('console', {
-            hash: '#/console/shell?load_from=data:text/plain,BYUwNmD2',
-          });
+          await loadFromDataUri('data:text/plain,BYUwNmD2');
 
           await retry.try(async () => {
             expect(await toasts.getCount()).to.equal(1);

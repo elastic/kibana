@@ -37,7 +37,7 @@ describe('Install pipeline tests', () => {
       const logger = loggerMock.create();
       await res.install(esClient, logger);
 
-      expect(esClient.ingest.putPipeline).toBeCalled();
+      expect(esClient.ingest.putPipeline).toHaveBeenCalled();
 
       // It should add the @custom pipeline for the main pipeline
       const pipelinesWithCustomProcessor = esClient.ingest.putPipeline.mock.calls.filter((call) =>
@@ -89,7 +89,7 @@ describe('Install pipeline tests', () => {
 
       await res.install(esClient, logger);
 
-      expect(esClient.ingest.putPipeline).toBeCalledTimes(2);
+      expect(esClient.ingest.putPipeline).toHaveBeenCalledTimes(2);
 
       // It should add the @custom pipeline only for the main pipeline
       const pipelinesWithCustomProcessor = esClient.ingest.putPipeline.mock.calls.filter((call) =>

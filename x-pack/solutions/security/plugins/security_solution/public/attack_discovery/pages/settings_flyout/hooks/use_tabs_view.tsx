@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiTabbedContent,
   EuiFlexGroup,
@@ -18,6 +18,9 @@ import { css } from '@emotion/react';
 
 import { SCHEDULE_TAB_ID, SETTINGS_TAB_ID } from '../constants';
 import type { SettingsOverrideOptions } from '../../results/history/types';
+import { useKibana } from '../../../../common/lib/kibana';
+import { AttackDiscoveryEventTypes } from '../../../../common/lib/telemetry';
+import type { AttackDiscoverySettingsTab } from '../../../../common/lib/telemetry';
 import * as i18n from './translations';
 import type { AlertsSelectionSettings } from '../types';
 import { useSettingsView } from './use_settings_view';
@@ -77,6 +80,7 @@ export const useTabsView = ({
   onSettingsChanged,
   settings,
 }: Props): UseTabsView => {
+  const { telemetry } = useKibana().services;
   const { settingsView, actionButtons: filterActionButtons } = useSettingsView({
     connectorId,
     onConnectorIdSelected,
@@ -118,7 +122,7 @@ export const useTabsView = ({
   );
 
   const tabs = useMemo(() => {
-    return [settingsTab, scheduleTab];
+    return [scheduleTab, settingsTab];
   }, [scheduleTab, settingsTab]);
 
   const [selectedTabId, setSelectedTabId] = useState<string>(defaultSelectedTabId ?? tabs[0].id);
@@ -131,9 +135,18 @@ export const useTabsView = ({
     }
   }, [tabs, selectedTabId]);
 
-  const onTabClick = (tab: EuiTabbedContentTab) => {
-    setSelectedTabId(tab.id);
-  };
+  const onTabClick = useCallback(
+    (tab: EuiTabbedContentTab) => {
+      if (tab.id === SCHEDULE_TAB_ID || tab.id === SETTINGS_TAB_ID) {
+        telemetry.reportEvent(AttackDiscoveryEventTypes.SettingsTabChanged, {
+          tab: tab.id as AttackDiscoverySettingsTab,
+        });
+      }
+
+      setSelectedTabId(tab.id);
+    },
+    [telemetry]
+  );
 
   const tabsContainer = useMemo(() => {
     return (
@@ -143,12 +156,15 @@ export const useTabsView = ({
         onTabClick={onTabClick}
       />
     );
-  }, [selectedTab, tabs]);
+  }, [onTabClick, selectedTab, tabs]);
 
-  const actionButtons = useMemo(
-    () => (selectedTabId === 'settings' ? filterActionButtons : scheduleTabButtons),
-    [filterActionButtons, scheduleTabButtons, selectedTabId]
-  );
+  const actionButtons = useMemo(() => {
+    if (selectedTabId === SCHEDULE_TAB_ID) {
+      return scheduleTabButtons;
+    }
+
+    return filterActionButtons;
+  }, [filterActionButtons, scheduleTabButtons, selectedTabId]);
 
   return { tabsContainer, actionButtons };
 };

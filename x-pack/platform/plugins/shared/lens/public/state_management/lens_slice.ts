@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createAction, createReducer, current } from '@reduxjs/toolkit';
+import { createAction, createReducer, current } from 'redux-toolkit-v1';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues, uniq } from 'lodash';
 import type { Filter, Query } from '@kbn/es-query';
@@ -827,14 +827,14 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         const activeVisualization =
           payload.visualizationId && visualizationMap[payload.visualizationId];
         const visualization = state.visualization;
-        let newVizState = visualization.state;
+        let newVisState = visualization.state;
         const ids: string[] = [];
         if (activeVisualization && activeVisualization.getLayerIds) {
           const layerIds = activeVisualization.getLayerIds(visualization.state);
           ids.push(...Object.values(layerIds));
-          newVizState = activeVisualization.initialize(() => ids[0]);
+          newVisState = activeVisualization.initialize(() => ids[0]);
         }
-        const currentVizId = ids[0];
+        const currentVisId = ids[0];
 
         const datasourceState = current(state).datasourceStates[payload.newDatasourceId]
           ? current(state).datasourceStates[payload.newDatasourceId]?.state
@@ -843,7 +843,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
             );
         const updatedState = datasourceMap[payload.newDatasourceId].insertLayer(
           datasourceState,
-          currentVizId
+          currentVisId
         );
 
         return {
@@ -857,7 +857,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           activeDatasourceId: payload.newDatasourceId,
           visualization: {
             ...visualization,
-            state: newVizState,
+            state: newVisState,
           },
         };
       })
@@ -1123,6 +1123,10 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
             targetLayerDimensionGroups: groups,
             dropType,
             indexPatterns: framePublicAPI.dataViews.indexPatterns,
+            activeVisualizationTypeId: activeVisualization.getVisualizationTypeId?.(
+              state.visualization.state,
+              target.layerId
+            ),
           });
           if (!newDatasourceState) {
             return;
@@ -1307,6 +1311,10 @@ function addInitialValueIfAvailable({
                 frame: framePublicAPI,
                 state: activeVisualizationState,
               }).groups,
+              activeVisualizationTypeId: activeVisualization.getVisualizationTypeId?.(
+                activeVisualizationState,
+                layerId
+              ),
             }
           ),
           activeVisualizationState,

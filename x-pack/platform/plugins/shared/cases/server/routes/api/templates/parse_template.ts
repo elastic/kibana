@@ -10,10 +10,18 @@ import type { Template, ParsedTemplate } from '../../../../common/types/domain/t
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
 
 /**
- * Parse a raw template definition (YAML string) into a ParsedTemplate
+ * Parse a raw template definition (YAML string) into a ParsedTemplate.
+ *
+ * `latestVersion` defaults to this document's `templateVersion`. That is correct for creates,
+ * updates, and list/get of the latest revision (`isLatest: true`). Callers fetching a historical
+ * version should pass the tip version explicitly so clients can tell they are not on latest.
+ *
  * NOTE: this will be moved to a service / domain layer or even the schema itself
  */
-export const parseTemplate = (template: Template): ParsedTemplate => {
+export const parseTemplate = (
+  template: Template,
+  { latestVersion }: { latestVersion?: number } = {}
+): ParsedTemplate => {
   const parsedDefinition = ParsedTemplateDefinitionSchema.parse(yamlParse(template.definition));
 
   return {
@@ -29,11 +37,11 @@ export const parseTemplate = (template: Template): ParsedTemplate => {
     author: template.author,
     usageCount: template.usageCount,
     fieldCount: template.fieldCount,
-    fieldNames: template.fieldNames,
+    fieldDefinitions: template.fieldDefinitions,
     lastUsedAt: template.lastUsedAt,
     isDefault: template.isDefault,
     isLatest: template.isLatest ?? false,
     isEnabled: template.isEnabled ?? true,
-    latestVersion: 1,
+    latestVersion: latestVersion ?? template.templateVersion,
   };
 };

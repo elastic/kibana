@@ -10,6 +10,7 @@ import {
   mockTitleGeneration,
   mockTitleGenerationWithError,
   mockFinalAnswer,
+  mockHangingFinalAnswer,
   mockAgentToolCall,
   mockAgentParallelToolCalls,
   mockSearchToolCallWithNaturalLanguageGen,
@@ -53,6 +54,50 @@ export const setupAgentDirectError = async ({
     mockTitleGenerationWithError(proxy, titleError ?? error);
   }
   mockFinalAnswer(proxy, error);
+};
+
+/**
+ * Simple request scenario - generates a title then leaves the final answer request hanging so
+ * the execution can be aborted while it is running. Resolves once the agent has issued the
+ * (hanging) final answer request.
+ */
+export const setupAgentHangingAnswer = ({
+  proxy,
+  title = 'New discussion',
+  continueConversation = false,
+}: {
+  title?: string;
+  proxy: LlmProxy;
+  continueConversation?: boolean;
+}): Promise<void> => {
+  if (!continueConversation) {
+    mockTitleGeneration(proxy, title);
+  }
+  return mockHangingFinalAnswer(proxy);
+};
+
+/**
+ * Tool call scenario without a final answer: the agent calls `toolName` and nothing else is
+ * mocked. Used when the tool call pauses the execution (e.g. a confirmation prompt), so the
+ * final answer is only mocked once the execution resumes.
+ */
+export const setupAgentCallTool = ({
+  proxy,
+  toolName,
+  toolArg,
+  title = 'New discussion',
+  continueConversation = false,
+}: {
+  proxy: LlmProxy;
+  toolName: string;
+  toolArg: Record<string, any>;
+  title?: string;
+  continueConversation?: boolean;
+}) => {
+  if (!continueConversation) {
+    mockTitleGeneration(proxy, title);
+  }
+  mockAgentToolCall({ llmProxy: proxy, toolName, toolArg });
 };
 
 /**

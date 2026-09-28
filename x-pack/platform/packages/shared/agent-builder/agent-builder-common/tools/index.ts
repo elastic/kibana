@@ -10,11 +10,15 @@ export {
   ToolOrigin,
   type ToolDefinition,
   type ToolDefinitionWithSchema,
+  type ToolConfirmationPolicyMode,
+  type ToolConfirmationPolicy,
 } from './definition';
 export { isReservedToolId, validateToolId, toolIdRegexp, toolIdMaxLength } from './tool_ids';
 export {
   platformCoreTools,
-  platformStreamsSigEventsTools,
+  platformCoreCasesTools,
+  platformSignificantEventsTools,
+  contextEngineAiIndexTools,
   attachmentTools,
   internalTools,
   activeToolsCountWarningThreshold,

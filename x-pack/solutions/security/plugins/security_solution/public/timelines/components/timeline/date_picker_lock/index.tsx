@@ -7,7 +7,7 @@
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { inputsActions, inputsSelectors } from '../../../../common/store/inputs';

@@ -20,9 +20,11 @@ import {
   navigateFromKibanaCollapsibleTo,
   openKibanaNavigation,
 } from '../../../tasks/kibana_navigation';
-import { ALERTS_PAGE } from '../../../screens/kibana_navigation';
+import { DASHBOARDS_PAGE } from '../../../screens/kibana_navigation';
 import { deleteDataView, postDataView } from '../../../tasks/api_calls/common';
-import { navigateToAlertsPageInServerless } from '../../../tasks/serverless/navigation';
+import { navigateFromHeaderTo } from '../../../tasks/security_header';
+import { ALERTS as ESS_ALERTS } from '../../../screens/security_header';
+import { ALERTS as SERVERLESS_ALERTS } from '../../../screens/serverless_security_header';
 
 const DATAVIEW = 'audit*';
 
@@ -38,7 +40,8 @@ describe('ESS - pinned filters', { tags: ['@ess'] }, () => {
 
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).find(GLOBAL_SEARCH_BAR_PINNED_FILTER).should('exist');
     openKibanaNavigation();
-    navigateFromKibanaCollapsibleTo(ALERTS_PAGE);
+    navigateFromKibanaCollapsibleTo(DASHBOARDS_PAGE);
+    navigateFromHeaderTo(ESS_ALERTS);
 
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('have.text', 'host.name: test-host');
   });
@@ -48,7 +51,8 @@ describe('ESS - pinned filters', { tags: ['@ess'] }, () => {
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('exist');
 
     openKibanaNavigation();
-    navigateFromKibanaCollapsibleTo(ALERTS_PAGE);
+    navigateFromKibanaCollapsibleTo(DASHBOARDS_PAGE);
+    navigateFromHeaderTo(ESS_ALERTS);
 
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('not.exist');
   });
@@ -65,7 +69,7 @@ describe('SERVERLESS - pinned filters', { tags: ['@serverless'] }, () => {
     visit(DISCOVER_WITH_PINNED_FILTER_URL);
 
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).find(GLOBAL_SEARCH_BAR_PINNED_FILTER).should('exist');
-    navigateToAlertsPageInServerless();
+    navigateFromHeaderTo(SERVERLESS_ALERTS, true);
 
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('have.text', 'host.name: test-host');
   });
@@ -74,7 +78,7 @@ describe('SERVERLESS - pinned filters', { tags: ['@serverless'] }, () => {
     visit(DISCOVER_WITH_FILTER_URL);
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('exist');
 
-    navigateToAlertsPageInServerless();
+    navigateFromHeaderTo(SERVERLESS_ALERTS, true);
 
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('not.exist');
   });

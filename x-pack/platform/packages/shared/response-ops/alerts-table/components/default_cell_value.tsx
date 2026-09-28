@@ -11,15 +11,17 @@ import { isEmpty } from 'lodash';
 import type { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   ALERT_DURATION,
+  ALERT_RULE_CONSUMER,
   ALERT_RULE_NAME,
   ALERT_RULE_UUID,
   ALERT_START,
   TIMESTAMP,
-  ALERT_RULE_CONSUMER,
   ALERT_RULE_PRODUCER,
 } from '@kbn/rule-data-utils';
-import { EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiText } from '@elastic/eui';
 import type { JsonValue } from '@kbn/utility-types';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import type { AlertsTableSupportedConsumers, GetAlertsTableProp } from '../types';
 import {
   alertProducersData,
@@ -38,9 +40,19 @@ export const DefaultCellValue = ({
   'alert' | 'columnId' | 'openLinksInNewTab'
 >) => {
   const {
-    services: { fieldFormats, http },
+    services: {
+      fieldFormats,
+      http,
+      notifications: { toasts },
+    },
   } = useAlertsTableContext();
   const formatField = useFieldFormatter(fieldFormats);
+  const { authorizedToReadRuleForAlert } = useGetRuleTypesPermissions({
+    filteredRuleTypes: [],
+    http,
+    toasts,
+    context: AlertsQueryContext,
+  });
   const rawValue = alert[columnId];
   const value = extractFieldValue(rawValue);
 
@@ -49,7 +61,7 @@ export const DefaultCellValue = ({
     case ALERT_START:
       return <>{formatField('date')(value)}</>;
 
-    case ALERT_RULE_NAME:
+    case ALERT_RULE_NAME: {
       if (!alert) {
         return <>{value}</>;
       }
@@ -58,14 +70,24 @@ export const DefaultCellValue = ({
       if (!ruleName || !ruleUuid) {
         return null;
       }
+      const canReadRule = authorizedToReadRuleForAlert(alert);
+      if (!canReadRule) {
+        return (
+          <EuiText size="s" data-test-subj="alertRuleName">
+            {ruleName}
+          </EuiText>
+        );
+      }
       return (
         <EuiLink
+          data-test-subj="alertRuleNameLink"
           href={http.basePath.prepend(`${STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX}${ruleUuid}`)}
           target={openLinksInNewTab ? '_blank' : undefined}
         >
           {ruleName}
         </EuiLink>
       );
+    }
 
     case ALERT_DURATION:
       return (

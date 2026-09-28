@@ -16,15 +16,13 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
-import type {
-  CreateActionPolicyData,
-  ActionPolicyResponse,
-  UpdateActionPolicyBody,
-} from '@kbn/alerting-v2-schemas';
+import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { FormProvider } from 'react-hook-form';
 import { ActionPolicyForm } from '../form/action_policy_form';
+import type { ActionPolicyFormState } from '../form/types';
 import { useActionPolicyForm } from '../form/use_action_policy_form';
 
 const FLYOUT_TITLE_ID = 'actionPolicyFlyoutTitle';
@@ -33,8 +31,11 @@ const noop = () => {};
 
 interface ActionPolicyFormFlyoutProps {
   onClose: () => void;
-  onSave?: (data: CreateActionPolicyData) => void;
-  onUpdate?: (id: string, data: UpdateActionPolicyBody) => void;
+  /**
+   * Receives the raw form state so the host can create the workflows and build the payload
+   */
+  onSave?: (values: ActionPolicyFormState) => void | Promise<void>;
+  onUpdate?: (id: string, values: ActionPolicyFormState, version: string) => void | Promise<void>;
   isLoading?: boolean;
   initialValues?: ActionPolicyResponse;
 }
@@ -46,17 +47,15 @@ export const ActionPolicyFormFlyout = ({
   isLoading = false,
   initialValues,
 }: ActionPolicyFormFlyoutProps) => {
-  const onSubmitCreate = (data: CreateActionPolicyData) => onSave?.(data);
-  const onSubmitUpdate = (id: string, data: UpdateActionPolicyBody) => onUpdate?.(id, data);
-
+  const application = useService(CoreStart('application'));
   const { methods, isEditMode, isSubmitEnabled, handleSubmit } = useActionPolicyForm({
     initialValues,
-    onSubmitCreate: onSave ? onSubmitCreate : noop,
-    onSubmitUpdate: onUpdate ? onSubmitUpdate : noop,
+    onSubmitCreate: onSave ?? noop,
+    onSubmitUpdate: onUpdate ?? noop,
   });
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby={FLYOUT_TITLE_ID} size="m" ownFocus>
+    <EuiFlyout onClose={onClose} aria-labelledby={FLYOUT_TITLE_ID} size="fill" ownFocus>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m" id={FLYOUT_TITLE_ID}>
           <h2 data-test-subj="title">
@@ -76,7 +75,22 @@ export const ActionPolicyFormFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <FormProvider {...methods}>
-          <ActionPolicyForm />
+          <ActionPolicyForm
+            config={{
+              layout: 'flyout',
+              connectorCreation: {
+                mode: 'new-tab',
+                href: application.getUrlForApp('management', {
+                  deepLinkId: 'triggersActionsConnectors',
+                  path: '/connectors',
+                }),
+              },
+              collapsibleSections: {
+                notificationControls: { initialIsOpen: false },
+                destination: { initialIsOpen: true },
+              },
+            }}
+          />
         </FormProvider>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

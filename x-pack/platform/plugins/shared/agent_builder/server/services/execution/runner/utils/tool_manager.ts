@@ -24,6 +24,10 @@ import type {
   AddToolInput,
 } from '@kbn/agent-builder-server/runner/tool_manager';
 import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
+import {
+  buildGuardedToolContent,
+  DEFAULT_MAX_TOOL_RESULT_TOKENS,
+} from '../../run_agent/utils/tool_result_guardrail';
 
 export const createToolManager = (): ToolManager => {
   return new ToolManager({
@@ -46,6 +50,7 @@ export class ToolManager implements IToolManager {
   private toolTypes: Map<string, ToolType>;
   private executableTools: Map<string, ExecutableTool> = new Map<string, ExecutableTool>();
   private eventEmitter?: AgentEventEmitterFn;
+  private maxToolResultTokens: number = DEFAULT_MAX_TOOL_RESULT_TOKENS;
 
   constructor(params: ToolManagerParams) {
     this.dynamicTools = new LRUCache<ToolName, StructuredTool>({
@@ -58,6 +63,10 @@ export class ToolManager implements IToolManager {
 
   public setEventEmitter(eventEmitter: AgentEventEmitterFn): void {
     this.eventEmitter = eventEmitter;
+  }
+
+  public setMaxToolResultTokens(maxTokens: number): void {
+    this.maxToolResultTokens = maxTokens;
   }
 
   /**
@@ -90,6 +99,13 @@ export class ToolManager implements IToolManager {
             sendEvent: this.eventEmitter,
             toolId: toolIdMapping.get(tool.id),
             addReasoningParam: false,
+            buildContent: ({ results, toolId, toolCallId }) =>
+              buildGuardedToolContent({
+                results,
+                toolId,
+                toolCallId,
+                maxTokens: tool.maxResultTokens ?? this.maxToolResultTokens,
+              }),
           })
         )
       );

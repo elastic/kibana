@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 export const strings = {
   getSwitchLanguageButtonText: () =>
     i18n.translate('kql.switchLanguage.buttonText', {
-      defaultMessage: 'Switch language button.',
+      defaultMessage: 'Switch language',
     }),
   getFilterLanguageLabel: () =>
     i18n.translate('kql.switchLanguage.filterLanguageLabel', {
@@ -59,7 +59,6 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
   isDisabled,
   deps: { docLinks },
 }: QueryLanguageSwitcherProps) {
-  const kueryQuerySyntaxDocs = docLinks.links.query.kueryQuerySyntax;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const button = (
@@ -77,6 +76,9 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
   );
 
   const isKqlSelected = language === 'kuery';
+  const querySyntaxDocs = isKqlSelected
+    ? docLinks.links.query.kueryQuerySyntax
+    : docLinks.links.query.luceneQuerySyntax;
 
   const languageMenuItem = (
     <>
@@ -112,7 +114,7 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
       <EuiContextMenuItem
         key={'documentation'}
         icon={'documentation'}
-        href={kueryQuerySyntaxDocs}
+        href={querySyntaxDocs}
         target="_blank"
       >
         {strings.documentationLabel()}

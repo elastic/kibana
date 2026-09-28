@@ -13,6 +13,7 @@ export type {
   PackagePolicyInputValidationResults,
 } from '../../common/services';
 export { ExperimentalFeaturesService } from './experimental_features';
+export { isAgentlessPoliciesUIEnabled } from './agentless_policies_ui';
 export {
   AgentStatusKueryHelper,
   agentPolicyRouteService,
@@ -45,11 +46,19 @@ export {
   policyHasFleetServer,
 } from '../../common/services';
 
-export { isPackageUnverified, isVerificationError } from './package_verification';
+export {
+  isPackageUnverified,
+  isVerificationError,
+  isAssetVerificationError,
+  getMissingAssetsFromError,
+} from './package_verification';
 export { isPackageUpdatable } from './is_package_updatable';
 export { pkgKeyFromPackageInfo } from './pkg_key_from_package_info';
 export { createExtensionRegistrationCallback } from './ui_extensions';
 export { incrementPolicyName } from './increment_policy_name';
+export type { EnrollmentTokenStatus } from './enrollment_token_status';
+export { getEnrollmentTokenStatus, isEnrollmentTokenExpired } from './enrollment_token_status';
 
 export { getYamlFormatters } from './yaml_formatters';
 export { useYaml } from './use_yaml';
+export { getDashboardsCount, buildDashboardsListLink } from './dashboards_link';

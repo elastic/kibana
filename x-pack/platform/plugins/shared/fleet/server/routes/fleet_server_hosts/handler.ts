@@ -12,12 +12,16 @@ import { isEqual } from 'lodash';
 import Boom from '@hapi/boom';
 
 import { throwIfSslPathInvalid } from '../utils/ssl_utils';
-import { SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
+import {
+  SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
+  SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
+} from '../../constants';
 
 import { FleetServerHostUnauthorizedError } from '../../errors';
 import { agentPolicyService, appContextService, fleetServerHostService } from '../../services';
 
 import type {
+  FleetRequestHandler,
   FleetServerHost,
   GetOneFleetServerHostRequestSchema,
   PostFleetServerHostRequestSchema,
@@ -53,6 +57,18 @@ function ensureNoDuplicateSecrets(fleetServerHost: Partial<FleetServerHost>) {
   }
 }
 
+function sanitizeFleetServerHostForNonSettingsRead(host: FleetServerHost): FleetServerHost {
+  const { secrets, ...hostWithoutSecrets } = host;
+  const sanitizedHost: FleetServerHost = { ...hostWithoutSecrets };
+
+  if (host.ssl) {
+    const { key, es_key, agent_key, ...sslWithoutSecrets } = host.ssl;
+    sanitizedHost.ssl = sslWithoutSecrets;
+  }
+
+  return sanitizedHost;
+}
+
 async function checkFleetServerHostsWriteAPIsAllowed(
   soClient: SavedObjectsClientContract,
   hostUrls: string[]
@@ -62,15 +78,33 @@ async function checkFleetServerHostsWriteAPIsAllowed(
     return;
   }
 
-  // Fleet Server hosts must have the default host URL in serverless.
+  // Fleet Server hosts must have either the default or the private endpoint URL in serverless.
   const serverlessDefaultFleetServerHost = await fleetServerHostService.get(
     SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
   );
-  if (!isEqual(hostUrls, serverlessDefaultFleetServerHost.host_urls)) {
-    throw new FleetServerHostUnauthorizedError(
-      `Fleet server host must have default URL in serverless: ${serverlessDefaultFleetServerHost.host_urls}`
-    );
+  if (isEqual(hostUrls, serverlessDefaultFleetServerHost.host_urls)) {
+    return;
   }
+
+  try {
+    const privateFleetServerHost = await fleetServerHostService.get(
+      SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID
+    );
+    if (isEqual(hostUrls, privateFleetServerHost.host_urls)) {
+      return;
+    }
+  } catch (e) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      throw e;
+    }
+    appContextService
+      .getLogger()
+      .debug(`Could not fetch private Fleet Server host SO: ${e?.message ?? e}`);
+  }
+
+  throw new FleetServerHostUnauthorizedError(
+    `Fleet server host must have default URL in serverless: ${serverlessDefaultFleetServerHost.host_urls}`
+  );
 }
 
 export const postFleetServerHost: RequestHandler<
@@ -194,10 +228,18 @@ export const putFleetServerHostHandler: RequestHandler<
   }
 };
 
-export const getAllFleetServerHostsHandler: RequestHandler = async (context, request, response) => {
+export const getAllFleetServerHostsHandler: FleetRequestHandler = async (
+  context,
+  request,
+  response
+) => {
+  const fleetContext = await context.fleet;
   const res = await fleetServerHostService.list();
+  const items = fleetContext.authz.fleet.readSettings
+    ? res.items
+    : res.items.map(sanitizeFleetServerHostForNonSettingsRead);
   const body = {
-    items: res.items,
+    items,
     page: res.page,
     perPage: res.perPage,
     total: res.total,

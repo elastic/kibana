@@ -12,6 +12,9 @@ export {
   interpolateEsqlQuery,
   validateEsqlQuery,
 } from './esql';
+export { listDatasets, getDatasetFields, type DatasetInfo } from './datasets';
+export { listViews, getViewFields, type ViewInfo } from './views';
+export { FROZEN_TIER, excludeFrozenTierQuery, applyFrozenTierExclusion } from './data_tiers';
 export {
   flattenMapping,
   cleanupMapping,
@@ -20,6 +23,7 @@ export {
   type MappingField,
 } from './mappings';
 export {
+  fetchFieldCaps,
   processFieldCapsResponse,
   processFieldCapsResponsePerIndex,
   type FieldListFromFieldCapsResponse,

@@ -22,6 +22,22 @@ import type { JsonSchema } from './schema/common/json_model_shape_schema';
 export const KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX = '#/kibana/definitions/' as const;
 
 /**
+ * Stable registry key for the alerting v2 notification group input definition.
+ * Use this constant in both the registry and any code that references the definition
+ * (e.g. `$ref: \`${KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX}${ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID}\``).
+ */
+export const ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID =
+  'alertingV2NotificationGroup' as const;
+
+/**
+ * Stable registry key for the Security alert-analysis Worker caller `alerts` input definition.
+ * Use this constant in both the registry and any code that references the definition
+ * (e.g. `$ref: \`${KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX}${SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID}\``).
+ */
+export const SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID =
+  'securityAlertAnalysisCallerAlerts' as const;
+
+/**
  * JSON Schema mirror of the alerting v2 action-policy dispatch payload for workflow input authoring.
  * Use as a workflow **input** when a step should receive the grouped notification context
  * (e.g. `inputs.payload` on workflows triggered by `action_policy`).
@@ -60,8 +76,16 @@ const alertingV2NotificationGroup: JsonSchema = {
             description: 'Timestamp of the latest event seen for this episode',
           },
           rule_id: {
-            type: 'string',
+            type: ['string', 'null'],
             description: 'Identifier of the rule that produced this episode',
+          },
+          source: {
+            type: 'string',
+            description: 'Origin of the alert events for this episode (e.g. `internal`)',
+          },
+          space_id: {
+            type: 'string',
+            description: 'Identifier of the space the episode belongs to',
           },
           group_hash: {
             type: 'string',
@@ -76,19 +100,111 @@ const alertingV2NotificationGroup: JsonSchema = {
             description: 'Current lifecycle status of the alert episode',
             enum: ['inactive', 'pending', 'active', 'recovering'],
           },
+          severity: {
+            type: 'string',
+            description: 'Severity of the alert episode',
+            enum: ['info', 'low', 'medium', 'high', 'critical'],
+          },
           data: {
             type: 'object',
             description: 'Data of the alert episode',
             additionalProperties: true,
           },
         },
-        required: ['last_event_timestamp', 'rule_id', 'group_hash', 'episode_id', 'episode_status'],
+        required: [
+          'last_event_timestamp',
+          'rule_id',
+          'source',
+          'space_id',
+          'group_hash',
+          'episode_id',
+          'episode_status',
+        ],
         additionalProperties: false,
       },
     },
+    rules: {
+      type: 'object',
+      description:
+        'Rule metadata keyed by rule id. Each value contains rule metadata (e.g. `{ name }`) for a rule referenced by the episodes. Access via `rules[episode.rule_id].name`.',
+      additionalProperties: true,
+    },
   },
-  required: ['id', 'policyId', 'groupKey', 'episodes'],
+  required: ['id', 'policyId', 'groupKey', 'episodes', 'rules'],
   additionalProperties: false,
+};
+
+/**
+ * JSON Schema mirror of the Security alert-analysis Worker caller `alerts` array.
+ * Reference from workflow YAML as `$ref: '#/kibana/definitions/securityAlertAnalysisCallerAlerts'`.
+ *
+ * @see AlertAnalysisCallerAlertItem / AlertAnalysisCallerAlerts in
+ * security_solution/common/workflows/alert_analysis_workflow.ts
+ */
+const securityAlertAnalysisCallerAlerts: JsonSchema = {
+  type: 'array',
+  title: 'Security alert analysis caller alerts',
+  description:
+    'Alert documents supplied by a workflow.execute caller (e.g. AlertZero Alert Triage Worker). Bounded to 1000 items; each item must include _id, _index (Security alerts alias or backing index), @timestamp, and kibana.alert.rule.uuid. Extra ES alert fields are allowed.',
+  maxItems: 1000,
+  items: {
+    type: 'object',
+    required: ['_id', '_index', '@timestamp', 'kibana'],
+    additionalProperties: true,
+    properties: {
+      _id: {
+        type: 'string',
+        minLength: 1,
+        maxLength: 512,
+      },
+      _index: {
+        type: 'string',
+        minLength: 1,
+        maxLength: 512,
+        pattern: '^\\.(internal\\.)?(preview\\.)?alerts-security\\.alerts-[a-zA-Z0-9._-]+$',
+        description:
+          'Security alerts alias or backing index. Related-alert graph search uses the executing-space alerts alias (not this value) so a cross-space index cannot leak enrichment; still required so caller payloads name a Security alerts index.',
+      },
+      '@timestamp': {
+        type: 'string',
+        format: 'date-time',
+        minLength: 1,
+        maxLength: 64,
+        description:
+          'UTC (`Z` suffix, as stored on Security alerts). Used verbatim as the ES date-math enrichment anchor (e.g. `||-24h`).',
+      },
+      kibana: {
+        type: 'object',
+        required: ['alert'],
+        additionalProperties: true,
+        properties: {
+          alert: {
+            type: 'object',
+            required: ['rule'],
+            additionalProperties: true,
+            properties: {
+              rule: {
+                type: 'object',
+                required: ['uuid'],
+                additionalProperties: true,
+                properties: {
+                  uuid: {
+                    type: 'string',
+                    minLength: 1,
+                    maxLength: 512,
+                  },
+                  name: {
+                    type: 'string',
+                    maxLength: 1024,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 };
 
 /**
@@ -100,7 +216,8 @@ const alertingV2NotificationGroup: JsonSchema = {
  * runtime-only keys still resolve at execution via {@link resolveRef} if added before validate.
  */
 export const builtinWorkflowInputDefinitions: Record<string, JsonSchema> = {
-  alertingV2NotificationGroup,
+  [ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID]: alertingV2NotificationGroup,
+  [SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID]: securityAlertAnalysisCallerAlerts,
 };
 
 const builtinRefList = Object.keys(builtinWorkflowInputDefinitions).map(

@@ -6,9 +6,14 @@
  */
 import type { Dictionary } from 'lodash';
 import { keyBy, keys, merge } from 'lodash';
-import type { RequestHandler } from '@kbn/core/server';
+import type { RequestHandler, SavedObject } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import pMap from 'p-map';
-import type { IndicesDataStreamsStatsDataStreamsStatsItem } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesDataStreamsStatsDataStreamsStatsItem,
+  MsearchRequestItem,
+  SearchTotalHits,
+} from '@elastic/elasticsearch/lib/api/types';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 
@@ -18,7 +23,10 @@ import type { GetDataStreamsResponse } from '../../../common/types';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import type { MeteringStats } from '../../services/data_streams';
 import { dataStreamService } from '../../services/data_streams';
-import { MAX_CONCURRENT_DATASTREAM_OPERATIONS } from '../../constants';
+import {
+  DATA_STREAM_INDEX_PATTERN_REGEX,
+  MAX_CONCURRENT_DATASTREAM_OPERATIONS,
+} from '../../constants';
 import { appContextService } from '../../services';
 import { FleetUnauthorizedError } from '../../errors';
 
@@ -135,15 +143,17 @@ export const getListHandler: RequestHandler = async (context, request, response)
       )
     );
     // Ignore dashboards not found
-    const allDashboardSavedObjects = allDashboardSavedObjectsResponse.saved_objects.filter((so) => {
-      if (so.error) {
-        if (so.error.statusCode === 404) {
-          return false;
+    const allDashboardSavedObjects = allDashboardSavedObjectsResponse.saved_objects.filter(
+      (so): so is SavedObject<{ title?: string }> => {
+        if (isSavedObjectErrorResult(so)) {
+          if (so.error.statusCode === 404) {
+            return false;
+          }
+          throw so.error;
         }
-        throw so.error;
+        return true;
       }
-      return true;
-    });
+    );
 
     const allDashboardSavedObjectsById = keyBy(
       allDashboardSavedObjects,
@@ -359,6 +369,98 @@ export const getDeprecatedILMCheckHandler: RequestHandler = async (context, requ
         `Not enough permissions to query ILM policies: ${err.message}`
       );
     }
+    throw err;
+  }
+};
+
+/**
+ * True when an ES error is (or wraps) a `security_exception`. The type can sit at the top level or
+ * be nested under `root_cause` when the failure is wrapped by a search phase exception.
+ */
+function isSecurityException(error: any): boolean {
+  if (!error) return false;
+  if (error.type === 'security_exception') return true;
+  return (error.root_cause ?? []).some((c: { type?: string }) => c.type === 'security_exception');
+}
+
+export const getHasDataHandler: RequestHandler = async (context, request, response) => {
+  const { dataStreams: dataStreamsParam, start } = request.query as {
+    dataStreams: string;
+    start: string;
+  };
+  const patterns = dataStreamsParam.split(',').map((p: string) => p.trim());
+
+  const invalidPattern = patterns.find((p: string) => !DATA_STREAM_INDEX_PATTERN_REGEX.test(p));
+  if (invalidPattern) {
+    return response.badRequest({
+      body: { message: `Invalid index pattern: "${invalidPattern}"` },
+    });
+  }
+
+  const { elasticsearch } = await context.core;
+  const esClient = elasticsearch.client.asCurrentUser;
+
+  const searches: MsearchRequestItem[] = patterns.flatMap((pattern: string) => [
+    { index: pattern, ignore_unavailable: true, allow_partial_search_results: true },
+    {
+      size: 0,
+      terminate_after: 1,
+      track_total_hits: 1,
+      query: { bool: { filter: [{ range: { '@timestamp': { gte: start } } }] } },
+    },
+  ]);
+
+  try {
+    const msearchResponse = await esClient.msearch({ searches });
+    const results: Record<string, boolean> = {};
+
+    patterns.forEach((pattern: string, i: number) => {
+      const hit = msearchResponse.responses[i];
+      if ('error' in hit) {
+        // msearch reports a per-index failure on the response item rather than throwing, so an
+        // access denial arrives here. Surface it as 403 instead of reporting "no data" — a
+        // silent `false` would leave callers polling forever with no sign of the real problem.
+        if (isSecurityException(hit.error)) {
+          throw new FleetUnauthorizedError(
+            `Not enough permissions to query data stream "${pattern}"`
+          );
+        }
+        results[pattern] = false;
+      } else {
+        results[pattern] = ((hit.hits.total as SearchTotalHits)?.value ?? 0) > 0;
+      }
+    });
+
+    return response.ok({ body: { results } });
+  } catch (err) {
+    if (err instanceof FleetUnauthorizedError) {
+      throw err;
+    }
+
+    const isResponseError = err instanceof errors.ResponseError;
+
+    if (isResponseError && isSecurityException(err?.body?.error)) {
+      throw new FleetUnauthorizedError(
+        `Not enough permissions to query data streams: ${err.message}`
+      );
+    }
+
+    // "No shards available" and "no data yet" are the same answer for the caller — a data stream
+    // that exists but has not been written to yet can report this.
+    const isNoShards =
+      isResponseError &&
+      err?.body?.error?.type === 'search_phase_execution_exception' &&
+      (err?.body?.error?.root_cause ?? []).some(
+        (c: { type?: string }) => c.type === 'no_shard_available_action_exception'
+      );
+    if (isNoShards) {
+      const results: Record<string, boolean> = {};
+      patterns.forEach((p: string) => {
+        results[p] = false;
+      });
+      return response.ok({ body: { results } });
+    }
+
     throw err;
   }
 };

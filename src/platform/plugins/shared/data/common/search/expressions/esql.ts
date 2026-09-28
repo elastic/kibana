@@ -87,13 +87,19 @@ function extractTypeAndReason(attributes: any): { type?: string; reason?: string
   return {};
 }
 
-function mapResponseToDatatable(body: ESQLSearchResponse, query: string, input: Input): Datatable {
+function mapResponseToDatatable(
+  body: ESQLSearchResponse,
+  query: string,
+  input: Input,
+  warning?: string
+): Datatable {
   // all_columns in the response means that there is a separation between
   // columns with data and empty columns
   // columns contain only columns with data while all_columns everything
   const hasEmptyColumns = body.all_columns && body.all_columns?.length > body.columns.length;
   const lookup = new Set(hasEmptyColumns ? body.columns?.map(({ name }) => name) || [] : []);
   const indexPattern = getIndexPatternFromESQLQuery(query);
+  const approximationApplied = body.approximation_applied;
 
   const appliedTimeRange = input?.timeRange
     ? {
@@ -115,13 +121,15 @@ function mapResponseToDatatable(body: ESQLSearchResponse, query: string, input: 
     : null;
 
   const allColumns =
-    (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
+    (body.all_columns ?? body.columns)?.map(({ name, type, original_types, _meta }) => {
       const originalTypes = original_types ?? [];
       const hasConflict = type === 'unsupported' && originalTypes.length > 1;
       const kibanaFieldType = hasConflict
         ? KBN_FIELD_TYPES.CONFLICT
         : esFieldTypeToKibanaFieldType(type);
 
+      const isSourceFieldFilterable =
+        !querySummary.newColumns.has(name) || (renameSourceFieldMap?.has(name) ?? false);
       const sourceField = renameSourceFieldMap?.get(name) ?? name;
 
       return {
@@ -137,14 +145,17 @@ function mapResponseToDatatable(body: ESQLSearchResponse, query: string, input: 
                   params: {},
                   indexPattern,
                   sourceField,
+                  isSourceFieldFilterable,
                 }
               : {
                   indexPattern,
                   sourceField,
+                  isSourceFieldFilterable,
                 },
           params: {
             id: kibanaFieldType,
           },
+          ...(_meta !== undefined && { esMeta: _meta }),
         },
         isNull: hasEmptyColumns ? !lookup.has(name) : false,
         isComputedColumn: isComputedColumn(name, querySummary),
@@ -174,10 +185,11 @@ function mapResponseToDatatable(body: ESQLSearchResponse, query: string, input: 
       statistics: {
         totalCount: normalizedValues.length,
       },
+      ...(approximationApplied !== undefined && { approximationApplied }),
     },
     columns: updatedWithVariablesColumns,
     rows,
-    warning: undefined,
+    warning,
   } as Datatable;
 }
 
@@ -267,6 +279,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           : 'UTC',
         locale,
         include_execution_metadata: true,
+        settings: { column_metadata: true },
       };
 
       if (input) {
@@ -311,7 +324,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
       }
 
       try {
-        const { rawResponse } = await searchService.esql(
+        const { rawResponse, warning } = await searchService.esql(
           {
             query: fixedQuery,
             params: params.params,
@@ -324,8 +337,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             sessionId: getSearchSessionId(),
             executionContext: getExecutionContext(),
             projectRouting: input?.projectRouting,
+            approximation: input?.isApproximate,
             dropNullColumns: true,
             includeExecutionMetadata: true,
+            columnMetadata: true,
             inspector: {
               adapter: inspectorAdapters.requests ?? new RequestAdapter(),
               title:
@@ -344,7 +359,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         );
 
         // Map to Datatable
-        return mapResponseToDatatable(rawResponse as any, query, input);
+        return mapResponseToDatatable(rawResponse as any, query, input, warning);
       } catch (error) {
         // Error formatting
         if (!error.attributes) {

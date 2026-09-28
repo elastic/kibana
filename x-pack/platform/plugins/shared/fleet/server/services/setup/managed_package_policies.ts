@@ -365,6 +365,10 @@ async function upgradePackagePolicy(
   }
 
   try {
+    // Agentless is intentionally NOT filtered out under disableAgentlessLegacyAPI: the flag targets
+    // the public legacy policy APIs, not this managed/keep_policies_up_to_date auto-upgrade — which
+    // is the only automatic upgrader for those packages. Same engine the agentless API uses, and the
+    // periodic deployment-sync task reconciles the workload by revision.
     await packagePolicyService.upgrade(
       soClient,
       esClient,

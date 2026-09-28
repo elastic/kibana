@@ -5,11 +5,31 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT UI. All 15 tests validate URL-based Discover state
+ * restoration driven by the Kibana alerting system — they navigate to Discover via alert-generated
+ * links and assert on data view selection, query/filter state, doc counts, and toast messages.
+ * Every assertion requires a real browser; none can be replaced by an API test.
+ *
+ * Migration notes:
+ * - Tests are deeply sequential: each `it` leaves side effects the next one depends on
+ *   (sourceDataViewId set in test 1, rule created in test 3, data view mutated in test 8, deleted
+ *   in test 12, rule deleted in test 14). Port as a single `test()` with `test.step`, or fully
+ *   decouple each case with its own setup/teardown so Playwright can retry them independently.
+ * - The suite requires an `.index` connector (writable ES output index). The Scout server config
+ *   needs the equivalent server args from functional_with_es_ssl (email/action transport settings).
+ * - The `defineSearchSourceAlert` helper uses `monacoEditor.setCodeEditorValue`; verify the Scout
+ *   `monacoEditor` fixture covers this before porting.
+ * - Several tests wait for real alert execution to produce output documents — keep timeouts
+ *   generous.
+ * - Serverless FTR duplicate to delete after Scout achieves stateful + serverless coverage:
+ *   x-pack/platform/test/serverless/functional/test_suites/discover_ml_uptime/discover/search_source_alert.ts
+ */
 // Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover_ml_uptime/discover/search_source_alert.ts
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
-import { openDiscoverSearchThresholdRuleFlyout } from '../../../../functional/apps/discover/open_search_threshold_rule_flyout';
+import { openDiscoverSearchThresholdRuleFlyout } from './open_search_threshold_rule_flyout';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -294,6 +314,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const clickViewInApp = async (ruleName: string) => {
     // navigate to discover using view in app link
     await openAlertRuleInManagement(ruleName);
+    await testSubjects.click('app-menu-overflow-button');
     await testSubjects.click('ruleDetails-viewInDiscover');
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
@@ -319,9 +340,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const checkUpdatedRuleParamsState = async () => {
     expect(await toasts.getCount()).to.be(0);
     const queryString = await queryBar.getQueryString();
-    const hasFilter = await filterBar.hasFilter('message.keyword', 'msg-1');
+    await filterBar.expectFilter('message.keyword', 'msg-1');
     expect(queryString).to.be.equal('message:msg-1');
-    expect(hasFilter).to.be.equal(true);
     expect(await dataGrid.getDocCount()).to.be(1);
   };
 
@@ -460,7 +480,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       const dataViewsElem = await testSubjects.find('euiSelectableList');
       const sourceDataViewOption = await dataViewsElem.findByCssSelector(
-        `[title="${SOURCE_DATA_VIEW}"]`
+        `[data-test-subj="dataView-${SOURCE_DATA_VIEW}"]`
       );
       await sourceDataViewOption.click();
 
@@ -479,6 +499,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await openAlertRuleInManagement(RULE_NAME);
+      await testSubjects.click('app-menu-overflow-button');
       await testSubjects.click('ruleDetails-viewInDiscover');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -495,7 +516,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await openAlertRuleInManagement(RULE_NAME);
 
       // change rule configuration
-      await testSubjects.click('ruleActionsButton');
+      await testSubjects.click('app-menu-overflow-button');
       await testSubjects.click('openEditRuleFlyoutButton');
       await queryBar.setQuery('message:msg-1');
       await filterBar.addFilter({ field: 'message.keyword', operation: 'is', value: 'msg-1' });
@@ -550,9 +571,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // change title
       await testSubjects.click('editIndexPatternButton');
-      await testSubjects.setValue('createIndexPatternTitleInput', 'search-s', {
-        clearWithKeyboard: true,
-        typeCharByChar: true,
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await retry.try(async () => {
+        await PageObjects.settings.setIndexPatternField('search-s*');
       });
       await testSubjects.click('saveIndexPatternButton');
       await testSubjects.click('confirmModalConfirmButton');
@@ -691,9 +712,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       const dataViewsElem = await testSubjects.find('euiSelectableList');
       const sourceDataViewOption = await dataViewsElem.findByCssSelector(
-        `[title="${SOURCE_DATA_VIEW}"]`
+        `[data-test-subj="dataView-${SOURCE_DATA_VIEW}"]`
       );
       await sourceDataViewOption.click();
+
+      await retry.waitFor('selection to happen', async () => {
+        const dataViewSelector = await testSubjects.find('selectDataViewExpression');
+        return (await dataViewSelector.getVisibleText()) === `DATA VIEW\n${SOURCE_DATA_VIEW}`;
+      });
 
       await testSubjects.click('rulePageFooterSaveButton');
 
@@ -711,7 +737,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        return await testSubjects.exists('ruleStatus-ok');
+        return await testSubjects.waitForExists('ruleStatus-ok', { timeout: 5000 });
       });
     });
   });

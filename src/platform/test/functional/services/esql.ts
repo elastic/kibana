@@ -178,9 +178,7 @@ export class ESQLService extends FtrService {
     await this.retry.waitFor('ES|QL control flyout to close after saving the control', async () => {
       await this.testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
       await this.testSubjects.click('saveEsqlControlsFlyoutButton');
-      const flyoutOpen = await this.testSubjects.exists('create_esql_control_flyout', {
-        timeout: 2000,
-      });
+      const flyoutOpen = await this.testSubjects.exists('create_esql_control_flyout');
       return !flyoutOpen;
     });
 
@@ -251,14 +249,41 @@ export class ESQLService extends FtrService {
     );
   }
 
+  public async getEsqlBadgeHoverText(badgeClassName: string): Promise<string> {
+    return this.retry.try(async () => {
+      await this.browser.moveMouseTo({ x: 0, y: 0 });
+      const badge = await this.findService.byCssSelector(`.${badgeClassName}`);
+      await badge.moveMouseTo();
+
+      // Wait for the hover popup to actually be displayed, not just present in the DOM.
+      await this.findService.displayedByCssSelector(`.monaco-hover`);
+      const rows = await this.findService.allByCssSelector(`.monaco-hover .hover-row`);
+      if (!rows.length) {
+        throw new Error('Monaco hover has no rows yet');
+      }
+
+      const texts = await Promise.all(rows.map((row) => row.getVisibleText()));
+      const text = texts.join(' ').trim();
+      if (!text) {
+        throw new Error('Monaco hover rows have no text yet');
+      }
+
+      return text;
+    });
+  }
+
   public async selectEsqlBadgeHoverOption(badgeClassName: string, optionText: string) {
     await this.retry.try(async () => {
       await this.browser.moveMouseTo({ x: 0, y: 0 });
       const badge = await this.findService.byCssSelector(`.${badgeClassName}`);
       await badge.moveMouseTo();
 
-      await this.findService.byCssSelector(`.monaco-hover`);
+      await this.findService.displayedByCssSelector(`.monaco-hover`);
       const options = await this.findService.allByCssSelector(`.monaco-hover .hover-row`);
+      if (!options.length) {
+        throw new Error('Monaco hover has no rows yet');
+      }
+
       let optionToSelect;
       for (const option of options) {
         if ((await option.getVisibleText()).includes(optionText)) {
