@@ -196,6 +196,7 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
                               key="from-library"
                               icon="download"
                               disabled={isAddDisabled}
+                              data-test-subj="agentConnectorsAddFromLibraryMenuItem"
                               onClick={() => {
                                 setIsAddMenuOpen(false);
                                 openLibrary();
@@ -206,6 +207,7 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
                             <EuiContextMenuItem
                               key="create-new"
                               icon="plusCircle"
+                              data-test-subj="agentConnectorsCreateNewMenuItem"
                               onClick={() => {
                                 setIsAddMenuOpen(false);
                                 openCreateFlyout();
