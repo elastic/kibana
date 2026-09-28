@@ -29,6 +29,7 @@ import {
   HIGHLIGHTED_STEP_TRIGGER,
   setHighlightedStepId,
 } from '../../../entities/workflows/store/workflow_detail/slice';
+import type { WorkflowUrlSelectionSetter } from '../../../hooks/use_workflow_url_state';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import type { RerunWorkflowExecutionParams } from '../../../pages/executions/build_replay_inputs_from_execution_context';
 import { useChildWorkflowExecutions } from '../../workflow_execution_detail/model/use_child_workflow_executions';
@@ -51,7 +52,7 @@ export interface WorkflowExecutionDetailProps {
   onReRunExecution?: (params: RerunWorkflowExecutionParams) => Promise<void>;
   showBackButton?: boolean;
   selectedStepExecutionId?: string | null;
-  onSelectedStepExecutionChange?: (stepExecutionId: string | null) => void;
+  onSelectedStepExecutionChange?: WorkflowUrlSelectionSetter;
 }
 
 function assignSelectedStepId(
@@ -110,7 +111,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
           isTerminalStatus(workflowExecution?.status) ||
           workflowExecution?.status === ExecutionStatus.QUEUED)
       ) {
-        setSelectedStepExecution(PSEUDO_STEP_OVERVIEW);
+        setSelectedStepExecution(PSEUDO_STEP_OVERVIEW, { replace: true });
       }
     }, [workflowExecution, selectedStepExecutionId, setSelectedStepExecution, executionId]);
 

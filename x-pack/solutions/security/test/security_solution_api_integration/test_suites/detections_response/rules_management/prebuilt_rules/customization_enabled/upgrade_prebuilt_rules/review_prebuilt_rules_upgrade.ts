@@ -563,6 +563,36 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(tagsCounts?.['tag-c']).toBe(1);
       });
 
+      it('returns isCustomized facet counts keyed by "true" / "false"', async () => {
+        await setUpRuleUpgrade({
+          assets: [
+            {
+              installed: { rule_id: 'rule-a', type: 'query', name: 'Rule A', version: 1 },
+              patch: { rule_id: 'rule-a', name: 'Rule A customized' },
+              upgrade: { rule_id: 'rule-a', type: 'query', name: 'Rule A v2', version: 2 },
+            },
+            {
+              installed: { rule_id: 'rule-b', type: 'query', name: 'Rule B', version: 1 },
+              patch: {},
+              upgrade: { rule_id: 'rule-b', type: 'query', name: 'Rule B v2', version: 2 },
+            },
+            {
+              installed: { rule_id: 'rule-c', type: 'query', name: 'Rule C', version: 1 },
+              patch: {},
+              upgrade: { rule_id: 'rule-c', type: 'query', name: 'Rule C v2', version: 2 },
+            },
+          ],
+          deps,
+        });
+
+        const response = await reviewPrebuiltRulesToUpgrade(supertest, {
+          aggregations: { counts: ['isCustomized'] },
+        });
+
+        expect(response.total).toBe(3);
+        expect(response.counts?.isCustomized).toEqual({ true: 1, false: 2 });
+      });
+
       it('fields narrows current_rule / target_rule while preserving baseline identity and the diff', async () => {
         await setUpRuleUpgrade({
           assets: [

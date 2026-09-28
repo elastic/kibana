@@ -26,6 +26,7 @@ const buildNlToEsqlAdditionalContext = (currentQuery: string): string => {
     'Index selection guidance:',
     '- If the instruction explicitly names a technology, product, or data source (e.g. "logstash", "nginx", "apache", "metrics"), prefer indices whose names contain that keyword over indices that merely have matching field names.',
     '- Treat a bare word like "logstash" as an explicit index name hint: prefer indices whose names start with or contain that word.',
+    '- An ES|QL view is a valid source. If the instruction names a view, select that view rather than reporting that no index exists.',
   ];
 
   if (currentQuery) {
@@ -118,6 +119,7 @@ export const registerNLtoESQLRoute = (
           additionalContext,
           execute: 'none',
           includeDatasets,
+          includeViews: true,
         });
 
         return response.ok({

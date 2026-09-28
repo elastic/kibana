@@ -66,6 +66,7 @@ export class ConversationProposalsService {
     const { proposals, total } = await this.proposalsService.list(
       { category, status: 'pending', excludeSuperseded: true, excludeExpired: false, size, from },
       spaceId,
+      request,
       [{ createdAt: { order: 'desc' as const } }, ...TIEBREAKER]
     );
 
@@ -87,6 +88,7 @@ export class ConversationProposalsService {
         from,
       },
       spaceId,
+      request,
       [
         { decidedAt: { order: 'desc' as const } },
         { createdAt: { order: 'desc' as const } },
@@ -127,7 +129,7 @@ export class ConversationProposalsService {
 
   /**
    * Second pass after the proposal list. Impact lives in its own index, keyed
-   * by conversationId. The client checks `read_impact` and derives the space
+   * by conversationId. The client checks the investigations manage privilege and derives the space
    * from the request. Failure here omits the field the same way a missing
    * title does — the queue is still usable without pills.
    */

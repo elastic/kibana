@@ -107,6 +107,7 @@ export const generateAPIKey = async ({
     metadata: {
       description:
         'Created for synthetics service to be passed to the heartbeat to communicate with ES',
+      managed: true,
     },
   });
 };
