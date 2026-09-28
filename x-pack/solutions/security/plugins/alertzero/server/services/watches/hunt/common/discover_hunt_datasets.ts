@@ -13,10 +13,23 @@ export interface DiscoveredDataset {
   index_pattern: string;
   /** e.g. 'okta.system' */
   dataset: string;
-  /** dataset's vendor token: the segment before the first '.', e.g. 'okta'; whole dataset when it has no '.' */
+  /**
+   * Dataset's vendor token: the segment before the first '.' or '-', e.g. 'okta' for
+   * `okta.system` and for `okta-prod` (a dashed namespace this parser could not tell
+   * apart from the dataset). Whole dataset when it has neither.
+   */
   vendor: string;
   /** backing data stream names that produced this entry, e.g. ['logs-okta.system-default'] */
   data_streams: string[];
+  /**
+   * What a hunt actually searches for this dataset. Normally `[index_pattern]`. When
+   * another discovered dataset extends this one's name with a dash (`windows` beside
+   * `windows-defender`), `logs-windows-*` would also match `logs-windows-defender-*`, so
+   * the entry searches its own namespaces instead: `logs-windows-default*`, one per
+   * backing stream. The trailing `*` keeps Tier 2's allowlist probe working, which
+   * needs a wildcard-bearing pattern to cover the dated backing indices.
+   */
+  search_patterns: string[];
 }
 
 export const HUNT_DISCOVERY_PATTERN = 'logs-*';
@@ -60,9 +73,13 @@ export const parseDataStreamName = (
   return { type, dataset, namespace };
 };
 
+// Fleet datasets are `<package>.<stream>` and package names use `_`, never `.` or `-`, so
+// the vendor token ends at the first of either. Stopping at '-' too means a dashed
+// namespace that leaked into the dataset (see `parseDataStreamName`) cannot hide the
+// vendor: `logs-okta-prod-eu` still yields `okta`.
 const vendorToken = (dataset: string): string => {
-  const dot = dataset.indexOf('.');
-  return dot === -1 ? dataset : dataset.slice(0, dot);
+  const end = dataset.search(/[.-]/);
+  return end === -1 ? dataset : dataset.slice(0, end);
 };
 
 const isInternalDataset = (dataset: string): boolean =>
@@ -123,10 +140,19 @@ export const discoverHuntDatasets = async ({
       dataset: parsed.dataset,
       vendor: vendorToken(parsed.dataset),
       data_streams: [name],
+      search_patterns: [indexPattern],
     });
   }
 
-  return Array.from(byPattern.values()).sort((a, b) =>
-    a.index_pattern.localeCompare(b.index_pattern)
-  );
+  const datasets = Array.from(byPattern.values());
+  for (const entry of datasets) {
+    const overMatchesSibling = datasets.some(
+      (other) => other !== entry && other.dataset.startsWith(`${entry.dataset}-`)
+    );
+    entry.search_patterns = overMatchesSibling
+      ? entry.data_streams.map((stream) => `${stream}*`)
+      : [entry.index_pattern];
+  }
+
+  return datasets.sort((a, b) => a.index_pattern.localeCompare(b.index_pattern));
 };

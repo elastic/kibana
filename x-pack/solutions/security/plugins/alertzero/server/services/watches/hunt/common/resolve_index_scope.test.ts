@@ -266,12 +266,14 @@ describe('resolveHuntScope', () => {
       dataset: 'okta.system',
       vendor: 'okta',
       data_streams: ['logs-okta.system-default'],
+      search_patterns: ['logs-okta.system-*'],
     };
     const ciscoDataset: DiscoveredDataset = {
       index_pattern: 'logs-cisco_asa.log-*',
       dataset: 'cisco_asa.log',
       vendor: 'cisco_asa',
       data_streams: ['logs-cisco_asa.log-default'],
+      search_patterns: ['logs-cisco_asa.log-*'],
     };
     const report = { vendor: 'Okta', text: 'Okta session hijacking' };
     const articleReport = { text: 'A campaign abusing session tokens' };
@@ -477,6 +479,29 @@ describe('resolveHuntScope', () => {
       expect(result.status).toBe('blocked');
       expect(result.resolution).toBe('blocked:no_report');
       expect(mockDiscover).not.toHaveBeenCalled();
+    });
+
+    it('searches a matched dataset by its search_patterns, so a sibling-prefixed dataset stays out of scope', async () => {
+      const esClient = createMockEsClient(new Set([alertsPattern])); // every static entry blocked
+      const windowsDataset: DiscoveredDataset = {
+        index_pattern: 'logs-windows-*',
+        dataset: 'windows',
+        vendor: 'windows',
+        data_streams: ['logs-windows-default', 'logs-windows-prod'],
+        search_patterns: ['logs-windows-default*', 'logs-windows-prod*'],
+      };
+      mockDiscover.mockResolvedValue([windowsDataset]);
+      mockDeterministic.mockReturnValue([windowsDataset]);
+
+      const result = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        report: { vendor: 'Microsoft', product: 'Windows' },
+      });
+
+      expect(result.resolution).toBe('discovered:deterministic');
+      expect(result.required).toEqual(['logs-windows-default*', 'logs-windows-prod*']);
+      expect(result.index_patterns).toEqual(result.required);
     });
 
     it('is ok on a deterministic vendor match with the discovered pattern as required', async () => {
@@ -764,6 +789,7 @@ describe('resolveHuntScope', () => {
           dataset: `${name}.log`,
           vendor: name,
           data_streams: [`logs-${name}.log-default`],
+          search_patterns: [`logs-${name}.log-*`],
         }));
         mockDiscover.mockResolvedValue(manyDatasets);
         await resolveHuntScope({ esClient, spaceId: SPACE_ID, report: iocReport, logger });

@@ -286,7 +286,9 @@ const buildDiscoveredScope = async ({
 }): Promise<HuntScope> => {
   const alertsPattern = alertsIndexPattern(spaceId);
   const [, alertsPresent] = await checkPattern(esClient, alertsPattern);
-  const required = uniq(matches.map((match) => match.index_pattern));
+  // `search_patterns`, not `index_pattern`: a dataset whose name a sibling extends with a
+  // dash searches its own namespaces so the sibling's streams stay out of scope.
+  const required = uniq(matches.flatMap((match) => match.search_patterns));
   const status = resolution === 'discovered:deterministic' ? 'ok' : 'degraded';
 
   return {

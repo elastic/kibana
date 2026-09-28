@@ -20,6 +20,7 @@ const dataset = (name: string): DiscoveredDataset => {
   const dot = name.indexOf('.');
   return {
     index_pattern: `logs-${name}-*`,
+    search_patterns: [`logs-${name}-*`],
     dataset: name,
     vendor: dot === -1 ? name : name.slice(0, dot),
     data_streams: [`logs-${name}-default`],

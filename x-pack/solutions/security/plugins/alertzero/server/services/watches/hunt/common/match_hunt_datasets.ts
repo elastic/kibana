@@ -66,7 +66,7 @@ export const HUNT_VENDOR_ALIASES: Readonly<Record<string, readonly string[]>> = 
 /** Normalized segments of a dataset vendor token: `cisco_asa` -> ['cisco', 'asa']. */
 const vendorSegments = (datasetVendor: string): string[] =>
   datasetVendor
-    .split('_')
+    .split(/[_-]/)
     .map(normalizeVendorToken)
     .filter((segment) => segment !== '');
 

@@ -1265,6 +1265,44 @@ describe('huntCoordinator', () => {
       expect(result.completed_successfully).toBe(true);
     });
 
+    it('keeps an ungrounded query retryable when another behavior on the same text did ground and run', async () => {
+      // One executed behavior proves the text holds literals a query can anchor to, so the
+      // model may well ground the failed one next time.
+      mockT1.mockResolvedValueOnce(
+        tier1Result({
+          status: 'no_searchable_terms',
+          searched_iocs: 0,
+          searched_techniques: 0,
+          resolved_iocs: [],
+          resolved_techniques: [],
+        })
+      );
+      mockT2.mockResolvedValueOnce(
+        tier2Result({
+          behaviors: [
+            {
+              technique_id: 'T1078',
+              technique_name: 'Valid Accounts',
+              rule_name: 'grounded',
+              esql: 'FROM logs-* | LIMIT 1',
+              evidence_quote: 'q',
+              confidence: 0.6,
+              severity: 'medium',
+              execution: { executed: true, row_count: 0, hit: false },
+            },
+          ],
+          incomplete: [
+            { reason: 'query_ungrounded', technique_id: 'T1190', detail: 'no literal matched' },
+          ],
+        })
+      );
+
+      const result = await run('run-partially-grounded');
+
+      expect(result.completeness).toBe('incomplete_retryable');
+      expect(result.completed_successfully).toBe(false);
+    });
+
     it('keeps an ungrounded Tier 2 query retryable when Tier 1 did have terms to search', async () => {
       mockT1.mockResolvedValueOnce(tier1Result());
       mockT2.mockResolvedValueOnce(

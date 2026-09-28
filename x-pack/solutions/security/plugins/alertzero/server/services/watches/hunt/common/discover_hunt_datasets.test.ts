@@ -92,8 +92,36 @@ describe('discoverHuntDatasets', () => {
         dataset: 'okta.system',
         vendor: 'okta',
         data_streams: ['logs-okta.system-default'],
+        search_patterns: ['logs-okta.system-*'],
       },
     ]);
+  });
+
+  it('stops the vendor token at a dash, so a dashed namespace that leaked into the dataset cannot hide the vendor', async () => {
+    mockDataStreams(['logs-okta-prod-eu', 'logs-okta-prod-us']);
+    const [okta] = await discoverHuntDatasets({ esClient });
+    expect(okta.dataset).toBe('okta-prod');
+    expect(okta.vendor).toBe('okta');
+  });
+
+  it('searches its own namespaces when a sibling dataset extends the name with a dash', async () => {
+    mockDataStreams([
+      'logs-windows-default',
+      'logs-windows-prod',
+      'logs-windows-defender-default',
+      'logs-okta.system-default',
+    ]);
+    const datasets = await discoverHuntDatasets({ esClient });
+    const byDataset = new Map(datasets.map((d) => [d.dataset, d]));
+
+    // `logs-windows-*` would swallow `logs-windows-defender-*`, so windows searches per namespace.
+    expect(byDataset.get('windows')?.search_patterns).toEqual([
+      'logs-windows-default*',
+      'logs-windows-prod*',
+    ]);
+    // The sibling and an unrelated dataset keep the plain pattern.
+    expect(byDataset.get('windows-defender')?.search_patterns).toEqual(['logs-windows-defender-*']);
+    expect(byDataset.get('okta.system')?.search_patterns).toEqual(['logs-okta.system-*']);
   });
 
   it('uses the whole dataset as vendor when it has no dot', async () => {
@@ -117,6 +145,7 @@ describe('discoverHuntDatasets', () => {
         dataset: 'aws.cloudtrail',
         vendor: 'aws',
         data_streams: ['logs-aws.cloudtrail-default', 'logs-aws.cloudtrail-prod'],
+        search_patterns: ['logs-aws.cloudtrail-*'],
       },
     ]);
   });

@@ -855,14 +855,17 @@ export const huntCoordinator = async (
   // writing hunt evidence can tell a searched-and-clean environment from one this run
   // never reached.
   //
-  // When Tier 1 had nothing to search, the report gave Tier 2 no literal values either,
-  // so an ungrounded query is a deterministic gap for this report: the same text yields
-  // the same generation and the same refusal every sweep. Leaving it retryable turned
-  // every IOC-less KEV entry into a Tier 2 call per sweep that never retired (seen live).
-  const nothingSearchable = tier1Raw.status === 'no_searchable_terms';
+  // When Tier 1 had nothing to search and no Tier 2 query grounded either, the report
+  // has shown it carries nothing a query can be anchored to: no IOC, no technique, and
+  // prose the grounding gate refused on every behavior. That gap is deterministic for
+  // this report, since the same text yields the same refusal every sweep, and leaving it
+  // retryable turned every IOC-less KEV entry into a Tier 2 call per sweep that never
+  // retired (seen live). If even one behavior grounded and executed, the text does hold
+  // usable literals and the remaining ungrounded ones keep their retry.
+  const nothingGroundable = tier1Raw.status === 'no_searchable_terms' && !tier2Executed;
   const completeness = huntCompletenessOf(
     gaps,
-    nothingSearchable ? { treatAsFinal: FINAL_WHEN_NOTHING_SEARCHABLE } : {}
+    nothingGroundable ? { treatAsFinal: FINAL_WHEN_NOTHING_SEARCHABLE } : {}
   );
 
   return {
