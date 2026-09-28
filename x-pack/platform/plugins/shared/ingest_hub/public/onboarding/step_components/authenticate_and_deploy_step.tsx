@@ -67,6 +67,13 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const { selectedServiceIds, dataFormat } = servicesStep;
   const { createDeployment, updateDeployment, persistDeploymentId } = useOnboardingSO();
 
+  // Lock the deployment method toggle once any service has been deployed, or while cleanup is still
+  // pending. Computed early so the auto-switch effect can respect it.
+  const isMethodLocked =
+    Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).length > 0 ||
+    Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0 ||
+    (detectAndReviewStep.ecfStacks?.length ?? 0) > 0;
+
   // ── Agent-based-only detection ────────────────────────────────────────────────
   const agentBasedOnlyServices = useMemo((): AwsServiceMatrixEntry[] => {
     if (!awsServicesMap || selectedServiceIds.length === 0) return [];
@@ -75,21 +82,16 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       .filter((s): s is AwsServiceMatrixEntry => !!s && isAgentBasedOnly(s));
   }, [selectedServiceIds, awsServicesMap]);
 
-  // All selected services require a self-managed Elastic Agent — lock the card.
-  const allAgentBasedOnly =
-    agentBasedOnlyServices.length > 0 &&
-    agentBasedOnlyServices.length === selectedServiceIds.length;
-
-  // Some (but not all) selected services require an Elastic Agent alongside MI/ECF services.
-  const isMixed = agentBasedOnlyServices.length > 0 && !allAgentBasedOnly;
+  // Any agent-based-only service in the selection forces agent-based mode for all — lock the card.
+  const allAgentBasedOnly = agentBasedOnlyServices.length > 0;
 
   const isAgentBased = deploymentMethod === 'agent_based';
 
   useEffect(() => {
-    if (allAgentBasedOnly && deploymentMethod !== 'agent_based') {
+    if (allAgentBasedOnly && deploymentMethod !== 'agent_based' && !isMethodLocked) {
       setDeploymentMethod('agent_based');
     }
-  }, [allAgentBasedOnly, deploymentMethod, setDeploymentMethod]);
+  }, [allAgentBasedOnly, deploymentMethod, setDeploymentMethod, isMethodLocked]);
 
   // ── Service settings (region + vars) ─────────────────────────────────────────
   // Read from session storage so ECF URLs can be pre-filled without re-entering data.
@@ -238,16 +240,6 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // Defined before handleNext so they can be referenced in the callback and dependency array.
   const showMiSection = !isAgentBased && miServiceIds.length > 0;
   const showAgentSection = isAgentBased && agentTargets.length > 0;
-
-  // Lock the deployment method toggle once any service has been deployed, or while cleanup is still
-  // pending. Changing the method would leave orphaned policies with no cleanup path. pendingCleanup
-  // must be included: removeDeployInstance moves IDs out of policyIdsByInstance into
-  // pendingCleanupPolicyIds, so after all instances are removed the lock would otherwise lift while
-  // stale policies still exist. ecfStacks covers ECF-only deployments which set neither policy map.
-  const isMethodLocked =
-    Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).length > 0 ||
-    Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0 ||
-    (detectAndReviewStep.ecfStacks?.length ?? 0) > 0;
 
   // ── ECF stack metadata helpers ────────────────────────────────────────────────
   const ecfStacks = useMemo(() => {
@@ -523,6 +515,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         <>
           <EuiHorizontalRule margin="l" />
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.ingestHub.authenticateAndDeployStep.agentBasedOnlyCallout.title"
@@ -577,36 +570,6 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       {hasAnyEcf && <EuiHorizontalRule margin="l" />}
 
       {hasAnyEcf && <EcfDeploymentSection {...ecfSectionProps} />}
-
-      {isMixed && !isAgentBased && (
-        <>
-          <EuiHorizontalRule margin="l" />
-          <EuiCallOut
-            title={
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.mixedDeploymentCallout.title"
-                defaultMessage="Some services require a self-managed Elastic Agent"
-              />
-            }
-            iconType="info"
-            color="primary"
-            data-test-subj="authenticateAndDeployStep-mixedDeploymentCallout"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.mixedDeploymentCallout.body"
-                defaultMessage="{services} {count, plural, one {requires} other {require}} a self-managed Elastic Agent and cannot be deployed here. After completing this wizard, install {count, plural, one {this integration} other {these integrations}} on an Elastic Agent policy and enroll an Elastic Agent that has access to your AWS environment."
-                values={{
-                  count: agentBasedOnlyServices.length,
-                  services: (
-                    <strong>{agentBasedOnlyServices.map((s) => s.name).join(', ')}</strong>
-                  ),
-                }}
-              />
-            </p>
-          </EuiCallOut>
-        </>
-      )}
 
       <EuiSpacer size="l" />
 

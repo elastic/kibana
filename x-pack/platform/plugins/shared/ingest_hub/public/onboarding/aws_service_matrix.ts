@@ -594,15 +594,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     deploymentMethods: [{ method: 'agent_based', preferred: true }],
   },
 
-  // ── awsfirehose package — Application Integration ─────────────────────────
-  {
-    id: 'awsfirehose',
-    name: 'Amazon Data Firehose',
-    category: 'application_integration',
-    packageName: 'awsfirehose',
-    deploymentMethods: [{ method: 'agent_based', preferred: true }],
-  },
-
   // ── amazon_security_lake package — Security, Identity & Compliance ────────
   {
     id: 'amazon_security_lake',

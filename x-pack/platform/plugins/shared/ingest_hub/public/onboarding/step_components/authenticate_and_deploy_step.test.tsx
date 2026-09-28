@@ -703,7 +703,8 @@ describe('AuthenticateAndDeployStep', () => {
     });
   });
 
-  describe('mixed deployment (MI + agent-based-only)', () => {
+  describe('mixed selection (MI + agent-based-only) — auto-switches all to agent-based', () => {
+    // Julia's model: any agent-based-only service selected → lock everything to agent-based.
     const agentService = {
       id: 'awsfargate',
       name: 'AWS Fargate',
@@ -718,44 +719,14 @@ describe('AuthenticateAndDeployStep', () => {
           ['guardduty', miService],
           ['awsfargate', agentService],
         ]),
-        deploymentMethod: 'managed_integration',
+        deploymentMethod: 'agent_based',
         setDeploymentMethod: jest.fn(),
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
       });
       mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: false }));
     });
 
-    it('renders DeploymentMethodCard so the user can switch to agent-based', () => {
-      renderStep();
-      expect(MockDeploymentMethodCard).toHaveBeenCalled();
-    });
-
-    it('renders ManagedIntegrationsSection for the MI service', () => {
-      renderStep();
-      expect(screen.getByTestId('mock-deploy-btn')).toBeInTheDocument();
-    });
-
-    it('shows the mixed deployment callout naming the agent-based service', () => {
-      renderStep();
-      expect(
-        screen.getByTestId('authenticateAndDeployStep-mixedDeploymentCallout')
-      ).toBeInTheDocument();
-    });
-
-    it('does not show the agent-based callout when MI is selected', () => {
-      renderStep();
-      expect(
-        screen.queryByTestId('authenticateAndDeployStep-agentBasedOnlyCallout')
-      ).not.toBeInTheDocument();
-    });
-
-    it('Next is disabled until MI is deployed', () => {
-      renderStep();
-      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).toBeDisabled();
-      fireEvent.click(screen.getByTestId('mock-deploy-btn'));
-      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).not.toBeDisabled();
-    });
-
-    it('switching to agent-based hides MI section, shows agent-based callout, hides mixed callout, enables Next', () => {
+    it('auto-switches to agent_based when any agent-based-only service is selected', () => {
       const mockSetDeploymentMethod = jest.fn();
       mockUseOnboardingFlow.mockReturnValue({
         servicesStep: { selectedServiceIds: ['guardduty', 'awsfargate'] },
@@ -763,18 +734,51 @@ describe('AuthenticateAndDeployStep', () => {
           ['guardduty', miService],
           ['awsfargate', agentService],
         ]),
-        deploymentMethod: 'agent_based',
+        deploymentMethod: 'managed_integration',
         setDeploymentMethod: mockSetDeploymentMethod,
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
       });
       renderStep();
-      expect(screen.queryByTestId('mock-deploy-btn')).not.toBeInTheDocument();
+      expect(mockSetDeploymentMethod).toHaveBeenCalledWith('agent_based');
+    });
+
+    it('renders DeploymentMethodCard locked', () => {
+      renderStep();
+      expect(MockDeploymentMethodCard).toHaveBeenCalledWith(
+        expect.objectContaining({ locked: true }),
+        expect.anything()
+      );
+    });
+
+    it('does not render ManagedIntegrationsSection — all services go agent-based', () => {
+      renderStep();
+      expect(MockManagedIntegrationsSection).not.toHaveBeenCalled();
+    });
+
+    it('shows the agent-based callout', () => {
+      renderStep();
       expect(
         screen.getByTestId('authenticateAndDeployStep-agentBasedOnlyCallout')
       ).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('authenticateAndDeployStep-mixedDeploymentCallout')
-      ).not.toBeInTheDocument();
-      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).not.toBeDisabled();
+    });
+
+    it('does not auto-switch when isMethodLocked (prior MI deployment exists)', () => {
+      const mockSetDeploymentMethod = jest.fn();
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['guardduty', 'awsfargate'] },
+        awsServicesMap: new Map([
+          ['guardduty', miService],
+          ['awsfargate', agentService],
+        ]),
+        deploymentMethod: 'managed_integration',
+        setDeploymentMethod: mockSetDeploymentMethod,
+        detectAndReviewStep: {
+          serviceStatuses: {},
+          policyIdsByInstance: { guardduty: 'policy-123' },
+        },
+      });
+      renderStep();
+      expect(mockSetDeploymentMethod).not.toHaveBeenCalled();
     });
   });
 
@@ -792,6 +796,7 @@ describe('AuthenticateAndDeployStep', () => {
         awsServicesMap: new Map([['awsfargate', agentService]]),
         deploymentMethod: 'agent_based',
         setDeploymentMethod: jest.fn(),
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
       });
       mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: false }));
     });
@@ -803,6 +808,7 @@ describe('AuthenticateAndDeployStep', () => {
         awsServicesMap: new Map([['awsfargate', agentService]]),
         deploymentMethod: 'managed_integration',
         setDeploymentMethod: mockSetDeploymentMethod,
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
       });
       renderStep();
       expect(mockSetDeploymentMethod).toHaveBeenCalledWith('agent_based');
