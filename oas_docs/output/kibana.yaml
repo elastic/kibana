@@ -335,7 +335,9 @@ paths:
       deprecated: true
       operationId: get-actions
       parameters: []
-      responses: {}
+      responses:
+        '200':
+          description: 'OK: A successful request.'
       summary: Get all connectors
       tags:
         - connectors
@@ -1247,7 +1249,9 @@ paths:
       deprecated: true
       operationId: get-actions-list-action-types
       parameters: []
-      responses: {}
+      responses:
+        '200':
+          description: 'OK: A successful request.'
       summary: Get connector types
       tags:
         - connectors
@@ -26275,6 +26279,7 @@ paths:
           example: kb12345
           in: path
           name: resource
+          required: true
           schema:
             type: string
       responses:
@@ -26346,6 +26351,7 @@ paths:
           example: kb12345
           in: path
           name: resource
+          required: true
           schema:
             type: string
         - description: ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
@@ -27830,6 +27836,7 @@ paths:
                 $ref: '#/components/examples/copy_saved_objects_request2'
       responses:
         '200':
+          description: 'OK: A successful request.'
           content:
             application/json:
               examples:
@@ -27886,7 +27893,9 @@ paths:
             examples:
               disableLegacyURLRequestExample1:
                 $ref: '#/components/examples/disable_legacy_url_request1'
-      responses: {}
+      responses:
+        '204':
+          description: Indicates a successful call.
       summary: Disable legacy URL aliases
       tags:
         - spaces
@@ -27924,7 +27933,9 @@ paths:
                   type: array
               required:
                 - objects
-      responses: {}
+      responses:
+        '200':
+          description: Indicates a successful call.
       summary: Get shareable references
       tags:
         - spaces
@@ -28009,6 +28020,7 @@ paths:
                 $ref: '#/components/examples/resolve_copy_saved_objects_request2'
       responses:
         '200':
+          description: 'OK: A successful request.'
           content:
             application/json:
               examples:
@@ -28071,6 +28083,7 @@ paths:
                 $ref: '#/components/examples/update_saved_objects_spaces_request1'
       responses:
         '200':
+          description: 'OK: A successful request.'
           content:
             application/json:
               examples:
@@ -28661,6 +28674,7 @@ paths:
                       description: The unique identifier of the deleted monitor.
                       type: string
                 type: array
+          description: A successful response.
       summary: Delete monitors
       tags:
         - synthetics
@@ -28763,6 +28777,7 @@ paths:
                     }
               schema:
                 type: object
+          description: A successful response.
         '404':
           description: If the monitor is not found, the API returns a 404 error.
       summary: Get a monitor
@@ -28916,7 +28931,7 @@ paths:
                     ]
               schema:
                 items:
-                  - $ref: '#/components/schemas/Synthetics_getParameterResponse'
+                  $ref: '#/components/schemas/Synthetics_getParameterResponse'
                 type: array
           description: A successful response.
       summary: Get parameters
@@ -29036,13 +29051,13 @@ paths:
                     "ids": ["param1-id", "param2-id"]
                   }
             schema:
-              property:
+              type: object
+              properties:
                 ids:
                   description: An array of parameter IDs to delete.
                   items:
                     type: string
                   type: array
-              type: object
         required: true
       responses:
         '200':
@@ -30544,7 +30559,7 @@ paths:
                     description: |
                       A list of errors that may have occurred preventing the reindex task from being created.
                     items:
-                      - type: object
+                      type: object
                     type: array
           description: Indicates a successful call.
       summary: Batch start or resume reindexing
@@ -30755,17 +30770,17 @@ paths:
                     bcc:
                       default: []
                       items:
-                        - type: string
+                        type: string
                       type: array
                     cc:
                       default: []
                       items:
-                        - type: string
+                        type: string
                       type: array
                     to:
                       default: []
                       items:
-                        - type: string
+                        type: string
                       type: array
                 heartbeatIndices:
                   default: heartbeat-*
@@ -56698,7 +56713,6 @@ components:
           description: |
             The value associated with the parameter. It will be included in the response if the user has write permissions.  
           type: string
-      required: null
     Synthetics_getPrivateLocation:
       additionalProperties: true
       properties:
@@ -56741,7 +56755,7 @@ components:
           properties:
             check:
               description: The check request settings.
-              type: objects
+              type: object
               properties:
                 request:
                   description: An optional request to send to the remote host.
@@ -58134,9 +58148,12 @@ components:
       required:
         - message
         - subject
-        - anyOf:
+      anyOf:
+        - required:
             - to
+        - required:
             - cc
+        - required:
             - bcc
       properties:
         bcc:
