@@ -117,6 +117,45 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     ]);
   });
 
+  it('threads renderProposedActions into the overview tab with the conversation id', async () => {
+    const { contract } = createFakeService();
+    const renderProposedActions = jest.fn(({ conversationId }: { conversationId: string }) => (
+      <span>proposed actions for {conversationId}</span>
+    ));
+    register(contract, { renderProposedActions });
+
+    const OverviewTabContent = contract.getTab('investigation.overview')?.content;
+    if (!OverviewTabContent) {
+      throw new Error('Expected a registered overview tab');
+    }
+
+    renderWithKibanaRenderContext(
+      <OverviewTabContent conversation={conversation} isOpenedFromChat={false} />
+    );
+
+    expect(await screen.findByText('proposed actions for conversation-1')).toBeInTheDocument();
+  });
+
+  it('omits the proposed actions section when no renderer is supplied', async () => {
+    const { contract } = createFakeService();
+    register(contract);
+
+    const OverviewTabContent = contract.getTab('investigation.overview')?.content;
+    if (!OverviewTabContent) {
+      throw new Error('Expected a registered overview tab');
+    }
+
+    renderWithKibanaRenderContext(
+      <OverviewTabContent conversation={conversation} isOpenedFromChat={false} />
+    );
+
+    // Waits for the lazy overview slot's chunk to resolve before asserting it stayed absent.
+    expect(
+      await screen.findByText('A second sign-in replayed the same session cookie.')
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Proposed actions')).not.toBeInTheDocument();
+  });
+
   it('registers the template UI definition with a header and footer', () => {
     const { contract } = createFakeService();
 

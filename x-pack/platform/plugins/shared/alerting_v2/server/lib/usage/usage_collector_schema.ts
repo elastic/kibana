@@ -95,46 +95,40 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
     type: 'date',
     _meta: { description: 'Earliest rule creation date.' },
   },
-  count_by_query_format: {
-    composed: {
-      type: 'long',
-      _meta: { description: 'Number of rules using the composed query format.' },
-    },
-    standalone: {
-      type: 'long',
-      _meta: { description: 'Number of rules using the standalone query format.' },
-    },
-  },
   count_by_recovery_strategy: {
     no_breach: {
       type: 'long',
       _meta: { description: 'Number of rules with recovery strategy no_breach.' },
     },
+    condition: {
+      type: 'long',
+      _meta: { description: 'Number of rules with recovery strategy condition.' },
+    },
     query: {
       type: 'long',
       _meta: { description: 'Number of rules with recovery strategy query.' },
     },
-    none: {
+    manual: {
       type: 'long',
-      _meta: { description: 'Number of rules with recovery strategy none.' },
+      _meta: { description: 'Number of rules with recovery strategy manual.' },
     },
   },
   count_by_no_data_strategy: {
-    last_known_status: {
+    ignore: {
       type: 'long',
-      _meta: { description: 'Number of rules with no-data strategy last_known_status.' },
+      _meta: { description: 'Number of rules with no-data strategy ignore.' },
     },
-    emit: {
+    keep_last: {
       type: 'long',
-      _meta: { description: 'Number of rules with no-data strategy emit.' },
+      _meta: { description: 'Number of rules with no-data strategy keep_last.' },
     },
-    recover: {
+    resolve: {
       type: 'long',
-      _meta: { description: 'Number of rules with no-data strategy recover.' },
+      _meta: { description: 'Number of rules with no-data strategy resolve.' },
     },
-    none: {
+    alert: {
       type: 'long',
-      _meta: { description: 'Number of rules with no-data strategy none.' },
+      _meta: { description: 'Number of rules with no-data strategy alert.' },
     },
   },
 

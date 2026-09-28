@@ -21,8 +21,6 @@ import {
 } from '../../../common/session/control_panels';
 import type { DiscoverSessionApiControlPanels, DiscoverSessionWarning } from '../schema';
 
-export { serializeEsqlControls as transformControlPanelsIn } from '../../../common/session/control_panels';
-
 const createDroppedControlPanelsWarning = (
   tabId: string,
   reason: string
