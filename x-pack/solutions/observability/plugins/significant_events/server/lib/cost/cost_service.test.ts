@@ -11,7 +11,7 @@ import {
   SIGNIFICANT_EVENTS_DECISION_TREE_REINFORCE_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-  SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+  NIGHTSHIFT_INVESTIGATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
@@ -41,7 +41,8 @@ const PRICES: PriceMap = new Map([
 
 const KNOWN_FEATURE_IDS = [
   SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+  NIGHTSHIFT_INVESTIGATION_INFERENCE_FEATURE_ID,
+  'significant_events_investigation',
   SIGNIFICANT_EVENTS_DECISION_TREE_REINFORCE_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
@@ -272,7 +273,7 @@ describe('calculateSignificantEventsCost', () => {
           },
         },
       });
-      return { aggregations: aggregations({ total: 50, features }) };
+      return { aggregations: aggregations({ total: 60, features }) };
     });
 
     const result = await calculate({ esClient });
@@ -286,7 +287,7 @@ describe('calculateSignificantEventsCost', () => {
     ]);
     expect(result.today.groups.find((group) => group.group === 'discovery')?.totalTokens).toBe(10);
     expect(result.today.groups.find((group) => group.group === 'investigation')?.totalTokens).toBe(
-      20
+      30
     );
     expect(result.today.groups.find((group) => group.group === 'ki_extraction')?.totalTokens).toBe(
       20

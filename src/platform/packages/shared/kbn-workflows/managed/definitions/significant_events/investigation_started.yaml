@@ -1,0 +1,28 @@
+version: '1'
+name: Significant Events Investigation Started
+description: Records started Nightshift investigations on their Significant Event.
+enabled: true
+tags:
+  - observability
+  - streams
+  - significant-events
+  - investigation
+
+triggers:
+  - type: nightshift-investigations.started
+    on:
+      condition: 'event.subject.type: "significant_event"'
+
+steps:
+  - name: attach_started_investigation
+    type: kibana.request
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/events/{{ event.subject.id }}/investigations'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        workflow_execution_id: '{{ event.investigation_id }}'
+        started_at: '{{ event.started_at }}'
+    on-failure:
+      continue: true

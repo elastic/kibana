@@ -7,11 +7,7 @@
 
 import assert from 'assert';
 import { isDeepStrictEqual } from 'util';
-import {
-  isToolCallStep,
-  platformSignificantEventsTools,
-  ToolResultType,
-} from '@kbn/agent-builder-common';
+import { isToolCallStep, platformNightshiftTools, ToolResultType } from '@kbn/agent-builder-common';
 import { investigationStateSchema } from '@kbn/significant-events-schema';
 import { isErrorResult } from '@kbn/agent-builder-common/tools';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
@@ -195,7 +191,7 @@ export const assertAgentTrace = (
     assert(span, `Agent trace must include tool call ${callId}`);
     // The progress schema orders recommendations and blind spots before tool execution.
     const executedParams =
-      toolId === platformSignificantEventsTools.reportInvestigationProgress
+      toolId === platformNightshiftTools.reportInvestigationProgress
         ? investigationStateSchema.parse(params)
         : params;
     assert.deepStrictEqual(

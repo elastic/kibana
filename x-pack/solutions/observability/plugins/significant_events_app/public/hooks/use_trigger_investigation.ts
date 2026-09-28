@@ -7,11 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { useKibana } from './use_kibana';
 import { getFormattedError } from '../util/errors';
 
 interface TriggerInvestigationResult {
-  executionId: string;
+  investigation_id: string;
 }
 
 const TRIGGER_SUCCESS_TOAST_TITLE = i18n.translate(
@@ -43,23 +44,52 @@ export const useTriggerInvestigation = ({
     core: {
       notifications: { toasts },
     },
-    dependencies: {
-      start: {
-        significantEvents: { significantEventsRepositoryClient },
-      },
-    },
+    dependencies,
   } = useKibana();
   const queryClient = useQueryClient();
 
-  const mutation = useMutation<TriggerInvestigationResult, Error, string>({
-    mutationFn: (eventUuid: string) =>
-      significantEventsRepositoryClient.fetch(
-        'POST /internal/significant_events/events/{id}/investigate',
-        {
-          params: { path: { id: eventUuid } },
-          signal: null,
-        }
-      ),
+  const mutation = useMutation<TriggerInvestigationResult, Error, SignificantEvent>({
+    mutationFn: (event: SignificantEvent) => {
+      const investigationsClient =
+        dependencies.start.nightshiftInvestigations?.investigationsClient;
+      if (!investigationsClient) {
+        throw new Error('Nightshift investigations plugin is unavailable');
+      }
+      const {
+        title,
+        summary,
+        stream_names,
+        event_uuid,
+        event_id,
+        status,
+        severity,
+        confidence,
+        causal_features,
+        blast_radius,
+      } = event;
+
+      return investigationsClient.fetch('POST /internal/nightshift/investigations', {
+        params: {
+          body: {
+            subject: { type: 'significant_event', id: event_id, summary },
+            title,
+            message: `${title}\n\n${summary}`,
+            stream_names: stream_names ?? [],
+            concurrency_key: event_id,
+            context: {
+              event_uuid,
+              event_id,
+              status,
+              severity,
+              confidence,
+              causal_features: causal_features ?? [],
+              blast_radius: blast_radius ?? [],
+            },
+          },
+        },
+        signal: null,
+      });
+    },
     onSuccess: () => {
       toasts.addSuccess({
         title: TRIGGER_SUCCESS_TOAST_TITLE,
@@ -79,7 +109,7 @@ export const useTriggerInvestigation = ({
   });
 
   return {
-    triggerInvestigation: (eventUuid: string) => mutation.mutate(eventUuid),
+    triggerInvestigation: (event: SignificantEvent) => mutation.mutate(event),
     isTriggering: mutation.isLoading,
   };
 };

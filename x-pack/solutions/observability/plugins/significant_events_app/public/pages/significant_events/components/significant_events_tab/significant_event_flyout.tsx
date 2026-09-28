@@ -424,7 +424,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
                 <EuiButton
                   iconType="inspect"
                   onClick={() => {
-                    if (!isTriggering) triggerInvestigation(latestEvent.event_uuid);
+                    if (!isTriggering) triggerInvestigation(latestEvent);
                   }}
                   isDisabled={isTriggering || blocksActivity}
                   hasAriaDisabled={blocksActivity}

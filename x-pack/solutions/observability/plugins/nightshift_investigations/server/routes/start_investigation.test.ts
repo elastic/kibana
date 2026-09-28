@@ -126,6 +126,42 @@ it('rejects a manual investigation without a question', () => {
   expect(schema.safeParse({ subject: { type: 'manual' } }).success).toBe(false);
 });
 
+it('starts a significant event investigation with title, context, and stream names', async () => {
+  const body = schema.parse({
+    subject: { type: 'significant_event', id: 'event-1' },
+    title: 'Latency Spike on Checkout',
+    concurrency_key: 'event-1',
+    stream_names: ['logs.checkout'],
+    context: { severity: 'high' },
+    message: 'Investigate latency spike',
+  });
+
+  await handler({
+    request: {},
+    getInvestigationsClient,
+    getAlertsClient,
+    params: { body },
+  } as never);
+
+  expect(start).toHaveBeenCalledWith({
+    subject: { type: 'significant_event', id: 'event-1' },
+    title: 'Latency Spike on Checkout',
+    concurrency_key: 'event-1',
+    stream_names: ['logs.checkout'],
+    context: { severity: 'high' },
+    message: 'Investigate latency spike',
+    trigger_type: 'manual',
+  });
+});
+
+it('rejects a significant event investigation without a title', () => {
+  expect(
+    schema.safeParse({
+      subject: { type: 'significant_event', id: 'event-1' },
+    }).success
+  ).toBe(false);
+});
+
 it('returns service unavailable when alert lookup is not wired', async () => {
   await expect(
     handler({

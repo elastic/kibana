@@ -6,7 +6,7 @@
  */
 
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
-import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
+import { platformCoreTools, platformNightshiftTools } from '@kbn/agent-builder-common/tools';
 import type { AgentBaseConfiguration, AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import {
   getInvestigationAgentType,
@@ -55,7 +55,7 @@ describe('Nightshift investigation agent type', () => {
       post_execution_workflow_ids: ['system-nightshift-cortex-optimize'],
     });
     expect(base.tools?.[0]?.tool_ids).toEqual([
-      platformSignificantEventsTools.reportInvestigationProgress,
+      platformNightshiftTools.reportInvestigationProgress,
       ...SANDBOX_TOOL_IDS,
     ]);
     expect(base.tools?.[0]?.tool_ids).not.toContain(platformCoreTools.executeEsql);
@@ -109,7 +109,7 @@ describe('Nightshift investigation agent type', () => {
     expect(base.workflow_ids).toBeUndefined();
     expect(base.post_execution_workflow_ids).toEqual(['system-nightshift-cortex-optimize']);
     expect(base.tools?.[0]?.tool_ids).toEqual([
-      platformSignificantEventsTools.reportInvestigationProgress,
+      platformNightshiftTools.reportInvestigationProgress,
     ]);
   });
 

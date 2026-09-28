@@ -38,6 +38,7 @@ const createRepository = () => {
   const savedObjectsClient: jest.Mocked<InvestigationSavedObjectsClient> = {
     create: jest.fn(),
     get: jest.fn(),
+    bulkGet: jest.fn(),
     update: jest.fn(),
     find: jest.fn(),
   };
@@ -88,6 +89,51 @@ describe('SavedObjectInvestigationRepository', () => {
       );
 
       await expect(repository.get('inv-missing')).resolves.toBeUndefined();
+    });
+  });
+
+  describe('bulkGetStatuses()', () => {
+    it('returns empty record for empty input', async () => {
+      const { repository, savedObjectsClient } = createRepository();
+      const result = await repository.bulkGetStatuses([]);
+      expect(result).toEqual({});
+      expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
+    });
+
+    it('returns map of statuses and omits missing/errored objects', async () => {
+      const { repository, savedObjectsClient } = createRepository();
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'inv-1',
+            type: TYPE,
+            attributes: { status: 'running' },
+            references: [],
+          },
+          {
+            id: 'inv-2',
+            type: TYPE,
+            error: { statusCode: 404, message: 'Not found' },
+          },
+          {
+            id: 'inv-3',
+            type: TYPE,
+            attributes: { status: 'completed' },
+            references: [],
+          },
+        ],
+      } as never);
+
+      const result = await repository.bulkGetStatuses(['inv-1', 'inv-2', 'inv-3']);
+      expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
+        { type: TYPE, id: 'inv-1', fields: ['status'] },
+        { type: TYPE, id: 'inv-2', fields: ['status'] },
+        { type: TYPE, id: 'inv-3', fields: ['status'] },
+      ]);
+      expect(result).toEqual({
+        'inv-1': 'running',
+        'inv-3': 'completed',
+      });
     });
   });
 

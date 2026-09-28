@@ -35,14 +35,14 @@ describe('resolveConnectorIdByFeature', () => {
     ]);
 
     const result = await resolveConnectorIdByFeature({
-      featureId: 'significant_events_investigation',
+      featureId: 'nightshift_investigation',
       request,
       searchInferenceEndpoints,
     });
 
     expect(result).toBe('feature-connector-1');
     expect(searchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledWith(
-      'significant_events_investigation',
+      'nightshift_investigation',
       request
     );
   });

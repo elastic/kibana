@@ -6,7 +6,8 @@
  */
 
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { InvestigationStatus } from '../../common';
 import { NIGHTSHIFT_INVESTIGATION_SO_TYPE } from '../saved_objects';
 import { buildInvestigationFilter } from './build_investigation_filter';
 import { InvestigationAlreadyExistsError, InvestigationStaleWriteError } from './errors';
@@ -35,7 +36,7 @@ const buildSearchFields = (query: FindInvestigationsQuery): string[] | undefined
 
 export type InvestigationSavedObjectsClient = Pick<
   SavedObjectsClientContract,
-  'create' | 'get' | 'update' | 'find'
+  'create' | 'get' | 'update' | 'find' | 'bulkGet'
 >;
 
 export interface SavedObjectInvestigationRepositoryDeps {
@@ -83,6 +84,25 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
       }
       throw error;
     }
+  }
+
+  async bulkGetStatuses(ids: string[]): Promise<Record<string, InvestigationStatus>> {
+    if (ids.length === 0) {
+      return {};
+    }
+
+    const { saved_objects: savedObjects } = await this.savedObjectsClient.bulkGet<
+      Pick<InvestigationAttributes, 'status'>
+    >(ids.map((id) => ({ type: NIGHTSHIFT_INVESTIGATION_SO_TYPE, id, fields: ['status'] })));
+
+    const statuses: Record<string, InvestigationStatus> = {};
+    for (const obj of savedObjects) {
+      if (!isSavedObjectErrorResult(obj) && obj.attributes?.status) {
+        statuses[obj.id] = obj.attributes.status;
+      }
+    }
+
+    return statuses;
   }
 
   async update({

@@ -14,7 +14,7 @@ import type {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
-import { SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID } from '@kbn/significant-events-schema';
+import { NIGHTSHIFT_INVESTIGATION_INFERENCE_FEATURE_ID } from '@kbn/significant-events-schema';
 import { i18n } from '@kbn/i18n';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { CORTEX_AI_INDEX_DEST, CORTEX_AI_INDEX_ID } from '../../common/cortex';
@@ -147,7 +147,7 @@ export const runCortexOptimize = async ({
   }
 
   const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
-    SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+    NIGHTSHIFT_INVESTIGATION_INFERENCE_FEATURE_ID,
     request
   );
   const connectorId = endpoints[0]?.connectorId;

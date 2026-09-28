@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
+import { platformNightshiftTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, ToolAvailabilityConfig } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
@@ -16,8 +16,8 @@ import {
 } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 
-export const SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID =
-  platformSignificantEventsTools.reportInvestigationProgress;
+export const NIGHTSHIFT_INVESTIGATION_PROGRESS_REPORT_TOOL_ID =
+  platformNightshiftTools.reportInvestigationProgress;
 
 const toolDescription = dedent`
   ${i18n.translate(
@@ -44,7 +44,7 @@ export const createInvestigationProgressReportTool = ({
   logger: Logger;
   availability: ToolAvailabilityConfig;
 }): BuiltinToolDefinition<typeof investigationStateSchema> => ({
-  id: SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
+  id: NIGHTSHIFT_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
   type: ToolType.builtin,
   description: toolDescription,
   availability,

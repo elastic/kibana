@@ -47,9 +47,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
         method: 'PUT',
         headers: { 'elastic-api-version': '1' },
         body: JSON.stringify({
-          features: [
-            { feature_id: 'significant_events_investigation', endpoints: [{ id: connector.id }] },
-          ],
+          features: [{ feature_id: 'nightshift_investigation', endpoints: [{ id: connector.id }] }],
         }),
       });
       await expect

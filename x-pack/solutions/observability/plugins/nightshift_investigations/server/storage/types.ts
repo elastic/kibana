@@ -86,6 +86,7 @@ export type FindInvestigationsResult<
 export interface InvestigationRepository {
   create(params: { id: string; attributes: InvestigationAttributes }): Promise<void>;
   get(id: string): Promise<InvestigationRecord | undefined>;
+  bulkGetStatuses(ids: string[]): Promise<Record<string, InvestigationStatus>>;
   update(params: { id: string; patch: InvestigationPatch; version?: string }): Promise<void>;
   find<Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes>(
     query: FindInvestigationsQuery<Fields>

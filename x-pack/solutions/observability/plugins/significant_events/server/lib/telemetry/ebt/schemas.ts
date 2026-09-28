@@ -9,7 +9,6 @@ import type { RootSchema } from '@elastic/ebt/client';
 import type {
   AgentBuilderKnowledgeIndicatorCreatedProps,
   AgentToolEventCreateProps,
-  AgentToolEventInvestigationAttachProps,
   AgentToolEventStatusUpdateProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
   CodeAnalysisGroundingProps,
@@ -559,35 +558,6 @@ const onboardingScheduledSchema: RootSchema<KnowledgeIndicatorOnboardingSchedule
   },
 };
 
-const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestigationAttachProps> =
-  {
-    success: {
-      type: 'boolean',
-      _meta: {
-        description: 'Whether the investigation attachment succeeded',
-      },
-    },
-    event_uuid: {
-      type: 'keyword',
-      _meta: {
-        description: 'The identifier of the significant event the investigation was attached to',
-      },
-    },
-    workflow_execution_id: {
-      type: 'keyword',
-      _meta: {
-        description: 'The investigation workflow execution id that was attached',
-      },
-    },
-    error_message: {
-      type: 'text',
-      _meta: {
-        description: 'Error message when investigation attachment fails',
-        optional: true,
-      },
-    },
-  };
-
 const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
   success: {
     type: 'boolean',
@@ -690,7 +660,6 @@ const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
 export {
   agentBuilderKnowledgeIndicatorCreatedSchema,
   agentToolEventCreateSchema,
-  agentToolEventInvestigationAttachSchema,
   agentToolEventSearchSchema,
   agentToolEventStatusUpdateSchema,
   agentToolEventWriteSchema,

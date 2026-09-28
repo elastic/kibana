@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
 import { internalEventsRoutes } from './route';
 
 const mockCleanupStaleEvents = jest.fn();
@@ -18,8 +17,6 @@ jest.mock('../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
 }));
 
-const investigateRoute =
-  internalEventsRoutes['POST /internal/significant_events/events/{id}/investigate'];
 const eventsSearchRoute = internalEventsRoutes['GET /internal/significant_events/events'];
 const lifecycleRoute =
   internalEventsRoutes['GET /internal/significant_events/events/{id}/lifecycle'];
@@ -27,12 +24,6 @@ const eventsGetRoute = internalEventsRoutes['GET /internal/significant_events/ev
 const eventsUpdateRoute =
   internalEventsRoutes['POST /internal/significant_events/events/{id}/update'];
 const cleanupRoute = internalEventsRoutes['POST /internal/significant_events/events/_cleanup'];
-
-type HandlerParams = Parameters<typeof investigateRoute.handler>[0];
-
-const makeMaintenanceService = (state: SignificantEventsMaintenanceState = 'enabled') => ({
-  getState: jest.fn().mockResolvedValue(state),
-});
 
 describe('POST /internal/significant_events/events/_cleanup', () => {
   it('runs cleanup with manage-scoped event and rule clients', async () => {
@@ -59,28 +50,6 @@ describe('POST /internal/significant_events/events/_cleanup', () => {
       alertEventsClient: undefined,
     });
     expect(result).toEqual({ scanned: 1, closed: 1, kept: 0, skipped: 0 });
-  });
-});
-
-describe('POST /internal/significant_events/events/{id}/investigate', () => {
-  it('rejects with 409 while paused before loading the event', async () => {
-    const findByEventUuid = jest.fn();
-    const handlerParams = {
-      params: { path: { id: 'event-1' } },
-      request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
-        licensing: {},
-        getEventClient: () => ({ findByEventUuid }),
-      }),
-      server: { nightshiftInvestigations: {} },
-      logger: { warn: jest.fn(), get: jest.fn().mockReturnValue({ warn: jest.fn() }) },
-      maintenanceService: makeMaintenanceService('paused'),
-    } as unknown as HandlerParams;
-
-    await expect(investigateRoute.handler(handlerParams)).rejects.toMatchObject({
-      output: { statusCode: 409 },
-    });
-    expect(findByEventUuid).not.toHaveBeenCalled();
   });
 });
 

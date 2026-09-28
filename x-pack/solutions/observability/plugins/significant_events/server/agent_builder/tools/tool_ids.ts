@@ -19,5 +19,3 @@ export const SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID = platformSignificantEvents
 export const SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID =
   platformSignificantEventsTools.updateEventStatus;
 export const SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID = platformSignificantEventsTools.searchEvent;
-export const SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID =
-  platformSignificantEventsTools.attachInvestigation;

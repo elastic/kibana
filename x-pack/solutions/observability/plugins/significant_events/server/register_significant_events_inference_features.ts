@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+  NIGHTSHIFT_INVESTIGATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
@@ -138,7 +138,7 @@ export function registerSignificantEventsInferenceFeatures(
       ignoreGlobalDefault: true,
     },
     {
-      featureId: SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+      featureId: NIGHTSHIFT_INVESTIGATION_INFERENCE_FEATURE_ID,
       featureName: i18n.translate('xpack.significantEvents.inferenceFeature.investigationName', {
         defaultMessage: 'Investigation',
       }),

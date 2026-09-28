@@ -27,8 +27,7 @@ export const SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID =
   'significant_events_discovery' as const;
 
 /** Root cause investigation. */
-export const SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID =
-  'significant_events_investigation' as const;
+export const NIGHTSHIFT_INVESTIGATION_INFERENCE_FEATURE_ID = 'nightshift_investigation' as const;
 
 /** Decision tree reinforcement. */
 export const SIGNIFICANT_EVENTS_DECISION_TREE_REINFORCE_INFERENCE_FEATURE_ID =

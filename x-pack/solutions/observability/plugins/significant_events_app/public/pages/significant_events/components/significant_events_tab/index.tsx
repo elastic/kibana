@@ -118,7 +118,7 @@ const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
         aria-label={RUN_ARIA_LABEL}
         onClick={(e: React.MouseEvent) => {
           e.stopPropagation();
-          if (!isTriggering) triggerInvestigation(event.event_uuid);
+          if (!isTriggering) triggerInvestigation(event);
         }}
         isDisabled={isTriggering || blocksActivity}
         isLoading={isTriggering}

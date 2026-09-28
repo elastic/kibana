@@ -122,35 +122,77 @@ normalize_evidence_bucket_size() {
 
 trigger_investigation() {
   local event_uuid="$1"
+  local event_file
   local response_file
   local status
-  local execution_id
+  local investigation_id
 
-  response_file=$(mktemp "${TMPDIR:-/tmp}/seed_nightshift_investigation.XXXXXX")
-  status=$(curl -s -o "$response_file" -w "%{http_code}" -u "$ES_AUTH" \
-    -X POST "${KIBANA_URL}/internal/significant_events/events/${event_uuid}/investigate" \
+  event_file=$(mktemp "${TMPDIR:-/tmp}/seed_nightshift_event.XXXXXX")
+  status=$(curl -s -o "$event_file" -w "%{http_code}" -u "$ES_AUTH" \
+    -X GET "${KIBANA_URL}/internal/significant_events/events/${event_uuid}" \
     -H "kbn-xsrf: true" \
     -H "x-elastic-internal-origin: Kibana")
 
   if [[ "$status" != "200" ]]; then
+    echo "ERROR: Failed to fetch event ${event_uuid} (HTTP ${status}):" >&2
+    cat "$event_file" >&2
+    rm -f "$event_file"
+    return 1
+  fi
+
+  local payload
+  payload=$(python3 -c "
+import sys, json
+with open(sys.argv[1]) as f:
+    ev = json.load(f)
+title = ev.get('title', '')
+summary = ev.get('summary', '')
+event_id = ev.get('event_id', '')
+body = {
+  'subject': {'type': 'significant_event', 'id': event_id, 'summary': summary},
+  'title': title,
+  'message': f'{title}\n\n{summary}',
+  'stream_names': ev.get('stream_names') or [],
+  'concurrency_key': event_id,
+  'context': {
+    'event_uuid': ev.get('event_uuid', ''),
+    'event_id': event_id,
+    'status': ev.get('status', 'open'),
+    'severity': ev.get('severity', ''),
+    'confidence': ev.get('confidence', 0),
+    'causal_features': ev.get('causal_features') or [],
+    'blast_radius': ev.get('blast_radius') or [],
+  }
+}
+print(json.dumps(body))
+" "$event_file")
+  rm -f "$event_file"
+
+  response_file=$(mktemp "${TMPDIR:-/tmp}/seed_nightshift_investigation.XXXXXX")
+  status=$(curl -s -o "$response_file" -w "%{http_code}" -u "$ES_AUTH" \
+    -X POST "${KIBANA_URL}/internal/nightshift/investigations" \
+    -H "Content-Type: application/json" \
+    -H "kbn-xsrf: true" \
+    -H "x-elastic-internal-origin: Kibana" \
+    -d "$payload")
+
+  if [[ "$status" != "200" ]]; then
     echo "ERROR: Failed to trigger investigation for ${event_uuid} (HTTP ${status}):" >&2
-    while IFS= read -r line; do
-      echo "$line" >&2
-    done < "$response_file"
+    cat "$response_file" >&2
     rm -f "$response_file"
     return 1
   fi
 
-  execution_id=$(python3 -c \
-    "import sys,json; print(json.load(sys.stdin).get('executionId', ''))" < "$response_file")
+  investigation_id=$(python3 -c \
+    "import sys,json; print(json.load(sys.stdin).get('investigation_id', ''))" < "$response_file")
   rm -f "$response_file"
 
-  if [[ -z "$execution_id" ]]; then
-    echo "ERROR: Investigation response for ${event_uuid} had no executionId." >&2
+  if [[ -z "$investigation_id" ]]; then
+    echo "ERROR: Investigation response for ${event_uuid} had no investigation_id." >&2
     return 1
   fi
 
-  echo "  ${event_uuid}: investigation ${execution_id} started"
+  echo "  ${event_uuid}: investigation ${investigation_id} started"
 }
 
 if [[ "$CLEAN" == "true" ]]; then

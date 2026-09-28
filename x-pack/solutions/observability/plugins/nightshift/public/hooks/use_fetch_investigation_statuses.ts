@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import { useQuery, type UseQueryResult } from '@kbn/react-query';
 import type { InvestigationRunStatus } from '@kbn/significant-events-schema';
+import type { InvestigationStatus } from '@kbn/nightshift-investigations-plugin/common';
 import { useKibana } from './use_kibana';
 
 export const NIGHTSHIFT_INVESTIGATION_STATUSES_QUERY_KEY = [
@@ -18,12 +19,23 @@ const PENDING_INVESTIGATIONS_REFETCH_INTERVAL_MS = 5_000;
 
 const MAX_INVESTIGATION_STATUS_IDS = 1000;
 
+const toRunStatus = (status: InvestigationStatus): InvestigationRunStatus => {
+  switch (status) {
+    case 'pending':
+    case 'running':
+      return 'pending';
+    case 'completed':
+      return 'complete';
+    case 'failed':
+    case 'cancelled':
+      return 'failed';
+  }
+};
+
 export const useFetchInvestigationStatuses = (
   workflowExecutionIds: string[]
 ): UseQueryResult<Record<string, InvestigationRunStatus>, Error> => {
-  const {
-    significantEvents: { significantEventsRepositoryClient },
-  } = useKibana().services;
+  const investigationsClient = useKibana().services.nightshiftInvestigations?.investigationsClient;
 
   const ids = useMemo(
     () =>
@@ -35,16 +47,23 @@ export const useFetchInvestigationStatuses = (
 
   return useQuery<Record<string, InvestigationRunStatus>, Error>({
     queryKey: [...NIGHTSHIFT_INVESTIGATION_STATUSES_QUERY_KEY, ids],
-    enabled: ids.length > 0,
+    enabled: ids.length > 0 && investigationsClient != null,
     queryFn: async ({ signal }) => {
-      const { statuses } = await significantEventsRepositoryClient.fetch(
-        'POST /internal/significant_events/investigations/_status',
+      if (!investigationsClient) {
+        throw new Error('Nightshift investigations plugin is unavailable');
+      }
+      const { statuses } = await investigationsClient.fetch(
+        'POST /internal/nightshift/investigations/_status',
         {
-          params: { body: { workflow_execution_ids: ids } },
+          params: { body: { investigation_ids: ids } },
           signal: signal ?? null,
         }
       );
-      return statuses;
+      const mapped: Record<string, InvestigationRunStatus> = {};
+      for (const [id, status] of Object.entries(statuses)) {
+        mapped[id] = toRunStatus(status);
+      }
+      return mapped;
     },
     refetchInterval: (data) =>
       Object.values(data ?? {}).some((status) => status === 'pending')

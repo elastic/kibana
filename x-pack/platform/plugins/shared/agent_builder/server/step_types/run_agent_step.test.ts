@@ -751,12 +751,12 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       await step.handler(
         createContext({
           input: { message: 'hello' },
-          config: { 'connector-id-by-feature': 'significant_events_investigation' },
+          config: { 'connector-id-by-feature': 'nightshift_investigation' },
         })
       );
 
       expect(featureServices.searchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledWith(
-        'significant_events_investigation',
+        'nightshift_investigation',
         expect.anything()
       );
       expect(execution.executeAgent).toHaveBeenCalledWith(

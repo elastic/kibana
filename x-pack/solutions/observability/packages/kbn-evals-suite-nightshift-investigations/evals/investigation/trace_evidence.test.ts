@@ -135,7 +135,7 @@ it('accepts a successful sandbox command after recovered tool errors', () => {
 it.each([
   {
     ...toolCall,
-    tool_id: 'platform.streams.investigation_progress_report',
+    tool_id: 'platform.nightshift.investigation_progress_report',
     results: [{ ...toolCall.results[0], data: { acknowledged: true } }],
   },
   {
@@ -163,7 +163,7 @@ it('checks executed progress arguments after schema ordering without losing the 
   const params = { summary: 'Investigating', hypotheses: [], blind_spots: [low, high] };
   const progressCall = {
     ...toolCall,
-    tool_id: 'platform.streams.investigation_progress_report',
+    tool_id: 'platform.nightshift.investigation_progress_report',
     params,
   };
   const spans = [

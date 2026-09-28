@@ -33,6 +33,7 @@ export {
   platformCoreTools,
   platformCoreCasesTools,
   platformSignificantEventsTools,
+  platformNightshiftTools,
   attachmentTools,
   internalTools,
   defaultAgentToolIds,

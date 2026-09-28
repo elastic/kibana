@@ -9,6 +9,7 @@ import {
   platformCoreTools,
   platformCoreCasesTools,
   platformSignificantEventsTools,
+  platformNightshiftTools,
   contextEngineAiIndexTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
@@ -27,6 +28,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   ...Object.values(platformCoreCasesTools),
   // Streams / Significant Events
   ...Object.values(platformSignificantEventsTools),
+  // Nightshift
+  ...Object.values(platformNightshiftTools),
 
   // Alerting
   `${internalNamespaces.platformAlerting}.manage_rule`,
@@ -217,7 +220,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'significant-events-changepoint-analysis',
   'significant-events-ki-grounding',
   'significant-events-assessment',
-  'streams-investigation-management',
+  'nightshift-investigation-management',
   'knowledge-indicators-management',
   'ki-identification-management',
   'feature-identification',

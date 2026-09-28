@@ -43,7 +43,7 @@ it('returns true when every start requirement is available', async () => {
     })
   ).resolves.toBe(true);
   expect(featureFlags.getBooleanValue$).toHaveBeenCalledWith(NIGHTSHIFT_ENABLED_FLAG, false);
-  expect(getForFeature).toHaveBeenCalledWith('significant_events_investigation', request);
+  expect(getForFeature).toHaveBeenCalledWith('nightshift_investigation', request);
 });
 
 it('returns false when feature flag is disabled', async () => {

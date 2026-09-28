@@ -7,7 +7,12 @@
 
 import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
-import { MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
+import {
+  MAX_ARRAY_LENGTH,
+  MAX_ID_LENGTH,
+  MAX_TEXT_LENGTH,
+  MAX_TITLE_LENGTH,
+} from '@kbn/significant-events-schema';
 import { freeFormContextSchema } from '../../common';
 import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID, MAX_KEYWORD_LENGTH } from '../../common';
 import { fetchAlertSnapshot } from '../lib/alert_snapshot';
@@ -51,6 +56,17 @@ const startInvestigationBodySchema = z.union([
     title: titleSchema.optional(),
     concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
     ...startInvestigationMessage,
+  }),
+  z.object({
+    subject: z.object({
+      type: z.literal('significant_event'),
+      ...subjectIdAndSummary,
+    }),
+    title: titleSchema,
+    concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+    context: freeFormContextSchema.optional(),
+    ...startInvestigationMessage,
+    stream_names: z.array(z.string().min(1).max(MAX_ID_LENGTH)).max(MAX_ARRAY_LENGTH).optional(),
   }),
   // A manual investigation is defined by its question, so `message` is required and the
   // subject id is optional: there is no entity to point at, only the prompt. The title is
@@ -121,7 +137,7 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
       }
       return await client.start({
         ...body,
-        title: body.title ?? deriveTitleFromMessage(body.message),
+        title: body.title ?? (body.message ? deriveTitleFromMessage(body.message) : ''),
         trigger_type: 'manual',
       });
     } catch (error) {

@@ -8,6 +8,7 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import type { InvestigationQuotaCallback, NightshiftInvestigationsSetupDeps } from './types';
 import { NightshiftInvestigationsPlugin } from './plugin';
+import { investigationManagementSkill } from './agent_builder/skills/investigation_management';
 
 const createPlugin = () =>
   new NightshiftInvestigationsPlugin(
@@ -42,6 +43,29 @@ describe('NightshiftInvestigationsPlugin setup', () => {
 
     expect(() => setup.registerInvestigationQuota(callback)).toThrow(
       'Investigation quota callback is already registered'
+    );
+  });
+});
+
+describe('NightshiftInvestigationsPlugin start', () => {
+  it('registers investigationManagementSkill with availability when agentBuilder is present', () => {
+    const plugin = createPlugin();
+    const coreStart = coreMock.createStart();
+    const agentBuilder = {
+      skills: {
+        register: jest.fn().mockResolvedValue(undefined),
+      },
+    };
+    plugin.start(coreStart, {
+      agentBuilder,
+    } as never);
+
+    expect(agentBuilder.skills.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: investigationManagementSkill.id,
+        name: investigationManagementSkill.name,
+        availability: expect.any(Object),
+      })
     );
   });
 });

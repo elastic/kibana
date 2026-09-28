@@ -10,7 +10,7 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { INVESTIGATION_PROGRESS_UI_EVENT } from '@kbn/significant-events-schema';
 import {
   createInvestigationProgressReportTool,
-  SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
+  NIGHTSHIFT_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
 } from './tool';
 
 const availability = { cacheMode: 'space' as const, handler: jest.fn() };
@@ -25,7 +25,7 @@ describe('investigation_progress_report tool', () => {
   it('uses the expected tool id', () => {
     const tool = createTool();
 
-    expect(tool.id).toBe(SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID);
+    expect(tool.id).toBe(NIGHTSHIFT_INVESTIGATION_PROGRESS_REPORT_TOOL_ID);
   });
 
   // Without this the tool stays listed in the catalog after investigations become unavailable.

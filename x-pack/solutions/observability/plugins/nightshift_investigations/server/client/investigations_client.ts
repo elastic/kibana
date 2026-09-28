@@ -723,6 +723,10 @@ export class NightshiftInvestigationsClient {
     return toInvestigationResponse(record);
   }
 
+  async getStatuses(investigationIds: string[]): Promise<Record<string, InvestigationStatus>> {
+    return this.investigationRepository.bulkGetStatuses(investigationIds);
+  }
+
   async list({
     statuses,
     severities,

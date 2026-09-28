@@ -27,6 +27,7 @@ import { installInvestigationWorkflow } from './lib/managed_workflows/install_in
 import { installCortexWorkflows } from './lib/managed_workflows/install_cortex_workflows';
 import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
+import { investigationManagementSkill } from './agent_builder/skills/investigation_management';
 import { createInvestigationAvailability } from './create_investigation_availability';
 import { nightshiftInvestigationsRouteRepository } from './routes';
 import { isInvestigationAvailable } from './is_investigation_available';
@@ -356,6 +357,14 @@ export class NightshiftInvestigationsPlugin
       }).catch((err) => {
         this.logger.error(`Failed to install investigation agent in default space: ${err.message}`);
       });
+      void agentBuilder.skills
+        .register({
+          ...investigationManagementSkill,
+          availability: this.getInvestigationAvailability(),
+        })
+        .catch((err) => {
+          this.logger.error(`Failed to register investigation management skill: ${err.message}`);
+        });
     }
 
     if (plugins.workflowsExtensions) {

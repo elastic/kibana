@@ -74,13 +74,6 @@ interface AgentToolEventStatusUpdateProps {
   error_message?: string;
 }
 
-interface AgentToolEventInvestigationAttachProps {
-  success: boolean;
-  event_uuid: string;
-  workflow_execution_id: string;
-  error_message?: string;
-}
-
 interface CodeAnalysisGroundingProps {
   stream_name: string;
   stream_type: string;
@@ -163,7 +156,6 @@ export {
   type AgentBuilderKnowledgeIndicatorCreatedProps,
   type AgentToolKnowledgeIndicatorIdentificationStartedProps,
   type AgentToolEventCreateProps,
-  type AgentToolEventInvestigationAttachProps,
   type AgentToolEventSearchProps,
   type AgentToolEventStatusUpdateProps,
   type AgentToolEventWriteProps,

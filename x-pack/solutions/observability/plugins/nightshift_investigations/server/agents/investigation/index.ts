@@ -7,7 +7,7 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
-import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
+import { platformNightshiftTools } from '@kbn/agent-builder-common/tools';
 import {
   NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID,
   NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID,
@@ -74,7 +74,7 @@ export const getInvestigationAgentType = ({
     tools: [
       {
         tool_ids: [
-          platformSignificantEventsTools.reportInvestigationProgress,
+          platformNightshiftTools.reportInvestigationProgress,
           ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
         ],
       },

@@ -119,6 +119,7 @@ const findResult = (records: InvestigationRecord[]): FindInvestigationsResult =>
 const createMockRepository = (): jest.Mocked<InvestigationRepository> => ({
   create: jest.fn().mockResolvedValue(undefined),
   get: jest.fn().mockResolvedValue(undefined),
+  bulkGetStatuses: jest.fn().mockResolvedValue({}),
   update: jest.fn().mockResolvedValue(undefined),
   find: jest.fn().mockResolvedValue(findResult([])),
 });
@@ -241,6 +242,23 @@ describe('NightshiftInvestigationsClient.get()', () => {
     expect(result.status).toBe('pending');
     expect(result.created_at).toBe('2024-01-01T00:00:00Z');
     expect(result.started_at).toBeUndefined();
+  });
+});
+
+describe('NightshiftInvestigationsClient.getStatuses()', () => {
+  it('delegates to the repository bulkGetStatuses', async () => {
+    repository.bulkGetStatuses.mockResolvedValue({
+      'inv-1': 'completed',
+      'inv-2': 'running',
+    });
+
+    const result = await makeClient().getStatuses(['inv-1', 'inv-2']);
+
+    expect(repository.bulkGetStatuses).toHaveBeenCalledWith(['inv-1', 'inv-2']);
+    expect(result).toEqual({
+      'inv-1': 'completed',
+      'inv-2': 'running',
+    });
   });
 
   it('returns the stored severity', async () => {

@@ -7,13 +7,12 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
-import { SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID } from '../../tools/register_tools';
 import content from './skill.md.text';
 
-export const streamsInvestigationManagementSkill = defineSkillType({
-  id: 'streams-investigation-management',
-  name: 'streams-investigation-management',
-  basePath: 'skills/platform/streams',
+export const investigationManagementSkill = defineSkillType({
+  id: 'nightshift-investigation-management',
+  name: 'nightshift-investigation-management',
+  basePath: 'skills/platform/nightshift',
   description:
     'Streams investigation management: trigger a root-cause analysis workflow for an observability issue, significant event, or alert; check the status of a running investigation; and summarise the structured findings once complete. Load when the user asks to investigate an incident, error, or anomaly — including a significant event attached to the conversation or a fired alert — optionally scoped to specific data streams.',
   content,
@@ -29,8 +28,5 @@ export const streamsInvestigationManagementSkill = defineSkillType({
     // on custom agents.
     platformCoreTools.generateEsql,
     platformCoreTools.executeEsql,
-    // Records the completed investigation back onto the significant event so the UI can
-    // surface investigation history and link to the full RCA result.
-    SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID,
   ],
 });

@@ -141,23 +141,7 @@ Use `platform.core.get_workflow_execution_status` with the `executionId` from th
 
 ### Recording the investigation on a Significant Event
 
-When you trigger an investigation for a Significant Event, record it on the event using `platform.streams.sig_events.event_investigation_attach` — once immediately when the investigation starts, and again once it reaches a terminal state. The event only tracks that a run happened and when; it does not track status — the full investigation state (hypotheses, conclusion) lives on the workflow execution itself, which the UI fetches or follows using `workflow_execution_id`.
-
-**On start** (right after `execute_workflow` returns an execution id):
-- `event_uuid` — the `event_uuid` of the Significant Event.
-- `workflow_execution_id` — the `executionId` returned by `execute_workflow`.
-- `started_at` — the execution start time from the workflow execution object.
-- Omit `completed_at`.
-
-**On completion** (once the investigation has reached a terminal state, regardless of whether it succeeded or failed):
-- `event_uuid` — same as above.
-- `workflow_execution_id` — same as above.
-- `started_at` — same start time as the initial call.
-- `completed_at` — the current ISO-8601 datetime.
-
-This tool is idempotent (replace-by-`workflow_execution_id`): the investigation workflow also auto-records both the start and terminal entries when it runs via the discovery pipeline, so calling this tool for the same execution id is always safe.
-
-Only call this tool when a Significant Event was the context for the investigation (`event_uuid` is known). Skip it for free-form issues or alert investigations.
+Nightshift records the run on the event automatically when `context.source` is `significant_event`.
 
 ### Presenting results
 

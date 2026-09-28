@@ -15,13 +15,12 @@ import {
   MAX_ASSESSMENT_NOTE_LENGTH,
   type ChangePointType,
   type Detection,
-  type InvestigationRunStatus,
   type SignificantEvent,
   type SignificantEventResponse,
   type LifecycleDetection,
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
-import { notFound, serverUnavailable } from '@hapi/boom';
+import { notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
@@ -30,11 +29,8 @@ import {
   cleanupStaleEvents,
   type CleanupStaleEventsResult,
 } from '../../../lib/significant_events/events/cleanup_stale_events';
-import { triggerInvestigationWorkflow } from '../../../lib/significant_events/events/trigger_investigation_workflow';
-import { resolveInvestigationStatuses } from '../../../lib/significant_events/events/resolve_investigation_status';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
 import { createServerRoute } from '../../create_server_route';
-import { assertNotPaused } from '../../utils/assert_not_paused';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
 const toArray = <T extends string>(val: T | T[] | undefined): T[] | undefined =>
@@ -226,13 +222,13 @@ const eventsLifecycleRoute = createServerRoute({
   },
 });
 
-/** Used by the managed investigation-completed subscriber workflow. */
+/** Used by the managed investigation lifecycle subscriber workflows. */
 const eventsAttachInvestigationRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/events/{id}/investigations',
   options: {
     access: 'internal',
     summary: 'Attach investigation to event',
-    description: 'Record a completed investigation against a significant event.',
+    description: 'Record an investigation lifecycle event against a significant event.',
   },
   security: {
     authz: {
@@ -243,7 +239,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
     path: z.object({
       id: z.string().max(255),
     }),
-    body: significantEventInvestigationSchema.required({ completed_at: true }),
+    body: significantEventInvestigationSchema,
   }),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
     const { getEventClient, getAlertEventsClient, licensing } = await getScopedClients({ request });
@@ -257,60 +253,6 @@ const eventsAttachInvestigationRoute = createServerRoute({
       alertEventsClient: await getAlertEventsClient(),
       logger,
     });
-  },
-});
-
-const eventsTriggerInvestigationRoute = createServerRoute({
-  endpoint: 'POST /internal/significant_events/events/{id}/investigate',
-  options: {
-    access: 'internal',
-    summary: 'Trigger investigation workflow for a significant event',
-    description:
-      'Starts the managed investigation workflow for the given significant event and returns the workflow execution id.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    path: z.object({
-      id: z.string().max(255),
-    }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-    logger,
-    maintenanceService,
-  }): Promise<{ executionId: string }> => {
-    const { getEventClient, licensing } = await getScopedClients({ request });
-
-    await assertSignificantEventsAccess({ server, licensing });
-    await assertNotPaused({ maintenanceService, request });
-
-    const eventClient = await getEventClient();
-    const { hits } = await eventClient.findByEventUuid(params.path.id);
-    if (hits.length === 0) {
-      throw notFound(`Significant event "${params.path.id}" not found.`);
-    }
-
-    const executionId = await triggerInvestigationWorkflow({
-      nightshiftInvestigations: server.nightshiftInvestigations,
-      request,
-      logger,
-      event: hits[0],
-    });
-
-    if (!executionId) {
-      throw serverUnavailable(
-        'Investigation workflow is not available. Ensure workflows management is enabled and Kibana has finished installing managed workflows.'
-      );
-    }
-
-    return { executionId };
   },
 });
 
@@ -450,55 +392,11 @@ const cleanupStaleEventsRoute = createServerRoute({
   },
 });
 
-const investigationStatusesRoute = createServerRoute({
-  endpoint: 'POST /internal/significant_events/investigations/_status',
-  options: {
-    access: 'internal',
-    summary: 'Resolve the outcome of investigation runs',
-    description:
-      'Reports whether each investigation run is pending, complete, failed, or unavailable, resolved from its workflow execution. Missing executions are omitted from the response.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    body: z.object({
-      workflow_execution_ids: z.array(z.string().max(MAX_ID_LENGTH)).max(1000),
-    }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-    logger,
-    getSpaceId,
-  }): Promise<{ statuses: Record<string, InvestigationRunStatus> }> => {
-    const { licensing } = await getScopedClients({ request });
-
-    await assertSignificantEventsAccess({ server, licensing });
-
-    const statuses = await resolveInvestigationStatuses({
-      request,
-      workflowsManagement: server.workflowsManagement,
-      spaceId: await getSpaceId(request),
-      workflowExecutionIds: params.body.workflow_execution_ids,
-      logger,
-    });
-
-    return { statuses };
-  },
-});
-
 export const internalEventsRoutes = {
   ...eventsSearchRoute,
   ...eventsGetRoute,
   ...eventsLifecycleRoute,
   ...eventsAttachInvestigationRoute,
-  ...eventsTriggerInvestigationRoute,
   ...eventsUpdateRoute,
   ...cleanupStaleEventsRoute,
-  ...investigationStatusesRoute,
 };

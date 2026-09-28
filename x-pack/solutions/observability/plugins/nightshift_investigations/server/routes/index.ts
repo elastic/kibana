@@ -7,6 +7,7 @@
 
 import { startInvestigationRoute } from './start_investigation';
 import { getInvestigationRoute } from './get_investigation';
+import { bulkGetInvestigationStatusesRoute } from './bulk_get_investigation_statuses';
 import { emitLifecycleEventRoute } from './emit_lifecycle_event';
 import { ensureInvestigationRoute } from './ensure_investigation';
 import { listInvestigationsRoute } from './list_investigations';
@@ -25,6 +26,7 @@ import { getDecisionTreeVersionRoute } from './get_decision_tree_version';
 export const nightshiftInvestigationsRouteRepository = {
   ...startInvestigationRoute,
   ...getInvestigationRoute,
+  ...bulkGetInvestigationStatusesRoute,
   ...emitLifecycleEventRoute,
   ...ensureInvestigationRoute,
   ...listInvestigationsRoute,
