@@ -4,7 +4,7 @@ Outcome eval for the Attack Discovery FP/TP analysis ([security-team#19285](http
 
 ## What it runs
 
-Until the managed analysis workflow ships ([security-team#19282](https://github.com/elastic/security-team/issues/19282)), the suite installs `src/sample_workflow/fp_tp_analysis.yaml` for the run and deletes it afterwards. The sample follows the contract's inputs, evidence sources, checks, and output shape, but it has **no claim-verification gate**: the verdict it returns is the model's proposal as-is. Its scores measure the prompt, not the product.
+The suite runs the managed workflow `system-security-attack-discovery-fp-tp-analysis`. `src/sample_workflow/` is still in the package; the spec installs it only when `FP_TP_WORKFLOW_SOURCE` is `sample`.
 
 The workflow's `ai.agent` step runs `alertzero-thin-agent` with no tools and resolves its connector from the `alertzero_reasoning` inference feature. `beforeAll` routes that feature to the model under test and restores the previous inference settings in `afterAll`.
 
@@ -50,7 +50,7 @@ src/
     registry.test.ts      Invariants every scenario must hold
     encoded_powershell/   One authored scenario: ids, attack, entities, event overlays, gold, examples
     mimicrat_clickfix/    One replayed chain, its benign mimic, and their variants
-  sample_workflow/        The workflow under test until #19282 ships
+  sample_workflow/        Installed only when FP_TP_WORKFLOW_SOURCE is sample
   workflow_task.ts        Runs the workflow and reads its output
   evaluators.ts
 ```
@@ -95,11 +95,8 @@ Run with `--repetitions 5` or more. Each repetition is a separate run in the rep
 - Hard gates on the core models: `PayloadConformance` = 1.0 and `UnsafeClose` = 1.0.
 - `OutcomeAccuracy`: record the sample workflow's numbers as the baseline #19282 has to beat, then set a threshold.
 
-## Switching to the managed workflow (after #19282)
+## Sample workflow cleanup
 
-1. Set `FP_TP_WORKFLOW_SOURCE` in `src/constants.ts` to `managed`.
-2. Delete `src/sample_workflow/` and the install and delete calls around it in the spec.
-3. Add the claim-grounding evaluator.
-4. Add a weekly step to `.buildkite/pipelines/evals/llm_evals.yml`, copying `Evals: Alert Analysis Workflow` with `EVAL_SUITE_ID: 'security-attack-discovery-fp-tp'`.
+`FP_TP_WORKFLOW_SOURCE` is `managed`. Still to do: delete `src/sample_workflow/` and the install and delete calls around it in the spec, and point the `FP_TP_VERDICT_RULES` text lock at the managed YAML.
 
-Until then the suite runs on demand through the `evals:security-attack-discovery-fp-tp` PR label.
+The suite also runs on demand through the `evals:security-attack-discovery-fp-tp` PR label.
