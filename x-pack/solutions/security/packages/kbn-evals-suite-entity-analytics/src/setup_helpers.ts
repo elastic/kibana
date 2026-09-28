@@ -68,6 +68,7 @@ interface SeedEntity {
   riskLevel?: EntityRiskLevels;
   riskScoreNorm?: number;
   assetCriticality?: AssetCriticalityLevel;
+  extraFields?: Record<string, unknown>;
 }
 
 export async function bulkIndexEntities({
@@ -84,28 +85,30 @@ export async function bulkIndexEntities({
   const latestAlias = getEntitiesAlias(ENTITY_LATEST, namespace);
   const now = new Date().toISOString();
 
-  const operations = entities.flatMap(({ euid, riskLevel, riskScoreNorm, assetCriticality }) => {
-    const [type, displayName] = euid.split(':');
+  const operations = entities.flatMap(
+    ({ euid, riskLevel, riskScoreNorm, assetCriticality, extraFields }) => {
+      const [type, displayName] = euid.split(':');
 
-    const hasRisk = riskLevel !== undefined || riskScoreNorm !== undefined;
-    const doc: Record<string, unknown> = {
-      '@timestamp': now,
-      entity: {
-        id: euid,
-        EngineMetadata: { Type: type },
-        ...(hasRisk && {
-          risk: {
-            ...(riskLevel !== undefined && { calculated_level: riskLevel }),
-            ...(riskScoreNorm !== undefined && { calculated_score_norm: riskScoreNorm }),
-          },
-        }),
-      },
-      [type]: { name: displayName },
-      ...(assetCriticality !== undefined && { asset: { criticality: assetCriticality } }),
-    };
+      const hasRisk = riskLevel !== undefined || riskScoreNorm !== undefined;
+      const doc: Record<string, unknown> = {
+        '@timestamp': now,
+        entity: {
+          id: euid,
+          EngineMetadata: { Type: type },
+          ...(hasRisk && {
+            risk: {
+              ...(riskLevel !== undefined && { calculated_level: riskLevel }),
+              ...(riskScoreNorm !== undefined && { calculated_score_norm: riskScoreNorm }),
+            },
+          }),
+        },
+        [type]: { name: displayName, ...extraFields },
+        ...(assetCriticality !== undefined && { asset: { criticality: assetCriticality } }),
+      };
 
-    return [{ index: { _index: latestAlias, _id: hashEuid(euid) } }, doc];
-  });
+      return [{ index: { _index: latestAlias, _id: hashEuid(euid) } }, doc];
+    }
+  );
 
   await esClient.bulk({ refresh: true, operations });
 }
@@ -193,4 +196,59 @@ export async function deleteEntityEngines({
   } catch (err) {
     log.warning(`deleteEntityEngines failed during teardown: ${(err as Error).message}`);
   }
+}
+
+/**
+ * Creates a source index for index-type watchlist entity source evals and loads documents into it.
+ *
+ * The mapping requirements are load-bearing: index sources always range-filter on `@timestamp`,
+ * and the sync aggregates the identifier field with a composite `terms` agg, so a missing
+ * `@timestamp` or a `text`-mapped identifier field yields zero matches with no error.
+ */
+export async function createSourceIndex({
+  esClient,
+  index,
+  identifierField,
+  properties,
+  documents,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+  identifierField: string;
+  properties: Record<string, unknown>;
+  documents: Array<Record<string, unknown>>;
+}): Promise<void> {
+  await deleteSourceIndex({ esClient, index });
+  await esClient.indices.create({
+    index,
+    mappings: {
+      properties: {
+        '@timestamp': { type: 'date' },
+        [identifierField]: { type: 'keyword' },
+        ...properties,
+      } as never,
+    },
+  });
+
+  if (documents.length === 0) return;
+
+  const now = new Date().toISOString();
+  await esClient.bulk({
+    refresh: true,
+    operations: documents.flatMap((doc) => [
+      { index: { _index: index } },
+      { '@timestamp': now, ...doc },
+    ]),
+  });
+}
+
+/** Best-effort teardown for {@link createSourceIndex}. */
+export async function deleteSourceIndex({
+  esClient,
+  index,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+}): Promise<void> {
+  await esClient.indices.delete({ index }, { ignore: [404] });
 }
