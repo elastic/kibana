@@ -73,7 +73,7 @@ export const clearEntityStoreIndices = async (esClient: EsClient) => {
   const toDelete = [LATEST_INDEX, UPDATES_INDEX, ...historyIndices];
   await esClient.indices.delete({ index: toDelete, ignore_unavailable: true }, { ignore: [404] });
 
-  await esClient.indices.deleteDataStream({ name: LOGS_TEST_INDEX_PATTERN }).catch(() => {});
+  await esClient.indices.deleteDataStream({ name: LOGS_TEST_INDEX }).catch(() => {});
   await esClient.indices.deleteDataStream({ name: QUERY_TRANSLATION_TEST_INDEX }).catch(() => {});
 };
 
