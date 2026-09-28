@@ -165,6 +165,8 @@ export async function updateManagedIntegrationsPolicy(
     package: { name: packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
     inputs,
-    ...(cloudConnector ? { cloud_connector: cloudConnector } : {}),
+    // null means "detach" (same as omitting — per Fleet schema); undefined means "preserve". Use
+    // !== undefined rather than truthiness so an intentional null reaches the wire explicitly.
+    ...(cloudConnector !== undefined ? { cloud_connector: cloudConnector } : {}),
   });
 }
