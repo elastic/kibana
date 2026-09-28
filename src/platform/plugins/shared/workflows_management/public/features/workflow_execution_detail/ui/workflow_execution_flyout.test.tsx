@@ -18,15 +18,6 @@ import {
   createMockWorkflowExecutionDto,
 } from '../../../shared/test_utils';
 
-const mockUrlState = {
-  shouldAutoResume: false,
-  clearResumeParam: jest.fn(),
-};
-
-jest.mock('../../../hooks/use_workflow_url_state', () => ({
-  useWorkflowUrlState: () => mockUrlState,
-}));
-
 jest.mock('../../../hooks/navigation/use_navigate_to_execution', () => ({
   useNavigateToExecution: ({
     workflowId,
@@ -161,7 +152,6 @@ describe('WorkflowExecutionFlyout resume', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUrlState.shouldAutoResume = false;
     mockWaitingStepResume.waitingStepExecutionId = undefined;
     mockWaitingStepResume.waitingStepStartedAt = undefined;
     mockWaitingStepResume.resumeMessage = undefined;
@@ -180,9 +170,10 @@ describe('WorkflowExecutionFlyout resume', () => {
     });
   });
 
-  const renderFlyout = () =>
+  // The flyout reads `?resume=true` and the selected step from the URL.
+  const renderFlyout = (search = '') =>
     render(<WorkflowExecutionFlyout executionId="exec-1" onClose={jest.fn()} />, {
-      wrapper: getTestProvider({ services }),
+      wrapper: getTestProvider({ services, initialEntries: [`/${search}`] }),
     });
 
   it('does not show resume when the run is not waiting for input', () => {
@@ -196,9 +187,7 @@ describe('WorkflowExecutionFlyout resume', () => {
   });
 
   it('does not show resume from ?resume=true until the waiting step is ready', () => {
-    mockUrlState.shouldAutoResume = true;
-
-    renderFlyout();
+    renderFlyout('?resume=true');
 
     expect(screen.queryByTestId('resume-execution-button')).not.toBeInTheDocument();
   });
@@ -207,9 +196,7 @@ describe('WorkflowExecutionFlyout resume', () => {
     mockWaitingStepResume.waitingStepExecutionId = 'step-wait';
     mockWaitingStepResume.waitingStepStartedAt = '2024-01-01T00:00:00Z';
     mockWaitingStepResume.resumeMessage = 'Approve this';
-    mockUrlState.shouldAutoResume = true;
-
-    renderFlyout();
+    renderFlyout('?resume=true');
 
     const resumeButtons = screen.getAllByTestId('resume-execution-button');
     expect(resumeButtons).toHaveLength(1);
