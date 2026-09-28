@@ -703,6 +703,9 @@ export const QueryBarTopRow = React.memo(
       visorNlResultHandlerRef.current = fn;
       setVisorNlResultHandlerReady(true);
     }, []);
+    const onVisorNlResult = useCallback((generatedQuery: string) => {
+      visorNlResultHandlerRef.current?.(generatedQuery);
+    }, []);
     useEffect(() => {
       if (shouldUseLegacyTimePicker || !propsOnRefreshChange) return;
 
@@ -790,6 +793,7 @@ export const QueryBarTopRow = React.memo(
     const propsOnTextLangQueryChange = props.onTextLangQueryChange;
     const onVisorUpdateAndSubmit = useCallback(
       (newEsqlQuery: string) => {
+        if (isSubmitDisabled) return;
         const aggregateQuery = { esql: newEsqlQuery } as AggregateQuery;
         propsOnTextLangQueryChange(aggregateQuery);
         onSubmit({
@@ -797,7 +801,7 @@ export const QueryBarTopRow = React.memo(
           dateRange: dateRangeRef.current,
         });
       },
-      [propsOnTextLangQueryChange, onSubmit]
+      [isSubmitDisabled, propsOnTextLangQueryChange, onSubmit]
     );
 
     const {
@@ -1427,10 +1431,9 @@ export const QueryBarTopRow = React.memo(
                     query={
                       props.query && isOfAggregateQueryType(props.query) ? props.query.esql : ''
                     }
-                    onNlResult={
-                      visorNlResultHandlerReady ? visorNlResultHandlerRef.current : undefined
-                    }
+                    onNlResult={visorNlResultHandlerReady ? onVisorNlResult : undefined}
                     onUpdateAndSubmitQuery={onVisorUpdateAndSubmit}
+                    isDisabled={isSubmitDisabled}
                   />
                 </EuiFlexItem>
                 {renderDatePickerWithUpdateBtn()}

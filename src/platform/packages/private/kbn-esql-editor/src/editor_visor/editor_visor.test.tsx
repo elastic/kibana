@@ -108,6 +108,18 @@ describe('Quick search visor', () => {
     expect(onUpdateAndSubmitQuery).not.toHaveBeenCalled();
   });
 
+  it('should not submit a KQL filter when disabled', async () => {
+    const onUpdateAndSubmitQuery = jest.fn();
+    renderWithI18n(renderESQLVisor({ ...props, isDisabled: true, onUpdateAndSubmitQuery }));
+
+    await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
+
+    const { onSubmit } = (kqlMock.QueryStringInput as jest.Mock).mock.calls.at(-1)[0];
+    act(() => onSubmit({ query: 'hostname:web-01', language: 'kuery' }));
+
+    expect(onUpdateAndSubmitQuery).not.toHaveBeenCalled();
+  });
+
   it('should build a TS query when the current query uses the TS command', async () => {
     const onUpdateAndSubmitQuery = jest.fn();
     renderWithI18n(renderESQLVisor({ ...props, query: 'TS ts_index', onUpdateAndSubmitQuery }));
