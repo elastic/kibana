@@ -14,6 +14,7 @@ import type {
   ServiceAccountWorkloadBinding,
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRef,
+  ServiceAccountWorkloadRequestParams,
 } from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 
@@ -56,7 +57,7 @@ export interface ServiceAccountWorkloadBindingsApi {
 
   withScopedRequest<T>(
     pluginId: string,
-    params: ServiceAccountWorkloadCoordinates,
+    params: ServiceAccountWorkloadRequestParams,
     fn: (request: KibanaRequest) => Promise<T>
   ): Promise<T>;
 }
@@ -192,13 +193,19 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
 
   async withScopedRequest<T>(
     pluginId: string,
-    params: ServiceAccountWorkloadCoordinates,
+    params: ServiceAccountWorkloadRequestParams,
     fn: (request: KibanaRequest) => Promise<T>
   ): Promise<T> {
     this.ensureAvailable();
 
     const coordinates = this.toCoordinates(pluginId, params);
     const binding = await this.requireBinding(coordinates);
+    if (
+      params.expectedServiceAccountId !== undefined &&
+      binding.serviceAccountId !== params.expectedServiceAccountId
+    ) {
+      throw Boom.forbidden('The workload binding does not match the expected service account.');
+    }
     let minted = false;
 
     const request = await this.backend.createFakeRequest({
