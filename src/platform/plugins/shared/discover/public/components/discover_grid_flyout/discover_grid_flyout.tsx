@@ -36,6 +36,7 @@ export interface DiscoverGridFlyoutProps
     | 'requestStateMeta'
     | 'notice'
     | 'flyoutMenuTrailingActions'
+    | 'gridImplementation'
   > {
   savedSearchId?: string;
   filters?: Filter[];
@@ -88,6 +89,7 @@ export function DiscoverGridFlyout({
   requestStateMeta,
   notice,
   flyoutMenuTrailingActions,
+  gridImplementation,
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
   const isEsqlQuery = isOfAggregateQueryType(query);
@@ -157,6 +159,7 @@ export function DiscoverGridFlyout({
       onInitialDocViewerStateChange={onInitialDocViewerStateChange}
       onUpdateSelectedTabId={onUpdateSelectedTabId}
       hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
+      gridImplementation={gridImplementation}
     />
   );
 }
