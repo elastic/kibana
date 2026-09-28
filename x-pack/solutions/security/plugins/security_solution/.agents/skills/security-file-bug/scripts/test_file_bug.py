@@ -16,6 +16,7 @@ from file_bug import (  # noqa: E402
     FILED_VIA,
     IssueMatch,
     PartialWrite,
+    TitleTooLong,
     check_draft,
     compress_video,
     decide_write_path,
@@ -329,6 +330,25 @@ class RenderBugBodyTest(unittest.TestCase):
         self.assertIn("Tenant isolation", describe)
         self.assertNotIn("Same record in empty space", describe)
 
+    def test_drops_non_path_media_status(self):
+        body = render_bug_body(
+            {
+                "title": "Leak across spaces",
+                "current_behavior": "Same record in empty space",
+                "expected_behavior": "Zero anomalies",
+                "steps_followed": ["open flyout"],
+                "evidence": [
+                    "Screenshot: `$SESSION_DIR/screenshots/leak.png`",
+                    "Video: unavailable (ffmpeg missing)",
+                ],
+            },
+            {"session_dir": "/tmp/session"},
+        )
+        current = body.split("**Current behaviour (with screenshots and recordings):**", 1)[1]
+        self.assertIn("/tmp/session/screenshots/leak.png", current)
+        self.assertNotIn("unavailable", current)
+        self.assertNotIn("ffmpeg", current)
+
     def test_tester_config_fills_deployment_space_role_install(self):
         config = {
             "environment": {
@@ -379,11 +399,11 @@ class FormatIssueTitleTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             format_issue_title("Entity Analytics", "broken")
 
-    def test_truncates_to_72(self):
-        title = format_issue_title("Entity Analytics", "x" * 80)
-        self.assertLessEqual(len(title), 72)
-        self.assertTrue(title.startswith("[Entity Analytics] "))
-        self.assertTrue(title.endswith("…"))
+    def test_rejects_too_long(self):
+        with self.assertRaises(TitleTooLong) as raised:
+            format_issue_title("Entity Analytics", "x" * 80)
+        self.assertIn("≤72", str(raised.exception))
+        self.assertNotIn("…", str(raised.exception))
 
 
 class ParseSearchResultsTest(unittest.TestCase):
@@ -916,6 +936,19 @@ class FileBugCliTest(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 1)
 
+    def test_format_title_cli_asks_when_too_long(self):
+        result = run_cli(
+            "format-title",
+            "--label",
+            "Team:Entity Analytics",
+            "--symptom",
+            "x" * 80,
+        )
+        self.assertEqual(result.returncode, 2)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "ask")
+        self.assertIn("≤72", payload["error"])
+
 
 TESTER_PARSE = (
     Path(__file__).resolve().parents[2]
@@ -1068,6 +1101,8 @@ class SkillProtocolTest(unittest.TestCase):
         self.assertIn("embed-uploads", self.text)
         self.assertIn("--search", self.text)
         self.assertIn("Video:", self.text)
+        self.assertIn("clipped title", self.text)
+        self.assertIn("Cases table", self.text)
 
 
 if __name__ == "__main__":

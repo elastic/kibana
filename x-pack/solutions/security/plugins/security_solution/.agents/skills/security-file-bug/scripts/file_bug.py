@@ -14,6 +14,13 @@ WriteAction = Literal["create", "comment", "reopen_comment", "ask"]
 UNKNOWN_ANSWER = "Unknown"
 FILED_VIA = "Filed via security-file-bug"
 MAX_TITLE_LEN = 72
+_MEDIA_SUFFIXES = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".mp4", ".webm", ".mov")
+
+
+class TitleTooLong(ValueError):
+    """Symptom does not fit in MAX_TITLE_LEN after the [team] prefix."""
+
+
 _VAGUE_SYMPTOMS = frozenset(
     {
         "broken",
@@ -86,7 +93,10 @@ def format_issue_title(team_label: str, symptom: str) -> str:
     if budget < 1:
         raise ValueError("team name leaves no room for a symptom")
     if len(symptom_text) > budget:
-        symptom_text = symptom_text[: budget - 1].rstrip() + "…"
+        raise TitleTooLong(
+            f"title would be {len(prefix) + len(symptom_text)} characters; "
+            f"shorten the symptom so the title is ≤{MAX_TITLE_LEN}"
+        )
     return f"{prefix}{symptom_text}"
 
 
@@ -474,6 +484,17 @@ def _normalize_evidence_value(raw: str, session_dir: str | None) -> str:
     return text
 
 
+def _looks_like_media_path(value: str) -> bool:
+    text = value.strip()
+    if not text:
+        return False
+    if text.startswith(("http://", "https://")):
+        return True
+    if "/" in text or "\\" in text:
+        return True
+    return text.lower().endswith(_MEDIA_SUFFIXES)
+
+
 def _values_with_prefix(
     lines: list[str], prefix: str, session_dir: str | None = None
 ) -> list[str]:
@@ -691,6 +712,7 @@ def _current_behaviour(
         value
         for prefix in _MEDIA_PREFIXES
         for value in _values_with_prefix(evidence, prefix, session_dir)
+        if _looks_like_media_path(value)
     ]
     if media:
         parts.append("\n".join(media))

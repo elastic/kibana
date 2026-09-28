@@ -25,7 +25,7 @@ Repo: `elastic/kibana`. Body template: this skill's `templates/bug-report.md` (n
 - Headings from `templates/bug-report.md`.
 - **Version** (stack). **Original install method** when known (`from source (dev)` for local/scout).
 - **Steps to reproduce**, **Current behaviour (with screenshots and recordings)**, **Expected behavior**.
-- **Title** (new issues): `[<team name>] <short symptom>`. Run `format-title` after you have a `Team:*` label (human or `infer-team`). If inference is `ask`, ask the human before create. Do not invent a team.
+- **Title** (new issues): `[<team name>] <short symptom>`. Run `format-title` after you have a `Team:*` label (human or `infer-team`). If inference is `ask`, ask the human before create. Do not invent a team. If `format-title` exits 2, the symptom is too long — ask the human to shorten it. Do not file a clipped title.
 - **Feature flags:** exact flag id, on/off, and **how to enable it**. If confirmed default/GA, write `No feature flag (default/GA)`.
 - **Deployment:** ECH, serverless, or both — where the bug reproduces. Run `infer-deployment`. Confident when the pack names `deployment`, or tester `environment.type` is `serverless` → Serverless or `stateful-ess` / `stateful-classic` → ECH, or Scout `arch`/`domain` is `serverless` / `stateful`. A URL that contains `cloud` is a **hint** — still ask. `kind: scout` or `kind: local` with no type/arch/URL → ask. `user-provided` without more signal → ask. Write **both** only if the human or pack says both. Prefill **Spaces** from `space_id` (session space, not “both”). Prefill **Role** from `setup.resolved_role` when present.
 - **Role required to reproduce:** specific Kibana/Security role, or none / any.
@@ -68,7 +68,7 @@ Do not ask for a write-yes until `check-draft` exits 0, or you have walked every
 
 ## Sanitize
 
-Before draft-and-stop, run `scan-sensitive` on the finding and draft. Flag emails, `SDH…` / case IDs, NDA, “customer name/id”. Strip or ask to strip anything not needed to repro. Default repo stays `elastic/kibana`. If they say the content is sensitive / NDA, **stop** and ask whether to file in `elastic/security-team` instead — do not switch silently.
+Before draft-and-stop, run `scan-sensitive` on the finding and draft. Flag emails, `SDH…` / case IDs, NDA, “customer name/id”. Strip or ask to strip anything not needed to repro. Cases product language (`Opening case 12345`, `Cases table`) will flag — confirm and keep when it is UI text, not a customer ID. Default repo stays `elastic/kibana`. If they say the content is sensitive / NDA, **stop** and ask whether to file in `elastic/security-team` instead — do not switch silently.
 
 ## Environment setup questions
 
@@ -150,7 +150,7 @@ Every GitHub read for labels and every GitHub write goes through `scripts/file-b
 | `scan-sensitive` | Emails / case IDs / NDA / customer wording (exit 2 if hits) |
 | `render-body` | Evidence pack → bug template body (includes the stamp) |
 | `infer-team` | Area / slug / route → `Team:*` |
-| `format-title` | `Team:*` + symptom → `[<team name>] …` |
+| `format-title` | `Team:*` + symptom → `[<team name>] …` (exit 2 if longer than 72) |
 | `infer-deployment` | ECH / serverless / both, or ask |
 | `parse-search` | `gh search --json` → `matches.json` |
 | `decide` | Search matches → write path |

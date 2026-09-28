@@ -15,6 +15,7 @@ from file_bug import (  # noqa: E402
     CreateFailed,
     IssueMatch,
     PartialWrite,
+    TitleTooLong,
     _default_run_gh as default_run_gh,
     catalog_from_search_results,
     check_draft,
@@ -191,6 +192,8 @@ def _cmd_infer_team(args: argparse.Namespace) -> int:
 def _cmd_format_title(args: argparse.Namespace) -> int:
     try:
         title = format_issue_title(args.label, args.symptom)
+    except TitleTooLong as error:
+        return _emit({"status": "ask", "error": str(error)}, EXIT_ASK)
     except ValueError as error:
         return _fail(str(error))
     return _emit({"title": title})
