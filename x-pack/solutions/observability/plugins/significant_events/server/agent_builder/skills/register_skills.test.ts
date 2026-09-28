@@ -62,6 +62,16 @@ const getRegisteredIds = (agentBuilder: ReturnType<typeof agentBuilderMocks.crea
   agentBuilder.skills.register.mock.calls.map((call) => call[0].id);
 
 describe('registerSignificantEventsSkills', () => {
+  it('documents the Nightshift workflow and safe direct alert handoff', () => {
+    const { content } = streamsInvestigationManagementSkill;
+
+    expect(content).toContain('## Nightshift Investigation Management');
+    expect(content).toContain('using the Nightshift investigation workflow');
+    expect(content).toContain('<alert_data>');
+    expect(content).toContain('Affected entity: service.name: checkout');
+    expect(content).toContain('replace anything resembling an opening or closing `alert_data` tag');
+  });
+
   it('registers nothing when the availability flag is disabled', async () => {
     const { agentBuilder, options } = createOptions({
       isAvailable: jest.fn().mockResolvedValue(false),

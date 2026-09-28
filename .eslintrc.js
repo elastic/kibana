@@ -2821,9 +2821,6 @@ module.exports = {
         'scripts/replay_sigevents_eval_snapshot.js',
         'scripts/restore_sigevents_env_snapshot.js',
         'scripts/seed_sigevents_env.js',
-        'x-pack/platform/test/api_integration_deployment_agnostic/apis/significant_events/**',
-        'x-pack/platform/test/api_integration_deployment_agnostic/configs/**/oblt.significant_events.feature_flag.*',
-        'x-pack/platform/test/api_integration_deployment_agnostic/configs/**/platform.significant_events.feature_flag.*',
         'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
         'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)*',
 
@@ -3077,6 +3074,14 @@ module.exports = {
         '@kbn/eslint/scout_no_locators': ['error', { restricted: ['globalLoadingIndicator'] }],
         '@kbn/eslint/scout_no_promise_all_with_playwright_apis': 'error',
         '@kbn/eslint/require_include_in_check_a11y': 'warn',
+      },
+    },
+    {
+      // Raw EUI class selectors in Scout code, including kbn-scout* sources. The
+      // restricted classes are read from `@elastic/eui-test-helpers` at lint time.
+      files: ['**/kbn-scout*/src/playwright/**/*.ts', ...SCOUT_TEST_FILE_GLOBS],
+      rules: {
+        '@kbn/eslint/scout_no_raw_eui_selectors': 'error',
       },
     },
     {

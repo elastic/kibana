@@ -20,6 +20,7 @@ import {
   deleteV1ThresholdSourceIndex,
   deleteV2PrivilegeRule,
   CUSTOM_THRESHOLD_RULE_TYPE_ID,
+  OBS_THRESHOLD_ALERTS_INDEX_PATTERN,
   seedV2PrivilegeRule,
   THRESHOLD_DATA_VIEW_ID,
   THRESHOLD_TEST_INDEX,
@@ -36,23 +37,43 @@ const READER_ES_PRIVILEGES: ElasticsearchPrivileges = {
   indices: [{ names: ['*'], privileges: ['read', 'view_index_metadata'] }],
 };
 
+/** Read on the classic alerts and rule source indices only, so any v2 query would be forbidden. */
+const CLASSIC_ONLY_ES_PRIVILEGES: ElasticsearchPrivileges = {
+  cluster: [],
+  indices: [
+    {
+      names: [OBS_THRESHOLD_ALERTS_INDEX_PATTERN, THRESHOLD_TEST_INDEX],
+      privileges: ['read', 'view_index_metadata'],
+    },
+  ],
+};
+
 const NO_ACCESS_ES_PRIVILEGES: ElasticsearchPrivileges = {
   cluster: [],
   indices: [],
 };
 
+const LOGS_KIBANA_PRIVILEGES: KibanaRole['kibana'] = [
+  {
+    base: [],
+    feature: {
+      logs: ['read'],
+    },
+    spaces: ['*'],
+  },
+];
+
 const LOGS_READ_ROLE: KibanaRole = {
   elasticsearch: READER_ES_PRIVILEGES,
-  kibana: [
-    {
-      base: [],
-      feature: {
-        logs: ['read'],
-      },
-      spaces: ['*'],
-    },
-  ],
+  kibana: LOGS_KIBANA_PRIVILEGES,
 };
+
+const LOGS_READ_CLASSIC_INDICES_ROLE: KibanaRole = {
+  elasticsearch: CLASSIC_ONLY_ES_PRIVILEGES,
+  kibana: LOGS_KIBANA_PRIVILEGES,
+};
+
+const V1_RULE_NAME = '[scout] Observability privilege test rule';
 
 const ALERTING_V2_ALERTS_READ_ROLE: KibanaRole = {
   elasticsearch: READER_ES_PRIVILEGES,
@@ -86,7 +107,15 @@ const EPISODES_ITEM_COUNT_RE = /^Showing(?: first)? \d[\d,]* episodes?$/;
 
 const assertEpisodesInboxHappyPath = async (
   observabilityAlerting: ObservabilityAlertingPage,
-  expectedTags: readonly string[]
+  {
+    expectedTags,
+    unexpectedTags,
+    expectedRuleNames = [],
+  }: {
+    expectedTags: readonly string[];
+    unexpectedTags: readonly string[];
+    expectedRuleNames?: readonly string[];
+  }
 ): Promise<void> => {
   await test.step('page renders without the privilege prompt', async () => {
     await expect(observabilityAlerting.pageTitle).toHaveText('Alert episodes', {
@@ -110,6 +139,11 @@ const assertEpisodesInboxHappyPath = async (
     await expect(observabilityAlerting.episodesListPage).toBeVisible();
     await expect(observabilityAlerting.episodesTableToolbar).toBeVisible({ timeout: 60_000 });
     await expect(observabilityAlerting.episodesItemCount).toHaveText(EPISODES_ITEM_COUNT_RE);
+    for (const ruleName of expectedRuleNames) {
+      await expect(observabilityAlerting.episodeRuleCell(ruleName)).toBeVisible({
+        timeout: 30_000,
+      });
+    }
   });
 
   await test.step('tags filter lists expected source tags', async () => {
@@ -121,6 +155,16 @@ const assertEpisodesInboxHappyPath = async (
         timeout: 30_000,
       });
     }
+    // Checked after the expected tags so the options have already loaded.
+    for (const tag of unexpectedTags) {
+      await observabilityAlerting.searchTagsFilter(tag);
+      await expect(observabilityAlerting.tagFilterOption(tag)).toHaveCount(0);
+    }
+  });
+
+  // Runs last so every page query has settled and any fetch-error toast has been raised.
+  await test.step('no error toasts are shown', async () => {
+    await expect(observabilityAlerting.toasts).toHaveCount(0);
   });
 };
 
@@ -128,9 +172,13 @@ const assertEpisodesInboxHappyPath = async (
  * Verifies that the observability alerting inbox page is fully accessible
  * when the user holds the v1 logs privilege or the v2 alerting_v2_alerts
  * privilege. Each privileged test asserts that the KPI panels, histogram,
- * list item count, and tags filter render. Logs read can RAC classic custom-threshold alerts, so
- * both seeded tags appear. `alerting_v2_alerts` + discover cannot RAC those
- * classic alerts, so only the v2 tag appears.
+ * list item count, and tags filter render and that no error toast is shown. Classic-only
+ * users must also see the seeded classic episode row; one of them has ES read on the classic
+ * indices only, so any v2 query would fail with a security exception.
+ * Logs read can RAC classic custom-threshold alerts
+ * but has no `alerting_v2_alerts` privilege, so only the v1 tag appears even though its ES
+ * index privileges could read the v2 data streams. `alerting_v2_alerts` + discover cannot RAC
+ * those classic alerts, so only the v2 tag appears.
  * A user with none of these privileges is blocked by the RequiredPrivilegesPrompt.
  *
  * A v1 custom threshold rule (`observability.rules.custom_threshold`, consumer
@@ -161,7 +209,7 @@ test.describe(
         override: true,
       });
       const created = await apiServices.alerting.rules.create({
-        name: '[scout] Observability privilege test rule',
+        name: V1_RULE_NAME,
         ruleTypeId: CUSTOM_THRESHOLD_RULE_TYPE_ID,
         consumer: 'logs',
         enabled: true,
@@ -212,10 +260,24 @@ test.describe(
     }) => {
       await browserAuth.loginWithCustomRole(LOGS_READ_ROLE);
       await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_INBOX_PATH);
-      await assertEpisodesInboxHappyPath(pageObjects.observabilityAlerting, [
-        V1_EPISODE_TAG,
-        V2_EPISODE_TAG,
-      ]);
+      await assertEpisodesInboxHappyPath(pageObjects.observabilityAlerting, {
+        expectedTags: [V1_EPISODE_TAG],
+        unexpectedTags: [V2_EPISODE_TAG],
+        expectedRuleNames: [V1_RULE_NAME],
+      });
+    });
+
+    test('user with logs read privilege and only classic index access sees no error toasts', async ({
+      browserAuth,
+      pageObjects,
+    }) => {
+      await browserAuth.loginWithCustomRole(LOGS_READ_CLASSIC_INDICES_ROLE);
+      await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_INBOX_PATH);
+      await assertEpisodesInboxHappyPath(pageObjects.observabilityAlerting, {
+        expectedTags: [V1_EPISODE_TAG],
+        unexpectedTags: [V2_EPISODE_TAG],
+        expectedRuleNames: [V1_RULE_NAME],
+      });
     });
 
     test('user with alerting_v2_alerts read privilege sees the full inbox page', async ({
@@ -224,7 +286,10 @@ test.describe(
     }) => {
       await browserAuth.loginWithCustomRole(ALERTING_V2_ALERTS_READ_ROLE);
       await pageObjects.observabilityAlerting.goto(OBSERVABILITY_ALERTING_INBOX_PATH);
-      await assertEpisodesInboxHappyPath(pageObjects.observabilityAlerting, [V2_EPISODE_TAG]);
+      await assertEpisodesInboxHappyPath(pageObjects.observabilityAlerting, {
+        expectedTags: [V2_EPISODE_TAG],
+        unexpectedTags: [V1_EPISODE_TAG],
+      });
     });
 
     test('user with no alerting privileges is blocked', async ({ browserAuth, pageObjects }) => {
