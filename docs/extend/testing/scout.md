@@ -87,9 +87,11 @@ Often yes, especially with [parallel test execution](./parallelism.md) and selec
 
 Scout uses the changed files to narrow the eligible tests in PR builds:
 
-- **Critical Scout files**, or disabling selective testing, select the full eligible set.
-- **Changes confined to Scout UI/API test scopes** select the configs that own the changed files. Markdown files, READMEs, and changelogs are ignored for this decision. Changes under a Scout `fixtures/` directory use dependency-based selection because other modules can import those fixtures.
-- **Other changes** select configs in affected modules, including downstream consumers. This can include multiple namespaces within a module.
+- **Critical Scout changes or selective testing disabled:** run all eligible configs.
+- **Only Scout tests changed:** run their owning configs. Markdown, README, and changelog changes don’t affect this classification.
+- **Other changes, including production code and Scout fixtures:** run configs in affected modules and their known downstream consumers, potentially across multiple namespaces.
+
+**Runtime dependencies need explicit coverage.** Some relationships—such as ML registering actions that Dashboard renders—aren’t captured by the static dependency graph. Scout supplements that graph with manually maintained [implicit-consumer rules](https://github.com/elastic/kibana/blob/main/.buildkite/scripts/steps/test/scout/scout_implicit_consumers.ts). When adding or changing a runtime integration, check whether those rules need updating so the consuming module’s tests are selected.
 
 Deployment tags and the pipeline’s CI test-channel selection still apply in every mode.
 
