@@ -233,7 +233,7 @@ export const installEntityStoreSuite = async ({
   );
   expect(initMaintainersResponse.statusCode).toBe(200);
 
-  const startAutomatedResolutionMaintainerResponse = await apiClient.post(
+  const startAutomatedResolutionMaintainerResponse = await apiClient.put(
     ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START('automated-resolution'),
     {
       headers: internalHeaders,
