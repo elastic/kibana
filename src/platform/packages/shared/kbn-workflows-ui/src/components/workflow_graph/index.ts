@@ -34,6 +34,7 @@ export {
 export { resolveNodeChipStyle, type NodeChipStyle } from './resolve_node_chip_style';
 export { aiIconTileCss } from './ai_icon_tile';
 export { stepSupportsErrorHandling } from './step_supports_error_handling';
+export { WORKFLOWS_SURFACE_RADIUS } from './surface_radius';
 // Side-effect: sync-warm EUI icons used by accordion arrows / node menus.
 export { ensureWorkflowGraphEuiIcons } from './ensure_eui_icons';
 export {

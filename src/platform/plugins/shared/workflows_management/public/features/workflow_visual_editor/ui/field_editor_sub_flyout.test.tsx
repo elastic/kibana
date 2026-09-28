@@ -13,40 +13,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 import { FieldEditorSubFlyout } from './field_editor_sub_flyout';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
-  return {
-    ...actual,
-    EuiFlyout: ({
-      children,
-      onClose,
-      'data-test-subj': dataTestSubj,
-    }: {
-      children: React.ReactNode;
-      onClose: (event?: unknown, meta?: { reason?: string }) => void;
-      'data-test-subj'?: string;
-    }) => (
-      <div data-test-subj={dataTestSubj}>
-        <button
-          type="button"
-          data-test-subj="mockFlyoutBack"
-          onClick={() => onClose(undefined, { reason: 'escape' })}
-        >
-          Back
-        </button>
-        <button
-          type="button"
-          data-test-subj="mockFlyoutCloseStack"
-          onClick={() => onClose(undefined, { reason: 'close-button' })}
-        >
-          Close stack
-        </button>
-        {children}
-      </div>
-    ),
-  };
-});
-
 jest.mock('./data_reference_catalog_tree', () => ({
   DataReferenceCatalogTree: () => <div data-test-subj="workflowDataReferenceCatalogTree" />,
 }));
@@ -96,11 +62,11 @@ describe('FieldEditorSubFlyout', () => {
       </I18nProvider>
     );
 
-    fireEvent.click(screen.getByTestId('mockFlyoutBack'));
+    fireEvent.click(screen.getByTestId('workflowFieldEditorSubFlyoutBack'));
     expect(onBack).toHaveBeenCalledTimes(1);
     expect(onCloseStack).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByTestId('mockFlyoutCloseStack'));
+    fireEvent.click(screen.getByTestId('workflowFieldEditorSubFlyoutClose'));
     expect(onCloseStack).toHaveBeenCalledTimes(1);
     expect(onBack).toHaveBeenCalledTimes(1);
   });

@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useRef, useState } from 'react';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import {
+  clearActiveDataReferenceInsertTarget,
+  setActiveDataReferenceInsertTarget,
+} from '../../../shared/lib/active_data_reference_insert_target';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 import { DataReferencePicker } from './data_reference_picker';
 
@@ -64,9 +68,11 @@ export function ReferenceCapableField({
   readonly children: (bind: ReferenceCapableBind) => React.ReactElement;
   readonly 'data-test-subj'?: string;
 }) {
+  const { euiTheme } = useEuiTheme();
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
   const selectionBridgeRef = useRef<ReferenceSelectionBridge | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
   const replaceRangeRef = useRef<{ start: number; end: number } | null>(null);
   const caretOnOpenRef = useRef(0);
 
@@ -138,6 +144,18 @@ export function ReferenceCapableField({
     },
     [focusAndSetCaret, onChange, value]
   );
+
+  // Stay registered across blur so click-to-insert from the execution flyout
+  // (which steals focus) still targets the last-edited templatable field.
+  useEffect(() => {
+    return () => {
+      clearActiveDataReferenceInsertTarget(handleInsert);
+    };
+  }, [handleInsert]);
+
+  const claimInsertTarget = useCallback(() => {
+    setActiveDataReferenceInsertTarget(handleInsert);
+  }, [handleInsert]);
 
   const reportChange = useCallback(
     (next: string, caret: number) => {
@@ -219,14 +237,56 @@ export function ReferenceCapableField({
     },
   };
 
+  // Expanded field editor owns pointer-aware drop; inline fields drop here.
+  const dropHandlers = fillHeight
+    ? undefined
+    : {
+        onDragOver: (e: React.DragEvent) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'copy';
+          setIsDragOver(true);
+        },
+        onDragLeave: (e: React.DragEvent) => {
+          if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+          setIsDragOver(false);
+        },
+        onDrop: (e: React.DragEvent) => {
+          e.preventDefault();
+          setIsDragOver(false);
+          const token = e.dataTransfer.getData('text/plain');
+          if (token) handleInsert(token);
+        },
+      };
+
   return (
-    <DataReferencePicker
-      catalog={catalog}
-      isOpen={isOpen}
-      onClose={closePicker}
-      onInsert={handleInsert}
-      fillHeight={fillHeight}
-      input={children(bind)}
-    />
+    <div
+      onFocusCapture={claimInsertTarget}
+      {...dropHandlers}
+      data-test-subj={`${dataTestSubj}DropTarget`}
+      css={{
+        width: '100%',
+        ...(fillHeight
+          ? {
+              flex: '1 1 auto',
+              height: '100%',
+              minHeight: 0,
+              display: 'flex',
+              flexDirection: 'column',
+            }
+          : {}),
+        borderRadius: euiTheme.border.radius.small,
+        boxShadow: isDragOver ? `inset 0 0 0 2px ${euiTheme.colors.borderStrongPrimary}` : undefined,
+        transition: `box-shadow ${euiTheme.animation.fast}`,
+      }}
+    >
+      <DataReferencePicker
+        catalog={catalog}
+        isOpen={isOpen}
+        onClose={closePicker}
+        onInsert={handleInsert}
+        fillHeight={fillHeight}
+        input={children(bind)}
+      />
+    </div>
   );
 }

@@ -19,10 +19,6 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
   EuiFormRow,
   EuiComboBox,
   EuiHorizontalRule,
@@ -63,7 +59,6 @@ import {
 } from './flyout_monaco_frame';
 import { ReferenceCapableField } from './reference_capable_field';
 import { StepErrorHandlingSection } from './step_error_handling_section';
-import { WORKFLOW_STEP_CONFIG_FLYOUT_HISTORY_KEY } from './workflow_step_config_flyout_history_key';
 
 ensureWorkflowGraphEuiIcons();
 
@@ -89,15 +84,14 @@ export interface StepConfigPanelProps {
    * Error handling section (mirrors canvas error-port eligibility).
    */
   readonly isFallbackStep?: boolean;
-  /** Flyout width in px (supports resize via `onResize`). */
-  readonly size?: number;
-  readonly minWidth?: number;
-  readonly maxWidth?: number;
-  readonly onResize?: (width: number) => void;
+  /**
+   * Notifies the canvas shell when the expanded field editor is open so it can
+   * widen to fill available canvas width.
+   */
+  readonly onExpandedChange?: (expanded: boolean) => void;
 }
 
-const DEFAULT_FLYOUT_SIZE = 560;
-const DEFAULT_FLYOUT_MIN_WIDTH = 420;
+const CODE_EDITOR_HEIGHT = 160;
 
 /** Builder form vs full-step YAML — same axis as the canvas bottom-bar toggle. */
 type ParametersMode = 'form' | 'yaml';
@@ -125,8 +119,6 @@ const resolveCatalogLabel = (
     description: connector?.description,
   });
 };
-
-const CODE_EDITOR_HEIGHT = 160;
 
 /** Flatten newlines / runs of whitespace for single-line Inputs display only. */
 const collapseWhitespaceForDisplay = (text: string): string => text.replace(/\s+/g, ' ');
@@ -209,10 +201,7 @@ export function StepConfigPanel({
   onCancel,
   onSave,
   isFallbackStep = false,
-  size = DEFAULT_FLYOUT_SIZE,
-  minWidth = DEFAULT_FLYOUT_MIN_WIDTH,
-  maxWidth,
-  onResize,
+  onExpandedChange,
 }: StepConfigPanelProps) {
   const { euiTheme } = useEuiTheme();
   const [parametersMode, setParametersMode] = useState<ParametersMode>('form');
@@ -227,11 +216,14 @@ export function StepConfigPanel({
   const nameEditBaselineRef = useRef('');
   const isEditingNameRef = useRef(false);
   const titleId = useGeneratedHtmlId({ prefix: 'workflowStepConfigTitle' });
-  const flyoutId = useGeneratedHtmlId({ prefix: 'workflowStepConfigFlyout' });
   const settingsAccordionId = useGeneratedHtmlId({ prefix: 'workflowStepConfigSettings' });
   const [settingsOpen, setSettingsOpen] = useState(settingsAccordionOpenForPage);
-  /** Field currently open in the expanded editor child flyout (depth ≤ 2). */
+  /** Field currently open in the expanded editor (depth ≤ 2). */
   const [expandedField, setExpandedField] = useState<StepFormField | null>(null);
+
+  useEffect(() => {
+    onExpandedChange?.(expandedField != null);
+  }, [expandedField, onExpandedChange]);
 
   const handleSettingsToggle = useCallback((isOpen: boolean) => {
     settingsAccordionOpenForPage = isOpen;
@@ -490,33 +482,32 @@ export function StepConfigPanel({
   });
 
   return (
-    <>
-    <EuiFlyout
-      // Keep the canvas interactive while this is open: no overlay mask, and
-      // outside clicks must not dismiss. Closing is driven by selection
-      // (pane click deselects → parent clears the panel) or Cancel / Escape.
-      id={flyoutId}
-      session="start"
-      historyKey={WORKFLOW_STEP_CONFIG_FLYOUT_HISTORY_KEY}
-      flyoutMenuProps={{ title: headerTitle }}
-      ownFocus={false}
-      outsideClickCloses={false}
-      hideCloseButton
-      paddingSize="none"
-      size={size}
-      minWidth={minWidth}
-      maxWidth={maxWidth}
-      resizable={Boolean(onResize)}
-      onResize={onResize}
-      onClose={handleClose}
+    <div
+      role="dialog"
+      aria-modal="false"
       aria-labelledby={titleId}
       data-test-subj="workflowStepConfigPanel"
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          e.stopPropagation();
+          handleClose();
+        }
+      }}
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        minHeight: 0,
+        position: 'relative',
+        background: euiTheme.colors.backgroundBasePlain,
+      }}
     >
-      <EuiFlyoutHeader
-        hasBorder
+      <div
         css={{
+          flex: '0 0 auto',
+          borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
           // Keep Visual builder / YAML tabs flush on the header border.
-          '&&': { paddingBottom: 0 },
+          paddingBottom: 0,
         }}
       >
         <div
@@ -603,6 +594,15 @@ export function StepConfigPanel({
                     isInvalid={Boolean(nameError)}
                     aria-label={stepNameLabel}
                     data-test-subj="workflowStepConfigPanelNameInput"
+                    // Step name is not templatable — reject reference drops.
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.dataTransfer.dropEffect = 'none';
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
                     onChange={(e) => {
                       setNameDraft(e.target.value);
                       if (nameError) setNameError(undefined);
@@ -752,24 +752,15 @@ export function StepConfigPanel({
             </EuiTab>
           ))}
         </EuiTabs>
-      </EuiFlyoutHeader>
+      </div>
 
-      <EuiFlyoutBody
+      <div
         css={{
-          // Own scroll / fill layout so YAML monaco can take remaining height.
-          '.euiFlyoutBody__overflow': {
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-          },
-          '.euiFlyoutBody__overflowContent': {
-            flex: '1 1 auto',
-            minHeight: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100%',
-            padding: 0,
-          },
+          flex: '1 1 auto',
+          minHeight: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
         }}
       >
         <div
@@ -882,22 +873,16 @@ export function StepConfigPanel({
             </div>
           )}
         </div>
-      </EuiFlyoutBody>
+      </div>
 
-      <EuiFlyoutFooter
+      <div
         css={{
-          // paddingSize="none" zeroes `.euiFlyoutFooter` via the parent flyout
-          // selector — pad an inner wrapper so we don't fight that cascade.
-          padding: 0,
+          flex: '0 0 auto',
+          borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+          paddingBlock: euiTheme.size.base,
+          paddingInline: euiTheme.size.base,
         }}
       >
-        <div
-          css={{
-            // Match EUI paddingSize="m" footer: 12px block / 16px inline → use 16px all around.
-            paddingBlock: euiTheme.size.base,
-            paddingInline: euiTheme.size.base,
-          }}
-        >
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
@@ -918,24 +903,34 @@ export function StepConfigPanel({
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </div>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+      </div>
 
       {expandedField ? (
-        <FieldEditorSubFlyout
-          fieldLabel={expandedField.label}
-          value={expandedFieldValue}
-          onChange={handleExpandedFieldChange}
-          catalog={referenceCatalog}
-          language={
-            expandedField.kind === 'code' ? expandedField.language : undefined
-          }
-          onBack={handleFieldEditorBack}
-          onCloseStack={onCancel}
-        />
+        <div
+          css={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 3,
+            background: euiTheme.colors.backgroundBasePlain,
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: 0,
+          }}
+        >
+          <FieldEditorSubFlyout
+            fieldLabel={expandedField.label}
+            value={expandedFieldValue}
+            onChange={handleExpandedFieldChange}
+            catalog={referenceCatalog}
+            language={
+              expandedField.kind === 'code' ? expandedField.language : undefined
+            }
+            onBack={handleFieldEditorBack}
+            onCloseStack={onCancel}
+          />
+        </div>
       ) : null}
-    </>
+    </div>
   );
 }
 

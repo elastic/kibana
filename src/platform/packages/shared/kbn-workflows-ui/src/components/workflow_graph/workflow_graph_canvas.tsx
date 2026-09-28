@@ -55,6 +55,7 @@ import './ensure_eui_icons';
 import { computeInsertionPoints } from './compute_insertion_points';
 import { computePendingErrorBranchPlacement, type PendingInsertVisual } from './pending_insert';
 import { resolveAppendInsertTarget } from './resolve_append_insert_target';
+import { WORKFLOWS_SURFACE_RADIUS } from './surface_radius';
 import { useInsertLayoutAnimation } from './use_insert_layout_animation';
 import { useWorkflowLayout } from './use_workflow_layout';
 import {
@@ -236,10 +237,10 @@ function CanvasZoomControls({
       css={[
         {
           background: euiTheme.colors.backgroundBasePlain,
-          borderRadius: euiTheme.border.radius.small,
+          borderRadius: WORKFLOWS_SURFACE_RADIUS,
           display: 'flex',
           flexDirection: 'column',
-          padding: 4,
+          padding: euiTheme.size.s,
           gap: 2,
           position: 'relative',
         },
@@ -315,9 +316,9 @@ function CanvasMinimap({
         css={[
           {
             background: euiTheme.colors.backgroundBasePlain,
-            borderRadius: euiTheme.border.radius.small,
+            borderRadius: WORKFLOWS_SURFACE_RADIUS,
             border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
-            padding: 4,
+            padding: euiTheme.size.s,
             position: 'relative',
           },
           floatingShadow,
@@ -342,7 +343,7 @@ function CanvasMinimap({
       css={[
         {
           position: 'relative',
-          borderRadius: euiTheme.border.radius.small,
+          borderRadius: WORKFLOWS_SURFACE_RADIUS,
           background: euiTheme.colors.emptyShade,
           border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
           overflow: 'hidden',
@@ -366,8 +367,7 @@ function CanvasMinimap({
           display: 'flex',
           justifyContent: 'flex-end',
           alignItems: 'center',
-          paddingTop: 4,
-          paddingRight: 4,
+          padding: euiTheme.size.s,
         }}
       >
         <EuiToolTip content={collapseLabel} position="left" disableScreenReaderOutput>
@@ -410,6 +410,11 @@ export interface WorkflowGraphCanvasProps {
   /** Optional UI rendered inside the ReactFlow canvas (e.g. top-left toolbar). */
   readonly toolbar?: React.ReactNode;
   readonly selectedStepId?: string;
+  /**
+   * When set, keep the selected node visible in the unobstructed canvas
+   * (left of a floating config panel). Width in CSS px of that panel inset.
+   */
+  readonly selectedNodePanelInset?: number;
   readonly onStepSelect: (stepId: string | undefined) => void;
   readonly onNodeClick?: (stepId: string, stepType: string) => void;
   readonly onLayoutFailed?: (reason: string) => void;
@@ -500,6 +505,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     isYamlValid,
     toolbar,
     selectedStepId,
+    selectedNodePanelInset,
     onStepSelect,
     onNodeClick,
     onLayoutFailed,
@@ -676,6 +682,23 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const flowInstanceRef = useRef<ReactFlowInstance | null>(null);
+
+  // Keep the selected node visible beside a floating config panel (right inset).
+  useEffect(() => {
+    if (!selectedStepId || !selectedNodePanelInset || selectedNodePanelInset <= 0) return;
+    const instance = flowInstanceRef.current;
+    if (!instance) return;
+    const node = instance.getNode(selectedStepId);
+    if (!node) return;
+    const zoom = instance.getZoom();
+    const w = node.measured?.width ?? (node.width as number | undefined) ?? 200;
+    const h = node.measured?.height ?? (node.height as number | undefined) ?? 80;
+    const centerX = node.position.x + w / 2;
+    const centerY = node.position.y + h / 2;
+    // Shift the viewport center so the node sits in the unobstructed left region.
+    const panelFlowOffset = selectedNodePanelInset / (2 * zoom);
+    instance.setCenter(centerX + panelFlowOffset, centerY, { zoom, duration: 220 });
+  }, [selectedStepId, selectedNodePanelInset]);
 
   // React Flow's `setCenter` derives the viewport from the store's container
   // `width`/`height`, which are 0 until its ResizeObserver measures the canvas

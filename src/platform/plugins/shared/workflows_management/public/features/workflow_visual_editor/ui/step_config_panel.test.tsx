@@ -841,9 +841,7 @@ with:
       'Hello {{ consts.name }}'
     );
 
-    // Jest's EUI test-env flyout stub invokes onClose() without a reason meta,
-    // which FieldEditorSubFlyout treats as Back (keeps edits, closes child only).
-    fireEvent.click(within(screen.getByTestId('workflowFieldEditorSubFlyout')).getByTestId('euiFlyoutCloseButton'));
+    fireEvent.click(screen.getByTestId('workflowFieldEditorSubFlyoutBack'));
     expect(screen.queryByTestId('workflowFieldEditorSubFlyout')).not.toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigField-with.message')).toHaveValue(
       'Hello {{ consts.name }}'
@@ -917,9 +915,7 @@ with:
       '{\n  "fields": null,\n  "id": "none"\n}'
     );
 
-    fireEvent.click(
-      within(screen.getByTestId('workflowFieldEditorSubFlyout')).getByTestId('euiFlyoutCloseButton')
-    );
+    fireEvent.click(screen.getByTestId('workflowFieldEditorSubFlyoutBack'));
     fireEvent.click(screen.getByTestId('workflowStepConfigPanelSave'));
     const saved = onSave.mock.calls[0][0] as string;
     // Document keeps structured YAML — display collapse must not flatten the source.

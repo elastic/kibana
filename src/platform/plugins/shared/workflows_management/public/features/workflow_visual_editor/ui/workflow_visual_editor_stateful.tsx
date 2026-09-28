@@ -39,8 +39,17 @@ import {
   WorkflowGraphCanvasWithoutProvider,
   type WorkflowGraphEditActions,
   type WorkflowGraphInsertionContext,
+  WORKFLOWS_SURFACE_RADIUS,
 } from '@kbn/workflows-ui';
 import { parseWorkflowYamlForAutocomplete } from '@kbn/workflows-yaml';
+import {
+  CanvasConfigPanelShell,
+  DEFAULT_CONFIG_PANEL_WIDTH,
+  FIELD_EDITOR_EXPANDED_PANEL_WIDTH,
+  MIN_CONFIG_PANEL_WIDTH,
+  MIN_VISIBLE_CANVAS_PX,
+  CANVAS_CONFIG_PANEL_MARGIN,
+} from './canvas_config_panel_shell';
 import { StepConfigPanel } from './step_config_panel';
 import { TriggerConfigPanel } from './trigger_config_panel';
 import { useCreationAgentChat } from './use_creation_agent_chat';
@@ -129,10 +138,8 @@ const TRIGGER_LABEL: Record<string, string> = {
 };
 
 /** Floating read-only flyout inset from the canvas edges (top, right, bottom). */
-const PANEL_MARGIN = 16;
+const PANEL_MARGIN = CANVAS_CONFIG_PANEL_MARGIN;
 const CONFIG_PANEL_WIDTH_STORAGE_KEY = 'workflows:configPanelWidth';
-const DEFAULT_CONFIG_PANEL_WIDTH = 560;
-const MIN_CONFIG_PANEL_WIDTH = 420;
 const FLASH_MS = 900;
 const INSERT_LAYOUT_MS = 300;
 /** Slide subsequent nodes, then flash the inserted node border. */
@@ -242,10 +249,26 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     CONFIG_PANEL_WIDTH_STORAGE_KEY,
     DEFAULT_CONFIG_PANEL_WIDTH
   );
+  const [canvasWidth, setCanvasWidth] = useState(
+    typeof window !== 'undefined' ? window.innerWidth : DEFAULT_CONFIG_PANEL_WIDTH * 2
+  );
+  const [fieldEditorExpanded, setFieldEditorExpanded] = useState(false);
+  const maxPanelWidth = Math.max(
+    MIN_CONFIG_PANEL_WIDTH,
+    canvasWidth - MIN_VISIBLE_CANVAS_PX - PANEL_MARGIN * 2
+  );
   const panelWidth = Math.min(
     Math.max(storedPanelWidth, MIN_CONFIG_PANEL_WIDTH),
-    typeof window !== 'undefined' ? window.innerWidth * 0.5 : DEFAULT_CONFIG_PANEL_WIDTH
+    maxPanelWidth
   );
+
+  // Opening the expanded field editor bumps a narrow panel wide enough for
+  // the catalog tree + value pane; user resize (incl. while expanded) wins after.
+  useEffect(() => {
+    if (!fieldEditorExpanded) return;
+    if (storedPanelWidth >= FIELD_EDITOR_EXPANDED_PANEL_WIDTH) return;
+    setStoredPanelWidth(Math.min(maxPanelWidth, FIELD_EDITOR_EXPANDED_PANEL_WIDTH));
+  }, [fieldEditorExpanded, maxPanelWidth, setStoredPanelWidth, storedPanelWidth]);
 
   const definition = useSelector(selectEditorWorkflowDefinition);
   const stepExecutions = useSelector(selectStepExecutions);
@@ -305,6 +328,22 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       flyoutPanelRef.current?.focus();
     }
   }, [selectedStepId]);
+
+  // Track canvas region width so the config panel can enforce min-visible-canvas
+  // (including when the push-type execution flyout shrinks this wrapper).
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const update = () => setCanvasWidth(el.clientWidth);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!panel) setFieldEditorExpanded(false);
+  }, [panel]);
 
   useEffect(() => {
     if (!flashNodeId) return;
@@ -931,6 +970,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         stepExecutions={stepExecutions}
         isYamlValid={isYamlValid}
         selectedStepId={selectedStepId}
+        selectedNodePanelInset={panel ? panelWidth + PANEL_MARGIN : undefined}
         onStepSelect={handleStepSelect}
         colorMode={toColorMode(colorMode)}
         direction={direction}
@@ -960,49 +1000,51 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         />
       )}
       {panel && (panel.mode === 'edit' || panel.mode === 'insert') && (
-        <StepConfigPanel
-          key={
-            panel.mode === 'edit'
-              ? `edit:${panel.stepName}`
-              : `insert:${panel.stepType}:${panel.actionLabel}`
-          }
-          mode={panel.mode}
-          stepType={panel.stepType}
-          actionLabel={panel.mode === 'insert' ? panel.actionLabel : undefined}
-          initialFragment={panel.fragment}
-          connectors={connectors}
-          workflowDefinition={workflow}
-          onCancel={handlePanelCancel}
-          onSave={handlePanelSave}
-          isFallbackStep={panelIsFallbackStep}
-          size={panelWidth}
-          minWidth={MIN_CONFIG_PANEL_WIDTH}
-          maxWidth={
-            typeof window !== 'undefined' ? window.innerWidth * 0.5 : DEFAULT_CONFIG_PANEL_WIDTH
-          }
-          onResize={(width) => setStoredPanelWidth(width)}
-        />
+        <CanvasConfigPanelShell
+          width={panelWidth}
+          onWidthChange={setStoredPanelWidth}
+          canvasWidth={canvasWidth}
+        >
+          <StepConfigPanel
+            key={
+              panel.mode === 'edit'
+                ? `edit:${panel.stepName}`
+                : `insert:${panel.stepType}:${panel.actionLabel}`
+            }
+            mode={panel.mode}
+            stepType={panel.stepType}
+            actionLabel={panel.mode === 'insert' ? panel.actionLabel : undefined}
+            initialFragment={panel.fragment}
+            connectors={connectors}
+            workflowDefinition={workflow}
+            onCancel={handlePanelCancel}
+            onSave={handlePanelSave}
+            isFallbackStep={panelIsFallbackStep}
+            onExpandedChange={setFieldEditorExpanded}
+          />
+        </CanvasConfigPanelShell>
       )}
       {panel && (panel.mode === 'edit-trigger' || panel.mode === 'insert-trigger') && (
-        <TriggerConfigPanel
-          key={
-            panel.mode === 'edit-trigger'
-              ? `edit-trigger:${panel.triggerIndex}`
-              : `insert-trigger:${panel.triggerType}`
-          }
-          triggerType={panel.triggerType}
-          triggerLabel={panel.triggerLabel}
-          initialFragment={panel.fragment}
-          workflowYaml={editorYaml}
-          onCancel={handlePanelCancel}
-          onSave={handlePanelSave}
-          size={panelWidth}
-          minWidth={MIN_CONFIG_PANEL_WIDTH}
-          maxWidth={
-            typeof window !== 'undefined' ? window.innerWidth * 0.5 : DEFAULT_CONFIG_PANEL_WIDTH
-          }
-          onResize={(width) => setStoredPanelWidth(width)}
-        />
+        <CanvasConfigPanelShell
+          width={panelWidth}
+          onWidthChange={(w) => setStoredPanelWidth(w)}
+          canvasWidth={canvasWidth}
+          data-test-subj="workflowTriggerConfigPanelContainer"
+        >
+          <TriggerConfigPanel
+            key={
+              panel.mode === 'edit-trigger'
+                ? `edit-trigger:${panel.triggerIndex}`
+                : `insert-trigger:${panel.triggerType}`
+            }
+            triggerType={panel.triggerType}
+            triggerLabel={panel.triggerLabel}
+            initialFragment={panel.fragment}
+            workflowYaml={editorYaml}
+            onCancel={handlePanelCancel}
+            onSave={handlePanelSave}
+          />
+        </CanvasConfigPanelShell>
       )}
       {flyoutTarget && !panel && (
         <EuiFocusTrap returnFocus>
@@ -1021,7 +1063,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
                 bottom: PANEL_MARGIN,
                 width: 420,
                 zIndex: euiTheme.levels.flyout,
-                borderRadius: euiTheme.border.radius.small,
+                borderRadius: WORKFLOWS_SURFACE_RADIUS,
                 overflow: 'hidden',
                 outline: 'none',
               },
