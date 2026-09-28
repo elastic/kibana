@@ -59,7 +59,16 @@ const SUMMARY_CRITERIA = [
 interface FpTpDatasetExample extends Example {
   input: { exampleId: string };
   output: { outcome: string };
-  metadata: { exampleId: string; scenarioKey: string; situation: string; evidenceState: string };
+  metadata: {
+    exampleId: string;
+    scenarioKey: string;
+    situation: string;
+    evidenceState: string;
+    provenance: string;
+    variant: string | null;
+    variantOf: string | null;
+    provisional: boolean;
+  };
 }
 
 evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classic }, () => {
@@ -119,11 +128,29 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
     'classifies seeded Attack Discoveries with the expected outcome',
     async ({ executorClient, evaluators, esClient, fetch, log, traceEsClient }) => {
       const examples: FpTpDatasetExample[] = FP_TP_EXAMPLES.map(
-        ({ id, scenarioKey, situation, evidenceState, expectedOutcome }) => ({
+        ({
+          id,
+          scenarioKey,
+          situation,
+          evidenceState,
+          expectedOutcome,
+          provenance,
+          variant,
+          provisional = false,
+        }) => ({
           id,
           input: { exampleId: id },
           output: { outcome: expectedOutcome },
-          metadata: { exampleId: id, scenarioKey, situation, evidenceState },
+          metadata: {
+            exampleId: id,
+            scenarioKey,
+            situation,
+            evidenceState,
+            provenance,
+            variant: variant?.kind ?? null,
+            variantOf: variant?.of ?? null,
+            provisional,
+          },
         })
       );
 
@@ -133,9 +160,11 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
             {
               name: 'security: attack-discovery-fp-tp-analysis',
               description:
-                'Runs the FP/TP analysis workflow against seeded U1 worlds (lookalike FP, true ' +
-                'attack, missing or mixed evidence, and both failure paths) and grades the ' +
-                'execution outcome and payload against the #19280 contract.',
+                'Runs the FP/TP analysis workflow against seeded U1-U6 worlds from an authored ' +
+                'encoded-PowerShell scenario and a replayed MIMICRAT ClickFix chain (true ' +
+                'attacks, benign mimics, missing or conflicting evidence, single-fact ' +
+                'mutations, and both failure paths) and grades the execution outcome and ' +
+                'payload against the #19280 contract.',
               examples,
             } satisfies EvaluationDataset,
           ],

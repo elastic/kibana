@@ -127,6 +127,8 @@ const getInputDisplay = (schema: DataSchemaFormat | null) => {
   });
 };
 
+import type { EntityTypes } from '../../common/http_api/shared/entity_type';
+
 type SelectOptions = DataSchemaFormat | 'unknown';
 
 export const SchemaSelector = ({
@@ -134,13 +136,13 @@ export const SchemaSelector = ({
   schemas,
   value,
   isLoading,
-  entityDisplayName = 'hosts',
+  nodeType,
 }: {
   onChange: (selected: DataSchemaFormat) => void;
   schemas: DataSchemaFormat[];
   value: DataSchemaFormat;
   isLoading: boolean;
-  entityDisplayName?: string;
+  nodeType: EntityTypes;
 }) => {
   const {
     services: { telemetry },
@@ -215,9 +217,10 @@ export const SchemaSelector = ({
       css={{ minWidth: '300px' }}
       helpText={
         (options.length > 1 || (options.length === 1 && isInvalid)) &&
-        i18n.translate('xpack.infra.schemaSelector.select.entityHelpText', {
-          defaultMessage: 'There are {entity} available in another schema',
-          values: { entity: entityDisplayName },
+        i18n.translate('xpack.infra.schemaSelector.select.otherSchemaAvailableHelpText', {
+          defaultMessage:
+            '{nodeType, select, host {There are hosts available in another schema} pod {There are Kubernetes pods available in another schema} other {There are entities available in another schema}}',
+          values: { nodeType },
         })
       }
     >

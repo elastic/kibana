@@ -11,7 +11,6 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiLink, useCurrentEuiBreakpoint } from '@elastic/eui';
 import styled from '@emotion/styled';
 import {
-  findInventoryModel,
   type DataSchemaFormat,
   type InventoryItemType,
 } from '@kbn/metrics-data-access-plugin/common';
@@ -84,7 +83,6 @@ export const NodesOverview = ({
   const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
   const { preferredSchema } = useWaffleOptionsContext();
   const isPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled();
-  const inventoryModel = findInventoryModel(nodeType);
   const schemas: DataSchemaFormat[] = useMemo(
     () => timeRangeMetadata?.schemas || [],
     [timeRangeMetadata?.schemas]
@@ -149,10 +147,10 @@ export const NodesOverview = ({
           defaultMessage: 'There is no data to display.',
         })}
         bodyText={
-          hasDataOnAnotherSchema ? (
+          hasDataOnAnotherSchema && isSchemaAwareNodeType(nodeType) ? (
             <SwitchSchemaMessage
               dataTestSubj="infraInventoryViewNoDataInSelectedSchema"
-              entityDisplayName={inventoryModel.displayName.toLowerCase()}
+              nodeType={nodeType}
             />
           ) : (
             <FormattedMessage

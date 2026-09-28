@@ -90,7 +90,7 @@ describe('generateKIQueries', () => {
     } as unknown as EbtTelemetryClient;
 
     const result = await generateKIQueries(
-      { streamName: 'logs.test', connectorId: 'test-connector' },
+      { streamName: 'logs.test', connectorId: 'test-connector', runId: 'run-1' },
       makeDeps({ telemetry, logger })
     );
 
@@ -111,6 +111,7 @@ describe('generateKIQueries', () => {
     });
     expect(executeKIQueryGenerationAgentMock).toHaveBeenCalledWith(
       expect.objectContaining({
+        interactionId: 'run-1',
         existingQueries: [
           {
             id: 'query-1',

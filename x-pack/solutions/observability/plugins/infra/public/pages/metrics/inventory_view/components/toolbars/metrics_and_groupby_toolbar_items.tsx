@@ -127,7 +127,7 @@ export const MetricsAndGroupByToolbarItems = ({
             schemas={schemas}
             isLoading={loading}
             onChange={changePreferredSchema}
-            entityDisplayName={inventoryModel.displayName.toLowerCase()}
+            nodeType={props.nodeType === 'pod' ? 'pod' : 'host'}
           />
         </EuiFlexItem>
       )}

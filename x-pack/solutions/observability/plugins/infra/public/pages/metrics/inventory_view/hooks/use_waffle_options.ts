@@ -131,18 +131,23 @@ export const useWaffleOptions = () => {
     urlState.preferredSchema ?? null
   );
 
+  // Keep Anomaly detection topbar visibility aligned with preferredSchema,
+  // including when that value is restored from the URL on mount.
+  useEffect(() => {
+    updateTopbarMenuVisibilityBySchema(preferredSchema);
+  }, [preferredSchema, updateTopbarMenuVisibilityBySchema]);
+
   const previousViewId = useRef<string>(currentView?.id ?? staticInventoryViewId);
   useEffect(() => {
     if (currentView && currentView.id !== previousViewId.current) {
       const state = mapInventoryViewToState(currentView, isPodSchemaSelectorEnabled);
-      updateTopbarMenuVisibilityBySchema(state.preferredSchema);
       setUrlState(state);
       previousViewId.current = currentView.id;
 
       // Same mapping as URL state — do not seed from the raw saved-object field.
       setPreferredSchema(state.preferredSchema ?? null);
     }
-  }, [currentView, isPodSchemaSelectorEnabled, setUrlState, updateTopbarMenuVisibilityBySchema]);
+  }, [currentView, isPodSchemaSelectorEnabled, setUrlState]);
 
   // there is a lot going on with the url state management on this hook
   // when the state resets, many things need to be synchronized
@@ -227,9 +232,8 @@ export const useWaffleOptions = () => {
       // the URL state can't be patched here because when the page reloads via clicking on the side nav
       // this will be called before the hydration of the URL state, causing the page to crash
       setPreferredSchema(schema);
-      updateTopbarMenuVisibilityBySchema(schema);
     },
-    [setPreferredSchema, updateTopbarMenuVisibilityBySchema]
+    [setPreferredSchema]
   );
 
   useEffect(() => {

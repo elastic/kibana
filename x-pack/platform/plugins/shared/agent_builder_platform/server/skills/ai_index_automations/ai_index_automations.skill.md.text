@@ -57,9 +57,9 @@ Whatever the strategy, a generated workflow has to:
   jitter. Rate limits, transient connector errors and a structured output that failed to parse
   once are the ordinary failures of a model call, and without the retry each one costs the unit
   it was profiling. The templates carry it; keep it on any `ai.prompt` you add.
-- **Write through the `context-engine` steps**, never a raw `elasticsearch.index`, and gate every
-  write on `context-engine.verifyKi` so an indicator whose ES|QL fails to parse is reported rather
-  than persisted.
+- **Write through the `context-engine` steps**, never a raw `elasticsearch.index`, and pass
+  `verifiers` to every `context-engine.createKi` so an indicator whose ES|QL fails to parse is
+  reported rather than persisted.
 - **Set a stable, normalized `ki_id`** derived from the indicator's own identifying data, so a
   re-run replaces rather than duplicates. This is the whole dedup mechanism; get it wrong and every
   run grows the index.
@@ -88,6 +88,8 @@ same registries. Nothing will correct a mistake in one of these except a failing
 written out here — this skill is the only place they exist.
 
 **`context-engine.createKi`** writes a new indicator and outputs `id`, the document id it wrote.
+Given `verifiers`, it runs them first and outputs `verification` (`passed` plus per-verifier
+`results`); when any fails, nothing is written and `id` is absent.
 
 ```yaml
 - name: write_ki
@@ -95,6 +97,9 @@ written out here — this skill is the only place they exist.
   with:
     ai_index_id: 'my-ai-index' # required
     ki_id: 'logs-index-profile' # optional, generated when omitted
+    verifiers: # optional; the write is skipped when any fails
+      - esql-valid-syntax
+      - esql-valid-runtime
     ki: # required
       type: 'index_metadata' # required
       title: 'logs-* index profile' # required
@@ -127,14 +132,18 @@ On an index `deleteKi` removes the document; on a data stream it appends a revis
 `governance.lifecycle.status: deleted`, so the earlier revisions stay in the backing store. It
 fails when the indicator does not exist. This is what pilot cleanup runs.
 
+Both find the indicator by search, so they only see refreshed writes. No write step refreshes by
+default; a workflow that writes an indicator and then updates or deletes it in the same run must
+pass `refresh: true` to the earlier step.
+
 **`context-engine.verifyKi`** takes a partial `ki` and a non-empty, duplicate-free `verifiers` list,
-and outputs `passed` plus a per-verifier `results` array of `{ verifier, passed, reason }`. The two
-built-in verifier ids are `esql-valid-syntax`, which parses each query the indicator carries without
-touching the cluster, and `esql-valid-runtime`, which executes it against live data bounded to a
-single row. An entry can also be a custom verifier workflow, `{ workflow_id }`, with an optional
-`timeout_sec` and `applies_to`; the templates use the two built-ins. An unknown id fails the step.
-Gate every write on this: an indicator carrying ES|QL that does not run is worse than a missing
-one, because retrieval surfaces it as though it worked.
+and outputs `passed` plus a per-verifier `results` array of `{ verifier, passed, reason }` without
+writing anything. The two built-in verifier ids are `esql-valid-syntax`, which parses each query the
+indicator carries without touching the cluster, and `esql-valid-runtime`, which executes it against
+live data bounded to a single row. An entry can also be a custom verifier workflow,
+`{ workflow_id }`, with an optional `timeout_sec` and `applies_to`; the templates use the two
+built-ins. An unknown id fails the step. Run both on every write: an indicator carrying ES|QL that
+does not run is worse than a missing one, because retrieval surfaces it as though it worked.
 
 `attributes` values are strings, numbers, booleans or arrays of strings — never nested objects. A
 single value caps at 10,000 characters, which is what bounds the ES|QL an indicator can carry. A
@@ -175,8 +184,9 @@ reference is `workflow-authoring`, and it is worth loading for a validation erro
 — but not for authoring, for the reason given at the top.
 
 **An `if` condition is KQL, not Liquid.** `condition:` is the one place in a workflow where `{{ }}`
-does not apply. The templates gate their write on `condition: "steps.verify_ki.output.passed :
-true"` — a KQL field match, with the colon, not `==` and not an interpolation. KQL cannot evaluate
+does not apply. The templates report a skipped write with `condition:
+"steps.create_ki.output.verification.passed : false"` — a KQL field match, with the colon, not
+`==` and not an interpolation. KQL cannot evaluate
 filters, so anything computed goes through a `data.set` first and the condition reads that step's
 output:
 
@@ -274,8 +284,9 @@ targeted KIs. **Start from the nearest template and edit it** — never write on
 nothing. A template is a complete workflow that runs as it stands once its `consts` block is
 filled in, and it already carries the parts a fresh draft gets wrong: the grounding, the prompt's
 output schema, the single `data.set` that builds the indicator so verification and the write see
-the same document, the `verifyKi` gate, the `ki_id` scheme that makes a re-run replace rather than
-duplicate, the retry on the model call, and the `attributes.esql` wiring the verifiers read.
+the same document, the `verifiers` on `createKi`, the `ki_id` scheme that makes a re-run replace
+rather than duplicate, the retry on the model call, and the `attributes.esql` wiring the verifiers
+read.
 
 Each template opens with a comment saying what to change and what to leave, and declares what
 varies in `consts` at the top — the AI Index id, the source index, the fields the strategy turns
@@ -430,9 +441,9 @@ automation that has been run. Read it, fill in its `consts` block, and add the g
 strategy needs. That is the draft. Authoring one from nothing is a long generate-and-repair loop
 that arrives somewhere worse, because the template already encodes the things a fresh draft gets
 wrong and a run does not catch: the single `data.set` that builds the indicator so verification and
-the write see the same document, the `verifyKi` gate, the `ki_id` scheme that makes a re-run
-replace rather than duplicate, and the `attributes.esql` wiring that decides what the verifiers
-actually check.
+the write see the same document, the `verifiers` on `createKi`, the `ki_id` scheme that makes a
+re-run replace rather than duplicate, and the `attributes.esql` wiring that decides what the
+verifiers actually check.
 
 Each template opens with a comment saying what to change and what to leave. Take it literally.
 Rewriting the parts it tells you to leave is how a draft acquires faults the template does not
