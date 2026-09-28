@@ -280,8 +280,17 @@ export function useMiDeploy({
         // Runs when isDirty regardless of whether there are new targets, so existing policies
         // are always brought up to date in the same run even when the user adds a service.
         if (isDirty) {
+          // Lock the Deploy button before awaiting any Fleet calls so a double-click cannot
+          // start a second dirty-update run from the same undeployed-target snapshot.
+          setIsDeploying(true);
+          updateDetectAndReviewStep({ isDeploying: true });
           const byPolicy = new Map<string, string[]>();
+          // Only include active instances (still in deployGroups). Removed instances whose
+          // policyIds linger in the SO are cleanup targets, not update targets; including them
+          // would cause resolveSurvivingMembers to reject on pruned synthetic instance IDs.
+          const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
           for (const [instanceId, policyId] of Object.entries(policyIdsByInstance)) {
+            if (!activeInstanceIds.has(instanceId)) continue;
             if (!byPolicy.has(policyId)) byPolicy.set(policyId, []);
             byPolicy.get(policyId)!.push(instanceId);
           }
@@ -478,7 +487,9 @@ export function useMiDeploy({
         // user only clicks Retry (not a fresh Deploy).
         if (isDirty) {
           const byPolicy = new Map<string, string[]>();
+          const activeRetryInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
           for (const [instanceId, policyId] of Object.entries(policyIdsByInstance)) {
+            if (!activeRetryInstanceIds.has(instanceId)) continue;
             if (!byPolicy.has(policyId)) byPolicy.set(policyId, []);
             byPolicy.get(policyId)!.push(instanceId);
           }

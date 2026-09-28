@@ -162,10 +162,23 @@ export function ManagedIntegrationsSection({
     [setStaticKeys]
   );
 
+  // Whether the replace form has ever reported ready in this component lifetime.
+  // Used to distinguish the initial-mount false (empty fields on fresh mount after Back+Next)
+  // from an explicit cancellation (user entered keys then cleared them), so remounting the form
+  // does not propagate false to the parent and clear a persisted isDirty flag.
+  const replaceFormEverReady = useRef(false);
   const handleStaticKeyReplaceReadyChange = useCallback(
     (ready: boolean) => {
       setIsDeployReady(ready);
-      onReplaceFormDirtyChange?.(ready);
+      if (ready) {
+        replaceFormEverReady.current = true;
+        onReplaceFormDirtyChange?.(true);
+      } else if (replaceFormEverReady.current) {
+        // Form was previously ready — user cleared the fields, treat as cancellation.
+        onReplaceFormDirtyChange?.(false);
+      }
+      // If form was never ready, its false is a mount-time event, not a cancellation —
+      // don't forward it so the persisted isDirty from a prior visit is preserved.
     },
     [onReplaceFormDirtyChange]
   );

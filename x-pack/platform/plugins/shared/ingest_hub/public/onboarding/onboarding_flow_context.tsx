@@ -377,6 +377,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         onboardingDeploymentId: prev?.onboardingDeploymentId,
         ecfStacks: prev?.ecfStacks,
         pendingCleanupPolicyIds: nextPendingCleanup,
+        isDirty: prev?.isDirty,
       });
     },
     [setDetectAndReviewStep]
@@ -413,6 +414,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         onboardingDeploymentId: prev?.onboardingDeploymentId,
         ecfStacks: prev?.ecfStacks,
         pendingCleanupPolicyIds: nextPendingCleanup,
+        isDirty: prev?.isDirty,
       });
     },
     [removeDeployInstance, setDetectAndReviewStep]
