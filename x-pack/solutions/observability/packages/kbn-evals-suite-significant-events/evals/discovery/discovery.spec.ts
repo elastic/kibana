@@ -7,6 +7,11 @@
 
 import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '@kbn/significant-events-plugin/server';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
+import {
+  SIGNIFICANT_EVENTS_ALERT_SOURCE,
+  SIGNIFICANT_EVENTS_SEVERITY_MAP,
+  SIGNIFICANT_EVENTS_STATUS_MAP,
+} from '@kbn/significant-events-schema';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
 import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
@@ -20,6 +25,7 @@ import {
   shiftSnapshotTimestamp,
   type ReplayShift,
 } from '../../src/data_generators/replay';
+import { RULE_EVENTS_DATA_STREAM } from '../../src/data_generators/snapshot_indices';
 import { replayKnowledgeIndicatorsSnapshot } from '../../src/data_generators/replay_knowledge_indicators_snapshot';
 import { seedChronicBackground } from '../../src/data_generators/seed_chronic_background';
 import { evaluate } from '../../src/evaluate';
@@ -50,6 +56,7 @@ import { buildDiscoveryInput } from '../../src/evaluators/discovery/discovery/bu
 import type { ContinuationCycle } from '../../src/evaluators/discovery/discovery/continuation/continuation_stability';
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
+const useRuleEventsRead = process.env.SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ === 'true';
 
 /** Events data stream — the index the discovery agent writes to via events_write. */
 const SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM = '.significant_events-events';
@@ -541,6 +548,8 @@ evaluate.describe(
                     // produce spurious noise. Deleting by explicit IDs is safer than wiping the
                     // entire stream and works correctly even when concurrency > 1.
                     const seededEventUuids: string[] = [];
+                    // Tracks event_ids written to RULE_EVENTS_DATA_STREAM for flag-on cleanup.
+                    const seededEventIds: string[] = [];
 
                     try {
                       // Feed one detection per cycle, oldest first. After each cycle, seed a
@@ -621,11 +630,48 @@ evaluate.describe(
                             document: seededEvent,
                           });
                           seededEventUuids.push(eventUuid);
+                          // When the flag is on, also write to .rule-events so the agent's
+                          // RuleEventsClient (which reads from that index) can find the seeded
+                          // episode in the next cycle's event_search call.
+                          if (useRuleEventsRead && seededEvent.event_id) {
+                            await esClient.index({
+                              index: RULE_EVENTS_DATA_STREAM,
+                              document: {
+                                '@timestamp': seededEvent['@timestamp'],
+                                group_hash: seededEvent.event_id,
+                                source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
+                                type: 'alert',
+                                space_id: 'default',
+                                severity: SIGNIFICANT_EVENTS_SEVERITY_MAP[seededEvent.severity],
+                                episode: {
+                                  status: SIGNIFICANT_EVENTS_STATUS_MAP[seededEvent.status],
+                                },
+                                data: {
+                                  event_id: seededEvent.event_id,
+                                  rule_name: seededEvent.title,
+                                  title: seededEvent.title,
+                                  summary: seededEvent.summary,
+                                  stream_names: seededEvent.stream_names,
+                                  confidence: seededEvent.confidence,
+                                  symptom_hypothesis: seededEvent.symptom_hypothesis,
+                                  signals: seededEvent.signals,
+                                  causal_features: seededEvent.causal_features,
+                                  blast_radius: seededEvent.blast_radius,
+                                },
+                              },
+                            });
+                            seededEventIds.push(seededEvent.event_id);
+                          }
                         }
                         if (producedEventIds.length > 0) {
                           await esClient.indices.refresh({
                             index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
                           });
+                          if (useRuleEventsRead) {
+                            await esClient.indices.refresh({
+                              index: RULE_EVENTS_DATA_STREAM,
+                            });
+                          }
                         }
                       }
                     } finally {
@@ -633,6 +679,13 @@ evaluate.describe(
                         await esClient.deleteByQuery({
                           index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
                           query: { terms: { event_uuid: seededEventUuids } },
+                          refresh: true,
+                        });
+                      }
+                      if (useRuleEventsRead && seededEventIds.length > 0) {
+                        await esClient.deleteByQuery({
+                          index: RULE_EVENTS_DATA_STREAM,
+                          query: { terms: { group_hash: seededEventIds } },
                           refresh: true,
                         });
                       }
