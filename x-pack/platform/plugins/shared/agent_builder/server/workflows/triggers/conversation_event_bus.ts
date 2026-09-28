@@ -20,6 +20,17 @@ export interface ConversationAttachmentEventsPayload {
   events: AttachmentTimelineEvent[];
 }
 
+export interface ConversationUpdatedPayload {
+  conversationId: string;
+  templateId?: string;
+  parentId?: string;
+  changeKinds: Array<'event' | 'attachment' | 'metadata' | 'attributes'>;
+  eventTypes: string[];
+  changedFields: string[];
+  contentChange: boolean;
+  summaryOnly: boolean;
+}
+
 type MetadataPatchedListener = (
   request: KibanaRequest,
   payload: ConversationMetadataPatchedPayload
@@ -28,6 +39,11 @@ type MetadataPatchedListener = (
 type AttachmentEventsListener = (
   request: KibanaRequest,
   payload: ConversationAttachmentEventsPayload
+) => void;
+
+type ConversationUpdatedListener = (
+  request: KibanaRequest,
+  payload: ConversationUpdatedPayload
 ) => void;
 
 /**
@@ -39,6 +55,8 @@ export interface ConversationEventBus {
   emitMetadataPatched(request: KibanaRequest, payload: ConversationMetadataPatchedPayload): void;
   onAttachmentEvents(listener: AttachmentEventsListener): void;
   emitAttachmentEvents(request: KibanaRequest, payload: ConversationAttachmentEventsPayload): void;
+  onConversationUpdated(listener: ConversationUpdatedListener): void;
+  emitConversationUpdated(request: KibanaRequest, payload: ConversationUpdatedPayload): void;
 }
 
 /**
@@ -49,6 +67,7 @@ export interface ConversationEventBus {
 export interface ScopedConversationEventEmitter {
   emitMetadataPatched(payload: ConversationMetadataPatchedPayload): void;
   emitAttachmentEvents(payload: ConversationAttachmentEventsPayload): void;
+  emitConversationUpdated(payload: ConversationUpdatedPayload): void;
 }
 
 export const createScopedConversationEventEmitter = (
@@ -57,6 +76,7 @@ export const createScopedConversationEventEmitter = (
 ): ScopedConversationEventEmitter => ({
   emitMetadataPatched: (payload) => bus.emitMetadataPatched(request, payload),
   emitAttachmentEvents: (payload) => bus.emitAttachmentEvents(request, payload),
+  emitConversationUpdated: (payload) => bus.emitConversationUpdated(request, payload),
 });
 
 export const createConversationEventBus = (): ConversationEventBus =>
@@ -65,6 +85,7 @@ export const createConversationEventBus = (): ConversationEventBus =>
 class ConversationEventBusImpl implements ConversationEventBus {
   private readonly metadataPatchedListeners: MetadataPatchedListener[] = [];
   private readonly attachmentEventsListeners: AttachmentEventsListener[] = [];
+  private readonly conversationUpdatedListeners: ConversationUpdatedListener[] = [];
 
   onMetadataPatched(listener: MetadataPatchedListener): void {
     this.metadataPatchedListeners.push(listener);
@@ -82,6 +103,16 @@ class ConversationEventBusImpl implements ConversationEventBus {
 
   emitAttachmentEvents(request: KibanaRequest, payload: ConversationAttachmentEventsPayload): void {
     for (const listener of this.attachmentEventsListeners) {
+      listener(request, payload);
+    }
+  }
+
+  onConversationUpdated(listener: ConversationUpdatedListener): void {
+    this.conversationUpdatedListeners.push(listener);
+  }
+
+  emitConversationUpdated(request: KibanaRequest, payload: ConversationUpdatedPayload): void {
+    for (const listener of this.conversationUpdatedListeners) {
       listener(request, payload);
     }
   }

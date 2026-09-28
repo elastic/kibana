@@ -10,6 +10,7 @@ import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extens
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import {
   conversationMetadataUpdatedTriggerCommonDefinition,
+  conversationUpdatedTriggerCommonDefinition,
   attachmentTriggerCommonDefinitions,
 } from '../../common/workflows/triggers';
 
@@ -69,6 +70,7 @@ export function registerWorkflowSteps(
   );
 
   workflowsExtensions.registerTriggerDefinition(conversationMetadataUpdatedTriggerCommonDefinition);
+  workflowsExtensions.registerTriggerDefinition(conversationUpdatedTriggerCommonDefinition);
   for (const definition of attachmentTriggerCommonDefinitions) {
     workflowsExtensions.registerTriggerDefinition(definition);
   }

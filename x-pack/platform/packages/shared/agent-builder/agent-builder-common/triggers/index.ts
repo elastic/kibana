@@ -13,6 +13,37 @@ import type { AttachmentEventSource } from '../chat/timeline_events';
  */
 export const ConversationMetadataUpdatedTriggerId = 'ai.conversation.metadataUpdated' as const;
 
+/**
+ * Trigger ID for any persisted conversation change: messages, timeline events,
+ * attachments, metadata, and attribute updates.
+ */
+export const ConversationUpdatedTriggerId = 'ai.conversation.updated' as const;
+
+export type ConversationChangeKind = 'event' | 'attachment' | 'metadata' | 'attributes';
+
+export interface ConversationUpdatedEvent {
+  /** The ID of the conversation that changed. */
+  conversationId: string;
+  /** The template that defines the metadata schema for this conversation. */
+  templateId?: string;
+  /** The ID of the parent conversation, when this conversation is a child. */
+  parentId?: string;
+  /** Which parts of the conversation document this write touched. */
+  changeKinds: ConversationChangeKind[];
+  /** Timeline event types included in this write. Empty when the write was not an event append. */
+  eventTypes: string[];
+  /** Metadata field names that changed. Empty when metadata was not written. */
+  changedFields: string[];
+  /**
+   * True when the write added content a summary should reflect: a message, an attachment,
+   * a custom event, a non-summary metadata change, or an attribute such as the title.
+   * Execution lifecycle events (`execution_step` and the other run events) leave this false.
+   */
+  contentChange: boolean;
+  /** True when the only change is the `summary` metadata field. */
+  summaryOnly: boolean;
+}
+
 export interface ConversationMetadataUpdatedEvent {
   /** The ID of the conversation whose metadata was updated. */
   conversationId: string;

@@ -107,6 +107,7 @@ import {
   type Document,
 } from './converters';
 import type { ScopedConversationEventEmitter } from '../../../workflows/triggers/conversation_event_bus';
+import { describeConversationWrite } from '../../../workflows/triggers/describe_conversation_write';
 import type { ConversationEventsServiceStart } from '../../conversation_events';
 import {
   materializeConversationEvents,
@@ -316,6 +317,31 @@ class ConversationClientImpl implements ConversationClient {
    * Notifies the attachment-events listener with the attachment events that were just persisted.
    * Best-effort: listener failures are logged and never fail the write.
    */
+  private notifyConversationUpdated(
+    conversation: Pick<Conversation, 'id' | 'template_id' | 'parent_conversation'>,
+    write: { events?: ConversationEvent[]; changedFields?: string[]; attributes?: boolean }
+  ): void {
+    if (!this.eventEmitter) {
+      return;
+    }
+    const described = describeConversationWrite({
+      conversationId: conversation.id,
+      templateId: conversation.template_id,
+      parentId: conversation.parent_conversation?.id,
+      events: write.events,
+      changedFields: write.changedFields,
+      attributes: write.attributes,
+    });
+    if (!described) {
+      return;
+    }
+    try {
+      this.eventEmitter.emitConversationUpdated(described);
+    } catch (error) {
+      this.logger.warn(`Failed to notify conversation update for "${conversation.id}": ${error}`);
+    }
+  }
+
   private notifyAttachmentEvents(conversationId: string, writtenEvents: ConversationEvent[]): void {
     if (!this.eventEmitter) {
       return;
@@ -673,9 +699,10 @@ class ConversationClientImpl implements ConversationClient {
       throw createInternalError(`Conversation ${id} was indexed without version metadata`);
     }
 
-    this.notifyAttachmentEvents(id, conversation.events ?? []);
-
-    return this.get(id);
+    const created = await this.get(id);
+    this.notifyAttachmentEvents(id, created.events ?? []);
+    this.notifyConversationUpdated(created, { events: created.events ?? [] });
+    return created;
   }
 
   async update(
@@ -692,6 +719,7 @@ class ConversationClientImpl implements ConversationClient {
       fields: () => withBoundedTitle(fields),
     });
 
+    this.notifyConversationUpdated(result, { attributes: true });
     return result;
   }
 
@@ -774,6 +802,7 @@ class ConversationClientImpl implements ConversationClient {
     });
 
     this.notifyAttachmentEvents(result.id, writtenEvents);
+    this.notifyConversationUpdated(result, { events: writtenEvents });
     return result;
   }
 
@@ -836,6 +865,7 @@ class ConversationClientImpl implements ConversationClient {
     });
 
     this.notifyAttachmentEvents(result.id, writtenEvents);
+    this.notifyConversationUpdated(result, { events: writtenEvents });
     return result;
   }
 
@@ -1055,6 +1085,7 @@ class ConversationClientImpl implements ConversationClient {
         parentId: result.parent_conversation?.id,
         changedFields,
       });
+      this.notifyConversationUpdated(result, { changedFields });
     }
 
     return { conversation: result, changedFields };
