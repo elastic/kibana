@@ -30,6 +30,10 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getTimeZone } from '@kbn/visualization-utils';
+import moment from 'moment-timezone';
 import type { EvidenceChart as EvidenceChartSpec } from '@kbn/significant-events-schema';
 
 const CHART_HEIGHT = 180;
@@ -81,12 +85,25 @@ export interface EvidenceChartProps {
 }
 
 /**
+ * The Kibana `dateFormat:tz` time zone, so evidence charts render times like every other chart in
+ * Kibana. Falls back to the browser time zone outside a Kibana context that provides `uiSettings`.
+ */
+const useChartTimeZone = (): string => {
+  const { uiSettings } = useKibana<{ uiSettings?: IUiSettingsClient }>().services;
+  return useMemo(
+    () => (uiSettings ? getTimeZone(uiSettings) : moment.tz.guess(true)),
+    [uiSettings]
+  );
+};
+
+/**
  * Renders the static chart spec an investigation attaches to a piece of evidence. The data points
  * travel with the spec, so the chart looks the same regardless of where the data came from.
  */
 export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart }) => {
   const { euiTheme } = useEuiTheme();
   const baseTheme = useElasticChartsTheme();
+  const timeZone = useChartTimeZone();
   const isTime = chart.x_axis.type === 'time';
   const yFormatter = Y_AXIS_FORMATTERS[chart.y_axis.unit ?? 'number'];
 
@@ -180,6 +197,7 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart }) => {
                   yAccessors={['y']}
                   xScaleType={xScaleType}
                   yScaleType={ScaleType.Linear}
+                  timeZone={timeZone}
                   stackAccessors={chart.stacked ? ['x'] : undefined}
                 />
               ) : (
@@ -193,6 +211,7 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart }) => {
                   yAccessors={['y']}
                   xScaleType={xScaleType}
                   yScaleType={ScaleType.Linear}
+                  timeZone={timeZone}
                 />
               )
             )}
