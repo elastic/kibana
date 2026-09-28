@@ -26,10 +26,10 @@ export const NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID =
  * Pre-execution workflow that allocates the investigator sandbox once, then
  * writes Cortex and Semantic Memory pages into that workspace in parallel.
  *
- * Agent Builder's beforeAgent hook still runs `workflow_ids` in sequence so
- * `new_prompt` can chain. Materialize must not be two entries in that list —
- * each execution would allocate a sandbox. Obtain returns one `sandbox_id`;
- * both writers take it as input so they cannot re-scope or re-allocate.
+ * Agent Builder's beforeAgent hook runs `workflow_ids` on every execution;
+ * this workflow allocates and materializes only when round_execution_index is 0.
+ * Obtain returns one `sandbox_id` shared by both writers so they cannot re-scope
+ * or re-allocate within the round.
  *
  * `enablement: 'enforced'` — a disabled workflow makes the beforeAgent hook
  * throw, which aborts the investigation.
@@ -37,7 +37,7 @@ export const NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID =
 export const NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW = {
   id: NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 1,
+  version: 2,
   billable: false,
   yaml: SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_YAML,
   management: {

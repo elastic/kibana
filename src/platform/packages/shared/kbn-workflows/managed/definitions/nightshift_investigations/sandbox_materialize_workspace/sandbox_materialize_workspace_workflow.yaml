@@ -26,6 +26,11 @@ triggers:
         agent_id:
           type: string
           description: Agent id for this round. Memory materialize is skipped when it is absent.
+        round_execution_index:
+          type: integer
+          minimum: 0
+          default: 0
+          description: Zero for the first execution, positive on HITL resume.
       additionalProperties: false
 
 steps:
@@ -33,7 +38,7 @@ steps:
     type: nightshift.obtainSandbox
     # `${{ }}` must render a boolean. A bare conversation id becomes a KQL string
     # and evaluateCondition treats it as a field query, which skips the step.
-    if: '${{ inputs.conversation_id != null }}'
+    if: '${{ inputs.round_execution_index == 0 and inputs.conversation_id != null }}'
     timeout: 45s
     with:
       conversation_id: '{{ inputs.conversation_id }}'

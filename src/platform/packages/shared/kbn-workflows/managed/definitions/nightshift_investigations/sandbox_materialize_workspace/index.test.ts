@@ -24,6 +24,9 @@ import {
 
 const workflow = parse(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.yaml) as {
   name: string;
+  triggers: Array<{
+    inputs: { properties: { round_execution_index: { type: string; default: number } } };
+  }>;
   steps: Array<{
     name: string;
     type?: string;
@@ -46,13 +49,17 @@ describe('nightshift sandbox materialize workspace workflow', () => {
     expect(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.id).toBe(
       NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID
     );
-    expect(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.version).toBe(1);
+    expect(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.version).toBe(2);
+    expect(workflow.triggers[0].inputs.properties.round_execution_index).toMatchObject({
+      type: 'integer',
+      default: 0,
+    });
     expect(workflow.name).toBe('Nightshift Sandbox Materialize Workspace');
     expect(workflow.steps).toEqual([
       expect.objectContaining({
         name: 'obtain_sandbox',
         type: 'nightshift.obtainSandbox',
-        if: '${{ inputs.conversation_id != null }}',
+        if: '${{ inputs.round_execution_index == 0 and inputs.conversation_id != null }}',
         with: { conversation_id: '{{ inputs.conversation_id }}' },
       }),
       expect.objectContaining({

@@ -15,6 +15,9 @@ import {
 
 const workflow = parse(NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW.yaml) as {
   name: string;
+  triggers: Array<{
+    inputs: { properties: { round_execution_index: { type: string; default: number } } };
+  }>;
   steps: Array<{ name: string; type?: string; if?: string }>;
 };
 
@@ -32,7 +35,14 @@ describe('decision tree hydrate workflow', () => {
     ]);
   });
 
-  it('skips the step when there is no conversation to namespace the sandbox', () => {
-    expect(workflow.steps[0].if).toBe('${{ inputs.conversation_id != null }}');
+  it('hydrates only on the first execution of a conversation round', () => {
+    expect(NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW.version).toBe(2);
+    expect(workflow.triggers[0].inputs.properties.round_execution_index).toMatchObject({
+      type: 'integer',
+      default: 0,
+    });
+    expect(workflow.steps[0].if).toBe(
+      '${{ inputs.round_execution_index == 0 and inputs.conversation_id != null }}'
+    );
   });
 });
