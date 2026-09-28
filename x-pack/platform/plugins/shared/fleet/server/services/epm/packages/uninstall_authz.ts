@@ -131,12 +131,15 @@ export async function assertUninstallAuthorizedForAffectedSpaces({
   installation,
   packagePolicies,
   savedObjectsClient,
+  precomputedSpaceIds,
 }: {
   request: KibanaRequest;
   pkgName: string;
   installation: Installation;
   packagePolicies: PackagePolicy[];
   savedObjectsClient: SavedObjectsClientContract;
+  // When provided (bulk handler), skip closure collection and use this set directly.
+  precomputedSpaceIds?: Set<string>;
 }): Promise<void> {
   const security = appContextService.getSecurity();
   if (!security) {
@@ -147,21 +150,27 @@ export async function assertUninstallAuthorizedForAffectedSpaces({
     return;
   }
 
-  // Collect all affected space IDs across the full dependency closure so that
-  // a single authz check covers everything before any deletion begins.
-  const { spaceIds, truncated } = await collectSpacesForUninstallClosure(
-    savedObjectsClient,
-    installation,
-    packagePolicies
-  );
+  let spaceIdsArray: string[];
 
-  if (truncated) {
-    throw new PackageRemovalError(
-      `Unable to verify uninstall authorization for package ${pkgName}: too many package policies to enumerate`
+  if (precomputedSpaceIds) {
+    spaceIdsArray = Array.from(precomputedSpaceIds);
+  } else {
+    // Collect all affected space IDs across the full dependency closure so that
+    // a single authz check covers everything before any deletion begins.
+    const { spaceIds, truncated } = await collectSpacesForUninstallClosure(
+      savedObjectsClient,
+      installation,
+      packagePolicies
     );
-  }
 
-  const spaceIdsArray = Array.from(spaceIds);
+    if (truncated) {
+      throw new PackageRemovalError(
+        `Unable to verify uninstall authorization for package ${pkgName}: too many package policies to enumerate`
+      );
+    }
+
+    spaceIdsArray = Array.from(spaceIds);
+  }
 
   const { authz } = security;
   const result = await authz.checkPrivilegesWithRequest(request).atSpaces(spaceIdsArray, {

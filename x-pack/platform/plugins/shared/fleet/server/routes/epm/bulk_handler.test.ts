@@ -10,7 +10,10 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { packagePolicyService } from '../../services';
 import { FleetUnauthorizedError } from '../../errors';
 import { getInstallationsByName } from '../../services/epm/packages/get';
-import { assertUninstallAuthorizedForAffectedSpaces } from '../../services/epm/packages/uninstall_authz';
+import {
+  assertUninstallAuthorizedForAffectedSpaces,
+  collectSpacesForUninstallClosure,
+} from '../../services/epm/packages/uninstall_authz';
 import { scheduleBulkUninstall } from '../../tasks/packages_bulk_operations';
 
 import { postBulkUninstallPackagesHandler } from './bulk_handler';
@@ -34,6 +37,9 @@ jest.mock('../../services/epm/packages/get', () => ({
 
 jest.mock('../../services/epm/packages/uninstall_authz', () => ({
   assertUninstallAuthorizedForAffectedSpaces: jest.fn().mockResolvedValue(undefined),
+  collectSpacesForUninstallClosure: jest
+    .fn()
+    .mockResolvedValue({ spaceIds: new Set(['default']), truncated: false }),
 }));
 
 jest.mock('../../tasks/packages_bulk_operations', () => ({
@@ -55,6 +61,8 @@ const mockAssertUninstallAuthorized =
   assertUninstallAuthorizedForAffectedSpaces as jest.MockedFunction<
     typeof assertUninstallAuthorizedForAffectedSpaces
   >;
+const mockCollectSpacesForUninstallClosure =
+  collectSpacesForUninstallClosure as jest.MockedFunction<typeof collectSpacesForUninstallClosure>;
 const mockScheduleBulkUninstall = scheduleBulkUninstall as jest.MockedFunction<
   typeof scheduleBulkUninstall
 >;
@@ -98,6 +106,10 @@ beforeEach(() => {
     perPage: 10000,
   });
   mockAssertUninstallAuthorized.mockResolvedValue(undefined);
+  mockCollectSpacesForUninstallClosure.mockResolvedValue({
+    spaceIds: new Set(['default']),
+    truncated: false,
+  });
   mockScheduleBulkUninstall.mockResolvedValue('task-id-123');
 });
 
@@ -166,5 +178,44 @@ describe('postBulkUninstallPackagesHandler — truncated policy list', () => {
     );
 
     expect(mockScheduleBulkUninstall).not.toHaveBeenCalled();
+  });
+
+  it('uses a shared beingRemoved set across all packages so shared deps are included in the closure', async () => {
+    // Two packages requested; collectSpacesForUninstallClosure must be called with the
+    // same beingRemoved set so a shared dep C (parent of both) is caught on the second call.
+    const INSTALLATION_B = {
+      name: 'apache',
+      version: '1.0.0',
+      installed_kibana_space_id: 'default',
+      additional_spaces_installed_kibana: {},
+    } as any;
+    mockGetInstallationsByName.mockResolvedValue([INSTALLATION, INSTALLATION_B]);
+
+    let capturedBeingRemovedOnFirstCall: Set<string> | undefined;
+    mockCollectSpacesForUninstallClosure.mockImplementation(
+      async (_soClient, _inst, _policies, beingRemoved) => {
+        if (!capturedBeingRemovedOnFirstCall) {
+          capturedBeingRemovedOnFirstCall = beingRemoved;
+        }
+        return { spaceIds: new Set(['default']), truncated: false };
+      }
+    );
+
+    const { mockRequest, context, response } = makeContext({
+      body: {
+        packages: [
+          { name: 'nginx', version: '3.2.2' },
+          { name: 'apache', version: '1.0.0' },
+        ],
+      },
+    });
+
+    await postBulkUninstallPackagesHandler(context, mockRequest, response);
+
+    // Both calls must share the same beingRemoved reference
+    expect(mockCollectSpacesForUninstallClosure).toHaveBeenCalledTimes(2);
+    const firstCallBeingRemoved = mockCollectSpacesForUninstallClosure.mock.calls[0][3];
+    const secondCallBeingRemoved = mockCollectSpacesForUninstallClosure.mock.calls[1][3];
+    expect(firstCallBeingRemoved).toBe(secondCallBeingRemoved);
   });
 });

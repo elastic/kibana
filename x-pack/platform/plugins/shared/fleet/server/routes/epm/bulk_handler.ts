@@ -34,7 +34,10 @@ import type {
 } from '../../../common/types';
 import { getInstallationsByName } from '../../services/epm/packages/get';
 import { FleetError, FleetUnauthorizedError } from '../../errors';
-import { assertUninstallAuthorizedForAffectedSpaces } from '../../services/epm/packages/uninstall_authz';
+import {
+  assertUninstallAuthorizedForAffectedSpaces,
+  collectSpacesForUninstallClosure,
+} from '../../services/epm/packages/uninstall_authz';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 import {
   scheduleBulkUninstall,
@@ -148,13 +151,42 @@ export const postBulkUninstallPackagesHandler: FleetRequestHandler<
     }
   }
 
+  // Build the combined dependency closure across ALL requested packages with a single
+  // shared beingRemoved set. This ensures shared auto-installed deps (C depended on
+  // by both requested packages A and B) are correctly identified as eventually-removed
+  // and included in the authz check, even though each package is evaluated in sequence.
+  const combinedBeingRemoved = new Set<string>();
+  const combinedSpaceIds = new Set<string>();
+  let closureTruncated = false;
+
   for (const installation of installations) {
+    const { spaceIds, truncated } = await collectSpacesForUninstallClosure(
+      savedObjectsClient,
+      installation,
+      policiesByPkg.get(installation.name) ?? [],
+      combinedBeingRemoved
+    );
+    if (truncated) closureTruncated = true;
+    for (const spaceId of spaceIds) combinedSpaceIds.add(spaceId);
+  }
+
+  if (closureTruncated) {
+    throw new FleetUnauthorizedError(
+      `Unable to verify uninstall authorization: too many package policies to enumerate`
+    );
+  }
+
+  // Single authz check covering the combined closure of all requested packages.
+  // assertUninstallAuthorizedForAffectedSpaces would recompute the closure per-package;
+  // pass the first installation as a representative carrier and override its space set.
+  if (installations.length > 0) {
     await assertUninstallAuthorizedForAffectedSpaces({
       request,
-      pkgName: installation.name,
-      installation,
-      packagePolicies: policiesByPkg.get(installation.name) ?? [],
+      pkgName: installations.map((i) => i.name).join(', '),
+      installation: installations[0],
+      packagePolicies: [],
       savedObjectsClient,
+      precomputedSpaceIds: combinedSpaceIds,
     });
   }
 
