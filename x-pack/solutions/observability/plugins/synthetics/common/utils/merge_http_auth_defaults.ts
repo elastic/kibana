@@ -7,12 +7,22 @@
 
 import { DEFAULT_HTTP_ADVANCED_FIELDS } from '../constants/monitor_defaults';
 import type { KerberosConfig, NtlmConfig } from '../runtime_types';
-import { ConfigKey } from '../runtime_types';
+import { ConfigKey, KerberosAuthType } from '../runtime_types';
 
 interface HttpAuthFields {
   [ConfigKey.KERBEROS]?: Partial<KerberosConfig> | null;
   [ConfigKey.NTLM]?: Partial<NtlmConfig> | null;
 }
+
+/** Clear the credential for the inactive Kerberos auth method so agents never get both. */
+const stripInactiveKerberosCredential = (
+  kerberos: KerberosConfig
+): KerberosConfig => {
+  if (kerberos.auth_type === KerberosAuthType.KEYTAB) {
+    return { ...kerberos, password: '' };
+  }
+  return { ...kerberos, keytab: '' };
+};
 
 /**
  * Shallow-spreading a monitor over DEFAULT_FIELDS replaces nested `kerberos` /
@@ -22,12 +32,14 @@ export const mergeHttpAuthDefaults = <T extends HttpAuthFields>(fields: T): T =>
   const kerberosDefaults = DEFAULT_HTTP_ADVANCED_FIELDS[ConfigKey.KERBEROS];
   const ntlmDefaults = DEFAULT_HTTP_ADVANCED_FIELDS[ConfigKey.NTLM];
 
+  const kerberos = {
+    ...kerberosDefaults,
+    ...(fields[ConfigKey.KERBEROS] ?? {}),
+  };
+
   return {
     ...fields,
-    [ConfigKey.KERBEROS]: {
-      ...kerberosDefaults,
-      ...(fields[ConfigKey.KERBEROS] ?? {}),
-    },
+    [ConfigKey.KERBEROS]: stripInactiveKerberosCredential(kerberos),
     [ConfigKey.NTLM]: {
       ...ntlmDefaults,
       ...(fields[ConfigKey.NTLM] ?? {}),

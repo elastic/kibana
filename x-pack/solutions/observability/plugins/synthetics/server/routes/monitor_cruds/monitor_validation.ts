@@ -221,6 +221,15 @@ export function validateMonitor(
             payload: monitorFields,
           };
         }
+        // Keytab path is a file on the agent host — not provisionable on managed public locations.
+        if (hasPublicServiceLocation(monitorFields.locations)) {
+          return {
+            valid: false,
+            reason: INVALID_AUTH_CONFIGURATION_ERROR,
+            details: INVALID_KERBEROS_KEYTAB_PUBLIC_LOCATION_DETAILS,
+            payload: monitorFields,
+          };
+        }
       }
     }
 
@@ -676,6 +685,14 @@ const INVALID_KERBEROS_KEYTAB_CREDENTIALS_DETAILS = i18n.translate(
   'xpack.synthetics.server.monitors.invalidKerberosKeytabCredentialsDetails',
   {
     defaultMessage: 'Kerberos keytab authentication requires both username and a keytab path.',
+  }
+);
+
+const INVALID_KERBEROS_KEYTAB_PUBLIC_LOCATION_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidKerberosKeytabPublicLocationDetails',
+  {
+    defaultMessage:
+      'Kerberos keytab authentication requires a keytab file on the agent host and is only supported on private locations.',
   }
 );
 

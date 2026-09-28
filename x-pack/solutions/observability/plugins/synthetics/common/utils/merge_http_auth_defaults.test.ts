@@ -46,4 +46,43 @@ describe('mergeHttpAuthDefaults', () => {
       [ConfigKey.NTLM]: DEFAULT_HTTP_ADVANCED_FIELDS[ConfigKey.NTLM],
     });
   });
+
+  it('clears password when Kerberos auth_type is keytab', () => {
+    const merged = mergeHttpAuthDefaults({
+      [ConfigKey.KERBEROS]: {
+        enabled: true,
+        auth_type: 'keytab',
+        username: 'svc',
+        password: 'stale-password',
+        keytab: '/etc/krb5.keytab',
+        config_path: '/etc/krb5.conf',
+      },
+    });
+
+    expect(merged[ConfigKey.KERBEROS]).toMatchObject({
+      auth_type: 'keytab',
+      username: 'svc',
+      password: '',
+      keytab: '/etc/krb5.keytab',
+    });
+  });
+
+  it('clears keytab when Kerberos auth_type is password', () => {
+    const merged = mergeHttpAuthDefaults({
+      [ConfigKey.KERBEROS]: {
+        enabled: true,
+        auth_type: 'password',
+        username: 'svc',
+        password: 'secret',
+        keytab: '/etc/stale.keytab',
+        config_path: '/etc/krb5.conf',
+      },
+    });
+
+    expect(merged[ConfigKey.KERBEROS]).toMatchObject({
+      auth_type: 'password',
+      password: 'secret',
+      keytab: '',
+    });
+  });
 });

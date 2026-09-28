@@ -130,7 +130,9 @@ const AUTH_INLINE_CONF_MAX = 131072; // krb5.conf / keytab content
 const authString = z.string().max(AUTH_STRING_MAX);
 const authInlineConf = z.string().max(AUTH_INLINE_CONF_MAX);
 
-export const KerberosConfigCodec = z.looseObject({
+// strictObject: reject unknown keys so size-bounded declared strings cannot be
+// bypassed via an oversized extra property on the auth block.
+export const KerberosConfigCodec = z.strictObject({
   enabled: z.boolean(),
   auth_type: KerberosAuthTypeCodec,
   username: authString,
@@ -144,7 +146,7 @@ export const KerberosConfigCodec = z.looseObject({
   enable_krb5_fast: z.boolean(),
 });
 
-export const NtlmConfigCodec = z.looseObject({
+export const NtlmConfigCodec = z.strictObject({
   enabled: z.boolean(),
   username: authString,
   password: authString,
