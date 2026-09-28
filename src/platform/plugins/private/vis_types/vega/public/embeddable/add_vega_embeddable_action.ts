@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { CoreStart } from '@kbn/core/public';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { apiCanAddNewPanel, type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
@@ -18,11 +19,14 @@ import { ADD_VEGA_EMBEDDABLE_ACTION_ID } from '../constants';
 import { getDefaultSpec } from '../default_spec';
 import { VegaPanelIcon } from '../vega_icon';
 import type { VegaEmbeddableApi } from './vega_embeddable';
+import { openVegaEditor } from './open_vega_editor';
 
-export const getAddVegaEmbeddableAction = (): ActionDefinition<EmbeddableApiContext> => ({
+export const getAddVegaEmbeddableAction = (
+  core: CoreStart
+): ActionDefinition<EmbeddableApiContext> => ({
   id: ADD_VEGA_EMBEDDABLE_ACTION_ID,
-  grouping: [ADD_PANEL_VISUALIZATION_GROUP],
   order: 0,
+  grouping: [ADD_PANEL_VISUALIZATION_GROUP],
   getIconType: () => VegaPanelIcon,
   getDisplayName: () => 'Vega',
   getDisplayNameTooltip: () =>
@@ -33,10 +37,18 @@ export const getAddVegaEmbeddableAction = (): ActionDefinition<EmbeddableApiCont
   isCompatible: async ({ embeddable }) => apiCanAddNewPanel(embeddable),
   execute: async ({ embeddable, returnFocus }) => {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
-    const vegaEmbeddable = await embeddable.addNewPanel<VegaByValueState, VegaEmbeddableApi>({
-      panelType: VEGA_EMBEDDABLE_TYPE,
-      serializedState: { spec: { format: 'hjson', value: getDefaultSpec() } },
+    openVegaEditor({
+      core,
+      parentApi: embeddable,
+      returnFocus,
+      isNewPanel: true,
+      loadApi: async () => {
+        const panel = await embeddable.addNewPanel<VegaByValueState, VegaEmbeddableApi>({
+          panelType: VEGA_EMBEDDABLE_TYPE,
+          serializedState: { spec: { format: 'hjson', value: getDefaultSpec() } },
+        });
+        return panel ?? undefined;
+      },
     });
-    vegaEmbeddable?.onEdit({ isNewPanel: true, returnFocus });
   },
 });

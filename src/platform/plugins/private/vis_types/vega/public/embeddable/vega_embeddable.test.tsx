@@ -11,8 +11,9 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
-import { openLazyFlyout } from '@kbn/presentation-util';
 import { BehaviorSubject, of } from 'rxjs';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
@@ -24,11 +25,16 @@ import type { VegaVisualizationDependencies } from '../plugin';
 import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../../common/constants';
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent, VegaEventHandler } from '../types';
+import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
+import { setDataViews } from '../services';
 import type { VegaByValueState } from '../../server';
+import { openVegaEditor } from './open_vega_editor';
 import { vegaEmbeddableFactory } from './vega_embeddable';
 
-jest.mock('@kbn/presentation-util', () => ({ openLazyFlyout: jest.fn() }));
+jest.mock('./open_vega_editor', () => ({
+  openVegaEditor: jest.fn(),
+}));
 jest.mock('../lib/vega_render_telemetry', () => ({ reportVegaRender: jest.fn() }));
 jest.mock('../lib/extract_index_pattern', () => ({
   extractIndexPatternsFromSpec: jest.fn(async (): Promise<never[]> => []),
@@ -56,8 +62,16 @@ jest.mock('../async_services', () => ({
   },
 }));
 
-const mockOpenLazyFlyout = jest.mocked(openLazyFlyout);
+const mockOpenVegaEditor = jest.mocked(openVegaEditor);
 const mockReportVegaRender = jest.mocked(reportVegaRender);
+const mockExtractIndexPatterns = jest.mocked(extractIndexPatternsFromSpec);
+
+jest.mock('@kbn/embeddable-plugin/public/kibana_services', () => ({
+  core: {
+    notifications: { toasts: { addError: jest.fn() } },
+    overlays: { openSystemFlyout: jest.fn() },
+  },
+}));
 
 describe('vegaEmbeddableFactory', () => {
   const executeTriggerActions = jest.fn();
@@ -118,7 +132,11 @@ describe('vegaEmbeddableFactory', () => {
 
   const buildEmbeddable = async ({
     standaloneEmbeddableEnabled = false,
-  }: { standaloneEmbeddableEnabled?: boolean } = {}) => {
+    spec = { format: 'hjson' as const, value: '{ mark: point }' },
+  }: {
+    standaloneEmbeddableEnabled?: boolean;
+    spec?: VegaByValueState['spec'];
+  } = {}) => {
     const coreStart = coreMock.createStart();
     coreStart.featureFlags.getBooleanValue$.mockImplementation((key, fallback) =>
       of(key === VEGA_STANDALONE_EMBEDDABLE_FLAG ? standaloneEmbeddableEnabled : fallback)
@@ -131,7 +149,7 @@ describe('vegaEmbeddableFactory', () => {
 
     return factory.buildEmbeddable({
       initializeDrilldownsManager,
-      initialState: { spec: { format: 'hjson', value: '{ mark: point }' }, title: 'Initial title' },
+      initialState: { spec, title: 'Initial title' },
       finalizeApi: (api) => ({
         ...api,
         uuid,
@@ -151,13 +169,47 @@ describe('vegaEmbeddableFactory', () => {
   beforeEach(() => {
     ({ query$, filters$, timeRange$, timeslice$, esqlVariables$, reload$, viewMode$, parentApi } =
       createParent());
+    const dataViews = dataViewPluginMocks.createStartContract();
+    dataViews.getDefault = jest.fn(async (): Promise<DataView | null> => null);
+    setDataViews(dataViews);
+    mockExtractIndexPatterns.mockReset();
+    mockExtractIndexPatterns.mockResolvedValue([]);
     executeTriggerActions.mockReset();
-    mockOpenLazyFlyout.mockReset();
+    mockOpenVegaEditor.mockReset();
     mockReportVegaRender.mockReset();
     mockCreateVegaRequestHandler.mockClear();
     mockVegaRequestHandler.mockReset();
     mockVegaRequestHandler.mockResolvedValue(visData);
     mockVegaVisComponentProps = undefined;
+  });
+
+  it('uses the default data view when the spec has none', async () => {
+    const defaultDataView = { id: 'default-view', title: 'logs-*' } as DataView;
+    const dataViews = dataViewPluginMocks.createStartContract();
+    dataViews.getDefault = jest.fn(async () => defaultDataView);
+    setDataViews(dataViews);
+
+    const { api } = await buildEmbeddable({
+      spec: { format: 'json', value: { mark: 'point' } },
+    });
+
+    await waitFor(() => expect(api.dataViews$.getValue()).toEqual([defaultDataView]));
+    expect(dataViews.getDefault).toHaveBeenCalled();
+  });
+
+  it('keeps data views named by the spec', async () => {
+    const fromSpec = [{ id: 'spec-view' }] as DataView[];
+    mockExtractIndexPatterns.mockResolvedValue(fromSpec);
+    const dataViews = dataViewPluginMocks.createStartContract();
+    dataViews.getDefault = jest.fn(async () => ({ id: 'default-view' } as DataView));
+    setDataViews(dataViews);
+
+    const { api } = await buildEmbeddable({
+      spec: { format: 'json', value: { data: { url: { index: 'logs-*' } } } },
+    });
+
+    await waitFor(() => expect(api.dataViews$.getValue()).toEqual(fromSpec));
+    expect(dataViews.getDefault).not.toHaveBeenCalled();
   });
 
   it('serializes and applies its state', async () => {
@@ -355,30 +407,29 @@ describe('vegaEmbeddableFactory', () => {
     const { api } = await buildEmbeddable();
     const returnFocus = jest.fn();
 
-    api.onEdit({ isNewPanel: true, returnFocus });
-    expect(mockOpenLazyFlyout.mock.calls[0][0]).toEqual(
+    await api.onEdit({ isNewPanel: true, returnFocus });
+    expect(mockOpenVegaEditor).toHaveBeenCalledWith(
       expect.objectContaining({
+        core: expect.anything(),
+        parentApi,
         returnFocus,
-        flyoutProps: expect.objectContaining({ focusedPanelId: api.uuid }),
+        focusedPanelId: api.uuid,
+        isNewPanel: true,
       })
     );
   });
 
   it('restores the original spec when editing is cancelled', async () => {
     const { api } = await buildEmbeddable();
-    const closeFlyout = jest.fn();
-
-    api.onEdit();
-    const flyout = mockOpenLazyFlyout.mock.calls[0][0];
-    const content = (await flyout.loadContent({
-      ariaLabelledBy: 'vega-flyout-title',
-      closeFlyout,
+    const content = (await api.getEditPanel?.({
+      ariaLabelledBy: 'vegaEditorTitle',
     })) as React.ReactElement<{
       onRevert: () => void;
       onPreview: (spec: VegaByValueState['spec']) => void;
     }>;
 
     content.props.onPreview({ format: 'hjson', value: '{ mark: bar }' });
+
     expect(api.serializeState().spec).toEqual({ format: 'hjson', value: '{ mark: bar }' });
     content.props.onRevert();
     expect(api.serializeState().spec).toEqual({ format: 'hjson', value: '{ mark: point }' });
@@ -387,13 +438,12 @@ describe('vegaEmbeddableFactory', () => {
 
   it('removes the panel when editing is cancelled on a brand-new one', async () => {
     const { api } = await buildEmbeddable();
-
-    api.onEdit({ isNewPanel: true });
-    const flyout = mockOpenLazyFlyout.mock.calls[0][0];
-    const content = (await flyout.loadContent({
-      ariaLabelledBy: 'vega-flyout-title',
-      closeFlyout: jest.fn(),
-    })) as React.ReactElement<{ onRevert: () => void }>;
+    const content = (await api.getEditPanel?.({
+      ariaLabelledBy: 'vegaEditorTitle',
+      isNewPanel: true,
+    })) as React.ReactElement<{
+      onRevert: () => void;
+    }>;
 
     // A new panel has no spec worth reverting to, so cancelling drops it from the dashboard.
     content.props.onRevert();
@@ -403,14 +453,11 @@ describe('vegaEmbeddableFactory', () => {
 
   it('keeps the edited spec when saving', async () => {
     const { api } = await buildEmbeddable();
-    const closeFlyout = jest.fn();
-
-    api.onEdit();
-    const flyout = mockOpenLazyFlyout.mock.calls[0][0];
-    const content = (await flyout.loadContent({
-      ariaLabelledBy: 'vega-flyout-title',
-      closeFlyout,
-    })) as React.ReactElement<{ onSave: (spec: VegaByValueState['spec']) => void }>;
+    const content = (await api.getEditPanel?.({
+      ariaLabelledBy: 'vegaEditorTitle',
+    })) as React.ReactElement<{
+      onSave: (spec: VegaByValueState['spec']) => void;
+    }>;
 
     content.props.onSave({ format: 'hjson', value: '{ mark: bar }' });
 

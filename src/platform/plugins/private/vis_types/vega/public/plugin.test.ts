@@ -28,6 +28,16 @@ import { VegaPlugin, type VegaPluginStartDependencies } from './plugin';
 
 const mockCreateVegaFn = jest.fn();
 const mockGetVegaVisRenderer = jest.fn();
+const mockGetAddVegaPanelAction = jest.fn(() => ({ id: ADD_VEGA_PANEL_ACTION_ID }));
+const mockGetAddVegaEmbeddableAction = jest.fn(() => ({ id: ADD_VEGA_EMBEDDABLE_ACTION_ID }));
+
+jest.mock('./add_vega_panel_action', () => ({
+  getAddVegaPanelAction: () => mockGetAddVegaPanelAction(),
+}));
+
+jest.mock('./embeddable/add_vega_embeddable_action', () => ({
+  getAddVegaEmbeddableAction: () => mockGetAddVegaEmbeddableAction(),
+}));
 
 jest.mock('./async_module', () => ({
   createVegaFn: mockCreateVegaFn,
@@ -127,6 +137,20 @@ describe('VegaPlugin', () => {
         ADD_CANVAS_ELEMENT_TRIGGER,
         ADD_VEGA_PANEL_ACTION_ID
       );
+    });
+
+    it('loads both add actions through their registered loaders', async () => {
+      const { uiActions } = startPlugin(new BehaviorSubject(false));
+      const legacyLoader = uiActions.registerActionAsync.mock.calls.find(
+        ([actionId]) => actionId === ADD_VEGA_PANEL_ACTION_ID
+      )?.[1];
+      const embeddableLoader = uiActions.registerActionAsync.mock.calls.find(
+        ([actionId]) => actionId === ADD_VEGA_EMBEDDABLE_ACTION_ID
+      )?.[1];
+      if (!legacyLoader || !embeddableLoader) throw new Error('Expected add action loaders');
+
+      expect((await legacyLoader()).id).toBe(ADD_VEGA_PANEL_ACTION_ID);
+      expect((await embeddableLoader()).id).toBe(ADD_VEGA_EMBEDDABLE_ACTION_ID);
     });
 
     it('swaps in the standalone action and detaches the legacy action when the flag is enabled', () => {

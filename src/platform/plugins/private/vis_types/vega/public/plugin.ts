@@ -145,7 +145,7 @@ export class VegaPlugin implements Plugin<void, void> {
       const { getAddVegaEmbeddableAction } = await import(
         './embeddable/add_vega_embeddable_action'
       );
-      return getAddVegaEmbeddableAction();
+      return getAddVegaEmbeddableAction(core);
     });
 
     // The feature flag swaps both Dashboard and Canvas from legacy Visualize action to the

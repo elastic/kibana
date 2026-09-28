@@ -21,7 +21,6 @@ import type {
 import {
   BehaviorSubject,
   combineLatest,
-  EMPTY,
   firstValueFrom,
   map,
   merge,
@@ -57,7 +56,6 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { openLazyFlyout } from '@kbn/presentation-util';
 import {
   VEGA_EMBEDDABLE_TYPE,
   VEGA_STANDALONE_EMBEDDABLE_FLAG,
@@ -68,11 +66,16 @@ import type { VegaEvent } from '../types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
 import type { VegaParser } from '../data_model/vega_parser';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
+import { getDataViews } from '../services';
 import { extractProjectRoutingOverrides } from '../lib/extract_project_routing_overrides';
 import { getEsqlQueriesFromSpec } from '../lib/spec_uses_esql';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
 import { createInspectorAdapters } from '../vega_inspector';
 import type { VegaByValueState } from '../../server';
+// Frame only. The spec editor stays a separate lazy chunk inside this module, so Edit does not
+// wait on `vega_editor_flyout` before the flyout can render.
+import { VegaEditorFlyout } from './vega_editor_flyout';
+import { openVegaEditor } from './open_vega_editor';
 
 const LazyVegaVisComponent = lazy(() =>
   import('../async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
@@ -107,7 +110,14 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
   PublishesEsql &
   PublishesProjectRoutingOverrides &
   PublishesDataViews &
-  PublishesRendered;
+  PublishesRendered & {
+    /** Returns the editor panel content for an already-open flyout. */
+    getEditPanel?: (options: {
+      ariaLabelledBy: string;
+      closeFlyout?: () => void;
+      isNewPanel?: boolean;
+    }) => Promise<JSX.Element | undefined>;
+  };
 
 interface VegaEmbeddableDependencies {
   uiActions: Pick<VegaPluginStartDependencies['uiActions'], 'executeTriggerActions'>;
@@ -136,7 +146,7 @@ export const vegaEmbeddableFactory = (
     const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
 
     // A spec change is parsed once for all derived subjects. `switchMap` is used instead
-    // of `tap` for dataViews$ because `extractIndexPatternsFromSpec` is async.
+    // of `tap` for dataViews$ because resolving data views is async.
     const specSubscription = spec$
       .pipe(
         map((spec) => {
@@ -151,7 +161,13 @@ export const vegaEmbeddableFactory = (
           esql$.next(spec ? getEsqlQueriesFromSpec(spec).map((esql) => ({ esql })) : []);
           projectRoutingOverrides$.next(spec ? extractProjectRoutingOverrides(spec) : undefined);
         }),
-        switchMap((spec) => (spec ? extractIndexPatternsFromSpec(spec) : EMPTY))
+        switchMap(async (spec) => {
+          const fromSpec = spec ? await extractIndexPatternsFromSpec(spec) : [];
+          if (fromSpec.length > 0) return fromSpec;
+          // Visualize's search bar uses the default data view when the spec names none.
+          const defaultDataView = await getDataViews().getDefault();
+          return defaultDataView ? [defaultDataView] : [];
+        })
       )
       .subscribe((dataViews) => dataViews$.next(dataViews));
 
@@ -194,6 +210,35 @@ export const vegaEmbeddableFactory = (
       },
     });
 
+    const getEditPanel = async ({
+      ariaLabelledBy,
+      closeFlyout = () => {},
+      isNewPanel = false,
+    }: {
+      ariaLabelledBy: string;
+      closeFlyout?: () => void;
+      isNewPanel?: boolean;
+    }) => {
+      const initialSpec = spec$.getValue();
+      return (
+        <VegaEditorFlyout
+          ariaLabelledBy={ariaLabelledBy}
+          closeFlyout={closeFlyout}
+          initialSpec={initialSpec}
+          isNewPanel={isNewPanel}
+          onPreview={(spec) => spec$.next(spec)}
+          onSave={(spec) => spec$.next(spec)}
+          onRevert={() => {
+            if (isNewPanel && apiIsPresentationContainer(parentApi)) {
+              parentApi.removePanel(api.uuid);
+            } else {
+              spec$.next(initialSpec);
+            }
+          }}
+        />
+      );
+    };
+
     const api = finalizeApi({
       ...titleManager.api,
       ...timeRangeManager.api,
@@ -209,37 +254,15 @@ export const vegaEmbeddableFactory = (
       supportedTriggers: () => VEGA_SUPPORTED_TRIGGERS,
       getTypeDisplayName: () => 'Vega',
       isEditingEnabled: () => true,
+      getEditPanel,
       onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
-        const initialSpec = spec$.getValue();
-        openLazyFlyout({
+        openVegaEditor({
           core,
           parentApi,
           returnFocus,
-          flyoutProps: {
-            size: 'm',
-            type: 'push',
-            focusedPanelId: uuid,
-          },
-          loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-            const { VegaEditorFlyout } = await import('./vega_editor_flyout');
-            return (
-              <VegaEditorFlyout
-                ariaLabelledBy={ariaLabelledBy}
-                closeFlyout={closeFlyout}
-                initialSpec={initialSpec}
-                isNewPanel={isNewPanel}
-                onPreview={(spec) => spec$.next(spec)}
-                onSave={(spec) => spec$.next(spec)}
-                onRevert={() => {
-                  if (isNewPanel && apiIsPresentationContainer(parentApi)) {
-                    parentApi.removePanel(api.uuid);
-                  } else {
-                    spec$.next(initialSpec);
-                  }
-                }}
-              />
-            );
-          },
+          focusedPanelId: uuid,
+          isNewPanel,
+          loadApi: async () => api,
         });
       },
       getInspectorAdapters: () => inspectorAdapters,
