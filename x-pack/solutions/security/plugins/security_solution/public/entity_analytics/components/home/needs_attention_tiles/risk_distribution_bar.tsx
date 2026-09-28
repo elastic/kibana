@@ -17,9 +17,9 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { RiskSeverity } from '../../../../../../common/search_strategy';
-import { RISK_SEVERITY_COLOUR } from '../../../../common';
-import type { SeverityCount } from '../../../severity/types';
+import { RiskSeverity } from '../../../../../common/search_strategy';
+import { RISK_SEVERITY_COLOUR } from '../../../common';
+import type { SeverityCount } from '../../severity/types';
 
 /** Highest severity first so Critical anchors the left edge of the bar. */
 const DISPLAY_ORDER: RiskSeverity[] = [

@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useHighCriticalCount } from './hooks/use_high_critical_count';
 
 const HIGH_CRITICAL_SCORE_THRESHOLD = 70;

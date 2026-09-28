@@ -6,7 +6,7 @@
  */
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
-import type { TimeRange } from '../use_time_range_param';
+import type { TimeRange } from '../../use_time_range_param';
 
 const ML_ANOMALIES_INDEX = '.ml-anomalies-shared*';
 const ENTITY_TYPES = ['user', 'host', 'service'] as const;

@@ -410,9 +410,11 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       riskMoversLoading,
       newlyHCCount,
       newlyHCLoading,
+      newlyHCMissingIndex,
       watchlistedCount,
       newEntityCount,
       newEntityLoading,
+      riskMoversMissingIndex,
       timeRange,
     ]
   );
@@ -517,13 +519,14 @@ const EntityAnalyticsEntitiesTableContent = ({
     defaultQuery: getDefaultQuery,
   });
 
+  const { onChangePage } = urlState;
   const prevCardFilterRef = useRef(cardFilter);
   useEffect(() => {
     if (prevCardFilterRef.current !== cardFilter) {
       prevCardFilterRef.current = cardFilter;
-      urlState.onChangePage(0);
+      onChangePage(0);
     }
-  }, [cardFilter, urlState.onChangePage]);
+  }, [cardFilter, onChangePage]);
 
   const state = useMemo(() => {
     const extraFilters = (
