@@ -129,8 +129,6 @@ packages:
   disabled:
 ```
 
-By default, configs belong to the `ci-on-commit` [test channel](#scout-test-channels), which PR and on-merge pipelines select. Deployment tags and [selective testing](./scout.md#scout-faq-selective-testing) determine which eligible tests run in a particular build.
-
 ::::::::
 
 ::::::::::{step} Write and run tests
@@ -140,27 +138,6 @@ Tweak the new Playwright config(s) and [write UI tests](./write-ui-tests.md) or 
 ::::::::::
 
 :::::::::
-
-## Choose a CI test channel [scout-test-channels]
-
-Deployment tags describe **where** a suite can run. Test channels describe **when CI selects a Playwright config**. Set channels for the whole config using `metadata.scout.testChannels` in `createPlaywrightConfig()`:
-
-```ts
-import { createPlaywrightConfig } from '@kbn/scout';
-
-export default createPlaywrightConfig({
-  testDir: './tests',
-  metadata: {
-    scout: {
-      testChannels: ['ci-batch-daily'],
-    },
-  },
-});
-```
-
-The supported channels are `ci-on-commit`, `ci-batch-3h`, `ci-batch-daily`, and `ci-batch-weekly`. If omitted, the config defaults to `['ci-on-commit']`. A pipeline selects configs whose channels overlap its `SCOUT_TEST_CHANNELS` setting.
-
-PR and on-merge pipelines select `ci-on-commit`, so the daily-only example above is excluded from those runs even if its deployment tags match. To keep that coverage, include `ci-on-commit` in the array. Channel metadata does not prevent you from running the config directly with the [local test commands](./run-scout-tests.md).
 
 ## Organize large plugins with namespaces [scout-namespaces]
 
@@ -184,7 +161,7 @@ A namespace holds the same layout you'd otherwise place at the Scout root, one l
 
 - **Scoped ownership**: assign each area to the team that owns it in `.github/CODEOWNERS`, so failures reach the smaller group that maintains that functionality.
 - **Run a focused subset**: point Scout at a single namespace's config to run (or re-run) only that area's tests, instead of the whole plugin's suite.
-- **Separate configs in CI**: each namespace has its own configs and reporting. [Selective testing](./scout.md#scout-faq-selective-testing) can select individual configs for test-only changes; changes to production code can select configs across the affected module's namespaces. Namespaces under the same Scout root share the same [server configuration](./run-scout-tests.md#scout-run-tests-server-config-set).
+- **Separate configs in CI**: each namespace has its own configs and reporting. [Selective testing](./scout.md#scout-faq-selective-testing) can select individual configs for test-only changes; production-code or fixture changes can select configs across the affected module's namespaces. Namespaces under the same Scout root share the same [server configuration](./run-scout-tests.md#scout-run-tests-server-config-set).
 
 ### Generate a namespace [scout-namespaces-generate]
 

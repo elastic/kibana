@@ -91,7 +91,7 @@ Scout uses the changed files to narrow the eligible tests in PR builds:
 - **Changes confined to Scout UI/API test scopes** select the configs that own the changed files. Markdown files, READMEs, and changelogs are ignored for this decision. Changes under a Scout `fixtures/` directory use dependency-based selection because other modules can import those fixtures.
 - **Other changes** select configs in affected modules, including downstream consumers. This can include multiple namespaces within a module.
 
-Deployment tags and [CI test channels](./setup-scout.md#scout-test-channels) still apply in every mode.
+Deployment tags and the pipeline’s CI test-channel selection still apply in every mode.
 
 Current PR builds group tests into Buildkite steps named `Scout Lane #<number> - <arch>-<domain> / <config-set>`. Check the lane's logs and test results for your config and suite to confirm they ran; a lane label alone does not show which tests executed.
 

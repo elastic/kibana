@@ -4,7 +4,7 @@ navigation_title: Deployment tags
 
 # Deployment tags [scout-deployment-tags]
 
-Deployment tags declare **which environments a test suite supports**. Add them to every `test.describe()` (or `apiTest.describe()` / `spaceTest.describe()`), then use `--grep` when running tests to select suites for a specific environment. Tags alone do not schedule a run; see [How tagged tests are selected](#scout-deployment-tags-selection).
+Deployment tags declare **where a test suite is expected to run**. Add them to every `test.describe()` (or `apiTest.describe()` / `spaceTest.describe()`), then use `--grep` when running tests to target a specific environment.
 
 Tags follow this shape:
 
@@ -53,7 +53,7 @@ This test will only run locally (stateful classic and serverless Security comple
 
 ## Pick the right tags [scout-deployment-tags-pick]
 
-Pick the narrowest scope that's still correct for the feature under test, as every extra deployment target can add CI work:
+Pick the narrowest scope that's still correct for the feature under test, as every extra deployment target spins up an additional run:
 
 | The test covers…                                 | Use                                                                                                                  |
 | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
@@ -63,24 +63,24 @@ Pick the narrowest scope that's still correct for the feature under test, as eve
 | Behavior that only exists on stateful            | `tags.stateful.classic` alone                                                                                        |
 
 ::::::{warning}
-Don't reach for `tags.deploymentAgnostic` from a solution module. It includes multiple solutions and can add unnecessary CI work — use explicit per-deployment tags instead. See the [`tags.deploymentAgnostic` note](#scout-deployment-tags-deployment-agnostic).
+Don't reach for `tags.deploymentAgnostic` from a solution module. It runs your test across every solution and is expensive — use explicit per-deployment tags instead. See the [`tags.deploymentAgnostic` note](#scout-deployment-tags-deployment-agnostic).
 ::::::
 
 ## Common shortcuts [scout-deployment-tags-shortcuts]
 
 ### `tags.deploymentAgnostic` [scout-deployment-tags-deployment-agnostic]
 
-Use this shortcut for **platform** specs that need coverage on stateful classic and the main Search, Observability, and Security serverless targets. It expands to:
+Use this tag for **platform** specs that need to run across every standard deployment type. It expands to:
 
 - `tags.stateful.all`
 - `tags.serverless.search`
 - `tags.serverless.observability.complete`
 - `tags.serverless.security.complete`
 
-It excludes the Observability Logs Essentials, Security Essentials, and Security EASE tiers, as well as Workplace AI. Add their explicit tags if the test needs coverage there.
+Workplace AI is excluded because it has no stateful counterpart.
 
 ::::{warning}
-`tags.deploymentAgnostic` includes multiple solutions. If your test lives in a solution module, use explicit targets instead (e.g. `[...tags.stateful.classic, ...tags.serverless.observability.complete]`).
+`tags.deploymentAgnostic` runs your test across all solutions, which is expensive. If your test lives in a solution module, use explicit targets instead (e.g. `[...tags.stateful.classic, ...tags.serverless.observability.complete]`).
 ::::
 
 ### Stateful [scout-deployment-tags-stateful]
@@ -150,13 +150,3 @@ For the authoritative list (and the exact tag strings), see `src/platform/packag
 ::::::{note}
 Use tags to **include** suites where they make sense, instead of skipping suites after the fact.
 ::::::
-
-## How tagged tests are selected [scout-deployment-tags-selection]
-
-A matching deployment tag makes a suite eligible for a target. Other selection rules still apply:
-
-- **Playwright project and filters**: `--project` selects the connection settings; `--grep` selects matching tests. Choosing a project does not automatically filter tests by deployment tag.
-- **CI configuration**: the module must be [enabled for Scout CI](./setup-scout.md#scout-setup-manual), and the Playwright config must belong to a [test channel](./setup-scout.md#scout-test-channels) selected by the pipeline.
-- **PR scope**: [selective testing](./scout.md#scout-faq-selective-testing) can select only a subset of eligible configs for the change.
-
-Explicit [skips](./skip-tests.md) still apply. CI schedules tests under `test/scout_<name>/` with [custom server configurations](./feature-flags.md#scout-feature-flags-custom-servers) only for local targets; adding a Cloud tag does not make those configurations available in Cloud runs.
