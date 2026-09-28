@@ -79,7 +79,7 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
       ? [
           {
             title: executionLabel,
-            status: 'complete' as const,
+            status: (showResultSection ? 'complete' : 'loading') as 'loading' | 'complete',
             children: (
               <ul
                 css={css`
