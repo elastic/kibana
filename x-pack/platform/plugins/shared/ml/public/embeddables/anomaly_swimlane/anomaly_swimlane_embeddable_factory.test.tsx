@@ -25,7 +25,7 @@ jest.mock('../../application/explorer/swimlane_container', () => ({
     // observable that the data fetcher subscribes to. Simulate that here.
     React.useEffect(() => {
       (props.onResize as (size: number) => void)?.(800);
-    }, []);
+    }, [props.onResize]);
     return <div data-test-subj={props['data-test-subj'] as string} />;
   },
 }));

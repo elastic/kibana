@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const mockPlayButton = jest.fn(() => null);
+const mockPlayButton = jest.fn((props: Record<string, unknown>) => null);
 
 jest.mock('./play_button', () => ({
   PlayButton: (props: Record<string, unknown>) => {

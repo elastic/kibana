@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const mockUnifiedDataTable = jest.fn(() => null);
+const mockUnifiedDataTable = jest.fn<void, [Record<string, unknown>]>();
 
 jest.mock('@kbn/unified-data-table', () => ({
   DEFAULT_PAGINATION_MODE: 'multiPage',
@@ -38,7 +38,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
-import { DiscoverGrid } from './discover_grid';
+import { DiscoverGrid, type DiscoverGridProps } from './discover_grid';
 
 const baseProps = {
   dataView: dataViewMock,
@@ -69,7 +69,7 @@ describe('DiscoverGrid preview mode', () => {
   });
 
   it('passes interactive props to UnifiedDataTable when previewMode is false', () => {
-    render(<DiscoverGrid {...(baseProps as DiscoverGridProps)} previewMode={false} />);
+    render(<DiscoverGrid {...(baseProps as unknown as DiscoverGridProps)} previewMode={false} />);
     const lastProps = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     expect(lastProps?.canDragAndDropColumns).toBe(true);
     expect(lastProps?.visibleCellActions).toBe(3);
@@ -78,7 +78,7 @@ describe('DiscoverGrid preview mode', () => {
   });
 
   it('passes disabled props to UnifiedDataTable when previewMode is true', () => {
-    render(<DiscoverGrid {...(baseProps as DiscoverGridProps)} previewMode={true} />);
+    render(<DiscoverGrid {...(baseProps as unknown as DiscoverGridProps)} previewMode={true} />);
     const lastProps = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     expect(lastProps?.isSortEnabled).toBe(false);
     expect(lastProps?.disableCellActions).toBe(true);
@@ -94,7 +94,7 @@ describe('DiscoverGrid preview mode', () => {
   });
 
   it('defaults to interactive mode when previewMode is not set', () => {
-    render(<DiscoverGrid {...(baseProps as DiscoverGridProps)} />);
+    render(<DiscoverGrid {...(baseProps as unknown as DiscoverGridProps)} />);
     const lastProps = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     expect(lastProps?.canDragAndDropColumns).toBe(true);
     expect(lastProps?.isSortEnabled).not.toBe(false);

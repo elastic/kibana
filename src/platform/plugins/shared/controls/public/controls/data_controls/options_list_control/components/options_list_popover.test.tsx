@@ -88,7 +88,7 @@ describe('Options list popover', () => {
     displaySettings,
   }: {
     componentApi: OptionsListComponentApi;
-    displaySettings: OptionsListDisplaySettings;
+    displaySettings: OptionsListDisplaySettings & { previewMode?: boolean };
   }) => {
     return render(
       <OptionsListControlContext.Provider
