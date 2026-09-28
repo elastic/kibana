@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { ReactNode, KeyboardEvent } from 'react';
-import React from 'react';
-// @ts-expect-error no @types definition
-import { Shortcuts } from 'react-shortcuts';
-import { isTextInput } from '../../../lib/is_text_input';
+import type { ReactNode } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { coreServices } from '../../../services/kibana_services';
+import { ShortcutStrings } from '../../../../i18n/shortcuts';
 import { forceReload } from '../../hooks/use_canvas_api';
+
+const shortcutHelp = ShortcutStrings.getShortcutHelp();
+const namespaceDisplayNames = ShortcutStrings.getNamespaceDisplayNames();
 
 interface ChildrenProps {
   isFullscreen: boolean;
@@ -33,73 +35,175 @@ interface Props {
   children: (props: ChildrenProps) => ReactNode;
 }
 
-export class FullscreenControl extends React.PureComponent<Props> {
-  /*
-    We need these instance functions because ReactShortcuts bind the handlers on it's mount, 
-    but then does no rebinding if it's props change. Using these instance functions will 
-    properly handle changes to incoming props since the instance functions are bound to the components
-    "this" context
-  */
-  _toggleFullscreen = () => {
-    const { setFullscreen, isFullscreen } = this.props;
+export const FullscreenControl: React.FC<Props> = ({
+  isFullscreen,
+  setFullscreen,
+  toggleAutoplay,
+  previousPage,
+  nextPage,
+  fetchAllRenderables,
+  children,
+}) => {
+  const propsRef = useRef({
+    isFullscreen,
+    setFullscreen,
+    toggleAutoplay,
+    previousPage,
+    nextPage,
+    fetchAllRenderables,
+  });
+  propsRef.current = {
+    isFullscreen,
+    setFullscreen,
+    toggleAutoplay,
+    previousPage,
+    nextPage,
+    fetchAllRenderables,
+  };
+
+  const toggleFullscreen = useCallback(() => {
     setFullscreen(!isFullscreen);
-  };
+  }, [isFullscreen, setFullscreen]);
 
-  toggleAutoplay = () => {
-    this.props.toggleAutoplay();
-  };
+  useEffect(() => {
+    if (!isFullscreen) return;
+    const group = namespaceDisplayNames.PRESENTATION;
+    return coreServices.hotkeys.registerMany([
+      {
+        def: {
+          id: 'canvas:presentation.refresh',
+          keys: 'Alt+R',
+          label: shortcutHelp.REFRESH,
+          scope: 'context',
+          group,
+        },
+        handler: () => {
+          forceReload();
+          propsRef.current.fetchAllRenderables();
+        },
+      },
+      {
+        def: {
+          id: 'canvas:presentation.prevPage',
+          keys: 'Alt+[',
+          label: shortcutHelp.PREV,
+          scope: 'context',
+          group,
+        },
+        handler: () => {
+          propsRef.current.previousPage();
+        },
+      },
+      {
+        def: {
+          id: 'canvas:presentation.prevPageBackspace',
+          keys: 'Backspace',
+          label: shortcutHelp.PREV,
+          scope: 'context',
+          group,
+        },
+        handler: () => {
+          propsRef.current.previousPage();
+        },
+      },
+      {
+        def: {
+          id: 'canvas:presentation.prevPageLeft',
+          keys: 'ArrowLeft',
+          label: shortcutHelp.PREV,
+          scope: 'context',
+          group,
+        },
+        handler: () => {
+          propsRef.current.previousPage();
+        },
+      },
+      {
+        def: {
+          id: 'canvas:presentation.nextPage',
+          keys: 'Alt+]',
+          label: shortcutHelp.NEXT,
+          scope: 'context',
+          group,
+        },
+        handler: () => {
+          propsRef.current.nextPage();
+        },
+      },
+      {
+        def: {
+          id: 'canvas:presentation.nextPageSpace',
+          keys: 'Space',
+          label: shortcutHelp.NEXT,
+          scope: 'context',
+          group,
+        },
+        handler: () => {
+          propsRef.current.nextPage();
+        },
+      },
+      {
+        def: {
+          id: 'canvas:presentation.nextPageRight',
+          keys: 'ArrowRight',
+          label: shortcutHelp.NEXT,
+          scope: 'context',
+          group,
+        },
+        handler: () => {
+          propsRef.current.nextPage();
+        },
+      },
+      {
+        def: {
+          id: 'canvas:presentation.fullscreen',
+          keys: 'Alt+F',
+          label: shortcutHelp.FULLSCREEN,
+          scope: 'context',
+          group,
+        },
+        handler: () => {
+          propsRef.current.setFullscreen(!propsRef.current.isFullscreen);
+        },
+      },
+      {
+        def: {
+          id: 'canvas:presentation.fullscreenAlt',
+          keys: 'Alt+P',
+          label: shortcutHelp.FULLSCREEN,
+          scope: 'context',
+          group,
+        },
+        handler: () => {
+          propsRef.current.setFullscreen(!propsRef.current.isFullscreen);
+        },
+      },
+      {
+        def: {
+          id: 'canvas:presentation.exitFullscreen',
+          keys: 'Escape',
+          label: shortcutHelp.FULLSCREEN_EXIT,
+          scope: 'context',
+          group,
+        },
+        handler: () => {
+          propsRef.current.setFullscreen(!propsRef.current.isFullscreen);
+        },
+      },
+      {
+        def: {
+          id: 'canvas:presentation.pageCycleToggle',
+          keys: 'P',
+          label: shortcutHelp.PAGE_CYCLE_TOGGLE,
+          scope: 'context',
+          group,
+        },
+        handler: () => {
+          propsRef.current.toggleAutoplay();
+        },
+      },
+    ]);
+  }, [isFullscreen]);
 
-  nextPage = () => {
-    this.props.nextPage();
-  };
-
-  previousPage = () => {
-    this.props.previousPage();
-  };
-
-  // handle keypress events for presentation events
-  _keyMap: { [key: string]: (...args: any[]) => void } = {
-    REFRESH: () => {
-      forceReload();
-      this.props.fetchAllRenderables();
-    },
-    PREV: this.previousPage,
-    NEXT: this.nextPage,
-    FULLSCREEN: this._toggleFullscreen,
-    FULLSCREEN_EXIT: this._toggleFullscreen,
-    PAGE_CYCLE_TOGGLE: this.toggleAutoplay,
-  };
-
-  _keyHandler = (action: string, event: KeyboardEvent) => {
-    if (Object.keys(this._keyMap).indexOf(action) < 0) {
-      return;
-    }
-
-    if (
-      !isTextInput(event.target as HTMLInputElement) &&
-      typeof this._keyMap[action] === 'function'
-    ) {
-      event.preventDefault();
-      this._keyMap[action]();
-    }
-  };
-
-  render() {
-    const { children, isFullscreen } = this.props;
-
-    return (
-      <span>
-        {isFullscreen && (
-          <Shortcuts
-            name="PRESENTATION"
-            handler={this._keyHandler}
-            targetNodeSelector="body"
-            global
-            isolate
-          />
-        )}
-        {children({ isFullscreen, toggleFullscreen: this._toggleFullscreen })}
-      </span>
-    );
-  }
-}
+  return <span>{children({ isFullscreen, toggleFullscreen })}</span>;
+};

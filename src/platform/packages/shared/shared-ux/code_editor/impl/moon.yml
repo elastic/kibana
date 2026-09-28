@@ -18,6 +18,7 @@ project:
   sourceRoot: src/platform/packages/shared/shared-ux/code_editor/impl
 dependsOn:
   - '@kbn/monaco'
+  - '@kbn/core-hotkeys-browser'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/test-jest-helpers'

@@ -8,7 +8,7 @@
  */
 
 import React, { createContext, useContext, useEffect } from 'react';
-import type { NotificationsSetup, DocLinksStart, HttpSetup } from '@kbn/core/public';
+import type { NotificationsSetup, DocLinksStart, HttpSetup, CoreStart } from '@kbn/core/public';
 import type { RouteComponentProps } from 'react-router-dom';
 
 import type { ApplicationStart } from '@kbn/core/public';
@@ -36,6 +36,7 @@ interface ContextServices {
 }
 
 export interface ContextValue extends ConsoleStartServices {
+  hotkeys: CoreStart['hotkeys'];
   services: ContextServices;
   docLinkVersion: string;
   docLinks: DocLinksStart['links'];

@@ -56,6 +56,7 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/core-application-common",
     "@kbn/core-application-browser",
+    "@kbn/core-hotkeys-browser",
     "@kbn/core-ui-settings-server",
     "@kbn/core-ui-settings-common",
     "@kbn/utility-types",

@@ -34,6 +34,7 @@ export const SearchModalInternal = ({
   reportEvent,
   basePathUrl,
   onClose,
+  hotkeys,
 }: SearchModalProps) => {
   const { euiTheme } = useEuiTheme();
   const mediumAndUpBreakpoint = useEuiBreakpoint(['m', 'l', 'xl']);
@@ -53,6 +54,7 @@ export const SearchModalInternal = ({
     navigateToUrl,
     reportEvent,
     onResultSelect: onClose,
+    hotkeys,
   });
 
   useEffect(() => {

@@ -60,6 +60,7 @@ interface ConsoleDependencies extends ConsoleStartServices {
   theme$: Observable<CoreTheme>;
   trackUiMetric: MetricsTracker;
   application: ApplicationStart;
+  hotkeys: CoreStart['hotkeys'];
 }
 
 const loadDependencies = async (
@@ -87,6 +88,7 @@ const loadDependencies = async (
   autocompleteInfo.mapping.setup(http, settings);
   return {
     ...startServices,
+    hotkeys: core.hotkeys,
     autocompleteInfo,
     docLinks: links,
     docLinkVersion: DOC_LINK_VERSION,
@@ -150,6 +152,7 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
     settings,
     storage,
     trackUiMetric,
+    hotkeys,
     ...startServices
   } = dependencies;
   return (
@@ -157,6 +160,7 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
       <ServicesContextProvider
         value={{
           ...startServices,
+          hotkeys,
           docLinkVersion,
           docLinks,
           services: {

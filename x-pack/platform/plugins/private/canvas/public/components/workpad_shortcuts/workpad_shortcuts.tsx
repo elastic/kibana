@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { KeyboardEvent } from 'react';
-import React, { Component } from 'react';
-
-import isEqual from 'react-fast-compare';
-// @ts-expect-error no @types definition
-import { Shortcuts } from 'react-shortcuts';
+import type React from 'react';
+import { useEffect, useRef } from 'react';
 import { isTextInput } from '../../lib/is_text_input';
+import { coreServices } from '../../services/kibana_services';
+import { ShortcutStrings } from '../../../i18n/shortcuts';
+
+const shortcutHelp = ShortcutStrings.getShortcutHelp();
+const namespaceDisplayNames = ShortcutStrings.getNamespaceDisplayNames();
 
 export interface Props {
   /**
@@ -92,49 +93,223 @@ export interface Props {
   nudgeRight: () => void;
 }
 
-export class WorkpadShortcuts extends Component<Props> {
-  private _keyMap: { [key: string]: () => void } = {
-    CUT: this.props.cutNodes,
-    COPY: this.props.copyNodes,
-    PASTE: this.props.pasteNodes,
-    CLONE: this.props.cloneNodes,
-    DELETE: this.props.deleteNodes,
-    BRING_TO_FRONT: this.props.bringToFront,
-    BRING_FORWARD: this.props.bringForward,
-    SEND_BACKWARD: this.props.sendBackward,
-    SEND_TO_BACK: this.props.sendToBack,
-    GROUP: this.props.groupNodes,
-    UNGROUP: this.props.ungroupNodes,
-    SHIFT_UP: this.props.shiftUp,
-    SHIFT_DOWN: this.props.shiftDown,
-    SHIFT_LEFT: this.props.shiftLeft,
-    SHIFT_RIGHT: this.props.shiftRight,
-    NUDGE_UP: this.props.nudgeUp,
-    NUDGE_DOWN: this.props.nudgeDown,
-    NUDGE_LEFT: this.props.nudgeLeft,
-    NUDGE_RIGHT: this.props.nudgeRight,
-  };
+export const WorkpadShortcuts: React.FC<Props> = (props) => {
+  const propsRef = useRef(props);
+  propsRef.current = props;
 
-  public render() {
-    return (
-      <Shortcuts
-        name="ELEMENT"
-        handler={(action: string, event: KeyboardEvent) => {
-          if (
-            !isTextInput(event.target as HTMLInputElement) &&
-            typeof this._keyMap[action] === 'function'
-          ) {
-            event.preventDefault();
-            this._keyMap[action]();
-          }
-        }}
-        targetNodeSelector={`body`}
-        global
-      />
-    );
-  }
+  useEffect(() => {
+    const group = namespaceDisplayNames.ELEMENT;
+    return coreServices.hotkeys.forApp('canvas').registerMany([
+      {
+        def: { id: 'canvas:element.cut', keys: 'Mod+X', label: shortcutHelp.CUT, group },
+        handler: (event) => {
+          if (isTextInput(event.target as HTMLInputElement)) return;
+          event.preventDefault();
+          propsRef.current.cutNodes();
+        },
+      },
+      {
+        def: { id: 'canvas:element.copy', keys: 'Mod+C', label: shortcutHelp.COPY, group },
+        handler: (event) => {
+          if (isTextInput(event.target as HTMLInputElement)) return;
+          event.preventDefault();
+          propsRef.current.copyNodes();
+        },
+      },
+      {
+        def: { id: 'canvas:element.paste', keys: 'Mod+V', label: shortcutHelp.PASTE, group },
+        handler: (event) => {
+          if (isTextInput(event.target as HTMLInputElement)) return;
+          event.preventDefault();
+          propsRef.current.pasteNodes();
+        },
+      },
+      {
+        def: { id: 'canvas:element.clone', keys: 'Mod+D', label: shortcutHelp.CLONE, group },
+        handler: (event) => {
+          if (isTextInput(event.target as HTMLInputElement)) return;
+          event.preventDefault();
+          propsRef.current.cloneNodes();
+        },
+      },
+      {
+        def: { id: 'canvas:element.delete', keys: 'Delete', label: shortcutHelp.DELETE, group },
+        handler: (event) => {
+          event.preventDefault();
+          propsRef.current.deleteNodes();
+        },
+      },
+      {
+        def: {
+          id: 'canvas:element.deleteAlt',
+          keys: 'Backspace',
+          label: shortcutHelp.DELETE,
+          group,
+        },
+        handler: (event) => {
+          event.preventDefault();
+          propsRef.current.deleteNodes();
+        },
+      },
+      {
+        def: {
+          id: 'canvas:element.bringForward',
+          keys: 'Mod+ArrowUp',
+          label: shortcutHelp.BRING_FORWARD,
+          group,
+        },
+        handler: (event) => {
+          if (isTextInput(event.target as HTMLInputElement)) return;
+          event.preventDefault();
+          propsRef.current.bringForward();
+        },
+      },
+      {
+        def: {
+          id: 'canvas:element.bringToFront',
+          keys: 'Mod+Shift+ArrowUp',
+          label: shortcutHelp.BRING_TO_FRONT,
+          group,
+        },
+        handler: (event) => {
+          if (isTextInput(event.target as HTMLInputElement)) return;
+          event.preventDefault();
+          propsRef.current.bringToFront();
+        },
+      },
+      {
+        def: {
+          id: 'canvas:element.sendBackward',
+          keys: 'Mod+ArrowDown',
+          label: shortcutHelp.SEND_BACKWARD,
+          group,
+        },
+        handler: (event) => {
+          if (isTextInput(event.target as HTMLInputElement)) return;
+          event.preventDefault();
+          propsRef.current.sendBackward();
+        },
+      },
+      {
+        def: {
+          id: 'canvas:element.sendToBack',
+          keys: 'Mod+Shift+ArrowDown',
+          label: shortcutHelp.SEND_TO_BACK,
+          group,
+        },
+        handler: (event) => {
+          if (isTextInput(event.target as HTMLInputElement)) return;
+          event.preventDefault();
+          propsRef.current.sendToBack();
+        },
+      },
+      {
+        def: { id: 'canvas:element.group', keys: 'G', label: shortcutHelp.GROUP, group },
+        handler: (event) => {
+          event.preventDefault();
+          propsRef.current.groupNodes();
+        },
+      },
+      {
+        def: { id: 'canvas:element.ungroup', keys: 'U', label: shortcutHelp.UNGROUP, group },
+        handler: (event) => {
+          event.preventDefault();
+          propsRef.current.ungroupNodes();
+        },
+      },
+      {
+        def: { id: 'canvas:element.shiftUp', keys: 'ArrowUp', label: shortcutHelp.SHIFT_UP, group },
+        handler: (event) => {
+          event.preventDefault();
+          propsRef.current.shiftUp();
+        },
+      },
+      {
+        def: {
+          id: 'canvas:element.shiftDown',
+          keys: 'ArrowDown',
+          label: shortcutHelp.SHIFT_DOWN,
+          group,
+        },
+        handler: (event) => {
+          event.preventDefault();
+          propsRef.current.shiftDown();
+        },
+      },
+      {
+        def: {
+          id: 'canvas:element.shiftLeft',
+          keys: 'ArrowLeft',
+          label: shortcutHelp.SHIFT_LEFT,
+          group,
+        },
+        handler: (event) => {
+          event.preventDefault();
+          propsRef.current.shiftLeft();
+        },
+      },
+      {
+        def: {
+          id: 'canvas:element.shiftRight',
+          keys: 'ArrowRight',
+          label: shortcutHelp.SHIFT_RIGHT,
+          group,
+        },
+        handler: (event) => {
+          event.preventDefault();
+          propsRef.current.shiftRight();
+        },
+      },
+      {
+        def: {
+          id: 'canvas:element.nudgeUp',
+          keys: 'Shift+ArrowUp',
+          label: shortcutHelp.NUDGE_UP,
+          group,
+        },
+        handler: (event) => {
+          event.preventDefault();
+          propsRef.current.nudgeUp();
+        },
+      },
+      {
+        def: {
+          id: 'canvas:element.nudgeDown',
+          keys: 'Shift+ArrowDown',
+          label: shortcutHelp.NUDGE_DOWN,
+          group,
+        },
+        handler: (event) => {
+          event.preventDefault();
+          propsRef.current.nudgeDown();
+        },
+      },
+      {
+        def: {
+          id: 'canvas:element.nudgeLeft',
+          keys: 'Shift+ArrowLeft',
+          label: shortcutHelp.NUDGE_LEFT,
+          group,
+        },
+        handler: (event) => {
+          event.preventDefault();
+          propsRef.current.nudgeLeft();
+        },
+      },
+      {
+        def: {
+          id: 'canvas:element.nudgeRight',
+          keys: 'Shift+ArrowRight',
+          label: shortcutHelp.NUDGE_RIGHT,
+          group,
+        },
+        handler: (event) => {
+          event.preventDefault();
+          propsRef.current.nudgeRight();
+        },
+      },
+    ]);
+  }, []);
 
-  public shouldComponentUpdate(nextProps: Props) {
-    return !isEqual(nextProps, this.props);
-  }
-}
+  return null;
+};

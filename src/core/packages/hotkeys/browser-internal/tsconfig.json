@@ -1,0 +1,21 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node"]
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/core-hotkeys-browser",
+    "@kbn/i18n",
+    "@kbn/core-chrome-sidebar",
+    "@kbn/use-observable",
+    "@kbn/core-chrome-browser-mocks",
+    "@kbn/core-application-browser-mocks",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/zod",
+    "@kbn/core-chrome-sidebar-components"
+  ],
+  "exclude": ["target/**/*"]
+}

@@ -274,6 +274,22 @@ export const useSearchState = ({
     [reportEvent, navigateToUrl, searchValue]
   );
 
+  // TODO:Eyo -- Rework in this file has displaced the registration site, will look into this later.
+  // useEffect(() => {
+  //   const handle = hotkeys.register(
+  //     {
+  //       id: 'platform:globalSearch.open',
+  //       keys: 'Mod+/',
+  //       scope: 'global',
+  //       group: 'Actions',
+  //       label: i18nStrings.keyboardShortcutLabel,
+  //       description: i18nStrings.keyboardShortcutDescription,
+  //     },
+  //     onShortcut
+  //   );
+  //   return handle.unregister;
+  // }, [hotkeys, onShortcut]);
+
   return {
     searchValue,
     setSearchValue,

@@ -18,6 +18,7 @@
     "@kbn/core-http-browser",
     "@kbn/core-fatal-errors-browser",
     "@kbn/core-ui-settings-browser",
+    "@kbn/core-hotkeys-browser",
     "@kbn/core-notifications-browser",
     "@kbn/core-application-browser",
     "@kbn/core-doc-links-browser",

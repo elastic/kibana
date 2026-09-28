@@ -110,6 +110,7 @@ export class HomePublicPlugin
           addDataService: this.addDataService,
           featureCatalogue: this.featuresCatalogueRegistry,
           welcomeService: this.welcomeService,
+          hotkeys: coreStart.hotkeys,
           cloud,
           cloudStart,
           overlays: coreStart.overlays,

@@ -76,17 +76,22 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
   }, []);
 
   useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      const hasModifier = isMac ? event.metaKey : event.ctrlKey;
-      if (hasModifier && (event.code === 'Semicolon' || event.key === ';')) {
+    const handle = coreStart.hotkeys.register(
+      {
+        id: 'aiAssistantManagement:openModal',
+        keys: 'Mod+;',
+        scope: 'global',
+        label: i18n.translate('aiAssistantManagementSelection.navControl.openModalShortcutLabel', {
+          defaultMessage: 'Open AI Assistant',
+        }),
+      },
+      (event) => {
         event.preventDefault();
         setModalOpen(true);
       }
-    };
-
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, []);
+    );
+    return handle.unregister;
+  }, [coreStart.hotkeys]);
 
   const modalTitleId = useGeneratedHtmlId({ prefix: 'aiAssistantModalTitle' });
 

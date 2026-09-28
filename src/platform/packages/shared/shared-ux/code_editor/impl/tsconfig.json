@@ -19,6 +19,7 @@
   ],
   "kbn_references": [
     "@kbn/monaco",
+    "@kbn/core-hotkeys-browser",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",

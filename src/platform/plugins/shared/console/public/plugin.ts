@@ -116,6 +116,7 @@ export class ConsoleUIPlugin
             autocompleteInfo: this.autocompleteInfo,
             isDevMode: this.ctx.env.mode.dev,
             defaultEditorContent: this.defaultEditorContent,
+            hotkeys: core.hotkeys,
           });
         },
       });

@@ -34,6 +34,7 @@
     "@kbn/core-di-mocks",
     "@kbn/core-user-storage-browser-mocks",
     "@kbn/lazy-object",
+    "@kbn/core-hotkeys-browser-mocks",
   ],
   "exclude": [
     "target/**/*",

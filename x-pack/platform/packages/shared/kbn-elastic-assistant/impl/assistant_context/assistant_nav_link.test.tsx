@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { hotkeysServiceMock } from '@kbn/core-hotkeys-browser-mocks';
 import { AssistantNavLink } from './assistant_nav_link';
 import { useAssistantContext } from '.';
 
@@ -27,6 +28,8 @@ jest.mock('.', () => {
   };
 });
 
+const mockHotkeys = hotkeysServiceMock.createStartContract();
+
 describe('AssistantNavLink', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -38,7 +41,7 @@ describe('AssistantNavLink', () => {
   it('should render the header link text', () => {
     const { queryByText, queryByTestId } = render(
       <>
-        <AssistantNavLink />
+        <AssistantNavLink hotkeys={mockHotkeys} />
       </>
     );
     expect(queryByTestId('assistantNavLink')).toBeInTheDocument();
@@ -55,7 +58,7 @@ describe('AssistantNavLink', () => {
 
     const { queryByText, queryByTestId } = render(
       <>
-        <AssistantNavLink />
+        <AssistantNavLink hotkeys={mockHotkeys} />
       </>
     );
     expect(queryByTestId('assistantNavLink')).not.toBeInTheDocument();
@@ -65,7 +68,7 @@ describe('AssistantNavLink', () => {
   it('should call the assistant overlay to show on click', () => {
     const { queryByTestId } = render(
       <>
-        <AssistantNavLink />
+        <AssistantNavLink hotkeys={mockHotkeys} />
       </>
     );
     queryByTestId('assistantNavLink')?.click();

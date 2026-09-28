@@ -12,14 +12,17 @@ import React, { useCallback } from 'react';
 import type { Observable } from 'rxjs';
 import type { DeveloperToolbarItemProps, DeveloperToolbarProps } from '@kbn/developer-toolbar';
 import { DeveloperToolbar, DeveloperToolbarItem } from '@kbn/developer-toolbar';
+import type { HotkeysStart } from '@kbn/core-hotkeys-browser';
 import useObservable from 'react-use/lib/useObservable';
 
 export const Toolbar = ({
   items$,
   envInfo,
+  hotkeys,
 }: {
   items$: Observable<DeveloperToolbarItemProps[]>;
   envInfo: DeveloperToolbarProps['envInfo'];
+  hotkeys: HotkeysStart;
 }) => {
   const updateLayout = useLayoutUpdate();
   const registeredItems = useObservable(items$) || [];
@@ -35,7 +38,7 @@ export const Toolbar = ({
 
   return (
     <>
-      <DeveloperToolbar envInfo={envInfo} onHeightChange={onHeightChange} />
+      <DeveloperToolbar envInfo={envInfo} onHeightChange={onHeightChange} hotkeys={hotkeys} />
       {registeredItems.map((item: DeveloperToolbarItemProps) => (
         <DeveloperToolbarItem key={item.id} id={item.id} priority={item.priority}>
           {item.children}

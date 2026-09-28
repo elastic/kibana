@@ -49,6 +49,7 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/ui-chrome-layout'
   - '@kbn/app-header'
+  - '@kbn/core-hotkeys-browser-mocks'
 tags:
   - shared-browser
   - package
