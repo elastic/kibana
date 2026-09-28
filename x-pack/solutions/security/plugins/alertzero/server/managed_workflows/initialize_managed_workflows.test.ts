@@ -246,6 +246,37 @@ describe('initializeManagedWorkflows', () => {
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('analysisWindowDays'));
     });
 
+    it('fills extras but does not persist a filled scheduleInterval, and warns', async () => {
+      const { client, workflowsExtensions, logger } = createDependencies();
+      const stored = {
+        settingsVersion: 1,
+        autonomyLevel: 'manual',
+        // scheduleInterval intentionally absent — the case this guard exists for.
+      };
+      client.listInstalledWorkflowStates.mockResolvedValue([
+        {
+          workflowId: `${RULE_TUNING_ID}-default`,
+          spaceId: 'default',
+          definitionId: RULE_TUNING_ID,
+          templateValues: stored,
+          documentVersion: 9,
+        },
+      ]);
+
+      await initializeManagedWorkflows({ workflowsExtensions, logger });
+
+      expect(client.install).toHaveBeenCalledWith(RULE_TUNING_ID, {
+        workflowId: `${RULE_TUNING_ID}-default`,
+        spaceId: 'default',
+        values: { ...stored, extras: RULE_TUNING_DEFAULT_EXTRAS },
+      });
+      const [, installedOptions] = client.install.mock.calls.find(([id]) => id === RULE_TUNING_ID)!;
+      expect((installedOptions as { values: Record<string, unknown> }).values).not.toHaveProperty(
+        'scheduleInterval'
+      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('scheduleInterval'));
+    });
+
     it('logs a warning when listInstalledWorkflowStates throws', async () => {
       const { client, workflowsExtensions, logger } = createDependencies();
       const ensureAgentForSpace = jest.fn(async () => undefined);
