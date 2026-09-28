@@ -1697,6 +1697,38 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
             },
           },
         },
+        options: {
+          oasOperationObject: () => ({
+            responses: {
+              200: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      successResponse: {
+                        value: {
+                          actionId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              400: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      badRequestResponse: {
+                        value: {
+                          message: 'Bad Request',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        },
       },
       restartAgentHandler
     );
@@ -1735,6 +1767,38 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
               body: genericErrorResponse,
             },
           },
+        },
+        options: {
+          oasOperationObject: () => ({
+            responses: {
+              200: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      successResponse: {
+                        value: {
+                          actionId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              400: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      badRequestResponse: {
+                        value: {
+                          message: 'Bad Request',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
         },
       },
       bulkRestartAgentsHandler
