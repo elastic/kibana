@@ -425,31 +425,39 @@ const readSidRuleWatermark = async (
   return rules?.[RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE]?.lastProcessedTimestamp;
 };
 
+const watermarkCovers = (watermark: string | null | undefined, firstSeen: string): boolean =>
+  typeof watermark === 'string' && Date.parse(watermark) >= Date.parse(firstSeen);
+
 /**
- * Fails if the SID matcher has not run, so negative asserts are not vacuous.
+ * Fails unless this call's SID matcher run advanced the watermark to the
+ * control entity's first_seen, so negative asserts are not vacuous.
  */
 export const assertSidRuleWatermarked = async (
   apiClient: ForceLogExtractionApiClient,
   headers: Record<string, string>,
   esClient: EsClient
 ): Promise<void> => {
+  const firstSeen = new Date().toISOString();
   await seedUserEntity(esClient, {
     entityId: 'sid-rule-watermark-control',
     namespace: 'active_directory',
     email: 'sid-rule-watermark-control@sid.example',
     userId: 'S-1-5-21-9-8-7-6501',
+    timestamp: firstSeen,
   });
 
-  if (typeof (await readSidRuleWatermark(apiClient, headers)) !== 'string') {
+  await triggerMaintainerRun(apiClient, headers, 'automated-resolution', { sync: true });
+  let watermark = await readSidRuleWatermark(apiClient, headers);
+  if (!watermarkCovers(watermark, firstSeen)) {
     await triggerMaintainerRun(apiClient, headers, 'automated-resolution', { sync: true });
+    watermark = await readSidRuleWatermark(apiClient, headers);
   }
 
-  const watermark = await readSidRuleWatermark(apiClient, headers);
-  if (typeof watermark !== 'string') {
+  if (!watermarkCovers(watermark, firstSeen)) {
     throw new Error(
       `windows_sid_bridge lastProcessedTimestamp is ${JSON.stringify(
         watermark
-      )} — the SID matcher did not run. Negative asserts would be vacuous.`
+      )} — expected it at or after the control first_seen ${firstSeen}. Negative asserts would be vacuous.`
     );
   }
 };
