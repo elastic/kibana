@@ -24,6 +24,7 @@ export type { NewPackagePolicy, KibanaSavedObjectType } from './types';
 export { SetupTechnology } from './types';
 export type {
   CloudConnector,
+  CloudConnectorIacState,
   CloudConnectorListOptions,
   CreateCloudConnectorRequest,
   CloudConnectorVars,
@@ -131,8 +132,48 @@ export const LazyPackageCard = lazy(() =>
 export { useGetDataStreams } from './hooks/use_request/data_stream';
 export { useGetPackagesQuery, useGetPackageInfoByKeyQuery } from './hooks/use_request/epm';
 export { useGetSettingsQuery } from './hooks/use_request/settings';
-export { sendCreateAgentlessPolicy } from './hooks/use_request/agentless_policy';
-export { sendGetPackageInfoByKey } from './hooks/use_request/epm';
+export {
+  sendCreateAgentlessPolicy,
+  sendUpdateAgentlessPolicy,
+  sendDeleteAgentlessPolicy,
+  sendGetAgentlessPolicy,
+} from './hooks/use_request/agentless_policy';
+export {
+  sendUpdateCloudConnector,
+  sendVerifyCloudConnectorIacKey,
+} from './hooks/use_request/cloud_connector';
+export type {
+  IacRenderedTemplate,
+  IacTemplateLaunchedFor,
+} from './components/cloud_connector/components/iac_key_check';
+export {
+  sendCreateCloudOnboardingDeployment,
+  sendGetCloudOnboardingDeployment,
+  sendUpdateCloudOnboardingDeployment,
+} from './hooks/use_request/cloud_onboarding_deployment';
+export type {
+  CloudOnboardingDeploymentAuthMethod,
+  DeploymentMethod,
+} from '../common/types/models/cloud_onboarding_deployment';
+export type {
+  CreateCloudOnboardingDeploymentRequest,
+  UpdateCloudOnboardingDeploymentRequest,
+} from '../common/types/rest_spec/cloud_onboarding_deployment';
+export { sendGetPackageInfoByKey, sendGetPackageInfoByKeyForRq } from './hooks/use_request/epm';
+export {
+  sendUpdatePackagePolicy,
+  sendDeletePackagePolicy,
+  sendGetOnePackagePolicy,
+} from './hooks/use_request/package_policy';
+export { sendRenderIacTemplate } from './hooks/use_request/iac_provisioner';
+export { useIacProvisioner } from './hooks/use_iac_provisioner';
+export type {
+  IacPolicyTemplateSelection,
+  RenderIacTemplateIntegration,
+  RenderIacTemplateRequest,
+  RenderIacTemplateResponse,
+} from '../common/types/rest_spec/iac_provisioner';
+export { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../common/types/rest_spec/iac_provisioner';
 export { useLink } from './hooks/use_link';
 export { NamespaceComboBox } from './components/namespace_combo_box';
 
@@ -146,6 +187,9 @@ export type { CloudConnectorSetupProps } from './components/cloud_connector';
 export { CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION } from './components/cloud_connector/constants';
 
 // AWS Connect Setup - auth method picker (Identity Federation + Static keys + Temporary keys) for external plugins
+// TODO: LazyAwsConnectSetup appears to have no active external callers. Consider consolidating
+// AwsAuthTypeSelector with ingest_hub's CredentialMethodSelector in a follow-up cleanup.
+// Track: https://github.com/elastic/ingest-dev/issues/9576
 export const LazyAwsConnectSetup = lazy(() =>
   import('./components/cloud_connector').then((module) => ({
     default: module.AwsConnectSetup,
@@ -182,3 +226,82 @@ export const LazyAwsIdentityFederationSetup = lazy(() =>
 export type { AwsIdentityFederationSetupProps } from './components/cloud_connector/aws_connect_setup/aws_identity_federation_setup';
 
 export { getAnyCloudConnectorIacTemplateUrl } from './components/cloud_connector/utils';
+
+// KibanaVersionContext — must be provided by any plugin that renders Fleet components
+// that call useKibanaVersion() (e.g. AgentEnrollmentFlyout → installation_message.tsx).
+// Without a KibanaVersionContext.Provider ancestor the hook throws by design.
+// See: public/hooks/use_kibana_version.ts
+export { KibanaVersionContext } from './hooks/use_kibana_version';
+
+// FlyoutContextProvider — required by AgentEnrollmentFlyout → EnrollmentRecommendation →
+// useFlyoutContext(). The hook throws if the context is absent. Add this provider alongside
+// FleetStatusProvider and KibanaVersionContext in any host app that renders the flyout.
+// See: public/hooks/use_flyout_context.tsx
+export { FlyoutContextProvider } from './hooks/use_flyout_context';
+
+// AgentEnrollmentFlyout — ingest_hub is the first plugin to render this outside Fleet.
+// Justification: ~1500 lines of platform-tab / enroll-command / root-privileges /
+// confirmation logic that must stay bit-identical; duplicating it guarantees drift.
+// Two providers MUST be present in the host app for this to render without throwing:
+//   1. authz: deps.fleet.authz  added to KibanaContextProvider services
+//   2. <KibanaVersionContext.Provider value={kibanaVersion}>
+// See plan for ingest-dev#9079 for full provider wiring details.
+export const LazyAgentEnrollmentFlyout = lazy(() =>
+  import('./components/agent_enrollment_flyout').then((m) => ({
+    default: m.AgentEnrollmentFlyout,
+  }))
+);
+// Narrow public surface — avoids TS4023 from unexported types in the full FlyOutProps.
+export interface AgentEnrollmentFlyoutProps {
+  onClose: () => void;
+  agentPolicy?: import('./types').AgentPolicy;
+  selectedAgentPolicies?: Array<import('./types').AgentPolicy>;
+  defaultMode?: 'managed' | 'standalone' | 'kubernetes';
+  isIntegrationFlow?: boolean;
+  hideIncomingDataStep?: boolean;
+  onAgentPolicyCreated?: (policy: import('./types').AgentPolicy) => void;
+  defaultAgentPolicyName?: string;
+  forceCreatePolicy?: boolean;
+}
+// AgentPolicy is required by AgentEnrollmentFlyoutProps — type-only, zero bundle cost.
+export type { AgentPolicy, NewAgentPolicy } from './types';
+
+// Agent policy integration form and validation — used by ingest_hub to render the policy config step.
+// Lazy-loaded to avoid pulling Fleet's applications/ subtree into the eager page-load bundle.
+export const LazyAgentPolicyIntegrationForm = lazy(() =>
+  import('./applications/fleet/sections/agent_policy/components/agent_policy_integration').then(
+    (m) => ({ default: m.AgentPolicyIntegrationForm })
+  )
+);
+export { agentPolicyFormValidation } from './applications/fleet/sections/agent_policy/components/agent_policy_validation';
+export type { ValidationResults } from './applications/fleet/sections/agent_policy/components/agent_policy_validation';
+
+// AWS Temporary Keys Form — standalone for cross-plugin use (parallel to LazyAwsStaticKeysForm)
+export const LazyAwsTemporaryKeysForm = lazy(() =>
+  import('./components/cloud_connector/aws_connect_setup/aws_temporary_keys_form').then(
+    (module) => ({ default: module.AwsTemporaryKeysForm })
+  )
+);
+export type { AwsTemporaryKeysFormProps } from './components/cloud_connector/aws_connect_setup/aws_temporary_keys_form';
+
+// Agent policies query — used by the agent-based policy selector in ingest_hub
+export { useGetAgentPoliciesQuery } from './hooks/use_request/agent_policy';
+
+// Imperative agent policies fetcher — used to resolve the next available policy name
+export { sendGetAgentPolicies } from './hooks/use_request/agent_policy';
+
+// Agent status — used by step 4 agent count summary field
+export { useGetAgentStatus, useGetAgentStatusQuery } from './hooks/use_request/agents';
+export { incrementPolicyName } from './services/increment_policy_name';
+
+// Enrollment API keys query — used by step 4 enrollment token summary field
+export { useGetEnrollmentAPIKeysQuery } from './hooks/use_request/enrollment_api_keys';
+
+// Combined agent-policy + package-policies creation — one transactional server-side call.
+// IMPORTANT: this route is registered at API_VERSIONS.public.v1 ('2023-10-31') despite the
+// /internal/ URL path. Do NOT change to internal.v1 ('1') — it returns 400 Unsupported version.
+// See: fleet/server/routes/agent_policy/index.ts ~line 308.
+export { sendCreateAgentPolicyWithPackagePolicies } from './hooks/use_request/agent_policy';
+
+// Package policy creation — used by the existing-agent-policy path in ingest_hub
+export { sendCreatePackagePolicyForRq as sendCreatePackagePolicy } from './hooks/use_request/package_policy';

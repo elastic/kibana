@@ -166,30 +166,11 @@ describe('HomePage', () => {
   });
 
   describe('the vectors stat', () => {
-    it('is shown to a caller that can monitor every index', () => {
-      render(<HomePage />);
-
-      expect(screen.getByTestId('homePageDataCard-vectors')).toBeInTheDocument();
-    });
-
-    it('is hidden from a caller that cannot monitor every index', () => {
-      mockServices({ canMonitorAllIndices: false });
-
+    it('is hidden while Elasticsearch cannot report dense vector counts on stateless', () => {
       render(<HomePage />);
 
       expect(screen.queryByTestId('homePageDataCard-vectors')).not.toBeInTheDocument();
       expect(screen.getByTestId('homePageDataCard-totalIndices')).toBeInTheDocument();
-    });
-
-    it('is still shown when the caller may see the count but it could not be computed', () => {
-      mockUseDeploymentStats.mockReturnValue({
-        stats: { ...stats, vectorCount: null },
-        isLoading: false,
-      });
-
-      render(<HomePage />);
-
-      expect(screen.getByTestId('homePageDataCard-vectors')).toBeInTheDocument();
     });
   });
 

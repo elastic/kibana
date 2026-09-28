@@ -279,19 +279,25 @@ describe('Create OAuth Client route', () => {
     expect(oauthMock.createClient).not.toHaveBeenCalled();
   });
 
-  it('returns 404 when the serverless project type has no UIAM mapping', async () => {
-    ({ routeHandler, oauthMock } = setup(mcpConfig, { serverlessProjectType: 'workplaceai' }));
-
+  it.each([
+    ['search', 'elasticsearch'],
+    ['observability', 'observability'],
+    ['security', 'security'],
+    ['vectordb', 'vectordb'],
+    ['workplaceai', 'workplaceai'],
+  ] as const)('maps %s to its UIAM project type', async (solution, projectType) => {
+    ({ routeHandler, oauthMock } = setup(mcpConfig, { serverlessProjectType: solution }));
+    oauthMock.createClient.mockResolvedValue({ id: 'client-id', resource: RESOURCE });
     const response = await routeHandler(
       getMockContext(),
-      httpServerMock.createKibanaRequest({
-        body: { client_name: 'Test' },
-      }),
+      httpServerMock.createKibanaRequest({ body: { client_name: 'Test' } }),
       kibanaResponseFactory
     );
-
-    expect(response.status).toBe(404);
-    expect(oauthMock.createClient).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(oauthMock.createClient).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ project_type: projectType })
+    );
   });
 
   it('returns 404 when OAuth is not available', async () => {

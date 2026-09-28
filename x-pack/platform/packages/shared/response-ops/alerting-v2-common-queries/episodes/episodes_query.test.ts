@@ -42,13 +42,13 @@ describe('buildEpisodesBaseQuery', () => {
     expect(queryString).toContain('WHERE @timestamp == last_timestamp');
   });
 
-  it('computes last_snooze_action and snooze_expiry grouped by group_hash', () => {
+  it('computes last_snooze_action and snoozed_until grouped by group_hash', () => {
     const esql = buildEpisodesBaseQuery(SPACE_ID).print('basic');
     expect(esql).toMatch(
       /last_snooze_action\s*=\s*LAST\(action_type,\s*@timestamp\)\s*WHERE\s*\(action_type\s*IN\s*\("snooze",\s*"unsnooze"\)\)/
     );
     expect(esql).toMatch(
-      /snooze_expiry\s*=\s*LAST\(expiry,\s*@timestamp\)\s*WHERE\s*action_type\s*==\s*"snooze"/
+      /snoozed_until\s*=\s*LAST\(expiry,\s*@timestamp\)\s*WHERE\s*action_type\s*==\s*"snooze"/
     );
   });
 
@@ -76,6 +76,30 @@ describe('buildEpisodesBaseQuery', () => {
       /last_assignee_uid\s*=\s*LAST\(assignee_uid,\s*@timestamp\)\s*WHERE\s*action_type\s*==\s*"assign"/
     );
     expect(esql).toMatch(/BY\s*episode_id/);
+  });
+});
+
+describe('duration lower bound flag', () => {
+  it('computes the start event and the first series event in the aggregations', () => {
+    const queryString = buildEpisodesBaseQuery(SPACE_ID).print('basic');
+
+    expect(queryString).toContain(
+      'start_event_timestamp = MIN(@timestamp) WHERE `episode.status` == "pending" AND `episode.status_count` == 1'
+    );
+    expect(queryString).toContain(
+      'first_series_event_timestamp = MIN(@timestamp) WHERE type == "alert"'
+    );
+  });
+
+  it('flags episodes whose start was not seen, in the list query only', () => {
+    const listQuery = buildEpisodesQuery(SPACE_ID).print('basic');
+    const baseQuery = buildEpisodesBaseQuery(SPACE_ID).print('basic');
+
+    expect(listQuery).toContain(
+      'EVAL duration_is_lower_bound = ((start_event_timestamp IS NULL OR start_event_timestamp != first_timestamp) AND first_series_event_timestamp >= first_timestamp)'
+    );
+    expect(listQuery).toMatch(/KEEP .*duration_is_lower_bound/);
+    expect(baseQuery).not.toContain('duration_is_lower_bound');
   });
 });
 
@@ -144,7 +168,7 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).toContain('severity == "critical", 4');
     expect(queryString).toContain('severity == "info", 0');
     expect(queryString).toContain(', -1)');
-    expect(queryString).toContain('SORT _severity_sort DESC');
+    expect(queryString).toContain('SORT _severity_sort DESC, @timestamp DESC');
   });
 
   it('should filter on episode.status when a single status filter is set', () => {
@@ -353,6 +377,18 @@ describe('buildEpisodesQuery', () => {
     const queryString = query.print('basic');
 
     expect(queryString).toContain('WHERE (severity IN ("high")) OR severity IS NULL');
+  });
+
+  it('should exclude all v2 rows when only v1-only severity values are selected', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { severity: ['warning'] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE FALSE');
+    expect(queryString).not.toContain('severity IN');
   });
 
   it('should trim queryString before applying', () => {

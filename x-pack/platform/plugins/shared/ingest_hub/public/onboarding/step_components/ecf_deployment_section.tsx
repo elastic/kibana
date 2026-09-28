@@ -89,7 +89,7 @@ interface UseEcfDeploymentOpts {
 interface UseEcfDeploymentResult {
   /** True when at least one ECF template family is relevant to the selected services. */
   hasAnyEcf: boolean;
-  /** Service IDs handled by ECF — used by the parent to exclude them from agentless chips. */
+  /** Service IDs handled by ECF — used by the parent to exclude them from managed-integration chips. */
   ecfServiceIds: Set<string>;
   /** True when all relevant ECF template families have had their Launch button clicked. */
   isDone: boolean;

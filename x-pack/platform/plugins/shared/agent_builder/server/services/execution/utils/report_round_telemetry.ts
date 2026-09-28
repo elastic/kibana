@@ -9,12 +9,15 @@ import type { Logger } from '@kbn/core/server';
 import type { ModelProvider } from '@kbn/inference-common';
 import type {
   Conversation,
-  ConversationAction,
   ConversationRound,
   ConverseInput,
   RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, isEventsNativeVersion } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  executionTerminatedEventId,
+  isEventsNativeVersion,
+} from '@kbn/agent-builder-common';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents/prompts';
 import {
   AgentPromptType,
@@ -25,10 +28,7 @@ import {
 import type { AnalyticsService } from '../../../telemetry';
 import type { TrackingService } from '../../../telemetry/tracking_service';
 import type { MeteringService } from '../../metering';
-import {
-  executionTerminatedEventId,
-  roundExecutionCount,
-} from '../../conversation/client/rounds_to_events';
+import { nextResumeIndex } from '../../conversation/client/rounds_to_events';
 
 /** How a human resolved one prompt, as reported to telemetry. */
 export type PromptResponseOutcome =
@@ -136,13 +136,11 @@ export const buildExecutionTelemetry = ({
   event,
   conversation,
   nextInput,
-  action,
   logger,
 }: {
   event: RoundCompleteEvent;
   conversation: Conversation;
   nextInput?: ConverseInput;
-  action?: ConversationAction;
   logger?: Logger;
 }): ExecutionTelemetry => {
   const roundTotals = event.data.round;
@@ -159,12 +157,9 @@ export const buildExecutionTelemetry = ({
 
   const executionRound = followUpRound ?? roundTotals;
   const roundId = roundTotals.id;
-  const executionIndex = isResume ? roundExecutionCount(conversation.events ?? [], roundId) : 0;
+  const executionIndex = isResume ? nextResumeIndex(conversation, roundId) : 0;
 
-  const isReplacingRound = action === 'regenerate' || isResume;
-  const roundCount = isReplacingRound
-    ? conversation.rounds.length
-    : (conversation.rounds?.length ?? 0) + 1;
+  const roundCount = isResume ? conversation.rounds.length : (conversation.rounds?.length ?? 0) + 1;
 
   const promptResponses = isResume ? Object.values(nextInput?.prompts ?? {}) : [];
 
@@ -198,7 +193,6 @@ export const reportRoundTelemetry = ({
   event,
   conversation,
   nextInput,
-  action,
   agentId,
   executionId,
   modelProvider,
@@ -210,7 +204,6 @@ export const reportRoundTelemetry = ({
   event: RoundCompleteEvent;
   conversation: Conversation;
   nextInput?: ConverseInput;
-  action?: ConversationAction;
   agentId: string;
   executionId: string;
   modelProvider: ModelProvider;
@@ -220,7 +213,7 @@ export const reportRoundTelemetry = ({
   logger: Logger;
 }): void => {
   try {
-    const telemetry = buildExecutionTelemetry({ event, conversation, nextInput, action, logger });
+    const telemetry = buildExecutionTelemetry({ event, conversation, nextInput, logger });
     const { roundTotals, roundId, roundCount, executionIndex } = telemetry;
 
     // Billing is per turn, so exactly one record per round, emitted when the turn answers and

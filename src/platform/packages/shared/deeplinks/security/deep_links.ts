@@ -140,16 +140,16 @@ export enum SecurityPageName {
    * `alertZeroLink()` instead of `securityLink()`. `alerts` and `attacks` are reused from above — the page
    * name is the same concept, and the app prefix is what distinguishes the two links.
    */
-  alertZeroChats = 'chats',
-  alertZeroRecords = 'records',
   alertZeroThreatHunt = 'threat_hunt',
   alertZeroStreams = 'streams',
+  alertZeroEscalations = 'escalations',
   alertZeroWatches = 'watches',
   alertZeroWatchesWorkers = 'watches_workers',
   alertZeroWatchesSkills = 'watches_skills',
   alertZeroWatchFloor = 'watch_floor',
   alertZeroWatchOfficer = 'watch_officer',
-  alertZeroWatchDark = 'watch_dark',
+  alertZeroWatchHunt = 'watch_hunt',
   alertZeroWatchDeep = 'watch_deep',
   alertZeroWatchDetection = 'watch_detection',
+  alertZeroWatchForensics = 'watch_forensics',
 }

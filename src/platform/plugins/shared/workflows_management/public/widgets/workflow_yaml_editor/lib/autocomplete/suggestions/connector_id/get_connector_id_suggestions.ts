@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
+import { monaco } from '@kbn/monaco';
+import { ALL_CONNECTOR_IDS } from '@kbn/workflows';
 import { getConnectorIdSuggestionsItems } from './get_connector_id_suggestions_items';
 import {
   resolveConnectorIdStepType,
@@ -24,9 +27,9 @@ export function getConnectorIdSuggestions({
   yamlDocument,
   dynamicConnectorTypes,
 }: AutocompleteContext) {
+  const triggerConnectorType = resolveConnectorIdTriggerType(path, yamlDocument);
   const stepConnectorType =
-    resolveConnectorIdStepType(focusedStepInfo, path, focusedYamlPair) ??
-    resolveConnectorIdTriggerType(path, yamlDocument);
+    resolveConnectorIdStepType(focusedStepInfo, path, focusedYamlPair) ?? triggerConnectorType;
 
   if (
     !stepConnectorType ||
@@ -36,15 +39,43 @@ export function getConnectorIdSuggestions({
   ) {
     return [];
   }
-  // If the user has typed part of the connector-id, we replace from the start of the value to the end of the line
-  if (lineParseResult.fullKey !== '') {
-    const replaceRange = {
-      ...range,
-      startColumn: lineParseResult.valueStartIndex + 1,
-      endColumn: line.length + 1,
-    };
-    return getConnectorIdSuggestionsItems(stepConnectorType, replaceRange, dynamicConnectorTypes);
+  // If the user has typed part of the connector-id, replace from the value start to the line end.
+  const replacementRange =
+    lineParseResult.fullKey !== ''
+      ? {
+          ...range,
+          startColumn: lineParseResult.valueStartIndex + 1,
+          endColumn: line.length + 1,
+        }
+      : range;
+  const suggestions = getConnectorIdSuggestionsItems(
+    stepConnectorType,
+    replacementRange,
+    dynamicConnectorTypes
+  );
+
+  if (!triggerConnectorType) {
+    return suggestions;
   }
 
-  return getConnectorIdSuggestionsItems(stepConnectorType, range, dynamicConnectorTypes);
+  return [
+    {
+      label: i18n.translate('workflows.editor.autocomplete.allConnectorInstancesLabel', {
+        defaultMessage: 'All connectors of this type',
+      }),
+      kind: monaco.languages.CompletionItemKind.Value,
+      insertText: JSON.stringify(ALL_CONNECTOR_IDS),
+      range: replacementRange,
+      detail: triggerConnectorType,
+      documentation: i18n.translate(
+        'workflows.editor.autocomplete.allConnectorInstancesDocumentation',
+        {
+          defaultMessage:
+            'Starts the workflow for events from every connector instance of this type.',
+        }
+      ),
+      sortText: '0_all_connectors',
+    },
+    ...suggestions,
+  ];
 }

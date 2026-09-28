@@ -109,15 +109,17 @@ export const getEcfServiceConfigs = (
 
     // Gate each ARN on the enabled inputs so stale values from a previous transport
     // selection don't end up in the launch URL and misconfigure the ECF stack.
-    // Both vars are multi-value; split the comma-joined draft string into individual ARNs
-    // so each can be normalised independently (e.g. log-group `:*` suffix per ARN).
-    const splitArns = (raw: string | undefined): string[] =>
-      raw
+    // Both vars are multi-value; split the comma-joined draft string (or already-typed array
+    // after SO resume) into individual ARNs for per-ARN normalisation.
+    const splitArns = (raw: string | string[] | undefined): string[] => {
+      if (Array.isArray(raw)) return raw.map((s) => s.trim()).filter(Boolean);
+      return raw
         ? raw
             .split(',')
             .map((s) => s.trim())
             .filter(Boolean)
         : [];
+    };
 
     const bucketArns = enabledInputs.includes('aws-s3')
       ? splitArns(dsVars?.varsByInput?.['aws-s3']?.bucket_arn)
@@ -163,7 +165,7 @@ const normaliseLogGroupArn = (arn: string): string => (arn.endsWith(':*') ? arn 
  * `ElasticAPIKey` is intentionally NOT pre-filled: it is a sensitive credential that should
  * not appear in browser history or URL logs.  The user fills it in the AWS console.
  *
- * TODO: generate a dedicated Elastic API key server-side and pre-fill it (follow-up issue).
+ * TODO: generate a dedicated Elastic API key server-side and pre-fill it (ingest-dev#9519).
  *
  * @param ecfConfigs    ECF service configurations (from `getEcfServiceConfigs`).
  * @param region        AWS region for the CloudFormation stack (the global region from Step 2).

@@ -1430,7 +1430,7 @@ attach them to a conversation.
 |---|---|
 | **SML Type** | A category of content you expose (e.g. `visualization`, `dashboard`). You implement `SmlTypeDefinition`. |
 | **Crawler** | A Task Manager background task that periodically calls your `list()` and `getSmlEntry()` hooks, indexing content into system indices. Uses mark-and-sweep with `last_crawled_at` timestamps for efficient change detection. |
-| **SML Document** | A single indexed entry stored in the `.chat-sml-data` system index, containing title, content, permissions, and space information. |
+| **SML Document** | A single indexed entry stored in the `.ai-index-idx-elastic-index` system index (the Elastic AI index), containing title, content, permissions, and space information. |
 | **`sml_search` tool** | A built-in Agent Builder tool the AI uses to keyword-search SML documents. Results are filtered by the requesting user's space and permissions. |
 | **`sml_attach` tool** | A built-in Agent Builder tool the AI uses to convert SML search hits into conversation attachments. It accepts `entry_ids` from `sml_search`;  `entry_id` format is `attachment_type:origin_id:uuid`. |
 | **Origin ID** | The unique identifier for the source asset (typically a saved object ID). Used to link SML documents back to their source. |
@@ -1440,7 +1440,7 @@ attach them to a conversation.
 1. **Crawl**: The crawler runs on a configurable interval (default 10 min).
    For each registered SML type it calls `list()` to enumerate items, detects
    changes via timestamps, and calls `getSmlEntry()` for new/updated items.
-2. **Index**: Results are written to the `.chat-sml-data` system index.
+2. **Index**: Results are written to the `.ai-index-idx-elastic-index` system index.
    Crawler state (which items have been seen) is stored in a separate
    `.chat-sml-crawler-state` index.
 3. **Search**: When the AI agent calls `sml_search`, the SML service queries
@@ -1652,7 +1652,7 @@ The full implementation is ~130 lines and serves as the reference for new types.
 The chat streaming layer lives across two folders:
 
 - `public/application/context/streaming/` — the lifted provider, its context hook, the
-  send/regenerate and resume mutation hooks, the chat-events subscriber, and shared types.
+  send and resume mutation hooks, the chat-events subscriber, and shared types.
 - `public/application/hooks/` — the per-conversation convenience hook
   (`use_conversation_stream.ts`) and the "any stream active?" derived hook
   (`use_is_any_conversation_streaming.ts`). They live here because they compose
@@ -1776,4 +1776,3 @@ What this means in practice:
   flight when the user navigates away, a confirm dialog appears; on confirm,
   `cancelAllStreams()` aborts every controller in the map before the platform
   proceeds.
-

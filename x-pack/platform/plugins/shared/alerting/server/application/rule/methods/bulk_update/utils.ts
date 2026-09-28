@@ -17,11 +17,7 @@ import {
   getRuleNotifyWhenType,
 } from '../../../../lib';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
-import {
-  getMappedParams,
-  addMissingUiamKeyTagIfNeeded,
-  API_KEY_ATTRIBUTES_TO_STRIP,
-} from '../../../../rules_client/common';
+import { getMappedParams, API_KEY_ATTRIBUTES_TO_STRIP } from '../../../../rules_client/common';
 import type {
   BulkOperationError,
   NormalizedAlertActionWithGeneratedValues,
@@ -176,6 +172,7 @@ export const prepareUpdate = async <Params extends RuleParams>({
       shouldUpdateApiKey: originalRule.enabled,
       errorMessage: 'Error updating rule: could not create API key',
       apiKeyOwnership: { apiKeyCreatedByUser: originalRule.apiKeyCreatedByUser },
+      refresh: false,
     });
 
     const newKeys: ApiKeyEntry = {
@@ -187,21 +184,12 @@ export const prepareUpdate = async <Params extends RuleParams>({
       apiKeys.set(id, newKeys);
     }
 
-    const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
-      data.tags,
-      apiKeyAttributes.uiamApiKey,
-      context.isServerless,
-      context.shouldGrantUiam,
-      context.apiKeyType
-    );
-
     const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
 
     const updatedRuleAttributes = updateMetaAttributes(context, {
       ...omit(originalRule, API_KEY_ATTRIBUTES_TO_STRIP),
       ...omit(data, 'actions', 'systemActions', 'artifacts'),
       ...apiKeyAttributes,
-      tags: tagsWithUiamCheck,
       params: updatedParams as RawRule['params'],
       actions: actionsWithRefs,
       notifyWhen,

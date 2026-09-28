@@ -70,7 +70,7 @@ export const WithProp: Story = {
 
 ## Running Storybook
 
-Launch Storybook with `yarn storybook <plugin>`, or build a static site with `yarn storybook --site <plugin>`.
+Launch Storybook with `pnpm storybook <plugin>`, or build a static site with `pnpm storybook --site <plugin>`.
 
 ## Embeddable Stories
 
@@ -93,9 +93,9 @@ export const Basic: EmbeddableStoryObj<StoryArgs> = {
 Build inline docs assets from embeddable stories for external documentation systems, (e.g. `docs-builder`):
 
 ```sh
-yarn storybook_docs <plugin> --dist   # registry + inline assets + tarball
-yarn storybook_docs <plugin> --build  # registry + inline assets, no tarball
-yarn storybook_docs <plugin> --dev    # serve with CORS, watch sources, start docs-builder
+pnpm storybook_docs <plugin> --dist   # registry + inline assets + tarball
+pnpm storybook_docs <plugin> --build  # registry + inline assets, no tarball
+pnpm storybook_docs <plugin> --dev    # serve with CORS, watch sources, start docs-builder
 ```
 
 ### Output
@@ -121,7 +121,7 @@ When `--dev` finds a `docset.yml` colocated with the alias and `docs-builder` is
 Kibana's internal developer docs live in `docs-dev/` rather than beside the packages they document, so auto-detection finds nothing for aliases such as `kbn_ui`. Pass the docset explicitly:
 
 ```bash
-yarn storybook_docs kbn_ui --dev --docs-path docs-dev
+pnpm storybook_docs kbn_ui --dev --docs-path docs-dev
 ```
 
 Options for docs-builder integration:

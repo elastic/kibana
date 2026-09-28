@@ -18,6 +18,7 @@ import {
   createInternalHttpSelfClient,
   SELF_CALL_MTLS_ERROR,
   SELF_CALL_RECURSION_ERROR,
+  type SelfClientUiamAttestationGetter,
 } from './self_client';
 
 const originalFetch = global.fetch;
@@ -49,9 +50,10 @@ const createClient = ({
   target = 'auto',
   getHttpConfig = jest.fn().mockReturnValue({
     ssl: { enabled: false, requestCert: false },
-    selfHttp: { ssl: {} },
+    selfHttp: { ssl: { verificationMode: 'full' } },
   } as HttpConfig),
   serverProtocol = 'http',
+  getUiamAttestationGetter,
 }: {
   publicBaseUrl?: string | null;
   authHeaders?: Record<string, string>;
@@ -59,6 +61,7 @@ const createClient = ({
   target?: 'auto' | 'local';
   getHttpConfig?: jest.MockedFunction<() => HttpConfig>;
   serverProtocol?: 'http' | 'https';
+  getUiamAttestationGetter?: () => SelfClientUiamAttestationGetter | undefined;
 } = {}) => {
   const authRequestHeaders =
     suppliedAuthRequestHeaders ??
@@ -87,6 +90,7 @@ const createClient = ({
     kibanaVersion: '9.9.9',
     log,
     target,
+    getUiamAttestationGetter,
   });
 
   return { authRequestHeaders, getHttpConfig, log, self };
@@ -211,6 +215,11 @@ describe('InternalHttpSelfScopedClient', () => {
     await expect(
       scoped.fetch('/api/status', { headers: { authorization: 'Bearer attacker' } })
     ).rejects.toThrow('protected headers are not allowed');
+    await expect(
+      scoped.fetch('/api/status', {
+        headers: { 'x-kbn-uiam-internal-caller-attestation': 'forged' },
+      })
+    ).rejects.toThrow('protected headers are not allowed');
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
@@ -247,7 +256,7 @@ describe('InternalHttpSelfScopedClient', () => {
       () =>
         ({
           ssl: { enabled: requestCert, requestCert },
-          selfHttp: { ssl: {} },
+          selfHttp: { ssl: { verificationMode: 'full' } },
         } as HttpConfig)
     );
     const { self } = createClient({ getHttpConfig });
@@ -277,7 +286,7 @@ describe('InternalHttpSelfScopedClient', () => {
       () =>
         ({
           ssl: { enabled: true, requestCert: false, certificate: localCertificate },
-          selfHttp: { ssl: {} },
+          selfHttp: { ssl: { verificationMode: 'full' } },
         } as HttpConfig)
     );
     const local = createClient({
@@ -298,7 +307,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
     const publicConfig = jest.fn().mockReturnValue({
       ssl: { enabled: true, requestCert: false },
-      selfHttp: { ssl: { certificateAuthorities: ['public CA'] } },
+      selfHttp: { ssl: { verificationMode: 'full', certificateAuthorities: ['public CA'] } },
     } as HttpConfig);
     const publicTarget = createClient({ getHttpConfig: publicConfig });
 
@@ -419,5 +428,47 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(outboundRequest.headers.get('host')).toBeNull();
     expect(outboundRequest.headers.get('x-elastic-internal-origin')).toBeNull();
     expect(outboundRequest.headers.get('user-agent')).toBe('KibanaSelfHttpClient/9.9.9');
+  });
+
+  describe('UIAM attestation getter', () => {
+    it('sets the attestation header from the string the getter returns', async () => {
+      const getter = jest.fn().mockReturnValue('sig-123');
+      const { self } = createClient({ getUiamAttestationGetter: () => getter });
+      const request = createRequest();
+
+      await self.asScoped(request).fetch('/api/status');
+
+      const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+      expect(outboundRequest.headers.get('x-kbn-uiam-internal-caller-attestation')).toBe('sig-123');
+      expect(outboundRequest.headers.get('x-kbn-self-call')).toBe('true');
+      expect(getter).toHaveBeenCalledWith(request, 'test-auth-token');
+    });
+
+    it('leaves headers unchanged when the getter returns nothing', async () => {
+      const getter = jest.fn().mockReturnValue(undefined);
+      const { self } = createClient({ getUiamAttestationGetter: () => getter });
+
+      await self.asScoped(createRequest()).fetch('/api/status');
+
+      expect(getter).toHaveBeenCalledTimes(1);
+      const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+      expect(outboundRequest.headers.get('x-kbn-uiam-internal-caller-attestation')).toBeNull();
+      expect(outboundRequest.headers.get('x-kbn-self-call')).toBe('true');
+      expect(outboundRequest.headers.get('authorization')).toBe('test-auth-token');
+    });
+
+    it('does not set the attestation header when no getter is available', async () => {
+      const getUiamAttestationGetter = jest.fn().mockReturnValue(undefined);
+      const withGetter = createClient({ getUiamAttestationGetter });
+      await withGetter.self.asScoped(createRequest()).fetch('/api/status');
+      expect(getUiamAttestationGetter).toHaveBeenCalledTimes(1);
+      const requestWithGetter = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+      expect(requestWithGetter.headers.get('x-kbn-uiam-internal-caller-attestation')).toBeNull();
+
+      const withoutGetter = createClient();
+      await withoutGetter.self.asScoped(createRequest()).fetch('/api/status');
+      const requestWithoutGetter = (global.fetch as jest.Mock).mock.calls[1][0] as Request;
+      expect(requestWithoutGetter.headers.get('x-kbn-uiam-internal-caller-attestation')).toBeNull();
+    });
   });
 });

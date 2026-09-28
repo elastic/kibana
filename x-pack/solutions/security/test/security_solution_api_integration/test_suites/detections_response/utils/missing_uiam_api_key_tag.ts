@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { ALERT_RULE_TAGS } from '@kbn/rule-data-utils';
+
 /**
  * On MKI, rules created with an ES API key and no UIAM key get this tag appended by the alerting
  * framework (see https://github.com/elastic/kibana/pull/289195). It is not present locally/ESS, so
@@ -20,3 +23,16 @@ export const MISSING_UIAM_API_KEY_TAG = 'Missing Elastic Cloud API Key';
  */
 export const stripMissingUiamApiKeyTag = (tags: readonly string[] = []): string[] =>
   tags.filter((tag) => tag !== MISSING_UIAM_API_KEY_TAG);
+
+/**
+ * Returns a copy of an alert document with the "Missing Elastic Cloud API Key" tag removed from
+ * `kibana.alert.rule.tags`. Used by removeRandomValuedPropertiesFromAlert to keep tag expectations
+ * stable on MKI.
+ */
+export const stripMissingUiamApiKeyTagFromAlert = (alert: DetectionAlert): DetectionAlert => {
+  const tags = alert[ALERT_RULE_TAGS];
+  if (!Array.isArray(tags)) {
+    return alert;
+  }
+  return { ...alert, [ALERT_RULE_TAGS]: stripMissingUiamApiKeyTag(tags) };
+};

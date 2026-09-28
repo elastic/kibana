@@ -18,6 +18,11 @@ interface CreateIndexOptions {
   logger: Logger;
 }
 
+/** Scale to 0 replicas on single-node clusters so health can go green. */
+const INDEX_SETTINGS = {
+  auto_expand_replicas: '0-1',
+} as const;
+
 export const createIndexWithMappings = async ({
   esClient,
   indexName,
@@ -44,6 +49,7 @@ export const createIndexWithMappings = async ({
         esClient.indices.create({
           index: indexName,
           mappings,
+          settings: INDEX_SETTINGS,
         }),
       { logger }
     );
@@ -85,7 +91,20 @@ export const createOrUpdateIndex = async ({
         logger,
       });
     } else {
-      // Index exists, check if we need to update mappings
+      try {
+        await retryTransientEsErrors(
+          () =>
+            esClient.indices.putSettings({
+              index: indexName,
+              settings: INDEX_SETTINGS,
+            }),
+          { logger }
+        );
+        logger?.debug(`Updated settings for existing index ${indexName}`);
+      } catch (settingsError) {
+        logger?.warn(`Failed to update settings for index ${indexName}: ${settingsError.message}`);
+      }
+
       try {
         await retryTransientEsErrors(
           () =>

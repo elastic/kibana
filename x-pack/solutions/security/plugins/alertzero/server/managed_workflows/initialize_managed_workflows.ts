@@ -6,11 +6,17 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { ALERTZERO_RULE_WORKFLOW_IDS } from '@kbn/workflows/managed';
+import {
+  ALERTZERO_ACTION_WORKFLOW_IDS,
+  ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+  ALERTZERO_FORENSICS_WORKFLOW_IDS,
+  ALERTZERO_RULE_WORKFLOW_IDS,
+} from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { ALERTZERO_MANAGED_WORKFLOW_OWNER_ID } from '../../common/constants';
+import { applyMissingInstalledWorkerSettings } from './apply_missing_installed_worker_settings';
 
 export const initializeManagedWorkflows = async ({
   workflowsExtensions,
@@ -26,21 +32,33 @@ export const initializeManagedWorkflows = async ({
   );
   let canReconcile = true;
 
-  const ruleWorkflowInstalls = await Promise.allSettled(
-    ALERTZERO_RULE_WORKFLOW_IDS.map((id) =>
-      client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID })
-    )
+  // AlertZero action catalog entries install alongside the rule workflows:
+  // all are global and static.
+  const globalWorkflowIds = [
+    ...ALERTZERO_RULE_WORKFLOW_IDS,
+    ...ALERTZERO_ACTION_WORKFLOW_IDS,
+    ...ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+    ...ALERTZERO_FORENSICS_WORKFLOW_IDS,
+  ] as const;
+
+  const globalWorkflowInstalls = await Promise.allSettled(
+    globalWorkflowIds.map((id) => client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
   );
-  for (const [index, result] of ruleWorkflowInstalls.entries()) {
+  for (const [index, result] of globalWorkflowInstalls.entries()) {
     if (result.status === 'rejected') {
       canReconcile = false;
       logger.error(
-        `Failed to install managed AlertZero rule workflow "${
-          ALERTZERO_RULE_WORKFLOW_IDS[index]
-        }": ${result.reason instanceof Error ? result.reason.message : String(result.reason)}`
+        // Covers rule and action workflows, so this stays generic.
+        `Failed to install managed AlertZero workflow "${globalWorkflowIds[index]}": ${
+          result.reason instanceof Error ? result.reason.message : String(result.reason)
+        }`
       );
     }
   }
+
+  // Dynamic auto upgrade re-renders from stored template values. Fill missing defaults first so
+  // that upgrade persists them instead of keeping the old document.
+  await applyMissingInstalledWorkerSettings(client, logger);
 
   if (canReconcile) {
     try {

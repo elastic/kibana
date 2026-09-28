@@ -32,11 +32,12 @@ import {
   DEFAULT_RECOVERY_CONDITION,
   deriveRecoveryConditions,
   generateId,
+  reconcileAlertConditionMetrics,
 } from './form_types';
 import { COMPARATOR_OPTIONS, CONDITION_OPERATOR_OPTIONS } from './translations';
 import { buildRecoveryBlock } from './build_esql';
 
-export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = ({ state, dispatch }) => {
+export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = () => {
   const { state: builderState, setState: onBuilderStateChange } =
     useBuilderState<ThresholdFormValues>();
   const { setValue, getValues } = useFormContext<FormValues>();
@@ -82,8 +83,6 @@ export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = ({ state
     });
   }, [recoveryConfig, generatedRecoveryBlock, getValues, setValue]);
 
-  const hasValidRecoveryBlock = Boolean(generatedRecoveryBlock);
-
   const metricOptions = useMemo(() => {
     const statLabels = builderState.stats.filter((s) => s.label.trim()).map((s) => s.label);
     const evalLabels = builderState.evaluations.filter((e) => e.label.trim()).map((e) => e.label);
@@ -113,66 +112,41 @@ export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = ({ state
   const addRecoveryCondition = useCallback(() => {
     if (!recoveryConfig) return;
     updateRecovery({
-      conditions: [
-        ...recoveryConfig.conditions,
-        { id: generateId(), ...DEFAULT_RECOVERY_CONDITION },
-      ],
+      conditions: reconcileAlertConditionMetrics(
+        [...recoveryConfig.conditions, { id: generateId(), ...DEFAULT_RECOVERY_CONDITION }],
+        builderState.stats,
+        builderState.evaluations
+      ),
     });
-  }, [recoveryConfig, updateRecovery]);
+  }, [recoveryConfig, updateRecovery, builderState.stats, builderState.evaluations]);
 
   const removeRecoveryCondition = useCallback(
     (index: number) => {
       if (!recoveryConfig) return;
-      const next = recoveryConfig.conditions.filter((_, i) => i !== index);
+      const filtered = recoveryConfig.conditions.filter((_, i) => i !== index);
       updateRecovery({
-        conditions: next.length ? next : [{ id: generateId(), ...DEFAULT_RECOVERY_CONDITION }],
+        conditions: reconcileAlertConditionMetrics(
+          filtered.length ? filtered : [{ id: generateId(), ...DEFAULT_RECOVERY_CONDITION }],
+          builderState.stats,
+          builderState.evaluations
+        ),
       });
     },
-    [recoveryConfig, updateRecovery]
+    [recoveryConfig, updateRecovery, builderState.stats, builderState.evaluations]
   );
 
   if (!recoveryConfig) return null;
 
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
-            <h4>
-              <FormattedMessage
-                id="xpack.alertingV2.composeDiscover.recoveryCondition.thresholdTitle"
-                defaultMessage="Recovery threshold conditions"
-              />
-            </h4>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.alertingV2.composeDiscover.recoveryCondition.previewTooltip',
-              { defaultMessage: 'Preview results' }
-            )}
-          >
-            <EuiButtonIcon
-              iconType="inspect"
-              aria-label={i18n.translate(
-                'xpack.alertingV2.composeDiscover.recoveryCondition.previewAriaLabel',
-                { defaultMessage: 'Preview results' }
-              )}
-              isDisabled={!hasValidRecoveryBlock || state.childOpen}
-              onClick={() =>
-                dispatch({
-                  type: 'OPEN_CHILD_FOR_STEP',
-                  step: state.step,
-                  isAlert: true,
-                  focusedTab: 'recovery',
-                })
-              }
-              data-test-subj="ruleBuilderRecoveryPreview"
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiTitle size="xxs">
+        <h4>
+          <FormattedMessage
+            id="xpack.alertingV2.composeDiscover.recoveryCondition.thresholdTitle"
+            defaultMessage="Recovery threshold conditions"
+          />
+        </h4>
+      </EuiTitle>
       <EuiSpacer size="s" />
 
       {recoveryConfig.conditions.length > 1 && (

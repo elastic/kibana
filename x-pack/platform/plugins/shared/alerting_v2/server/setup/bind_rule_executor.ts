@@ -24,7 +24,12 @@ import {
   CancellationBoundaryMiddleware,
   ErrorHandlingMiddleware,
   ApmMiddleware,
+  RuleExecutionTelemetryMiddleware,
 } from '../lib/rule_executor/middleware';
+import {
+  RuleExecutionTelemetry,
+  RuleExecutionTelemetryToken,
+} from '../lib/rule_executor/otel/rule_execution_telemetry';
 import { DirectorStep } from '../lib/rule_executor/steps/director_step';
 import { StoreAlertEventsStep } from '../lib/rule_executor/steps/store_alert_events';
 import {
@@ -43,6 +48,7 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
   bind(CancellationBoundaryMiddleware).toSelf().inSingletonScope();
   bind(ApmMiddleware).toSelf().inSingletonScope();
   bind(ErrorHandlingMiddleware).toSelf().inSingletonScope();
+  bind(RuleExecutionTelemetryMiddleware).toSelf().inSingletonScope();
   bind(MetricsMiddleware).toSelf().inSingletonScope();
 
   /**
@@ -55,7 +61,14 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
   bind(RuleExecutionMiddlewaresToken).to(CancellationBoundaryMiddleware).inSingletonScope();
   bind(RuleExecutionMiddlewaresToken).to(ApmMiddleware).inSingletonScope();
   bind(RuleExecutionMiddlewaresToken).to(ErrorHandlingMiddleware).inSingletonScope();
+  bind(RuleExecutionMiddlewaresToken).to(RuleExecutionTelemetryMiddleware).inSingletonScope();
   bind(RuleExecutionMiddlewaresToken).to(MetricsMiddleware).inSingletonScope();
+
+  /**
+   * OTel telemetry (one meter per process)
+   */
+  bind(RuleExecutionTelemetry).toSelf().inSingletonScope();
+  bind(RuleExecutionTelemetryToken).toService(RuleExecutionTelemetry);
 
   /**
    * Metrics collection primitives.

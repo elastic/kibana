@@ -15,9 +15,9 @@
             }
         ] */
 
-import prConfigs from '../../../pull_requests.json';
-import { runPreBuild } from './pre_build';
-import { getEvalTriggerStep } from '../../../pipelines/evals/eval_pipeline';
+import { runPreBuild } from './pre_build.ts';
+import { getEvalTriggerStep } from '../../../pipelines/evals/eval_pipeline.ts';
+import { loadBuildkiteJson } from '../../../pipeline-utils/load_buildkite_json.ts';
 import {
   areChangesSkippable,
   doAnyChangesMatch,
@@ -36,6 +36,9 @@ import {
   isAutomatedVersionBumpPR,
 } from '#pipeline-utils';
 
+const prConfigs =
+  loadBuildkiteJson<typeof import('../../../pull_requests.json')>('pull_requests.json');
+
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 const emptyStep = `steps: []`;
 const cancelable: GetPipelineOptions = { cancelOnGateFailure: true };
@@ -52,7 +55,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
 // this covers external dependency changes, which the package graph below cannot see.
 const STORYBOOK_BUILD_CRITICAL_PATHS = [
-  /^yarn\.lock$/,
+  /^pnpm-lock\.yaml$/,
   /^pnpm-workspace\.yaml$/,
   /^\.buildkite\/scripts\/steps\/storybooks\//,
 ];
@@ -336,12 +339,6 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       (await isStorybookBuildAffected())
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/storybooks.yml', cancelable));
-    }
-
-    if (GITHUB_PR_LABELS.includes('ci:build-webpack-bundle-analyzer')) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/webpack_bundle_analyzer.yml', cancelable)
-      );
     }
 
     if (

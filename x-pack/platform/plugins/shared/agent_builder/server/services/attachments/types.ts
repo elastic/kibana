@@ -5,20 +5,34 @@
  * 2.0.
  */
 
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type {
+  AttachmentInput,
+  AttachmentRefActor,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
+import type {
+  AttachmentStateManager,
+  AttachmentTypeDefinition,
+} from '@kbn/agent-builder-server/attachments';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ValidateAttachmentResult } from './validate_attachment';
 
 export interface AttachmentServiceSetup {
   registerType(attachmentType: AttachmentTypeDefinition): void;
 }
 
 export interface AttachmentServiceStart {
-  validate<Type extends string, Data>(
-    attachment: AttachmentInput<Type, Data>,
+  validateAttachmentInputs(
+    attachments: AttachmentInput[] | undefined,
     request: KibanaRequest
-  ): Promise<ValidateAttachmentResult<Type, Data>>;
+  ): Promise<AttachmentInput[] | undefined>;
   getTypeDefinition(type: string): AttachmentTypeDefinition | undefined;
   getRegisteredTypeIds(): string[];
+  createStateManager(attachments: VersionedAttachment[]): AttachmentStateManager;
+  mergeAttachmentInputs(options: {
+    stateManager: AttachmentStateManager;
+    inputs: AttachmentInput[];
+    request: KibanaRequest;
+    actor: AttachmentRefActor;
+    updateOriginSnapshot?: boolean;
+  }): Promise<void>;
 }

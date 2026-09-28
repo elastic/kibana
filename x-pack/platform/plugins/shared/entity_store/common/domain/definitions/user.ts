@@ -149,6 +149,9 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     ],
   },
 
+  /** High-signal user logs: authoritative identity snapshots from an IdP. */
+  priorityExtractionGate: idpGate,
+
   /**
    * Restricts single-document creation to local users; other namespaces would mint a
    * high-confidence entity without authoritative IdP evidence.

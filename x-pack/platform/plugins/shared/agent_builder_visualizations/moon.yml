@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/agent-builder-visualizations-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-presentation'
+  defaultOwner: '@elastic/kibana-dashboards'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/agent-builder-visualizations-plugin'
   description: Moon project for @kbn/agent-builder-visualizations-plugin
   channel: ''
-  owner: '@elastic/kibana-presentation'
+  owner: '@elastic/kibana-dashboards'
   sourceRoot: x-pack/platform/plugins/shared/agent_builder_visualizations
 dependsOn:
   - '@kbn/data-plugin'

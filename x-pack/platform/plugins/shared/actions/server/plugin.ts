@@ -96,6 +96,7 @@ import {
   scheduleUserConnectorTokenCleanupTask,
 } from './lib/user_connector_token_cleanup_task';
 import {
+  CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
@@ -276,6 +277,7 @@ export interface ActionsPluginsStart {
 
 const includedHiddenTypes = [
   ACTION_SAVED_OBJECT_TYPE,
+  CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
@@ -293,6 +295,7 @@ export class ActionsPlugin
   private actionExecutor?: ActionExecutor;
   private licenseState: ILicenseState | null = null;
   private security?: SecurityPluginSetup;
+  private securityStart?: SecurityPluginStart;
   private spaces?: SpacesPluginSetup;
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
@@ -356,6 +359,8 @@ export class ActionsPlugin
           baseUrl: this.actionsConfig.relay.url,
           configurationUtilities: actionsConfigUtils,
           logger: this.logger.get('relay-client'),
+          useSystemIdentity: this.actionsConfig.relay.uiam?.enabled ?? false,
+          getSystemIdentity: () => this.securityStart?.authc.systemIdentity,
         })
       : undefined;
 
@@ -601,6 +606,12 @@ export class ActionsPlugin
   }
 
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
+    this.securityStart = plugins.security;
+    if (this.actionsConfig.relay?.uiam?.enabled && !plugins.security?.authc.systemIdentity) {
+      this.logger.warn(
+        '`xpack.actions.relay.uiam.enabled` is set but this Kibana has no UIAM system identity. Relay requests will fail until `xpack.security.uiam` is configured with a client certificate (`ssl.certificate` and `ssl.key`).'
+      );
+    }
     const {
       logger,
       licenseState,
@@ -684,6 +695,7 @@ export class ActionsPlugin
         evictClientPool: async (connectorId: string) => {
           await this.clientLeasePool.evict(connectorId);
         },
+        securityService: core.security,
       });
     };
 
@@ -1130,6 +1142,7 @@ export class ActionsPlugin
             getCurrentUserProfileId: (requestWithAuth: KibanaRequest) =>
               getCurrentUserProfileIdFromRequest(requestWithAuth, pluginsStart.security, logger),
             evictClientPool,
+            securityService: coreStart.security,
           });
         },
         listTypes: (featureId?: string) => {

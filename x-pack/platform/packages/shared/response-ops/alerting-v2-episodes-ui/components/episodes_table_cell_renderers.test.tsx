@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import {
+  EpisodeDurationCell,
   EpisodeStatusCell,
   EpisodeTagsCell,
   EpisodeRuleCell,
@@ -51,7 +52,7 @@ describe('EpisodeStatusCell', () => {
       group_hash: 'gh1',
       last_ack_action: 'ack',
       last_snooze_action: 'snooze',
-      snooze_expiry: '3035-01-01T00:00:00Z',
+      snoozed_until: '3035-01-01T00:00:00Z',
     });
     renderWithI18n(<EpisodeStatusCell {...baseCellProps} columnId="episode.status" row={row} />);
 
@@ -72,6 +73,45 @@ describe('EpisodeStatusCell', () => {
     expect(screen.getByText('Active')).toBeInTheDocument();
     expect(screen.queryByTestId('alertEpisodeStatusCellSnoozeIndicator')).not.toBeInTheDocument();
     expect(screen.queryByTestId('alertEpisodeStatusCellAckIndicator')).not.toBeInTheDocument();
+  });
+});
+
+describe('EpisodeDurationCell', () => {
+  const mockDataView = {
+    getFieldByName: jest.fn().mockReturnValue({ name: 'duration' }),
+    getFormatterForField: jest
+      .fn()
+      .mockReturnValue({ convertToText: (value: number) => `${value} ms` }),
+  } as never;
+  const durationCellProps = { ...baseCellProps, columnId: 'duration', dataView: mockDataView };
+
+  it('renders the formatted duration when the episode start was seen', () => {
+    renderWithI18n(
+      <EpisodeDurationCell
+        {...durationCellProps}
+        row={makeRow({ duration: 840000, duration_is_lower_bound: false })}
+      />
+    );
+
+    expect(screen.getByText('840000 ms')).toBeInTheDocument();
+    expect(screen.queryByTestId('episodeDurationLowerBound')).not.toBeInTheDocument();
+  });
+
+  it('marks the duration as a lower bound when the episode started before the time range', () => {
+    renderWithI18n(
+      <EpisodeDurationCell
+        {...durationCellProps}
+        row={makeRow({ duration: 840000, duration_is_lower_bound: true })}
+      />
+    );
+
+    expect(screen.getByTestId('episodeDurationLowerBound')).toHaveTextContent('≥ 840000 ms');
+  });
+
+  it('renders an empty value when the row has no duration', () => {
+    renderWithI18n(<EpisodeDurationCell {...durationCellProps} row={makeRow({})} />);
+
+    expect(screen.getByText('—')).toBeInTheDocument();
   });
 });
 
@@ -260,7 +300,7 @@ describe('EpisodeRuleCell', () => {
     it('calls back with the rule id and prevents navigation on a plain click', () => {
       // fireEvent returns false when the handler called preventDefault
       expect(fireEvent.click(renderRuleNameLink())).toBe(false);
-      expect(mockOnRuleNameClick).toHaveBeenCalledWith('r1');
+      expect(mockOnRuleNameClick).toHaveBeenCalledWith('r1', undefined);
     });
 
     it('lets a modified click follow the link', () => {
@@ -310,6 +350,51 @@ describe('EpisodeRuleCell', () => {
     );
     expect(screen.getByText('Prometheus HighCPU')).toBeInTheDocument();
     expect(screen.queryByTestId('episodeRuleCellNameLink')).not.toBeInTheDocument();
+  });
+
+  it('renders source_grouping tags next to the embedded rule name when the rule SO is missing', () => {
+    const row = makeRow({
+      'rule.id': 'v1-rule-id',
+      'rule.name': 'Classic CPU Rule',
+      source_id: 'classic-alerts',
+      source_grouping: { 'host.name': 'web-01' },
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        row={row}
+        rulesCache={{}}
+        isLoadingRules={false}
+        rowHeight={2}
+      />
+    );
+    expect(screen.getByText('Classic CPU Rule')).toBeInTheDocument();
+    expect(screen.queryByTestId('episodeRuleCellNameLink')).not.toBeInTheDocument();
+    expect(screen.getByTestId('episodeRuleCellGroupingTags')).toBeInTheDocument();
+    expect(screen.getByLabelText('host.name: web-01')).toBeInTheDocument();
+    expect(screen.getByText('web-01')).toBeInTheDocument();
+  });
+
+  it('renders source_grouping tags next to data.rule_name when the rule SO is missing', () => {
+    const row = makeRow({
+      'rule.id': 'v1-rule-id',
+      source_id: 'classic-alerts',
+      episode_data: JSON.stringify({ rule_name: 'High CPU on web-01' }),
+      source_grouping: { 'host.name': 'web-01' },
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        row={row}
+        rulesCache={{}}
+        isLoadingRules={false}
+        rowHeight={2}
+      />
+    );
+    expect(screen.getByText('High CPU on web-01')).toBeInTheDocument();
+    expect(screen.queryByTestId('episodeRuleCellNameLink')).not.toBeInTheDocument();
+    expect(screen.getByTestId('episodeRuleCellGroupingTags')).toBeInTheDocument();
+    expect(screen.getByLabelText('host.name: web-01')).toBeInTheDocument();
   });
 
   it('renders a shortened rule id with no link when the rule and every name are missing', () => {
@@ -444,6 +529,61 @@ describe('EpisodeRuleCell', () => {
     expect(screen.queryByTestId('episodeRuleCellGroupingTags')).not.toBeInTheDocument();
   });
 
+  it('does not render grouping tags when source_grouping is missing on a source row', () => {
+    const row = makeRow({
+      'rule.id': 'r1',
+      source_id: 'classic-alerts',
+      source_grouping: null,
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        row={row}
+        rulesCache={{ r1: makeRule('My Rule') }}
+        isLoadingRules={false}
+        rowHeight={2}
+      />
+    );
+    expect(screen.queryByTestId('episodeRuleCellGroupingTags')).not.toBeInTheDocument();
+  });
+
+  it('reads grouping from source_grouping for a source row', () => {
+    const row = makeRow({
+      'rule.id': 'r1',
+      source_id: 'classic-alerts',
+      source_grouping: { 'host.name': 'from-source' },
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        row={row}
+        rulesCache={{ r1: makeRule('My Rule', { fields: ['host.name'] }) }}
+        isLoadingRules={false}
+        rowHeight={2}
+      />
+    );
+    expect(screen.getByLabelText('host.name: from-source')).toBeInTheDocument();
+    expect(screen.getByText('from-source')).toBeInTheDocument();
+  });
+
+  it('reads grouping from episode_data for a native row', () => {
+    const row = makeRow({
+      'rule.id': 'r1',
+      episode_data: JSON.stringify({ host: { name: 'from-episode' } }),
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        row={row}
+        rulesCache={{ r1: makeRule('My Rule', { fields: ['host.name'] }) }}
+        isLoadingRules={false}
+        rowHeight={2}
+      />
+    );
+    expect(screen.getByLabelText('host.name: from-episode')).toBeInTheDocument();
+    expect(screen.queryByLabelText('host.name: from-source')).not.toBeInTheDocument();
+  });
+
   it('does not render grouping tags when all grouping values are empty', () => {
     const row = makeRow({
       'rule.id': 'r1',
@@ -462,9 +602,122 @@ describe('EpisodeRuleCell', () => {
     expect(screen.getByTestId('episodeRuleCellBreachQuery')).toHaveTextContent('FROM My Rule');
   });
 
+  it('calls getRuleDetailsHref with isSourceRule=true for a source episode', () => {
+    const mockGetRuleDetailsHref = jest.fn().mockReturnValue('/app/rules/v1-rule-id');
+    const row = makeRow({
+      'rule.id': 'v1-rule-id',
+      source_id: 'classic-alerts',
+      rule_category: 'Test',
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        getRuleDetailsHref={mockGetRuleDetailsHref}
+        row={row}
+        rulesCache={{ 'v1-rule-id': makeRule('Classic Rule') }}
+        isLoadingRules={false}
+        rowHeight={1}
+      />
+    );
+    expect(mockGetRuleDetailsHref).toHaveBeenCalledWith('v1-rule-id', true);
+  });
+
+  it('calls getRuleDetailsHref with isSourceRule=false for a v2 episode', () => {
+    const mockGetRuleDetailsHref = jest.fn().mockReturnValue('/app/rules/r1');
+    const row = makeRow({ 'rule.id': 'r1' });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        getRuleDetailsHref={mockGetRuleDetailsHref}
+        row={row}
+        rulesCache={{ r1: makeRule('V2 Rule') }}
+        isLoadingRules={false}
+        rowHeight={1}
+      />
+    );
+    expect(mockGetRuleDetailsHref).toHaveBeenCalledWith('r1', false);
+  });
+
+  it('treats a source episode whose cached rule has kind as a native v2 rule', () => {
+    const mockGetRuleDetailsHref = jest.fn().mockReturnValue('/app/alerting/rules/v2-rule-id');
+    const mockOnRuleNameClick = jest.fn();
+    const v2Rule: Rule = { ...makeRule('V2 Rule'), kind: 'alert' };
+    const row = makeRow({
+      'rule.id': 'v2-rule-id',
+      source_id: 'classic-alerts',
+      rule_category: 'Custom query',
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        getRuleDetailsHref={mockGetRuleDetailsHref}
+        row={row}
+        rulesCache={{ 'v2-rule-id': v2Rule }}
+        isLoadingRules={false}
+        rowHeight={1}
+        onRuleNameClick={mockOnRuleNameClick}
+      />
+    );
+
+    const link = screen.getByTestId('episodeRuleCellNameLink');
+    expect(mockGetRuleDetailsHref).toHaveBeenCalledWith('v2-rule-id', false);
+    expect(link).toHaveAttribute('href', '/app/alerting/rules/v2-rule-id');
+    fireEvent.click(link);
+    expect(mockOnRuleNameClick).toHaveBeenCalledWith('v2-rule-id', undefined);
+  });
+
+  it('omits href when getRuleDetailsHref returns no details route', () => {
+    const mockOnRuleNameClick = jest.fn();
+    const row = makeRow({
+      'rule.id': 'v1-rule-id',
+      source_id: 'classic-alerts',
+      rule_category: 'Test',
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        getRuleDetailsHref={() => undefined}
+        row={row}
+        rulesCache={{ 'v1-rule-id': makeRule('Classic Rule') }}
+        isLoadingRules={false}
+        rowHeight={1}
+        onRuleNameClick={mockOnRuleNameClick}
+      />
+    );
+
+    const link = screen.getByTestId('episodeRuleCellNameLink');
+    expect(link).not.toHaveAttribute('href');
+    fireEvent.click(link);
+    expect(mockOnRuleNameClick).toHaveBeenCalledWith('v1-rule-id', { category: 'Test' });
+  });
+
+  it('calls onRuleNameClick with sourceRuleInfo for a source episode', () => {
+    const mockOnRuleNameClick = jest.fn();
+    const row = makeRow({
+      'rule.id': 'v1-rule-id',
+      source_id: 'classic-alerts',
+      rule_category: 'Test',
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        row={row}
+        rulesCache={{ 'v1-rule-id': makeRule('Classic Rule') }}
+        isLoadingRules={false}
+        rowHeight={1}
+        onRuleNameClick={mockOnRuleNameClick}
+      />
+    );
+    fireEvent.click(screen.getByTestId('episodeRuleCellNameLink'));
+    expect(mockOnRuleNameClick).toHaveBeenCalledWith('v1-rule-id', {
+      category: 'Test',
+    });
+  });
+
   it('renders classic rule via rules cache when resolved by classic fallback', () => {
     const row = makeRow({
       'rule.id': 'v1-rule-id',
+      source_id: 'classic-alerts',
       supports_actions: false,
       supports_timeline: false,
     });
@@ -486,6 +739,7 @@ describe('EpisodeRuleCell', () => {
     } as unknown as Rule;
     const row = makeRow({
       'rule.id': 'v1-rule-id',
+      source_id: 'classic-alerts',
       supports_actions: false,
       supports_timeline: false,
     });

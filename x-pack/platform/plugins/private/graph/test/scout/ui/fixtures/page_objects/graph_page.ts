@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
-import { ContentListWrapper } from '@kbn/scout';
+import {
+  AppMenu,
+  ContentListWrapper,
+  type KibanaUrl,
+  type Locator,
+  type ScoutPage,
+} from '@kbn/scout';
 
 const LISTING_TIMEOUT = 20_000;
 
 export class GraphPage {
   /** Shared wrapper for the Content List listing UI (toolbar, table, selection bar). */
   readonly contentList: ContentListWrapper;
+  private readonly appMenu: AppMenu;
 
   // Public locators consumed directly by specs.
   readonly createGraphPromptButton: Locator;
@@ -28,7 +34,6 @@ export class GraphPage {
   // Internal locators — consumed only by methods on this class.
   private readonly newButton: Locator;
   private readonly settingsButton: Locator;
-  private readonly appMenuOverflowButton: Locator;
   private readonly emptyState: Locator;
   private readonly datasourceButton: Locator;
   private readonly addFieldButton: Locator;
@@ -51,13 +56,13 @@ export class GraphPage {
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.contentList = new ContentListWrapper(page);
+    this.appMenu = new AppMenu(page);
     this.createGraphPromptButton = this.page.testSubj.locator('graphCreateGraphPromptButton');
     this.createGraphButton = this.page.testSubj.locator('graphCreateGraphButton');
 
     this.newButton = this.page.testSubj.locator('graphNewButton');
     this.saveButton = this.page.testSubj.locator('graphSaveButton');
     this.settingsButton = this.page.testSubj.locator('graphSettingsButton');
-    this.appMenuOverflowButton = this.page.testSubj.locator('app-menu-overflow-button');
     this.emptyState = this.page.testSubj.locator('content-list-emptyState');
     this.currentGraphBreadcrumb = this.page.locator(
       '[data-test-subj~="graphCurrentGraphBreadcrumb"]'
@@ -108,24 +113,12 @@ export class GraphPage {
       .waitFor({ state: 'visible', timeout: LISTING_TIMEOUT });
   }
 
-  private async clickAppMenuItem(item: Locator) {
-    if (!(await item.isVisible())) {
-      await this.appMenuOverflowButton.click();
-      await item.waitFor({ state: 'visible' });
-    }
-    await item.click();
-  }
-
   async clickCreateGraph() {
     if (await this.createGraphPromptButton.isVisible()) {
       await this.createGraphPromptButton.click();
       return;
     }
-    if (!(await this.createGraphButton.isVisible())) {
-      await this.appMenuOverflowButton.click();
-      await this.createGraphButton.waitFor({ state: 'visible' });
-    }
-    await this.createGraphButton.click();
+    await this.appMenu.clickItem(this.createGraphButton);
   }
 
   /**
@@ -172,18 +165,18 @@ export class GraphPage {
   }
 
   async saveWorkspaceAs(title: string) {
-    await this.clickAppMenuItem(this.saveButton);
+    await this.appMenu.clickItem(this.saveButton);
     await this.saveTitleInput.fill(title);
     await this.saveConfirmButton.click();
     await this.saveSuccessToast.waitFor({ state: 'visible' });
   }
 
   async clickSettings() {
-    await this.clickAppMenuItem(this.settingsButton);
+    await this.appMenu.clickItem(this.settingsButton);
   }
 
   async newWorkspace({ discardChanges = false }: { discardChanges?: boolean } = {}) {
-    await this.clickAppMenuItem(this.newButton);
+    await this.appMenu.clickItem(this.newButton);
     if (discardChanges) {
       await this.confirmModalTitle.waitFor({ state: 'visible' });
       await this.confirmModalConfirmButton.click();

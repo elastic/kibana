@@ -50,10 +50,11 @@ export const startCmd: Command<void> = {
       evaluationConnectorId,
       projects,
       profileEnvOverrides,
+      suiteScoutEnv,
       exportProfile,
       datasetsProfile,
       requiresEisCcm,
-    } = await resolveEvalRunContext({ repoRoot, log, flagsReader, profile });
+    } = await resolveEvalRunContext({ repoRoot, log, flagsReader, profile, suite });
 
     const skipServer = flagsReader.boolean('skip-server');
 
@@ -63,7 +64,7 @@ export const startCmd: Command<void> = {
     if (projects.length > 0) {
       log.info(`Models:    ${projects.join(', ')}`);
     } else {
-      log.info(`Models:    all (from KIBANA_TESTING_AI_CONNECTORS)`);
+      log.info(`Models:    all (from KIBANA_TESTING_INFERENCE_ENDPOINTS)`);
     }
     log.info(`Server:    ${skipServer ? 'skip (using existing)' : 'managed'}`);
     if (suite?.serverConfigSet) {
@@ -97,6 +98,7 @@ export const startCmd: Command<void> = {
         repoRoot,
         log,
         profileEnvOverrides,
+        suiteScoutEnv,
         serverConfigSet: suite?.serverConfigSet,
         requiresEisCcm,
       });
@@ -111,6 +113,7 @@ export const startCmd: Command<void> = {
       skipServer,
       suite,
       profileEnvOverrides,
+      suiteScoutEnv,
       flagsReader,
       log,
     });

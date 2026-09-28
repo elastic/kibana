@@ -18,11 +18,12 @@ import {
   type StepContext,
   type WorkflowContext,
 } from '@kbn/workflows';
-import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
-import { buildWorkflowContext } from './build_workflow_context';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
+import { buildWorkflowRenderContext } from './build_workflow_context';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { StepExecutionMetadata, WorkflowExecutionState } from './workflow_execution_state';
+import type { RuntimeGraphView } from './workflow_runtime_graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import {
   callKibanaApi,
@@ -36,7 +37,7 @@ import { isSerializedError } from '../utils/errors';
 export interface ContextManagerInit {
   // New properties for logging
   templateEngine: WorkflowTemplatingEngine;
-  workflowExecutionGraph: WorkflowGraph;
+  workflowExecutionGraph: RuntimeGraphView;
   workflowExecutionState: WorkflowExecutionState;
   stepIoService: StepIoService;
   node: GraphNodeUnion;
@@ -57,7 +58,7 @@ type ContextPathSegment = string | number;
 type ContextPath = ContextPathSegment[];
 
 export class WorkflowContextManager {
-  private workflowExecutionGraph: WorkflowGraph;
+  private workflowExecutionGraph: RuntimeGraphView;
   private workflowExecutionState: WorkflowExecutionState;
   private stepIoService: StepIoService;
   private esClient: ElasticsearchClient;
@@ -140,6 +141,7 @@ export class WorkflowContextManager {
       node: this.node,
       predecessorsResolver: () => this.predecessors,
       consumerId: this.consumerExecutionId,
+      stackFrames: this.stackFrames,
     });
   }
 
@@ -327,7 +329,7 @@ export class WorkflowContextManager {
    * Steps are processed in execution order to ensure consistent variable assignment.
    */
   public getVariables(): Record<string, unknown> {
-    return this.stepIoService.getDataSetVariables();
+    return this.stepIoService.getDataSetVariables(this.stackFrames);
   }
 
   /**
@@ -339,7 +341,7 @@ export class WorkflowContextManager {
 
   private buildWorkflowContext(): WorkflowContext {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-    return buildWorkflowContext(workflowExecution, this.coreStart, this.dependencies);
+    return buildWorkflowRenderContext(workflowExecution, this.coreStart, this.dependencies);
   }
 
   private getRenderingContext(value: unknown): StepContext {
@@ -545,10 +547,13 @@ export class WorkflowContextManager {
         buildStepExecutionId(executionId, topFrame.stepId, scopeStack.stackFrames)
       );
       scopeEntries.push({ topFrame, stepExecution });
-      // Parallel branches expose the same {{ foreach.item }} / {{ foreach.index }}
+      // Dynamic parallel branches expose the same {{ foreach.item }} / {{ foreach.index }}
       // context as a sequential foreach: each branch scope carries the item it
       // is processing, derived from the persisted index + re-evaluated list.
-      if (stepExecution?.stepType === 'foreach' || stepExecution?.stepType === 'parallel') {
+      // Static `branches` have no item, so they must not shadow an outer foreach.
+      const isDynamicParallel =
+        stepExecution?.stepType === 'parallel' && stepExecution.state?.static !== true;
+      if (stepExecution?.stepType === 'foreach' || isDynamicParallel) {
         foreachEntries.push({ topFrame, stepExecution });
       }
       if (stepExecution?.stepType === 'while') {
@@ -732,11 +737,14 @@ export class WorkflowContextManager {
         stepState: Record<string, unknown> | undefined;
       }
     | undefined {
-    const io = this.stepIoService.getLatestStepIO(stepId);
+    const io = this.stepIoService.getLatestStepIO(stepId, this.stackFrames);
     if (!io) {
       return;
     }
-    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
+    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(
+      stepId,
+      this.stackFrames
+    );
     return {
       runStepResult: {
         input: io.input,

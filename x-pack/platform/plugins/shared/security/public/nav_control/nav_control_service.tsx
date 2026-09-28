@@ -106,7 +106,7 @@ export class SecurityNavControlService {
   }
 
   private registerSecurityNavControl(core: CoreStart, authc: AuthenticationServiceSetup) {
-    core.chrome.next.userMenu.set(
+    core.chrome.controls.userMenu.set(
       <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
         <SecurityNavControl
           editProfileUrl={core.http.basePath.prepend('/security/account')}

@@ -2058,7 +2058,10 @@ describe('create()', () => {
     });
 
     await rulesClient.create({ data });
-    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: 123/my rule name');
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith(
+      'Alerting: 123/my rule name',
+      undefined
+    );
   });
 
   test('should create rule with given notifyWhen value if notifyWhen is not null', async () => {
@@ -4288,7 +4291,7 @@ describe('create()', () => {
     await rulesClient.create({ data, options: { cloneApiKey: true } });
 
     expect(rulesClientParams.cloneAPIKey).not.toHaveBeenCalled();
-    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: 123/abc');
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: 123/abc', undefined);
   });
 
   test('throws error and does not add API key to invalidatePendingApiKey SO when create saved object fails if the user is authenticated using an api key', async () => {
@@ -4906,7 +4909,7 @@ This is the type of text _investigation guides_ will contain.`;
   });
 
   describe('missing UIAM API key tagging', () => {
-    test('should add missing UIAM API key tag when UIAM key creation fails in serverless', async () => {
+    test('should defer missing UIAM API key tagging until rule execution', async () => {
       // Set up serverless environment
       const serverlessRulesClient = new RulesClient({
         ...rulesClientParams,
@@ -4954,11 +4957,11 @@ This is the type of text _investigation guides_ will contain.`;
 
       await serverlessRulesClient.create({ data });
 
-      // Verify the missing UIAM key tag was added
+      // Rule execution owns the missing UIAM key tag.
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         RULE_SAVED_OBJECT_TYPE,
         expect.objectContaining({
-          tags: expect.arrayContaining(['foo', 'Missing Elastic Cloud API Key']),
+          tags: ['foo'],
         }),
         expect.anything()
       );

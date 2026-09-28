@@ -15,10 +15,15 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   EXPAND_DETECTIONS: 'expandDetections',
   FILTER_BY_IMPACTED_SERVICES: 'filterByImpactedServices',
   OPEN_IN_CHAT: 'openInChat',
+  OPEN_START_INVESTIGATION: 'openStartInvestigation',
+  RETRY_INVESTIGATIONS: 'retryInvestigations',
+  SHOW_MORE_INVESTIGATIONS: 'showMoreInvestigations',
+  START_INVESTIGATION: 'startInvestigation',
   VIEW_ALL_SIGNIFICANT_EVENTS: 'viewAllSignificantEvents',
   VIEW_DETECTION: 'viewDetection',
   VIEW_ENTITY: 'viewEntity',
   VIEW_INVESTIGATION: 'viewInvestigation',
+  VIEW_MANAGEMENT: 'viewManagement',
   VIEW_SETTINGS: 'viewSettings',
   VIEW_SIGNIFICANT_EVENT: 'viewSignificantEvent',
   VIEW_SIGNIFICANT_EVENTS: 'viewSignificantEvents',
@@ -26,6 +31,8 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
 
 export const NIGHTSHIFT_EBT_ELEMENTS = {
   IMPACTED_SERVICES: 'nightshiftImpactedServices',
+  INVESTIGATIONS_LIST: 'nightshiftInvestigationsList',
+  INVESTIGATION_DETAIL_FLYOUT: 'nightshiftInvestigationDetailFlyout',
   DETECTION_FLYOUT: 'nightshiftDetectionFlyout',
   DETECTION_FLYOUT_ENTITIES: 'nightshiftDetectionFlyoutEntities',
   ENTITY_FLYOUT: 'nightshiftEntityFlyout',
@@ -36,6 +43,7 @@ export const NIGHTSHIFT_EBT_ELEMENTS = {
   INVESTIGATION_SUMMARY: 'nightshiftInvestigationSummary',
   PAGE_HEADER: 'nightshiftPageHeader',
   SIGNIFICANT_EVENTS_LIST: 'nightshiftSignificantEventsList',
+  START_INVESTIGATION_PANEL: 'nightshiftStartInvestigationPanel',
   STATUS_SUMMARY: 'nightshiftStatusSummary',
 } as const;
 

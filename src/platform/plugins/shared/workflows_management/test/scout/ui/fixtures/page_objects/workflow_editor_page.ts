@@ -25,6 +25,7 @@ export class WorkflowEditorPage {
   public actionsMenuButton: Locator;
   public actionsMenuSearch: Locator;
   public readOnlyBadge: Locator;
+  public readonly accessMode: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.yamlEditor = this.page.testSubj.locator('workflowYamlEditor');
@@ -45,6 +46,45 @@ export class WorkflowEditorPage {
     this.actionsMenuButton = this.page.testSubj.locator('workflowBottomBarActionsMenu');
     this.actionsMenuSearch = this.page.locator('#actions-menu-search');
     this.readOnlyBadge = this.page.testSubj.locator('workflowEditorReadOnlyBadge');
+    this.accessMode = this.page.testSubj.locator('entityAccessControlMode');
+  }
+
+  async openAccessDialog(): Promise<void> {
+    await this.page.testSubj.click('app-menu-overflow-button');
+    await this.page.testSubj.click('workflowAccessButton');
+    await this.accessMode.waitFor({ state: 'visible' });
+  }
+
+  async hoverDisabledAccessButton(): Promise<void> {
+    await this.page.testSubj.click('app-menu-overflow-button');
+    await this.page.testSubj.locator('workflowAccessButton').hover({ force: true });
+  }
+
+  async setAccessMode(mode: 'private' | 'public'): Promise<void> {
+    await this.page.components.superSelect('entityAccessControlMode').selectOptionByValue(mode);
+  }
+
+  async addAccessUser(name: string): Promise<void> {
+    await this.page.testSubj
+      .locator('entityAccessControlUserSearch')
+      .getByRole('combobox')
+      .fill(name);
+    await this.page.getByRole('option', { name }).click();
+  }
+
+  accessRole(username: string): Locator {
+    return this.page.getByLabel(`Role for ${username}`, { exact: true });
+  }
+
+  async setAccessRole(username: string, role: 'viewer' | 'executor' | 'editor'): Promise<void> {
+    await this.page.components
+      .superSelect(`entityAccessControlRole-${username}`)
+      .selectOptionByValue(role);
+  }
+
+  async saveAccess(): Promise<void> {
+    await this.page.testSubj.click('workflowAccessSave');
+    await this.accessMode.waitFor({ state: 'hidden' });
   }
 
   /**
@@ -379,6 +419,12 @@ export class WorkflowEditorPage {
     await this.page.testSubj.click('confirmModalConfirmButton');
   }
 
+  async executeWorkflowFromBottomBar(inputs: Record<string, unknown>): Promise<void> {
+    await this.page.testSubj.click('workflowBottomBarRunButton');
+    await this.setExecuteModalInputs(inputs);
+    await this.page.testSubj.click('executeWorkflowButton');
+  }
+
   /**
    * Execute the workflow from the execute modal with the given inputs.
    * Assumes the run button has already been clicked or the execute modal is about to appear.
@@ -422,7 +468,11 @@ export class WorkflowEditorPage {
    * Finds the first occurrence of `searchText` in the editor and places the cursor
    * at the end of it, then triggers autocomplete via Ctrl+Space.
    */
-  async triggerAutocompleteAfter(yamlContent: string, searchText: string) {
+  async triggerAutocompleteAfter(
+    yamlContent: string,
+    searchText: string,
+    textToInsert: string = ''
+  ): Promise<void> {
     await this.setYamlEditorValue(yamlContent);
 
     // Wait for the workflow definition to be parsed after setting the YAML.
@@ -432,7 +482,7 @@ export class WorkflowEditorPage {
     // Use Monaco API to find the text and position cursor right after it
     const uri = await this.getEditorUri(this.yamlEditor);
     await this.page.evaluate(
-      ({ modelUri, text }) => {
+      ({ modelUri, text, insertion }) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- monaco environment is global, but we don't have a type for it
         const monacoEnv = (window as any).MonacoEnvironment;
         if (!monacoEnv?.monaco?.editor) {
@@ -456,15 +506,22 @@ export class WorkflowEditorPage {
 
         // Get the editor instance and set cursor position + focus
         const editors = monacoEnv.monaco.editor.getEditors();
-        if (editors.length > 0) {
-          const editor = editors[0];
-          editor.setPosition(position);
-          editor.focus();
-          // Trigger suggest directly via the editor command
-          editor.trigger('autocomplete-test', 'editor.action.triggerSuggest', {});
+        const editor = editors.find(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Monaco editor instances are untyped in the browser context
+          (candidate: any) => candidate.getModel()?.uri?.toString() === model.uri.toString()
+        );
+        if (!editor) {
+          throw new Error('No editor instance found for the YAML model');
         }
+
+        editor.setPosition(position);
+        editor.focus();
+        if (insertion) {
+          editor.trigger('autocomplete-test', 'type', { text: insertion });
+        }
+        editor.trigger('autocomplete-test', 'editor.action.triggerSuggest', {});
       },
-      { modelUri: uri, text: searchText }
+      { modelUri: uri, text: searchText, insertion: textToInsert }
     );
   }
 

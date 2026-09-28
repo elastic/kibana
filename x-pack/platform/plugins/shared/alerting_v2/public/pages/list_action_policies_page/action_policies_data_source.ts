@@ -10,7 +10,6 @@ import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core-di-browser';
 import type { ContentListItem, DataSourceConfig } from '@kbn/content-list';
-import { TAG_FILTER_ID } from '@kbn/content-list-provider';
 import type { IncludeExcludeFilter } from '@kbn/content-list-provider';
 import type {
   ActionPolicyResponse,
@@ -27,7 +26,6 @@ export interface FindActionPoliciesUiParams {
   page?: number;
   perPage?: number;
   search?: string;
-  tags?: string[];
   enabled?: boolean;
   sortField?: FindActionPoliciesSortField;
   sortOrder?: 'asc' | 'desc';
@@ -37,7 +35,6 @@ export const toFindActionPoliciesRequest = ({
   page,
   perPage,
   search,
-  tags,
   enabled,
   sortField,
   sortOrder,
@@ -48,7 +45,6 @@ export const toFindActionPoliciesRequest = ({
     page,
     per_page: perPage,
     search,
-    tags,
     enabled,
     sort_field: sortField,
     sort_order: sortOrder,
@@ -62,9 +58,8 @@ export type ActionPolicyContentListItem = ContentListItem & {
 const toContentListItem = (policy: ActionPolicyResponse): ActionPolicyContentListItem => ({
   id: policy.id,
   title: policy.name,
-  tags: policy.tags ?? undefined,
-  createdBy: policy.created_by ?? undefined,
-  updatedBy: policy.updated_by ?? undefined,
+  createdBy: policy.created_by?.profile_uid ?? undefined,
+  updatedBy: policy.updated_by?.profile_uid ?? undefined,
   updatedAt: policy.updated_at ? new Date(policy.updated_at) : undefined,
   policy,
 });
@@ -75,7 +70,6 @@ export const useActionPoliciesDataSource = (): DataSourceConfig => {
 
   const findItems = useCallback<DataSourceConfig['findItems']>(
     async ({ searchQuery, filters, sort, page }) => {
-      const tagFilter = filters[TAG_FILTER_ID] as IncludeExcludeFilter | undefined;
       const enabledFilter = filters[ENABLED_FILTER_ID] as IncludeExcludeFilter | undefined;
 
       let enabled: boolean | undefined;
@@ -90,7 +84,6 @@ export const useActionPoliciesDataSource = (): DataSourceConfig => {
             page: page.index + 1,
             perPage: page.size,
             search: searchQuery || undefined,
-            tags: tagFilter?.include,
             enabled,
             sortField: sort?.field as FindActionPoliciesSortField | undefined,
             sortOrder: sort?.direction,

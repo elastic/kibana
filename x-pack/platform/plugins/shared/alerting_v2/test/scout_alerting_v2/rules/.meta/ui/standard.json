@@ -1,5 +1,5 @@
 {
-  "sha1": "2c5d81e764f6678cb91cfd684144751db2bf7299",
+  "sha1": "a7ba547ccf54242b53804483507243296a2c8e94",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -277,6 +277,38 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rules_list_privileges.spec.ts",
         "line": 37,
         "column": 5
+      }
+    },
+    {
+      "id": "53098749cd65a45-e4f965bf0f7a155",
+      "title": "Rules list - heading tabs privileges shows the V1 and V2 rules tabs when the user can read both surfaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rules_list_tabs_privileges.spec.ts",
+        "line": 20,
+        "column": 10
+      }
+    },
+    {
+      "id": "53098749cd65a45-9506b52c0a003ea",
+      "title": "Rules list - heading tabs privileges hides the tab strip when the user cannot read the v1 Rules page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rules_list_tabs_privileges.spec.ts",
+        "line": 27,
+        "column": 13
       }
     }
   ]

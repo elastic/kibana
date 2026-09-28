@@ -1879,7 +1879,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         savedObjectType,
         id,
         {
-          ...restOfPackagePolicy,
+          ...omit(restOfPackagePolicy, 'cloud_connector_name'),
           ...(restOfPackagePolicy.package
             ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
             : {}),
@@ -2333,7 +2333,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           type: savedObjectType,
           id,
           attributes: {
-            ...restOfPackagePolicy,
+            ...omit(restOfPackagePolicy, 'cloud_connector_name'),
             ...(restOfPackagePolicy.package
               ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
               : {}),

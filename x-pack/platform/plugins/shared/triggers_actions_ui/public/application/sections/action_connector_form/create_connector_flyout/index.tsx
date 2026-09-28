@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -19,14 +19,13 @@ import {
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   AgentBuilderConnectorFeatureId,
   getConnectorCompatibility,
   getConnectorFeatureName,
 } from '@kbn/actions-plugin/common';
 import { isLLMConnectorTypeId } from '@kbn/response-ops-rule-form/src/constants';
-import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
+import { connectorTypeIsDual, connectorTypeIsInboundOnly } from '@kbn/connector-specs';
 import {
   DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE,
   DEPRECATED_LLM_CONNECTOR_INFO,
@@ -46,12 +45,16 @@ import type { ResetForm } from '../connector_form';
 import { ConnectorForm } from '../connector_form';
 import { useConnectorCreateForm } from '../use_connector_create_form';
 import { useKibana } from '../../../../common/lib/kibana';
+import { ConnectorContext } from '../../../context/connector_context';
 import { EditConnectorFlyoutContent } from '../edit_connector_flyout';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';
-import { InboundIngressCredentials } from '../inbound_ingress_credentials';
-import { isInboundIngressConnector } from '../../../lib/inbound_ingress';
+import { InboundEventsSaveToGenerateCallout } from '../inbound_events_save_to_generate_callout';
+import {
+  readClusterInboundEventsEnabled,
+  shouldRotateInboundAfterSave,
+} from '../../../lib/inbound_ingress';
 import { useRotateInboundIngress } from '../../../hooks/use_rotate_inbound_ingress';
 
 export interface CreateConnectorFlyoutProps {
@@ -59,6 +62,7 @@ export interface CreateConnectorFlyoutProps {
   onClose: () => void;
   featureId?: string;
   onConnectorCreated?: (connector: ActionConnector) => void;
+  onConnectorUpdated?: (connector: ActionConnector) => void;
   onTestConnector?: (connector: ActionConnector) => void;
   isServerless?: boolean;
   initialConnector?: Partial<Omit<ActionConnector, 'secrets'>> & { actionTypeId: string };
@@ -71,12 +75,19 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   featureId,
   onClose,
   onConnectorCreated,
+  onConnectorUpdated,
   onTestConnector,
   initialConnector,
   icon,
   size,
 }) => {
-  const { docLinks } = useKibana().services;
+  const services = useKibana().services;
+  const connectorContext = useContext(ConnectorContext);
+  const { docLinks } = services;
+  const isClusterInboundEventsEnabled = readClusterInboundEventsEnabled(
+    services,
+    connectorContext?.services
+  );
   const [allActionTypes, setAllActionTypes] = useState<ActionTypeIndex | undefined>(undefined);
   const [actionType, setActionType] = useState<ActionType | null>(null);
   const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
@@ -164,6 +175,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             isDeprecated: false,
             config: {},
             secrets: {},
+            ...(connectorTypeIsDual(id) ? { isInboundEventsEnabled: false } : {}),
           },
         });
       }
@@ -173,9 +185,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const resetActionType = useCallback(() => setActionType(null), []);
 
   const [connectorToTest, setConnectorToTest] = useState<ActionConnector | null>(null);
-  const [createdInboundConnector, setCreatedInboundConnector] = useState<ActionConnector | null>(
-    null
-  );
+  const [editTab, setEditTab] = useState(EditConnectorTabs.Test);
   const [isFormModified, setIsFormModified] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const { isLoading: isRotating, rotateIngress } = useRotateInboundIngress();
@@ -183,18 +193,46 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const testConnector = useCallback(async () => {
     const createdConnector = await validateAndCreateConnector();
 
-    if (createdConnector) {
-      if (onConnectorCreated) {
-        onConnectorCreated(createdConnector);
-      }
-
-      if (onTestConnector) {
-        onTestConnector(createdConnector);
-      }
-
-      setConnectorToTest(createdConnector);
+    if (!createdConnector) {
+      return;
     }
-  }, [validateAndCreateConnector, onConnectorCreated, onTestConnector]);
+
+    let connectorForTest = createdConnector;
+    if (shouldRotateInboundAfterSave(createdConnector, isClusterInboundEventsEnabled)) {
+      try {
+        const rotated = await rotateIngress(createdConnector.id);
+        connectorForTest = {
+          ...createdConnector,
+          secrets: { ingestToken: rotated.ingestToken },
+        } as ActionConnector;
+      } catch {
+        // Danger toast is shown by the rotate hook. Edit the connector that was created.
+        if (onConnectorCreated) {
+          onConnectorCreated(createdConnector);
+        }
+        setEditTab(EditConnectorTabs.Configuration);
+        setConnectorToTest(createdConnector);
+        return;
+      }
+    }
+
+    if (onConnectorCreated) {
+      onConnectorCreated(connectorForTest);
+    }
+
+    if (onTestConnector) {
+      onTestConnector(connectorForTest);
+    }
+
+    setEditTab(EditConnectorTabs.Test);
+    setConnectorToTest(connectorForTest);
+  }, [
+    validateAndCreateConnector,
+    onConnectorCreated,
+    onTestConnector,
+    rotateIngress,
+    isClusterInboundEventsEnabled,
+  ]);
 
   const onSubmit = useCallback(async () => {
     const createdConnector = await validateAndCreateConnector();
@@ -203,22 +241,31 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         onConnectorCreated(createdConnector);
       }
 
-      if (isInboundIngressConnector(createdConnector)) {
+      if (shouldRotateInboundAfterSave(createdConnector, isClusterInboundEventsEnabled)) {
+        let connectorForEdit = createdConnector;
         try {
           const rotated = await rotateIngress(createdConnector.id);
-          setCreatedInboundConnector({
+          connectorForEdit = {
             ...createdConnector,
             secrets: { ingestToken: rotated.ingestToken },
-          } as ActionConnector);
+          } as ActionConnector;
         } catch {
-          // Danger toast is shown by the rotate hook. Stay on the create form.
+          // Danger toast is shown by the rotate hook. Edit the connector that was created.
         }
+        setEditTab(EditConnectorTabs.Configuration);
+        setConnectorToTest(connectorForEdit);
         return;
       }
 
       onClose();
     }
-  }, [validateAndCreateConnector, onClose, onConnectorCreated, rotateIngress]);
+  }, [
+    validateAndCreateConnector,
+    onClose,
+    onConnectorCreated,
+    rotateIngress,
+    isClusterInboundEventsEnabled,
+  ]);
 
   const handleSearchValueChange = useCallback((newValue: string) => {
     setSearchValue(newValue);
@@ -259,39 +306,34 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   }, []);
 
   const inboundSettingsContent = useMemo(() => {
-    if (createdInboundConnector) {
-      return <InboundIngressCredentials allowRotate connector={createdInboundConnector} />;
-    }
-    if (actionType == null || !connectorTypeHasInboundEvents(actionType.id)) {
+    if (actionType == null) {
       return undefined;
     }
-    return (
-      <EuiCallOut
-        announceOnMount
-        size="s"
-        color="primary"
-        iconType="info"
-        data-test-subj="inbound-ingress-save-to-view-credentials"
-        title={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionConnectorAdd.inboundIngressSaveToViewTitle',
-          {
-            defaultMessage: 'Webhook URL and ingest token',
-          }
-        )}
-      >
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.actionConnectorAdd.inboundIngressSaveToViewDescription"
-          defaultMessage="Save this connector to generate the webhook URL and ingest token. The token is shown only once."
-        />
-      </EuiCallOut>
-    );
-  }, [actionType, createdInboundConnector]);
+    if (isClusterInboundEventsEnabled && connectorTypeIsInboundOnly(actionType.id)) {
+      return <InboundEventsSaveToGenerateCallout />;
+    }
+    if (connectorTypeIsDual(actionType.id) && isClusterInboundEventsEnabled) {
+      return <InboundEventsSaveToGenerateCallout />;
+    }
+    return undefined;
+  }, [actionType, isClusterInboundEventsEnabled]);
+
+  const beforeCloseRef = useRef<() => void>(() => undefined);
+
+  const handleEmbeddedConnectorUpdated = useCallback(
+    (updated: ActionConnector) => {
+      setConnectorToTest(updated);
+      onConnectorUpdated?.(updated);
+    },
+    [onConnectorUpdated]
+  );
 
   const onFlyoutClose = useCallback(() => {
     if (connectorToTest && isFormModified) {
       setShowConfirmModal(true);
       return;
     }
+    beforeCloseRef.current();
     onClose();
   }, [connectorToTest, isFormModified, onClose]);
 
@@ -307,14 +349,15 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
           actionTypeRegistry={actionTypeRegistry}
           connector={connectorToTest}
           onClose={onClose}
-          tab={EditConnectorTabs.Test}
-          onConnectorUpdated={setConnectorToTest}
+          tab={editTab}
+          onConnectorUpdated={handleEmbeddedConnectorUpdated}
           icon={icon}
           isFormModified={isFormModified}
           onFormModifiedChange={setIsFormModified}
           onCloseAttempt={onFlyoutClose}
           showConfirmModal={showConfirmModal}
           onConfirmModalCancel={() => setShowConfirmModal(false)}
+          beforeCloseRef={beforeCloseRef}
         />
       </EuiFlyout>
     );
@@ -369,7 +412,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                 <EuiButtonGroup
                   isFullWidth
                   buttonSize="m"
-                  color="primary"
                   legend=""
                   options={groupActionButtons}
                   idSelected={actionType.id}

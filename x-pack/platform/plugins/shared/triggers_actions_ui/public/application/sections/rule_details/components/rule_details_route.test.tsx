@@ -13,6 +13,7 @@ import { createMemoryHistory, createLocation } from 'history';
 import type { ToastsApi } from '@kbn/core/public';
 import { RuleDetailsRoute, getRuleData } from './rule_details_route';
 import type { Rule } from '../../../../types';
+import { STACK_MANAGEMENT_RULES_HOST, getRulesAppDetailsRoute } from '@kbn/rule-data-utils';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
@@ -32,6 +33,7 @@ jest.mock('../../../../common/get_experimental_features', () => ({
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
     push: jest.fn(),
+    createHref: jest.fn(({ pathname }: { pathname: string }) => pathname),
   }),
   useLocation: () => ({
     pathname: '/triggersActions/rules/',
@@ -61,7 +63,9 @@ describe('rule_details_route', () => {
   async function setup() {
     const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKibanaMock().services.spaces = spacesMock;
+    const services = useKibanaMock().services;
+    services.spaces = spacesMock;
+    services.host = undefined;
   }
 
   it('render a loader while fetching data', async () => {
@@ -94,7 +98,41 @@ describe('rule_details_route', () => {
     });
 
     expect((spacesMock as any).ui.redirectLegacyUrl).toHaveBeenCalledWith({
-      path: 'insightsAndAlerting/triggersActions/rule/new_id',
+      path: `${STACK_MANAGEMENT_RULES_HOST.pathPrefix}${getRulesAppDetailsRoute('new_id')}`,
+      aliasPurpose: 'savedObjectConversion',
+      objectNoun: 'rule',
+    });
+  });
+
+  it('uses the mount host path prefix for aliasMatch redirects', async () => {
+    await setup();
+    const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+
+    useKibanaMock().services.host = {
+      app: 'observabilityAlerting',
+      pathPrefix: '/rules/v1',
+    };
+    const rule = mockRule();
+    const { resolveRule } = mockApis();
+
+    resolveRule.mockImplementationOnce(async () => ({
+      ...rule,
+      id: 'new_id',
+      outcome: 'aliasMatch',
+      alias_target_id: rule.id,
+      alias_purpose: 'savedObjectConversion',
+    }));
+
+    renderWithIntl(
+      <RuleDetailsRoute {...mockRouterProps(rule)} {...{ ...mockApis(), resolveRule }} />
+    );
+
+    await waitFor(() => {
+      expect(resolveRule).toHaveBeenCalledWith(rule.id);
+    });
+
+    expect((spacesMock as any).ui.redirectLegacyUrl).toHaveBeenCalledWith({
+      path: '/rules/v1/rule/new_id',
       aliasPurpose: 'savedObjectConversion',
       objectNoun: 'rule',
     });
@@ -134,7 +172,9 @@ describe('rule_details_route', () => {
       currentObjectId: 'new_id',
       objectNoun: 'rule',
       otherObjectId: rule.id,
-      otherObjectPath: `insightsAndAlerting/triggersActions/rule/${rule.id}`,
+      otherObjectPath: `${STACK_MANAGEMENT_RULES_HOST.pathPrefix}${getRulesAppDetailsRoute(
+        rule.id
+      )}`,
     });
   });
 

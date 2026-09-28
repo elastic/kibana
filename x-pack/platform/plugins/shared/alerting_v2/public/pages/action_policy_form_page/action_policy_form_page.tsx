@@ -8,7 +8,6 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -16,6 +15,7 @@ import {
   EuiPageTemplate,
   EuiSpacer,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { ActionPolicyDestination, ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -27,10 +27,12 @@ import { FormProvider } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { useActionPolicyAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { ActionPolicyForm } from '../../components/action_policy/form/action_policy_form';
+import { ActionPoliciesLicenseCallout } from '../../components/action_policy/action_policies_license_callout';
+import { useIsActionPoliciesLicenseValid } from '../../hooks/use_is_action_policies_license_valid';
 import { toCreatePayload, toUpdatePayload } from '../../components/action_policy/form/form_utils';
 import type { ActionPolicyFormState } from '../../components/action_policy/form/types';
 import { useActionPolicyForm } from '../../components/action_policy/form/use_action_policy_form';
-import { paths } from '../../constants';
+import { useAlertingLocators } from '../../application/locator_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useCreateActionPolicy } from '../../hooks/use_create_action_policy';
 import { useCreateInlineWorkflows } from '../../hooks/use_create_inline_workflows';
@@ -39,8 +41,7 @@ import { useUpdateActionPolicy } from '../../hooks/use_update_action_policy';
 
 export const ActionPolicyFormPage = () => {
   const { id: policyId } = useParams<{ id?: string }>();
-  const { navigateToUrl } = useService(CoreStart('application'));
-  const { basePath } = useService(CoreStart('http'));
+  const { actionPolicyLocators } = useAlertingLocators();
 
   const {
     data: existingPolicy,
@@ -54,8 +55,8 @@ export const ActionPolicyFormPage = () => {
   const isReady = !isEditMode || !!existingPolicy;
 
   const navigateToList = useCallback(() => {
-    navigateToUrl(basePath.prepend(paths.actionPolicyList));
-  }, [navigateToUrl, basePath]);
+    actionPolicyLocators.navigateSync({ page: 'list' });
+  }, [actionPolicyLocators]);
 
   const returnButton = (
     <EuiFlexGroup justifyContent="flexStart">
@@ -108,7 +109,7 @@ export const ActionPolicyFormPage = () => {
           }
         />
         <EuiSpacer size="m" />
-        <EuiCallOut
+        <KbnDangerCallout
           announceOnMount
           title={
             <FormattedMessage
@@ -116,12 +117,10 @@ export const ActionPolicyFormPage = () => {
               defaultMessage="Failed to load action policy"
             />
           }
-          color="danger"
-          iconType="error"
           data-test-subj="fetchErrorCallout"
         >
           {fetchError?.message}
-        </EuiCallOut>
+        </KbnDangerCallout>
       </>
     );
   }
@@ -221,6 +220,7 @@ const ActionPolicyFormPageContent = ({
   });
 
   const isLoading = isCreating || isUpdating || isCreatingWorkflows;
+  const isLicenseValid = useIsActionPoliciesLicenseValid();
 
   return (
     <EuiPageTemplate.Section
@@ -260,6 +260,7 @@ const ActionPolicyFormPageContent = ({
         data-test-subj="pageTitle"
       />
       <EuiSpacer size="m" />
+      <ActionPoliciesLicenseCallout />
 
       <FormProvider {...methods}>
         <ActionPolicyForm />
@@ -281,7 +282,7 @@ const ActionPolicyFormPageContent = ({
             fill
             onClick={handleSubmit}
             isLoading={isLoading}
-            disabled={!isSubmitEnabled}
+            disabled={!isSubmitEnabled || !isLicenseValid}
             data-test-subj="submitButton"
           >
             {isEditMode ? (

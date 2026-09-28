@@ -15,7 +15,11 @@ import type {
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/agents';
+import type { ChatCompletionReasoningEffort } from '@kbn/inference-common';
+import type { ChatTriggerMode } from '@kbn/agent-builder-common';
 import type { ConversationWithPermissions } from './conversations';
+
+export { ChatTriggerMode } from '@kbn/agent-builder-common';
 
 /**
  * Body payload for the public agent_builder converse endpoints (`/api/agent_builder/converse`, `/converse/async`).
@@ -36,8 +40,19 @@ export interface ChatRequestBodyPayload {
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
   action?: ConversationAction;
   project_routing?: string;
+  /** Optional reasoning level forwarded to the inference plugin. */
+  reasoning_level?: ChatCompletionReasoningEffort;
   /** Force a specific execution mode. When omitted, the server auto-detects. */
   _execution_mode?: 'local' | 'task_manager';
+  /** Use `never` to persist a message without executing the agent. */
+  trigger_mode?: ChatTriggerMode;
+}
+
+/** Response of `POST /internal/agent_builder/executions/{id}/abort`. */
+export interface AbortExecutionResponse {
+  acknowledged: boolean;
+  /** True when the run wound down and its `execution_aborted` event was saved before returning. */
+  terminal_persisted: boolean;
 }
 
 export type ChatResponse = Omit<

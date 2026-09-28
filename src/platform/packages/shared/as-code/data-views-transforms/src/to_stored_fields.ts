@@ -24,6 +24,7 @@ import {
   RUNTIME_FIELD_COMPOSITE_TYPE,
   type AsCodeCompositeRuntimeField,
   type AsCodeDataViewSpec,
+  type AsCodeFieldFormat,
   type AsCodeFieldSettings,
   type AsCodeRuntimeField,
   type AsCodeSavedCompositeRuntimeField,
@@ -31,6 +32,8 @@ import {
   type AsCodeSavedFieldSettings,
   type AsCodeSavedRuntimeField,
 } from '@kbn/as-code-data-views-schema';
+import { camelCase } from 'lodash';
+import { isDurationFormat, isHistogramFormat, camelCaseKeys, isColorFormat } from './utils';
 
 export function isRuntimeField(
   field: AsCodeFieldSettings | AsCodeSavedFieldSettings
@@ -92,22 +95,70 @@ export function toStoredFieldFormats(
   const fieldFormats: DataViewSpec['fieldFormats'] = {};
   for (const [name, field] of Object.entries(fieldSettings)) {
     if ('format' in field && field.format) {
+      const params = toStoredFieldFormatParams(field.format);
       fieldFormats[name] = {
         id: field.format.type,
-        ...(field.format.params ? { params: field.format.params } : {}),
+        ...(params ? { params } : {}),
       };
     }
     if (!isCompositeRuntimeField(field)) continue;
     for (const [subName, subField] of Object.entries(field.fields)) {
       if ('format' in subField && subField.format) {
+        const params = toStoredFieldFormatParams(subField.format);
         fieldFormats[`${name}.${subName}`] = {
           id: subField.format.type,
-          ...(subField.format.params ? { params: subField.format.params } : {}),
+          ...(params ? { params } : {}),
         };
       }
     }
   }
   return fieldFormats;
+}
+
+export function toStoredFieldFormatParams(
+  format: AsCodeFieldFormat
+): NonNullable<DataViewSpec['fieldFormats']>[string]['params'] | undefined {
+  if (!('params' in format) || !format.params || Object.keys(format.params).length === 0) {
+    return undefined;
+  }
+
+  if (isDurationFormat(format)) {
+    const outputFormat = format.params.output_format
+      ? camelCase(format.params.output_format)
+      : undefined;
+
+    return {
+      ...camelCaseKeys(format.params),
+      ...(outputFormat ? { outputFormat } : {}),
+    };
+  }
+
+  if (isHistogramFormat(format)) {
+    return {
+      id: format.params.format,
+      params: {
+        pattern: format.params.pattern,
+      },
+    };
+  }
+
+  if (isColorFormat(format)) {
+    const params = camelCaseKeys(format.params);
+
+    if (format.params.field_type !== 'boolean') {
+      return params;
+    }
+
+    return {
+      ...params,
+      colors: format.params.colors.map((color) => ({
+        ...color,
+        boolean: color.boolean.toString(),
+      })),
+    };
+  }
+
+  return camelCaseKeys(format.params);
 }
 
 /**

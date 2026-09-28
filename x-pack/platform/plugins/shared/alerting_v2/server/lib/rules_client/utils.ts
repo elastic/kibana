@@ -12,6 +12,7 @@ import {
   IMMUTABLE_RULE_FIELDS,
   isNoDataQueryConsistentWithStrategy,
   isNoDataQueryProvidedForStrategy,
+  isRecoveryTransitionConsistentWithStrategy,
   isRecoveryQueryConsistentWithStrategy,
   isRecoveryQueryProvidedForStrategy,
   isSignalQueryBreachOnly,
@@ -223,6 +224,43 @@ const toApiQuery = (query: RuleSavedObjectAttributes['query']): Query => {
   return withoutBreach;
 };
 
+type StoredStateTransition = RuleSavedObjectAttributes['state_transition'];
+type ApiStateTransition = RuleResponse['state_transition'];
+
+const toStoredOperator = (operator: 'and' | 'or' | undefined): 'AND' | 'OR' | undefined => {
+  if (operator === undefined) return undefined;
+  return operator === 'and' ? 'AND' : 'OR';
+};
+
+const toApiOperator = (operator: 'AND' | 'OR' | undefined): 'and' | 'or' | undefined => {
+  if (operator === undefined) return undefined;
+  return operator === 'AND' ? 'and' : 'or';
+};
+
+/**
+ * The API uses lowercase `and`/`or` for `state_transition.*_operator`; the SO
+ * schema keeps the legacy uppercase literals so this rename doesn't require a
+ * saved-object migration.
+ */
+const toStoredStateTransition = (stateTransition: ApiStateTransition): StoredStateTransition =>
+  stateTransition
+    ? {
+        ...stateTransition,
+        pending_operator: toStoredOperator(stateTransition.pending_operator),
+        recovering_operator: toStoredOperator(stateTransition.recovering_operator),
+      }
+    : stateTransition;
+
+/** Inverse of {@link toStoredStateTransition}. */
+const toApiStateTransition = (stateTransition: StoredStateTransition): ApiStateTransition =>
+  stateTransition
+    ? {
+        ...stateTransition,
+        pending_operator: toApiOperator(stateTransition.pending_operator),
+        recovering_operator: toApiOperator(stateTransition.recovering_operator),
+      }
+    : stateTransition;
+
 /**
  * Converts a create-rule API body into saved object attributes.
  */
@@ -230,9 +268,9 @@ export function transformCreateRuleBodyToRuleSoAttributes(
   data: CreateRuleData,
   serverFields: {
     enabled: boolean;
-    createdBy: string | null;
+    createdBy: RuleSavedObjectAttributes['createdBy'];
     createdAt: string;
-    updatedBy: string | null;
+    updatedBy: RuleSavedObjectAttributes['updatedBy'];
     updatedAt: string;
     version: number;
   }
@@ -243,7 +281,6 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     metadata: {
       name: data.metadata.name,
       description: data.metadata.description,
-      owner: data.metadata.owner,
       tags: data.metadata.tags,
       builder_type: data.metadata.builder_type,
       version,
@@ -256,7 +293,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     query: toStoredQuery(data.query),
     recovery_strategy: data.recovery_strategy,
     no_data_strategy: data.no_data_strategy,
-    state_transition: data.state_transition,
+    state_transition: toStoredStateTransition(data.state_transition),
     grouping: data.grouping,
     artifacts: data.artifacts,
     ...restServerFields,
@@ -312,7 +349,11 @@ function resolveBuilderType(
 export function buildUpdateRuleAttributes(
   existingAttrs: RuleSavedObjectAttributes,
   updateData: UpdateRuleData,
-  serverFields: { updatedBy: string | null; updatedAt: string; version: number }
+  serverFields: {
+    updatedBy: RuleSavedObjectAttributes['updatedBy'];
+    updatedAt: string;
+    version: number;
+  }
 ): RuleSavedObjectAttributes {
   const { version, ...restServerFields } = serverFields;
   return {
@@ -339,7 +380,7 @@ export function buildUpdateRuleAttributes(
     no_data_strategy: nullToUndefined(updateData.no_data_strategy, existingAttrs.no_data_strategy),
     // `null` → clear (null). SO schema uses `maybe(nullable())`.
     state_transition: applyNullableUpdate(
-      updateData.state_transition,
+      toStoredStateTransition(updateData.state_transition),
       existingAttrs.state_transition
     ),
     // `null` → clear (undefined). SO schema uses `maybe()` without `nullable()`.
@@ -413,6 +454,13 @@ export function validateMergedRuleAttributes(
       code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
       details: { rule_id: ruleId },
     },
+    {
+      valid: isRecoveryTransitionConsistentWithStrategy(attrs),
+      message:
+        'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).',
+      code: ALERTING_ERROR_CODES.INVALID_STATE_TRANSITION_CONFIG,
+      details: { rule_id: ruleId },
+    },
   ];
 
   for (const invariant of invariants) {
@@ -440,7 +488,6 @@ export function transformRuleSoAttributesToRuleApiResponse(
     metadata: {
       name: attrs.metadata.name,
       description: attrs.metadata.description,
-      owner: attrs.metadata.owner,
       tags: attrs.metadata.tags,
       builder_type: attrs.metadata.builder_type,
       version: attrs.metadata.version ?? RULE_VERSION_FALLBACK,
@@ -453,7 +500,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
     query: toApiQuery(attrs.query),
     recovery_strategy: attrs.recovery_strategy,
     no_data_strategy: attrs.no_data_strategy,
-    state_transition: attrs.state_transition,
+    state_transition: toApiStateTransition(attrs.state_transition),
     grouping: attrs.grouping,
     // Project to the public artifact contract. Migrated rules may still carry a
     // legacy `value` on disk for model-version rollback; echoing it in the API

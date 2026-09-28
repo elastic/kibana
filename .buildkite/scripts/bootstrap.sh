@@ -32,14 +32,17 @@ BOOTSTRAP_PARAMS=()
 if [[ "${BOOTSTRAP_ALWAYS_FORCE_INSTALL:-}" ]]; then
   BOOTSTRAP_PARAMS+=(--force-install)
 fi
+if [[ "${BOOTSTRAP_NO_FROZEN_LOCKFILE:-}" ]]; then
+  BOOTSTRAP_PARAMS+=(--no-frozen-lockfile)
+fi
 
 # Use the packages that are baked into the agent image, if they exist, as a cache
 # But only for agents not mounting the workspace on a local ssd or in memory
 # It actually ends up being slower to move all of the tiny files between the disks vs extracting archives from the yarn cache
 if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
-  if [[ -d ~/.cache/kibana/pnpm/node_modules ]]; then
-    echo "Using ~/.cache/kibana/pnpm/node_modules as a starting point"
-    mv ~/.cache/kibana/pnpm/node_modules ./
+  if [[ -d ~/.cache/kibana/pnpm/node_modules ]] && [[ ! -d ./node_modules ]]; then
+      echo "Using ~/.cache/kibana/pnpm/node_modules as a starting point"
+      mv ~/.cache/kibana/pnpm/node_modules ./
   fi
   if [[ -d ~/.cache/kibana/pnpm/.pnpm-store ]]; then
     echo "Using ~/.cache/kibana/pnpm/.pnpm-store as a starting point"
@@ -49,14 +52,13 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
   if [[ -z "${KBN_BOOTSTRAP_NO_PREBUILT:-}" ]]; then
     if download_tmp_artifact moon-cache.tar.zst "$HOME" "$BUILDKITE_BUILD_ID" false; then
       echo "Found moon-cache.tar.zst artifact, extracting to ./.moon/cache"
-      mkdir -p ./.moon/cache
-      echo "Extracting moon-cache.tar.zst to ./.moon/cache"
-      tar -xf ~/moon-cache.tar.zst -I zstd -C ./
+      extract_moon_cache ~/moon-cache.tar.zst || true
     fi
     .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
   fi
 elif [[ "$(pwd)" == "/dev/shm"* ]]; then
-  yarn config set cache-folder /dev/shm/yarn-cache > /dev/null
+  # pnpm store on tmpfs so the install doesn't fill the small root disk
+  export npm_config_store_dir=/dev/shm/pnpm-store
   if [[ -f ~/.kibana/node_modules.tar.zst ]]; then
     echo "Extracting ~/.kibana/node_modules.tar.zst"
     tar -xf ~/.kibana/node_modules.tar.zst -I "zstd -T0" -C ./
@@ -74,7 +76,8 @@ if ! (pnpm kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"); then
   rm -rf node_modules
 
   echo "--- pnpm install and bootstrap, attempt 2"
-  pnpm kbn bootstrap --force-install
+  BOOTSTRAP_PARAMS+=(--force-install)
+  pnpm kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"
 fi
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then

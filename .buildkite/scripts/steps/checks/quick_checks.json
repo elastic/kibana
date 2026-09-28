@@ -101,7 +101,8 @@
     "mayChangeFiles": true
   },
   {
-    "script": ".buildkite/scripts/steps/checks/unused_deps.sh"
+    "script": ".buildkite/scripts/steps/checks/unused_deps.sh",
+    "requiresStableWorkspace": true
   },
   {
     "script": ".buildkite/scripts/steps/checks/jest_negative.sh"

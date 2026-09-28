@@ -8,8 +8,9 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 // have to copy `isMac` from `@kbn/shared-ux-utility` to get around allowlist
@@ -24,8 +25,22 @@ interface AppMenuHistoryComponentProps {
 const COMMAND_KEY = isMac ? '⌘' : 'CTRL';
 
 export const AppMenuHistoryComponent = ({ historyConfig }: AppMenuHistoryComponentProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  if (!historyConfig?.undo && !historyConfig?.redo) {
+    return null;
+  }
+
   return (
-    <>
+    <div
+      css={css`
+        display: flex;
+        align-items: center;
+        margin-inline-end: ${euiTheme.size.s};
+        padding-inline-end: ${euiTheme.size.m};
+        border-inline-end: ${euiTheme.border.thin};
+      `}
+    >
       {historyConfig?.undo && (
         <EuiToolTip
           content={
@@ -43,6 +58,7 @@ export const AppMenuHistoryComponent = ({ historyConfig }: AppMenuHistoryCompone
               defaultMessage: 'Undo',
             })}
             color="text"
+            size="xs"
             disabled={historyConfig.undo.disabled}
             iconType={'undo'}
             onClick={historyConfig.undo.onClick}
@@ -66,12 +82,13 @@ export const AppMenuHistoryComponent = ({ historyConfig }: AppMenuHistoryCompone
               defaultMessage: 'Redo',
             })}
             color="text"
+            size="xs"
             disabled={historyConfig.redo.disabled}
             iconType={'redo'}
             onClick={historyConfig.redo.onClick}
           />
         </EuiToolTip>
       )}
-    </>
+    </div>
   );
 };
