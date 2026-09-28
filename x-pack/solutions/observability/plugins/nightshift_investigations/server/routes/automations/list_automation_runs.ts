@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { notFound, serverUnavailable } from '@hapi/boom';
+import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
@@ -20,10 +20,10 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
     description: 'Returns run history for a nightshift automation.',
   },
   security: {
-    authz: { requiredPrivileges: ['manage_nightshift', 'read_nightshift'] },
+    authz: { requiredPrivileges: ['read_nightshift'] },
   },
   params: z.object({
-    path: z.object({ id: z.string().min(1) }),
+    path: z.object({ id: z.string().min(1).max(512) }),
     query: z.object({
       page: z.coerce.number().int().min(1).optional().default(1),
       size: z.coerce.number().int().min(1).max(100).optional().default(20),
@@ -49,10 +49,6 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
       NIGHTSHIFT_AUTOMATION_SO_TYPE,
       params.path.id
     );
-    if (!so) {
-      throw notFound(`Automation ${params.path.id} not found`);
-    }
-
     if (!so.attributes.workflowId) {
       return { runs: [], total: 0, page: params.query.page, size: params.query.size };
     }
