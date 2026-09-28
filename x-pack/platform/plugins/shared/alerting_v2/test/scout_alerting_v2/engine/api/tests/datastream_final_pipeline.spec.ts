@@ -77,7 +77,7 @@ apiTest.describe(
       );
 
       apiTest(
-        `${dataStreamName}: stamps @timestamp on writes that omit it`,
+        `${dataStreamName}: stamps timestamp on writes that omit it`,
         async ({ esClient }) => {
           await esClient.index({ index: dataStreamName, document, refresh: 'wait_for' });
 
