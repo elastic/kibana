@@ -75,8 +75,13 @@ const ActionableSummaryComponent: React.FC<Props> = ({
 
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
 
+  // Only a persisted discovery can be attached, so "Add to chat" is not offered otherwise.
+  const persistedAttackDiscovery = isAttackDiscoveryAlert(attackDiscovery)
+    ? attackDiscovery
+    : undefined;
+
   const openAgentBuilderFlyout = useAttackDiscoveryAttachment(
-    isAttackDiscoveryAlert(attackDiscovery) ? attackDiscovery : undefined,
+    persistedAttackDiscovery,
     replacements
   );
 
@@ -98,14 +103,16 @@ const ActionableSummaryComponent: React.FC<Props> = ({
 
         <EuiFlexItem grow={false}>
           {isAgentChatExperienceEnabled ? (
-            <NewAgentBuilderAttachment
-              onClick={openAgentBuilderFlyout}
-              size="xs"
-              telemetry={{
-                pathway: 'attack_discovery_bottom',
-                attachments: ['attack_discovery'],
-              }}
-            />
+            persistedAttackDiscovery != null && (
+              <NewAgentBuilderAttachment
+                onClick={openAgentBuilderFlyout}
+                size="xs"
+                telemetry={{
+                  pathway: 'attack_discovery_bottom',
+                  attachments: ['attack_discovery'],
+                }}
+              />
+            )
           ) : (
             <ViewInAiAssistant
               compact={true}

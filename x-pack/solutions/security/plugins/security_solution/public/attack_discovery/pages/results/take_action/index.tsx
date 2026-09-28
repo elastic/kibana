@@ -197,10 +197,13 @@ const TakeActionComponent: React.FC<Props> = ({
   const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled, hasValidAgentBuilderLicense } =
     useAgentBuilderAvailability();
   const attackDiscovery = attackDiscoveries.length === 1 ? attackDiscoveries[0] : undefined;
-  const openAgentBuilderFlyout = useAttackDiscoveryAttachment(
+  // Only a persisted discovery can be attached, so "Add to chat" is not offered otherwise.
+  const persistedAttackDiscovery =
     attackDiscovery != null && isAttackDiscoveryAlert(attackDiscovery)
       ? attackDiscovery
-      : undefined,
+      : undefined;
+  const openAgentBuilderFlyout = useAttackDiscoveryAttachment(
+    persistedAttackDiscovery,
     replacements
   );
   const reportAddToChatClick = useReportAddToChat();
@@ -353,7 +356,7 @@ const TakeActionComponent: React.FC<Props> = ({
 
     const aiItems = isSingleAttackDiscovery
       ? isAgentChatExperienceEnabled
-        ? hasAgentBuilderPrivilege
+        ? hasAgentBuilderPrivilege && persistedAttackDiscovery != null
           ? [
               {
                 'data-test-subj': 'viewInAgentBuilder',
@@ -404,6 +407,7 @@ const TakeActionComponent: React.FC<Props> = ({
     addToCaseDisabled,
     isAgentChatExperienceEnabled,
     hasAgentBuilderPrivilege,
+    persistedAttackDiscovery,
     isAddToChatDisabled,
     isAssistantVisible,
     onViewInAgentBuilder,
