@@ -186,7 +186,7 @@ describe('AlertingPage', () => {
     ).toBeInTheDocument();
     expect(screen.getByTestId('fleetAlertingEngineTab-v2')).toHaveTextContent('Kibana ES|QL Rules');
     expect(screen.getByTestId('fleetAlertingEngineTab-v1')).toHaveTextContent(
-      'Kibana Standard Rules'
+      'Standard Rules'
     );
     expect(screen.getByText('[System] Metrics template')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: '[System] Metrics template' })).toHaveAttribute(
