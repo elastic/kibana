@@ -6,7 +6,9 @@
  */
 
 import type { CoreStart, Logger } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { runSavedAutomation, type RunAutomationResult } from '../save_automation/handler';
@@ -58,13 +60,13 @@ export const runAutomationHandler = async ({
   });
 
   const serverBasePath = (await getCoreStart()).http.basePath.serverBasePath;
-  const spaceSegment = spaceId && spaceId !== 'default' ? `/s/${spaceId}` : '';
+  const spaceSegment = spaceId && spaceId !== DEFAULT_SPACE_ID ? `/s/${spaceId}` : '';
   const workflowBaseUrl = `${serverBasePath}${spaceSegment}/app/workflows/${encodeURIComponent(
     params.workflowId
   )}`;
 
   if (!runResult.started) {
-    return runResult;
+    return { ...runResult, workflowUrl: workflowBaseUrl };
   }
 
   const workflowUrl = `${workflowBaseUrl}?tab=executions&executionId=${encodeURIComponent(
@@ -74,7 +76,7 @@ export const runAutomationHandler = async ({
   return {
     ...runResult,
     workflowUrl,
-    statusCheckHint: `Use platform.core.get_workflow_execution_status with executionId "${runResult.executionId}" to check progress. The user can ask you for a status update at any time.`,
+    statusCheckHint: `Use ${platformCoreTools.getWorkflowExecutionStatus} with executionId "${runResult.executionId}" to check progress. The user can ask you for a status update at any time.`,
   };
 };
 

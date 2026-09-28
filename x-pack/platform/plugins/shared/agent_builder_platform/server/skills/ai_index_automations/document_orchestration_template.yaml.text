@@ -1,0 +1,105 @@
+version: "1"
+# Bottom-Up strategy — discovers a bounded corpus and runs one summary workflow per document.
+#
+# This is a working workflow, not a sketch. Edit the `consts` block and it runs as it stands;
+# everything below `consts` is already correct and does not need to be rewritten to make it work.
+# The per-document prompt, verification and write are `document-summary-template`. Do not paste
+# them into the parallel branch.
+#
+# Installed by platform.context_engine.install_automation_template. The tool fills the consts.
+# Do not save this YAML yourself. Each branch calls the system workflow
+# system-context-engine-document-summary. That workflow is already installed and is not attached
+# to the AI index.
+#
+# A parallel `foreach` throws above 100 items. `parallel_batch_size` stays at that ceiling;
+# `concurrency.max` is how many summaries run at once, not how many rows a batch may hold.
+name: Document KI orchestration
+description: >
+  Summarises each document in a bounded corpus into its own Knowledge Indicator by running the
+  document summary workflow over the rows, several at a time.
+enabled: true
+
+consts:
+  # The Context Engine AI index the indicators are written into.
+  ai_index_id: __AI_INDEX_ID__
+  # The index the documents are read from.
+  source_index: __SOURCE_INDEX__
+  # The field used as the document's title.
+  title_field: __TITLE_FIELD__
+  # The field holding the document body.
+  body_field: __BODY_FIELD__
+  # The agreed corpus filter, as a complete ES|QL line. Empty takes the whole index.
+  corpus_filter: __CORPUS_FILTER__
+  # Upper bound on documents summarised in one run. Each costs a model call.
+  max_documents: __MAX_DOCUMENTS__
+  # Bodies are truncated before they reach the prompt so one long document cannot exhaust the
+  # context window and silently drop the rest of the batch.
+  body_max_chars: __BODY_MAX_CHARS__
+  # Parallel fan-out ceiling. Do not raise this above 100.
+  parallel_batch_size: 100
+  no_rows: []
+
+tags:
+  - document-ki
+  - ce-template:document_orchestration
+
+triggers:
+  - type: manual
+
+steps:
+  # Fetched once, outside the fan-out, and handed to every summary. Without it the model only
+  # ever sees one document's text, so the access patterns it writes name fields that do not exist
+  # and the KI fails verification — which costs the whole per-document model call.
+  - name: fetch_mapping
+    type: elasticsearch.request
+    with:
+      method: GET
+      path: /{{ consts.source_index }}/_mapping
+
+  - name: discover_documents
+    type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM {{ consts.source_index }} METADATA _id
+        {{ consts.corpus_filter }}
+        | EVAL body = SUBSTRING(`{{ consts.body_field }}`, 1, {{ consts.body_max_chars }})
+        | KEEP _id, `{{ consts.title_field }}`, body
+        | LIMIT {{ consts.max_documents }}
+
+  # One parallel step per chunk, so a run never exceeds the fan-out ceiling.
+  - name: summarize_batches
+    type: foreach
+    foreach: "${{ steps.discover_documents.output.values | default: consts.no_rows | chunk: consts.parallel_batch_size }}"
+    steps:
+      # Copies the chunk so the inner parallel's foreach.item is one row, not the batch.
+      - name: current_batch
+        type: data.set
+        with:
+          rows: "${{ foreach.item }}"
+
+      - name: summarize_documents
+        type: parallel
+        # One document that fails to summarise does not fail the run.
+        mode: settled
+        concurrency:
+          # Five model calls in flight. count-waiting stays at its default (true): a branch
+          # parked on inference still holds its slot, so this width is the real cap on
+          # concurrent prompt load.
+          max: 5
+        foreach: "${{ steps.current_batch.output.rows }}"
+        steps:
+          # One child execution per document. The branch is a single step so it does not
+          # re-read summarize_document by name while other branches are running, and so the
+          # summary workflow can keep its verification `if`.
+          # Column order comes from the `KEEP` above: _id, title, body.
+          - name: summarize_document
+            type: workflow.execute
+            with:
+              workflow-id: __DOCUMENT_SUMMARY_WORKFLOW_ID__
+              inputs:
+                ai_index_id: "{{ consts.ai_index_id }}"
+                source_index: "{{ consts.source_index }}"
+                doc_id: "{{ foreach.item[0] }}"
+                title: "{{ foreach.item[1] }}"
+                body: "{{ foreach.item[2] }}"
+                mapping: "{{ steps.fetch_mapping.output | json }}"

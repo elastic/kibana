@@ -16,14 +16,35 @@ import {
   kiShapesReference,
 } from '../context_engine_shared';
 import { contextEngineSkillAvailability } from '../context_engine_skill_availability';
+import CONTEXT_ENGINE_DOCUMENT_ORCHESTRATION_TEMPLATE from './document_orchestration_template.yaml.text';
+import DOCUMENT_SUMMARY_YAML from './document_summary_workflow.yaml.text';
+import CONTEXT_ENGINE_INDEX_METADATA_TEMPLATE from './index_metadata_template.yaml.text';
+import CONTEXT_ENGINE_UNIT_PROFILE_TEMPLATE from './unit_profile_template.yaml.text';
+
+const CONTEXT_ENGINE_DOCUMENT_SUMMARY_WORKFLOW = { yaml: DOCUMENT_SUMMARY_YAML };
 import {
   aiIndexAutomationsSkill,
-  DOCUMENT_TEMPLATE_NAME,
-  INDEX_METADATA_TEMPLATE_NAME,
   TARGETED_KI_WRITER_TEMPLATE_NAME,
   UNIT_PROFILE_TEMPLATE_NAME,
 } from './ai_index_automations_skill';
 
+const INDEX_METADATA_TEMPLATE_NAME = 'index-metadata-template';
+const DOCUMENT_TEMPLATE_NAME = 'document-template';
+
+const attached = (name: string): string => {
+  const reference = (aiIndexAutomationsSkill.referencedContent ?? []).find(
+    (entry) => entry.name === name
+  );
+  if (!reference) {
+    throw new Error(`template ${name} is not attached to the skill`);
+  }
+  return reference.content;
+};
+
+// Every workflow this skill is responsible for, whether the agent reads it here or the install
+// tool ships it. The structural rules below hold for all of them; only the two attached ones are
+// content the agent is handed. `document-template` is the per-document workflow the orchestration
+// calls, since that is where the indicator is built and written.
 const TEMPLATE_NAMES: readonly string[] = [
   INDEX_METADATA_TEMPLATE_NAME,
   UNIT_PROFILE_TEMPLATE_NAME,
@@ -31,10 +52,12 @@ const TEMPLATE_NAMES: readonly string[] = [
   TARGETED_KI_WRITER_TEMPLATE_NAME,
 ];
 
-const templates = () =>
-  (aiIndexAutomationsSkill.referencedContent ?? []).filter(({ name }) =>
-    TEMPLATE_NAMES.includes(name)
-  );
+const templates = (): Array<{ name: string; content: string }> => [
+  { name: INDEX_METADATA_TEMPLATE_NAME, content: CONTEXT_ENGINE_INDEX_METADATA_TEMPLATE },
+  { name: UNIT_PROFILE_TEMPLATE_NAME, content: CONTEXT_ENGINE_UNIT_PROFILE_TEMPLATE },
+  { name: DOCUMENT_TEMPLATE_NAME, content: CONTEXT_ENGINE_DOCUMENT_SUMMARY_WORKFLOW.yaml },
+  { name: TARGETED_KI_WRITER_TEMPLATE_NAME, content: attached(TARGETED_KI_WRITER_TEMPLATE_NAME) },
+];
 
 interface WorkflowStep {
   name?: string;
@@ -134,67 +157,47 @@ describe('aiIndexAutomationsSkill', () => {
     expect(aiIndexAutomationsSkill.content.length).toBeGreaterThan(0);
   });
 
-  it('carries one workflow template per strategy that ships with one, plus the shared references', () => {
+  it('carries the unit profile and the targeted writer, plus the shared references', () => {
     const names = (aiIndexAutomationsSkill.referencedContent ?? []).map(({ name }) => name);
 
     expect(names).toEqual([
-      'index-metadata-template',
       'unit-profile-template',
-      'document-template',
       'targeted-ki-writer',
       KI_SHAPES_REFERENCE_NAME,
       STRATEGY_CATALOG_REFERENCE_NAME,
     ]);
   });
 
-  it('ships each template as a complete workflow rather than a fragment', () => {
-    for (const reference of templates()) {
+  it('attaches every reference at the skill root, where the content points', () => {
+    for (const reference of aiIndexAutomationsSkill.referencedContent ?? []) {
       expect(reference.relativePath).toBe('.');
-      // A template is only a starting point if it runs: it needs the sink, the gate that guards
-      // it, and the `consts` block that is the whole of the adaptation.
-      expect(reference.content).toContain('consts:');
-      expect(reference.content).toContain('ai_index_id');
-      expect(reference.content).toContain('context-engine.createKi');
-      expect(reference.content).toContain('verifiers:');
-      expect(reference.content).toContain('esql-valid-runtime');
     }
   });
 
-  it('verifies inside create_ki and reports a rejected KI from its verification output', () => {
-    for (const name of TEMPLATE_NAMES) {
-      const template = parsedTemplate(name);
-      const createKi = stepNamed(template, 'create_ki');
-      const gate = stepNamed(template, 'check_verification');
-      const failureLog = stepNamed(template, 'log_verification_failure');
-
-      expect(allSteps(template.steps).map(({ type }) => type)).not.toContain(
-        'context-engine.verifyKi'
-      );
-      expect(createKi.type).toBe('context-engine.createKi');
-      expect(createKi.with?.verifiers).toEqual(['esql-valid-syntax', 'esql-valid-runtime']);
-      expect(createKi.with?.ki).toBeDefined();
-      expect(gate.type).toBe('if');
-      expect(gate.condition).toBe('steps.create_ki.output.verification.passed : false');
-      expect(gate.else).toBeUndefined();
-      expect(gate.steps).toContain(failureLog);
-      expect(failureLog.type).toBe('console');
-      expect(failureLog.with?.message).toContain(
-        '{{ steps.create_ki.output.verification.results | json }}'
-      );
-    }
+  it('attaches the unit profile as the exact YAML the install tool renders', () => {
+    expect(attached(UNIT_PROFILE_TEMPLATE_NAME)).toBe(CONTEXT_ENGINE_UNIT_PROFILE_TEMPLATE);
   });
 
-  it('pins every ai.prompt to the default connector, which the user can change after the save', () => {
+  it('installs document, index-metadata and unit-profile automations through the tool', () => {
+    const { content } = aiIndexAutomationsSkill;
+
+    expect(content).toContain('platform.context_engine.install_automation_template');
+    expect(content).toContain('system-context-engine-document-summary');
+    expect(content).toMatch(/calling it again replaces/i);
+    expect(content).not.toContain('document-summary-template');
+    expect(content).not.toContain('document_workflow_id');
+  });
+
+  it('routes ai.prompt via the context-engine-prompt feature rather than a literal connector', () => {
     const blocks = templates().flatMap(({ content: yaml }) => aiPromptBlocks(yaml));
 
     expect(blocks.length).toBeGreaterThan(0);
     for (const block of blocks) {
-      expect(block).toMatch(/^\s*connector-id: \.google-gemini-3\.5-flash-chat_completion\s*$/m);
+      expect(block).toContain('connector-id-by-feature: context_engine_prompt');
     }
-    // The connector belongs on the prompt steps only; nothing else in a template names one.
+    // The feature routes the call, so no template names a literal connector anywhere.
     for (const reference of templates()) {
-      const pinned = reference.content.match(/connector-id:/g) ?? [];
-      expect(pinned).toHaveLength(aiPromptBlocks(reference.content).length);
+      expect(reference.content).not.toMatch(/^\s*connector-id: /m);
     }
   });
 
@@ -217,19 +220,11 @@ describe('aiIndexAutomationsSkill', () => {
       // No minimum on the prompt's access_patterns array: an invented query is worse than none.
       const accessPatternsSchema = yaml.match(/access_patterns:\n\s+type: array\n(\s+)(\w+):/);
       expect(accessPatternsSchema?.[2]).toBe('items');
-      expect(yaml).toMatch(/Return\s+an\s+empty\s+array\s+rather\s+than\s+an\s+invented\s+query/);
       // `default: nil` turns an empty list into null, which the createKi schema drops.
       expect(yaml).toMatch(/esql: "\$\{\{ [^"]*\| map: 'esql_example' \| default: nil \}\}"/);
       // The content block says so too, instead of rendering an empty heading.
       expect(yaml).toMatch(/access_patterns\.size > 0/);
     }
-  });
-
-  it('tells targeted-ki-writer authors to leave the esql key out for a KI with no query', () => {
-    const targeted = templates().find(({ name }) => name === TARGETED_KI_WRITER_TEMPLATE_NAME);
-
-    expect(targeted?.content).toMatch(/leaves the `esql` key out entirely/);
-    expect(targeted?.content).toMatch(/never an empty list/);
   });
 
   it('documents the null-omits-attribute contract for attributes.esql in the step contract', () => {
@@ -240,75 +235,11 @@ describe('aiIndexAutomationsSkill', () => {
     );
   });
 
-  it('pages the unit template on a cursor', () => {
-    const unitTemplate = templates().find(({ name }) => name === UNIT_PROFILE_TEMPLATE_NAME);
-
-    expect(unitTemplate?.content).toContain('type: while');
-    expect(unitTemplate?.content).toMatch(/variables\.cursor/);
-    expect(unitTemplate?.content).toMatch(/\| last \| first/);
-    // The three strategy answers as consts.
-    for (const constName of [
-      'unit_index:',
-      'unit_key:',
-      'activity_field:',
-      'catalog_index:',
-      'discovery_filter:',
-      'batch_size:',
-    ]) {
-      expect(unitTemplate?.content).toContain(constName);
-    }
-  });
-
-  it('writes targeted KIs without a model call, from consts', () => {
-    const writer = templates().find(({ name }) => name === TARGETED_KI_WRITER_TEMPLATE_NAME);
-
-    expect(writer?.content).not.toContain('ai.prompt');
-    expect(writer?.content).toContain('type: constraint');
-    expect(writer?.content).toMatch(/ki: "\$\{\{ foreach\.item\.ki \}\}"/);
-  });
-
   describe('unit template re-runs', () => {
     const template = () => parsedTemplate(UNIT_PROFILE_TEMPLATE_NAME);
     const stepNames = () => allSteps(template().steps).map(({ name }) => name);
     const unitTemplateYaml = () =>
       templates().find(({ name }) => name === UNIT_PROFILE_TEMPLATE_NAME)?.content ?? '';
-
-    it('profiles every unit on every run, with no gate that skips one', () => {
-      for (const removed of [
-        'fingerprint_input',
-        'source_fingerprint',
-        'read_existing_ki',
-        'freshness',
-        'skip_unchanged_unit',
-      ]) {
-        expect(stepNames()).not.toContain(removed);
-      }
-      expect(allSteps(template().steps).map(({ type }) => type)).not.toContain('loop.continue');
-      expect(unitTemplateYaml()).not.toMatch(/freshness|fingerprint|loop\.continue/);
-    });
-
-    it('carries no const or attribute that only a freshness check would read', () => {
-      const [ki] = assembledKis(UNIT_PROFILE_TEMPLATE_NAME);
-
-      for (const removed of ['profile_version', 'destination_index', 'freshness_field']) {
-        expect(template().consts).not.toHaveProperty(removed);
-      }
-      expect(ki.attributes).not.toHaveProperty('source_fingerprint');
-    });
-
-    it('carries the activity range in the text only, not as a separate attribute', () => {
-      const [ki] = assembledKis(UNIT_PROFILE_TEMPLATE_NAME);
-      const discovery = stepNamed(template(), 'discover_units').with?.query as string;
-      const unitContext = stepNamed(template(), 'unit_context').with ?? {};
-
-      expect(ki.attributes).not.toHaveProperty('source_updated_at');
-      expect(unitContext).not.toHaveProperty('unit_last_seen');
-      // Discovery only lists units; the range comes from `unit_totals`.
-      expect(discovery).not.toContain('activity_field');
-      expect(unitTemplateYaml()).toMatch(
-        /Active from \{\{ steps\.unit_metrics\.output\.first_seen \}\} to \{\{ steps\.unit_metrics\.output\.last_seen \}\}/
-      );
-    });
 
     it('keys each KI on the raw unit key, so keys that differ only in case or punctuation stay apart', async () => {
       const kiId = stepNamed(template(), 'unit_context').with?.ki_id as string;
@@ -321,24 +252,11 @@ describe('aiIndexAutomationsSkill', () => {
       expect(new Set(ids).size).toBe(keys.length);
     });
 
-    it('says a re-run regenerates every unit and replaces its KI by ki_id', () => {
-      expect(unitTemplateYaml()).toMatch(/A re-run regenerates every unit/);
-      expect(unitTemplateYaml()).toMatch(/`ki_id` is derived from the unit/);
-    });
-
     it('reads the catalog record with the other grounding queries, right before the prompt', () => {
       const order = stepNames();
 
       expect(order.indexOf('unit_breakdown')).toBeLessThan(order.indexOf('catalog_record'));
       expect(order.indexOf('catalog_record')).toBe(order.indexOf('profile_unit') - 1);
-      expect(unitTemplateYaml()).toMatch(/# Grounding 3: the unit's own record/);
-    });
-
-    it('lists units in discovery and leaves the counting to unit_totals', () => {
-      const discovery = stepNamed(template(), 'discover_units').with?.query as string;
-
-      expect(discovery).toMatch(/\| STATS BY \{\{ consts\.unit_key \}\}/);
-      expect(discovery).toMatch(/\| KEEP \{\{ consts\.unit_key \}\}\s*$/);
     });
   });
 
@@ -442,7 +360,7 @@ describe('aiIndexAutomationsSkill', () => {
 
     expect(escapedUnit).toBe(esqlLiteral);
     // A raw quote in the cursor would end the string literal and break every page after it.
-    expect(rendered).toContain(`ProductKey > "${esqlLiteral}"`);
+    expect(rendered).toContain(`\`ProductKey\` > "${esqlLiteral}"`);
   });
 
   it('documents the escape as LiquidJS reads it, with backslashes escaped first', () => {
@@ -504,8 +422,8 @@ describe('aiIndexAutomationsSkill', () => {
       const [ki] = assembledKis(DOCUMENT_TEMPLATE_NAME);
 
       expect(referenceUris(ki)).toEqual([
-        'index://{{ consts.source_index }}',
-        'doc://{{ consts.source_index }}/{{ steps.document_context.output.doc_id }}',
+        'index://{{ inputs.source_index }}',
+        'doc://{{ inputs.source_index }}/{{ inputs.doc_id }}',
       ]);
     });
 
@@ -568,8 +486,8 @@ describe('aiIndexAutomationsSkill', () => {
       `${internalNamespaces.workflows}.get_step_definitions`,
       `${internalNamespaces.workflows}.get_trigger_definitions`,
       `${internalNamespaces.workflows}.get_examples`,
-      `${internalNamespaces.workflows}.get_connectors`,
       `${internalNamespaces.workflows}.workflow_execute_step`,
+      'platform.context_engine.install_automation_template',
       'platform.context_engine.save_automation',
       'platform.context_engine.run_automation',
     ]);
@@ -661,22 +579,23 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/all take a raw\s+`yaml` string/);
     });
 
-    it('names each template where its strategy is described, so the brief can cite one', () => {
-      expect(content).toMatch(/Index\/Table Metadata.*\n?.*`index-metadata-template`/);
-      expect(content).toMatch(/Bottom-Up.*\n?.*`document-template`/);
-      expect(content).toMatch(/Cumulative \/ Wiki-style.*\n?.*`unit-profile-template`/);
+    it('names the install tool for each of the three strategies it covers', () => {
+      expect(content).toMatch(/Index\/Table Metadata.*\n?.*install_automation_template/);
+      expect(content).toMatch(/Bottom-Up.*\n?.*install_automation_template/);
+      expect(content).toMatch(/Cumulative \/ Wiki-style.*\n?.*install_automation_template/);
+      expect(content).toContain('system-context-engine-document-summary');
+    });
+
+    it('names the targeted writer, the one template with no install path', () => {
       expect(content).toMatch(/Targeted KIs.*\n?.*`targeted-ki-writer`/);
+      expect(content).toMatch(/There is no install path for it/);
       expect(content).not.toContain('entity-profile-template');
     });
 
-    it('describes the unit template as the three strategy answers written into consts', () => {
-      expect(content).toMatch(/`unit_index` and `unit_key` are the unit/);
-      expect(content).toMatch(/how units are found and refreshed/);
-      expect(content).toMatch(
-        /the metrics, the `activity_field` range\s+and `catalog_index` are what one KI carries/
-      );
-      expect(content).toMatch(/`discovery_filter` and `batch_size` are how units are\s+found/);
-      expect(content).toMatch(/A re-run\s+regenerates every unit/);
+    it('describes the unit install as the three strategy answers', () => {
+      expect(content).toMatch(/The\s+`consts` are the three strategy answers written down/);
+      expect(content).toMatch(/pages through the units on a keyword cursor/);
+      expect(content).toMatch(/a re-run regenerates every unit/);
       expect(content).not.toMatch(/fingerprint|profile_version|freshness_field/);
     });
 
@@ -708,10 +627,16 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/Never rerun a\s+failed call unchanged/);
     });
 
-    it('points the strategies without a template at the one to start from', () => {
-      expect(content).toMatch(/Selective \/ Outlier.*\n?.*start from `document-template`/);
-      expect(content).toMatch(/Atomic Facts.*\n?.*start from `document-template`/);
-      expect(content).toMatch(/Detection \/ Feature.*\n?.*start from `index-metadata-template`/);
+    it('tells the unit install to pass the metrics that separate sibling profiles', () => {
+      expect(content).toContain('`template: unit_profile`');
+      expect(content).toContain('**Pass `metricFields`.**');
+      expect(content).toMatch(/near-identical to a retriever unless their\s+descriptions carry/);
+    });
+
+    it('keeps strategies that need a different prompt off the install tool', () => {
+      expect(content).toMatch(/Selective \/ Outlier.*\n?.*custom workflow/);
+      expect(content).toMatch(/Atomic Facts.*\n?.*custom workflow/);
+      expect(content).toMatch(/Detection \/ Feature.*\n?.*custom workflow/);
     });
 
     it('says what a template already encodes, so it is edited rather than rewritten', () => {
@@ -720,9 +645,11 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/none of them announce themselves/);
     });
 
-    it('has the brief name the template, since a subagent without one writes from nothing', () => {
-      expect(content).toMatch(/\*\*the template it starts from, by name\*\*/);
-      expect(content).toMatch(/rediscovering what the\s+template already encodes/);
+    it('has the brief name the worked automation, since a subagent without one writes from nothing', () => {
+      expect(content).toMatch(
+        /\*\*the workflow it starts from, by name\*\* — `unit-profile-template`/
+      );
+      expect(content).toMatch(/rediscovering what\s+that automation already encodes/);
     });
 
     it('points at the lookup tools that cover built-in and connector step types', () => {
@@ -834,6 +761,8 @@ describe('aiIndexAutomationsSkill', () => {
         '`ai.prompt`',
         '`foreach`',
         '`while`',
+        '`parallel`',
+        '`workflow.execute`',
         '`if`',
         '`data.set`',
         '`console`',
@@ -850,6 +779,8 @@ describe('aiIndexAutomationsSkill', () => {
         'ai.prompt',
         'foreach',
         'while',
+        'parallel',
+        'workflow.execute',
         'if',
         'data.set',
         'console',
@@ -872,25 +803,21 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/one call for the example library rather than one per step/);
     });
 
-    it('names the default connector for every prompt step, inside and outside the templates', () => {
-      expect(content).toMatch(
-        /set its\s+`connector-id` to `\.google-gemini-3\.5-flash-chat_completion`/
-      );
-      expect(content).toMatch(/default model for\s+every prompt step in every automation/);
-      expect(content).toMatch(
-        /a\s+workflow you assemble outside the templates carries it too, on each `ai\.prompt` and `ai\.agent`\s+step/
-      );
-      expect(content).toMatch(/Use a different connector only when the user names one/);
+    it('routes ai.prompt through a named feature rather than a literal connector-id', () => {
+      expect(content).toMatch(/`connector-id-by-feature`/);
+      expect(content).toContain('context_engine_prompt');
+      expect(content).toMatch(/Leave `connector-id`\s+off/);
     });
 
-    it('says the templates carry the default connector and it is not a placeholder', () => {
+    it('says the templates use connector-id-by-feature deliberately, so no literal connector is added', () => {
       expect(content).toMatch(
-        /Every `ai\.prompt` step in the templates carries `connector-id: \.google-gemini-3\.5-flash-chat_completion`/
+        /connector-id-by-feature: context_engine_prompt.*on their `ai\.prompt` steps/s
       );
-      expect(content).toMatch(/That is the default, not a placeholder/);
+      expect(content).toMatch(/do not add a `connector-id`/);
       expect(content).toMatch(
-        /put the same id on any prompt step you add or write outside the templates/
+        /put the same line on any prompt step you add or write outside the templates/
       );
+      expect(content).not.toContain('.google-gemini-3.5-flash-chat_completion');
     });
 
     it('requires ${{ }} for non-strings, since {{ }} stringifies objects and booleans', () => {
@@ -967,10 +894,10 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/not on\s+`context-engine\.createKi`/);
     });
 
-    it('points the pilot bound at the consts the templates already expose', () => {
-      expect(content).toMatch(
-        /`max_documents`, `corpus_filter`, `discovery_filter`, and `batch_size`/
-      );
+    it('points the pilot bound at the arguments the install tool exposes', () => {
+      expect(content).toMatch(/`maxUnits`, `maxDocuments`,\s+`corpusFilter` and `discoveryFilter`/);
+      expect(content).toContain('are arguments to the install tool');
+      expect(content).toMatch(/you do not edit those\s+workflows by hand/);
     });
 
     it('saves the piloted definition rather than a regenerated one', () => {
@@ -1098,9 +1025,12 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('documents only filters a template uses', () => {
-      const templateYaml = templates()
-        .map(({ content: yaml }) => yaml)
-        .join('\n');
+      // Includes the orchestration, which is installed rather than attached, so a filter only it
+      // uses still counts as documented.
+      const templateYaml = [
+        ...templates().map(({ content: yaml }) => yaml),
+        CONTEXT_ENGINE_DOCUMENT_ORCHESTRATION_TEMPLATE,
+      ].join('\n');
       const table = content.slice(content.indexOf('| Filter | Use |')).split('\n\n')[0];
       const documented = table
         .split('\n')

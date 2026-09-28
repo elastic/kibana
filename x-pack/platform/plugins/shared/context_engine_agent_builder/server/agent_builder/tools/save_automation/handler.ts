@@ -7,11 +7,11 @@
 
 import { ATTACHMENT_REF_ACTOR, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import {
-  executeWorkflow,
   hasWorkflowCreatePrivilege,
   hasWorkflowExecutePrivilege,
   hasWorkflowReadPrivilege,
   hasWorkflowUpdatePrivilege,
+  startWorkflow,
 } from '@kbn/agent-builder-tools-base/workflows';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { CoreStart, Logger } from '@kbn/core/server';
@@ -187,15 +187,13 @@ export const tryResolveSavedWorkflowById = async ({
   workflowsManagement,
   workflowId,
   spaceId,
-  request,
 }: {
   workflowsManagement: WorkflowsManagementApi;
   workflowId: string;
   spaceId: string;
-  request: KibanaRequest;
 }): Promise<SavedWorkflowSummary | undefined> => {
   try {
-    const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId, request);
+    const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId);
     return workflow ? { name: workflow.name, enabled: workflow.enabled } : undefined;
   } catch {
     return undefined;
@@ -291,7 +289,7 @@ const assertWorkflowReadAccess = async ({
     );
   }
 
-  const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId, request);
+  const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId);
   if (!workflow) {
     throw new Error(`Workflow '${workflowId}' was not found in this space.`);
   }
@@ -494,7 +492,7 @@ const persistWorkflow = async ({
     // exists. If it does not, `updateWorkflow` would fail with a message about the id rather than
     // about the choice, and the caller has a create available that it may not think to fall back
     // to. A workflow can also have been deleted since the attachment recorded it.
-    const target = await workflowsManagement.getWorkflow(existingWorkflowId, spaceId, request);
+    const target = await workflowsManagement.getWorkflow(existingWorkflowId, spaceId);
     if (!target) {
       throw new Error(
         `Workflow '${existingWorkflowId}' was not found in this space, so there is nothing to ` +
@@ -543,7 +541,7 @@ export const runSavedAutomation = async ({
 
     // A disabled definition cannot be run by id. Asking to save and run is consent to enable it,
     // and `enabled` on its own is the one update a managed workflow accepts.
-    const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId, request);
+    const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId);
     const enabledForRun = workflow?.enabled !== true;
     if (enabledForRun) {
       // Enabling is a write to the saved workflow, and holding execute says nothing about holding
@@ -578,15 +576,28 @@ export const runSavedAutomation = async ({
       }
     }
 
-    const result = await executeWorkflow({
-      workflowId,
+    // Re-read after enabling so the model carries the stored `enabled`, rather than the `false`
+    // the copy above was fetched with.
+    const runnable = enabledForRun
+      ? await workflowsManagement.getWorkflow(workflowId, spaceId)
+      : workflow;
+    if (!runnable) {
+      return {
+        started: false,
+        reason: `Workflow '${workflowId}' was not found in this space, so it was not run.`,
+        ...(enabledForRun && { enabledForRun }),
+      };
+    }
+
+    // A full-corpus run costs a model call per document, so the turn returns the execution id to
+    // poll. `startWorkflow` rather than `executeWorkflow` because the latter waits for the
+    // execution document even when told not to wait for completion, and nothing here reads it.
+    const result = await startWorkflow({
+      workflow: runnable,
       workflowParams: {},
       request,
       spaceId,
       workflowApi: workflowsManagement,
-      // A full-corpus run costs a model call per document, so return the execution id to poll
-      // rather than holding the turn open until it finishes.
-      waitForCompletion: false,
     });
 
     if (!result.success) {
@@ -595,7 +606,7 @@ export const runSavedAutomation = async ({
 
     return {
       started: true,
-      executionId: result.execution.execution_id,
+      executionId: result.executionId,
       ...(enabledForRun && { enabledForRun }),
     };
   } catch (error) {
