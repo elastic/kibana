@@ -7,7 +7,9 @@
 
 import { useCallback, useMemo } from 'react';
 
-import { useLink, useStartServices } from '../../../../../hooks';
+import { i18n } from '@kbn/i18n';
+
+import { useStartServices } from '../../../../../hooks';
 
 import type { IntegrationCardItem } from '..';
 
@@ -15,10 +17,14 @@ import type { IntegrationCardItem } from '..';
 const ONBOARDING_ENABLED_FLAG = 'ingestHub.onboardingEnabled';
 const ONBOARDING_APP_ID = 'onboarding';
 const ONBOARDING_AWS_PATH = '/aws';
+const AWS_TITLE = i18n.translate('xpack.fleet.onboardingOverride.awsTitle', {
+  defaultMessage: 'Amazon Web Services',
+});
+const AWS_DESCRIPTION = i18n.translate('xpack.fleet.onboardingOverride.awsDescription', {
+  defaultMessage: 'Collect logs and metrics from Amazon Web Services (AWS).',
+});
 
 export const AWS_ONBOARDING_PACKAGE_NAME = 'aws';
-// Card id of the top-level aws package. Its policy templates are `epr:aws-<template>`.
-const AWS_PACKAGE_TILE_ID = 'epr:aws';
 
 // hiding tiles that are included in the AWS onboarding flow: https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/ingest_hub/public/onboarding/aws_service_matrix.ts#L188
 const HIDDEN_TILE_NAMES = new Set([
@@ -42,10 +48,10 @@ const HIDDEN_TILE_NAMES = new Set([
   'aws_vpcflow_otel',
   'aws_waf_otel',
 ]);
+const HIDDEN_TILE_IDS = new Set(['epr:aws']);
 
 export function useOnboardingOverride() {
   const { featureFlags, application } = useStartServices();
-  const { getHref } = useLink();
   const isOnboardingEnabled = featureFlags.useBooleanValue(ONBOARDING_ENABLED_FLAG, false);
 
   const onboardingUrl = useMemo(
@@ -67,24 +73,26 @@ export function useOnboardingOverride() {
         return cards;
       }
 
-      return cards.reduce<IntegrationCardItem[]>((kept, card) => {
-        if (card.id === AWS_PACKAGE_TILE_ID) {
-          // Pinned to the overview page so `enableIntegrationTileClickToAdd` cannot send the
-          // tile past the detail page, which is where the handover to onboarding lives.
-          kept.push({
-            ...card,
-            url: getHref('integration_details_overview', {
-              pkgkey: `${card.name}-${card.version}`,
-              ...(card.integration ? { integration: card.integration } : {}),
-            }),
-          });
-        } else if (!HIDDEN_TILE_NAMES.has(card.name)) {
-          kept.push(card);
-        }
-        return kept;
-      }, []);
+      const filtered = cards.filter(
+        (card) => !HIDDEN_TILE_NAMES.has(card.name) && !HIDDEN_TILE_IDS.has(card.id)
+      );
+
+      const onboardingAwsTile: IntegrationCardItem = {
+        id: 'epr:aws',
+        title: AWS_TITLE,
+        description: AWS_DESCRIPTION,
+        icons: [{ type: 'eui', src: 'logoAWS' }],
+        url: onboardingUrl,
+        integration: 'aws',
+        name: 'aws-onboarding',
+        version: '',
+        categories: ['aws'],
+        onCardClick: navigateToOnboarding,
+      };
+
+      return [onboardingAwsTile, ...filtered];
     };
-  }, [isOnboardingEnabled, getHref]);
+  }, [isOnboardingEnabled, navigateToOnboarding, onboardingUrl]);
 
   return { applyOnboardingOverride, isOnboardingEnabled, navigateToOnboarding, onboardingUrl };
 }

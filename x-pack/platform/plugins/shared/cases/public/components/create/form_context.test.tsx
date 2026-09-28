@@ -483,6 +483,39 @@ describe('Create case', () => {
       });
     });
 
+    it('inherits extractObservables from the space configuration when creating a case', async () => {
+      useGetConnectorsMock.mockReturnValue({
+        ...sampleConnectorData,
+        data: connectorsMock,
+      });
+
+      renderWithTestingProviders(
+        <TestComponent
+          selectedOwner={SECURITY_SOLUTION_OWNER}
+          onSuccess={onFormSubmitSuccess}
+          currentConfiguration={{ ...currentConfiguration, extractObservables: false }}
+        >
+          <CreateCaseFormFields
+            {...defaultCreateCaseForm}
+            configuration={{ ...currentConfiguration, extractObservables: false }}
+          />
+        </TestComponent>
+      );
+
+      await waitForFormToRender();
+      await fillFormReactTestingLib({ user });
+
+      await user.click(screen.getByTestId('create-case-submit'));
+
+      await waitFor(() => expect(postCase).toHaveBeenCalled());
+
+      expect(postCase).toHaveBeenCalledWith({
+        request: expect.objectContaining({
+          settings: { syncAlerts: true, extractObservables: false },
+        }),
+      });
+    });
+
     it('should select LOW as the default severity', async () => {
       renderWithTestingProviders(
         <TestComponent
