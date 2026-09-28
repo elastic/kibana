@@ -8,18 +8,22 @@
  */
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import type {
+  DiscoverSessionApiData,
+  DiscoverSessionApiTabBase,
+} from '@kbn/as-code-discover-schema';
 import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { parseSearchSourceJSON } from '@kbn/data-plugin/common';
-import { isFilterPinned, unpinFilter } from '@kbn/es-query';
-import type {
-  DiscoverSessionAttributes,
-  DiscoverSessionTabAttributes,
-} from '@kbn/saved-search-plugin/server';
-import type { DiscoverSessionTab } from '../../embeddable';
+import {
+  injectReferences,
+  parseSearchSourceJSON,
+  type SerializedSearchSourceFields,
+} from '@kbn/data-plugin/common';
+import { isFilterPinned, isOfAggregateQueryType, unpinFilter } from '@kbn/es-query';
+import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import { isDiscoverSessionEsqlTab } from '../../../common/embeddable';
-import { fromStoredTab } from '../../../common/embeddable/transform_utils';
-import type { DiscoverSessionApiData, DiscoverSessionWarning } from '../schema';
+import { fromStoredTabWithSearchSource } from '../../../common/embeddable/transform_utils';
+import type { DiscoverSessionWarning } from '../schema';
 import { transformControlPanelsOut } from './transform_control_panels';
 import { toApiTabTypeState } from '../../../common/session/tab_type_state';
 import { toApiVisContext } from '../../../common/session/vis_context';
@@ -35,11 +39,12 @@ export const transformDiscoverSessionOut = (
     description: attributes.description,
     tags,
     tabs: attributes.tabs.map((tab) => {
-      const transformedTab = fromStoredTab(pinnedFiltersToAppFilters(tab.attributes), references);
-      const inlineDataViewId = getStoredInlineDataViewId(
-        transformedTab,
+      const parsedSearchSource = parseSearchSourceJSON(
         tab.attributes.kibanaSavedObjectMeta.searchSourceJSON
       );
+      const searchSource = prepareSessionSearchSource(parsedSearchSource, references);
+      const transformedTab = fromStoredTabWithSearchSource(tab.attributes, searchSource);
+      const inlineDataViewId = getStoredInlineDataViewId(transformedTab, searchSource.index);
       const apiTab = omitInlineDataViewIdFromFilters(transformedTab, inlineDataViewId);
       const visContext = toApiVisContext(tab.attributes.visContext);
       const { panels: controlPanels, warnings: controlPanelWarnings } = transformControlPanelsOut(
@@ -86,43 +91,41 @@ export const transformDiscoverSessionOut = (
   return { sessionState, warnings };
 };
 
+/** Resolves references and converts pinned filters for classic; ES|QL only uses its query. */
+const prepareSessionSearchSource = (
+  searchSource: SerializedSearchSourceFields,
+  references: SavedObjectReference[]
+): SerializedSearchSourceFields => {
+  if (isOfAggregateQueryType(searchSource.query)) {
+    return searchSource;
+  }
+
+  return convertPinnedFiltersToAppFilters(injectReferences(searchSource, references));
+};
+
 /**
- * Preserves Kibana's pre-as-code Discover behavior: stored pinned filters are loaded
- * as app filters, keeping their conditions instead of dropping them during API conversion.
+ * Converts pinned filters to app filters in an already-parsed SearchSource,
+ * preserving their conditions to match Discover's pre-as-code behavior.
  */
-const pinnedFiltersToAppFilters = (attributes: DiscoverSessionTabAttributes) => {
-  const { kibanaSavedObjectMeta } = attributes;
-  const searchSource = parseSearchSourceJSON(kibanaSavedObjectMeta.searchSourceJSON);
+const convertPinnedFiltersToAppFilters = (searchSource: SerializedSearchSourceFields) => {
   const { filter: filters } = searchSource;
 
   if (!Array.isArray(filters) || !filters.some(isFilterPinned)) {
-    return attributes;
+    return searchSource;
   }
 
-  const searchSourceJSON = JSON.stringify({
-    ...searchSource,
-    filter: filters.map(unpinFilter),
-  });
-
-  return {
-    ...attributes,
-    kibanaSavedObjectMeta: {
-      ...kibanaSavedObjectMeta,
-      searchSourceJSON,
-    },
-  };
+  return { ...searchSource, filter: filters.map(unpinFilter) };
 };
 
 /** Returns the stored ID only when the API tab contains an inline data view. */
 const getStoredInlineDataViewId = (
-  tab: DiscoverSessionTab,
-  searchSourceJSON: string
+  tab: DiscoverSessionApiTabBase,
+  index: SerializedSearchSourceFields['index']
 ): string | undefined => {
   if (tab.data_source.type !== AS_CODE_DATA_VIEW_SPEC_TYPE) {
     return undefined;
   }
 
-  const { index } = parseSearchSourceJSON(searchSourceJSON);
   if (!index || typeof index === 'string') {
     return undefined;
   }
@@ -135,9 +138,9 @@ const getStoredInlineDataViewId = (
  * IDs pointing to other Data Views are preserved.
  */
 const omitInlineDataViewIdFromFilters = (
-  tab: DiscoverSessionTab,
+  tab: DiscoverSessionApiTabBase,
   inlineDataViewId: string | undefined
-): DiscoverSessionTab => {
+): DiscoverSessionApiTabBase => {
   if (inlineDataViewId === undefined || isDiscoverSessionEsqlTab(tab)) {
     return tab;
   }

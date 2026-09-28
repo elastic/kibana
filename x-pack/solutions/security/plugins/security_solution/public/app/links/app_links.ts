@@ -29,7 +29,7 @@ import { launchPadLinks, onboardingLinks } from '../../onboarding/links';
 import { findingsLinks } from '../../cloud_security_posture/links';
 import type { StartPlugins } from '../../types';
 import { dashboardsLinks } from '../../dashboards/links';
-import { entityAnalyticsLinks, entityAnalyticsV2Links } from '../../entity_analytics/links';
+import { entityAnalyticsLinks } from '../../entity_analytics/links';
 
 export const appLinks: AppLinkItems = Object.freeze([
   dashboardsLinks,
@@ -88,9 +88,7 @@ export const getFilteredLinks = async (
     timelinesLinks,
     indicatorsLinks,
     exploreLinks,
-    experimentalFeatures.entityAnalyticsNewHomePageEnabled
-      ? entityAnalyticsV2Links
-      : entityAnalyticsLinks,
+    entityAnalyticsLinks,
     assetInventoryLinks,
     rulesLinks,
     siemMigrationsLinks,

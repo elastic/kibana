@@ -24,10 +24,13 @@ export const createNavigationTree = (
   chatExperience: AIChatExperience = AIChatExperience.Classic
 ): NavigationTreeDefinition => {
   const showAgentBuilder = chatExperience === AIChatExperience.Agent;
-  const agentBuilderNavAtTop = services.featureFlags.getBooleanValue(
-    AGENT_BUILDER_NAV_AT_TOP_FLAG,
-    false
-  );
+  let agentBuilderNavAtTop = false;
+  services.featureFlags
+    .getBooleanValue$(AGENT_BUILDER_NAV_AT_TOP_FLAG, false)
+    .subscribe((enabled) => {
+      agentBuilderNavAtTop = enabled;
+    })
+    .unsubscribe();
 
   const agentBuilderLink = {
     icon: 'productAgent',
@@ -46,7 +49,7 @@ export const createNavigationTree = (
         link: 'inbox' as AppDeepLinkId,
         icon: 'mail',
       },
-      // AlertZero body (nodes omitted when xpack.alertzero.enabled is false)
+      // AlertZero body (nodes omitted when securitySolution:enableAlertZero is off)
       ...defaultNavigationTree.alertZero(),
       {
         link: 'discover',
@@ -79,9 +82,7 @@ export const createNavigationTree = (
         link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
       },
       defaultNavigationTree.cases(),
-      defaultNavigationTree.entityAnalytics(
-        services.experimentalFeatures?.entityAnalyticsNewHomePageEnabled
-      ),
+      defaultNavigationTree.entityAnalytics(),
       defaultNavigationTree.explore(),
       defaultNavigationTree.investigations(),
       {

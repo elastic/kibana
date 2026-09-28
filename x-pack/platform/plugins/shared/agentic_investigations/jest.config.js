@@ -13,6 +13,6 @@ module.exports = {
     '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/agentic_investigations',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/platform/plugins/shared/agentic_investigations/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/shared/agentic_investigations/{common,server}/**/*.{js,ts,tsx}',
   ],
 };

@@ -32,7 +32,7 @@ test.describe('Inference Navigation', () => {
         pageHeader: pageObjects.eisModels.pageHeader,
         urlPath: INFERENCE_PAGES.eisModels.urlPath,
         classicBreadcrumbs: [...BREADCRUMBS.stateful.classic, 'Elastic Inference'],
-        isNextChrome: await pageObjects.chrome.isNextChrome(),
+        isProjectChrome: await pageObjects.chrome.isProjectChrome(),
       });
     }
   );
@@ -48,7 +48,7 @@ test.describe('Inference Navigation', () => {
         pageHeader: pageObjects.eisModels.pageHeader,
         urlPath: INFERENCE_PAGES.eisModels.urlPath,
         classicBreadcrumbs: [...BREADCRUMBS.serverless.search, 'Elastic Inference'],
-        isNextChrome: await pageObjects.chrome.isNextChrome(),
+        isProjectChrome: await pageObjects.chrome.isProjectChrome(),
         isServerless: true,
       });
     }
@@ -65,7 +65,7 @@ test.describe('Inference Navigation', () => {
         pageHeader: pageObjects.externalInference.pageHeader,
         urlPath: INFERENCE_PAGES.externalInference.urlPath,
         classicBreadcrumbs: [...BREADCRUMBS.stateful.classic, 'External Inference'],
-        isNextChrome: await pageObjects.chrome.isNextChrome(),
+        isProjectChrome: await pageObjects.chrome.isProjectChrome(),
       });
     }
   );
@@ -81,7 +81,7 @@ test.describe('Inference Navigation', () => {
         pageHeader: pageObjects.externalInference.pageHeader,
         urlPath: INFERENCE_PAGES.externalInference.urlPath,
         classicBreadcrumbs: [...BREADCRUMBS.serverless.search, 'External Inference'],
-        isNextChrome: await pageObjects.chrome.isNextChrome(),
+        isProjectChrome: await pageObjects.chrome.isProjectChrome(),
         isServerless: true,
       });
     }
@@ -98,7 +98,7 @@ test.describe('Inference Navigation', () => {
         pageHeader: pageObjects.featureSettings.pageHeader,
         urlPath: INFERENCE_PAGES.featureSettings.urlPath,
         classicBreadcrumbs: [...BREADCRUMBS.stateful.classic, 'Feature Settings'],
-        isNextChrome: await pageObjects.chrome.isNextChrome(),
+        isProjectChrome: await pageObjects.chrome.isProjectChrome(),
       });
     }
   );
@@ -114,7 +114,7 @@ test.describe('Inference Navigation', () => {
         pageHeader: pageObjects.featureSettings.pageHeader,
         urlPath: INFERENCE_PAGES.featureSettings.urlPath,
         classicBreadcrumbs: [...BREADCRUMBS.serverless.search, 'Feature Settings'],
-        isNextChrome: await pageObjects.chrome.isNextChrome(),
+        isProjectChrome: await pageObjects.chrome.isProjectChrome(),
         isServerless: true,
       });
     }

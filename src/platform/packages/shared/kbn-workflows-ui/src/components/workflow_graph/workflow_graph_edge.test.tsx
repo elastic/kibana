@@ -270,7 +270,7 @@ describe('WorkflowGraphEdge — fork bus routing gate', () => {
     });
   });
 
-  describe('merge edges (no branchType) remain on smooth-step', () => {
+  describe('untagged edges remain on smooth-step', () => {
     it('uses smooth-step (midpoint label) when branchType and isMerge are both absent', () => {
       // An untagged edge (no branchType, no isMerge) must stay on smooth-step.
       // If it accidentally hit the fork bus or merge bus, the label would land

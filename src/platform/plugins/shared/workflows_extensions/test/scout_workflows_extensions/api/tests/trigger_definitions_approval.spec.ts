@@ -13,8 +13,7 @@ import { expect } from '@kbn/scout/api';
 import { APPROVED_TRIGGER_DEFINITIONS } from '../fixtures/approved_trigger_definitions';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
-// Failing: See https://github.com/elastic/kibana/issues/275431
-apiTest.describe.skip(
+apiTest.describe(
   'Workflows Extensions - Event-Driven Trigger Definitions Approval',
   {
     tag: [...tags.stateful.classic],
@@ -27,7 +26,7 @@ apiTest.describe.skip(
     });
 
     apiTest(
-      'should validate that all registered event-driven trigger definitions are approved by workflows-eng team',
+      'should validate that registered event-driven trigger definitions match the workflows-eng approved catalog',
       async ({ apiClient }) => {
         const response = await apiClient.get('internal/workflows_extensions/trigger_definitions', {
           headers: {
@@ -43,14 +42,21 @@ apiTest.describe.skip(
         ).toBe(true);
         expect(Array.isArray(response.body.triggers)).toBe(true);
 
-        for (const trigger of response.body.triggers) {
-          const approvedTrigger = APPROVED_TRIGGER_DEFINITIONS.find(({ id }) => id === trigger.id);
+        const registeredTriggers: Array<{ id: string; schemaHash: string }> =
+          response.body.triggers;
+        const registeredIds = registeredTriggers.map(({ id }) => id).sort();
+        const approvedIds = APPROVED_TRIGGER_DEFINITIONS.map(({ id }) => id).sort();
 
-          expect(approvedTrigger, {
-            message: `Trigger "${trigger.id}" is not in the approved list`,
-          }).toBeDefined();
+        expect(registeredIds, {
+          message: 'Registered trigger ids do not match the approved catalog',
+        }).toStrictEqual(approvedIds);
 
-          expect(approvedTrigger?.schemaHash, {
+        const approvedSchemaHashById = new Map(
+          APPROVED_TRIGGER_DEFINITIONS.map(({ id, schemaHash }) => [id, schemaHash])
+        );
+
+        for (const trigger of registeredTriggers) {
+          expect(approvedSchemaHashById.get(trigger.id), {
             message: `Trigger "${trigger.id}" has an invalid schema hash`,
           }).toBe(trigger.schemaHash);
         }

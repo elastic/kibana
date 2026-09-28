@@ -95,7 +95,7 @@ exports[`Header renders 1`] = `
           >
             <div
               class="css-t9e3g0-helpSlot"
-              data-test-subj="chromeNextGlobalHeaderHelp"
+              data-test-subj="kbnChromeHeader-help"
             >
               <span
                 class="euiThemeProvider emotion-euiColorMode-LIGHT"
@@ -113,7 +113,7 @@ exports[`Header renders 1`] = `
                       aria-haspopup="true"
                       aria-label="Help menu"
                       class="css-1bhuz6c-headerButtonBaseStyles-squareStyles-headerButtonBorderedStyles"
-                      data-test-subj="chromeNextGlobalHeaderHelpButton"
+                      data-test-subj="kbnChromeHeader-helpButton"
                       style="--header-btn-border: #485975; --header-btn-hover: rgba(255,255,255, 0.08); --header-btn-focus: #61A2FF; border-radius: 4px;"
                       type="button"
                     >
@@ -129,7 +129,7 @@ exports[`Header renders 1`] = `
             </div>
             <div
               class="css-150lav9-actionsSlot"
-              data-test-subj="chromeNextGlobalHeaderActions"
+              data-test-subj="kbnChromeHeader-actions"
             />
           </div>
         </div>
