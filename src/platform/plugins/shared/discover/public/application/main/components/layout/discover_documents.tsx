@@ -55,6 +55,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { BehaviorSubject } from 'rxjs';
 import { DiscoverGrid } from '../../../../components/discover_grid';
+import type { DiscoverGridImplementation } from '../../../../components/discover_grid/discover_grid_implementation';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import {
   selectTabCombinedFilters,
@@ -137,6 +138,7 @@ function DiscoverDocumentsComponent({
     density,
     documentsDisplayMode,
     jsonModeSettings,
+    gridImplementation,
   ] = useAppStateSelector((state) => {
     return [
       state.dataSource,
@@ -151,6 +153,7 @@ function DiscoverDocumentsComponent({
       state.density,
       state.documentsDisplayMode,
       state.jsonModeSettings,
+      state.gridImplementation,
     ];
   });
   const expandedDoc = useCurrentTabSelector((state) => state.expandedDoc);
@@ -318,6 +321,13 @@ function DiscoverDocumentsComponent({
   const onUpdateJsonModeSettings = useCallback(
     (newJsonModeSettings: JsonModeSettings) => {
       dispatch(updateAppState({ appState: { jsonModeSettings: newJsonModeSettings } }));
+    },
+    [dispatch, updateAppState]
+  );
+
+  const onChangeGridImplementation = useCallback(
+    (nextGridImplementation: DiscoverGridImplementation) => {
+      dispatch(updateAppState({ appState: { gridImplementation: nextGridImplementation } }));
     },
     [dispatch, updateAppState]
   );
@@ -652,6 +662,8 @@ function DiscoverDocumentsComponent({
             renderDocumentView="external"
             setRenderDocumentViewMeta={setRenderDocumentViewMetaForDefaultOwner}
             renderCustomToolbar={renderCustomToolbarWithElements}
+            toolbarLeftSide={isDataGridFullScreen ? undefined : renderViewModeToggle()}
+            toolbarTrailingControl={saveToDashboardButton}
             services={services}
             totalHits={totalHits}
             onFetchMoreRecords={onFetchMoreRecords}
@@ -669,6 +681,8 @@ function DiscoverDocumentsComponent({
             onUpdateDocumentsDisplayMode={onUpdateDocumentsDisplayMode}
             jsonModeSettingsState={jsonModeSettings}
             onUpdateJsonModeSettings={onUpdateJsonModeSettings}
+            gridImplementation={gridImplementation}
+            onChangeGridImplementation={onChangeGridImplementation}
           />
         </CellActionsProvider>
       </div>
