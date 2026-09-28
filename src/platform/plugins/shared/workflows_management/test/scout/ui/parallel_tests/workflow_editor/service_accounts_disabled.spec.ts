@@ -117,7 +117,10 @@ test.describe(
           .getByRole('option', { name: /Load more service accounts/ })
       ).toBeHidden();
       await editor.dismissYamlSuggestions();
+      await page.clock.install();
       await editor.hoverServiceAccountId(ACCOUNT_ID);
+      // Flush delayed hover callbacks before checking that the directory was never called.
+      await page.clock.runFor(1_000);
       await expect(editor.serviceAccountBadges).toHaveCount(0);
       await expect(editor.serviceAccountPopup).toBeHidden();
       expect(await editor.getYamlEditorValue()).toContain(`run_as: ${ACCOUNT_ID}`);

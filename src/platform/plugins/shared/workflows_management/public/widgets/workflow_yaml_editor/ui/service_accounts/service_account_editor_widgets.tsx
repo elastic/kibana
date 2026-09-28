@@ -37,6 +37,9 @@ type Popup =
     }
   | { kind: 'details'; position: monaco.IPosition; account: WorkflowServiceAccount };
 
+const getSuggestionLabel = ({ label }: ServiceAccountSuggestion): string =>
+  typeof label === 'string' ? label : label.label;
+
 export const ServiceAccountEditorWidgets = ({
   editor,
 }: {
@@ -368,6 +371,8 @@ export const ServiceAccountEditorWidgets = ({
   }, [node, popup]);
 
   if (!node || !popup) return null;
+  const selectedSuggestion =
+    popup.kind === 'suggestions' ? popup.suggestions[popup.selected] : undefined;
   return createPortal(
     <EuiPanel
       paddingSize={popup.kind === 'details' ? 'm' : 'none'}
@@ -437,9 +442,7 @@ export const ServiceAccountEditorWidgets = ({
                     </EuiFlexItem>
                   )}
                   <EuiFlexItem css={css({ overflowWrap: 'anywhere' })}>
-                    {typeof suggestion.label === 'string'
-                      ? suggestion.label
-                      : suggestion.label.label}
+                    {getSuggestionLabel(suggestion)}
                   </EuiFlexItem>
                   {suggestion.account && (
                     <EuiFlexItem grow={false}>
@@ -452,8 +455,8 @@ export const ServiceAccountEditorWidgets = ({
           </div>
           <EuiScreenReaderOnly>
             <div role="status" aria-live="polite">
-              {popup.suggestions[popup.selected]?.account?.name}{' '}
-              {popup.suggestions[popup.selected]?.account?.roles.join(', ')}
+              {selectedSuggestion && getSuggestionLabel(selectedSuggestion)}{' '}
+              {selectedSuggestion?.account?.roles.join(', ')}
             </div>
           </EuiScreenReaderOnly>
         </>

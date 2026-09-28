@@ -62,14 +62,18 @@ describe('ServiceAccountDetails', () => {
     expect(screen.getByText('Current project')).not.toHaveAttribute('title');
   });
 
-  it('explains unavailable accounts and missing roles', () => {
+  it.each([
+    { enabled: false, assumable: true },
+    { enabled: true, assumable: false },
+    { enabled: false, assumable: false },
+  ])('explains unavailable accounts and missing roles (%j)', (availability) => {
     render(
       <ServiceAccountDetails
-        account={{ ...account, enabled: false, assumable: false, roles: [] }}
+        account={{ ...account, ...availability, roles: [] }}
         environment={{ isServerless: false }}
       />
     );
-    expect(screen.getByText('Disabled')).toBeInTheDocument();
+    expect(screen.getByText(availability.enabled ? 'Enabled' : 'Disabled')).toBeInTheDocument();
     expect(screen.getByText('No roles assigned')).toBeInTheDocument();
     expect(screen.getByText('This account cannot run workflows.')).toBeInTheDocument();
   });

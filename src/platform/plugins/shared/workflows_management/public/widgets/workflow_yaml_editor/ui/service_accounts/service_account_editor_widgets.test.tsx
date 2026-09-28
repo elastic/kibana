@@ -108,6 +108,27 @@ describe('ServiceAccountEditorWidgets', () => {
     ]);
   });
 
+  it.each(['keyboard', 'mouse'])('announces and accepts pagination using the %s', async (input) => {
+    const { editor, directory, action } = setup();
+    directory.list.mockImplementation(async (after?: string) =>
+      after
+        ? { serviceAccounts: [{ ...account, id: 'second', name: 'Second reader' }] }
+        : { serviceAccounts: [account], nextPage: 'page-two' }
+    );
+    const more = await screen.findByRole('option', { name: 'Load more service accounts' });
+    await action('next');
+    expect(more).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('status')).toHaveTextContent('Load more service accounts');
+    if (input === 'keyboard') await action('accept');
+    else fireEvent.click(more);
+    await screen.findByRole('option', { name: 'Second reader viewer' });
+    expect(directory.list).toHaveBeenLastCalledWith('page-two');
+    expect(editor.executeEdits).not.toHaveBeenCalled();
+    expect(
+      screen.queryByRole('option', { name: 'Load more service accounts' })
+    ).not.toBeInTheDocument();
+  });
+
   it('opens details from the keyboard and dismisses them with Escape', async () => {
     const { action } = setup(true, 'settings:\n  run_as: opaque-id');
     await screen.findByRole('listbox');

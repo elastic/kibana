@@ -8,11 +8,7 @@
  */
 
 import { parseDocument } from 'yaml';
-import {
-  createServiceAccountEditor,
-  getRunAsValue,
-  LOAD_MORE_SERVICE_ACCOUNTS,
-} from './service_account_editor';
+import { createServiceAccountEditor, getRunAsValue } from './service_account_editor';
 import { createFakeMonacoModel } from '../../../../../common/mocks/monaco_model';
 import type { ServiceAccountDirectory } from '../../../../entities/service_accounts';
 
@@ -106,9 +102,7 @@ describe('service account editor', () => {
     );
     const first = await complete();
     expect(directory.list).toHaveBeenCalledTimes(1);
-    const more = first?.suggestions.find(
-      (suggestion) => suggestion.command?.id === LOAD_MORE_SERVICE_ACCOUNTS
-    );
+    const more = first?.suggestions.find((suggestion) => !suggestion.account);
     expect(more?.insertText).toBe('');
     expect(more?.range).toEqual({
       startLineNumber: position.lineNumber,

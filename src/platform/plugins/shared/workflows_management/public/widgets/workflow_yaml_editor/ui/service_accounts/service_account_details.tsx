@@ -113,7 +113,7 @@ export const ServiceAccountDetails = ({
           values={{ enabled: String(account.enabled) }}
         />
       </EuiBadge>
-      {!account.assumable && (
+      {(!account.enabled || !account.assumable) && (
         <>
           <EuiSpacer size="s" />
           <EuiTextColor color="warning">

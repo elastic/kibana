@@ -19,8 +19,6 @@ export interface ServiceAccountSuggestion extends monaco.languages.CompletionIte
   account?: WorkflowServiceAccount;
 }
 
-export const LOAD_MORE_SERVICE_ACCOUNTS = 'workflows.editor.loadMoreServiceAccounts';
-
 export const getRunAsValue = (
   model: monaco.editor.ITextModel,
   position: monaco.Position
@@ -125,7 +123,6 @@ export const createServiceAccountEditor = (directory: ServiceAccountDirectory) =
             .getLineContent(position.lineNumber)
             .slice(value.range.startColumn - 1, position.column - 1),
           sortText: 'z_load_more',
-          command: { id: LOAD_MORE_SERVICE_ACCOUNTS, title: label },
         });
       }
       return { suggestions };

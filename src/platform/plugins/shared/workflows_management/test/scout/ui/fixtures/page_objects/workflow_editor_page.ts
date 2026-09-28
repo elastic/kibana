@@ -358,6 +358,38 @@ export class WorkflowEditorPage {
     await this.page.keyboard.press('Escape');
   }
 
+  serviceAccountOption(name: string): Locator {
+    return this.serviceAccountPopup.getByRole('option', { name, exact: true });
+  }
+
+  async openServiceAccountPicker(yaml: string): Promise<void> {
+    await this.setYamlEditorValue(`${yaml}\nsettings:\n  run_as: `);
+    await this.setCursorToText('run_as: ');
+    await this.page.keyboard.press('End');
+    await this.page.keyboard.press('Control+Space');
+    await this.serviceAccountPopup.getByRole('listbox', { name: 'Service accounts' }).waitFor();
+  }
+
+  async selectServiceAccount(name: string): Promise<void> {
+    await this.serviceAccountOption(name).click();
+  }
+
+  async highlightNextServiceAccount(): Promise<void> {
+    await this.page.keyboard.press('ArrowDown');
+  }
+
+  async acceptSelectedServiceAccount(): Promise<void> {
+    await this.page.keyboard.press('Enter');
+  }
+
+  async getServiceAccountBadgeText(): Promise<string> {
+    return (await this.serviceAccountBadges.allTextContents()).join('').replaceAll('\u00a0', ' ');
+  }
+
+  async hoverServiceAccountBadge(): Promise<void> {
+    await this.serviceAccountBadges.filter({ hasText: /^[✓○]/ }).hover();
+  }
+
   async hoverServiceAccountId(id: string): Promise<void> {
     const activateEditor = this.yamlEditor.getByRole('button', {
       name: 'Code Editor, activate edit mode',
