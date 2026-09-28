@@ -75,14 +75,14 @@ describe('Worker settings declarations', () => {
   });
 
   it('nests Continuous Threat Hunt dials under extras with a 4h schedule', () => {
-    expect(createDefaultWorkerSettings(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID)).toEqual(
-      {
-        workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
-        autonomy: 'manual',
-        scheduleInterval: '4h',
-        extras: { tier2When: 'on_hits', candidateLimit: 10, fanOutMax: 10 },
-      }
-    );
+    expect(
+      createDefaultWorkerSettings(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID)
+    ).toEqual({
+      workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+      autonomy: 'manual',
+      scheduleInterval: '4h',
+      extras: { tier2When: 'on_hits', candidateLimit: 10, fanOutMax: 10 },
+    });
   });
 
   it('rejects an unknown Continuous Threat Hunt extras key by name', () => {
@@ -118,19 +118,19 @@ describe('Worker settings declarations', () => {
 
   it('accepts an optional technology dial on Continuous Threat Hunt', () => {
     expect(
-      getCompleteWorkerSettingsSchema(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID).safeParse(
-        {
-          workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
-          autonomy: 'assisted',
-          scheduleInterval: '4h',
-          extras: {
-            tier2When: 'always',
-            candidateLimit: 5,
-            fanOutMax: 3,
-            technology: 'aws_iam',
-          },
-        }
-      ).success
+      getCompleteWorkerSettingsSchema(
+        SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID
+      ).safeParse({
+        workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+        autonomy: 'assisted',
+        scheduleInterval: '4h',
+        extras: {
+          tier2When: 'always',
+          candidateLimit: 5,
+          fanOutMax: 3,
+          technology: 'aws_iam',
+        },
+      }).success
     ).toBe(true);
   });
 
