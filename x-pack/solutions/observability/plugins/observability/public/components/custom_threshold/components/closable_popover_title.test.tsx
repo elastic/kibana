@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, waitFor } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import * as React from 'react';
 import { ClosablePopoverTitle } from './closable_popover_title';
 
@@ -21,7 +21,7 @@ describe('closable popover title', () => {
     expect(child.textContent).toBe('hello_world()');
   });
 
-  it('onClose function gets called', async () => {
+  it('onClose function gets called', () => {
     const onClose = jest.fn();
     const children = <div className="foo" />;
     const { getByRole } = render(
@@ -30,10 +30,8 @@ describe('closable popover title', () => {
 
     const closeButton = getByRole('button');
 
-    closeButton.click();
+    fireEvent.click(closeButton);
 
-    await waitFor(() => {
-      expect(onClose).toHaveBeenCalled();
-    });
+    expect(onClose).toHaveBeenCalled();
   });
 });
