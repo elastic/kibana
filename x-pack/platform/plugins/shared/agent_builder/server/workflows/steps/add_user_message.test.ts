@@ -74,7 +74,6 @@ describe('addUserMessageStepDefinition', () => {
         nextInput: { message: 'Deployment finished', attachments },
         triggerMode: ChatTriggerMode.Never,
       },
-      useTaskManager: false,
     });
     expect(result).toEqual({ output: { conversation_id: conversationId } });
   });

@@ -40,7 +40,6 @@ export const addUserMessageStepDefinition = ({
               nextInput: { message, attachments },
               triggerMode: ChatTriggerMode.Never,
             },
-            useTaskManager: false,
           });
 
         return { output: { conversation_id: storedConversationId ?? conversationId } };
