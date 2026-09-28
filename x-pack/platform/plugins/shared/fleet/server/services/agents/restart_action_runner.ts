@@ -46,7 +46,11 @@ export async function restartBatch(
   const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
 
-  const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
+  const spaceId = options.spaceId;
+  const namespaces = spaceId ? [spaceId] : [];
+  const internalSoClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
+
+  const hostedPolicies = await getHostedPolicies(internalSoClient, givenAgents);
 
   const errors: Record<Agent['id'], Error> = {};
   const eligibleAgents: Agent[] = [];
@@ -64,10 +68,6 @@ export async function restartBatch(
       eligibleAgents.push(agent);
     }
   }
-
-  const spaceId = options.spaceId;
-  const namespaces = spaceId ? [spaceId] : [];
-  const internalSoClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
 
   await createAgentAction(esClient, internalSoClient, {
     id: actionId,
