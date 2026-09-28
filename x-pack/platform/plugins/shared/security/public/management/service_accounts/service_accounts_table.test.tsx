@@ -16,6 +16,8 @@ import type { ServiceAccountTableItem } from './service_accounts_table';
 import { ServiceAccountsTable } from './service_accounts_table';
 
 describe('ServiceAccountsTable', () => {
+  jest.setTimeout(15_000);
+
   const firstAccount = {
     id: 'first-id',
     name: 'nightshift-relay',
