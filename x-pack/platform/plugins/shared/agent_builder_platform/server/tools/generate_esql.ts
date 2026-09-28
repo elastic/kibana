@@ -33,9 +33,7 @@ const nlToEsqlToolSchema = z.object({
   index: z
     .string()
     .optional()
-    .describe(
-      '(optional) Index, index-pattern, or ES|QL view to query. Views are queried with FROM <view_name> and are not indices. If not provided, will automatically select the best source to use based on the query.'
-    ),
+    .describe('(optional) Index, index-pattern, or ES|QL view to query. '),
   context: z
     .string()
     .optional()
