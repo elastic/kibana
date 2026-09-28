@@ -1378,11 +1378,7 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument({ title: 'Tune noisy rule' }));
       const { service } = createService(storage);
 
-      await service.revise(
-        { id: 'proposal-1', title: 'Tune the Okta rule' },
-        SPACE_ID,
-        request
-      );
+      await service.revise({ id: 'proposal-1', title: 'Tune the Okta rule' }, SPACE_ID, request);
 
       const [[reviseArgs]] = storage.index.mock.calls;
       expect(reviseArgs.document).toMatchObject({ title: 'Tune the Okta rule' });
