@@ -84,4 +84,20 @@ describe('CapabilitiesSection', () => {
     await user.click(screen.getByTestId('agentOverviewCapabilityCardConnectors'));
     expect(onNavigateToConnectors).toHaveBeenCalled();
   });
+
+  it("does not navigate when the Connectors card's technical-preview badge is clicked", async () => {
+    const user = userEvent.setup();
+    const onNavigateToConnectors = jest.fn();
+
+    render(
+      <CapabilitiesSection
+        {...baseProps}
+        isExperimentalFeaturesEnabled={false}
+        onNavigateToConnectors={onNavigateToConnectors}
+      />
+    );
+
+    await user.click(screen.getByText('Technical preview'));
+    expect(onNavigateToConnectors).not.toHaveBeenCalled();
+  });
 });

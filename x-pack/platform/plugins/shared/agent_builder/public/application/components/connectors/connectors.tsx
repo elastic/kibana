@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBetaBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiBetaBadge, EuiButton, EuiText } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { getEbtProps } from '@kbn/ebt-click';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
@@ -22,20 +22,14 @@ export const AgentBuilderConnectors = () => {
   return (
     <KibanaPageTemplate data-test-subj="agentBuilderConnectorsPage">
       <KibanaPageTemplate.Header
-        pageTitle={
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>{labels.connectors.libraryTitle}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge {...connectorsTechPreviewBadgeProps} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
+        pageTitle={labels.connectors.libraryTitle}
         description={labels.connectors.pageDescription}
         css={({ euiTheme }) => ({
           backgroundColor: euiTheme.colors.backgroundBasePlain,
           borderBlockEnd: 'none',
         })}
         rightSideItems={[
+          <EuiBetaBadge key="tech-preview" {...connectorsTechPreviewBadgeProps} />,
           ...(hasAllPrivileges
             ? [
                 <EuiButton
