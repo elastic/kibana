@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { useWorkers } from '../hooks/use_workers_api';
 import { useInvestigationsCount } from '../hooks/use_investigations_api';
@@ -17,6 +17,12 @@ export const LandingPage: React.FC = () => {
   // remains mounted as a wrapper. 'onboarding' also prevents the spinner from
   // re-appearing on every background poll after the decision is confirmed.
   const [decision, setDecision] = useState<'queue' | 'onboarding' | null>(null);
+
+  // Track whether OnboardingPage has a save in flight. A window-focus refetch
+  // during the fan-out can return a partially-committed enabled state and trigger
+  // showQueue before all PATCHes have settled, prematurely unmounting the form.
+  const [savingInProgress, setSavingInProgress] = useState(false);
+  const handleSavingChange = useCallback((saving: boolean) => setSavingInProgress(saving), []);
 
   const queryEnabled = decision === null;
   const workers = useWorkers();
@@ -48,7 +54,10 @@ export const LandingPage: React.FC = () => {
 
   // showQueue is always checked so background data updates (another admin enabling a worker,
   // or a successful save invalidating the cache) transition the page without needing a reload.
-  if (showQueue) return <ConversationsPage />;
+  // savingInProgress suppresses the transition during the PATCH fan-out: a window-focus
+  // refetch between individual PATCHes can return partially-committed state, and we must
+  // not unmount the onboarding form before the user's save has fully settled.
+  if (showQueue && !savingInProgress) return <ConversationsPage />;
 
   // Guard on decision === null so the spinner only appears before the initial
   // resolution; after the onboarding decision is latched we render directly.
@@ -62,5 +71,5 @@ export const LandingPage: React.FC = () => {
     );
   }
 
-  return <OnboardingPage />;
+  return <OnboardingPage onSavingChange={handleSavingChange} />;
 };

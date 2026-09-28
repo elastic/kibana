@@ -19,7 +19,8 @@ type WorkerEnabledMap = Record<string, boolean>;
 export const useEnableWorkers = (
   workerIds: readonly string[],
   workerEnabled: WorkerEnabledMap,
-  onSuccess?: () => void
+  onSuccess?: () => void,
+  onSavingChange?: (saving: boolean) => void
 ) => {
   const queryClient = useQueryClient();
   const { services } = useKibana<CoreStart>();
@@ -38,6 +39,7 @@ export const useEnableWorkers = (
     const idsToUpdate = workerIds.filter((id) => visibleIds.has(id));
 
     setIsSaving(true);
+    onSavingChange?.(true);
     // Direct http.patch calls instead of useUpdateWorker so no replaceWorkerInList
     // fires per-PATCH. LandingPage's showQueue guard must only react to real server
     // state changes (background refetches), not optimistic per-PATCH cache writes
@@ -53,6 +55,7 @@ export const useEnableWorkers = (
       )
     );
     setIsSaving(false);
+    onSavingChange?.(false);
 
     let hadFailure = false;
     results.forEach((result) => {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
@@ -14,6 +14,14 @@ import { createMemoryHistory } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
+import {
+  SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+} from '@kbn/alertzero-common';
+import { queryKeys } from '../query_keys';
 import { useWorkers } from '../hooks/use_workers_api';
 import { useInvestigationsCount } from '../hooks/use_investigations_api';
 import { LandingPage } from './landing_page';
@@ -40,8 +48,15 @@ jest.mock('../hooks/use_current_user', () => ({
 
 const mockUseWorkers = useWorkers as jest.Mock;
 const mockUseInvestigationsCount = useInvestigationsCount as jest.Mock;
-// useUpdateWorker is used by OnboardingPage (rendered when no workers are enabled);
-// the mock above provides a no-op stub so OnboardingPage doesn't crash.
+// useUpdateWorker mock above is kept for completeness; OnboardingPage no longer calls it.
+
+const ALL_ONBOARDING_WORKER_IDS = [
+  SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+];
 
 type QueryOverrides = Partial<{
   data: unknown;
@@ -207,6 +222,63 @@ describe('LandingPage', () => {
 
     expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
     expect(screen.queryByText('Enable your workers')).not.toBeInTheDocument();
+  });
+
+  it('does not transition to the queue when a background refetch returns partial state mid-save', async () => {
+    // Render with no workers enabled — onboarding shown.
+    mockUseWorkers.mockReturnValue(workersResult([]));
+    mockUseInvestigationsCount.mockReturnValue(investigationsResult(0));
+
+    // Use a custom queryClient and core so we can keep PATCHes in-flight.
+    const resolvers: Array<() => void> = [];
+    const httpPatch = jest.fn().mockImplementation(
+      () => new Promise((resolve) => resolvers.push(() => resolve({})))
+    );
+    const coreStart = coreMock.createStart();
+    (coreStart.application.capabilities as Record<string, unknown>).alertzero = { write: true };
+    const core = { ...coreStart, http: { ...coreStart.http, patch: httpPatch } };
+    const history = createMemoryHistory();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
+    // Seed the workers cache so useEnableWorkers can filter IDs on the first click.
+    queryClient.setQueryData(queryKeys.workers.list(), {
+      workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({ id, enabled: false })),
+    });
+
+    render(
+      <I18nProvider>
+        <EuiProvider>
+          <QueryClientProvider client={queryClient}>
+            <KibanaContextProvider services={core}>
+              <Router history={history}>
+                <LandingPage />
+              </Router>
+            </KibanaContextProvider>
+          </QueryClientProvider>
+        </EuiProvider>
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Enable your workers')).toBeInTheDocument();
+
+    // Start the save — this calls onSavingChange(true) in LandingPage.
+    fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
+
+    // Wait until all five PATCHes are in-flight (button becomes disabled).
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Enable and continue' })).toHaveAttribute(
+        'disabled'
+      )
+    );
+
+    // Simulate a window-focus refetch returning a partially-committed enabled worker.
+    // LandingPage must not unmount OnboardingPage while savingInProgress=true, even
+    // though showQueue would otherwise be true.
+    mockUseWorkers.mockReturnValue(workersResult([{ enabled: true }]));
+
+    expect(screen.getByText('Enable your workers')).toBeInTheDocument();
+    expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
   });
 
   it('transitions from queue to onboarding when stale positive cache is corrected by a fresh empty response', () => {

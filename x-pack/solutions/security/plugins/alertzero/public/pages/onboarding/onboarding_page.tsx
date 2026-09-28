@@ -67,7 +67,11 @@ const ONBOARDING_WORKERS_CATALOG = SYSTEM_SECURITY_WORKER_CATALOG.filter(({ id }
     (ONBOARDING_WORKER_IDS as readonly string[]).indexOf(b.id)
 );
 
-export const OnboardingPage: React.FC = () => {
+interface Props {
+  onSavingChange?: (saving: boolean) => void;
+}
+
+export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
   const { euiTheme } = useEuiTheme();
   const {
     services: { application },
@@ -100,7 +104,8 @@ export const OnboardingPage: React.FC = () => {
   const { handleEnableAndContinue, isSaving } = useEnableWorkers(
     availableWorkerIds,
     workerEnabled,
-    () => history.push('/watches')
+    () => history.push('/watches'),
+    onSavingChange
   );
 
   const enabledCount = availableWorkerIds.filter((id) => workerEnabled[id]).length;
