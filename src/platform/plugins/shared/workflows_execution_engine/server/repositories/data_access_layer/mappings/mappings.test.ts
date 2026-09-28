@@ -127,6 +127,7 @@ describe('ES FLS allowlist cross-repo sync', () => {
       'stepId',
       'createdBy',
       'executedBy',
+      'effectiveIdentity.*',
       'startedAt',
       'finishedAt',
       'duration',
