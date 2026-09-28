@@ -10,7 +10,12 @@ import { createHash } from 'crypto';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
-import { writeEntityIds, hashEntityId, matchExistingTargetIds } from './update_entities';
+import {
+  writeEntityIds,
+  hashEntityId,
+  matchExistingTargetIds,
+  TARGET_VALIDATION_CHUNK_SIZE,
+} from './update_entities';
 import type { EntityRelationshipRecord } from './types';
 
 const makeCrudClient = (errors: Array<{ status: number }> = []): EntityUpdateClient =>
@@ -421,6 +426,68 @@ describe('matchExistingTargetIds', () => {
     const call = (esClient.search as jest.Mock).mock.calls[0][0];
     expect(call.index).toContain('acme');
     expect(call.query.terms['entity.id']).toEqual(['host:x']);
+  });
+
+  describe('more candidates than one search may return', () => {
+    // One more than two full chunks, so the last chunk is a partial one.
+    const candidateCount = TARGET_VALIDATION_CHUNK_SIZE * 2 + 1;
+    const candidates = new Set(
+      Array.from({ length: candidateCount }, (_, i) => `user:u${i}@workday`)
+    );
+
+    // Echoes back every requested ID, as if all of them exist.
+    const makeEchoEsClient = (): ElasticsearchClient =>
+      ({
+        search: jest.fn(async ({ query }) => ({
+          hits: {
+            hits: (query.terms['entity.id'] as string[]).map((id) => ({
+              fields: { 'entity.id': [id] },
+            })),
+          },
+        })),
+      } as unknown as ElasticsearchClient);
+
+    it('never asks a single search for more hits than index.max_result_window allows', async () => {
+      const esClient = makeEchoEsClient();
+      await matchExistingTargetIds(esClient, 'default', candidates);
+
+      const calls = (esClient.search as jest.Mock).mock.calls;
+      expect(calls).toHaveLength(3);
+      for (const [request] of calls) {
+        expect(request.size).toBeLessThanOrEqual(10_000);
+        expect(request.size).toBe(request.query.terms['entity.id'].length);
+      }
+    });
+
+    it('checks every candidate exactly once and merges the results', async () => {
+      const esClient = makeEchoEsClient();
+      const result = await matchExistingTargetIds(esClient, 'default', candidates);
+
+      const requested = (esClient.search as jest.Mock).mock.calls.flatMap(
+        ([request]) => request.query.terms['entity.id']
+      );
+      expect(requested).toHaveLength(candidateCount);
+      expect(new Set(requested)).toEqual(candidates);
+      expect(result).toEqual(candidates);
+    });
+
+    it('logs which chunk failed, with the caller prefix, and rethrows', async () => {
+      const logger = loggerMock.create();
+      const esClient = makeEchoEsClient();
+      (esClient.search as jest.Mock)
+        .mockResolvedValueOnce({ hits: { hits: [] } })
+        .mockRejectedValueOnce(new Error('search_phase_execution_exception'));
+
+      await expect(
+        matchExistingTargetIds(esClient, 'default', candidates, logger, '[supervises][workday]')
+      ).rejects.toThrow('search_phase_execution_exception');
+
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      const [message] = logger.error.mock.calls[0];
+      expect(message).toContain('[supervises][workday]');
+      expect(message).toContain('chunk 2/3');
+      expect(message).toContain('search_phase_execution_exception');
+    });
   });
 });
 
