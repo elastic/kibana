@@ -14,6 +14,7 @@ import type {
   ExecutionLogsParams,
   IWorkflowEventLogger,
   IWorkflowEventLoggerService,
+  IWorkflowEventLoggerWithFlush,
   LogsByLevelParams,
   StepLogsParams,
   WorkflowEventLoggerContext,
@@ -32,7 +33,7 @@ export class WorkflowEventLoggerService implements IWorkflowEventLoggerService {
     this.logsRepository = new LogsRepository(dataStreams, logger);
   }
 
-  public createLogger(context: WorkflowEventLoggerContext): IWorkflowEventLogger {
+  public createLogger(context: WorkflowEventLoggerContext): IWorkflowEventLoggerWithFlush {
     return new WorkflowEventLogger(this.logsRepository, this.logger, context, {
       enableConsoleLogging: this.enableConsoleLogging,
     });

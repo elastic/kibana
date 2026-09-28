@@ -157,7 +157,7 @@ describe('WorkflowEventLogger', () => {
     const timingEvent = { event: { action: 'poll' } } as WorkflowLogEvent;
     stepLogger.startTiming(timingEvent);
     stepLogger.stopTiming(timingEvent);
-    await stepLogger.flushEvents();
+    await (stepLogger as WorkflowEventLogger).flushEvents();
 
     const events = (logsRepository.createLogs as jest.Mock).mock.calls[0][0] as WorkflowLogEvent[];
     expect(events).toHaveLength(2);

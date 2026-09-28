@@ -27,7 +27,6 @@ export const createMockWorkflowEventLogger = (): jest.Mocked<IWorkflowEventLogge
     startTiming: jest.fn(),
     stopTiming: jest.fn(),
     createStepLogger: jest.fn(),
-    flushEvents: jest.fn(),
   };
 };
 
