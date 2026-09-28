@@ -10,9 +10,6 @@ import { AGENTIC_INVESTIGATIONS_INTERNAL_URL } from '../constants';
 export const ESCALATIONS_INTERNAL_URL =
   `${AGENTIC_INVESTIGATIONS_INTERNAL_URL}/escalations` as const;
 export const ESCALATION_BY_ID_URL = `${ESCALATIONS_INTERNAL_URL}/{id}` as const;
-export const ESCALATIONS_SUGGEST_USERS_URL =
-  `${ESCALATIONS_INTERNAL_URL}/_suggest_user_profiles` as const;
-
 /** URL for the per-escalation assignment route. */
 export const ESCALATION_ASSIGN_URL = `${ESCALATION_BY_ID_URL}/assignees` as const;
 
