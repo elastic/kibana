@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { evaluate as evalsBase, getSpaceIdsFromEnv } from '@kbn/evals';
+import { evaluate as evalsBase } from '@kbn/evals';
 import { tags } from '@kbn/scout';
 import { AgentBuilderEvaluationChatClient } from '../../src/chat_client';
 import {
@@ -45,8 +45,11 @@ import {
 const base = evalsBase.extend<{}, { chatClient: AgentBuilderEvaluationChatClient }>({
   chatClient: [
     async ({ fetch, log, connector }, use) => {
-      const [spaceId] = getSpaceIdsFromEnv() ?? [];
-      await use(new AgentBuilderEvaluationChatClient(fetch, log, connector.id, spaceId));
+      // Space on the *target* Kibana that agent requests are sent to. Distinct from
+      // `--space-ids` / EVAL_SPACE_IDS, which only scopes where datasets and scores are stored
+      // (possibly on a separate evaluations Kibana). Unset = default space.
+      const targetSpaceId = process.env.EVAL_TARGET_SPACE_ID;
+      await use(new AgentBuilderEvaluationChatClient(fetch, log, connector.id, targetSpaceId));
     },
     { scope: 'worker' },
   ],
