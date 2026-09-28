@@ -12,6 +12,10 @@ exports[`HeaderPage it renders 1`] = `
   display: inline-block;
   max-width: 100%;
   overflow: hidden;
+  -webkit-text-decoration: inherit;
+  text-decoration: inherit;
+  -webkit-text-decoration-thickness: inherit;
+  text-decoration-thickness: inherit;
   text-overflow: ellipsis;
   vertical-align: top;
   white-space: nowrap;
