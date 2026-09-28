@@ -30,7 +30,7 @@ describe('kiRetrievalSkill', () => {
   });
 
   it('queries the AI index targets in content', () => {
-    expect(kiRetrievalSkill.content).toContain('FROM v-ai-index-* METADATA _id, _index, _score');
+    expect(kiRetrievalSkill.content).toContain('FROM <targets> METADATA _id, _index, _score');
     expect(kiRetrievalSkill.content).toContain('FROM v-ai-index-<id> METADATA _id, _index, _score');
     expect(kiRetrievalSkill.content).not.toContain('FROM ai-index-*');
   });

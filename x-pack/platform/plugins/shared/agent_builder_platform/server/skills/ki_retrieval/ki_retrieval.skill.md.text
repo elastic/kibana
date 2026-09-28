@@ -14,8 +14,7 @@ queried through a view named `v-ai-index-<id>`, which returns their current, act
 and drops the governance fields, so lifecycle handling never belongs in your query. AI indices
 Elastic manages have no view and are queried through their backing store: their KIs carry
 per-document space permissions that ES|QL only applies there, and `query_ai_indices` applies the
-same lifecycle rules to them. `v-ai-index-*` reaches every AI index created in Kibana that you can
-read.
+same lifecycle rules to them.
 
 The AI INDICES section of your instructions lists the targets available to this agent. When that
 section is absent, `platform.context_engine.list_ai_indices` returns the AI indices you can read
@@ -23,7 +22,10 @@ in this space, each with its target as `esql_target`. Views are not indices, so
 `platform.core.list_indices` does not show them.
 
 Start every query with `FROM <target> METADATA _id, _index, _score`: `SORT _score DESC`, the `:`
-match operators and `FUSE` need those fields, on a view and on a backing store alike.
+match operators and `FUSE` need those fields, on a view and on a backing store alike. Where a
+template below says `<targets>`, list the `esql_target` of every AI index in the AI INDICES
+section, comma-separated, for example `v-ai-index-runbooks, .ai-index-idx-elastic-index`.
+`v-ai-index-*` alone misses the AI indices Elastic manages.
 
 ### Field reference
 
@@ -51,7 +53,7 @@ absence rather than assume every KI has it. `attributes` is `flattened`, so extr
 with `FIELD_EXTRACT` before filtering or keeping it:
 
 ```esql
-FROM v-ai-index-* METADATA _id, _index, _score
+FROM <targets> METADATA _id, _index, _score
 | WHERE type == "detection"
 | EVAL esql = FIELD_EXTRACT(attributes, "esql")
 | WHERE esql IS NOT NULL
@@ -81,14 +83,14 @@ a fixed vocabulary. Aggregate to discover what this index actually holds before 
 either one:
 
 ```esql
-FROM v-ai-index-* METADATA _id, _index, _score
+FROM <targets> METADATA _id, _index, _score
 | STATS ki_count = COUNT(*) BY type
 | SORT ki_count DESC
 | LIMIT 10
 ```
 
 ```esql
-FROM v-ai-index-* METADATA _id, _index, _score
+FROM <targets> METADATA _id, _index, _score
 | STATS ki_count = COUNT(*) BY tags
 | SORT ki_count DESC
 | LIMIT 10
@@ -101,7 +103,7 @@ Aggregations also run over a result set, not just the whole index. Use this to s
 matches for a query distribute before narrowing:
 
 ```esql
-FROM v-ai-index-* METADATA _id, _index, _score
+FROM <targets> METADATA _id, _index, _score
 | WHERE content:"<query>" OR title:"<query>" OR description:"<query>"
 | STATS ki_count = COUNT(*) BY tags
 | SORT ki_count DESC
@@ -119,7 +121,7 @@ and combines them with reciprocal rank fusion, so documents matching both branch
 than documents matching only one.
 
 FORK runs against a single target only. Several targets in one `FROM` already form a branch, and
-ES|QL allows one level of branching, so `FROM v-ai-index-* | FORK` fails. To search several AI
+ES|QL allows one level of branching, so `FROM <targets> | FORK` fails. To search several AI
 indices, run this template once per target, or use the single-`WHERE` template below.
 
 ```esql
@@ -150,7 +152,7 @@ semantic conditions in a single `WHERE`. Elasticsearch scores the row on whichev
 match, without rank fusion:
 
 ```esql
-FROM v-ai-index-* METADATA _id, _index, _score
+FROM <targets> METADATA _id, _index, _score
 | WHERE content:"<query>" OR title:"<query>" OR description:"<query>"
     OR content.semantic:"<query>" OR title.semantic:"<query>" OR description.semantic:"<query>"
 | SORT _score DESC, _id ASC
@@ -183,7 +185,7 @@ Replace `type == "index_metadata"` with any combination of `type` or `tags` filt
 
 - **`_id`, `_index`, `_score`** — request them with `METADATA _id, _index, _score` on the `FROM`;
   `SORT _score DESC`, the `:` match operators and `FUSE` need them.
-- **One target per FORK** — `FROM v-ai-index-*` unions several views and cannot be followed by
+- **One target per FORK** — `FROM <targets>` unions several sources and cannot be followed by
   `FORK`.
 - **FORK branches** — each branch is an independent sub-query executed in parallel. A generous
   per-branch `LIMIT` (e.g. 20) ensures FUSE has enough candidates.
