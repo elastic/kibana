@@ -104,6 +104,19 @@ describe('convertJsonSchemaToZod', () => {
     expect(zodSchema.safeParse({ name: 'Alice', extra: 1 }).success).toBe(false);
   });
 
+  it('validates the object branch when a typed map is unioned with another type', () => {
+    const jsonSchema: JSONSchema7 = {
+      type: ['object', 'string'],
+      additionalProperties: { type: 'number' },
+    };
+    const zodSchema = convertJsonSchemaToZod(jsonSchema);
+
+    expect(zodSchema.safeParse({ count: 2 }).success).toBe(true);
+    expect(zodSchema.safeParse({ count: 'not a number' }).success).toBe(false);
+    expect(zodSchema.safeParse('plain').success).toBe(true);
+    expect(zodSchema.safeParse(null).success).toBe(false);
+  });
+
   it('keeps anyOf composition when a branch is a typed map', () => {
     const jsonSchema: JSONSchema7 = {
       anyOf: [{ type: 'object', additionalProperties: { type: 'string' } }, { type: 'null' }],
@@ -551,7 +564,6 @@ describe('buildFieldsZodValidator', () => {
           additionalProperties: {
             type: 'object',
             properties: { name: { type: 'string' } },
-            required: ['name'],
             additionalProperties: false,
           },
         },

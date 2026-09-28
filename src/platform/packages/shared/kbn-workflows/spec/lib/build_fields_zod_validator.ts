@@ -20,11 +20,30 @@ const schemaTypeList = (jsonSchema: JSONSchema7): string[] => {
 };
 
 /**
- * `fromJSONSchema` only compiles a single `type`. `['object', 'null']` becomes
- * `z.unknown()`, so a typed map on that node has to be rebuilt here.
+ * `fromJSONSchema` only compiles a single `type`. A type array becomes `z.unknown()`,
+ * so a typed map on that node has to be rebuilt as a union of one branch per type.
  */
-const isObjectOrNullTypeList = (types: string[]): boolean =>
-  types.includes('object') && types.every((type) => type === 'object' || type === 'null');
+const compileTypedMapBranch = (jsonSchema: JSONSchema7, valueSchema: z.ZodType): z.ZodType => {
+  const compiled = fromJSONSchema({ ...jsonSchema, type: 'object' } as Record<string, unknown>);
+  return compiled instanceof z.ZodObject
+    ? compiled.catchall(valueSchema)
+    : z.object({}).catchall(valueSchema);
+};
+
+const compileScalarBranch = (jsonSchema: JSONSchema7, type: string): z.ZodType | null => {
+  const compiled = fromJSONSchema({ ...jsonSchema, type } as Record<string, unknown>);
+  if (compiled === undefined || compiled instanceof z.ZodUnknown) {
+    return null;
+  }
+  return compiled;
+};
+
+const unionBranches = (branches: z.ZodType[]): z.ZodType => {
+  if (branches.length === 1) {
+    return branches[0];
+  }
+  return z.union(branches as [z.ZodType, z.ZodType, ...z.ZodType[]]);
+};
 
 /**
  * Applies `additionalProperties` that fromJSONSchema does not preserve at this wrapper layer.
@@ -32,7 +51,7 @@ const isObjectOrNullTypeList = (types: string[]): boolean =>
  * - `false` → `.strict()` so extra keys are rejected
  * - a schema object on a compiled object → `.catchall`, so `getSchemaAtPath` walks unknown keys
  *   into the value shape (including map-only objects such as `rules`)
- * - `type: ['object', 'null']` → that catchall object unioned with `null`
+ * - a type array that includes `object` → that catchall object unioned with each other type
  *
  * `anyOf` / `oneOf` results are left as compiled. Replacing them with a record drops the
  * composition.
@@ -67,13 +86,15 @@ function applyAdditionalProperties(
   }
 
   const types = schemaTypeList(jsonSchema);
-  if (zodResult instanceof z.ZodUnknown && isObjectOrNullTypeList(types)) {
-    const compiled = fromJSONSchema({ ...jsonSchema, type: 'object' } as Record<string, unknown>);
-    const mapSchema =
-      compiled instanceof z.ZodObject
-        ? compiled.catchall(valueSchema)
-        : z.object({}).catchall(valueSchema);
-    return types.includes('null') ? z.union([mapSchema, z.null()]) : mapSchema;
+  if (zodResult instanceof z.ZodUnknown && types.includes('object')) {
+    const branches = [
+      compileTypedMapBranch(jsonSchema, valueSchema),
+      ...types
+        .filter((type) => type !== 'object')
+        .map((type) => compileScalarBranch(jsonSchema, type))
+        .filter((branch): branch is z.ZodType => branch !== null),
+    ];
+    return unionBranches(branches);
   }
 
   return zodResult;
