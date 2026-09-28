@@ -89,6 +89,50 @@ function getSiteBase(ctx: ActionContext, resourceGroupName: string, siteName: st
   )}/providers/Microsoft.Web/sites/${encodeURIComponent(siteName)}`;
 }
 
+/**
+ * Upper bound on pages followed by {@link getAllPages}. ARM returns at most
+ * a few hundred entries per page, so this is far above any realistic
+ * subscription while still bounding the work a single action can do.
+ */
+const MAX_ARM_PAGES = 20;
+
+interface ArmCollection {
+  value?: unknown[];
+  nextLink?: string;
+}
+
+/**
+ * Fetch every page of an ARM collection, following `nextLink` until it is
+ * absent. ARM paginates list routes without any caller-supplied page size, so
+ * returning only the first page silently truncates the result — a subscription
+ * with more sites than fit in one page would appear to have fewer.
+ *
+ * `nextLink` is an absolute, fully-parameterised URL (it already carries
+ * api-version and an opaque skip token), so it is requested as-is with no
+ * additional params.
+ */
+async function getAllPages(
+  ctx: ActionContext,
+  url: string,
+  params: Record<string, unknown>
+): Promise<{ value: unknown[]; truncated?: true }> {
+  const first = await ctx.client.get<ArmCollection>(url, { params });
+  const value = [...(first.data?.value ?? [])];
+  let nextLink = first.data?.nextLink;
+
+  let page = 1;
+  while (nextLink && page < MAX_ARM_PAGES) {
+    const next = await ctx.client.get<ArmCollection>(nextLink);
+    value.push(...(next.data?.value ?? []));
+    nextLink = next.data?.nextLink;
+    page++;
+  }
+
+  // Report truncation rather than pretending the list is complete, so an agent
+  // can narrow its query instead of acting on a partial inventory.
+  return nextLink ? { value, truncated: true } : { value };
+}
+
 function extractAzureErrorMessage(error: unknown): string {
   const err = error as {
     response?: {
@@ -224,7 +268,7 @@ export const AzureFunctions: ConnectorSpec = {
       isTool: true,
       scope: 'destroy',
       description:
-        'Invoke an HTTP-triggered Azure Function and return its response status, headers, and body. This is the primary action: use it to run custom remediation or enrichment code from a workflow. Requires a function or host key unless the trigger is anonymous — get one from listFunctionKeys (this function only) or listHostKeys (any function in the app). Classified as a write/destroy action because the function body can do anything.',
+        'Invoke an HTTP-triggered Azure Function and return its response status, headers, and body. This is the primary action: use it to run custom remediation or enrichment code from a workflow. Requires a function or host key unless the trigger is anonymous — get one from listFunctionKeys (this function only) or listHostKeys (any function in the app). Any HTTP status the function returns is reported in the "status" field rather than raised as an error, so check it: a 4xx or 5xx body is returned for inspection, and only an authentication failure or a transport error throws. Classified as a write/destroy action because the function body can do anything.',
       input: InvokeInputSchema,
       handler: async (ctx, input: InvokeInput) => {
         let defaultHostName: string | undefined;
@@ -264,6 +308,13 @@ export const AzureFunctions: ConnectorSpec = {
               Authorization: undefined,
               ...(input.functionKey && { 'x-functions-key': input.functionKey }),
             },
+            // A function that deliberately answers 4xx/5xx is reporting its own
+            // outcome, not failing the invoke: returning that response as a
+            // result lets a workflow branch on the status and read the error
+            // body. 401/403 stay exceptions because they mean the *key* was
+            // wrong, which is a connector configuration problem rather than
+            // something the function chose to say.
+            validateStatus: (status: number) => status !== 401 && status !== 403,
           });
           return {
             status: response.status,
@@ -356,15 +407,15 @@ export const AzureFunctions: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        "List the functions in a function app, with each function's trigger config, language, invoke_url_template, and isDisabled flag. Call this to discover invocable targets (and their routes) before an invoke when the function name is not known ahead of time.",
+        'List the functions in a function app, with each function\'s trigger config, language, invoke_url_template, and isDisabled flag. Call this to discover invocable targets (and their routes) before an invoke when the function name is not known ahead of time. Every page of results is followed, so the list is complete unless "truncated" is true.',
       input: ListFunctionsInputSchema,
       handler: async (ctx, input: ListFunctionsInput) => {
         try {
-          const response = await ctx.client.get(
+          return await getAllPages(
+            ctx,
             `${getSiteBase(ctx, input.resourceGroupName, input.functionAppName)}/functions`,
-            { params: { 'api-version': WEB_API_VERSION } }
+            { 'api-version': WEB_API_VERSION }
           );
-          return response.data;
         } catch (error) {
           throwAzureError(error);
         }
@@ -377,7 +428,7 @@ export const AzureFunctions: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'List the App Service sites in the subscription, or in one resource group when resourceGroupName is supplied. Use this to pick a target app when its resource group and name are not known ahead of time. Note that the result includes every App Service site, not only function apps — a function app has a "kind" containing "functionapp".',
+        'List the App Service sites in the subscription, or in one resource group when resourceGroupName is supplied. Use this to pick a target app when its resource group and name are not known ahead of time. Note that the result includes every App Service site, not only function apps — a function app has a "kind" containing "functionapp". Every page of results is followed, so the list is complete unless "truncated" is true.',
       input: ListFunctionAppsInputSchema,
       handler: async (ctx, input: ListFunctionAppsInput) => {
         try {
@@ -390,14 +441,11 @@ export const AzureFunctions: ConnectorSpec = {
               )}/providers/Microsoft.Web/sites`
             : `${subscriptionScope}/providers/Microsoft.Web/sites`;
 
-          const response = await ctx.client.get(url, {
-            params: {
-              'api-version': WEB_API_VERSION,
-              ...(input.resourceGroupName &&
-                input.includeSlots !== undefined && { includeSlots: input.includeSlots }),
-            },
+          return await getAllPages(ctx, url, {
+            'api-version': WEB_API_VERSION,
+            ...(input.resourceGroupName &&
+              input.includeSlots !== undefined && { includeSlots: input.includeSlots }),
           });
-          return response.data;
         } catch (error) {
           throwAzureError(error);
         }
@@ -498,7 +546,10 @@ export const AzureFunctions: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/rest/api/appservice/web-apps/list-sync-function-triggers
     listSyncFunctionTriggers: {
       isTool: true,
-      scope: 'read',
+      // Despite the "list" name this POST re-synchronizes the app's trigger
+      // metadata with its deployed content, so it is a mutating operation and
+      // must not be classified as a read an agent can make freely.
+      scope: 'destroy',
       description:
         "Re-synchronize the function app's trigger metadata with its deployed content and return the sync status (the ARM ListSyncFunctionTriggers operation). Call this after a deployment when listFunctions does not yet show a newly added function. It reports whether the sync succeeded; it does not return invoke URLs or keys — use listFunctions or getFunction for a trigger URL, and listFunctionKeys or listHostKeys for a key.",
       input: ListSyncFunctionTriggersInputSchema,
@@ -540,9 +591,13 @@ export const AzureFunctions: ConnectorSpec = {
     '',
     'KEYS: prefer listFunctionKeys (one function) over listHostKeys (whole app), and never use the masterKey returned by listHostKeys for a normal invoke — it grants administrative access to the entire app.',
     '',
-    "STALE TRIGGER METADATA: if listFunctions does not show a function that was just deployed, call listSyncFunctionTriggers to re-sync the app's trigger metadata, then list again. It returns only a sync status, not URLs or keys.",
+    "STALE TRIGGER METADATA: if listFunctions does not show a function that was just deployed, call listSyncFunctionTriggers to re-sync the app's trigger metadata, then list again. It returns only a sync status, not URLs or keys, and it mutates the app's metadata — do not call it as a read.",
     '',
-    'AUTH SCOPES: reads need the Reader role on the subscription; restart/stop/start and every key-reading action need Website Contributor.',
+    'READING AN INVOKE RESULT: invoke reports whatever status the function returned in its "status" field, so check it rather than assuming success. A 4xx or 5xx means the function ran and rejected the request — its body explains why. Only a wrong or missing key (401/403) or a transport failure raises an error.',
+    '',
+    'LARGE RESULT SETS: listFunctionApps and listFunctions return every page. If the response carries "truncated": true, the inventory is incomplete — narrow it with resourceGroupName rather than acting on a partial list.',
+    '',
+    'AUTH SCOPES: reads need the Reader role on the subscription; restart/stop/start, the trigger re-sync, and every key-reading action need Website Contributor.',
   ].join('\n'),
 
   test: {
@@ -553,13 +608,13 @@ export const AzureFunctions: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       try {
-        const response = await ctx.client.get(
+        const { value } = await getAllPages(
+          ctx,
           `${ARM_BASE}/subscriptions/${getSubscriptionId(ctx)}/providers/Microsoft.Web/sites`,
-          { params: { 'api-version': WEB_API_VERSION } }
+          { 'api-version': WEB_API_VERSION }
         );
-        const count = Array.isArray(response.data?.value) ? response.data.value.length : 0;
         return {
-          message: `Successfully connected to Azure: found ${count} App Service site(s) in the subscription`,
+          message: `Successfully connected to Azure: found ${value.length} App Service site(s) in the subscription`,
         };
       } catch (error) {
         throwAzureError(error);

@@ -10,6 +10,7 @@
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { AzureFunctions } from './azure_functions';
+import { InvokeInputSchema } from './types';
 
 const ARM_BASE = 'https://management.azure.com';
 const SUB_ID = '11111111-1111-1111-1111-111111111111';
@@ -146,6 +147,35 @@ describe('AzureFunctions', () => {
       );
     });
 
+    // ARM paginates list routes with an absolute nextLink URL that already
+    // carries api-version and a skip token, so it must be requested as-is.
+    it('follows nextLink and concatenates every page', async () => {
+      const nextUrl = `${ARM_BASE}/next-page?skipToken=abc`;
+      mockClient.get
+        .mockResolvedValueOnce({ data: { value: [{ name: 'app-1' }], nextLink: nextUrl } })
+        .mockResolvedValueOnce({ data: { value: [{ name: 'app-2' }] } });
+
+      const result = await AzureFunctions.actions.listFunctionApps.handler(mockContext, {});
+
+      expect(mockClient.get).toHaveBeenNthCalledWith(2, nextUrl);
+      expect(result).toEqual({ value: [{ name: 'app-1' }, { name: 'app-2' }] });
+    });
+
+    it('reports truncation instead of pretending the list is complete', async () => {
+      // Always returning a nextLink forces the page cap to be hit.
+      mockClient.get.mockResolvedValue({
+        data: { value: [{ name: 'app' }], nextLink: `${ARM_BASE}/more` },
+      });
+
+      const result = (await AzureFunctions.actions.listFunctionApps.handler(mockContext, {})) as {
+        value: unknown[];
+        truncated?: true;
+      };
+
+      expect(result.truncated).toBe(true);
+      expect(mockClient.get).toHaveBeenCalledTimes(20);
+    });
+
     // includeSlots only exists on the by-resource-group route; the
     // subscription-wide route rejects unknown query params.
     it('drops includeSlots when listing subscription-wide', async () => {
@@ -216,16 +246,29 @@ describe('AzureFunctions', () => {
       );
     });
 
-    it('reads trigger URLs via a bodyless POST to /listsyncfunctiontriggerstatus', async () => {
-      mockClient.post.mockResolvedValue({ data: { trigger_url: 'https://x/api/y?code=z' } });
+    // The live ARM route returns a sync status, NOT the FunctionSecrets
+    // {key, trigger_url} its swagger response schema advertises. Asserting the
+    // observed shape here stops the spec drifting back to promising URLs.
+    it('re-syncs triggers via a bodyless POST and returns the sync status', async () => {
+      mockClient.post.mockResolvedValue({ data: { status: 'success' } });
 
-      await AzureFunctions.actions.listSyncFunctionTriggers.handler(mockContext, APP_REF);
+      const result = await AzureFunctions.actions.listSyncFunctionTriggers.handler(
+        mockContext,
+        APP_REF
+      );
 
       expect(mockClient.post).toHaveBeenCalledWith(
         `${SITE_BASE}/listsyncfunctiontriggerstatus`,
         undefined,
         { params: { 'api-version': API_VERSION } }
       );
+      expect(result).toEqual({ status: 'success' });
+    });
+
+    // Re-syncing mutates the app's trigger metadata, so it must not be
+    // classified as a read an agent can make freely.
+    it('classifies the trigger re-sync as a mutating action', () => {
+      expect(AzureFunctions.actions.listSyncFunctionTriggers.scope).toBe('destroy');
     });
   });
 
@@ -312,6 +355,8 @@ describe('AzureFunctions', () => {
           Authorization: undefined,
           'x-functions-key': 'secret-key',
         },
+        // Asserted in detail by the status-handling tests below.
+        validateStatus: expect.any(Function),
       });
       expect(result).toEqual({
         status: 202,
@@ -355,6 +400,49 @@ describe('AzureFunctions', () => {
       expect(requestConfig.data).toBeUndefined();
     });
 
+    // A function that deliberately answers 4xx/5xx is reporting its own
+    // outcome; axios would otherwise reject and the caller would never see it.
+    it('returns a non-2xx function response as a result rather than throwing', async () => {
+      mockClient.get.mockResolvedValue(siteResponse);
+      mockClient.request.mockResolvedValue({
+        status: 409,
+        headers: {},
+        data: { error: 'host already quarantined' },
+      });
+
+      const result = await AzureFunctions.actions.invoke.handler(mockContext, {
+        ...APP_REF,
+        functionName: 'QuarantineHost',
+        functionKey: 'k',
+      });
+
+      expect(result).toEqual({
+        status: 409,
+        headers: {},
+        body: { error: 'host already quarantined' },
+      });
+    });
+
+    // 401/403 mean the key was wrong — a connector configuration problem, not
+    // something the function chose to report.
+    it('treats only auth failures as exceptions', async () => {
+      mockClient.get.mockResolvedValue(siteResponse);
+      mockClient.request.mockResolvedValue({ status: 200, headers: {}, data: '' });
+
+      await AzureFunctions.actions.invoke.handler(mockContext, {
+        ...APP_REF,
+        functionName: 'Ping',
+        functionKey: 'k',
+      });
+
+      const [{ validateStatus }] = mockClient.request.mock.calls[0];
+      expect(validateStatus(200)).toBe(true);
+      expect(validateStatus(409)).toBe(true);
+      expect(validateStatus(500)).toBe(true);
+      expect(validateStatus(401)).toBe(false);
+      expect(validateStatus(403)).toBe(false);
+    });
+
     it('fails with an actionable error when the app has no hostname', async () => {
       mockClient.get.mockResolvedValue({ data: { properties: {} } });
 
@@ -367,6 +455,37 @@ describe('AzureFunctions', () => {
         `Function app '${APP}' has no defaultHostName, so its HTTP trigger endpoint cannot be resolved.`
       );
       expect(mockClient.request).not.toHaveBeenCalled();
+    });
+  });
+
+  // Every other invoke input is bounded; an unbounded body would let one tool
+  // call allocate and serialize an arbitrarily large string on the server.
+  describe('invoke body bound', () => {
+    const validBase = { ...APP_REF, functionName: 'Ping' };
+
+    it('accepts a normal JSON body', () => {
+      expect(
+        InvokeInputSchema.safeParse({ ...validBase, body: { hostId: 'abc-123' } }).success
+      ).toBe(true);
+    });
+
+    it('accepts an omitted body', () => {
+      expect(InvokeInputSchema.safeParse(validBase).success).toBe(true);
+    });
+
+    it('rejects a body over the serialized size cap', () => {
+      const result = InvokeInputSchema.safeParse({
+        ...validBase,
+        body: { blob: 'x'.repeat(1024 * 1024 + 1) },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a body that cannot be serialized', () => {
+      const cyclic: Record<string, unknown> = {};
+      cyclic.self = cyclic;
+
+      expect(InvokeInputSchema.safeParse({ ...validBase, body: cyclic }).success).toBe(false);
     });
   });
 

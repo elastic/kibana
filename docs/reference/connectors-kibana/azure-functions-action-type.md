@@ -9,11 +9,15 @@ applies_to:
 
 # Azure Functions connector [azure-functions-action-type]
 
-The Azure Functions connector lets a workflow or agent run custom code in Azure without leaving Elastic: invoke an HTTP-triggered function to do remediation or enrichment, read the keys that an invoke needs, resolve a function app and its running state, and restart, stop, or start an app that is wedged or compromised.
+The Azure Functions connector lets an agent run custom code in Azure without leaving Elastic: invoke an HTTP-triggered function to do remediation or enrichment, read the keys that an invoke needs, resolve a function app and its running state, and restart, stop, or start an app that is wedged or compromised.
+
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+::::
 
 ## Overview
 
-This is a **custom connector** that authenticates as a Microsoft Entra app registration (service principal) using the OAuth 2.0 Client Credentials grant.
+The connector authenticates as a Microsoft Entra app registration (service principal) using the OAuth 2.0 Client Credentials grant.
 
 Azure splits functions across two planes, and this connector uses both:
 
@@ -46,12 +50,14 @@ The `invoke` action does not use the service principal token. It authenticates w
 
 | Action | Description |
 |--------|-------------|
-| `invoke` | Invoke an HTTP-triggered function and return its status, headers, and body. Parameters: `resourceGroupName`, `functionAppName`, `functionName` (all three required), `method`, `route`, `body`, `query`, `functionKey`. |
+| `invoke` | Invoke an HTTP-triggered function and return its status, headers, and body. Any status the function returns is reported in the `status` field rather than raised as an error; only an authentication failure or a transport error throws. Parameters: `resourceGroupName`, `functionAppName`, `functionName` (all three required), `method`, `route`, `body`, `query`, `functionKey`. |
 | `listFunctionKeys` | Read the function-level keys of one function, as a name-to-key map. Parameters: `resourceGroupName`, `functionAppName`, `functionName` (all three required). |
 | `getFunctionApp` | Get a function app's configuration and running state. Parameters: `resourceGroupName`, `functionAppName` (both required). |
 | `restartFunctionApp` | Restart a function app. Parameters: `resourceGroupName`, `functionAppName` (both required), `softRestart`, `synchronous`. |
 | `listFunctions` | List the functions in an app, with each function's trigger config, language, and invoke URL template. Parameters: `resourceGroupName`, `functionAppName` (both required). |
 | `listFunctionApps` | List the App Service sites in the subscription, or in one resource group. Parameters: `resourceGroupName`, `includeSlots` (both optional). |
+
+The two list actions follow Azure's pagination links and return every page. If a result set is larger than the connector will retrieve in one call, the response includes `truncated: true`; narrow the query with `resourceGroupName` in that case.
 | `stopFunctionApp` | Stop a function app, so it runs no further executions. Parameters: `resourceGroupName`, `functionAppName` (both required). |
 | `startFunctionApp` | Start a stopped function app. Parameters: `resourceGroupName`, `functionAppName` (both required). |
 | `listHostKeys` | Read an app's host-level keys: `masterKey`, `functionKeys`, and `systemKeys`. Parameters: `resourceGroupName`, `functionAppName` (both required). |

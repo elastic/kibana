@@ -10,6 +10,14 @@
 import { z } from '@kbn/zod/v4';
 
 /**
+ * Cap on the serialized `invoke` request body. Azure Functions' own HTTP
+ * request limit is far higher, but a connector action is driven by an LLM tool
+ * call, so the payload is bounded here to keep one call from allocating an
+ * arbitrarily large string on the Kibana server.
+ */
+const MAX_INVOKE_BODY_BYTES = 1024 * 1024;
+
+/**
  * Azure resource-group names allow letters, digits, periods, underscores,
  * hyphens and parentheses, up to 90 characters. Every action interpolates this
  * value into an ARM URL path, so it is constrained here as well as escaped in
@@ -130,8 +138,28 @@ export const InvokeInputSchema = FunctionAppRefSchema.extend({
   body: z
     .unknown()
     .optional()
+    .refine(
+      (value) => {
+        if (value === undefined) return true;
+        try {
+          // Bound the serialized size rather than the shape: a function body is
+          // caller-defined JSON, so there is no schema to constrain, but an
+          // unbounded payload would be allocated and serialized on the Kibana
+          // server before ever reaching Azure.
+          return JSON.stringify(value).length <= MAX_INVOKE_BODY_BYTES;
+        } catch {
+          // A value that cannot be serialized (a cycle, a BigInt) could never
+          // be sent to the function, so reject it here with a clear message
+          // instead of failing opaquely inside the HTTP client.
+          return false;
+        }
+      },
+      {
+        message: `Body must be JSON-serializable and at most ${MAX_INVOKE_BODY_BYTES} bytes once serialized.`,
+      }
+    )
     .describe(
-      'JSON request body sent to the function. Omit for GET triggers. Example: {"hostId": "abc-123"}.'
+      `JSON request body sent to the function. Omit for GET triggers. Example: {"hostId": "abc-123"}. Must be JSON-serializable and at most ${MAX_INVOKE_BODY_BYTES} bytes once serialized.`
     ),
   query: z
     .record(z.string().max(200), z.string().max(2000))
