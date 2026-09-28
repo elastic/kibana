@@ -8,9 +8,10 @@
  */
 
 import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormLabel,
   EuiText,
   EuiTitle,
@@ -24,7 +25,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 import { DataReferenceCatalogTree } from './data_reference_catalog_tree';
 import { ReferenceCapableField } from './reference_capable_field';
-import { WORKFLOW_STEP_CONFIG_FLYOUT_HISTORY_KEY } from './workflow_step_config_flyout_history_key';
 
 export interface FieldEditorSubFlyoutProps {
   readonly fieldLabel: string;
@@ -44,9 +44,8 @@ const VALUE_LABEL = i18n.translate('workflows.fieldEditorSubFlyout.valueLabel', 
 });
 
 /**
- * Expanded field editor as a history-stacked flyout (same historyKey as the
- * step panel). Live write-through to the step working state — no save/cancel
- * of its own.
+ * Expanded field editor stacked inside the canvas-bounded step panel.
+ * Live write-through to the step working state — no save/cancel of its own.
  */
 export function FieldEditorSubFlyout({
   fieldLabel,
@@ -59,7 +58,6 @@ export function FieldEditorSubFlyout({
   const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'workflowFieldEditorTitle' });
   const valueLabelId = useGeneratedHtmlId({ prefix: 'workflowFieldEditorValue' });
-  const flyoutId = useGeneratedHtmlId({ prefix: 'workflowFieldEditorFlyout' });
   const [draft, setDraft] = useState(value);
   const [isDragOver, setIsDragOver] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -165,86 +163,90 @@ export function FieldEditorSubFlyout({
     [draft]
   );
 
-  const handleClose = useCallback(
-    (_event?: unknown, meta?: { reason?: string }) => {
-      // Escape / Back / history pop → this panel only. Header ✕ → whole stack.
-      if (meta?.reason === 'close-button') {
-        onCloseStack();
-        return;
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        onBack();
       }
-      onBack();
     },
-    [onBack, onCloseStack]
+    [onBack]
   );
 
   return (
-    <EuiFlyout
-      key={fieldLabel}
-      id={flyoutId}
-      // Same historyKey as the step panel so EUI renders the standard
-      // Back ⌄ + ✕ menu row; title stays in EuiFlyoutHeader beneath it.
-      session="start"
-      historyKey={WORKFLOW_STEP_CONFIG_FLYOUT_HISTORY_KEY}
-      flyoutMenuDisplayMode="always"
-      size="l"
-      maxWidth={1080}
-      ownFocus={false}
-      outsideClickCloses={false}
-      paddingSize="none"
-      flyoutMenuProps={{ title: fieldLabel, titleId }}
-      onClose={handleClose}
+    <div
+      role="dialog"
+      aria-modal="false"
       aria-labelledby={titleId}
       aria-label={fieldLabel}
       data-test-subj="workflowFieldEditorSubFlyout"
+      onKeyDown={handleKeyDown}
       css={{
-        // Always cover the step flyout — never sit beside it when EUI's
-        // combined-width heuristic would pick side-by-side.
-        insetInlineEnd: '0 !important',
-        width: 'min(82vw, 1080px) !important',
-        maxWidth: '1080px !important',
-        zIndex: Number(euiTheme.levels.flyout) + 2,
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        minHeight: 0,
+        background: euiTheme.colors.backgroundBasePlain,
       }}
     >
-      <EuiFlyoutHeader
-        hasBorder
+      <div
         css={{
-          // paddingSize="none" clears header inset — 12px (size.m) around the title.
-          '&&': {
-            padding: euiTheme.size.m,
-          },
+          flex: '0 0 auto',
+          borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+          padding: euiTheme.size.m,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: euiTheme.size.s,
         }}
       >
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="center"
+          justifyContent="spaceBetween"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              flush="left"
+              iconType="chevronSingleLeft"
+              onClick={onBack}
+              data-test-subj="workflowFieldEditorSubFlyoutBack"
+            >
+              {i18n.translate('workflows.fieldEditorSubFlyout.back', {
+                defaultMessage: 'Back',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="cross"
+              color="text"
+              aria-label={i18n.translate('workflows.fieldEditorSubFlyout.closeStack', {
+                defaultMessage: 'Close',
+              })}
+              onClick={onCloseStack}
+              data-test-subj="workflowFieldEditorSubFlyoutClose"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiTitle size="xs">
           <h4 id={titleId} data-test-subj="workflowFieldEditorSubFlyoutTitle">
             {fieldLabel}
           </h4>
         </EuiTitle>
-      </EuiFlyoutHeader>
+      </div>
 
-      <EuiFlyoutBody
+      <div
         css={{
-          // Body is height:100% but not a flex container by default — without
-          // this the overflow child sizes to content and the editor stays ~1 line.
+          flex: '1 1 auto',
+          minHeight: 0,
           display: 'flex',
           flexDirection: 'column',
-          minHeight: 0,
-          '.euiFlyoutBody__overflow': {
-            flex: '1 1 auto',
-            minHeight: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-          },
-          '.euiFlyoutBody__overflowContent': {
-            flex: '1 1 auto',
-            minHeight: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            padding: 0,
-          },
+          overflow: 'hidden',
         }}
       >
-        <div
+<div
           css={{
             flex: '1 1 auto',
             minHeight: 0,
@@ -431,7 +433,7 @@ export function FieldEditorSubFlyout({
             </div>
           </div>
         </div>
-      </EuiFlyoutBody>
-    </EuiFlyout>
+      </div>
+    </div>
   );
 }

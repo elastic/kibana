@@ -28,6 +28,7 @@ import React, {
   useState,
 } from 'react';
 import { i18n } from '@kbn/i18n';
+import { WORKFLOWS_SURFACE_RADIUS } from './surface_radius';
 
 export type WorkflowDetailBottomBarView = 'yaml' | 'graph';
 
@@ -384,7 +385,7 @@ export function WorkflowDetailBottomBar({
               opacity: isExpanded ? 1 : 0,
               transition: 'opacity 200ms ease',
               background: euiTheme.colors.backgroundBasePlain,
-              borderRadius: euiTheme.border.radius.small,
+              borderRadius: WORKFLOWS_SURFACE_RADIUS,
               paddingBlock: euiTheme.size.s,
               paddingLeft: 12,
               paddingRight: euiTheme.size.s,

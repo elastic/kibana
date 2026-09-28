@@ -16,10 +16,6 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
   EuiFormRow,
   EuiIcon,
   EuiTab,
@@ -63,14 +59,7 @@ export interface TriggerConfigPanelProps {
   readonly workflowYaml?: string;
   readonly onCancel: () => void;
   readonly onSave: (fragment: string) => void;
-  readonly size?: number;
-  readonly minWidth?: number;
-  readonly maxWidth?: number;
-  readonly onResize?: (width: number) => void;
 }
-
-const DEFAULT_FLYOUT_SIZE = 560;
-const DEFAULT_FLYOUT_MIN_WIDTH = 420;
 
 type ParametersMode = 'form' | 'yaml';
 
@@ -121,10 +110,10 @@ const readScheduledEvery = (fragment: string): string => {
 };
 
 /**
- * Edit-mode flyout for a workflow trigger — same shell as {@link StepConfigPanel}
- * (EuiFlyout + Visual builder / YAML tabs). Manual triggers expose an Inputs
- * builder; scheduled triggers expose the interval field. Alert triggers are
- * read-only (event fields come from the detection rule).
+ * Edit-mode panel for a workflow trigger — same canvas-bounded shell as
+ * {@link StepConfigPanel} (Visual builder / YAML tabs). Manual triggers expose
+ * an Inputs builder; scheduled triggers expose the interval field. Alert
+ * triggers are read-only (event fields come from the detection rule).
  */
 export function TriggerConfigPanel({
   triggerType,
@@ -133,10 +122,6 @@ export function TriggerConfigPanel({
   workflowYaml = '',
   onCancel,
   onSave,
-  size = DEFAULT_FLYOUT_SIZE,
-  minWidth = DEFAULT_FLYOUT_MIN_WIDTH,
-  maxWidth,
-  onResize,
 }: TriggerConfigPanelProps) {
   const { euiTheme } = useEuiTheme();
   const [parametersMode, setParametersMode] = useState<ParametersMode>('form');
@@ -284,24 +269,30 @@ export function TriggerConfigPanel({
   const showScheduledSettings = triggerType === 'scheduled';
 
   return (
-    <EuiFlyout
-      ownFocus={false}
-      outsideClickCloses={false}
-      hideCloseButton
-      paddingSize="none"
-      size={size}
-      minWidth={minWidth}
-      maxWidth={maxWidth}
-      resizable={Boolean(onResize)}
-      onResize={onResize}
-      onClose={handleClose}
+    <div
+      role="dialog"
+      aria-modal="false"
       aria-labelledby={titleId}
       data-test-subj="workflowTriggerConfigPanel"
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          e.stopPropagation();
+          handleClose();
+        }
+      }}
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        minHeight: 0,
+        background: euiTheme.colors.backgroundBasePlain,
+      }}
     >
-      <EuiFlyoutHeader
-        hasBorder
+      <div
         css={{
-          '&&': { paddingBottom: 0 },
+          flex: '0 0 auto',
+          borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+          paddingBottom: 0,
         }}
       >
         <div
@@ -403,20 +394,15 @@ export function TriggerConfigPanel({
             </EuiTab>
           ))}
         </EuiTabs>
-      </EuiFlyoutHeader>
+      </div>
 
-      <EuiFlyoutBody
+      <div
         css={{
-          '.euiFlyoutBody__overflow': {
-            display: 'flex',
-            flexDirection: 'column',
-          },
-          '.euiFlyoutBody__overflowContent': {
-            display: 'flex',
-            flexDirection: 'column',
-            flex: '1 1 auto',
-            minHeight: 0,
-          },
+          flex: '1 1 auto',
+          minHeight: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
         }}
       >
         <div
@@ -556,22 +542,16 @@ export function TriggerConfigPanel({
             </div>
           )}
         </div>
-      </EuiFlyoutBody>
+      </div>
 
-      <EuiFlyoutFooter
+      <div
         css={{
-          // paddingSize="none" zeroes `.euiFlyoutFooter` via the parent flyout
-          // selector — pad an inner wrapper so we don't fight that cascade.
-          padding: 0,
+          flex: '0 0 auto',
+          borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+          paddingBlock: euiTheme.size.base,
+          paddingInline: euiTheme.size.base,
         }}
       >
-        <div
-          css={{
-            // 16px inset to match header / body.
-            paddingBlock: euiTheme.size.base,
-            paddingInline: euiTheme.size.base,
-          }}
-        >
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
@@ -594,8 +574,7 @@ export function TriggerConfigPanel({
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </div>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+      </div>
+    </div>
   );
 }

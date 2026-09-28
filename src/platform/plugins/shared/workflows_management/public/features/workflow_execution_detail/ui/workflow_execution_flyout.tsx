@@ -61,6 +61,8 @@ import {
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useKibana } from '../../../hooks/use_kibana';
+import { insertIntoActiveDataReferenceTarget } from '../../../shared/lib/active_data_reference_insert_target';
+import { appendKeyPath } from '../../../shared/lib/flatten_key_paths';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
 import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
@@ -179,7 +181,21 @@ const truncateStepName = (name: string): string =>
 
 const SECTION_PAGE_SIZE = 10;
 
-const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
+const StepDataSection = ({
+  label,
+  data,
+  /**
+   * When set, table rows are drag/click sources that insert a templated
+   * REFERENCE path into the last-focused config field — never the run's
+   * literal value. A workflow wired to one run's URL (etc.) breaks on every
+   * later run.
+   */
+  referencePathPrefix,
+}: {
+  label: string;
+  data: unknown;
+  referencePathPrefix?: string;
+}) => {
   const { euiTheme } = useEuiTheme();
   const [view, setView] = useState<'table' | 'code'>(() => (isTableable(data) ? 'table' : 'code'));
   const [isViewPopoverOpen, setIsViewPopoverOpen] = useState(false);
@@ -218,6 +234,32 @@ const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
           defaultMessage: 'No data',
         });
 
+  const wrapAsReferenceSource = useCallback(
+    (field: string, node: React.ReactNode) => {
+      if (referencePathPrefix == null) return node;
+      // Drag/click inserts the REFERENCE path token, never the run's literal value.
+      const token = `{{ ${appendKeyPath(referencePathPrefix, field)} }}`;
+      return (
+        <div
+          draggable
+          data-test-subj={`workflowExecutionOutputField-${field}`}
+          title={token}
+          onDragStart={(e) => {
+            e.dataTransfer.setData('text/plain', token);
+            e.dataTransfer.effectAllowed = 'copy';
+          }}
+          onClick={() => {
+            insertIntoActiveDataReferenceTarget(token);
+          }}
+          css={{ cursor: 'grab', width: '100%', minWidth: 0 }}
+        >
+          {node}
+        </div>
+      );
+    },
+    [referencePathPrefix]
+  );
+
   const tableColumns = useMemo<Array<EuiBasicTableColumn<StepDataTableRow>>>(
     () => [
       {
@@ -227,42 +269,44 @@ const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
         }),
         className: 'workflowStepDataFieldCol',
         width: `${FIELD_COLUMN_MAX_PX}px`,
-        render: (field: string, row) => (
-          <div
-            css={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              minWidth: 0,
-              maxWidth: FIELD_COLUMN_MAX_PX,
-              overflow: 'hidden',
-            }}
-          >
-            <EuiToken
-              iconType={fieldTypeToToken[row.fieldType]}
-              size="xs"
-              css={{ flexShrink: 0, width: '12px', height: '12px', margin: 0 }}
-            />
-            <EuiToolTip content={field} position="top">
-              <span
-                tabIndex={0}
-                css={{
-                  fontSize: '12px',
-                  fontFamily: euiTheme.font.familyCode,
-                  minWidth: 0,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  // Truncate from the left so the leaf segment stays visible.
-                  direction: 'rtl',
-                  textAlign: 'left',
-                }}
-              >
-                <bdi>{field}</bdi>
-              </span>
-            </EuiToolTip>
-          </div>
-        ),
+        render: (field: string, row) =>
+          wrapAsReferenceSource(
+            field,
+            <div
+              css={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                minWidth: 0,
+                maxWidth: FIELD_COLUMN_MAX_PX,
+                overflow: 'hidden',
+              }}
+            >
+              <EuiToken
+                iconType={fieldTypeToToken[row.fieldType]}
+                size="xs"
+                css={{ flexShrink: 0, width: '12px', height: '12px', margin: 0 }}
+              />
+              <EuiToolTip content={field} position="top">
+                <span
+                  tabIndex={0}
+                  css={{
+                    fontSize: '12px',
+                    fontFamily: euiTheme.font.familyCode,
+                    minWidth: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    // Truncate from the left so the leaf segment stays visible.
+                    direction: 'rtl',
+                    textAlign: 'left',
+                  }}
+                >
+                  <bdi>{field}</bdi>
+                </span>
+              </EuiToolTip>
+            </div>
+          ),
       },
       {
         field: 'value',
@@ -271,10 +315,11 @@ const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
         }),
         className: 'workflowStepDataValueCol',
         truncateText: true,
-        render: (value: string) => <StepDataValueCell value={value} />,
+        render: (value: string, row) =>
+          wrapAsReferenceSource(row.field, <StepDataValueCell value={value} />),
       },
     ],
-    [euiTheme.font.familyCode]
+    [euiTheme.font.familyCode, wrapAsReferenceSource]
   );
 
   const onTableChange = useCallback(({ page }: Criteria<StepDataTableRow>) => {
@@ -894,6 +939,14 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                         defaultMessage: 'Input',
                       })}
                       data={activeStepExecution?.input}
+                      referencePathPrefix={
+                        selectedStepExecutionId === 'trigger' &&
+                        activeStepExecution?.stepType?.startsWith('trigger_')
+                          ? activeStepExecution.stepType.replace('trigger_', '') === 'manual'
+                            ? 'inputs'
+                            : 'event'
+                          : undefined
+                      }
                     />
                     {!isPseudoStep &&
                       isForeachOrWhileStep &&
@@ -923,6 +976,11 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                             defaultMessage: 'Output',
                           })}
                           data={stepOutputData}
+                          referencePathPrefix={
+                            activeStepExecution?.stepId
+                              ? `steps.${activeStepExecution.stepId}.output`
+                              : undefined
+                          }
                         />
                       ) : null)}
                   </>
