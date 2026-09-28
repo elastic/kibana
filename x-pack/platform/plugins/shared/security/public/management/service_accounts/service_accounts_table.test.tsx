@@ -6,7 +6,7 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { screen } from '@testing-library/react';
+import { act, screen, within } from '@testing-library/react';
 import user from '@testing-library/user-event';
 import React from 'react';
 
@@ -87,6 +87,58 @@ describe('ServiceAccountsTable', () => {
 
     expect(await screen.findByText('incident-responder')).toBeVisible();
     expect(screen.queryByText('nightshift-relay')).not.toBeInTheDocument();
+  });
+
+  it('filters accounts by the selected role and restores them when cleared', async () => {
+    renderTable();
+
+    await user.click(screen.getByRole('button', { name: 'Role Selection' }));
+    await user.click(screen.getByRole('option', { name: 'viewer' }));
+
+    expect(screen.getByText('nightshift-relay')).toBeVisible();
+    expect(screen.queryByText('incident-responder')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('option', { name: 'viewer' }));
+
+    expect(screen.getByText('incident-responder')).toBeVisible();
+    expect(screen.getByText('nightshift-relay')).toBeVisible();
+  });
+
+  it.each([
+    { column: 'Roles', ascending: ['incident-responder', 'nightshift-relay'] },
+    { column: 'Created by', ascending: ['nightshift-relay', 'incident-responder'] },
+  ])('sorts accounts by $column in both directions', async ({ column, ascending }) => {
+    renderTable();
+    const sortButton = within(
+      screen.getByRole('columnheader', { name: new RegExp(column) })
+    ).getByRole('button');
+
+    await user.click(sortButton);
+    screen.getAllByRole('rowheader').forEach((header, index) => {
+      expect(header).toHaveTextContent(ascending[index]);
+    });
+
+    await user.click(sortButton);
+    const descending = [...ascending].reverse();
+    screen.getAllByRole('rowheader').forEach((header, index) => {
+      expect(header).toHaveTextContent(descending[index]);
+    });
+  });
+
+  it('explains the unavailable workload count on keyboard focus', async () => {
+    renderTable();
+    const row = screen.getByRole('row', { name: /incident-responder/ });
+    const cells = within(row).getAllByRole('cell');
+    const workloadCell = cells[cells.length - 1];
+    const unavailableCount = within(workloadCell).getByText('—');
+
+    expect(unavailableCount).toHaveAttribute('tabindex', '0');
+    act(() => unavailableCount.focus());
+
+    expect(unavailableCount).toHaveFocus();
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'Workload associations are not available yet.'
+    );
   });
 
   it('loads the next cursor page on demand', async () => {

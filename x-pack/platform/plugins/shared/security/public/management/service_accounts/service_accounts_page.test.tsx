@@ -144,6 +144,45 @@ describe('ServiceAccountsPage', () => {
     expect(list).toHaveBeenNthCalledWith(2, { limit: 100, after: 'next-page' });
   });
 
+  it('keeps an empty cursor page reachable and can retry before loading accounts', async () => {
+    const { list } = renderPage({
+      nextPage: 'next-page',
+      loadMoreError: new Error('Unavailable'),
+    });
+
+    await user.click(await screen.findByTestId('serviceAccountsLoadMore'));
+
+    expect(await screen.findByText('Unable to load more service accounts.')).toBeVisible();
+    expect(screen.queryByTestId('serviceAccountsEmptyPromptCreateButton')).not.toBeInTheDocument();
+    list.mockResolvedValueOnce({
+      serviceAccounts: [
+        {
+          id: 'account-id',
+          name: 'reachable-account',
+          roles: ['viewer'],
+          enabled: true,
+          assumable: true,
+        },
+      ],
+    });
+    await user.click(screen.getByTestId('serviceAccountsLoadMore'));
+
+    expect(await screen.findByText('reachable-account')).toBeVisible();
+    expect(list).toHaveBeenNthCalledWith(2, { limit: 100, after: 'next-page' });
+    expect(list).toHaveBeenNthCalledWith(3, { limit: 100, after: 'next-page' });
+    expect(screen.queryByTestId('serviceAccountsLoadMore')).not.toBeInTheDocument();
+  });
+
+  it('shows the empty prompt only after the final empty cursor page', async () => {
+    const { list } = renderPage({ nextPage: 'next-page' });
+
+    await user.click(await screen.findByTestId('serviceAccountsLoadMore'));
+
+    expect(await screen.findByTestId('serviceAccountsEmptyPromptCreateButton')).toBeVisible();
+    expect(list).toHaveBeenCalledTimes(2);
+    expect(screen.queryByTestId('serviceAccountsTable')).not.toBeInTheDocument();
+  });
+
   it('keeps loaded accounts visible when the next cursor page fails', async () => {
     renderPage({
       serviceAccounts: [

@@ -207,7 +207,9 @@ export const ServiceAccountsTable = ({
                 { defaultMessage: 'Workload associations are not available yet.' }
               )}
             >
-              {unavailableValue}
+              <EuiText color="subdued" size="s" tabIndex={0}>
+                &mdash;
+              </EuiText>
             </EuiToolTip>
           ) : (
             <EuiBadge color="primary">{workloadCount}</EuiBadge>

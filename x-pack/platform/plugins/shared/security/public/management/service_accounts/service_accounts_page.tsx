@@ -90,6 +90,8 @@ export const ServiceAccountsPage = ({
     }
   }, [loadServiceAccounts, nextPage]);
 
+  const isEmpty = serviceAccounts.length === 0 && nextPage === undefined;
+
   const menu: AppHeaderMenu | undefined = canCreate
     ? {
         primaryActionItem: {
@@ -117,7 +119,7 @@ export const ServiceAccountsPage = ({
         spacing="bleed"
       />
       <KibanaPageTemplate.Section
-        alignment={isLoading || hasError || serviceAccounts.length === 0 ? 'center' : 'top'}
+        alignment={isLoading || hasError || isEmpty ? 'center' : 'top'}
         grow
       >
         {isLoading ? (
@@ -159,7 +161,7 @@ export const ServiceAccountsPage = ({
             }
             data-test-subj="serviceAccountsLoadError"
           />
-        ) : serviceAccounts.length === 0 ? (
+        ) : isEmpty ? (
           <ServiceAccountsEmptyPrompt canCreate={canCreate} onCreateAccount={onCreateAccount} />
         ) : (
           <ServiceAccountsTable
