@@ -770,9 +770,12 @@ describe('TableRowActions', () => {
   });
 
   describe('Restart agent action', () => {
-    it('should render restart button for active non-agentless agent', async () => {
+    const qualifyingVersion = { elastic: { agent: { version: '9.6.0' } } };
+    const oldVersion = { elastic: { agent: { version: '9.5.0' } } };
+
+    it('should render restart button enabled for active 9.6+ agent', async () => {
       const { utils } = renderTableRowActions({
-        agent: { active: true, status: 'online', local_metadata: {} } as any,
+        agent: { active: true, status: 'online', local_metadata: qualifyingVersion } as any,
         agentPolicy: { is_managed: false, supports_agentless: false } as AgentPolicy,
       });
 
@@ -780,9 +783,18 @@ describe('TableRowActions', () => {
       expect(utils.getByTestId('agentRestartBtn')).toBeEnabled();
     });
 
+    it('should render restart button disabled for agent below 9.6', async () => {
+      const { utils } = renderTableRowActions({
+        agent: { active: true, status: 'online', local_metadata: oldVersion } as any,
+        agentPolicy: { is_managed: false, supports_agentless: false } as AgentPolicy,
+      });
+
+      expect(utils.getByTestId('agentRestartBtn')).toBeDisabled();
+    });
+
     it('should render restart button disabled for agentless policy', async () => {
       const { utils } = renderTableRowActions({
-        agent: { active: true, status: 'online', local_metadata: {} } as any,
+        agent: { active: true, status: 'online', local_metadata: qualifyingVersion } as any,
         agentPolicy: { is_managed: false, supports_agentless: true } as AgentPolicy,
       });
 
@@ -791,7 +803,7 @@ describe('TableRowActions', () => {
 
     it('should render restart button disabled for inactive agent', async () => {
       const { utils } = renderTableRowActions({
-        agent: { active: false, status: 'unenrolled', local_metadata: {} } as any,
+        agent: { active: false, status: 'unenrolled', local_metadata: qualifyingVersion } as any,
         agentPolicy: { is_managed: false, supports_agentless: false } as AgentPolicy,
       });
 
@@ -803,7 +815,7 @@ describe('TableRowActions', () => {
       const renderer = createFleetTestRendererMock();
       const { getByTestId } = renderer.render(
         <TableRowActions
-          agent={{ active: true, status: 'online', local_metadata: {} } as any}
+          agent={{ active: true, status: 'online', local_metadata: qualifyingVersion } as any}
           agentPolicy={{ is_managed: false, supports_agentless: false } as AgentPolicy}
           onAddRemoveTagsClick={jest.fn()}
           onReassignClick={jest.fn()}

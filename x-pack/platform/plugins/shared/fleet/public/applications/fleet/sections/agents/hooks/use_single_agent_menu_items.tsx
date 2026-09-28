@@ -17,6 +17,7 @@ import {
   isAgentEligibleForMigration,
   isAgentEligibleForPrivilegeLevelChange,
   isAgentRequestDiagnosticsSupported,
+  isAgentRestartSupported,
   isAgentUpgrading,
 } from '../../../../../../common/services';
 import { isStuckInUpdating } from '../../../../../../common/services/agent_status';
@@ -192,7 +193,7 @@ export function useSingleAgentMenuItems({
             />
           ),
           icon: 'refresh',
-          disabled: !agent.active || agentPolicy?.supports_agentless === true,
+          disabled: !isAgentRestartSupported(agent) || agentPolicy?.supports_agentless === true,
           onClick: () => {
             callbacks.onRestartClick();
           },
