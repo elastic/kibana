@@ -42,7 +42,7 @@ export const buildRiskMoversCountQuery = (
     `SET unmapped_fields="nullify";`,
     `FROM ${index}`,
     `| WHERE @timestamp >= NOW() - ${fetchWindow}`,
-    `| EVAL entity_name = COALESCE(host.name, user.name, service.name)`,
+    `| EVAL entity_name = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value)`,
     `| EVAL risk_score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)`,
     `| WHERE entity_name IS NOT NULL`,
     `| EVAL period = CASE(@timestamp <= NOW() - ${period}, "boundary", "current")`,

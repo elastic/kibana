@@ -12,7 +12,7 @@ import type { TimeRange } from '../use_time_range_param';
  * risk since the N-period boundary, using the risk score time-series history index.
  *
  * Levels are mapped to integers (Critical=4, High=3, Moderate=2, Low=1, Unknown=0)
- * because MAX on the raw keyword sorts lexicographically (Unknown > Medium > Low > High > Critical).
+ * because MAX on the raw keyword sorts lexicographically (Unknown > Moderate > Low > High > Critical).
  *
  * Uses the same two-step LAST() pattern as tile_risk_movers_query.ts:
  * - Step 1: LAST(level_num, @timestamp) BY entity_name, period — actual level at each boundary
@@ -45,7 +45,7 @@ export const buildNewlyHighCriticalCountQuery = (
     `SET unmapped_fields="nullify";`,
     `FROM ${index}`,
     `| WHERE @timestamp >= NOW() - ${fetchWindow}`,
-    `| EVAL entity_name = COALESCE(host.name, user.name, service.name)`,
+    `| EVAL entity_name = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value)`,
     `| EVAL risk_level = COALESCE(host.risk.calculated_level, user.risk.calculated_level, service.risk.calculated_level)`,
     `| WHERE entity_name IS NOT NULL`,
     `| EVAL level_num = CASE(risk_level == "Critical", 4, risk_level == "High", 3, risk_level == "Moderate", 2, risk_level == "Low", 1, 0)`,
