@@ -51,7 +51,8 @@ describe('Slack', () => {
 
   it('is allowlisted to declare inbound events', () => {
     expect(SPECS_ALLOWED_EVENTS.has(Slack.metadata.id)).toBe(true);
-    expect(Slack.events).toBeUndefined();
+    expect(Slack.events).toBeDefined();
+    expect(Slack.events?.definitions.any).toBeUndefined();
   });
 
   it('should have correct metadata', () => {

@@ -32,6 +32,42 @@ Bot Token
 The **Search messages** action requires a user token and is not available when using Bot Token authentication. Use **Get conversation history** to read messages from a specific channel instead.
 ::::
 
+## Receive Slack events [slack-v2-inbound-events]
+
+The connector can start a workflow from a Slack Events API `event_callback`. A saved Slack connector does not receive events until **Receive events** is turned on for that connector.
+
+| Workflow event | Slack `event.type` | Fields |
+| --- | --- | --- |
+| `slack2.message` | `message` | `workspace`, `channel`, `messageId`, `threadId`, `sender`, `text`, `subtype`, `botId` |
+| `slack2.app_mention` | `app_mention` | `workspace`, `channel`, `messageId`, `sender`, `text` |
+| `slack2.reaction_added` | `reaction_added` | `channel`, `messageId`, `user`, `reaction` |
+| `slack2.file_shared` | `file_shared` | `fileId`, `user`, `channel` |
+| `slack2.file_public` | `file_public` | `fileId`, `userId` |
+| `slack2.channel_created` | `channel_created` | `channelId`, `name`, `creator` |
+| `slack2.team_join` | `team_join` | `userId`, `name`, `realName`, `displayName`, `email` |
+| `slack2.member_joined_channel` | `member_joined_channel` | `userId`, `channelId`, `inviter` |
+
+`threadId`, `sender`, `text`, `subtype`, and `botId` are present only when Slack sends them. The same applies to `channel` on a shared file, `userId` on a file made public, and `inviter` on a channel join. An event type that is not in this table does not start a workflow.
+
+Example `app_mention` body:
+
+```json
+{
+  "type": "event_callback",
+  "team_id": "T123",
+  "event_id": "Ev123",
+  "event": {
+    "type": "app_mention",
+    "user": "U123",
+    "text": "<@UAPP> hello",
+    "ts": "1515449522.000016",
+    "channel": "C123"
+  }
+}
+```
+
+That payload emits `slack2.app_mention` with `workspace`, `channel`, `messageId`, `sender`, and `text`.
+
 ## Test connectors [slack-v2-action-configuration]
 
 You can test connectors when you create or edit the connector in {{kib}}. The test verifies connectivity by calling Slack `auth.test`.
