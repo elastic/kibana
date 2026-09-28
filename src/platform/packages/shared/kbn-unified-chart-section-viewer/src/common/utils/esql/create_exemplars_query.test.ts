@@ -160,6 +160,15 @@ FROM exemplars-generic.otel-default
         })
       ).toContain('FROM exemplars-generic.otel-default');
     });
+
+    it('falls back to indexName when originalSource is a backing index that cannot be mapped', () => {
+      expect(
+        createExemplarsQuery({
+          metricItem: { ...mockMetric, dimensionFields: [] },
+          originalSource: '.ds-metrics-generic.otel-default-2026.09.25-000001',
+        })
+      ).toContain('FROM exemplars-generic.otel-default');
+    });
   });
 
   describe('returns an empty string so callers skip the fetch', () => {

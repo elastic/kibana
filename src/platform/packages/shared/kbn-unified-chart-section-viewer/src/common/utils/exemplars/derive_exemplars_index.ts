@@ -49,10 +49,13 @@ export const deriveExemplarsIndex = (metricsIndex: string): string | undefined =
 
 /**
  * The exemplars stream for a metric chart. A concrete source the user typed wins over the
- * metric's own index, matching how the chart query itself is scoped.
+ * metric's own index, matching how the chart query itself is scoped. When that source cannot
+ * be mapped (a `.ds-` backing index, for example), fall back to the data stream METRICS_INFO
+ * reported for the metric.
  */
 export const resolveExemplarsIndex = (
   { indexName }: Pick<ParsedMetricItem, 'indexName'>,
   originalSource?: string
 ): string | undefined =>
-  deriveExemplarsIndex(isSingleSource(originalSource) ? originalSource : indexName);
+  (isSingleSource(originalSource) ? deriveExemplarsIndex(originalSource) : undefined) ??
+  deriveExemplarsIndex(indexName);
