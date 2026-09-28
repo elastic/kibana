@@ -11,6 +11,7 @@ import { SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID } from '@kbn/alertzero-com
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import { ALERTZERO_API_PRIVILEGE_WRITE } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
+import { createRouteContextMock } from '../route_context.mock';
 import { registerUpdateWorkerRoute } from './update_worker';
 
 const TRIAGE = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
@@ -59,7 +60,7 @@ describe('registerUpdateWorkerRoute', () => {
     const response = httpServerMock.createResponseFactory();
 
     await handler(
-      {},
+      createRouteContextMock(),
       httpServerMock.createKibanaRequest({
         params: { workerId: TRIAGE },
         body: { enabled: true },
@@ -91,7 +92,7 @@ describe('registerUpdateWorkerRoute', () => {
     const response = httpServerMock.createResponseFactory();
 
     await handler(
-      {},
+      createRouteContextMock(),
       httpServerMock.createKibanaRequest({
         params: { workerId: TRIAGE },
         body: { enabled: true },
@@ -116,7 +117,7 @@ describe('registerUpdateWorkerRoute', () => {
     const response = httpServerMock.createResponseFactory();
 
     await handler(
-      {},
+      createRouteContextMock(),
       httpServerMock.createKibanaRequest({
         params: { workerId: TRIAGE },
         body: { settingsRevision: 1, settings: { autonomy: 'manual' } },

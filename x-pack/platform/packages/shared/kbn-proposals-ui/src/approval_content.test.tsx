@@ -19,7 +19,6 @@ const baseProps: ApprovalContentProps = {
   tone: 'danger',
   iconType: 'lock',
   comment: 'Isolate the compromised host.',
-  actionImpact: { variant: 'description', description: 'One host, reversible.' },
   primaryAction: {
     label: 'Approve',
     onClick: jest.fn(),
@@ -50,12 +49,22 @@ describe('ApprovalContent', () => {
 
   it('renders the header when showHeader is true (default)', () => {
     renderContent();
-    expect(screen.getByText(/approval required/i)).toBeInTheDocument();
+    expect(screen.getByText('Needs review')).toBeInTheDocument();
   });
 
   it('hides the header when showHeader is false', () => {
     renderContent({ showHeader: false });
-    expect(screen.queryByText(/approval required/i)).not.toBeInTheDocument();
+    expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
+  });
+
+  it('renders a caption under the badge when supplied', () => {
+    renderContent({ caption: 'Rule tuning · Reversible' });
+    expect(screen.getByText('Rule tuning · Reversible')).toBeInTheDocument();
+  });
+
+  it('omits the caption line when none is supplied', () => {
+    renderContent({ caption: undefined });
+    expect(screen.queryByText('Rule tuning · Reversible')).not.toBeInTheDocument();
   });
 
   it('renders the comment', () => {
@@ -82,42 +91,6 @@ describe('ApprovalContent', () => {
     expect(screen.queryByTestId('approvalContent-comment')).not.toBeInTheDocument();
   });
 
-  it('renders the impact section label', () => {
-    renderContent();
-    expect(screen.getByText('Impact')).toBeInTheDocument();
-  });
-
-  it('renders the impact description variant prose', () => {
-    renderContent();
-    expect(screen.getByText('One host, reversible.')).toBeInTheDocument();
-  });
-
-  it('renders impact list variant items', () => {
-    renderContent({
-      actionImpact: {
-        variant: 'list',
-        items: [
-          { id: 'item-1', iconType: 'globe', text: 'host: 10.0.0.4' },
-          { id: 'item-2', iconType: 'tag', text: 'network' },
-        ],
-      },
-    });
-    expect(screen.getByText('host: 10.0.0.4')).toBeInTheDocument();
-    expect(screen.getByText('network')).toBeInTheDocument();
-  });
-
-  it('omits the impact section when no actionImpact is supplied', () => {
-    renderContent({ actionImpact: undefined });
-    expect(screen.queryByText('Impact')).not.toBeInTheDocument();
-  });
-
-  it("renders the comment above the impact section, so the proposal's own explanation leads", () => {
-    renderContent();
-    expect(
-      isBefore(screen.getByText('Isolate the compromised host.'), screen.getByText('Impact'))
-    ).toBe(true);
-  });
-
   it('renders the secondary action before the primary, so the committing decision sits last', () => {
     renderContent();
     expect(
@@ -132,17 +105,6 @@ describe('ApprovalContent', () => {
       ],
     });
     expect(screen.getByTestId('content-x').querySelector('[data-euiicon-type]')).toBeTruthy();
-  });
-
-  it('renders the actor row by default', () => {
-    renderContent();
-    expect(screen.getByText('You')).toBeInTheDocument();
-    expect(screen.getByText(/Senior Analyst/)).toBeInTheDocument();
-  });
-
-  it('hides the actor row when showActorRow is false', () => {
-    renderContent({ showActorRow: false });
-    expect(screen.queryByText('You')).not.toBeInTheDocument();
   });
 
   it('renders the primary action button', () => {

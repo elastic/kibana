@@ -896,6 +896,28 @@ describe('WatchDetailPage', () => {
     });
   });
 
+  it('locks worker settings and hides save when the user cannot write', () => {
+    mockUseCanWriteAlertZero.mockReturnValue(false);
+    renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+
+    expect(screen.queryByTestId('alertZeroWatchSettingsSave')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertZeroWatchSettingsDiscard')).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId(
+        `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      )
+    ).toBeDisabled();
+    expect(
+      within(
+        within(
+          screen.getByTestId(
+            `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+          )
+        ).getByTestId('alertZeroAutonomyCard-manual')
+      ).getByRole('radio')
+    ).toBeDisabled();
+  });
+
   it('resets collapsed accordion state when navigating to a different Watch, not just on remount', () => {
     // Parameter-only navigation keeps this page mounted, so a `useState` initializer runs once —
     // collapsedWorkerIds must be reset by an effect keyed on watchId. Both Watches share a Worker

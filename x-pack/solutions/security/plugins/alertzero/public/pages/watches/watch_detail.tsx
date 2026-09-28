@@ -33,6 +33,7 @@ import * as settingsI18n from './settings_translations';
 export const WatchDetailPage: React.FC = () => {
   const history = useHistory();
   const { watchId } = useParams<{ watchId: string }>();
+  const canWrite = useCanWriteAlertZero();
   const { euiTheme } = useEuiTheme();
   const canWrite = useCanWriteAlertZero();
   const { data, isLoading, error, refetch } = useWatch(watchId);

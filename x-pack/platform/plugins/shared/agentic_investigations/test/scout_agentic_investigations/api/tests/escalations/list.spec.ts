@@ -219,7 +219,7 @@ apiTest.describe(
     });
 
     apiTest('viewer (escalations_read) can list escalations', async ({ apiClient }) => {
-      // Viewer holds escalations_read explicitly. They can list but not create or update.
+      // Viewer holds escalations_read through base Read (includeIn: 'read'). They can list but not create or update.
       const response = await apiClient.get(LIST_ESCALATIONS_PATH, {
         headers: { ...INTERNAL_HEADERS, ...viewerCookieHeader },
         responseType: 'json',

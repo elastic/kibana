@@ -77,7 +77,9 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
                 name: i18n.translate('xpack.agenticInvestigations.escalationsReadPrivilegeName', {
                   defaultMessage: 'View escalations',
                 }),
-                includeIn: 'none',
+                // View rolls into base Read and All so stateful editor/viewer can list.
+                // Create and update stay includeIn: 'none' on escalations_all.
+                includeIn: 'read',
                 api: [ESCALATIONS_API_PRIVILEGE_READ],
                 savedObject: { all: [], read: [] },
                 ui: [ESCALATIONS_UI_CAPABILITY_SHOW],
