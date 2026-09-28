@@ -113,8 +113,14 @@ function mockNpFindAllDecrypted(
 
 const createMockWorkflowsManagement = (): jest.Mocked<WorkflowsServerPluginSetup['management']> =>
   ({
-    getWorkflowsByIds: jest.fn().mockResolvedValue([]),
-    bulkScheduleWorkflow: jest.fn().mockResolvedValue([]),
+    getWorkflowsByIdsForRequests: jest.fn(
+      async (
+        lookups: Parameters<
+          WorkflowsServerPluginSetup['management']['getWorkflowsByIdsForRequests']
+        >[0]
+      ) => lookups.map(() => ({ status: 'fulfilled' as const, value: [] }))
+    ),
+    getClient: jest.fn(() => ({ bulkScheduleWorkflow: jest.fn().mockResolvedValue([]) })),
   } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>);
 
 function buildDispatcherService(deps: {

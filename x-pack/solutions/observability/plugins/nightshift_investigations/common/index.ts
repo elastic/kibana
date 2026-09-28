@@ -11,7 +11,6 @@ import type {
   InvestigationImpact,
   InvestigationRecommendation,
   Severity,
-  TriggerFeedback,
 } from '@kbn/significant-events-schema';
 import type { InvestigationSubjectType, InvestigationTriggerType } from './workflows/triggers';
 
@@ -120,7 +119,6 @@ export interface InvestigationStructuredOutput {
   hypotheses?: InvestigationHypothesis[];
   recommendations?: InvestigationRecommendation[];
   blind_spots?: InvestigationBlindSpot[];
-  trigger_feedback?: TriggerFeedback[];
   impact?: InvestigationImpact;
 }
 

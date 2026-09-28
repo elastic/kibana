@@ -72,20 +72,6 @@ const toOccHit = (hit: {
   };
 };
 
-const buildBulkIndexOperations = (
-  hits: OccWorkflowHit[],
-  mutate: (hit: OccWorkflowHit) => WorkflowProperties,
-  bumpVersion: boolean
-) =>
-  hits.map((hit) => ({
-    index: {
-      _id: hit._id,
-      if_seq_no: hit.seqNo,
-      if_primary_term: hit.primaryTerm,
-      document: bumpVersion ? applyWorkflowVersion(mutate(hit), hit._source) : mutate(hit),
-    },
-  }));
-
 const refreshOccHits = async (
   client: BulkOccIndexClient,
   ids: string[]
@@ -166,7 +152,30 @@ export const bulkIndexWithOccRetry = async ({
   const maxAttempts = 1 + maxRetries;
 
   for (let attempt = 1; attempt <= maxAttempts && pendingHits.length > 0; attempt++) {
-    const operations = buildBulkIndexOperations(pendingHits, mutate, bumpVersion);
+    const operations = pendingHits.flatMap((hit) => {
+      try {
+        const document = mutate(hit);
+        return [
+          {
+            index: {
+              _id: hit._id,
+              if_seq_no: hit.seqNo,
+              if_primary_term: hit.primaryTerm,
+              document: bumpVersion ? applyWorkflowVersion(document, hit._source) : document,
+            },
+          },
+        ];
+      } catch (error) {
+        failures.push({
+          id: hit._id,
+          error: error instanceof Error ? error.message : String(error),
+        });
+        return [];
+      }
+    });
+    if (operations.length === 0) {
+      break;
+    }
     const bulkResponse = await client.bulk({
       operations,
       refresh,
@@ -177,19 +186,18 @@ export const bulkIndexWithOccRetry = async ({
     for (let itemIndex = 0; itemIndex < bulkResponse.items.length; itemIndex++) {
       const operation = getBulkIndexOperation(bulkResponse.items[itemIndex]);
       const bulkOperation = operations[itemIndex]?.index;
-      const hit = pendingHits[itemIndex];
 
-      if (operation && hit && bulkOperation?.document) {
+      if (operation && bulkOperation?.document) {
         if (!operation.error) {
           if (operation._id) {
             successIds.push(operation._id);
             successfulDocuments.push({ id: operation._id, document: bulkOperation.document });
           }
         } else if (operation.status === OCC_CONFLICT_STATUS_CODE && attempt < maxAttempts) {
-          conflictIds.push(hit._id);
+          conflictIds.push(bulkOperation._id);
         } else {
           failures.push({
-            id: operation._id ?? hit._id,
+            id: operation._id ?? bulkOperation._id,
             error: extractBulkItemError(operation.error),
           });
         }

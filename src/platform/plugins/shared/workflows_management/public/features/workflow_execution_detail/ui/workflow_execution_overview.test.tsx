@@ -10,9 +10,10 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
+import { buildOverviewStepExecutionFromContext } from './workflow_pseudo_step_context';
 
 const renderWithIntl = (component: React.ReactElement) => {
   return render(component, { wrapper: I18nProvider });
@@ -66,6 +67,67 @@ const createMockStepExecution = (
 });
 
 describe('WorkflowExecutionOverview', () => {
+  it('renders persisted identity when credential validation failed before runtime setup', () => {
+    const execution: WorkflowExecutionDto = {
+      id: 'run-failed',
+      workflowId: 'workflow',
+      spaceId: 'default',
+      status: ExecutionStatus.FAILED,
+      isTestRun: false,
+      startedAt: '2026-09-27T10:00:00Z',
+      finishedAt: '2026-09-27T10:00:01Z',
+      executedBy: 'alice',
+      effectiveIdentity: { type: 'service_account', id: 'sa-proof' },
+      error: { type: 'ServiceAccountExecutionError', message: 'Binding changed' },
+      context: {},
+      stepExecutions: [],
+      duration: 1000,
+      yaml: '',
+      workflowDefinition: {
+        version: '1',
+        name: 'Identity test',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [],
+      },
+    };
+    renderWithIntl(
+      <WorkflowExecutionOverview stepExecution={buildOverviewStepExecutionFromContext(execution)} />
+    );
+    expect(screen.getByText('Triggered by')).toBeInTheDocument();
+    expect(screen.getByText('alice')).toBeInTheDocument();
+    expect(screen.getByText('Run as')).toBeInTheDocument();
+    expect(screen.getByText('sa-proof')).toBeInTheDocument();
+  });
+
+  it('separates the triggering user from the service account identity', () => {
+    const stepExecution = createMockStepExecution({
+      input: {
+        execution: {
+          executedBy: 'alice',
+          effectiveIdentity: { type: 'service_account', id: 'sa-proof' },
+        },
+      },
+    });
+    renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+    expect(screen.getByText('Triggered by')).toBeInTheDocument();
+    expect(screen.getByText('alice')).toBeInTheDocument();
+    expect(screen.getByText('Run as')).toBeInTheDocument();
+    expect(screen.getByText('sa-proof')).toBeInTheDocument();
+  });
+
+  it('shows the persisted end time when execution fails before context is updated', () => {
+    const stepExecution = createMockStepExecution({
+      status: ExecutionStatus.FAILED,
+      finishedAt: '2024-01-15T10:35:50.456Z',
+      input: {},
+    });
+    renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+    expect(
+      screen.queryByText((content, element) => element?.tagName === 'STRONG' && content === '-')
+    ).not.toBeInTheDocument();
+  });
+
   describe('rendering', () => {
     it('should render the component with execution data', () => {
       const stepExecution = createMockStepExecution();
