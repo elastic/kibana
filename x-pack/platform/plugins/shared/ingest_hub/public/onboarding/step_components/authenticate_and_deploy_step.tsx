@@ -130,7 +130,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // Compare current session values against the SO whenever edit mode is active and the user
   // changes auth (connector / auth method). serviceVars drift is checked at the same time.
   const { onboardingDeploymentId, policyIdsByInstance } = detectAndReviewStep;
-  const { authMethod, connectorId } = authenticateAndDeployStep;
+  const { authMethod, connectorId } = authenticateAndDeployStep ?? {};
   // Stores the SO-derived dirty result so the replace-form cancel handler can merge it without
   // re-fetching. Starts false; updated once the SO fetch resolves.
   const driftDirtyRef = useRef(false);

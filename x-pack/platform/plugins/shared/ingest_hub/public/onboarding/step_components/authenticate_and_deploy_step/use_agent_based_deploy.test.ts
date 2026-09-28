@@ -40,6 +40,14 @@ jest.mock('./policy_cleanup_agent_based', () => ({
   cleanupAgentBasedPolicies: jest.fn(),
 }));
 
+jest.mock('./use_onboarding_so', () => ({
+  useOnboardingSO: jest.fn(() => ({
+    createDeployment: jest.fn().mockResolvedValue(null),
+    updateDeployment: jest.fn().mockResolvedValue(true),
+    persistDeploymentId: jest.fn(),
+  })),
+}));
+
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {
