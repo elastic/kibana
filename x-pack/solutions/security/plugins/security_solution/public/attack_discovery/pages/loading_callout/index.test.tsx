@@ -58,7 +58,7 @@ describe('LoadingCallout', () => {
           },
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockResolvedValue(false),
+          useBooleanValue: jest.fn().mockReturnValue(false),
         },
         uiSettings: {
           get: jest.fn().mockReturnValue(false),
@@ -143,7 +143,7 @@ describe('LoadingCallout', () => {
           },
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockResolvedValue(true),
+          useBooleanValue: jest.fn().mockReturnValue(true),
         },
         uiSettings: {
           get: jest.fn().mockReturnValue(true),
@@ -212,7 +212,7 @@ describe('LoadingCallout', () => {
           },
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockResolvedValue(true),
+          useBooleanValue: jest.fn().mockReturnValue(true),
         },
         uiSettings: {
           get: jest.fn().mockReturnValue(true),
@@ -289,7 +289,7 @@ describe('LoadingCallout', () => {
             },
           },
           featureFlags: {
-            getBooleanValue: jest.fn().mockResolvedValue(true),
+            useBooleanValue: jest.fn().mockReturnValue(true),
           },
           uiSettings: {
             get: jest.fn().mockReturnValue(true),
@@ -311,7 +311,7 @@ describe('LoadingCallout', () => {
 
       // Wait for the feature flag async call to resolve
       await waitFor(() => {
-        expect(mockUseKibana().services.featureFlags.getBooleanValue).toHaveBeenCalled();
+        expect(mockUseKibana().services.featureFlags.useBooleanValue).toHaveBeenCalled();
       });
 
       const detailsButton = screen.queryByTestId('detailsButton');
@@ -332,7 +332,7 @@ describe('LoadingCallout', () => {
             },
           },
           featureFlags: {
-            getBooleanValue: jest.fn().mockResolvedValue(false),
+            useBooleanValue: jest.fn().mockReturnValue(false),
           },
           uiSettings: {
             get: jest.fn().mockReturnValue(false),
@@ -365,7 +365,7 @@ describe('LoadingCallout', () => {
             },
           },
           featureFlags: {
-            getBooleanValue: jest.fn().mockResolvedValue(false),
+            useBooleanValue: jest.fn().mockReturnValue(false),
           },
           uiSettings: {
             get: jest.fn().mockReturnValue(false),
@@ -384,7 +384,7 @@ describe('LoadingCallout', () => {
       // Wait for the async feature flag read to resolve so a late-arriving
       // `true` value could not have re-rendered the button.
       await waitFor(() => {
-        expect(mockUseKibana().services.featureFlags.getBooleanValue).toHaveBeenCalled();
+        expect(mockUseKibana().services.featureFlags.useBooleanValue).toHaveBeenCalled();
       });
 
       // With the flag off there is no entry point to open the flyout, so it
@@ -404,7 +404,7 @@ describe('LoadingCallout', () => {
             },
           },
           featureFlags: {
-            getBooleanValue: jest.fn().mockResolvedValue(true),
+            useBooleanValue: jest.fn().mockReturnValue(true),
           },
           uiSettings: {
             get: jest.fn().mockReturnValue(false),
@@ -421,14 +421,14 @@ describe('LoadingCallout', () => {
       );
 
       await waitFor(() => {
-        expect(mockUseKibana().services.featureFlags.getBooleanValue).toHaveBeenCalled();
+        expect(mockUseKibana().services.featureFlags.useBooleanValue).toHaveBeenCalled();
       });
 
       expect(screen.queryByTestId('detailsButton')).not.toBeInTheDocument();
     });
 
     it('reads the feature flag with a true default (ON by default)', async () => {
-      const getBooleanValue = jest.fn().mockResolvedValue(true);
+      const useBooleanValue = jest.fn().mockReturnValue(true);
       mockUseKibana.mockReturnValue({
         services: {
           application: {
@@ -439,7 +439,7 @@ describe('LoadingCallout', () => {
             },
           },
           featureFlags: {
-            getBooleanValue,
+            useBooleanValue,
           },
           uiSettings: {
             get: jest.fn().mockReturnValue(true),
@@ -456,7 +456,7 @@ describe('LoadingCallout', () => {
       );
 
       await waitFor(() =>
-        expect(getBooleanValue).toHaveBeenCalledWith(
+        expect(useBooleanValue).toHaveBeenCalledWith(
           'securitySolution.attackDiscoveryWorkflowsEnabled',
           true
         )
@@ -474,7 +474,7 @@ describe('LoadingCallout', () => {
             },
           },
           featureFlags: {
-            getBooleanValue: jest.fn().mockResolvedValue(false),
+            useBooleanValue: jest.fn().mockReturnValue(false),
           },
           uiSettings: {
             get: jest.fn().mockReturnValue(true),
@@ -491,7 +491,7 @@ describe('LoadingCallout', () => {
       );
 
       await waitFor(() => {
-        expect(mockUseKibana().services.featureFlags.getBooleanValue).toHaveBeenCalled();
+        expect(mockUseKibana().services.featureFlags.useBooleanValue).toHaveBeenCalled();
       });
 
       expect(screen.queryByTestId('detailsButton')).not.toBeInTheDocument();
@@ -508,7 +508,7 @@ describe('LoadingCallout', () => {
             },
           },
           featureFlags: {
-            getBooleanValue: jest.fn().mockResolvedValue(true),
+            useBooleanValue: jest.fn().mockReturnValue(true),
           },
           uiSettings: {
             get: jest.fn().mockReturnValue(true),
@@ -540,7 +540,7 @@ describe('LoadingCallout', () => {
             },
           },
           featureFlags: {
-            getBooleanValue: jest.fn().mockResolvedValue(true),
+            useBooleanValue: jest.fn().mockReturnValue(true),
           },
           uiSettings: {
             get: jest.fn().mockReturnValue(true),
@@ -572,7 +572,7 @@ describe('LoadingCallout', () => {
             },
           },
           featureFlags: {
-            getBooleanValue: jest.fn().mockResolvedValue(true),
+            useBooleanValue: jest.fn().mockReturnValue(true),
           },
           uiSettings: {
             get: jest.fn().mockReturnValue(true),
@@ -589,7 +589,7 @@ describe('LoadingCallout', () => {
       );
 
       await waitFor(() => {
-        expect(mockUseKibana().services.featureFlags.getBooleanValue).toHaveBeenCalled();
+        expect(mockUseKibana().services.featureFlags.useBooleanValue).toHaveBeenCalled();
       });
 
       expect(screen.queryByTestId('detailsButton')).not.toBeInTheDocument();
@@ -608,7 +608,7 @@ describe('LoadingCallout', () => {
             },
           },
           featureFlags: {
-            getBooleanValue: jest.fn().mockResolvedValue(true),
+            useBooleanValue: jest.fn().mockReturnValue(true),
           },
           http: {},
           telemetry: { reportEvent: jest.fn() },
@@ -683,7 +683,7 @@ describe('LoadingCallout', () => {
               },
             },
           },
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { useBooleanValue: jest.fn().mockReturnValue(true) },
           uiSettings: {
             get: jest.fn().mockReturnValue(true),
           },

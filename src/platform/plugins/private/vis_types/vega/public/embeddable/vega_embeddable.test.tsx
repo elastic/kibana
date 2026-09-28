@@ -15,7 +15,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import {
@@ -143,8 +143,8 @@ describe('vegaEmbeddableFactory', () => {
     spec?: VegaByValueState['spec'];
   } = {}) => {
     const coreStart = coreMock.createStart();
-    coreStart.featureFlags.getBooleanValue.mockImplementation((key, fallback) =>
-      key === VEGA_STANDALONE_EMBEDDABLE_FLAG ? standaloneEmbeddableEnabled : fallback
+    coreStart.featureFlags.getBooleanValue$.mockImplementation((key, fallback) =>
+      of(key === VEGA_STANDALONE_EMBEDDABLE_FLAG ? standaloneEmbeddableEnabled : fallback)
     );
     const factory = vegaEmbeddableFactory(coreStart, {
       uiActions: { executeTriggerActions },
