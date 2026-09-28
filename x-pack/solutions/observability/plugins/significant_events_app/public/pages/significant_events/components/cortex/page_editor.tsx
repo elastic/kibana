@@ -26,16 +26,18 @@ import { useUpdateCortexPage } from './use_cortex';
 
 interface CortexPageEditorProps {
   page: CortexPage;
+  /** Version the edit starts from; a save fails if the page has changed since. */
+  version: string;
   onDone: () => void;
 }
 
-export function CortexPageEditor({ page, onDone }: CortexPageEditorProps) {
+export function CortexPageEditor({ page, version, onDone }: CortexPageEditorProps) {
   const [title, setTitle] = useState(page.title);
   const [status, setStatus] = useState(page.status);
   const [description, setDescription] = useState(page.description ?? '');
   const [content, setContent] = useState(page.content);
   // Pinned so a background refetch can't turn a stale draft into a blind overwrite.
-  const [version] = useState(page.version);
+  const [baseVersion] = useState(version);
   const { mutate: updatePage, isLoading } = useUpdateCortexPage();
 
   const onSave = () =>
@@ -47,7 +49,7 @@ export function CortexPageEditor({ page, onDone }: CortexPageEditorProps) {
         description: description.trim(),
         content,
         status,
-        version,
+        version: baseVersion,
       },
       { onSuccess: onDone }
     );

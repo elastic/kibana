@@ -74,8 +74,11 @@ export function CortexPageView({ pageId, canEdit, onArchived }: CortexPageViewPr
     );
   }
 
-  if (isEditing) {
-    return <CortexPageEditor page={page} onDone={() => setIsEditing(false)} />;
+  const { version } = page;
+  const canWrite = canEdit && version !== undefined;
+
+  if (isEditing && version !== undefined) {
+    return <CortexPageEditor page={page} version={version} onDone={() => setIsEditing(false)} />;
   }
 
   return (
@@ -86,7 +89,7 @@ export function CortexPageView({ pageId, canEdit, onArchived }: CortexPageViewPr
             <h2>{page.title}</h2>
           </EuiTitle>
         </EuiFlexItem>
-        {canEdit && (
+        {canWrite && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
@@ -101,7 +104,7 @@ export function CortexPageView({ pageId, canEdit, onArchived }: CortexPageViewPr
             </EuiButtonEmpty>
           </EuiFlexItem>
         )}
-        {canEdit && page.status !== 'archived' && (
+        {canWrite && page.status !== 'archived' && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
@@ -176,7 +179,7 @@ export function CortexPageView({ pageId, canEdit, onArchived }: CortexPageViewPr
           />
         </EuiText>
       )}
-      {isConfirmingArchive && (
+      {isConfirmingArchive && version !== undefined && (
         <EuiConfirmModal
           aria-labelledby={archiveTitleId}
           titleProps={{ id: archiveTitleId }}
@@ -185,9 +188,7 @@ export function CortexPageView({ pageId, canEdit, onArchived }: CortexPageViewPr
             values: { title: page.title },
           })}
           onCancel={() => setIsConfirmingArchive(false)}
-          onConfirm={() =>
-            archivePage({ id: page.id, version: page.version }, { onSuccess: onArchived })
-          }
+          onConfirm={() => archivePage({ id: page.id, version }, { onSuccess: onArchived })}
           isLoading={isArchiving}
           cancelButtonText={i18n.translate(
             'xpack.significantEventsApp.cortex.archiveConfirmCancel',

@@ -9,7 +9,7 @@ import { conflict, notFound } from '@hapi/boom';
 import type { CortexPage } from '../../common/cortex';
 import { archiveCortexPageRoute } from './archive_cortex_page';
 
-const { handler } = archiveCortexPageRoute['DELETE /internal/nightshift/cortex/pages/{id}'];
+const { handler, params } = archiveCortexPageRoute['DELETE /internal/nightshift/cortex/pages/{id}'];
 
 const run = (id: string, resolved: CortexPage | undefined, version?: string) => {
   const store = {
@@ -73,4 +73,10 @@ it('throws conflict when the page changed since it was loaded', async () => {
       'Cortex page cortex_service_checkout changed since it was loaded. Reload it and try again.'
     )
   );
+});
+
+it('requires the version the page was loaded at', () => {
+  const path = { id: 'cortex_service_checkout' };
+  expect(params?.safeParse({ path, query: {} }).success).toBe(false);
+  expect(params?.safeParse({ path, query: { version: '7:1' } }).success).toBe(true);
 });

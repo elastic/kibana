@@ -24,7 +24,7 @@ export type CortexPageInput = Pick<
   'entity_type' | 'slug' | 'title' | 'description' | 'content' | 'status'
 >;
 
-type CortexPageVersion = Pick<CortexPage, 'version'>;
+type CortexPageVersion = Required<Pick<CortexPage, 'version'>>;
 
 /**
  * Typed client for the Nightshift routes, or undefined when the plugin is not installed. Every

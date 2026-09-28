@@ -10,7 +10,8 @@ import type { CortexPage } from '../../common/cortex';
 import { createCortexPageRoute, updateCortexPageRoute } from './write_cortex_page';
 
 const { handler: create } = createCortexPageRoute['POST /internal/nightshift/cortex/pages'];
-const { handler: update } = updateCortexPageRoute['PUT /internal/nightshift/cortex/pages'];
+const { handler: update, params: updateParams } =
+  updateCortexPageRoute['PUT /internal/nightshift/cortex/pages'];
 
 const body = {
   entity_type: 'service' as const,
@@ -34,8 +35,8 @@ const page: CortexPage = {
 const setup = ({
   existing,
   enabled = true,
-  version,
-}: { existing?: CortexPage; enabled?: boolean; version?: string } = {}) => {
+  overrides = {},
+}: { existing?: CortexPage; enabled?: boolean; overrides?: Record<string, string> } = {}) => {
   const store = {
     pruneDuplicates: jest.fn().mockResolvedValue(0),
     get: jest.fn().mockResolvedValue(existing),
@@ -44,7 +45,7 @@ const setup = ({
   };
   const context = {
     request: {},
-    params: { body: version === undefined ? body : { ...body, version } },
+    params: { body: { ...body, ...overrides } },
     isCortexEnabled: () => enabled,
     getCortexPageStore: () => store,
   } as never;
@@ -82,6 +83,11 @@ describe('createCortexPageRoute', () => {
 });
 
 describe('updateCortexPageRoute', () => {
+  it('requires the version the page was loaded at', () => {
+    expect(updateParams?.safeParse({ body }).success).toBe(false);
+    expect(updateParams?.safeParse({ body: { ...body, version: '7:1' } }).success).toBe(true);
+  });
+
   it('overwrites the page without a create-only write', async () => {
     const { store, context } = setup({ existing: page });
     await expect(update(context)).resolves.toEqual({ page });
@@ -102,7 +108,7 @@ describe('updateCortexPageRoute', () => {
   });
 
   it('writes against the version the caller loaded and rejects a stale one', async () => {
-    const { store, context } = setup({ existing: page, version: '7:1' });
+    const { store, context } = setup({ existing: page, overrides: { version: '7:1' } });
     store.upsert.mockRejectedValueOnce({ statusCode: 409 });
     await expect(update(context)).rejects.toEqual(
       conflict(

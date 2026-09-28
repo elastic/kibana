@@ -16,12 +16,11 @@ import { createNightshiftInvestigationsServerRoute } from './create_server_route
 const MAX_DESCRIPTION_LENGTH = 4_096;
 const MAX_CONTENT_LENGTH = 100_000;
 
-/** The `version` a page was read at; writes carrying it fail if the page changed since. */
+/** The `version` a page was read at; the write fails if the page changed since. */
 export const cortexPageVersion = z
   .string()
   .max(39)
-  .regex(/^\d{1,19}:\d{1,19}$/)
-  .optional();
+  .regex(/^\d{1,19}:\d{1,19}$/);
 
 /** Maps a lost versioned write to a 409 the UI can explain. */
 export const withVersionConflict = async <T>(id: string, write: () => Promise<T>): Promise<T> => {

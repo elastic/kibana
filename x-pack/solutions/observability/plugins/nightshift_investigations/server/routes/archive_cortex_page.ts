@@ -18,7 +18,7 @@ export const archiveCortexPageRoute = createNightshiftInvestigationsServerRoute(
     access: 'internal',
     summary: 'Archive a Cortex page',
     description:
-      'Soft-deletes a Cortex wiki page by archiving it, so it stops being loaded into investigations but stays restorable.',
+      'Soft-deletes a Cortex wiki page by archiving it, so it stops being loaded into investigations but stays restorable. Fails if the page changed since the given version.',
   },
   security: {
     authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] },
@@ -27,7 +27,7 @@ export const archiveCortexPageRoute = createNightshiftInvestigationsServerRoute(
     path: z.object({
       id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
     }),
-    query: z.object({ version: cortexPageVersion }).optional(),
+    query: z.object({ version: cortexPageVersion }),
   }),
   handler: async ({ request, params, getCortexPageStore, isCortexEnabled }) => {
     if (!isCortexEnabled()) throw notFound('Cortex is not enabled');
@@ -40,7 +40,7 @@ export const archiveCortexPageRoute = createNightshiftInvestigationsServerRoute(
     const page =
       existing &&
       (await withVersionConflict(existing.id, () =>
-        store.archive(existing.id, params.query?.version)
+        store.archive(existing.id, params.query.version)
       ));
     if (!page) {
       throw notFound(`Cortex page ${params.path.id} was not found`);
