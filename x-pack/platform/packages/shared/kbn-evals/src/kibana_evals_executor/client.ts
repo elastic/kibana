@@ -232,16 +232,18 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
               // When the task did not surface its own trace id, stamp the per-run task-span
               // id back onto the output so the recorded `run.output.traceId` and `run.traceId`
               // are the same deterministic per-run value (the identity investigation.spec.ts
-              // asserts as `run.traceId === output.traceId`). We never overwrite a trace id the
-              // task already surfaced, and we leave the output untouched when no id is available.
-              if (
+              // asserts as `run.traceId === output.traceId`). Build a per-run output object
+              // instead of mutating the task-owned return value in place: a task that reuses (or
+              // freezes) one output object across examples/repetitions would otherwise leak the
+              // first run's id onto every run (or throw on a frozen object). We never overwrite a
+              // trace id the task already surfaced, and we leave the output untouched otherwise.
+              const runOutput =
                 taskOrClientTraceId &&
                 !taskSurfacedTraceId &&
                 taskOutput &&
                 typeof taskOutput === 'object'
-              ) {
-                (taskOutput as { traceId?: string }).traceId = taskOrClientTraceId;
-              }
+                  ? { ...(taskOutput as Record<string, unknown>), traceId: taskOrClientTraceId }
+                  : taskOutput;
 
               runs[runKey] = {
                 exampleIndex,
@@ -249,7 +251,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 input: example.input,
                 expected: example.output ?? null,
                 metadata: example.metadata ?? {},
-                output: taskOutput,
+                output: runOutput,
                 traceId: taskOrClientTraceId,
               };
 

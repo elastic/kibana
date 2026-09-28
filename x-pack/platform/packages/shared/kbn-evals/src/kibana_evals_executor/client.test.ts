@@ -456,6 +456,33 @@ describe('KibanaEvalsClient', () => {
     expect(seenOutputTraceId).toBe('this-task-span-trace');
   });
 
+  it('does not mutate the task-owned output object when backfilling the trace id', async () => {
+    const client = createClient();
+    const dataset: EvaluationDataset = {
+      name: 'ds',
+      description: 'desc',
+      examples: [{ input: { q: 1 }, output: { expected: 1 } }],
+    };
+    // A task that returns a frozen/shared output object: mutating it in place would throw
+    // (frozen) and, when reused across runs, would leak the first run's trace id onto every run.
+    const sharedOutput = Object.freeze({ value: 1 });
+    const task = async () => sharedOutput;
+
+    (withTaskSpan as jest.Mock).mockImplementationOnce(
+      (_name: string, _opts: unknown, cb: (span?: unknown) => unknown) =>
+        cb({ spanContext: () => ({ traceId: 'this-task-span-trace' }) })
+    );
+
+    const [exp] = await client.runExperiment({ datasets: [dataset], task }, []);
+    const [firstRun] = Object.values(exp.runs);
+
+    // The task-owned object is never mutated (no throw, no injected property)...
+    expect(sharedOutput).not.toHaveProperty('traceId');
+    // ...and the per-run trace id is stamped onto a distinct copy stored on the run.
+    expect(firstRun.output).not.toBe(sharedOutput);
+    expect((firstRun.output as { traceId?: string }).traceId).toBe('this-task-span-trace');
+  });
+
   it('does not overwrite a task-surfaced traceId with this task span id', async () => {
     const client = createClient();
     const dataset: EvaluationDataset = {
