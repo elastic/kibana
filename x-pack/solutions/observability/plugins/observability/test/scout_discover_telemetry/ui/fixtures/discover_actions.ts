@@ -70,9 +70,9 @@ export async function removeFieldFromTable(page: ScoutPage, field: string) {
   const selected = page.testSubj
     .locator('fieldListGroupedSelectedFields')
     .locator(`[data-test-subj="field-${field}"]`);
-  if (!(await selected.isVisible())) {
-    return;
-  }
+  // After a reload the sidebar renders after search finishes. An immediate
+  // visibility check skips the click and the removal event never fires.
+  await selected.waitFor({ state: 'visible' });
   await fieldToggle(page, 'fieldListGroupedSelectedFields', field).click();
   await selected.waitFor({ state: 'hidden' });
 }
