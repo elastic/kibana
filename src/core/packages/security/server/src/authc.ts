@@ -27,9 +27,12 @@ export interface CoreAuthenticationService {
   /**
    * Classify the principal bound to the provided request: a user, an anonymous user, an API key
    * or a service account, each Elasticsearch-issued (`stack`) or UIAM-issued (`uiam`) where that
-   * applies. Performs no I/O.
+   * applies. Performs no I/O. Anonymous access resolves to `anonymous` even when the anonymous
+   * provider authenticates with an API key.
    *
-   * `null` means no authenticated principal is known, e.g. for unauthenticated requests.
+   * `null` means no authenticated principal is known: unauthenticated requests, and fake requests
+   * that were not minted for a service account (or when service accounts are disabled). That
+   * includes Task Manager requests. Use {@link getCurrentUser} for the user such a request acts for.
    *
    * @param request The request to classify the authenticated principal for.
    */

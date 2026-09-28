@@ -158,9 +158,7 @@ describe('resolveWorkloadBinder', () => {
     expect(resolveUserProfileId).not.toHaveBeenCalled();
   });
 
-  it('records anonymous callers as users, matching the persisted binder shape', async () => {
-    resolveUserProfileId.mockResolvedValue(undefined);
-
+  it('records anonymous callers as users, without looking up a profile they cannot have', async () => {
     await expect(
       resolveWorkloadBinder(
         mockAuthenticatedUser({
@@ -171,6 +169,8 @@ describe('resolveWorkloadBinder', () => {
         resolveUserProfileId
       )
     ).resolves.toEqual({ type: 'user', username: 'anonymous_user' });
+
+    expect(resolveUserProfileId).not.toHaveBeenCalled();
   });
 
   it('records anonymous callers authenticated with a stack API key as that key', async () => {
@@ -184,12 +184,9 @@ describe('resolveWorkloadBinder', () => {
         }),
         resolveUserProfileId
       )
-    ).resolves.toEqual({
-      type: 'api_key',
-      apiKeyId: 'anonymous-key-id',
-      variant: 'stack',
-      userProfileId: 'resolved-profile-uid',
-    });
+    ).resolves.toEqual({ type: 'api_key', apiKeyId: 'anonymous-key-id', variant: 'stack' });
+
+    expect(resolveUserProfileId).not.toHaveBeenCalled();
   });
 
   it('records anonymous callers authenticated with a UIAM API key as that key', async () => {

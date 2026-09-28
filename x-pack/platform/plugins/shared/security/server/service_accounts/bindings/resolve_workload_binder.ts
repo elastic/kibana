@@ -77,19 +77,16 @@ export const resolveWorkloadBinder = async (
 
     case 'anonymous':
       // The persisted binder has no anonymous arm; authorization decides whether anonymous
-      // callers may bind at all.
+      // callers may bind at all. Anonymous access never activates a user profile, so there is
+      // nothing to look up, including for the creator of a configured API key.
       if (user.api_key) {
-        return await toApiKeyBinder(
-          user.api_key.id,
-          user.api_key.managed_by === 'cloud' ? 'uiam' : 'stack',
-          resolveUserProfileId
-        );
+        return {
+          type: 'api_key',
+          apiKeyId: user.api_key.id,
+          variant: user.api_key.managed_by === 'cloud' ? 'uiam' : 'stack',
+        };
       }
-      return {
-        type: 'user',
-        username: principal.username,
-        ...optionalUserProfileId(await resolveUserProfileId()),
-      };
+      return { type: 'user', username: principal.username };
   }
 };
 
