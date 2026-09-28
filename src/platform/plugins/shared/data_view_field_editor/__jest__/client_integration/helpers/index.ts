@@ -18,5 +18,7 @@ export {
   setSearchResponseLatency,
 } from './setup_environment';
 
+export { setUseDebounceDelayed } from './jest.mocks';
+
 export type { EsDoc, TestDoc } from './mocks';
 export { mockDocuments } from './mocks';

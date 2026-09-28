@@ -9,13 +9,13 @@
 
 // This import needs to come first as it contains the jest.mocks
 import { createPreviewError, mockDocuments } from './helpers/mocks';
-import { setupEnvironment } from './helpers';
-import { screen, waitFor } from '@testing-library/react';
+import { setUseDebounceDelayed, setupEnvironment } from './helpers';
+import { act, screen, waitFor } from '@testing-library/react';
 import { setSearchResponse } from './field_editor_flyout_preview.helpers';
 import { setup } from './field_editor_flyout_content.helpers';
 
 describe('<FieldEditorFlyoutContent />', () => {
-  const { httpRequestsMockHelpers } = setupEnvironment();
+  const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
@@ -227,6 +227,85 @@ describe('<FieldEditorFlyoutContent />', () => {
         type: 'keyword',
         script: { source: 'echo("hello")' },
         format: null,
+      });
+    });
+
+    describe('with a debounced preview', () => {
+      // The preview request is debounced, so changing the type and then correcting the script can
+      // leave the response for the previous script arriving after the new script is already being
+      // validated. The field must still settle on the outcome of the latest preview.
+      const fieldToEdit = {
+        name: 'atest',
+        type: 'keyword' as const,
+        script: { source: "emit('hello world')" },
+      };
+
+      const advanceTimers = async (ms: number) => {
+        await act(async () => {
+          jest.advanceTimersByTime(ms);
+        });
+      };
+
+      beforeEach(() => {
+        setUseDebounceDelayed(true);
+
+        const painlessError = createPreviewError({
+          reason: 'Cannot cast from [java.lang.String] to [long]',
+        });
+
+        // "post" is overloaded, so type the mock explicitly to be able to read the request body.
+        const postMock = server.post as unknown as jest.Mock<
+          Promise<{ data: unknown }>,
+          [string, { body?: string }]
+        >;
+
+        postMock.mockImplementation((_path, options) => {
+          const { script } = JSON.parse(String(options?.body ?? '{}')) as {
+            script: { source: string } | null;
+          };
+
+          // The request for the script we are about to replace answers with a painless error,
+          // and answers slowly enough to land after the script has already been corrected.
+          if (script?.source === fieldToEdit.script.source) {
+            return new Promise((resolve) => {
+              setTimeout(
+                () => resolve({ data: { values: [], error: painlessError, status: 400 } }),
+                200
+              );
+            });
+          }
+
+          return Promise.resolve({ data: { values: [6] } });
+        });
+      });
+
+      afterEach(() => {
+        setUseDebounceDelayed(false);
+      });
+
+      it('clears a script error once a newer preview succeeds', async () => {
+        const {
+          actions: { fields, saveField },
+        } = await setup({ fieldToEdit });
+
+        await fields.updateType('long');
+        // Let the debounced preview for the *previous* script start.
+        await advanceTimers(500);
+
+        await fields.updateScript('emit(6);');
+        // The in-flight response for the previous script lands here, while the corrected script
+        // is already being validated.
+        await advanceTimers(200);
+        // The debounced preview for the corrected script runs and succeeds.
+        await advanceTimers(500);
+
+        expect(screen.queryByText('Invalid Painless script.')).toBeNull();
+        expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
+
+        await saveField();
+
+        // Saving is not blocked: changing the type of an existing field asks for confirmation.
+        await waitFor(() => expect(screen.getByTestId('saveModalConfirmText')).toBeVisible());
       });
     });
   });

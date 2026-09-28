@@ -78,10 +78,30 @@ jest.doMock(MONACO_MODULE, () => {
   };
 });
 
+/**
+ * By default the debounce is bypassed and the callback runs immediately, which keeps most tests
+ * free from having to flush the debounce timers. Tests that need to reproduce a race between a
+ * debounced request and a later parameter change can opt into the real timing with
+ * setUseDebounceDelayed(true), and drive it with jest's fake timers.
+ */
+const useDebounceConfig = { delayed: false };
+const mockUseDebounceConfig = useDebounceConfig;
+
+export const setUseDebounceDelayed = (delayed: boolean) => {
+  useDebounceConfig.delayed = delayed;
+};
+
 jest.mock('react-use/lib/useDebounce', () => {
   return (cb: () => void, ms: number, deps: any[]) => {
     mockUseEffect(() => {
-      cb();
+      if (!mockUseDebounceConfig.delayed) {
+        cb();
+        return;
+      }
+
+      const timeoutId = setTimeout(cb, ms);
+
+      return () => clearTimeout(timeoutId);
     }, deps);
   };
 });

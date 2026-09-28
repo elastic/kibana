@@ -71,6 +71,7 @@ const ScriptFieldComponent = ({ links, placeholder, disabled }: Props) => {
   const monacoEditor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const editorValidationSubscription = useRef<Subscription>();
   const fieldCurrentValue = useRef<string>('');
+  const previousError = useRef<PreviewState['previewResponse']['error']>(null);
 
   const { controller } = useFieldPreviewContext();
   const error = useStateSelector(controller.state$, currentErrorSelector);
@@ -207,6 +208,23 @@ const ScriptFieldComponent = ({ links, placeholder, disabled }: Props) => {
   useEffect(() => {
     nextValidationData$({ isFetchingDoc, isLoadingPreview, error });
   }, [nextValidationData$, isFetchingDoc, isLoadingPreview, error]);
+
+  // The script validation resolves from the preview response, which arrives asynchronously and
+  // is debounced. A response can therefore land while a newer script value is already being
+  // validated, leaving the validation settled against an error that no longer applies to the
+  // current script. Re-validating whenever the preview error changes makes the field converge on
+  // the latest preview outcome instead of staying invalid with a stale error.
+  useEffect(() => {
+    if (previousError.current === error) {
+      return;
+    }
+
+    previousError.current = error;
+
+    if (fieldCurrentValue.current.trim() !== '') {
+      validateFields(['script.source']);
+    }
+  }, [error, validateFields]);
 
   useEffect(() => {
     if (error?.code === 'PAINLESS_SCRIPT_ERROR') {

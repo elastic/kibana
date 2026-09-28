@@ -970,7 +970,9 @@ export class SettingsPageObject extends FtrService {
 
   async clickSaveField() {
     this.log.debug('click Save');
-    await this.testSubjects.click('fieldSaveButton');
+    // Clicking a disabled button silently does nothing, which would surface later as a timeout
+    // somewhere else in the test, so wait until the form actually allows saving.
+    await this.testSubjects.clickWhenNotDisabled('fieldSaveButton');
     await this.header.waitUntilLoadingHasFinished();
   }
 
