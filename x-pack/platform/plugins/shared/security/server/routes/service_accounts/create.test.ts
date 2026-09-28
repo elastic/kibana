@@ -9,20 +9,36 @@ import Boom from '@hapi/boom';
 
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import type {
+  CheckPrivileges,
+  CheckPrivilegesWithRequest,
+} from '@kbn/security-plugin-types-server';
 
 import { defineCreateServiceAccountRoute } from './create';
-import { createServiceAccountBodySchema } from './schemas';
+import {
+  getCreateServiceAccountBodySchema,
+  getCreateServiceAccountMaxBodyBytes,
+  getServiceAccountRoleLimits,
+} from './schemas';
+import { licenseMock } from '../../../common/licensing/index.mock';
 import { SERVICE_ACCOUNT_NAME_MAX_LENGTH } from '../../../common/service_accounts';
+import {
+  ES_SERVICE_ACCOUNT_ROLE_LIMITS,
+  UIAM_SERVICE_ACCOUNT_ROLE_LIMITS,
+} from '../../service_accounts';
 import type { ServiceAccountsServiceStart } from '../../service_accounts';
 import { serviceAccountsServiceMock } from '../../service_accounts/service_accounts_service.mock';
+import { UiamServiceAccounts } from '../../service_accounts/uiam_service_accounts';
+import { uiamServiceMock } from '../../uiam/uiam_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 
 const enabledConfig = { serviceAccounts: { enabled: true } };
 
-const requestBody = { name: 'nightshift-relay' };
+const requestBody = { name: 'nightshift-relay', roles: ['viewer'] };
 
-const serviceAccount = { id: 'service-account-id', name: 'nightshift-relay' };
+const serviceAccount = { id: 'service-account-id', name: 'nightshift-relay', roles: ['viewer'] };
 
 describe('Create service account route', () => {
   function getMockContext(
@@ -53,6 +69,9 @@ describe('Create service account route', () => {
         : serviceAccountsServiceMock.createStart();
     mockRouteDefinitionParams.getServiceAccountsService.mockReturnValue(serviceAccountsMock);
 
+    mockRouteDefinitionParams.buildFlavor =
+      options.serverless === false ? 'traditional' : 'serverless';
+
     defineCreateServiceAccountRoute(mockRouteDefinitionParams);
 
     const [routeConfig, handler] = mockRouteDefinitionParams.router.post.mock.calls.find(
@@ -68,13 +87,9 @@ describe('Create service account route', () => {
 
   const callRoute = (
     routeHandler: RequestHandler<any, any, any, any>,
-    context = getMockContext()
-  ) =>
-    routeHandler(
-      context,
-      httpServerMock.createKibanaRequest({ body: requestBody }),
-      kibanaResponseFactory
-    );
+    context = getMockContext(),
+    request = httpServerMock.createKibanaRequest({ body: requestBody })
+  ) => routeHandler(context, request, kibanaResponseFactory);
 
   describe('route registration', () => {
     it('registers an internal route that delegates authorization to UIAM', () => {
@@ -162,7 +177,166 @@ describe('Create service account route', () => {
     expect(response.status).toBe(409);
   });
 
+  describe.each([
+    ['serverless', true, 'UIAM', UIAM_SERVICE_ACCOUNT_ROLE_LIMITS],
+    ['traditional', false, 'Elasticsearch', ES_SERVICE_ACCOUNT_ROLE_LIMITS],
+  ] as const)('role limits on a %s build', (buildFlavor, serverless, backendName, limits) => {
+    const { maxRoles, maxRoleNameLength } = limits;
+    const schema = getCreateServiceAccountBodySchema(limits);
+    const distinctRoles = (count: number) => Array.from({ length: count }, (_, i) => `role-${i}`);
+
+    // The build flavor fixes the backend, so the route holds requests to that backend's limits
+    // rather than to the larger of the two.
+    it(`uses the ${backendName} backend's limits`, () => {
+      expect(getServiceAccountRoleLimits(buildFlavor)).toBe(limits);
+    });
+
+    it(`accepts ${maxRoles} roles and rejects one more`, () => {
+      expect(schema.safeParse({ ...requestBody, roles: distinctRoles(maxRoles) }).success).toBe(
+        true
+      );
+      const result = schema.safeParse({ ...requestBody, roles: distinctRoles(maxRoles + 1) });
+      expect(result.success).toBe(false);
+      expect(result.error!.issues.map(({ path }) => path.join('.'))).toContain('roles');
+    });
+
+    // The server contract drops duplicates before counting too, so both entry points agree.
+    it('counts distinct roles, dropping duplicates first', () => {
+      const roles = distinctRoles(maxRoles);
+
+      expect(schema.parse({ ...requestBody, roles: [...roles, roles[0]] })).toEqual({
+        ...requestBody,
+        roles,
+      });
+    });
+
+    it(`accepts role names up to ${maxRoleNameLength} characters and rejects longer ones`, () => {
+      expect(
+        schema.safeParse({ ...requestBody, roles: ['a'.repeat(maxRoleNameLength)] }).success
+      ).toBe(true);
+      const result = schema.safeParse({
+        ...requestBody,
+        roles: ['a'.repeat(maxRoleNameLength + 1)],
+      });
+      expect(result.success).toBe(false);
+      expect(result.error!.issues.map(({ path }) => path.join('.'))).toContain('roles.0');
+    });
+
+    // A 413 carries no field-level message, so the largest body the schema accepts must fit,
+    // even when every role name character is one JSON has to escape.
+    it('fits the largest valid body within the body size limit', () => {
+      const { routeConfig } = setup({ serverless });
+      const body = {
+        name: 'a'.repeat(SERVICE_ACCOUNT_NAME_MAX_LENGTH),
+        roles: Array.from({ length: maxRoles }, (_, i) => `${i}`.padEnd(maxRoleNameLength, '"')),
+      };
+
+      expect(routeConfig.options?.body?.maxBytes).toBe(getCreateServiceAccountMaxBodyBytes(limits));
+      expect(schema.safeParse(body).success).toBe(true);
+      expect(Buffer.byteLength(JSON.stringify(body))).toBeLessThanOrEqual(
+        routeConfig.options!.body!.maxBytes!
+      );
+    });
+  });
+
+  describe('UIAM creation credentials', () => {
+    const setupUiam = () => {
+      const uiam = uiamServiceMock.create();
+      uiam.createServiceAccount.mockResolvedValue({
+        ...serviceAccount,
+        type: 'project',
+        organization_id: 'organization-id',
+        role_assignments: {},
+        assumable_by: [],
+      });
+      const license = licenseMock.create();
+      license.isEnabled.mockReturnValue(true);
+      const checkPrivileges: jest.Mocked<CheckPrivileges> = {
+        atSpace: jest.fn(),
+        atSpaces: jest.fn(),
+        globally: jest.fn().mockResolvedValue({
+          hasAllRequested: true,
+          username: 'elastic',
+          privileges: {
+            kibana: [],
+            elasticsearch: {
+              cluster: [{ privilege: 'manage_security', authorized: true }],
+              index: {},
+            },
+          },
+        }),
+      };
+      const checkPrivilegesWithRequest: jest.MockedFunction<CheckPrivilegesWithRequest> = jest
+        .fn()
+        .mockReturnValue(checkPrivileges);
+      const backend = new UiamServiceAccounts({
+        logger: loggingSystemMock.createLogger(),
+        requestLifetimeMs: 600_000,
+        license,
+        uiam,
+        checkPrivilegesWithRequest,
+        getCurrentUser: () => null,
+        cloudProjectContext: {
+          organizationId: 'organization-id',
+          projectId: 'project-id',
+          projectType: 'security',
+        },
+      });
+      const { routeHandler } = setup({
+        serviceAccounts: { ...serviceAccountsServiceMock.createStart(), backend },
+      });
+
+      return { routeHandler, uiam, checkPrivilegesWithRequest, checkPrivileges };
+    };
+
+    it.each(['Bearer essu_user_session', 'ApiKey essu_key'])(
+      'creates an account with %s',
+      async (authorization) => {
+        const { routeHandler, uiam, checkPrivilegesWithRequest, checkPrivileges } = setupUiam();
+        const request = httpServerMock.createKibanaRequest({
+          body: requestBody,
+          headers: { authorization },
+        });
+
+        const response = await callRoute(routeHandler, undefined, request);
+
+        expect(response.status).toBe(200);
+        expect(response.payload).toEqual(serviceAccount);
+        expect(checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
+        expect(checkPrivileges.globally).toHaveBeenCalledWith({
+          elasticsearch: { cluster: ['manage_security'], index: {} },
+        });
+        expect(uiam.createServiceAccount).toHaveBeenCalledWith(
+          HTTPAuthorizationHeader.parseFromRequest(request),
+          expect.objectContaining({ name: requestBody.name }),
+          undefined
+        );
+      }
+    );
+
+    it('returns a 400 for an Elasticsearch API key before checking privileges', async () => {
+      const { routeHandler, uiam, checkPrivilegesWithRequest } = setupUiam();
+      const request = httpServerMock.createKibanaRequest({
+        body: requestBody,
+        headers: { authorization: 'ApiKey a2V5LWlkOnNlY3JldA==' },
+      });
+
+      const response = await callRoute(routeHandler, undefined, request);
+
+      expect(response.status).toBe(400);
+      expect(response.payload).toMatchObject({
+        message: 'Provided credential is not compatible with UIAM',
+      });
+      expect(checkPrivilegesWithRequest).not.toHaveBeenCalled();
+      expect(uiam.createServiceAccount).not.toHaveBeenCalled();
+    });
+  });
+
   describe('body schema', () => {
+    const createServiceAccountBodySchema = getCreateServiceAccountBodySchema(
+      UIAM_SERVICE_ACCOUNT_ROLE_LIMITS
+    );
+
     const issuesFor = (body: unknown) => {
       const result = createServiceAccountBodySchema.safeParse(body);
       expect(result.success).toBe(false);
@@ -171,8 +345,17 @@ describe('Create service account route', () => {
 
     const issuePathsFor = (body: unknown) => issuesFor(body).map((issue) => issue.path.join('.'));
 
-    it('accepts a name', () => {
+    it('accepts a name and roles', () => {
       expect(createServiceAccountBodySchema.parse(requestBody)).toEqual(requestBody);
+    });
+
+    // Every account is created with explicit roles; there is no "same as me" default.
+    it('rejects an omitted `roles`', () => {
+      expect(issuePathsFor({ name: 'nightshift-relay' })).toContain('roles');
+    });
+
+    it('rejects an empty `roles`', () => {
+      expect(issuePathsFor({ ...requestBody, roles: [] })).toContain('roles');
     });
 
     it('rejects unknown fields, so callers cannot smuggle in `assumable_by`', () => {
@@ -181,7 +364,7 @@ describe('Create service account route', () => {
       ]);
     });
 
-    // UIAM's first iteration takes a fixed payload, so callers do not get to choose privileges.
+    // Callers choose roles through `roles`; the UIAM role assignments model is Kibana's to build.
     it('rejects `role_assignments`, which Kibana supplies itself', () => {
       expect(
         issuesFor({ ...requestBody, role_assignments: { limit: { access: ['application'] } } })

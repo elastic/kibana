@@ -39,7 +39,8 @@ export class RunRuleRoute extends BaseAlertingRoute {
     },
     response: {
       202: {
-        description: 'The rule run was triggered successfully.',
+        description:
+          'The run was accepted: the rule is scheduled to run. Requests that arrive before the run starts are collapsed into a single run. Poll the rule execution history to observe the result.',
       },
       400: {
         body: () => errorResponseSchema,

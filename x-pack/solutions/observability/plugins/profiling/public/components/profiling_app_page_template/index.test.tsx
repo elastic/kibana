@@ -11,9 +11,7 @@ import { render } from '@testing-library/react';
 jest.mock('react-router-dom', () => ({ useLocation: jest.fn() }));
 jest.mock('../../hooks/use_profiling_router');
 jest.mock('../../hooks/use_default_time_range');
-jest.mock('../../hooks/use_local_storage');
 jest.mock('../contexts/profiling_dependencies/use_profiling_dependencies');
-jest.mock('../contexts/profiling_setup_status/use_profiling_setup_status');
 jest.mock('../contexts/back_navigation/use_back_navigation');
 jest.mock('./primary_profiling_search_bar', () => ({
   PrimaryProfilingSearchBar: () => null,
@@ -22,14 +20,11 @@ jest.mock('@kbn/app-header', () => ({
   AppHeader: () => null,
   SuppressChromeBackButton: () => null,
 }));
-jest.mock('@kbn/ui-callout', () => ({ KbnWarningCallout: () => null }));
 
 import { useLocation } from 'react-router-dom';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useDefaultTimeRange } from '../../hooks/use_default_time_range';
-import { useLocalStorage } from '../../hooks/use_local_storage';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
-import { useProfilingSetupStatus } from '../contexts/profiling_setup_status/use_profiling_setup_status';
 import { useBackNavigation } from '../contexts/back_navigation/use_back_navigation';
 import { ProfilingAppPageTemplate } from '.';
 
@@ -54,10 +49,6 @@ describe('ProfilingAppPageTemplate', () => {
     (useDefaultTimeRange as jest.Mock).mockReturnValue(mockDefaultTimeRange);
 
     (useProfilingRouter as jest.Mock).mockReturnValue({ link: mockLink });
-
-    (useLocalStorage as jest.Mock).mockReturnValue([false, jest.fn()]);
-
-    (useProfilingSetupStatus as jest.Mock).mockReturnValue({ profilingSetupStatus: undefined });
 
     (useBackNavigation as jest.Mock).mockReturnValue(undefined);
 

@@ -6,8 +6,12 @@
  */
 
 import { defineCreateServiceAccountRoute } from './create';
+import { defineGetServiceAccountRoute } from './get';
+import { defineListServiceAccountsRoute } from './list';
 import type { RouteDefinitionParams } from '..';
 
 export function defineServiceAccountsRoutes(params: RouteDefinitionParams) {
   defineCreateServiceAccountRoute(params);
+  defineListServiceAccountsRoute(params);
+  defineGetServiceAccountRoute(params);
 }
