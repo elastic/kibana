@@ -154,13 +154,26 @@ describe('Significant Events timestamp rendering', () => {
 });
 
 describe('SignificantEventFlyout actions menu', () => {
+  const { useFetchSignificantEventLifecycle: lifecycleMock } = jest.requireMock(
+    '../../../../hooks/use_fetch_significant_event_lifecycle'
+  ) as { useFetchSignificantEventLifecycle: jest.Mock };
+
+  afterEach(() => {
+    // Restore the default (no lifecycle) so other describe blocks are unaffected.
+    lifecycleMock.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isSuccess: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
+  });
+
   it('shows Dismiss and Close for an open event and opens the dismiss modal', () => {
     // Provide a non-empty lifecycle so hasCanonicalLifecycle is true and
-    // close/dismiss actions are enabled.
-    const { useFetchSignificantEventLifecycle } = jest.requireMock(
-      '../../../../hooks/use_fetch_significant_event_lifecycle'
-    );
-    useFetchSignificantEventLifecycle.mockReturnValueOnce({
+    // close/dismiss actions are enabled. Use mockReturnValue (not Once) so
+    // re-renders triggered by fireEvent keep the same return value.
+    lifecycleMock.mockReturnValue({
       data: { events: [event], detections: [] },
       isLoading: false,
       isSuccess: true,
