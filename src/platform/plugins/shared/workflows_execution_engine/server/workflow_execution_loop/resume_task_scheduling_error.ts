@@ -8,7 +8,8 @@
  */
 
 /**
- * Thrown when the `workflow:resume` task for a parked wait cannot be scheduled.
+ * Thrown when the `workflow:resume` task for a parked wait cannot be scheduled,
+ * e.g. Task Manager fails to clone the task's UIAM API key because it was revoked.
  * Nothing can advance the execution afterwards, so step-level `on-failure`
  * handlers (retry, fallback, continue) must not recover from it: the execution
  * has to fail instead of staying WAITING without a continuation.
