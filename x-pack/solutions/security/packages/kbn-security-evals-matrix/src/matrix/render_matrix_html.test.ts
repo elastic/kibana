@@ -883,6 +883,62 @@ describe('round 7 regression: tooltip mins and suite-scoped variants', () => {
   });
 });
 
+describe('round 9 regression: dataset-scoped columns do not borrow a sibling dataset trace', () => {
+  it("falls back to a trace from the column's own dataset, not the suite's first example", () => {
+    const datasetCfg = {
+      ...mockConfig,
+      columns: [
+        {
+          ...mockConfig.columns[0],
+          datasetIds: ['dataset-b'],
+          suites: ['suite-1'],
+        },
+      ],
+    };
+    const traces = {
+      // Both traces are in suite-1, but only the second one belongs to the column's
+      // declared dataset (dataset-b). The suite-level fallback must not attach the
+      // dataset-a prompt/answer to a dataset-b column.
+      'test-model:direct:suite-1:example-a': {
+        suiteId: 'suite-1',
+        datasetId: 'dataset-a',
+        question: 'dataset-a question',
+      },
+      'test-model:direct:suite-1:example-b': {
+        suiteId: 'suite-1',
+        datasetId: 'dataset-b',
+        question: 'dataset-b question',
+      },
+    } as never;
+    const html = renderMatrixHtml(mockMatrix, datasetCfg, {}, traces);
+    expect(html).toContain('dataset-b question');
+    expect(html).not.toContain('dataset-a question');
+  });
+
+  it('leaves the trace unavailable when no direct trace matches the dataset', () => {
+    const datasetCfg = {
+      ...mockConfig,
+      columns: [
+        {
+          ...mockConfig.columns[0],
+          datasetIds: ['dataset-b'],
+          suites: ['suite-1'],
+        },
+      ],
+    };
+    const traces = {
+      'test-model:direct:suite-1:example-a': {
+        suiteId: 'suite-1',
+        datasetId: 'dataset-a',
+        question: 'dataset-a question',
+      },
+    } as never;
+    const html = renderMatrixHtml(mockMatrix, datasetCfg, {}, traces);
+    expect(html).not.toContain('dataset-a question');
+    expect(html).toContain('Trace unavailable.');
+  });
+});
+
 describe('round 8 regression: self-judged disclosure on not-recommended cells', () => {
   it('marks a failing self-judged cell in HTML', () => {
     const matrix: Matrix = {

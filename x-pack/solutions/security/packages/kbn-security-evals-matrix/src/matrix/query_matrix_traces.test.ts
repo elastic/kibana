@@ -877,18 +877,24 @@ describe('queryMatrixTraces example fetching', () => {
 });
 
 describe('overlayRepeatedCacheTrails', () => {
-  const scored = (model: string, toolId: string, repetition: number): EvaluationScoreDocument =>
+  const scored = (
+    model: string,
+    toolId: string,
+    repetition: number,
+    suiteId = 'security-persona-matrix'
+  ): EvaluationScoreDocument =>
     ({
       task: {
         model: { id: model },
         repetition_index: repetition,
         output: { steps: [{ type: 'tool_call', tool_id: toolId }] },
       },
+      metadata: { suite_id: suiteId },
     } as unknown as EvaluationScoreDocument);
 
   it('overlays the genuine 3-rep execution and ignores sibling 1-rep weekly runs', () => {
     const traces: MatrixTraceData = {
-      'opus:workflow-authoring-a': { toolTrail: ['weekly'] },
+      'opus:direct:security-persona-matrix:workflow-authoring-a': { toolTrail: ['weekly'] },
     };
     overlayRepeatedCacheTrails(traces, {
       'old::security-persona-matrix::opus::workflow-authoring-a': [
@@ -900,7 +906,7 @@ describe('overlayRepeatedCacheTrails', () => {
         scored('opus', 'execute_api', 0),
       ],
     });
-    expect(traces['opus:workflow-authoring-a'].repTrails).toEqual([
+    expect(traces['opus:direct:security-persona-matrix:workflow-authoring-a'].repTrails).toEqual([
       ['generate_workflow'],
       ['generate_workflow'],
       ['sml_search'],
@@ -913,7 +919,42 @@ describe('overlayRepeatedCacheTrails', () => {
       'run-a::security-persona-matrix::gpt::workflow-authoring-a': [scored('gpt', 'search', 0)],
       'run-b::security-persona-matrix::gpt::workflow-authoring-a': [scored('gpt', 'load_skill', 0)],
     });
-    expect(traces['gpt:workflow-authoring-a']).toBeUndefined();
+    expect(traces['gpt:direct:security-persona-matrix:workflow-authoring-a']).toBeUndefined();
+  });
+
+  it('drops cache entries with no suite_id rather than guessing a scope', () => {
+    const traces: MatrixTraceData = {};
+    const untagged = {
+      task: {
+        model: { id: 'opus' },
+        repetition_index: 0,
+        output: { steps: [{ type: 'tool_call', tool_id: 'legacy_tool' }] },
+      },
+    } as unknown as EvaluationScoreDocument;
+    overlayRepeatedCacheTrails(traces, {
+      'run::legacy::opus::workflow-authoring-a': [untagged, { ...untagged }],
+    });
+    expect(Object.keys(traces)).toHaveLength(0);
+  });
+
+  it("does not overlay one suite's cached repetitions onto another suite's reused example id", () => {
+    const traces: MatrixTraceData = {
+      'opus:direct:suite-a:shared-example': { toolTrail: ['suite-a-tool'] },
+      'opus:direct:suite-b:shared-example': { toolTrail: ['suite-b-tool'] },
+    };
+    overlayRepeatedCacheTrails(traces, {
+      // Only suite-a has repeated cached runs; suite-b must not inherit them just
+      // because it reuses the same example id.
+      'run::suite-a::opus::shared-example': [
+        scored('opus', 'suite-a-tool', 0, 'suite-a'),
+        scored('opus', 'suite-a-tool', 1, 'suite-a'),
+      ],
+    });
+    expect(traces['opus:direct:suite-a:shared-example'].repTrails).toEqual([
+      ['suite-a-tool'],
+      ['suite-a-tool'],
+    ]);
+    expect(traces['opus:direct:suite-b:shared-example'].repTrails).toBeUndefined();
   });
 });
 

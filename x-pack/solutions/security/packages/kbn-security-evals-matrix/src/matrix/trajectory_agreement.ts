@@ -268,6 +268,14 @@ export const rowAgreement = (cells: TrajectoryCell[], modelId: string): Reliabil
   }
   const topHotspot = [...hotspots.entries()].sort((a, b) => b[1] - a[1])[0];
 
+  // The Wilson interval assumes independent Bernoulli trials. Pooled pairs are not
+  // independent — a cell's k repetitions produce k(k-1)/2 pairs that all share the same
+  // k underlying runs, so treating each pair as its own trial understates uncertainty
+  // (e.g. 10 repetitions yield 45 pseudo-independent observations from one run of data).
+  // Estimate the interval at the cell level instead: each measured cell contributes one
+  // observation, valued at its own identical-rate, so the sample size is the cell count.
+  const cellSuccesses = measured.reduce((s, a) => s + (a.identicalRate ?? 0), 0);
+
   return {
     modelId,
     status: 'measured',
@@ -277,7 +285,7 @@ export const rowAgreement = (cells: TrajectoryCell[], modelId: string): Reliabil
     toolSetRate,
     sequenceSimilarity: sequenceSim,
     pairs,
-    interval: wilsonInterval(matches, pairs),
+    interval: wilsonInterval(cellSuccesses, measured.length),
     answerSimilarity: answerPairs > 0 ? answerSum / answerPairs : undefined,
     legacyClassifiedCells: legacyClassifiedCells || undefined,
     divergenceHotspot: topHotspot ? { tool: topHotspot[0], cells: topHotspot[1] } : undefined,

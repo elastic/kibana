@@ -345,7 +345,7 @@ export const matrixCmd: Command<void> = {
     let traces: MatrixTraceData | undefined;
     const judgeVerdicts: JudgeVerdict[] = [];
     const traceCacheForProvenance = flagsReader.string('trace-cache') ?? 'none';
-    const localGit = readLocalGitState(repoRoot, log);
+    const localGit = readLocalGitState(repoRoot, log, [Path.resolve(repoRoot, configPath)]);
     if (generateHtml) {
       log.info('Querying trace data for HTML report...');
       // Pre-pulled score documents keyed `${executionId}::${exampleId}`; cached cells skip the server fetch.

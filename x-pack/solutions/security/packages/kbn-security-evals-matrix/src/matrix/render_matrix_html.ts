@@ -11,6 +11,35 @@ import type { MatrixProvenance } from './render_matrix';
 import type { MatrixTraceData, MatrixTraceEntry, TraceStep } from './trace_types';
 import { traceKey, parseDirectTraceKey } from './trace_types';
 
+/**
+ * Resolves a direct trace for a `datasetIds`-restricted column: only a trace whose own
+ * `datasetId` is in the column's allow-list qualifies. Falling through to the suite-level
+ * key (as non-restricted columns do) would attach another dataset's prompt/answer/score to
+ * this column, since that key holds the suite's first complete example regardless of dataset.
+ */
+const findDatasetTrace = (
+  traces: MatrixTraceData | undefined,
+  modelId: string,
+  column: MatrixColumnConfig
+): MatrixTraceEntry | undefined => {
+  if (!traces || !column.datasetIds?.length) {
+    return undefined;
+  }
+  const allowed = new Set(column.datasetIds);
+  const modelPrefix = `${traceKey(modelId, '')}`;
+  for (const [key, entry] of Object.entries(traces)) {
+    if (
+      key.startsWith(modelPrefix) &&
+      parseDirectTraceKey(key) &&
+      entry.datasetId &&
+      allowed.has(entry.datasetId)
+    ) {
+      return entry;
+    }
+  }
+  return undefined;
+};
+
 const REPORT_CSS = `
   :root {
     --bg:#0f1115; --panel:#171a21; --panel2:#1f2430; --border:#2a3140;
@@ -482,8 +511,17 @@ const renderModelCard = (
             column?.examplePrefixes
               ?.map((p) => traces?.[traceKey(row.modelId, `prefix:${p}`)])
               .find((t) => t != null) ??
-            // Column ids differ from suite ids, so fall back to the column's suites.
-            column?.suites.map((s) => traces?.[traceKey(row.modelId, s)]).find((t) => t != null);
+            // `datasetIds`-restricted columns must resolve a direct trace from their own
+            // dataset: the suite-level key below holds the suite's first complete example
+            // regardless of dataset, so falling through to it would label another dataset's
+            // prompt/answer/score as this column's. Whether or not a dataset-scoped trace
+            // exists, an unmatched dataset column stays unavailable rather than borrowing one.
+            (column?.datasetIds?.length
+              ? findDatasetTrace(traces, row.modelId, column)
+              : // Column ids differ from suite ids, so fall back to the column's suites.
+                column?.suites
+                  .map((s) => traces?.[traceKey(row.modelId, s)])
+                  .find((t) => t != null));
           const cards =
             variantTraces.length > 0 ? variantTraces : [{ label: col.id, trace: fallbackTrace }];
           return cards

@@ -575,11 +575,14 @@ export const queryMatrixScores = async (
             return Number.isFinite(at) && at <= asOf;
           })
         );
-        const shards = shardMembers.some(
-          (member) => member.execution_id === (latest.execution_id ?? latest.experiment_id)
-        )
-          ? shardMembers
-          : [latest];
+        // `pickShardExperiments` already resolves the newest COMPLETE sweep, falling back to an
+        // older one when the newest is partial (see its own doc comment). That result must be
+        // used as-is: comparing it against `latest` and discarding it when `latest` (chosen by
+        // `pickLatestExperimentPerModel`, which knows nothing about shard completeness) belongs
+        // to a different, incomplete sweep would throw away the complete fallback sweep and
+        // silently publish a single shard instead. Only fall back to `[latest]` when there is no
+        // shard-complete sweep at all (unsharded run, or every sweep partial).
+        const shards = shardMembers.length > 0 ? shardMembers : [latest];
 
         const perShardStats = await Promise.all(
           shards.map((shard) =>

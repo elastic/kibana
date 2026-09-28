@@ -23,6 +23,10 @@ export interface MatrixTraceEntry {
   /** Suite the example ran under; direct example ids can repeat across suites, so
    * renderers need this to avoid showing another suite's trace in a column. */
   suiteId?: string;
+  /** `example.dataset.id` the example came from; `datasetIds`-restricted columns need this
+   * to resolve a direct trace scoped to their own dataset instead of an unrelated one that
+   * merely shares the suite (see render_matrix_html's dataset-scoped fallback). */
+  datasetId?: string;
   /** The initial user question from the eval dataset. */
   question?: string;
   /** Ordered list of tool IDs the agent called. */

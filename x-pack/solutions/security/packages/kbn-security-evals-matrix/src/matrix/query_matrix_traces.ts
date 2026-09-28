@@ -10,7 +10,7 @@ import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import type { MatrixEvalsClient } from './matrix_evals_client';
 import type { AggregatedModelScores } from './query_matrix_scores';
 import type { MatrixTraceData, MatrixTraceEntry, TraceStep } from './trace_types';
-import { directTraceKey, parseDirectTraceKey, traceKey } from './trace_types';
+import { directTraceKey, traceKey } from './trace_types';
 import type { PathContract } from './trajectory_agreement';
 import { answersFromDocs, pathContractFromDocs, trailsFromDocs } from './trajectory_agreement';
 import type { JudgeVerdict } from './judge_agreement';
@@ -115,6 +115,8 @@ const extractTraceFromScore = (score: EvaluationScoreDocument): MatrixTraceEntry
   }
 
   return {
+    suiteId: score.metadata?.suite_id,
+    datasetId: score.example?.dataset?.id,
     question,
     toolTrail: toolTrail.length > 0 ? toolTrail : undefined,
     answer,
@@ -202,10 +204,17 @@ export const overlayRepeatedCacheTrails = (
     if (split >= 0 && docs.length > 0) {
       const exampleId = cacheKey.slice(split + 2);
       const modelId = docs[0].task?.model?.id;
-      if (modelId && exampleId) {
+      // A repeated cache entry is scoped to the suite/execution it came from: two suites
+      // reusing an example ID must not receive each other's cached repetitions, or a suite
+      // with no repeated runs of its own would be measured as a repeated reliability cell
+      // for work another suite actually did. `metadata.suite_id` is absent only on legacy
+      // documents (see EvaluationScoreDocument doc); such untagged entries cannot be safely
+      // scoped and are dropped rather than guessed at.
+      const suiteId = docs[0].metadata?.suite_id;
+      if (modelId && exampleId && suiteId) {
         const trails = trailsFromDocs(docs);
         if (trails.length > 1) {
-          const combo = `${modelId}\0${exampleId}`;
+          const combo = `${modelId}\0${suiteId}\0${exampleId}`;
           const previous = best.get(combo);
           if (!previous || trails.length > previous.trails.length) {
             best.set(combo, {
@@ -220,29 +229,21 @@ export const overlayRepeatedCacheTrails = (
     }
   }
   for (const [combo, cell] of best) {
-    const sep = combo.indexOf('\0');
-    const modelId = combo.slice(0, sep);
-    const exampleId = combo.slice(sep + 1);
-    // Overlay onto every suite-scoped direct cell for this (model, example); the
-    // cache keys carry no suite id, so all matching suites receive the reps.
-    const matching = Object.keys(traces).filter((key) => {
-      const parsed = parseDirectTraceKey(key);
-      return parsed && parsed.modelId === modelId && parsed.exampleId === exampleId;
-    });
-    const keys = matching.length > 0 ? matching : [traceKey(modelId, exampleId)];
-    for (const key of keys) {
-      const measured = {
-        repTrails: cell.trails,
-        repAnswers: cell.answers,
-        pathContract: cell.pathContract,
-        repExecutionIds: [cell.executionId],
-      };
-      const existing = traces[key];
-      if (existing) {
-        Object.assign(existing, measured);
-      } else {
-        traces[key] = measured;
-      }
+    const [modelId, suiteId, exampleId] = combo.split('\0');
+    // Overlay onto the suite-scoped direct cell this cache entry actually came from; a
+    // suite-tagged entry no longer falls back to every same-(model, example) key.
+    const key = directTraceKey(modelId, suiteId, exampleId);
+    const measured = {
+      repTrails: cell.trails,
+      repAnswers: cell.answers,
+      pathContract: cell.pathContract,
+      repExecutionIds: [cell.executionId],
+    };
+    const existing = traces[key];
+    if (existing) {
+      Object.assign(existing, measured);
+    } else {
+      traces[key] = measured;
     }
   }
 };

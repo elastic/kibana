@@ -137,6 +137,26 @@ describe('rowAgreement', () => {
     expect(row.measuredCells).toBe(2);
     expect(row.identicalRate).toBe(0.5);
   });
+
+  it('sizes the Wilson interval on measured cells, not pooled pairs', () => {
+    // Each cell has 10 repetitions -> 45 pairs; pooling pairs as independent trials
+    // would report a far tighter interval than the 2 actual data points justify.
+    const row = rowAgreement(
+      [
+        { model: 'opus', example: 'a', trails: Array.from({ length: 10 }, () => ['x']) },
+        { model: 'opus', example: 'b', trails: Array.from({ length: 10 }, () => ['y']) },
+      ],
+      'opus'
+    );
+    expect(row.status).toBe('measured');
+    expect(row.measuredCells).toBe(2);
+    expect(row.pairs).toBe(90);
+    // Both cells are internally identical (identicalRate 1 each), so the pooled rate is
+    // 1 regardless of weighting, but the interval's sample size must be the cell count (2),
+    // not the pair count (90) — a 2-point Wilson interval at p=1 is wide, a 90-point one tiny.
+    expect(row.interval).toEqual(wilsonInterval(2, 2));
+    expect(row.interval?.low).toBeLessThan(wilsonInterval(90, 90).low);
+  });
 });
 
 describe('answersFromDocs / pathContractFromDocs', () => {
