@@ -16,7 +16,12 @@ from file_bug import (  # noqa: E402
     IssueMatch,
     _default_run_gh as default_run_gh,
     decide_write_path,
+    finding_from_jsonl,
+    format_issue_title,
+    infer_deployment,
     infer_team_label,
+    pack_gaps,
+    parse_search_results,
     render_bug_body,
     upload_evidence,
     validate_labels,
@@ -128,6 +133,65 @@ def _cmd_infer_team(args: argparse.Namespace) -> int:
     )
 
 
+def _cmd_format_title(args: argparse.Namespace) -> int:
+    try:
+        title = format_issue_title(args.label, args.symptom)
+    except ValueError as error:
+        return _fail(str(error))
+    return _emit({"title": title})
+
+
+def _cmd_parse_search(args: argparse.Namespace) -> int:
+    matches = parse_search_results(_read_json(args.input))
+    return _emit(
+        {
+            "matches": [
+                {"number": match.number, "state": match.state, "title": match.title}
+                for match in matches
+            ]
+        }
+    )
+
+
+def _cmd_infer_deployment(args: argparse.Namespace) -> int:
+    finding = _read_json(args.finding) if args.finding else {}
+    config = _read_json(args.config) if args.config else {}
+    if not isinstance(finding, dict) or not isinstance(config, dict):
+        return _fail("finding and config must be JSON objects")
+    result = infer_deployment(finding, config)
+    return _emit(
+        {"status": result.status, "label": result.label, "hint": result.hint},
+        EXIT_ASK if result.status == "ask" else EXIT_OK,
+    )
+
+
+def _cmd_from_findings(args: argparse.Namespace) -> int:
+    records = [
+        json.loads(line)
+        for line in _read_text(args.jsonl).splitlines()
+        if line.strip()
+    ]
+    try:
+        finding = finding_from_jsonl(
+            records, index=args.index, title=_optional(args.title)
+        )
+    except ValueError as error:
+        return _fail(str(error), EXIT_ASK)
+    return _emit({"finding": finding})
+
+
+def _cmd_check_pack(args: argparse.Namespace) -> int:
+    finding = _read_json(args.finding)
+    config = _read_json(args.config) if args.config else {}
+    if not isinstance(finding, dict) or not isinstance(config, dict):
+        return _fail("finding and config must be JSON objects")
+    gaps = pack_gaps(finding, config)
+    return _emit(
+        {"thin": bool(gaps), "gaps": gaps},
+        EXIT_ASK if gaps else EXIT_OK,
+    )
+
+
 def _cmd_render_body(args: argparse.Namespace) -> int:
     finding = _read_json(args.finding)
     config = _read_json(args.config) if args.config else {}
@@ -212,6 +276,43 @@ def _build_parser() -> argparse.ArgumentParser:
     infer.add_argument("--route", default=None)
     infer.add_argument("--knowledge", required=True, help="security-domain-knowledge.md path")
     infer.set_defaults(handler=_cmd_infer_team)
+
+    title = subparsers.add_parser("format-title", help="Build [<team name>] symptom")
+    title.add_argument("--label", required=True, help="Team:* label or display name")
+    title.add_argument("--symptom", required=True)
+    title.set_defaults(handler=_cmd_format_title)
+
+    search = subparsers.add_parser(
+        "parse-search", help="Turn gh search JSON into matches.json"
+    )
+    search.add_argument(
+        "--input",
+        required=True,
+        help="`gh search issues --json` output, or - for stdin",
+    )
+    search.set_defaults(handler=_cmd_parse_search)
+
+    deploy = subparsers.add_parser(
+        "infer-deployment", help="ECH / serverless / both, or ask"
+    )
+    deploy.add_argument("--config", default=None)
+    deploy.add_argument("--finding", default=None)
+    deploy.set_defaults(handler=_cmd_infer_deployment)
+
+    from_findings = subparsers.add_parser(
+        "from-findings", help="Pick one finding from parse-findings JSONL"
+    )
+    from_findings.add_argument("--jsonl", required=True)
+    from_findings.add_argument("--index", type=int, default=None)
+    from_findings.add_argument("--title", default=None)
+    from_findings.set_defaults(handler=_cmd_from_findings)
+
+    check = subparsers.add_parser(
+        "check-pack", help="List missing required / always-ask fields"
+    )
+    check.add_argument("--finding", required=True)
+    check.add_argument("--config", default=None)
+    check.set_defaults(handler=_cmd_check_pack)
 
     render = subparsers.add_parser(
         "render-body", help="Render the security-file-bug template"

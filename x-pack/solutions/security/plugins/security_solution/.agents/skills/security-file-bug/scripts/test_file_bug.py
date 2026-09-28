@@ -16,7 +16,12 @@ from file_bug import (  # noqa: E402
     IssueMatch,
     compress_video,
     decide_write_path,
+    finding_from_jsonl,
+    format_issue_title,
+    infer_deployment,
     infer_team_label,
+    pack_gaps,
+    parse_search_results,
     render_bug_body,
     upload_evidence,
     validate_labels,
@@ -156,6 +161,7 @@ class RenderBugBodyTest(unittest.TestCase):
         self.assertNotIn("**Feature flags:**", body)
         self.assertNotIn("**Preconditions:**", body)
         self.assertNotIn("**Describe the bug:**\n\n**Version", body)
+        self.assertNotIn("_unknown_", body)
 
     def test_optional_environment_headings_only_when_needed(self):
         finding = {
@@ -236,6 +242,146 @@ class RenderBugBodyTest(unittest.TestCase):
             {},
         )
         self.assertNotIn("**Preconditions:**", empty)
+
+    def test_omits_empty_console_logs_and_never_writes_placeholder(self):
+        body = render_bug_body(
+            {
+                "current_behavior": "broken",
+                "expected_behavior": "works",
+                "steps_followed": ["click"],
+            },
+            {},
+        )
+        self.assertNotIn("_unknown_", body)
+        self.assertNotIn("**Errors in browser console (if relevant):**", body)
+        self.assertNotIn("**Logs and/or server output (if relevant):**", body)
+        self.assertNotIn("**Version:**", body)
+        self.assertIn("**Current behaviour (with screenshots and recordings):**", body)
+
+    def test_unknown_answer_keeps_heading(self):
+        body = render_bug_body(
+            {
+                "current_behavior": "broken",
+                "expected_behavior": "works",
+                "steps_followed": ["click"],
+                "deployment": "Unknown",
+                "role": "Unknown",
+                "spaces": "Unknown",
+                "feature_flags": "Unknown",
+            },
+            {"kibana_version": "Unknown"},
+        )
+        self.assertIn("**Deployment:**\nUnknown", body)
+        self.assertIn("**Role required to reproduce:**\nUnknown", body)
+        self.assertIn("**Spaces:**\nUnknown", body)
+        self.assertIn("**Feature flags:**\nUnknown", body)
+        self.assertIn("**Version:**\nUnknown", body)
+        self.assertNotIn("_unknown_", body)
+
+
+class FormatIssueTitleTest(unittest.TestCase):
+    def test_strips_team_prefix(self):
+        self.assertEqual(
+            format_issue_title("Team:Entity Analytics", "Risk table empty"),
+            "[Entity Analytics] Risk table empty",
+        )
+
+    def test_collapses_whitespace(self):
+        self.assertEqual(
+            format_issue_title("Entity Analytics", "  risk   table  "),
+            "[Entity Analytics] risk table",
+        )
+
+
+class ParseSearchResultsTest(unittest.TestCase):
+    def test_parses_gh_array(self):
+        matches = parse_search_results(
+            [{"number": 1, "state": "open", "title": "A"}]
+        )
+        self.assertEqual(matches[0].number, 1)
+        self.assertEqual(matches[0].state, "open")
+
+    def test_parses_items_wrapper(self):
+        matches = parse_search_results({"items": [{"number": 9, "state": "closed"}]})
+        self.assertEqual(matches[0].number, 9)
+        self.assertEqual(matches[0].state, "closed")
+
+
+class FindingFromJsonlTest(unittest.TestCase):
+    records = [
+        {"kind": "flow_header", "flow_name": "Happy path"},
+        {"kind": "finding", "title": "First", "current_behavior": "a"},
+        {"kind": "finding", "title": "Second", "current_behavior": "b"},
+    ]
+
+    def test_picks_by_title(self):
+        finding = finding_from_jsonl(self.records, title="Second")
+        self.assertEqual(finding["current_behavior"], "b")
+
+    def test_picks_by_index(self):
+        finding = finding_from_jsonl(self.records, index=0)
+        self.assertEqual(finding["title"], "First")
+
+    def test_missing_title_raises(self):
+        with self.assertRaises(ValueError):
+            finding_from_jsonl(self.records, title="Nope")
+
+
+class InferDeploymentTest(unittest.TestCase):
+    def test_explicit_both(self):
+        result = infer_deployment({"deployment": "both"}, {})
+        self.assertEqual(result.status, "confident")
+        self.assertEqual(result.label, "ECH and serverless")
+
+    def test_arch_serverless(self):
+        result = infer_deployment({}, {"environment": {"arch": "serverless"}})
+        self.assertEqual(result.status, "confident")
+        self.assertEqual(result.label, "Serverless")
+
+    def test_arch_stateful_is_ech(self):
+        result = infer_deployment({}, {"environment": {"arch": "stateful"}})
+        self.assertEqual(result.status, "confident")
+        self.assertEqual(result.label, "ECH")
+
+    def test_url_cloud_asks_with_hint(self):
+        result = infer_deployment(
+            {}, {"environment": {"url": "https://foo.elastic-cloud.com"}}
+        )
+        self.assertEqual(result.status, "ask")
+        self.assertIn("cloud", result.hint or "")
+
+    def test_kind_only_asks(self):
+        result = infer_deployment({}, {"environment": {"kind": "scout"}})
+        self.assertEqual(result.status, "ask")
+        self.assertIsNone(result.label)
+
+
+class PackGapsTest(unittest.TestCase):
+    def test_fixture_is_thin_without_always_ask(self):
+        finding = json.loads((FIXTURES / "finding.json").read_text())
+        config = json.loads((FIXTURES / "session-config.json").read_text())
+        gaps = pack_gaps(finding, config)
+        self.assertIn("feature_flags", gaps)
+        self.assertIn("deployment", gaps)
+        self.assertIn("spaces", gaps)
+        self.assertNotIn("version", gaps)
+        self.assertNotIn("steps", gaps)
+        self.assertNotIn("role", gaps)
+
+    def test_unknown_is_not_a_gap(self):
+        gaps = pack_gaps(
+            {
+                "current_behavior": "broken",
+                "expected_behavior": "works",
+                "steps_followed": ["click"],
+                "feature_flags": "Unknown",
+                "deployment": "Unknown",
+                "role": "Unknown",
+                "spaces": "Unknown",
+            },
+            {"kibana_version": "9.3.0"},
+        )
+        self.assertEqual(gaps, [])
 
 
 class UploadEvidenceTest(unittest.TestCase):
@@ -468,6 +614,66 @@ class FileBugCliTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0)
         self.assertIn("**Steps to reproduce:**", json.loads(result.stdout)["body"])
 
+    def test_format_title_cli(self):
+        result = run_cli(
+            "format-title",
+            "--label",
+            "Team:Entity Analytics",
+            "--symptom",
+            "Risk table empty",
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(
+            json.loads(result.stdout)["title"],
+            "[Entity Analytics] Risk table empty",
+        )
+
+    def test_parse_search_cli(self):
+        result = run_cli(
+            "parse-search",
+            "--input",
+            "-",
+            stdin=json.dumps([{"number": 12, "state": "open", "title": "A"}]),
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(json.loads(result.stdout)["matches"][0]["number"], 12)
+
+    def test_infer_deployment_cli_asks(self):
+        result = run_cli(
+            "infer-deployment",
+            "--config",
+            str(FIXTURES / "session-config.json"),
+        )
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(json.loads(result.stdout)["status"], "ask")
+
+    def test_from_findings_cli(self):
+        jsonl = "\n".join(
+            [
+                json.dumps({"kind": "flow_header", "flow_name": "A"}),
+                json.dumps({"kind": "finding", "title": "Named", "current_behavior": "x"}),
+            ]
+        )
+        with TemporaryDirectory() as tmp:
+            path = Path(tmp) / "findings.jsonl"
+            path.write_text(jsonl, encoding="utf-8")
+            result = run_cli("from-findings", "--jsonl", str(path), "--title", "Named")
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(json.loads(result.stdout)["finding"]["title"], "Named")
+
+    def test_check_pack_cli_exits_2_when_thin(self):
+        result = run_cli(
+            "check-pack",
+            "--finding",
+            str(FIXTURES / "finding.json"),
+            "--config",
+            str(FIXTURES / "session-config.json"),
+        )
+        self.assertEqual(result.returncode, 2)
+        payload = json.loads(result.stdout)
+        self.assertTrue(payload["thin"])
+        self.assertIn("deployment", payload["gaps"])
+
 
 SKILL = Path(__file__).resolve().parents[1] / "SKILL.md"
 
@@ -506,8 +712,30 @@ class SkillProtocolTest(unittest.TestCase):
         self.assertIn("specific role", self.text.lower())
         self.assertIn("default space", self.text.lower())
         self.assertIn("Preconditions:", self.text)
-        self.assertIn("Standalone environment setup", self.text)
+        self.assertIn("Environment setup questions", self.text)
         self.assertIn("exact error message", self.text.lower())
+
+    def test_two_collect_paths(self):
+        self.assertIn("Two collect paths", self.text)
+        self.assertIn("Path A — from scratch", self.text)
+        self.assertIn("Path B — exploratory-tester pack", self.text)
+        self.assertIn("two full loops", self.text.lower())
+        self.assertIn("[<team name>]", self.text)
+        self.assertIn("Unknown", self.text)
+        self.assertIn("Do not assume every session is local Scout", self.text)
+        self.assertIn("thin", self.text.lower())
+        self.assertIn("not already on that issue", self.text)
+        self.assertIn("parse-findings.py", self.text)
+        self.assertIn("from-findings", self.text)
+        self.assertIn("parse-search", self.text)
+        self.assertIn("format-title", self.text)
+        self.assertIn("infer-deployment", self.text)
+        self.assertIn("check-pack", self.text)
+        self.assertIn("two issues", self.text)
+        self.assertNotIn("usually two issues", self.text)
+        self.assertIn("URL that contains `cloud`", self.text)
+        self.assertIn("stateful", self.text)
+        self.assertIn("Never write `_unknown_`", self.text)
 
 
 if __name__ == "__main__":

@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Callable, Literal
 
 WriteAction = Literal["create", "comment", "reopen_comment", "ask"]
+UNKNOWN_ANSWER = "Unknown"
 
 
 @dataclass(frozen=True)
@@ -32,6 +33,62 @@ class LabelDecision:
     keep: tuple[str, ...]
     dropped: tuple[tuple[str, str], ...]
     ask_team: bool
+
+
+def format_issue_title(team_label: str, symptom: str) -> str:
+    name = re.sub(r"^Team:\s*", "", team_label.strip())
+    symptom_text = " ".join(symptom.split()).strip()
+    if not name or not symptom_text:
+        raise ValueError("team label and symptom are required")
+    return f"[{name}] {symptom_text}"
+
+
+def parse_search_results(payload: object) -> list[IssueMatch]:
+    if isinstance(payload, dict):
+        entries = payload.get("items") or payload.get("matches") or []
+    elif isinstance(payload, list):
+        entries = payload
+    else:
+        return []
+    matches: list[IssueMatch] = []
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        try:
+            number = int(entry["number"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        state = entry.get("state", "open")
+        if state not in ("open", "closed"):
+            state = "open"
+        matches.append(IssueMatch(number, state, str(entry.get("title", ""))))
+    return matches
+
+
+def finding_from_jsonl(
+    records: list,
+    *,
+    index: int | None = None,
+    title: str | None = None,
+) -> dict:
+    findings = [
+        record
+        for record in records
+        if isinstance(record, dict) and record.get("kind") == "finding"
+    ]
+    if title is not None:
+        wanted = title.strip().lower()
+        for finding in findings:
+            if str(finding.get("title", "")).strip().lower() == wanted:
+                return finding
+        raise ValueError(f"no finding titled {title!r}")
+    if index is None:
+        if len(findings) == 1:
+            return findings[0]
+        raise ValueError("pass --index or --title when jsonl has multiple findings")
+    if index < 0 or index >= len(findings):
+        raise ValueError(f"finding index {index} out of range")
+    return findings[index]
 
 
 def decide_write_path(matches: list[IssueMatch]) -> WritePath:
@@ -227,7 +284,6 @@ def infer_team_label(
     return TeamInference("ask", None, tuple(candidates))
 
 
-_UNKNOWN = "_unknown_"
 _DEV_INSTALL = "from source (dev)"
 _LOCAL_KINDS = frozenset({"local", "scout"})
 _SCREENSHOT_PREFIX = "Screenshot:"
@@ -244,7 +300,6 @@ _HEADING_SERVER_OS = "**Server OS version:**"
 _DEPLOYMENT_LABELS = {
     "ech": "ECH",
     "ess": "ECH",
-    "cloud": "ECH",
     "hosted": "ECH",
     "serverless": "Serverless",
     "both": "ECH and serverless",
@@ -274,25 +329,24 @@ def _first_text(*values: object) -> str:
         text = str(value).strip()
         if text:
             return text
-    return _UNKNOWN
+    return ""
 
 
 def _optional_text(*values: object) -> str | None:
-    text = _first_text(*values)
-    return None if text == _UNKNOWN else text
+    return _first_text(*values) or None
 
 
 def _environment(config: dict) -> dict:
     return _as_mapping(config.get("environment"))
 
 
-def _install_method(environment: dict) -> str:
-    explicit = _first_text(environment.get("install_method"))
-    if explicit != _UNKNOWN:
+def _install_method(environment: dict) -> str | None:
+    explicit = _optional_text(environment.get("install_method"))
+    if explicit:
         return explicit
     if environment.get("kind") in _LOCAL_KINDS:
         return _DEV_INSTALL
-    return _UNKNOWN
+    return None
 
 
 def _describe_the_bug(finding: dict) -> str:
@@ -303,13 +357,13 @@ def _describe_the_bug(finding: dict) -> str:
     why = finding.get("why_issue")
     if why is not None and str(why).strip():
         parts.append(str(why).strip())
-    return "\n\n".join(parts) if parts else _UNKNOWN
+    return "\n\n".join(parts)
 
 
 def _numbered_steps(finding: dict) -> str:
     steps = finding.get("steps_followed")
     if not isinstance(steps, list) or not steps:
-        return _UNKNOWN
+        return ""
     return "\n".join(f"{index}. {step}" for index, step in enumerate(steps, start=1))
 
 
@@ -391,16 +445,59 @@ def _feature_flags(finding: dict, config: dict, environment: dict) -> str | None
     return _with_flag_setup(flags, finding, config, environment)
 
 
-def _deployment(finding: dict, config: dict, environment: dict) -> str | None:
-    raw = _optional_text(
+@dataclass(frozen=True)
+class DeploymentInference:
+    status: Literal["confident", "ask"]
+    label: str | None
+    hint: str | None = None
+
+
+def infer_deployment(finding: dict, config: dict) -> DeploymentInference:
+    environment = _environment(config)
+    explicit = _optional_text(
         finding.get("deployment"),
         config.get("deployment"),
         environment.get("deployment"),
         environment.get("project_type"),
     )
-    if raw is None:
-        return None
-    return _DEPLOYMENT_LABELS.get(raw.lower(), raw)
+    if explicit:
+        if explicit.lower() == UNKNOWN_ANSWER.lower():
+            return DeploymentInference("confident", UNKNOWN_ANSWER)
+        return DeploymentInference(
+            "confident", _DEPLOYMENT_LABELS.get(explicit.lower(), explicit)
+        )
+    arch = _optional_text(
+        environment.get("arch"),
+        config.get("arch"),
+        environment.get("domain"),
+        config.get("domain"),
+    )
+    if arch:
+        key = arch.lower()
+        if "serverless" in key:
+            return DeploymentInference("confident", "Serverless")
+        if "stateful" in key or key in {"ess", "ech"}:
+            return DeploymentInference("confident", "ECH")
+    url = _optional_text(
+        environment.get("url"),
+        config.get("url"),
+        environment.get("kibana_url"),
+        config.get("kibana_url"),
+    )
+    if url and "cloud" in url.lower():
+        return DeploymentInference(
+            "ask",
+            None,
+            "URL contains 'cloud' (may be serverless) — confirm with the human",
+        )
+    return DeploymentInference("ask", None)
+
+
+def _deployment(finding: dict, config: dict, environment: dict) -> str | None:
+    result = infer_deployment(finding, config)
+    if result.status == "confident":
+        return result.label
+    return None
 
 
 def _preconditions(finding: dict, config: dict) -> str | None:
@@ -462,11 +559,34 @@ def _current_behaviour(finding: dict, evidence: list[str]) -> str:
     ]
     if media:
         parts.append("\n".join(media))
-    return "\n\n".join(parts) if parts else _UNKNOWN
+    return "\n\n".join(parts)
 
 
-def _joined_or_unknown(values: list[str]) -> str:
-    return "\n".join(values) if values else _UNKNOWN
+def pack_gaps(finding: dict, config: dict) -> list[str]:
+    environment = _environment(config)
+    evidence = _evidence_lines(finding)
+    gaps: list[str] = []
+    if not _stack_version(config, environment):
+        gaps.append("version")
+    if not _numbered_steps(finding):
+        gaps.append("steps")
+    if not _current_behaviour(finding, evidence):
+        gaps.append("current")
+    if not _first_text(finding.get("expected_behavior")):
+        gaps.append("expected")
+    if not _feature_flags(finding, config, environment):
+        gaps.append("feature_flags")
+    if infer_deployment(finding, config).status == "ask":
+        gaps.append("deployment")
+    if not _optional_text(finding.get("role"), config.get("role")):
+        gaps.append("role")
+    if not _spaces(finding, config, environment):
+        gaps.append("spaces")
+    return gaps
+
+
+def is_thin_pack(finding: dict, config: dict) -> bool:
+    return bool(pack_gaps(finding, config))
 
 
 def render_bug_body(finding: dict, config: dict) -> str:
@@ -522,19 +642,18 @@ def render_bug_body(finding: dict, config: dict) -> str:
         (_HEADING_STEPS, _numbered_steps(finding)),
         (_HEADING_CURRENT, _current_behaviour(finding, evidence)),
         (_HEADING_EXPECTED, _first_text(finding.get("expected_behavior"))),
-        (
-            _HEADING_CONSOLE,
-            _joined_or_unknown(_values_with_prefix(evidence, _CONSOLE_PREFIX)),
-        ),
-        (
-            _HEADING_LOGS,
-            _joined_or_unknown(_values_with_prefix(evidence, _NETWORK_PREFIX)),
-        ),
     ]
+    console = "\n".join(_values_with_prefix(evidence, _CONSOLE_PREFIX))
+    if console:
+        sections.append((_HEADING_CONSOLE, console))
+    logs = "\n".join(_values_with_prefix(evidence, _NETWORK_PREFIX))
+    if logs:
+        sections.append((_HEADING_LOGS, logs))
     additional = optional_present.get(_HEADING_ADDITIONAL)
     if additional is not None:
         sections.append((_HEADING_ADDITIONAL, additional))
-    return "\n\n".join(f"{heading}\n{body}" for heading, body in sections) + "\n"
+    filled = [(heading, body) for heading, body in sections if body]
+    return "\n\n".join(f"{heading}\n{body}" for heading, body in filled) + "\n"
 
 
 _ASSET_URL = (
