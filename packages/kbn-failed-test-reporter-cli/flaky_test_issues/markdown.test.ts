@@ -200,6 +200,7 @@ describe('formatFailedBranches', () => {
   it('falls back to the count without names', () => {
     expect(formatFailedBranches({ failedBranches: 7 })).toBe('7');
     expect(formatFailedBranches({ failedBranches: 1, failedBranchNames: [] })).toBe('1');
+    expect(formatFailedBranches({ failedBranches: 0, failedBranchNames: [] })).toBe('-');
   });
 });
 

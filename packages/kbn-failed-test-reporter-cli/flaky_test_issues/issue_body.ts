@@ -458,9 +458,12 @@ const errorSection = (suite: FlakySuite, error: SuiteError, totalFailures: numbe
   );
 };
 
-/** An error seen on nothing but pull request builds is that pull request's, not the suite's. */
+/**
+ * An error seen on nothing but pull request builds is that pull request's, not the suite's. One
+ * with no recorded branch is kept: it cannot be shown to be anyone's.
+ */
 const isPullRequestOnly = (error: SuiteError): boolean =>
-  [...error.branches].every(isPullRequestRef);
+  error.branches.size > 0 && [...error.branches].every(isPullRequestRef);
 
 /**
  * The suite's distinct errors over the window, most failures first, at most `MAX_ERRORS` shown.

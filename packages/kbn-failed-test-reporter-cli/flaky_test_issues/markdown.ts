@@ -310,7 +310,7 @@ export const formatFailedBranches = ({
   if (pullRequests > 0) {
     parts.push(plural(pullRequests, 'PR'));
   }
-  return parts.join(', ') || String(failedBranches);
+  return parts.join(', ') || (failedBranches > 0 ? String(failedBranches) : '-');
 };
 
 /** Newest sampled failure of a suite, across its tests. */

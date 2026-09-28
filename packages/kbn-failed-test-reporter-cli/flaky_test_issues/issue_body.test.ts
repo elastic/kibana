@@ -374,6 +374,16 @@ describe('renderFlakySuiteIssueBody', () => {
     expect(body).toContain('</details>\n\n*Errors that only appeared in PR builds were excluded.*');
   });
 
+  it('keeps an error with no recorded branch, which cannot be shown to be pull request only', () => {
+    const report = flakyReport([
+      flakyTest({ errors: [{ ...flakyTest().errors[0], branches: [] }] }),
+    ]);
+    const body = renderFlakySuiteIssueBody(groupIntoSuites(report.flaky)[0], { report });
+    expect(body).toContain('1 distinct error:\n\n<details>');
+    expect(body).toContain('| **Branches** | - |');
+    expect(body).not.toContain('were excluded');
+  });
+
   it('says so when every error was seen on pull request builds only', () => {
     const report = flakyReport([
       flakyTest({
