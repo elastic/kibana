@@ -13,6 +13,13 @@ import type { Activity } from './types';
 const TASK_MANAGER_CONTEXT_TYPE = 'task manager';
 const TASK_RUN_NAME_PREFIX = 'run ';
 const MAX_FIELD_LENGTH = 256;
+/** C0/C1 control characters (incl. CR/LF and ESC) could forge log lines or terminal escapes. */
+const isControlCharacter = (code: number): boolean => code < 0x20 || (code >= 0x7f && code <= 0x9f);
+
+const sanitize = (value: string): string =>
+  Array.from(value.slice(0, MAX_FIELD_LENGTH), (char) =>
+    isControlCharacter(char.charCodeAt(0)) ? '?' : char
+  ).join('');
 
 /**
  * Maps an execution context to an allowlisted activity, or `undefined` when it is not tracked.
@@ -28,8 +35,8 @@ export const toActivity = (
   }
   return {
     kind: 'task',
-    type: name.slice(TASK_RUN_NAME_PREFIX.length, TASK_RUN_NAME_PREFIX.length + MAX_FIELD_LENGTH),
-    id: id.slice(0, MAX_FIELD_LENGTH),
+    type: sanitize(name.slice(TASK_RUN_NAME_PREFIX.length)),
+    id: sanitize(id),
     startedAt: now,
   };
 };

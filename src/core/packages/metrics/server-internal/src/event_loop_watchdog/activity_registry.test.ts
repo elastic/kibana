@@ -27,6 +27,11 @@ describe('toActivity', () => {
     expect(toActivity({ type: 'task manager', name: 'run x' })).toBeUndefined();
   });
 
+  it('replaces control characters that could forge log lines', () => {
+    const activity = toActivity({ ...taskContext, name: 'run a\nb', id: 'x\r\n\u001b[31my' });
+    expect(activity).toEqual(expect.objectContaining({ type: 'a?b', id: 'x???[31my' }));
+  });
+
   it('truncates long values', () => {
     const activity = toActivity({ ...taskContext, id: 'x'.repeat(1000) });
     expect(activity?.id).toHaveLength(256);

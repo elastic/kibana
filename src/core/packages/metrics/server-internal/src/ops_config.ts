@@ -66,6 +66,14 @@ const boundedDuration = (defaultValue: string, minMs: number, maxMs: number) =>
     },
   });
 
+const boundedInteger = (defaultValue: number, min: number, max: number) =>
+  schema.number({
+    defaultValue,
+    min,
+    max,
+    validate: (value) => (Number.isInteger(value) ? undefined : 'must be an integer'),
+  });
+
 const configSchema = schema.object({
   interval: schema.duration({ defaultValue: OPS_METRICS_INTERVAL }),
   cGroupOverrides: schema.object({
@@ -76,10 +84,10 @@ const configSchema = schema.object({
     threshold: boundedDuration('500ms', 50, MINUTE),
     heartbeatInterval: boundedDuration('100ms', 10, 10 * SECOND),
     liveNoticeInterval: boundedDuration('5s', 100, 5 * MINUTE),
-    maxLiveNoticesPerBlock: schema.number({ defaultValue: 12, min: 1, max: 100 }),
+    maxLiveNoticesPerBlock: boundedInteger(12, 1, 100),
     maxProfileDuration: boundedDuration('10s', 100, MINUTE),
     profileCooldown: boundedDuration('1m', 0, 60 * MINUTE),
-    maxCandidates: schema.number({ defaultValue: 10, min: 1, max: 100 }),
+    maxCandidates: boundedInteger(10, 1, 100),
   }),
 });
 

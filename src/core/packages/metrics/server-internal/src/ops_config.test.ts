@@ -34,6 +34,8 @@ describe('ops config: eventLoopWatchdog', () => {
     [{ heartbeatInterval: '1m' }, /heartbeatInterval/],
     [{ maxProfileDuration: '2m' }, /maxProfileDuration/],
     [{ maxCandidates: 1000 }, /maxCandidates/],
+    [{ maxCandidates: 2.5 }, /maxCandidates.*integer/],
+    [{ maxLiveNoticesPerBlock: 1.5 }, /maxLiveNoticesPerBlock.*integer/],
   ])('rejects out-of-bounds values %j', (eventLoopWatchdog, error) => {
     expect(() => opsConfig.schema.validate({ eventLoopWatchdog })).toThrow(error);
   });
