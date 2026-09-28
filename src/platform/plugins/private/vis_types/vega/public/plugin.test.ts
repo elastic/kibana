@@ -19,6 +19,7 @@ import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -52,6 +53,7 @@ describe('VegaPlugin', () => {
     const startDeps = {
       expressions: { getFunction: jest.fn() },
       uiActions: { executeTriggerActions: jest.fn() },
+      unifiedSearch: { ui: { SearchBar: jest.fn() } },
     };
     core.getStartServices.mockResolvedValue([startCore, startDeps, {}]);
 
@@ -109,6 +111,7 @@ describe('VegaPlugin', () => {
         expressions: expressionsPluginMock.createStartContract(),
         inspector: inspectorPluginMock.createStartContract(),
         uiActions,
+        unifiedSearch: unifiedSearchPluginMock.createStartContract(),
         // No public start mocks exist for these; the plugin only stores them at start.
         mapsEms: {} as MapsEmsPluginPublicStart,
         usageCollection: {} as UsageCollectionStart,

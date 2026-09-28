@@ -14,10 +14,15 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { BehaviorSubject, of } from 'rxjs';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import { apiPublishesEsql, type ViewMode } from '@kbn/presentation-publishing';
+import {
+  apiPublishesEsql,
+  apiPublishesWritableUnifiedSearch,
+  type ViewMode,
+} from '@kbn/presentation-publishing';
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { VegaParser } from '../data_model/vega_parser';
@@ -143,6 +148,7 @@ describe('vegaEmbeddableFactory', () => {
     );
     const factory = vegaEmbeddableFactory(coreStart, {
       uiActions: { executeTriggerActions },
+      SearchBar: (() => null) as UnifiedSearchPublicPluginStart['ui']['SearchBar'],
       visualizationDependencies,
     });
     const uuid = 'vega-panel';
@@ -419,8 +425,10 @@ describe('vegaEmbeddableFactory', () => {
     );
   });
 
-  it('restores the original spec when editing is cancelled', async () => {
+  it('restores the original spec, query, and filters when editing is cancelled', async () => {
     const { api } = await buildEmbeddable();
+    api.setQuery({ language: 'kuery', query: 'bytes > 1000' });
+    api.setFilters([{ meta: { alias: 'panel filter' }, query: { match: { status: 200 } } }]);
     const content = (await api.getEditPanel?.({
       ariaLabelledBy: 'vegaEditorTitle',
     })) as React.ReactElement<{
@@ -429,10 +437,16 @@ describe('vegaEmbeddableFactory', () => {
     }>;
 
     content.props.onPreview({ format: 'hjson', value: '{ mark: bar }' });
+    api.setQuery({ language: 'kuery', query: 'bytes > 2000' });
+    api.setFilters([{ meta: { alias: 'changed filter' }, query: { match: { status: 500 } } }]);
 
     expect(api.serializeState().spec).toEqual({ format: 'hjson', value: '{ mark: bar }' });
     content.props.onRevert();
     expect(api.serializeState().spec).toEqual({ format: 'hjson', value: '{ mark: point }' });
+    expect(api.query$.getValue()).toEqual({ language: 'kuery', query: 'bytes > 1000' });
+    expect(api.filters$.getValue()).toEqual([
+      { meta: { alias: 'panel filter' }, query: { match: { status: 200 } } },
+    ]);
     expect(jest.mocked(parentApi.removePanel)).not.toHaveBeenCalled();
   });
 
@@ -493,6 +507,50 @@ describe('vegaEmbeddableFactory', () => {
         expect.objectContaining({ esqlVariables: updated })
       );
     });
+  });
+
+  it('merges a panel query and filters into the request without changing esql$', async () => {
+    const esql = 'FROM logs-* | WHERE machine.os.keyword == ?fizzbuzz';
+    const panelFilter = { meta: { alias: 'panel filter' }, query: { match: { status: 200 } } };
+    const { api, Component: PanelComponent } = await buildEmbeddable();
+    render(<PanelComponent />);
+
+    api.applySerializedState({
+      spec: {
+        format: 'hjson',
+        value: `{ data: { url: { "%type%": "esql", query: "${esql}" } } }`,
+      },
+      title: 'Initial title',
+    });
+    await waitFor(() => expect(mockVegaRequestHandler).toHaveBeenCalled());
+
+    query$.next({ language: 'kuery', query: 'response: 200' });
+    filters$.next([{ meta: { alias: 'dashboard filter' }, query: { match: { host: 'a' } } }]);
+    api.setQuery({ language: 'kuery', query: 'bytes > 1000' });
+    api.setFilters([panelFilter]);
+
+    await waitFor(() => {
+      expect(mockVegaRequestHandler).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          query: [
+            { language: 'kuery', query: 'response: 200' },
+            { language: 'kuery', query: 'bytes > 1000' },
+          ],
+          filters: [
+            { meta: { alias: 'dashboard filter' }, query: { match: { host: 'a' } } },
+            panelFilter,
+          ],
+        })
+      );
+    });
+    expect(api.esql$.getValue()).toEqual([{ esql }]);
+    expect(apiPublishesWritableUnifiedSearch(api)).toBe(true);
+    expect(api.serializeState()).toEqual(
+      expect.objectContaining({
+        query: { language: 'kql', expression: 'bytes > 1000' },
+        filters: expect.any(Array),
+      })
+    );
   });
 
   it('publishes ES|QL queries via esql$ for a single-source spec', async () => {

@@ -8,7 +8,11 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { Filter, Query } from '@kbn/es-query';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { VegaEmbeddableApi } from './vega_embeddable';
 import { VegaEditorFlyout } from './vega_editor_flyout';
 
 jest.mock('../components/vega_vis_editor', () => ({
@@ -30,10 +34,58 @@ jest.mock('../components/vega_vis_editor', () => ({
 }));
 
 const renderFlyout = ({
+  initialQuery,
+  initialFilters,
   isNewPanel = false,
 }: {
+  initialQuery?: Query;
+  initialFilters?: Filter[];
   isNewPanel?: boolean;
 } = {}) => {
+  const query$ = new BehaviorSubject<Query | undefined>(initialQuery);
+  const filters$ = new BehaviorSubject<Filter[] | undefined>(initialFilters);
+  const dataViews$ = new BehaviorSubject([]);
+  const api = {
+    query$,
+    filters$,
+    dataViews$,
+    setQuery: jest.fn((query?: Query) => query$.next(query)),
+    setFilters: jest.fn((filters?: Filter[]) => filters$.next(filters)),
+  } as unknown as VegaEmbeddableApi;
+
+  const SearchBar = ((props: unknown) => {
+    const { filters, onQuerySubmit, onFiltersUpdated } = props as {
+      filters: Filter[];
+      onQuerySubmit: (payload: { dateRange: unknown; query?: Query }) => void;
+      onFiltersUpdated: (filters: Filter[]) => void;
+    };
+
+    return (
+      <div>
+        <div>{`filtersLength:${filters.length}`}</div>
+        <button
+          onClick={() =>
+            onQuerySubmit({
+              dateRange: undefined,
+              query: { language: 'kuery', query: 'bytes > 1000' },
+            })
+          }
+        >
+          updateQuery
+        </button>
+        <button
+          onClick={() =>
+            onFiltersUpdated([
+              { meta: { alias: 'panel filter' }, query: { match: { status: 200 } } },
+            ])
+          }
+        >
+          updateFilters
+        </button>
+      </div>
+    );
+  }) as UnifiedSearchPublicPluginStart['ui']['SearchBar'];
+
   const closeFlyout = jest.fn();
   const onPreview = jest.fn();
   const onRevert = jest.fn();
@@ -41,9 +93,11 @@ const renderFlyout = ({
 
   const view = render(
     <VegaEditorFlyout
+      api={api}
       ariaLabelledBy="vegaEditorTitle"
       closeFlyout={closeFlyout}
       initialSpec={{ format: 'hjson', value: '{ mark: point }' }}
+      SearchBar={SearchBar}
       isNewPanel={isNewPanel}
       onPreview={onPreview}
       onRevert={onRevert}
@@ -51,7 +105,7 @@ const renderFlyout = ({
     />
   );
 
-  return { closeFlyout, onPreview, onRevert, onSave, view };
+  return { api, closeFlyout, onPreview, onRevert, onSave, view };
 };
 
 describe('VegaEditorFlyout', () => {
@@ -102,5 +156,27 @@ describe('VegaEditorFlyout', () => {
     view.unmount();
 
     expect(onRevert).toHaveBeenCalledTimes(1);
+  });
+
+  it('applies search changes live and enables saving for them', async () => {
+    const { api } = renderFlyout();
+
+    fireEvent.click(await screen.findByText('updateQuery'));
+    fireEvent.click(screen.getByText('updateFilters'));
+
+    await waitFor(() => {
+      expect(api.setQuery).toHaveBeenCalledWith({ language: 'kuery', query: 'bytes > 1000' });
+      expect(api.setFilters).toHaveBeenCalledWith([
+        { meta: { alias: 'panel filter' }, query: { match: { status: 200 } } },
+      ]);
+    });
+
+    expect(screen.getByRole('button', { name: 'Apply and close' })).toBeEnabled();
+  });
+
+  it('passes an empty filters array to the search bar when the panel has no filters', async () => {
+    renderFlyout();
+
+    expect(await screen.findByText('filtersLength:0')).toBeInTheDocument();
   });
 });

@@ -10,6 +10,8 @@
 import React, { Suspense, lazy, useEffect, useRef } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
+import { fromStoredFilters, toStoredFilters } from '@kbn/as-code-filters-transforms';
+import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
@@ -18,6 +20,7 @@ import type {
   EmbeddablePublicDefinition,
   HasDrilldowns,
 } from '@kbn/embeddable-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import {
   BehaviorSubject,
   combineLatest,
@@ -28,7 +31,13 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
-import type { AggregateQuery, Query } from '@kbn/es-query';
+import {
+  FilterStateStore,
+  isOfQueryType,
+  type AggregateQuery,
+  type Filter,
+  type Query,
+} from '@kbn/es-query';
 import { parse } from 'hjson';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
@@ -37,6 +46,7 @@ import {
   areTriggersDisabled,
   fetch$,
   getInheritedViewMode,
+  initializeStateManager,
   initializeStateApi,
   initializeTimeRangeManager,
   initializeTitleManager,
@@ -48,6 +58,7 @@ import {
   type PublishesWritableDescription,
   type PublishesWritableTitle,
   type PublishesEsql,
+  type PublishesWritableUnifiedSearch,
   type PublishesProjectRoutingOverrides,
   type PublishesRendered,
   type HasSupportedTriggers,
@@ -91,6 +102,47 @@ interface VegaRenderInput {
   visData: VegaParser;
 }
 
+const isAppliedQuery = (query: Query | AggregateQuery | undefined): query is Query => {
+  if (!isOfQueryType(query)) return false;
+  if (typeof query.query === 'string') return query.query.trim().length > 0;
+  return Object.keys(query.query).length > 0;
+};
+
+/** Parent dashboard search plus a non-empty panel query and panel filters. */
+const mergePanelSearch = (
+  parentQuery: Query | AggregateQuery | undefined,
+  parentFilters: Filter[] | undefined,
+  panelQuery: Query | AggregateQuery | undefined,
+  panelFilters: Filter[] | undefined
+): { query: Query | Query[] | undefined; filters: Filter[] } => {
+  const filters = [...(parentFilters ?? []), ...(panelFilters ?? [])];
+  if (!isAppliedQuery(panelQuery)) {
+    return { query: parentQuery as Query | undefined, filters };
+  }
+  if (isOfQueryType(parentQuery)) {
+    return { query: [parentQuery, panelQuery], filters };
+  }
+  return { query: panelQuery, filters };
+};
+
+const toUnifiedSearchFilters = (filters: VegaByValueState['filters']): Filter[] | undefined => {
+  return toStoredFilters(filters)?.map((filter): Filter => {
+    if (filter.$state) {
+      return {
+        ...filter,
+        $state: {
+          store: filter.$state.store ?? FilterStateStore.APP_STATE,
+        },
+      };
+    }
+
+    return {
+      ...filter,
+      $state: undefined,
+    };
+  });
+};
+
 /**
  * By-value state for the dedicated Dashboard Vega panel.
  *
@@ -108,6 +160,7 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
   PublishesWritableDescription &
   PublishesWritableTitle &
   PublishesEsql &
+  PublishesWritableUnifiedSearch &
   PublishesProjectRoutingOverrides &
   PublishesDataViews &
   PublishesRendered & {
@@ -121,6 +174,7 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
 
 interface VegaEmbeddableDependencies {
   uiActions: Pick<VegaPluginStartDependencies['uiActions'], 'executeTriggerActions'>;
+  SearchBar: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
   visualizationDependencies: VegaVisualizationDependencies;
 }
 
@@ -140,6 +194,23 @@ export const vegaEmbeddableFactory = (
     const timeRangeManager = initializeTimeRangeManager(initialState);
     const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
     const spec$ = new BehaviorSubject(initialState.spec);
+    const panelSearchStateManager = initializeStateManager<{
+      query?: Query | AggregateQuery;
+      filters?: Filter[];
+    }>(
+      {
+        query: toStoredQuery(initialState.query),
+        filters: toUnifiedSearchFilters(initialState.filters),
+      },
+      {
+        query: undefined,
+        filters: undefined,
+      },
+      {
+        query: 'deepEquality',
+        filters: 'deepEquality',
+      }
+    );
     const esql$ = new BehaviorSubject<AggregateQuery[]>([]);
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(undefined);
@@ -181,12 +252,18 @@ export const vegaEmbeddableFactory = (
     const stateApi = initializeStateApi<VegaByValueState>({
       uuid,
       parentApi,
-      serializeState: () => ({
-        ...titleManager.getLatestState(),
-        ...timeRangeManager.getLatestState(),
-        ...drilldownsManager.getLatestState(),
-        spec: spec$.getValue(),
-      }),
+      serializeState: () => {
+        const panelQuery = panelSearchStateManager.api.query$.getValue();
+
+        return {
+          ...titleManager.getLatestState(),
+          ...timeRangeManager.getLatestState(),
+          ...drilldownsManager.getLatestState(),
+          query: isOfQueryType(panelQuery) ? toAsCodeQuery(panelQuery) : undefined,
+          filters: fromStoredFilters(panelSearchStateManager.api.filters$.getValue()),
+          spec: spec$.getValue(),
+        };
+      },
       anyStateChange$: merge(
         titleManager.anyStateChange$,
         timeRangeManager.anyStateChange$,
@@ -194,18 +271,25 @@ export const vegaEmbeddableFactory = (
         spec$.pipe(
           skip(1),
           map((): void => undefined)
-        )
+        ),
+        panelSearchStateManager.anyStateChange$
       ),
       getComparators: () => ({
         ...titleComparators,
         ...timeRangeComparators,
         ...drilldownsManager.comparators,
+        query: 'deepEquality',
+        filters: 'deepEquality',
         spec: 'deepEquality',
       }),
       applySerializedState: (nextState) => {
         titleManager.reinitializeState(nextState);
         timeRangeManager.reinitializeState(nextState);
         drilldownsManager.reinitializeState(nextState);
+        panelSearchStateManager.reinitializeState({
+          query: toStoredQuery(nextState.query),
+          filters: toUnifiedSearchFilters(nextState.filters),
+        });
         spec$.next(nextState.spec);
       },
     });
@@ -220,9 +304,12 @@ export const vegaEmbeddableFactory = (
       isNewPanel?: boolean;
     }) => {
       const initialSpec = spec$.getValue();
+      const initialSearch = panelSearchStateManager.getLatestState();
       return (
         <VegaEditorFlyout
+          api={api}
           ariaLabelledBy={ariaLabelledBy}
+          SearchBar={deps.SearchBar}
           closeFlyout={closeFlyout}
           initialSpec={initialSpec}
           isNewPanel={isNewPanel}
@@ -233,6 +320,7 @@ export const vegaEmbeddableFactory = (
               parentApi.removePanel(api.uuid);
             } else {
               spec$.next(initialSpec);
+              panelSearchStateManager.reinitializeState(initialSearch);
             }
           }}
         />
@@ -243,6 +331,7 @@ export const vegaEmbeddableFactory = (
       ...titleManager.api,
       ...timeRangeManager.api,
       ...drilldownsManager.api,
+      ...panelSearchStateManager.api,
       ...stateApi,
       blockingError$,
       dataLoading$,
@@ -301,9 +390,14 @@ export const vegaEmbeddableFactory = (
       rendered$.next(true);
     };
 
-    const fetchSubscription = combineLatest([spec$, fetch$(api)])
+    const fetchSubscription = combineLatest([
+      spec$,
+      fetch$(api),
+      panelSearchStateManager.api.query$,
+      panelSearchStateManager.api.filters$,
+    ])
       .pipe(
-        switchMap(async ([spec, data]) => {
+        switchMap(async ([spec, data, panelQuery, panelFilters]) => {
           abortController.abort();
           abortController = new AbortController();
           const { signal } = abortController;
@@ -327,10 +421,16 @@ export const vegaEmbeddableFactory = (
               abortSignal: signal,
               inspectorAdapters,
             });
+            const panelSearch = mergePanelSearch(
+              data.query,
+              data.filters,
+              panelQuery,
+              panelFilters
+            );
             const visData = await requestHandler({
               timeRange,
-              query: data.query as Query,
-              filters: data.filters,
+              query: panelSearch.query,
+              filters: panelSearch.filters,
               visParams: {
                 spec: spec.format === 'json' ? JSON.stringify(spec.value) : spec.value,
               },

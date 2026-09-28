@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -21,7 +21,22 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { QueryState } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { isOfQueryType, type Query } from '@kbn/es-query';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { isEqual } from 'lodash';
 import type { VegaByValueState } from '../../server';
+import type { VegaEmbeddableApi } from './vega_embeddable';
+
+type PanelSearch = Omit<QueryState, 'time' | 'refreshInterval'>;
+
+const emptyQuery: Query = { language: 'kuery', query: '' };
+
+const searchBarCss = css({
+  flexShrink: 0,
+});
 
 const bodyCss = css({
   display: 'flex',
@@ -37,6 +52,9 @@ const editorContainerCss = css({
   minHeight: 0,
   overflow: 'hidden',
 });
+
+const sameSearch = (left: PanelSearch, right: PanelSearch): boolean =>
+  isEqual(left.query, right.query) && isEqual(left.filters ?? [], right.filters ?? []);
 
 const VegaSpecEditor = lazy(() =>
   import('../components/vega_vis_editor').then((module) => ({ default: module.VegaSpecEditor }))
@@ -57,14 +75,18 @@ const specFromEditor = (
 };
 
 export const VegaEditorFlyout = ({
+  api,
   ariaLabelledBy,
   closeFlyout,
   initialSpec,
+  SearchBar,
   isNewPanel = false,
   onPreview,
   onRevert,
   onSave,
 }: {
+  api: VegaEmbeddableApi;
+  SearchBar: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
   ariaLabelledBy: string;
   closeFlyout: () => void;
   initialSpec: VegaByValueState['spec'];
@@ -78,8 +100,28 @@ export const VegaEditorFlyout = ({
   const [spec, setSpec] = useState(initialEditorValue);
   const [previewedSpec, setPreviewedSpec] = useState(initialEditorValue);
   const [format, setFormat] = useState<VegaByValueState['spec']['format']>(initialSpec.format);
+  const [publishedQuery, publishedFilters, publishedDataViews] = useBatchedPublishingSubjects(
+    api.query$,
+    api.filters$,
+    api.dataViews$
+  );
+  const dataViews = publishedDataViews ?? [];
+  const search = useMemo<PanelSearch>(
+    () => ({
+      query: isOfQueryType(publishedQuery) ? publishedQuery : undefined,
+      filters: publishedFilters,
+    }),
+    [publishedFilters, publishedQuery]
+  );
+  const initialSearch = useMemo<PanelSearch>(
+    () => ({
+      query: isOfQueryType(api.query$.getValue()) ? api.query$.getValue() : undefined,
+      filters: api.filters$.getValue(),
+    }),
+    [api]
+  );
   const canPreview = spec !== previewedSpec;
-  const canSave = isNewPanel || spec !== initialEditorValue;
+  const canSave = isNewPanel || spec !== initialEditorValue || !sameSearch(search, initialSearch);
 
   // Revert on unmount unless the user saved. A ref holds the latest callback without re-arming the
   // unmount effect; `saved` suppresses the revert after a successful Save.
@@ -99,6 +141,14 @@ export const VegaEditorFlyout = ({
     setPreviewedSpec(spec);
   };
 
+  const applyQuery = (next: Query | undefined) => {
+    if (!next || typeof next.query !== 'string' || next.query.trim() === '') {
+      api.setQuery(undefined);
+      return;
+    }
+    api.setQuery({ language: next.language, query: next.query });
+  };
+
   const handleSave = () => {
     saved.current = true;
     onSave(specFromEditor(spec, format));
@@ -113,6 +163,30 @@ export const VegaEditorFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="editorFlyoutBody">
         <div css={bodyCss}>
+          <div css={searchBarCss}>
+            <SearchBar
+              appName="vegaEditorFlyout"
+              query={search.query && isOfQueryType(search.query) ? search.query : emptyQuery}
+              filters={search.filters ?? []}
+              indexPatterns={dataViews as DataView[]}
+              showQueryInput
+              showFilterBar
+              showDatePicker={false}
+              showSubmitButton
+              showSavedQueryControls={false}
+              isAutoRefreshDisabled
+              useDefaultBehaviors={false}
+              disableSubscribingToGlobalDataServices
+              onQuerySubmit={({ query: next }) => {
+                applyQuery(next && isOfQueryType(next) ? next : undefined);
+              }}
+              onFiltersUpdated={(next) => {
+                api.setFilters(next.length > 0 ? next : undefined);
+              }}
+              displayStyle="inPage"
+              dataTestSubj="editorFlyoutSearchBar"
+            />
+          </div>
           <div css={editorContainerCss}>
             <Suspense
               fallback={
