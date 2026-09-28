@@ -59,6 +59,9 @@ type FetcherOptions = NonNullable<z.infer<typeof FetcherConfigSchema>> & {
  */
 const KIBANA_STEP_RESPONSE_HEADERS_TIMEOUT_MS = 300_000;
 
+/** Error bodies are truncated, not size-limited by `max-step-size`, so failures keep their status. */
+const KIBANA_STEP_ERROR_BODY_MAX_BYTES = 1024 * 1024;
+
 /**
  * Describes a single field in a multipart/form-data upload.
  * Used by the `form_data` param of `kibana.request` steps.
@@ -282,6 +285,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
         query: requestConfig.query,
         headers: requestConfig.headers,
         maxResponseBytes: this.getMaxResponseBytes(),
+        maxErrorBodyBytes: KIBANA_STEP_ERROR_BODY_MAX_BYTES,
         target,
         signal: this.stepExecutionRuntime.abortController.signal,
         timeout: KIBANA_STEP_RESPONSE_HEADERS_TIMEOUT_MS,
@@ -609,7 +613,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
 
     if (!response.ok) {
       const errorBody = await this.readStreamWithLimit(response, {
-        maxBytes: 1024 * 1024,
+        maxBytes: KIBANA_STEP_ERROR_BODY_MAX_BYTES,
         onExceed: 'truncate',
       });
       throw new Error(`HTTP ${response.status}: ${errorBody}`);

@@ -386,6 +386,33 @@ describe('KibanaActionStepImpl', () => {
       expect(headers).not.toHaveProperty('Cookie');
       expect(headers['x-custom']).toBe('kept');
     });
+
+    it('fails with the HTTP status and a truncated message when an error body exceeds max-step-size', async () => {
+      const chunks = ['E'.repeat(1024), 'E'.repeat(2 * 1024 * 1024)].map((chunk) =>
+        new TextEncoder().encode(chunk)
+      );
+      selfFetch.mockImplementation(async () => ({
+        request: { url: 'http://localhost:5601/api/broken' },
+        response: {
+          ok: false,
+          status: 500,
+          headers: new Headers({ 'content-type': 'text/plain' }),
+          body: {
+            getReader: () => ({
+              read: async () =>
+                chunks.length > 0 ? { done: false, value: chunks.shift() } : { done: true },
+              cancel: jest.fn(),
+              releaseLock: jest.fn(),
+            }),
+          },
+        },
+      }));
+      const result = await (
+        createStep({ request: { method: 'GET', path: '/api/broken' } }) as any
+      )._run();
+      expect(result.error.type).toBe('KibanaApiCallError');
+      expect(result.error.message).toBe(`HTTP 500: ${'E'.repeat(1024)}... [truncated]`);
+    });
   });
 
   describe('legacy fetch (kibana.request flag off)', () => {

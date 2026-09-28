@@ -625,6 +625,31 @@ describe('callKibanaApi', () => {
     ).rejects.toBeInstanceOf(CallKibanaApiResponseTooLargeError);
   });
 
+  it('truncates an error body above maxErrorBodyBytes and keeps the HTTP status', async () => {
+    const encoder = new TextEncoder();
+    const chunks = [encoder.encode('{"message":"'), encoder.encode(`${'x'.repeat(2048)}"}`)];
+    const response = createMockResponse({ body: '', status: 500 });
+    (response as { body: unknown }).body = {
+      getReader: () => ({
+        read: async () =>
+          chunks.length > 0 ? { done: false, value: chunks.shift() } : { done: true },
+        releaseLock: () => {},
+        cancel: jest.fn(),
+      }),
+    };
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(response));
+
+    const error = await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart(), maxResponseBytes: 256 },
+      { method: 'GET', path: '/api/boom', maxErrorBodyBytes: 16 }
+    ).catch((err) => err);
+
+    expect(error).toBeInstanceOf(KibanaApiCallError);
+    expect(error.status).toBe(500);
+    expect(error.body).toBe('{"message":"... [truncated]');
+    expect(error.message).toBe('HTTP 500: {"message":"... [truncated]');
+  });
+
   it('normalizes to type/message/details:{status} via toExecutionError, never body/headers (ES guard)', async () => {
     mockSelfFetch.mockResolvedValue(
       mockSelfResponse(

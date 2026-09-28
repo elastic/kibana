@@ -93,6 +93,11 @@ export interface CallKibanaApiParams {
   timeout?: number;
   /** Optional per-call response size cap. */
   maxResponseBytes?: number;
+  /**
+   * Byte cap for non-2xx bodies. When set, a larger error body is truncated to a string ending in
+   * `... [truncated]` instead of failing the call. Defaults to `maxResponseBytes`.
+   */
+  maxErrorBodyBytes?: number;
 }
 
 export interface CallKibanaApiResult<T = unknown> {
@@ -189,7 +194,8 @@ const headersToRecord = (headers: Headers | undefined): Record<string, string> =
 
 const parseResponseBody = async (
   response: Response,
-  maxResponseBytes: number
+  maxResponseBytes: number,
+  onExceed: 'throw' | 'truncate' = 'throw'
 ): Promise<unknown> => {
   if (response.status === 204 || response.status === 304) {
     return {};
@@ -200,6 +206,9 @@ const parseResponseBody = async (
   const contentType = response.headers?.get('content-type') ?? null;
   const { buffer, truncated } = await readResponseStream(response, maxResponseBytes);
   if (truncated) {
+    if (onExceed === 'truncate') {
+      return `${buffer.toString('utf-8')}... [truncated]`;
+    }
     throw new CallKibanaApiResponseTooLargeError(maxResponseBytes);
   }
   if (buffer.byteLength === 0) {
@@ -344,10 +353,12 @@ export async function callKibanaApi<T = unknown>(
   // `Response.ok` is true only for 2xx; treat 304 Not Modified as a successful response with no body
   // so callers using conditional GETs see the same shape as a 204.
   if (!response.ok && response.status !== 304) {
-    // Parse the error body via the same path (and size limit) as success so step authors can
-    // recover a structured partial-success response without string-parsing the message and
-    // without the previous separate 1 MB cap.
-    const errorBody = await parseResponseBody(response, maxResponseBytes);
+    // Parse the error body via the same path as success so step authors can recover a structured
+    // partial-success response without string-parsing the message.
+    const errorBody =
+      params.maxErrorBodyBytes === undefined
+        ? await parseResponseBody(response, maxResponseBytes)
+        : await parseResponseBody(response, params.maxErrorBodyBytes, 'truncate');
     throw new KibanaApiCallError({
       status: response.status,
       headers: headersToRecord(response.headers),
