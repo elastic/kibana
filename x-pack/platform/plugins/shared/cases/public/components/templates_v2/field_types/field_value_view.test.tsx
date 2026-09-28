@@ -87,6 +87,98 @@ describe('FieldValueView', () => {
     expect(onEdit).not.toHaveBeenCalled();
   });
 
+  it('opens edit mode when clicking the markdown content area outside a link', async () => {
+    const onEdit = jest.fn();
+
+    renderWithTestingProviders(
+      <FieldValueView
+        field={{
+          name: 'notes',
+          label: 'Notes',
+          control: FieldType.TEXTAREA,
+          type: 'keyword',
+          metadata: { markdown: true },
+        }}
+        value="plain prose without links"
+        isRequired={false}
+        isRequiredOnClose={false}
+        onEdit={onEdit}
+      />
+    );
+
+    await userEvent.click(screen.getByText('plain prose without links'));
+    expect(onEdit).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens edit mode when the row is activated with Enter', async () => {
+    const onEdit = jest.fn();
+
+    renderWithTestingProviders(
+      <FieldValueView
+        field={{
+          name: 'investigation_notes',
+          label: 'Investigation notes',
+          control: FieldType.INPUT_TEXT,
+          type: 'keyword',
+        }}
+        value="some value"
+        isRequired={false}
+        isRequiredOnClose={false}
+        onEdit={onEdit}
+      />
+    );
+
+    screen.getByRole('button', { name: 'Edit Investigation notes' }).focus();
+    await userEvent.keyboard('{Enter}');
+    expect(onEdit).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens edit mode when the row is activated with Space', async () => {
+    const onEdit = jest.fn();
+
+    renderWithTestingProviders(
+      <FieldValueView
+        field={{
+          name: 'investigation_notes',
+          label: 'Investigation notes',
+          control: FieldType.INPUT_TEXT,
+          type: 'keyword',
+        }}
+        value="some value"
+        isRequired={false}
+        isRequiredOnClose={false}
+        onEdit={onEdit}
+      />
+    );
+
+    screen.getByRole('button', { name: 'Edit Investigation notes' }).focus();
+    await userEvent.keyboard(' ');
+    expect(onEdit).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses a div element for the row, not a native button, so nested links are valid HTML', () => {
+    const onEdit = jest.fn();
+
+    renderWithTestingProviders(
+      <FieldValueView
+        field={{
+          name: 'notes',
+          label: 'Notes',
+          control: FieldType.TEXTAREA,
+          type: 'keyword',
+          metadata: { markdown: true },
+        }}
+        value="[Visit Elastic](https://elastic.co)"
+        isRequired={false}
+        isRequiredOnClose={false}
+        onEdit={onEdit}
+      />
+    );
+
+    const row = screen.getByRole('button', { name: 'Edit Notes' });
+    expect(row.tagName).toBe('DIV');
+  });
+
   it('renders a plain textarea value as text without markdown parsing', () => {
     renderWithTestingProviders(
       <FieldValueView

@@ -244,9 +244,22 @@ export const FieldValueRow: React.FC<FieldValueRowProps> = ({
   }
 
   return (
-    <button
-      type="button"
-      onClick={onEdit}
+    // div + role="button" instead of a native <button> so nested <a> links are valid HTML.
+    // The click/keydown handlers skip anchor targets so links navigate without opening edit mode.
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest('a')) return;
+        onEdit();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          if ((e.target as HTMLElement).closest('a')) return;
+          e.preventDefault();
+          onEdit();
+        }
+      }}
       aria-label={i18n.EDIT_FIELD_LABEL(label)}
       data-test-subj={`template-field-edit-${name}`}
       css={[styles.row, styles.interactiveRow]}
@@ -254,7 +267,7 @@ export const FieldValueRow: React.FC<FieldValueRowProps> = ({
       <span data-test-subj={`template-field-value-${name}`} css={{ display: 'contents' }}>
         {content}
       </span>
-    </button>
+    </div>
   );
 };
 
@@ -294,24 +307,9 @@ export const FieldValueView: React.FC<FieldValueViewProps> = ({
     >
       {valueText !== undefined ? (
         isMarkdownTextarea ? (
-          // Stop link clicks from bubbling to the row button so the link navigates normally.
-          // Non-link clicks still reach the button and open edit mode.
-          <div
-            onClick={(e) => {
-              if ((e.target as HTMLElement).closest('a')) {
-                e.stopPropagation();
-              }
-            }}
-            onKeyDown={(e) => {
-              if ((e.key === 'Enter' || e.key === ' ') && (e.target as HTMLElement).closest('a')) {
-                e.stopPropagation();
-              }
-            }}
-          >
-            <EuiMarkdownFormat css={proseCss} textSize="s">
-              {valueText}
-            </EuiMarkdownFormat>
-          </div>
+          <EuiMarkdownFormat css={proseCss} textSize="s">
+            {valueText}
+          </EuiMarkdownFormat>
         ) : (
           valueText
         )
