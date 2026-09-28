@@ -261,6 +261,16 @@ describe('loadSourceForMutation', () => {
     expect(access.allowed).toBe(true);
   });
 
+  it('denies mutation of a global catalog source from every space', async () => {
+    const access = await loadSourceForMutation({
+      esClient: globalSource('*') as never,
+      sourceId: 'rss:mandiant-research',
+      spaceId: 'default',
+    });
+
+    expect(access).toEqual({ allowed: false });
+  });
+
   // A 403 told the caller a source with this id exists in some other space, which
   // is an existence oracle across a boundary the rest of the feature treats as a
   // security boundary. Both outcomes have to look the same.

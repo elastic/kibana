@@ -22,6 +22,7 @@ import {
   workerNameForCards,
   supervisedWarnForWorker,
   type AutonomyLevelCard,
+  type AutonomyLevelCardsCopy,
   type LevelCardFactPart,
 } from './autonomy_level_cards_data';
 import * as i18n from '../settings_translations';
@@ -135,6 +136,21 @@ function LevelCardBody({ card }: { card: AutonomyLevelCard }) {
 }
 
 /**
+ * The single level a Worker offers, or null when it offers a choice. The server's projection is
+ * consulted before the card copy: the declaration is what decides whether there is a choice, and a
+ * Worker the copy map does not know still has one.
+ */
+const resolveFixedLevel = (
+  allowedAutonomyLevels: readonly WatchAutonomyLevel[] | undefined,
+  cards: AutonomyLevelCardsCopy | null
+): WatchAutonomyLevel | null => {
+  if (allowedAutonomyLevels?.length === 1) {
+    return allowedAutonomyLevels[0];
+  }
+  return cards?.levels.length === 1 ? cards.levels[0].level : null;
+};
+
+/**
  * Autonomy picker: EuiCheckableCard radios so level meanings stay visible before selection.
  * Selecting the highest level shows the supervised warning callout under the cards.
  */
@@ -156,6 +172,36 @@ export const AutonomyLevelControl: React.FC<AutonomyLevelControlProps> = ({
     return levels.length > 0 ? { ...allCards, levels } : null;
   }, [allCards, allowedAutonomyLevels]);
 
+  // One allowed level is a fact about the Worker, not a choice — render it as a fixed value
+  // rather than a radio the analyst can click but never change.
+  const fixedLevel = resolveFixedLevel(allowedAutonomyLevels, cards);
+  if (fixedLevel) {
+    const fixedCard = cards?.levels.find(({ level }) => level === fixedLevel) ?? null;
+    return (
+      <div data-test-subj="alertZeroAutonomyLevelControl">
+        <EuiCheckableCard
+          id={`${groupName}-${fixedLevel}`}
+          name={groupName}
+          checkableType="radio"
+          label={i18n.autonomyLevelName(fixedLevel)}
+          labelProps={{ 'data-test-subj': 'alertZeroAutonomyFixedLevel' }}
+          // The only radio in its group, so it is checked and stays checked. React routes a
+          // radio's `onChange` off its click event, so clicking an already-checked one still calls
+          // the handler — hence the no-op rather than `onChange`, which would patch the Worker
+          // with the level it already has. Left enabled rather than disabled so the level reads at
+          // full contrast: it is the Worker's actual setting, not one withheld from the analyst.
+          checked={true}
+          disabled={true}
+          onChange={() => {}}
+          data-test-subj={`alertZeroAutonomyCard-${fixedLevel}`}
+        >
+          {/* The same explanation the level carries inside a choice. */}
+          {fixedCard ? <LevelCardBody card={fixedCard} /> : null}
+        </EuiCheckableCard>
+      </div>
+    );
+  }
+
   if (!cards) {
     return (
       <EuiText size="s" color="subdued">
@@ -166,20 +212,6 @@ export const AutonomyLevelControl: React.FC<AutonomyLevelControlProps> = ({
 
   const levels = cards.levels.map((card) => card.level);
   const selectedLevel = levels.includes(current) ? current : levels[0];
-
-  // One allowed level is a fact about the Worker, not a choice — render it as a fixed value
-  // rather than a radio the analyst can click but never change.
-  if (levels.length === 1) {
-    return (
-      <EuiText size="s" color="subdued">
-        <p data-test-subj="alertZeroAutonomyLevelControl">
-          <span data-test-subj="alertZeroAutonomyFixedLevel">
-            {i18n.autonomyLevelName(selectedLevel)}
-          </span>
-        </p>
-      </EuiText>
-    );
-  }
   const isHighest =
     levels.length > 1 &&
     selectedLevel === levels[levels.length - 1] &&

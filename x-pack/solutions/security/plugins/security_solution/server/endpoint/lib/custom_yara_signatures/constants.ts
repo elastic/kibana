@@ -15,13 +15,6 @@
 export const MAX_YARA_RULE_CONTENT_BYTE_LENGTH = 32766;
 
 /**
- * Maximum length of a YARA rule identifier. Kept at 95 characters, because in ManifestManager
- * we're adding 1 underscore plus 32 unique characters to the identifier to make it unique,
- * which is 128 characters in total, which equals to the limit by the YARA engine.
- */
-export const MAXIMUM_RULE_IDENTIFIER_LENGTH = 95;
-
-/**
  * Safe client-facing message when libyara/WASM throws. Do not interpolate engine internals.
  */
 export const YARA_ENGINE_INTERNAL_ERROR_MESSAGE =
