@@ -78,7 +78,7 @@ export const TraceSelector = ({ value, onChange, ebtElement }: TraceSelectorProp
           })}
         >
           {i18n.translate('xpack.contextEngine.traceSelector.genAiLibrariesToggle', {
-            defaultMessage: 'GenAI libraries',
+            defaultMessage: 'External agents',
           })}
         </EuiButton>
       </EuiButtonGroup>

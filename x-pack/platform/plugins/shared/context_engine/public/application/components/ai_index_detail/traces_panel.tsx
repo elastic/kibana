@@ -37,6 +37,7 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
     aiIndex,
     onSaved,
   });
+  const hasTrace = currentTrace !== undefined;
 
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="contextTracesPanel">
@@ -62,22 +63,41 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
         </EuiFlexItem>
         {!editing && !isManaged && !isLoading && (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="pencil"
-              onClick={startEditing}
-              isDisabled={aiIndex === undefined}
-              data-test-subj="contextEditTracesButton"
-              {...getEbtProps({
-                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageTracesPanel,
-                action: CONTEXT_ENGINE_UI_EBT.action.traces.EDIT,
-              })}
-            >
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.traces.editButton"
-                defaultMessage="Edit"
-              />
-            </EuiButtonEmpty>
+            {hasTrace ? (
+              <EuiButtonEmpty
+                size="s"
+                iconType="pencil"
+                onClick={startEditing}
+                isDisabled={aiIndex === undefined}
+                data-test-subj="contextEditTracesButton"
+                {...getEbtProps({
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageTracesPanel,
+                  action: CONTEXT_ENGINE_UI_EBT.action.traces.EDIT,
+                })}
+              >
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.traces.editButton"
+                  defaultMessage="Edit"
+                />
+              </EuiButtonEmpty>
+            ) : (
+              <EuiButtonEmpty
+                size="s"
+                iconType="plusCircle"
+                onClick={startEditing}
+                isDisabled={aiIndex === undefined}
+                data-test-subj="contextAddTracesButton"
+                {...getEbtProps({
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageTracesPanel,
+                  action: CONTEXT_ENGINE_UI_EBT.action.traces.EDIT,
+                })}
+              >
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.traces.addButton"
+                  defaultMessage="Add traces"
+                />
+              </EuiButtonEmpty>
+            )}
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

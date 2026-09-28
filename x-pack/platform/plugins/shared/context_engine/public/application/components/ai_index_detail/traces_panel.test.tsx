@@ -81,6 +81,8 @@ describe('TracesPanel', () => {
 
     expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
     expect(screen.getByText(PICK_HINT)).toBeInTheDocument();
+    expect(screen.getByTestId('contextAddTracesButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextEditTracesButton')).not.toBeInTheDocument();
   });
 
   it('renders read-only empty fallback for managed AI indexes', () => {
@@ -163,7 +165,7 @@ describe('TracesPanel', () => {
     expect(screen.queryByTestId('contextEditTracesButton')).not.toBeInTheDocument();
   });
 
-  it('treats an esql trace as empty, shows Edit, and replaces it on save', async () => {
+  it('treats an esql trace as empty, shows Add traces, and replaces it on save', async () => {
     const onSaved = jest.fn();
     const testServices = coreMock.createStart();
     testServices.http.put.mockResolvedValue({ status: 'updated' });
@@ -182,9 +184,9 @@ describe('TracesPanel', () => {
     );
 
     expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
-    expect(screen.getByTestId('contextEditTracesButton')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAddTracesButton')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('contextEditTracesButton'));
+    fireEvent.click(screen.getByTestId('contextAddTracesButton'));
 
     fireEvent.change(screen.getByTestId('contextTraceAgentComboBox').querySelector('input')!, {
       target: { value: 'Loyalty' },
@@ -222,7 +224,7 @@ describe('TracesPanel', () => {
       testServices
     );
 
-    fireEvent.click(screen.getByTestId('contextEditTracesButton'));
+    fireEvent.click(screen.getByTestId('contextAddTracesButton'));
 
     fireEvent.change(screen.getByTestId('contextTraceAgentComboBox').querySelector('input')!, {
       target: { value: 'Loyalty' },
@@ -465,7 +467,7 @@ describe('TracesPanel', () => {
       <TracesPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
     );
 
-    fireEvent.click(screen.getByTestId('contextEditTracesButton'));
+    fireEvent.click(screen.getByTestId('contextAddTracesButton'));
 
     expect(screen.getByTestId('contextTracesSaveButton')).not.toBeDisabled();
   });
@@ -493,7 +495,7 @@ describe('TracesPanel', () => {
 
     renderWithProviders(<PanelWithRefetch />, testServices);
 
-    fireEvent.click(screen.getByTestId('contextEditTracesButton'));
+    fireEvent.click(screen.getByTestId('contextAddTracesButton'));
 
     fireEvent.change(screen.getByTestId('contextTraceAgentComboBox').querySelector('input')!, {
       target: { value: 'Loyalty' },

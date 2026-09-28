@@ -447,7 +447,7 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
     expect(services.http.get).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByTestId('contextEditTracesButton'));
+    fireEvent.click(screen.getByTestId('contextAddTracesButton'));
 
     fireEvent.change(screen.getByTestId('contextTraceAgentComboBox').querySelector('input')!, {
       target: { value: 'Loyalty' },
