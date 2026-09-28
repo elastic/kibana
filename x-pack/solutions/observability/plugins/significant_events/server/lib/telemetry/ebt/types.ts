@@ -16,8 +16,8 @@ interface KnowledgeIndicatorQueriesGeneratedProps {
   cached_tokens_used: number;
   duration_ms: number;
   source_id: string;
-  tool_usage: SignificantEventsToolUsage;
-  external_content_tool_continuations: number;
+  tool_usage?: SignificantEventsToolUsage;
+  external_content_tool_continuations?: number;
 }
 
 interface KnowledgeIndicatorFeaturesIdentifiedProps {

@@ -631,14 +631,7 @@ const generateQueriesRoute = createServerRoute({
     telemetry,
   }): Promise<SignificantEventsQueriesGenerationResult & { connectorId: string }> => {
     const scopedClients = await getScopedClients({ request });
-    const {
-      sourcesClient,
-      inferenceClient,
-      scopedClusterClient,
-      streamDataEsClient,
-      licensing,
-      tuningConfig,
-    } = scopedClients;
+    const { sourcesClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
@@ -663,7 +656,6 @@ const generateQueriesRoute = createServerRoute({
         runId: resolvedRunId,
       },
       {
-        inferenceClient,
         kiClient,
         agentBuilder: server.agentBuilder,
         searchInferenceEndpoints: server.searchInferenceEndpoints,
