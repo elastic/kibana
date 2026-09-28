@@ -2023,6 +2023,12 @@ importers:
       '@kbn/enterprise-search-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/search/plugins/enterprise_search
+      '@kbn/entity-access-control':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-entity-access-control
+      '@kbn/entity-access-control-ui':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-entity-access-control-ui
       '@kbn/entity-store':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/entity_store
@@ -2073,7 +2079,7 @@ importers:
         version: link:src/platform/packages/private/kbn-esql-editor
       '@kbn/esql-language':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-language
+        version: link:src/platform/packages/shared/esql/kbn-esql-language
       '@kbn/esql-language-inspector-plugin':
         specifier: workspace:*
         version: link:examples/esql_ast_inspector
@@ -2082,13 +2088,13 @@ importers:
         version: link:src/platform/packages/shared/kbn-esql-resource-browser
       '@kbn/esql-server-utils':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-server-utils
+        version: link:src/platform/packages/shared/esql/kbn-esql-server-utils
       '@kbn/esql-types':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-types
+        version: link:src/platform/packages/shared/esql/kbn-esql-types
       '@kbn/esql-utils':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-utils
+        version: link:src/platform/packages/shared/esql/kbn-esql-utils
       '@kbn/esql-ux-example-plugin':
         specifier: workspace:*
         version: link:examples/esql_ux_example
@@ -2380,9 +2386,6 @@ importers:
       '@kbn/index-management-shared-types':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/index-management/index_management_shared_types
-      '@kbn/index-patterns-test-plugin':
-        specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/index_patterns
       '@kbn/indices-metadata-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/indices_metadata
@@ -2454,7 +2457,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-interpreter
       '@kbn/investigation-output':
         specifier: workspace:*
-        version: link:x-pack/platform/packages/shared/kbn-investigation-output
+        version: link:x-pack/solutions/observability/packages/kbn-investigation-output
       '@kbn/io-ts-utils':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-io-ts-utils
@@ -2793,7 +2796,7 @@ importers:
         version: link:x-pack/platform/packages/shared/kbn-nightshift-ai
       '@kbn/nightshift-decision-trees':
         specifier: workspace:*
-        version: link:x-pack/platform/packages/shared/kbn-nightshift-decision-trees
+        version: link:x-pack/solutions/observability/packages/kbn-nightshift-decision-trees
       '@kbn/nightshift-investigations-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/nightshift_investigations
@@ -2802,10 +2805,10 @@ importers:
         version: link:x-pack/solutions/observability/plugins/nightshift
       '@kbn/nightshift-shared':
         specifier: workspace:*
-        version: link:x-pack/platform/packages/shared/kbn-nightshift-shared
+        version: link:x-pack/solutions/observability/packages/kbn-nightshift-shared
       '@kbn/nightshift-sources-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/nightshift_sources
+        version: link:x-pack/solutions/observability/plugins/nightshift_sources
       '@kbn/no-data-page-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/no_data_page
@@ -7881,6 +7884,14 @@ importers:
 
   src/platform/packages/shared/esql/kbn-esql-browser: {}
 
+  src/platform/packages/shared/esql/kbn-esql-language: {}
+
+  src/platform/packages/shared/esql/kbn-esql-server-utils: {}
+
+  src/platform/packages/shared/esql/kbn-esql-types: {}
+
+  src/platform/packages/shared/esql/kbn-esql-utils: {}
+
   src/platform/packages/shared/home/sample_data_card: {}
 
   src/platform/packages/shared/home/sample_data_tab: {}
@@ -8033,6 +8044,10 @@ importers:
 
   src/platform/packages/shared/kbn-encrypted-saved-objects-shared: {}
 
+  src/platform/packages/shared/kbn-entity-access-control: {}
+
+  src/platform/packages/shared/kbn-entity-access-control-ui: {}
+
   src/platform/packages/shared/kbn-es: {}
 
   src/platform/packages/shared/kbn-es-archiver: {}
@@ -8051,17 +8066,9 @@ importers:
 
   src/platform/packages/shared/kbn-esql-composer: {}
 
-  src/platform/packages/shared/kbn-esql-language: {}
-
   src/platform/packages/shared/kbn-esql-resource-browser: {}
 
   src/platform/packages/shared/kbn-esql-resource-browser/.storybook: {}
-
-  src/platform/packages/shared/kbn-esql-server-utils: {}
-
-  src/platform/packages/shared/kbn-esql-types: {}
-
-  src/platform/packages/shared/kbn-esql-utils: {}
 
   src/platform/packages/shared/kbn-eval-kql: {}
 
@@ -8765,8 +8772,6 @@ importers:
 
   src/platform/test/plugin_functional/plugins/hardening: {}
 
-  src/platform/test/plugin_functional/plugins/index_patterns: {}
-
   src/platform/test/plugin_functional/plugins/kbn_top_nav: {}
 
   src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations: {}
@@ -9061,8 +9066,6 @@ importers:
 
   x-pack/platform/packages/shared/kbn-ink: {}
 
-  x-pack/platform/packages/shared/kbn-investigation-output: {}
-
   x-pack/platform/packages/shared/kbn-key-value-metadata-table: {}
 
   x-pack/platform/packages/shared/kbn-kibana-api-cli: {}
@@ -9074,10 +9077,6 @@ importers:
   x-pack/platform/packages/shared/kbn-mcp-client: {}
 
   x-pack/platform/packages/shared/kbn-nightshift-ai: {}
-
-  x-pack/platform/packages/shared/kbn-nightshift-decision-trees: {}
-
-  x-pack/platform/packages/shared/kbn-nightshift-shared: {}
 
   x-pack/platform/packages/shared/kbn-profiler-cli: {}
 
@@ -9401,8 +9400,6 @@ importers:
 
   x-pack/platform/plugins/shared/ml/evals: {}
 
-  x-pack/platform/plugins/shared/nightshift_sources: {}
-
   x-pack/platform/plugins/shared/notification_center: {}
 
   x-pack/platform/plugins/shared/notifications: {}
@@ -9553,6 +9550,12 @@ importers:
 
   x-pack/solutions/observability/packages/kbn-genai-cli: {}
 
+  x-pack/solutions/observability/packages/kbn-investigation-output: {}
+
+  x-pack/solutions/observability/packages/kbn-nightshift-decision-trees: {}
+
+  x-pack/solutions/observability/packages/kbn-nightshift-shared: {}
+
   x-pack/solutions/observability/packages/kbn-observability-schema: {}
 
   x-pack/solutions/observability/packages/kbn-scout-oblt: {}
@@ -9586,6 +9589,8 @@ importers:
   x-pack/solutions/observability/plugins/nightshift: {}
 
   x-pack/solutions/observability/plugins/nightshift_investigations: {}
+
+  x-pack/solutions/observability/plugins/nightshift_sources: {}
 
   x-pack/solutions/observability/plugins/observability: {}
 

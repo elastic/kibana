@@ -16,23 +16,9 @@ describe('formatLocation', () => {
     isServiceManaged: false,
   };
 
-  it('carries isAgentSharding for a scalable private location', () => {
-    expect(formatLocation({ ...privateLocation, isAgentSharding: true })).toEqual(
-      expect.objectContaining({
-        id: 'loc-1',
-        agentPolicyId: 'ap-1',
-        isAgentSharding: true,
-      })
-    );
-  });
-
-  it('does not add isAgentSharding for a classic private location', () => {
-    expect(formatLocation(privateLocation)).not.toHaveProperty('isAgentSharding');
-  });
-
-  it('omits isAgentSharding: false', () => {
-    expect(formatLocation({ ...privateLocation, isAgentSharding: false })).not.toHaveProperty(
-      'isAgentSharding'
-    );
+  it('drops the removed isAgentSharding attribute', () => {
+    expect(
+      formatLocation({ ...privateLocation, isAgentSharding: true } as PrivateLocation)
+    ).not.toHaveProperty('isAgentSharding');
   });
 });
