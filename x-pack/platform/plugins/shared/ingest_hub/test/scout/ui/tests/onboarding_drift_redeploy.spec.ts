@@ -889,18 +889,20 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     // isDirty cleared → session reflects the new state. The step may navigate away after
     // a successful deploy (unmounting the callout), so assert on session state rather than
     // UI element visibility to avoid a vacuously-true assertion (4123330463).
-    const isDirtyAfter = await page.evaluate(
+    // Poll instead of a one-shot read: soPutPromise resolves when the PUT is SENT, but
+    // isDirty is only written after the response lands and React state updates — a one-shot
+    // evaluate races and can read stale state (4123900598).
+    await page.waitForFunction(
       ({ key }) => {
         const raw = sessionStorage.getItem(key);
-        if (!raw) return null;
+        if (!raw) return false;
         try {
-          return (JSON.parse(raw) as Record<string, unknown>).isDirty ?? null;
+          return !(JSON.parse(raw) as Record<string, unknown>).isDirty;
         } catch {
-          return null;
+          return false;
         }
       },
       { key: DETECT_AND_REVIEW_SESSION_KEY }
     );
-    expect(isDirtyAfter).toBeFalsy();
   });
 });

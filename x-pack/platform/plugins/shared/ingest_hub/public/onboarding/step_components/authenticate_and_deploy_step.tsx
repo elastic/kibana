@@ -66,6 +66,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     deploymentMethod,
     setDeploymentMethod,
     authenticateAndDeployStep,
+    agentBasedDeployment: agentBasedDeploymentFromFlow,
     detectAndReviewStep,
     updateDetectAndReviewStep,
     removeDeployInstances,
@@ -130,10 +131,14 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // Compare current session values against the SO whenever edit mode is active and the user
   // changes auth (connector / auth method). serviceVars drift is checked at the same time.
   const { onboardingDeploymentId, policyIdsByInstance } = detectAndReviewStep;
-  const { authMethod, connectorId, selectedAgentPolicyIds } = authenticateAndDeployStep ?? {};
-  // Stable key for selectedAgentPolicyIds so the drift effect can re-run when policy selection
+  const { authMethod, connectorId } = authenticateAndDeployStep ?? {};
+  // Stable key for selectedAgentPolicyIds (from agentBasedDeployment, available via useOnboardingFlow
+  // before useAgentBasedDeploy is called) so the drift effect can re-run when policy selection
   // changes in edit mode without referential-equality churn on every render (4123478517).
-  const selectedAgentPoliciesKey = (selectedAgentPolicyIds ?? []).slice().sort().join(',');
+  const selectedAgentPoliciesKey = agentBasedDeploymentFromFlow.selectedAgentPolicyIds
+    .slice()
+    .sort()
+    .join(',');
   // Stores the SO-derived dirty result so the replace-form cancel handler can merge it without
   // re-fetching. Starts false; updated once the SO fetch resolves.
   const driftDirtyRef = useRef(false);
@@ -191,7 +196,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         // Detect agent policy selection drift: if the user has changed which agent policies
         // are targeted, the existing policies must be re-attached to the new selection (4123478517).
         const agentPoliciesDirty = (() => {
-          const selected = new Set(selectedAgentPolicyIds ?? []);
+          const selected = new Set(agentBasedDeploymentFromFlow.selectedAgentPolicyIds);
           if (selected.size === 0) return false; // no selection yet — not in agent edit mode
           const deployed = new Set(item.agentPolicyIds ?? []);
           return selected.size !== deployed.size || [...selected].some((id) => !deployed.has(id));
@@ -295,7 +300,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // user skip past the unresolved failure; the retry path clears failedInstances on success.
   const isMiDone =
     driftSettled &&
-    ((isAlreadyDeployed && !isDirty && !hasFailed) ||
+    // The already-deployed arm must check !isDeploying and failedInstances independently:
+    // !hasFailed collapses to (isDeploying || failedInstances.length === 0), so when Retry
+    // starts isDeploying=true makes !hasFailed true and isMiDone flips true mid-retry, enabling
+    // Next before the Retry PUT has finished (4123900574).
+    ((isAlreadyDeployed && !isDirty && !isDeploying && failedInstances.length === 0) ||
       (deployAttempted && !isDeploying && failedInstances.length === 0 && !isDirty));
 
   const handleDeployClick = useCallback(() => {

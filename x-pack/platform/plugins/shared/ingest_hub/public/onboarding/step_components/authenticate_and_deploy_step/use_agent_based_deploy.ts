@@ -325,8 +325,12 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
                   string,
                   Record<string, unknown>
                 >,
-                authMethod: authenticateAndDeployStep.authMethod ?? null,
-                connectorId: authenticateAndDeployStep.connectorId ?? null,
+                packagePolicyIds: [...new Set(Object.values(postCleanupIds))],
+                policyIdsByInstance: postCleanupIds,
+                authMethod: toSOAuthMethod(agentCredentialMethod),
+                // Persist selected agent policies so resume restores the correct selection
+                // (4123900586).
+                ...(targetPolicyIds.length > 0 ? { agentPolicyIds: targetPolicyIds } : {}),
               });
               if (!soOk) {
                 setIsDeploying(false);
