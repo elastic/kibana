@@ -12,6 +12,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server';
 import type { SandboxSecretsClient } from '../../sandbox_secrets';
+import { deriveConnectorCredentialSecretValues } from './connector_credentials';
 import { createOutputRedactor, redactDeep, type OutputRedactor } from './output_redactor';
 
 export type GetSandboxOutputRedactor = (request: KibanaRequest) => Promise<OutputRedactor>;
@@ -43,9 +44,14 @@ export const createSandboxOutputRedactorProvider =
   async (request) => {
     const { actions, sandboxSecretsClient } = getDeps();
     const sandboxSecretValues = (await sandboxSecretsClient?.getRedactionValues(request)) ?? [];
-    const connectorSecretValues = (actions?.inMemoryConnectors ?? []).flatMap(({ secrets }) =>
-      collectSecretLeaves(secrets)
-    );
+    // Every raw secret leaf, plus any values a credential resolver derives from them (e.g. the
+    // bare API key `deriveConnectorCredentialSecretValues` extracts out of an `Authorization`
+    // header) — a value that never appears verbatim in `secrets` itself would otherwise round-trip
+    // unredacted through a later tool call (e.g. reading back a file a bash command wrote it to).
+    const connectorSecretValues = (actions?.inMemoryConnectors ?? []).flatMap(({ secrets }) => [
+      ...collectSecretLeaves(secrets),
+      ...deriveConnectorCredentialSecretValues(secrets),
+    ]);
     return createOutputRedactor([...sandboxSecretValues, ...connectorSecretValues]);
   };
 

@@ -40,13 +40,14 @@ const setup = ({
   const sandboxWorkspaceManager = {
     ensureWorkspaceReady: jest.fn().mockResolvedValue(undefined),
   } as unknown as SandboxWorkspaceManager;
+  const logger = loggingSystemMock.createLogger();
 
   const tool = createSandboxBashTool({
     getSandboxStart: () => sandboxStart,
     sandboxWorkspaceManager,
     resolveConnectorCredentials,
     sandboxSecretsClient: { resolveForCommand },
-    logger: loggingSystemMock.createLogger(),
+    logger,
   });
 
   const request = httpServerMock.createKibanaRequest();
@@ -62,7 +63,7 @@ const setup = ({
       context
     );
 
-  return { tool, run, runCommand, resolveForCommand, request };
+  return { tool, run, runCommand, resolveForCommand, request, logger, session };
 };
 
 describe('sandbox bash tool — sandbox secrets', () => {
@@ -144,5 +145,18 @@ describe('sandbox bash tool — sandbox secrets', () => {
     const { tool } = setup();
 
     expect(tool.excludeFromMcp).toBe(true);
+  });
+
+  it('logs only the error type, never the error message, when the sandbox call throws', async () => {
+    const { run, runCommand, logger } = setup({ stdout: '' });
+    runCommand.mockRejectedValue(new Error(`boom while handling ${GITHUB_TOKEN}`));
+
+    await run({ secret_keys: ['GITHUB_TOKEN'] });
+
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    const [loggedMessage] = logger.error.mock.calls[0];
+    expect(loggedMessage).not.toContain(GITHUB_TOKEN);
+    expect(loggedMessage).not.toContain('boom while handling');
+    expect(loggedMessage).toContain('Error');
   });
 });

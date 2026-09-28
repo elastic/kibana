@@ -74,6 +74,41 @@ describe('withSandboxOutputRedaction', () => {
     expect(getRedactionValues).toHaveBeenCalledWith(request);
   });
 
+  it('redacts the bare API key derived from a connector Authorization header', async () => {
+    // A bare API key never appears as-is in a connector's raw `secrets`, only inside the full
+    // `Authorization: ApiKey <key>` header — but a bash command can inject just the derived key
+    // (CONNECTOR_SECRET_PASSWORD) and write it to a file, which a later tool call (e.g. view_file)
+    // then reads back. That value must still be redacted from this tool's own results.
+    const apiKey = 'derived-elasticsearch-api-key-value';
+    const actions = {
+      inMemoryConnectors: [
+        { id: 'c1', secrets: { secretHeaders: { Authorization: `ApiKey ${apiKey}` } } },
+      ],
+    } as unknown as ActionsPluginStart;
+    const handler = jest.fn().mockResolvedValue({
+      results: [{ type: ToolResultType.other, data: { stdout: apiKey } }],
+    });
+    const tool = { id: 'sandbox_tool', schema, handler } as unknown as BuiltinToolDefinition<
+      typeof schema
+    >;
+    const wrapped = withSandboxOutputRedaction(tool, {
+      getOutputRedactor: createSandboxOutputRedactorProvider({
+        getDeps: () => ({
+          actions,
+          sandboxSecretsClient: { getRedactionValues: jest.fn().mockResolvedValue([]) },
+        }),
+      }),
+      logger: loggingSystemMock.createLogger(),
+    });
+    const request = httpServerMock.createKibanaRequest();
+
+    await expect(
+      (wrapped.handler as unknown as (p: unknown, c: unknown) => Promise<unknown>)({}, { request })
+    ).resolves.toEqual({
+      results: [{ type: ToolResultType.other, data: { stdout: REDACTED_PLACEHOLDER } }],
+    });
+  });
+
   it('does not run the tool when stored secrets cannot be loaded', async () => {
     const { run, handler, logger } = setup({
       getRedactionValues: jest.fn().mockRejectedValue(new Error('Unable to decrypt')),

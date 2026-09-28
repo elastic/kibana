@@ -21,6 +21,12 @@ export const NIGHTSHIFT_READ_ROLE: KibanaRole = {
   kibana: [{ base: [], feature: { [NIGHTSHIFT_FEATURE_ID]: ['read'] }, spaces: ['*'] }],
 };
 
+// Can open Kibana and the space, but has no Nightshift feature privilege at all (not even read).
+export const NIGHTSHIFT_NO_ACCESS_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [], indices: [] },
+  kibana: [{ base: [], feature: {}, spaces: ['*'] }],
+};
+
 const spacePath = (spaceId: string): string => `s/${spaceId}/${SANDBOX_SECRETS_PATH}`;
 
 export const getSandboxSecrets = (

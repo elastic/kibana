@@ -12,6 +12,7 @@ import {
   apiTest,
   NIGHTSHIFT_MANAGE_ROLE,
   NIGHTSHIFT_READ_ROLE,
+  NIGHTSHIFT_NO_ACCESS_ROLE,
   getSandboxSecrets,
   putSandboxSecrets,
   uniqueId,
@@ -20,6 +21,15 @@ import {
 const SPACE_ID = uniqueId('nightshift-secrets-space');
 const OTHER_SPACE_ID = uniqueId('nightshift-secrets-other');
 const GITHUB_TOKEN = 'ghp_scout_secret_value';
+const OTHER_VALUE = 'other-secret-value';
+
+// Neither submitted secret value may appear in any response; a check that only excludes one of
+// them would still pass if the API leaked the other.
+const expectNoSecretValuesLeaked = (body: unknown) => {
+  const serialized = JSON.stringify(body);
+  expect(serialized).not.toContain(GITHUB_TOKEN);
+  expect(serialized).not.toContain(OTHER_VALUE);
+};
 
 const setNightshiftEnabled = (apiServices: ApiServicesFixture, enabled: boolean | null) =>
   apiServices.core.settings({ 'feature_flags.overrides': { [NIGHTSHIFT_ENABLED_FLAG]: enabled } });
@@ -73,18 +83,18 @@ apiTest.describe(
       const created = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
         entries: [
           { key: 'GITHUB_TOKEN', value: GITHUB_TOKEN },
-          { key: 'OTHER_KEY', value: 'other-value' },
+          { key: 'OTHER_KEY', value: OTHER_VALUE },
         ],
       });
       expect(created).toHaveStatusCode(200);
       expect(created.body.keys).toStrictEqual(['GITHUB_TOKEN', 'OTHER_KEY']);
-      expect(JSON.stringify(created.body)).not.toContain(GITHUB_TOKEN);
+      expectNoSecretValuesLeaked(created.body);
 
       const listed = await getSandboxSecrets(apiClient, manageCookie, SPACE_ID);
       expect(listed).toHaveStatusCode(200);
       expect(listed.body.keys).toStrictEqual(['GITHUB_TOKEN', 'OTHER_KEY']);
       expect(listed.body.canEncrypt).toBe(true);
-      expect(JSON.stringify(listed.body)).not.toContain(GITHUB_TOKEN);
+      expectNoSecretValuesLeaked(listed.body);
 
       // Omitting a value keeps it; omitting a key removes it.
       const kept = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
@@ -143,12 +153,37 @@ apiTest.describe(
     apiTest(
       'lets read-only users list keys but not change secrets',
       async ({ apiClient, samlAuth }) => {
+        const seeded = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
+          entries: [{ key: 'READ_ONLY_VISIBLE', value: 'read-only-visible-value' }],
+        });
+        expect(seeded).toHaveStatusCode(200);
+
         const { cookieHeader: readCookie } = await samlAuth.asInteractiveUser(NIGHTSHIFT_READ_ROLE);
         const listed = await getSandboxSecrets(apiClient, readCookie, SPACE_ID);
         expect(listed).toHaveStatusCode(200);
+        expect(listed.body.keys).toContain('READ_ONLY_VISIBLE');
 
         const update = await putSandboxSecrets(apiClient, readCookie, SPACE_ID, {
           entries: [{ key: 'READ_ONLY', value: 'read-only-value' }],
+        });
+        expect(update).toHaveStatusCode(403);
+
+        await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, { entries: [] });
+      }
+    );
+
+    apiTest(
+      'rejects users without any Nightshift privilege in the space',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader: noAccessCookie } = await samlAuth.asInteractiveUser(
+          NIGHTSHIFT_NO_ACCESS_ROLE
+        );
+
+        const listed = await getSandboxSecrets(apiClient, noAccessCookie, SPACE_ID);
+        expect(listed).toHaveStatusCode(403);
+
+        const update = await putSandboxSecrets(apiClient, noAccessCookie, SPACE_ID, {
+          entries: [{ key: 'NO_ACCESS', value: 'no-access-value' }],
         });
         expect(update).toHaveStatusCode(403);
       }

@@ -217,7 +217,11 @@ export const createSandboxBashTool = ({
         ],
       };
     } catch (error) {
-      logger.error(`Sandbox bash tool failed: ${error}`);
+      // Log only the error's type, never its message: a thrown error can embed unredacted command
+      // output (this catch runs before any redaction), and the message returned to the agent below
+      // is already redacted.
+      const errorType = error instanceof Error ? error.constructor.name : typeof error;
+      logger.error(`Sandbox bash tool failed with a ${errorType}.`);
       return {
         results: [
           {

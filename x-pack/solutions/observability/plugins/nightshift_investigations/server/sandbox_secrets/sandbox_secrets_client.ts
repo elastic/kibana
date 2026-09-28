@@ -23,7 +23,11 @@ import {
   validateSandboxSecretKey,
   validateSandboxSecretValue,
 } from '../../common/sandbox_secrets';
-import { NIGHTSHIFT_SECRETS_SO_TYPE, type NightshiftSecretsAttributes } from '../saved_objects';
+import {
+  NIGHTSHIFT_SECRETS_SO_ID,
+  NIGHTSHIFT_SECRETS_SO_TYPE,
+  type NightshiftSecretsAttributes,
+} from '../saved_objects';
 import {
   SandboxSecretsConflictError,
   SandboxSecretsDisabledError,
@@ -122,19 +126,21 @@ export const createSandboxSecretsClient = ({
       .asScopedToNamespace(getSpaceId(request));
   };
 
-  // A space is expected to hold a single secrets object; the oldest one wins if a race created more.
-  const findSecretsObject = async (
+  // The space's secrets object always lives at the fixed NIGHTSHIFT_SECRETS_SO_ID.
+  const getSecretsObject = async (
     request: KibanaRequest
   ): Promise<SavedObject<NightshiftSecretsAttributes> | undefined> => {
-    const { saved_objects: savedObjects } = await getSavedObjectsClient(
-      request
-    ).find<NightshiftSecretsAttributes>({
-      type: NIGHTSHIFT_SECRETS_SO_TYPE,
-      perPage: 1,
-      sortField: 'created_at',
-      sortOrder: 'asc',
-    });
-    return savedObjects[0];
+    try {
+      return await getSavedObjectsClient(request).get<NightshiftSecretsAttributes>(
+        NIGHTSHIFT_SECRETS_SO_TYPE,
+        NIGHTSHIFT_SECRETS_SO_ID
+      );
+    } catch (err) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        return undefined;
+      }
+      throw err;
+    }
   };
 
   const readDecryptedValues = async (request: KibanaRequest, id: string | undefined) => {
@@ -173,7 +179,7 @@ export const createSandboxSecretsClient = ({
       return cached;
     }
     const promise = (async () => {
-      const existing = await findSecretsObject(request);
+      const existing = await getSecretsObject(request);
       return existing ? readDecryptedValues(request, existing.id) : {};
     })();
     decryptedValuesByRequest.set(request, promise);
@@ -215,7 +221,7 @@ export const createSandboxSecretsClient = ({
   return {
     listKeys: async (request) => {
       await assertNightshiftEnabled();
-      const existing = await findSecretsObject(request);
+      const existing = await getSecretsObject(request);
       if (!existing) {
         return { keys: [], canEncrypt };
       }
@@ -226,7 +232,15 @@ export const createSandboxSecretsClient = ({
       await assertNightshiftEnabled();
       validateEntries(params);
 
-      const existing = await findSecretsObject(request);
+      const existing = await getSecretsObject(request);
+      // Once an object exists, every write must prove it saw the latest version: an unversioned
+      // write is indistinguishable from a stale one and would otherwise silently discard a
+      // concurrent editor's keys and encrypted values. Only the very first write, before any
+      // object exists, may omit it.
+      if (existing && !params.version) {
+        throw new SandboxSecretsConflictError();
+      }
+
       let existingValues: Record<string, string>;
       try {
         existingValues = await readDecryptedValues(request, existing?.id);
@@ -252,7 +266,12 @@ export const createSandboxSecretsClient = ({
         const saved = await getSavedObjectsClient(request).create<NightshiftSecretsAttributes>(
           NIGHTSHIFT_SECRETS_SO_TYPE,
           { keys, values },
-          existing ? { id: existing.id, overwrite: true, version: params.version } : undefined
+          // Without an existing object, `overwrite` stays unset: two concurrent first writes both
+          // targeting NIGHTSHIFT_SECRETS_SO_ID then collide as a natural create conflict (409)
+          // instead of each succeeding with their own generated id.
+          existing
+            ? { id: NIGHTSHIFT_SECRETS_SO_ID, overwrite: true, version: params.version }
+            : { id: NIGHTSHIFT_SECRETS_SO_ID }
         );
         return { keys, version: saved.version };
       } catch (err) {
@@ -267,7 +286,7 @@ export const createSandboxSecretsClient = ({
       if (await getSandboxAccessDeniedReason(request)) {
         return [];
       }
-      const existing = await findSecretsObject(request);
+      const existing = await getSecretsObject(request);
       return existing?.attributes.keys ?? [];
     },
 

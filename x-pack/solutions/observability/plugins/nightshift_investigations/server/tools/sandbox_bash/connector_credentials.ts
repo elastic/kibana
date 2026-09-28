@@ -64,6 +64,27 @@ const readAuthorizationHeader = (secretHeaders: unknown): string | undefined => 
 };
 
 /**
+ * Secret values derived from a connector's raw `secrets`, beyond its own top-level leaves — e.g.
+ * the bare API key `buildConnectorEnv` extracts out of an `Authorization: ApiKey …` header and
+ * injects as `CONNECTOR_SECRET_PASSWORD`. Anything derived here must also reach every redactor
+ * that guards this connector's secrets, not just the one covering a single command's own output:
+ * a bare derived value never appears verbatim in the raw `secrets` object, so a redactor built
+ * only from `collectSecretLeaves`-style traversal of `secrets` would miss it.
+ */
+export const deriveConnectorCredentialSecretValues = (
+  secrets: Record<string, unknown>
+): string[] => {
+  const secretValues: string[] = [];
+  // HTTP ES connectors store `Authorization: ApiKey …` in secretHeaders, not `password`.
+  const authorization = readAuthorizationHeader(secrets.secretHeaders);
+  if (authorization?.startsWith('ApiKey ')) {
+    const apiKey = authorization.slice('ApiKey '.length);
+    if (apiKey.length >= MIN_REDACTABLE_SECRET_LENGTH) secretValues.push(apiKey);
+  }
+  return secretValues;
+};
+
+/**
  * Builds the CONNECTOR_* environment for a connector. Config keys map to CONNECTOR_CONFIG_<KEY>,
  * secret keys to CONNECTOR_SECRET_<KEY>; nested values are JSON-encoded.
  */
@@ -102,8 +123,8 @@ export const buildConnectorEnv = ({
     if (env.CONNECTOR_SECRET_PASSWORD === undefined) {
       env.CONNECTOR_SECRET_PASSWORD = apiKey;
     }
-    if (apiKey.length >= MIN_REDACTABLE_SECRET_LENGTH) secretValues.push(apiKey);
   }
+  secretValues.push(...deriveConnectorCredentialSecretValues(secrets));
 
   return { env, secretValues };
 };

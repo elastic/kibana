@@ -26,6 +26,7 @@ export type { SeedTimeWindow } from './helpers';
 export {
   NIGHTSHIFT_MANAGE_ROLE,
   NIGHTSHIFT_READ_ROLE,
+  NIGHTSHIFT_NO_ACCESS_ROLE,
   getSandboxSecrets,
   putSandboxSecrets,
 } from './sandbox_secrets';

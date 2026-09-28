@@ -79,7 +79,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "fleet-uninstall-tokens": "6e7d75921dcce46e566f175eab1b0e3825fe565f20cdb3c984e7037934d61e23",
         "ingest-download-sources": "b3740796eab0a91736e43bd22f7489cbf6f2ad0241ae370d1c8195b6a8d8ad52",
         "ingest-outputs": "d66716d5333484a25c57f7917bead5ac2576ec57a4b9eb61701b573f35ab62ad",
-        "nightshift-secrets": "5fbb5b35cb5763ea2ff3f29f7131889a1e6f73a40c9e30e9e2077230bb355fe7",
+        "nightshift-secrets": "dda5d9c34f2dfad530fd3ce2f7d30aa1b626e925ba8da6469f7da62136e2d8aa",
         "oauth_state": "b01289e5c133db9d4d802a2b838e43cce4a8399566dedb21de551da57c88894a",
         "privmon-api-key": "7d7b76b3bc5287a784518731ba66d4f761052177fc04b1a85e5605846ab9de42",
         "service-account-credential": "5d9f328d92718249b324fbd5d01332bcef80be980003d510a3bd24af230244ff",
