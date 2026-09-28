@@ -308,48 +308,45 @@ describe('ManagedIntegrationsSection', () => {
       expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
     });
 
-    it('Deploy button is enabled immediately when connectorId is present and drift detected', () => {
-      // isDirty=true bypasses form re-validation: the connector was already used in the
-      // previous deploy and is still valid — no need to wait for the form to re-validate it.
+    it('Deploy button is disabled until identity federation form reports ready, even with pre-loaded connector', () => {
+      // isDeployReady is not seeded from connectorId — the form must validate the connector
+      // before Deploy is enabled. This ensures an invalid connector (e.g. failed IaC key check)
+      // keeps the button disabled without relying on a second onReadyChange(false) emission.
       setupMocks({ connectorId: 'conn-123', authMethod: 'identity_federation' });
       renderSection({ showIdentityFederation: true, isDirty: true });
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
+      act(() => {
+        fireEvent.click(screen.getByText('mark-ready'));
+      });
       expect(screen.getByTestId('managedIntegrationsSection-deployButton')).not.toBeDisabled();
     });
 
     it('Deploy button is disabled when drift detected but no connector is pre-loaded', () => {
-      // isDirty bypass only applies when a connector is present (identity federation path).
-      // Without a connector the form must signal ready before Deploy is enabled.
       setupMocks({ connectorId: undefined, authMethod: 'identity_federation' });
       renderSection({ showIdentityFederation: true, isDirty: true });
       expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
     });
 
-    it('onReadyChange(false) is suppressed while connector is pre-loaded (avoids loading flash)', () => {
-      // With a pre-loaded connector, the identity federation form calls onReadyChange(false)
-      // on mount while it re-validates. isDeployReady must stay true during that window.
+    it('onReadyChange(false) disables the Deploy button for identity federation', () => {
+      // The form is authoritative — onReadyChange(false) always reaches setIsDeployReady so
+      // a failed IaC key check correctly disables the button.
       setupMocks({ connectorId: 'conn-123', authMethod: 'identity_federation' });
       renderSection({ showIdentityFederation: true, isDirty: true });
       act(() => {
         fireEvent.click(screen.getByText('mark-not-ready'));
       });
-      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).not.toBeDisabled();
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
     });
 
-    it('isDirty bypass clears after user changes connector, so form validation applies', () => {
-      // After user picks a new connector, isConnectorPreloaded becomes false.
-      // isDirty bypass no longer applies, and isDeployReady=false from the loading form
-      // must disable the button until the new connector is validated.
+    it('button disabled while new connector validates after user changes connector', () => {
       setupMocks({ connectorId: 'conn-123', authMethod: 'identity_federation' });
       renderSection({ showIdentityFederation: true, isDirty: true });
-      // Bypass active initially
-      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).not.toBeDisabled();
       act(() => {
         fireEvent.click(screen.getByText('mark-named')); // user picks new connector
       });
       act(() => {
         fireEvent.click(screen.getByText('mark-not-ready')); // form loading new connector
       });
-      // Bypass cleared — button disabled while new connector validates
       expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
     });
 

@@ -140,9 +140,23 @@ export function planMiRetryRun(
   failedInstances: string[]
 ): MiRetryPlan {
   const retrySet = new Set(instanceIds);
-  const groupsToDeploy = deployGroups.filter(({ instanceIds: ids }) =>
-    ids.some((id) => retrySet.has(id))
-  );
+  // Only include members that are not already deployed — avoids creating duplicate policies when
+  // existing instance IDs appear in failedInstances (e.g. after a dirty-update failure where the
+  // underlying Fleet policies were already deployed and only the settings update failed).
+  const groupsToDeploy = deployGroups
+    .map((group) => {
+      const retryMembers = group.members.filter(
+        ({ instance }) =>
+          retrySet.has(instance.instanceId) && !(instance.instanceId in policyIdsByInstance)
+      );
+      if (retryMembers.length === 0) return null;
+      return {
+        ...group,
+        instanceIds: retryMembers.map(({ instance }) => instance.instanceId),
+        members: retryMembers,
+      };
+    })
+    .filter((g): g is DeployGroup => g !== null);
   // May be wider than retrySet when a bundled group is included.
   const deployedTargets = groupsToDeploy.flatMap(({ instanceIds: ids }) => ids);
   const remainingFailed = failedInstances.filter((id) => !deployedTargets.includes(id));
@@ -555,8 +569,14 @@ export function useMiDeploy({
       const newServiceStatuses = buildInstanceStatuses(deployedTargets, newFailed, 'detecting');
 
       // Merge with instances that failed in a prior run but weren't retried in this one.
+      // When a dirty update was applied, exclude instances that were already deployed (in
+      // policyIdsByInstance) — they appear in failedInstances due to a dirty-update failure, but
+      // the settings update has now succeeded so they are no longer failed.
       const deployedSet = new Set(deployedTargets);
-      const previouslyFailed = getLatestFailedInstances().filter((id) => !deployedSet.has(id));
+      const previouslyFailed = getLatestFailedInstances().filter(
+        (id) =>
+          !deployedSet.has(id) && !(dirtyUpdateApplied && id in policyIdsByInstance)
+      );
       const mergedFailed = [...previouslyFailed, ...newFailed];
 
       // Update SO with deploy outcome (best-effort).
