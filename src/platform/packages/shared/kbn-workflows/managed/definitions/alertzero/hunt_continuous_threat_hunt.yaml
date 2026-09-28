@@ -173,15 +173,15 @@ steps:
         type: data.set
         with:
           outcome: |-
-            {%- if steps.hunt.output.status != 'success' -%}
+            {%- if steps.hunt.output.status == 'failed' -%}
             failed
-            {%- elsif steps.package_report.output.status == 'run_incomplete' -%}
+            {%- elsif steps.hunt.output.status == 'partial' or steps.package_report.output.status == 'run_incomplete' -%}
             partial
             {%- else -%}
             completed
             {%- endif -%}
           incomplete_stage: |-
-            {%- if steps.hunt.output.status != 'success' -%}
+            {%- if steps.hunt.output.status == 'failed' or steps.hunt.output.status == 'partial' -%}
             hunt
             {%- elsif steps.package_report.output.status == 'run_incomplete' -%}
             packaging
@@ -214,6 +214,12 @@ steps:
               - **Report:** `{{ foreach.item }}`
               - **Hunt:** {{ steps.hunt.output.headline }}.
               - **Packaging:** {{ steps.package_report.output.summary | strip }}
+              {% elsif steps.resolve_run_outcome.output.outcome == 'partial' and steps.hunt.output.status == 'partial' -%}
+              ### Hunt Watch run partial: the hunt could not cover everything it was asked to
+              - **Report:** `{{ foreach.item }}`
+              - **Hunt:** {{ steps.hunt.output.headline }}. {{ steps.hunt.output.reason }}
+              - **Packaging:** {% if steps.package_report.output.status == 'run_incomplete' %}did not complete. {{ steps.package_report.output.reason }}.{% else %}{{ steps.package_report.output.summary | strip }}{% endif %}
+              - **What this means:** the findings above are real, but part of the search did not run, so the report stays eligible for the next scheduled sweep or a manual rerun; the Investigation stays open.
               {% elsif steps.resolve_run_outcome.output.outcome == 'partial' -%}
               ### Hunt Watch run partial: packaging did not complete
               - **Report:** `{{ foreach.item }}`

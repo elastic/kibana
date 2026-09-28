@@ -150,9 +150,15 @@ steps:
   # the narrative's own line breaks survive. The SSE count appended here is
   # what the coordinator prepared; whether each attachment landed is not
   # observable from a foreach's output, and packaging's conclusion reports that.
+  # Gated on the coordinator having answered at all, not on
+  # `completed_successfully`: under main's completeness model that flag is false
+  # for an `incomplete_retryable` run too, which still has findings (and a
+  # coverage section in the narrative) the analyst must see. Only the evidence
+  # write below keys off `completed_successfully`, so a retryable run keeps the
+  # report eligible without hiding what it found.
   - name: write_hunt_results_message
     type: workflow.execute
-    if: "${{ steps.run_hunt_coordinator.output.completed_successfully == true }}"
+    if: "${{ steps.run_hunt_coordinator.output != nil }}"
     with:
       workflow-id: system-alertzero-journal-note
       inputs:
@@ -258,15 +264,24 @@ steps:
   - name: resolve_result_status
     type: data.set
     with:
+      # `success`: the run covered what it was asked to. `partial`: the
+      # coordinator answered but reports `incomplete_retryable` (a tier could not
+      # finish for a transient reason), so findings were written but no hunt
+      # evidence, and the report stays eligible. `failed`: the coordinator call
+      # itself failed or was skipped.
       result_status: |-
         {%- if steps.run_hunt_coordinator.output.completed_successfully == true -%}
         success
+        {%- elsif steps.run_hunt_coordinator.output != nil -%}
+        partial
         {%- else -%}
         failed
         {%- endif -%}
       result_reason: |-
         {%- if inputs.investigationConversationId == nil or inputs.investigationConversationId == empty -%}
         no Investigation available (find_or_create failed upstream; hunt coordinator was not called)
+        {%- elsif steps.run_hunt_coordinator.output != nil and steps.run_hunt_coordinator.output.completed_successfully != true -%}
+        The hunt was {{ steps.run_hunt_coordinator.output.completeness | replace: "_", " but " }} ({{ steps.run_hunt_coordinator.output.message }}), so no hunt evidence was recorded and the report stays eligible for a later sweep.
         {%- else -%}
         {{ steps.run_hunt_coordinator.error.message }}
         {%- endif -%}
