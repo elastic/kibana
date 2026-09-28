@@ -2023,6 +2023,12 @@ importers:
       '@kbn/enterprise-search-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/search/plugins/enterprise_search
+      '@kbn/entity-access-control':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-entity-access-control
+      '@kbn/entity-access-control-ui':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-entity-access-control-ui
       '@kbn/entity-store':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/entity_store
@@ -2073,7 +2079,7 @@ importers:
         version: link:src/platform/packages/private/kbn-esql-editor
       '@kbn/esql-language':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-language
+        version: link:src/platform/packages/shared/esql/kbn-esql-language
       '@kbn/esql-language-inspector-plugin':
         specifier: workspace:*
         version: link:examples/esql_ast_inspector
@@ -2082,13 +2088,13 @@ importers:
         version: link:src/platform/packages/shared/kbn-esql-resource-browser
       '@kbn/esql-server-utils':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-server-utils
+        version: link:src/platform/packages/shared/esql/kbn-esql-server-utils
       '@kbn/esql-types':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-types
+        version: link:src/platform/packages/shared/esql/kbn-esql-types
       '@kbn/esql-utils':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-utils
+        version: link:src/platform/packages/shared/esql/kbn-esql-utils
       '@kbn/esql-ux-example-plugin':
         specifier: workspace:*
         version: link:examples/esql_ux_example
@@ -2380,9 +2386,6 @@ importers:
       '@kbn/index-management-shared-types':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/index-management/index_management_shared_types
-      '@kbn/index-patterns-test-plugin':
-        specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/index_patterns
       '@kbn/indices-metadata-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/indices_metadata
@@ -7881,6 +7884,14 @@ importers:
 
   src/platform/packages/shared/esql/kbn-esql-browser: {}
 
+  src/platform/packages/shared/esql/kbn-esql-language: {}
+
+  src/platform/packages/shared/esql/kbn-esql-server-utils: {}
+
+  src/platform/packages/shared/esql/kbn-esql-types: {}
+
+  src/platform/packages/shared/esql/kbn-esql-utils: {}
+
   src/platform/packages/shared/home/sample_data_card: {}
 
   src/platform/packages/shared/home/sample_data_tab: {}
@@ -8033,6 +8044,10 @@ importers:
 
   src/platform/packages/shared/kbn-encrypted-saved-objects-shared: {}
 
+  src/platform/packages/shared/kbn-entity-access-control: {}
+
+  src/platform/packages/shared/kbn-entity-access-control-ui: {}
+
   src/platform/packages/shared/kbn-es: {}
 
   src/platform/packages/shared/kbn-es-archiver: {}
@@ -8051,17 +8066,9 @@ importers:
 
   src/platform/packages/shared/kbn-esql-composer: {}
 
-  src/platform/packages/shared/kbn-esql-language: {}
-
   src/platform/packages/shared/kbn-esql-resource-browser: {}
 
   src/platform/packages/shared/kbn-esql-resource-browser/.storybook: {}
-
-  src/platform/packages/shared/kbn-esql-server-utils: {}
-
-  src/platform/packages/shared/kbn-esql-types: {}
-
-  src/platform/packages/shared/kbn-esql-utils: {}
 
   src/platform/packages/shared/kbn-eval-kql: {}
 
@@ -8764,8 +8771,6 @@ importers:
   src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin: {}
 
   src/platform/test/plugin_functional/plugins/hardening: {}
-
-  src/platform/test/plugin_functional/plugins/index_patterns: {}
 
   src/platform/test/plugin_functional/plugins/kbn_top_nav: {}
 

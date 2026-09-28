@@ -130,7 +130,7 @@ const eligibleStreamsRoute = createServerRoute({
           featureName: 'knowledge indicator extraction',
           request,
         }),
-        streamsKIsOnboardingClient.getRecentExecutions(),
+        streamsKIsOnboardingClient.getRecentExecutions(request),
         streamsClient.listStreams(),
         uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS),
         uiSettingsClient.get<string>(OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS),

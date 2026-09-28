@@ -6,13 +6,20 @@
  */
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { MAX_PER_PAGE } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 
 export const EMPTY_VALUE = '—';
 export const LAST_EPISODE_TIMESTAMP_ESQL_VARIABLE = 'lastEpisodeTimestamp';
 export const RELATED_ALERT_EPISODES_PAGE_SIZE = 5;
-/** Max episodes returned per list page (ESQL LIMIT) and max unique rules resolved in one batch. */
+/** Max episodes returned per list page (ESQL LIMIT). */
 export const ALERT_EPISODES_LIST_PAGE_SIZE = 1000;
+/**
+ * Rule ids resolved per find request. Bounded by the API's `per_page` ceiling, and
+ * well under it the id filter travels in the query string, where a single batch of
+ * every id on a full page would exceed Kibana's 64KB header limit.
+ */
+export const RULES_RESOLUTION_BATCH_SIZE = MAX_PER_PAGE;
 /** Source id used when settling the native v2 ES|QL episode fetches. */
 export const ALERTING_V2_EPISODE_SOURCE_ID = 'v2';
 export const QUERY_STALE_TIME = 30_000;
