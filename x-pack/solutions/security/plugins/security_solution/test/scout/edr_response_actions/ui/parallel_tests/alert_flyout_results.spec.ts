@@ -6,20 +6,11 @@
  */
 
 import { expect } from '@kbn/scout-security/ui';
-import { spaceTest, tags } from '../fixtures';
+import { getPlaywrightTagsFor, spaceTest, tags } from '../fixtures';
 import {
   seedAlertFlyoutResponseAction,
   type SeededAlertFlyoutResponseAction,
 } from '../fixtures/seed_response_actions_history';
-
-/**
- * Flyout v2 phrases the action as "is executing isolate command" / "executed
- * isolate command". The response-actions list still uses "isolate is pending"
- * / "isolate completed successfully", and the shared loader can also mark the
- * action failed. Any of these means the isolate result rendered.
- */
-const ISOLATE_RESULT =
-  /isolate is pending|isolate completed successfully|isolate failed|is executing isolate command|executed isolate command|failed to execute isolate command|tried to execute isolate command/;
 
 const requireSeededAlert = (
   seeded: SeededAlertFlyoutResponseAction | undefined
@@ -34,15 +25,17 @@ spaceTest.describe(
   'Alert flyout automated response results',
   {
     // Cypress was `@ess`, `@serverless`, and `@skipInServerlessMKI`.
-    // `@local-serverless-security_complete` keeps simulated serverless and leaves
-    // out Cloud serverless (MKI). Host indexing needs the system-indices user,
-    // which cannot be provisioned on MKI.
-    tag: [...tags.stateful.classic, '@local-serverless-security_complete'],
+    // Local serverless only: Cloud serverless (MKI) cannot provision the
+    // system-indices user this seed uses.
+    tag: [
+      ...tags.stateful.classic,
+      ...getPlaywrightTagsFor('serverless', 'security_complete', 'local'),
+    ],
   },
   () => {
     let seeded: SeededAlertFlyoutResponseAction | undefined;
 
-    spaceTest.beforeAll(async ({ esClient, kbnClient, scoutSpace, config }) => {
+    spaceTest.beforeAll(async ({ apiServices, esClient, kbnClient, scoutSpace, config }) => {
       // Endpoint host indexing installs Fleet and waits on metadata transforms.
       spaceTest.setTimeout(600_000);
       // Serverless forces xpack.spaces.allowSolutionVisibility off, so the
@@ -55,15 +48,16 @@ spaceTest.describe(
         kbnClient,
         spaceId: scoutSpace.id,
         config,
+        detectionRule: apiServices.detectionRule,
+        detectionAlerts: apiServices.detectionAlerts,
       });
     });
 
     spaceTest.beforeEach(async ({ browserAuth }) => {
-      // The alerts page requires manage on `.lists-*` and `.items-*`. soc_manager
-      // does not have it, so the page stops on the privileges callout and the
-      // alerts table never reaches its loaded state. platform_engineer has that
-      // index access and actions-log read, which is what the response details need.
-      await browserAuth.loginAsPlatformEngineer();
+      // soc_manager is the analyst-tier role from the Cypress spec. It can read
+      // alerts and the response-actions log. A missing `manage` privilege on the
+      // lists indices shows a callout beside the table; it does not replace it.
+      await browserAuth.loginAsSecurityRole('soc_manager');
     });
 
     spaceTest.afterAll(async () => {
@@ -71,20 +65,20 @@ spaceTest.describe(
     });
 
     spaceTest('shows the isolate action on the alert response details', async ({ pageObjects }) => {
-      // The alerts grid wait is 60s, and the suite timeout is also 60s.
+      // openForRule waits up to 60s for the alerts grid, and the suite timeout is also 60s.
       spaceTest.setTimeout(180_000);
-      const { alertId } = requireSeededAlert(seeded);
-      const { alertFlyoutResponse } = pageObjects;
+      const { ruleName } = requireSeededAlert(seeded);
+      const { documentFlyout, responseTool } = pageObjects;
 
       await spaceTest.step('open the seeded alert', async () => {
-        await alertFlyoutResponse.openAlert(alertId);
+        await documentFlyout.openForRule(ruleName);
       });
 
       await spaceTest.step('open the response details', async () => {
-        await alertFlyoutResponse.openResponseDetails();
+        await responseTool.openResponseDetails();
       });
 
-      await expect(alertFlyoutResponse.responseDetails).toContainText(ISOLATE_RESULT);
+      await expect(responseTool.responseDetails).toContainText('executed isolate command');
     });
   }
 );

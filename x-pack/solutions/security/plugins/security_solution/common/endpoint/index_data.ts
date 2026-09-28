@@ -77,7 +77,8 @@ export const indexHostsAndAlerts = usageTracker.track(
     numResponseActions?: number,
     alertIds?: string[],
     isServerless: boolean = false,
-    logger_?: ToolingLog
+    logger_?: ToolingLog,
+    responseState?: 'success'
   ): Promise<IndexedHostsAndAlertsResponse> => {
     const random = seedrandom(seed);
     const logger = logger_ ?? createToolingLogger();
@@ -133,6 +134,7 @@ export const indexHostsAndAlerts = usageTracker.track(
         withResponseActions,
         numResponseActions,
         alertIds,
+        responseState,
       });
 
       mergeAndAppendArrays(response, indexedHosts);

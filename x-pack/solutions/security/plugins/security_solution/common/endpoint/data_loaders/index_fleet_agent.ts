@@ -238,24 +238,6 @@ export const deleteIndexedFleetAgents = async (
       await new Promise((resolve) => setTimeout(resolve, 250));
     }
 
-    // The policy delete only cares that no active agent is still assigned.
-    // If a conflict survives the retries, unenroll the doc so that check passes.
-    if ((deleted?.version_conflicts ?? 0) > 0) {
-      await esClient
-        .updateByQuery({
-          index: `${indexedData.fleetAgentsIndex}-*`,
-          wait_for_completion: true,
-          conflicts: 'proceed',
-          refresh: true,
-          query,
-          script: {
-            lang: 'painless',
-            source: 'ctx._source.active = false',
-          },
-        })
-        .catch(wrapErrorAndRejectPromise);
-    }
-
     response.agents = deleted;
   }
 

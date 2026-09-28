@@ -6,7 +6,12 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { EsClient, KbnClient, ScoutTestConfig } from '@kbn/scout-security';
+import type {
+  EsClient,
+  KbnClient,
+  ScoutTestConfig,
+  SecurityApiServicesFixture,
+} from '@kbn/scout-security';
 import { createSystemIndicesEsClient } from './system_indices_es_client';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import {
@@ -117,11 +122,13 @@ const indexResponseActionHost = ({
   alertIds,
   isServerless,
   hostNamePrefix = 'history-log',
+  responseState,
 }: Omit<SeedResponseActionsHistoryParams, 'spaceId' | 'config'> & {
   numResponseActions: number;
   alertIds?: string[];
   isServerless: boolean;
   hostNamePrefix?: string;
+  responseState?: 'success';
 }): Promise<IndexedHostsAndAlertsResponse> => {
   return indexHostsAndAlerts(
     esClient,
@@ -141,7 +148,9 @@ const indexResponseActionHost = ({
     true,
     numResponseActions,
     alertIds,
-    isServerless
+    isServerless,
+    undefined,
+    responseState
   );
 };
 
@@ -289,12 +298,11 @@ const assertAutomatedActionRuleId = async (esClient: EsClient, agentId: string):
 };
 
 export interface SeededAlertFlyoutResponseAction {
-  readonly alertId: string;
+  readonly ruleName: string;
   cleanup: () => Promise<void>;
 }
 
 const SPACE_ALERTS_INDEX_PREFIX = '.alerts-security.alerts-';
-const DETECTION_ENGINE_RULES_URL = '/api/detection_engine/rules';
 const ALERT_WAIT_TIMEOUT_MS = 180_000;
 const ALERT_WAIT_INTERVAL_MS = 1_000;
 
@@ -335,16 +343,21 @@ const waitForSpaceAlertId = async (
 };
 
 /**
- * Creates one detection alert in the worker space and one automated isolate
- * action for that alert. The action status is chosen by the shared data
- * loader, so callers should accept pending, successful, and failed isolate copy.
+ * Creates one detection alert in the worker space and one successful automated
+ * isolate action for that alert.
  */
 export const seedAlertFlyoutResponseAction = async ({
   esClient,
   kbnClient: rootKbnClient,
   spaceId,
   config,
-}: SeedResponseActionsHistoryParams): Promise<SeededAlertFlyoutResponseAction> => {
+  detectionRule,
+  detectionAlerts,
+}: SeedResponseActionsHistoryParams &
+  Pick<
+    SecurityApiServicesFixture,
+    'detectionRule' | 'detectionAlerts'
+  >): Promise<SeededAlertFlyoutResponseAction> => {
   const kbnClient = scopeKbnClientToSpace(rootKbnClient, spaceId);
   const systemEsClient = await createSystemIndicesEsClient(esClient, config);
   const sourceIndex = `flyout-results-source-${randomUUID()}`;
@@ -365,20 +378,9 @@ export const seedAlertFlyoutResponseAction = async ({
       deletions.push(deleteIndexedHostsAndAlerts(systemEsClient, kbnClient, host));
     }
     if (ruleCreated) {
-      deletions.push(
-        kbnClient
-          .request({
-            method: 'DELETE',
-            path: `${DETECTION_ENGINE_RULES_URL}?rule_id=${encodeURIComponent(ruleId)}`,
-          })
-          .catch((error: unknown) => {
-            const message = error instanceof Error ? error.message : String(error);
-            if (!message.includes('404')) {
-              throw error;
-            }
-          })
-      );
+      deletions.push(detectionRule.deleteAll());
     }
+    deletions.push(detectionAlerts.deleteAll());
     deletions.push(esClient.indices.delete({ index: sourceIndex, ignore_unavailable: true }));
 
     const results = await Promise.allSettled(deletions);
@@ -425,22 +427,18 @@ export const seedAlertFlyoutResponseAction = async ({
       refresh: 'wait_for',
     });
 
-    await kbnClient.request({
-      method: 'POST',
-      path: DETECTION_ENGINE_RULES_URL,
-      body: {
-        index: [sourceIndex],
-        enabled: true,
-        name: ruleName,
-        description: 'Scout alert for the response flyout',
-        risk_score: 1,
-        rule_id: ruleId,
-        severity: 'high',
-        type: 'query',
-        query: '*:*',
-        from: '2019-01-01T00:00:00.000Z',
-        interval: '1m',
-      },
+    await detectionRule.createCustomQueryRule({
+      index: [sourceIndex],
+      enabled: true,
+      name: ruleName,
+      description: 'Scout alert for the response flyout',
+      risk_score: 1,
+      rule_id: ruleId,
+      severity: 'high',
+      type: 'query',
+      query: '*:*',
+      from: '2019-01-01T00:00:00.000Z',
+      interval: '1m',
     });
     ruleCreated = true;
 
@@ -453,10 +451,11 @@ export const seedAlertFlyoutResponseAction = async ({
       alertIds: [alertId],
       isServerless: config.serverless,
       hostNamePrefix: 'flyout-results',
+      responseState: 'success',
     });
 
     return {
-      alertId,
+      ruleName,
       cleanup,
     };
   } catch (error) {
