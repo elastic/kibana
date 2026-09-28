@@ -45,7 +45,7 @@ export const buildNewlyHighCriticalCountQuery = (
     `SET unmapped_fields="nullify";`,
     `FROM ${index}`,
     `| WHERE @timestamp >= NOW() - ${fetchWindow}`,
-    `| EVAL entity_euid = CASE(host.risk.id_value IS NOT NULL, CONCAT("host:", host.risk.id_value), user.risk.id_value IS NOT NULL, CONCAT("user:", user.risk.id_value), service.risk.id_value IS NOT NULL, CONCAT("service:", service.risk.id_value), null)`,
+    `| EVAL entity_euid = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value)`,
     `| EVAL risk_level = COALESCE(host.risk.calculated_level, user.risk.calculated_level, service.risk.calculated_level)`,
     `| WHERE entity_euid IS NOT NULL`,
     `| EVAL level_num = CASE(risk_level == "Critical", 4, risk_level == "High", 3, risk_level == "Moderate", 2, risk_level == "Low", 1, 0)`,
