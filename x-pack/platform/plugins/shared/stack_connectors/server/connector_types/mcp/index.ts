@@ -13,6 +13,7 @@ import {
   AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
+import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
   ValidatorType,
@@ -28,13 +29,16 @@ import {
 } from '@kbn/connector-schemas/mcp';
 import { McpConnector } from './mcp';
 
-export const getMcpConnectorType = (): SubActionConnectorType<
-  MCPConnectorConfig,
-  MCPConnectorSecrets
-> => ({
+export interface McpConnectorTypeDeps {
+  getClientLeasePool: ActionsPluginSetupContract['getClientLeasePool'];
+}
+
+export const getMcpConnectorType = ({
+  getClientLeasePool,
+}: McpConnectorTypeDeps): SubActionConnectorType<MCPConnectorConfig, MCPConnectorSecrets> => ({
   id: CONNECTOR_ID,
   name: CONNECTOR_NAME,
-  getService: (params) => new McpConnector(params),
+  getService: (params) => new McpConnector(params, getClientLeasePool()),
   schema: {
     config: MCPConnectorConfigSchema,
     secrets: MCPConnectorSecretsSchema,
