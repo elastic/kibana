@@ -151,6 +151,14 @@ describe('KibanaActionStepImpl', () => {
       expect(global.fetch).not.toHaveBeenCalled();
     });
 
+    it('JSON-encodes a scalar string body when the request is JSON', async () => {
+      step = createStep({ request: { method: 'POST', path: '/api/test', body: 'hello' } });
+      await (step as any)._run();
+      expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
+        expect.objectContaining({ body: '"hello"' })
+      );
+    });
+
     it('preserves JSON strings and caller content type', async () => {
       step = createStep({
         request: {

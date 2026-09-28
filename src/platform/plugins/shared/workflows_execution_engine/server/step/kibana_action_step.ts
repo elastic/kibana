@@ -271,7 +271,10 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       result = await contextManager.callKibanaApi({
         method: normalizedMethod as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
         path: requestConfig.path,
-        body: requestConfig.rawBody === undefined ? requestConfig.body : undefined,
+        body:
+          requestConfig.rawBody === undefined
+            ? this.selfClientBody(requestConfig.body, requestConfig.headers)
+            : undefined,
         rawBody: requestConfig.rawBody,
         query: requestConfig.query,
         headers: requestConfig.headers,
@@ -295,6 +298,30 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       return { ...result.body, _debug: { method: normalizedMethod, fullUrl: result.url } };
     }
     return result.body;
+  }
+
+  /**
+   * Core sends string bodies unchanged. A non-JSON string with `application/json` would be
+   * invalid JSON; legacy fetch JSON.stringified every body, so encode only that case.
+   * Strings that are already JSON stay raw, including an explicit non-JSON content type.
+   */
+  private selfClientBody(body: unknown, headers?: Record<string, string>): unknown {
+    if (typeof body !== 'string' || !this.sendsJsonBody(headers)) {
+      return body;
+    }
+    try {
+      JSON.parse(body);
+      return body;
+    } catch {
+      return JSON.stringify(body);
+    }
+  }
+
+  private sendsJsonBody(headers?: Record<string, string>): boolean {
+    const contentType = Object.entries(headers ?? {}).find(
+      ([name]) => name.toLowerCase() === 'content-type'
+    )?.[1];
+    return contentType === undefined || contentType.toLowerCase().includes('application/json');
   }
 
   private getKibanaUrl(use_server_info = false, use_localhost = false): string {
