@@ -30,6 +30,8 @@ export interface UseFetchExemplarsParams {
   whereStatements?: string[];
   originalSource?: string;
   profileId: string;
+  /** False while Discover keeps the grid mounted but hidden; nothing is fetched then. */
+  isComponentVisible: boolean;
 }
 
 /**
@@ -43,6 +45,7 @@ export const useFetchExemplars = ({
   whereStatements,
   originalSource,
   profileId,
+  isComponentVisible,
 }: UseFetchExemplarsParams): ExemplarsResponse | undefined => {
   const isExemplarsEnabled = useFeatureFlag(
     FEATURE_FLAGS.IS_EXEMPLARS_ENABLED,
@@ -60,7 +63,7 @@ export const useFetchExemplars = ({
 
   const { value } = useAbortableAsync<ExemplarsResponse | undefined>(
     async ({ signal }) => {
-      if (!isExemplarsEnabled || !dataView) {
+      if (!isExemplarsEnabled || !isComponentVisible || !dataView) {
         return undefined;
       }
 
@@ -109,10 +112,13 @@ export const useFetchExemplars = ({
         return undefined;
       }
     },
-    // `fetchParams.timeRange`, `filters` and `lastReloadRequestTime` are rebuilt once per Discover
-    // fetch (see `processFetchParams` in kbn-unified-histogram), so this re-fires at the chart's cadence.
+    // `fetchParams.timeRange`, `filters`, `lastReloadRequestTime` and `abortController` are rebuilt
+    // once per Discover fetch (see `processFetchParams` in kbn-unified-histogram), so this re-fires at
+    // the chart's cadence and, like the metrics-info fetch, aborts the previous request when a new
+    // Discover fetch starts.
     [
       isExemplarsEnabled,
+      isComponentVisible,
       dataView,
       metricItem,
       whereStatements,
@@ -122,6 +128,7 @@ export const useFetchExemplars = ({
       fetchParams.filters,
       fetchParams.esqlVariables,
       fetchParams.lastReloadRequestTime,
+      fetchParams.abortController,
       uiSettings,
       profileId,
       reportError,

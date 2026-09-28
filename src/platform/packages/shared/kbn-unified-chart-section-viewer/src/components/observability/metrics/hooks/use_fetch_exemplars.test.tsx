@@ -96,6 +96,7 @@ const createParams = (
   } as unknown as ChartSectionProps['services'],
   metricItem: mockMetric,
   profileId: TEST_PROFILE_ID,
+  isComponentVisible: true,
   ...overrides,
 });
 
@@ -148,6 +149,17 @@ describe('useFetchExemplars', () => {
   it('does nothing without a data view', async () => {
     const params = createParams();
     params.fetchParams = { ...params.fetchParams, dataView: null as unknown as DataView };
+
+    const { result } = renderHook(() => useFetchExemplars(params));
+
+    await flushAsync();
+    expect(mockProbe).not.toHaveBeenCalled();
+    expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
+    expect(result.current).toBeUndefined();
+  });
+
+  it('neither probes nor fetches while the grid is hidden', async () => {
+    const params = createParams({ isComponentVisible: false });
 
     const { result } = renderHook(() => useFetchExemplars(params));
 

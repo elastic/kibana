@@ -104,6 +104,11 @@ export type MetricsGridProps = Pick<
    *
    */
   isTabSelected: boolean;
+  /**
+   * `ChartsGrid` hides an inactive grid with CSS rather than unmounting it, so per-chart
+   * fetches that should pause while hidden (exemplars) need this flag explicitly.
+   */
+  isComponentVisible: boolean;
 };
 
 const getItemKey = (metricItem: ParsedMetricItem, index: number) => {
@@ -124,6 +129,7 @@ export const MetricsGrid = ({
   getUserMessages,
   getDescription,
   isTabSelected,
+  isComponentVisible,
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -293,6 +299,7 @@ export const MetricsGrid = ({
                   profileId={profileId}
                   gridSettings={gridSettings}
                   onMetricExplored={onMetricExplored}
+                  isComponentVisible={isComponentVisible}
                 />
               </EuiFlexItem>
             );
@@ -335,6 +342,7 @@ interface ChartItemProps
   profileId: string;
   gridSettings: MetricsGridSettings;
   onMetricExplored?: (metricUniqueKey: string) => void;
+  isComponentVisible: boolean;
 }
 
 const ChartItem = React.memo(
@@ -364,6 +372,7 @@ const ChartItem = React.memo(
     profileId,
     gridSettings,
     onMetricExplored,
+    isComponentVisible,
   }: ChartItemProps) => {
     const { euiTheme } = useEuiTheme();
     const colorPalette = useMemo(
@@ -398,6 +407,7 @@ const ChartItem = React.memo(
       whereStatements,
       originalSource: userSource,
       profileId,
+      isComponentVisible,
     });
     // TODO(kibana#289722): feed `exemplars` into useChartLayers as a points layer.
     void exemplars;
