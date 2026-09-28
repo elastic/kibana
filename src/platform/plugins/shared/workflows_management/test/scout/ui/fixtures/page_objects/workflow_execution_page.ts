@@ -20,9 +20,27 @@ import type { Locator, ScoutPage } from '@kbn/scout';
  */
 export class WorkflowExecutionPage {
   public executionPanel: Locator;
+  public readonly serviceAccountIdentity: Locator;
+  public readonly serviceAccountBadges: Locator;
+  public readonly copyServiceAccountId: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.executionPanel = this.page.testSubj.locator('workflowExecutionPanel');
+    this.serviceAccountIdentity = this.page.testSubj.locator('workflowServiceAccountName');
+    this.serviceAccountBadges = this.page.testSubj
+      .locator('workflowServiceAccountResolved')
+      .or(this.page.testSubj.locator('workflowServiceAccountUnavailable'));
+    this.copyServiceAccountId = this.page.getByRole('button', { name: 'Copy service account ID' });
+  }
+
+  async gotoOverview(workflowId: string, executionId: string): Promise<void> {
+    await this.page.gotoApp(`workflows/${workflowId}`, {
+      params: { executionId, stepExecutionId: '__overview', tab: 'executions' },
+    });
+    await this.page.testSubj
+      .locator('workflowExecutionOverview')
+      .or(this.page.testSubj.locator('workflowExecutionFlyout'))
+      .waitFor({ state: 'visible' });
   }
 
   /**
