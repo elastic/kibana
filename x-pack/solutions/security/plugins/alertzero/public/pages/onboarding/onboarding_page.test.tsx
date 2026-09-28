@@ -15,6 +15,10 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { OnboardingPage } from './onboarding_page';
 
+jest.mock('../../components/scan_failure_callout/scan_failure_callout', () => ({
+  ScanFailureCallout: () => null,
+}));
+
 const renderPage = ({ canWrite = false }: { canWrite?: boolean } = {}) => {
   const core = coreMock.createStart();
   // coreMock.createStart() does not populate feature capabilities; set the
