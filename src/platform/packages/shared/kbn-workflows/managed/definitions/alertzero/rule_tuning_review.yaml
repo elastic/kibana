@@ -119,7 +119,9 @@ consts:
   preview_invocation_count: 2
   # How long an AI-created exception lasts before it needs re-approval, so a wrong
   # diagnosis self-heals instead of permanently muting the rule.
-  exception_expire_days: 30
+  # 30 days, in seconds (Liquid filters chain left-to-right, so the offset has to be
+  # a single addable value).
+  exception_expire_seconds: 2592000
   # Written onto every alert that reached a decision, alongside the tag naming the
   # outcome. Filtered out by the sweep's harvest, so a later sweep cannot rediagnose
   # the same alerts into the same review; consts.reviewed_tag in rule_tuning_worker.yaml
@@ -560,26 +562,21 @@ steps:
     on-failure:
       continue: true
 
-  # Two steps because a single data.set step's fields can't reference each other:
-  # this converts consts.exception_expire_days into a seconds offset first...
-  - name: compute_exception_expire_offset
-    type: data.set
-    if: "${{ steps.diagnose_rule.output.structured_output.change_type == 'exception' }}"
-    with:
-      seconds: "{{ consts.exception_expire_days | times: 86400 }}"
-
-  # ...then adds it to the current epoch and formats the result as the ISO 8601 string
-  # the exceptions API's expire_time expects.
+  # Adds the expiry offset to the current epoch and formats the result as the ISO 8601
+  # string the exceptions API's expire_time expects.
   - name: compute_exception_expire_time
     type: data.set
     if: "${{ steps.diagnose_rule.output.structured_output.change_type == 'exception' }}"
     with:
       expire_time: >-
-        {{ "now" | date: "%s" | plus: steps.compute_exception_expire_offset.output.seconds | date: "%Y-%m-%dT%H:%M:%S.%LZ", "UTC" }}
+        {{ "now" | date: "%s" | plus: consts.exception_expire_seconds | date: "%Y-%m-%dT%H:%M:%S.%LZ", "UTC" }}
 
   # Rules using a data view, timestamp override, or alert suppression need fields
-  # the preview API cannot conditionally omit, so query and exception auto-apply is
-  # restricted the same way (both reuse this same preview mechanism below).
+  # the preview API cannot conditionally omit, and a saved-query rule has no inline
+  # query to preview, so query and exception auto-apply is restricted the same way
+  # (both reuse this same preview mechanism below). The exception arm additionally
+  # requires its filter to have been built: falling back to the rule's own filters
+  # would backtest the unchanged rule and present it as the exception's result.
   # Gated on fetch_rule so a skipped diagnose_rule leaves supported null/false.
   - name: can_preview_query_change
     type: data.set
@@ -589,8 +586,11 @@ steps:
     with:
       supported: >-
         ${{ (steps.diagnose_rule.output.structured_output.change_type == 'query'
-            or steps.diagnose_rule.output.structured_output.change_type == 'exception')
+            or (steps.diagnose_rule.output.structured_output.change_type == 'exception'
+              and steps.build_exception_filter.error == null
+              and steps.build_exception_filter.output.filters != null))
           and steps.fetch_rule.output.type == 'query'
+          and steps.fetch_rule.output.saved_id == null
           and steps.fetch_rule.output.data_view_id == null
           and steps.fetch_rule.output.timestamp_override == null
           and steps.fetch_rule.output.alert_suppression == null }}
@@ -730,7 +730,7 @@ steps:
         {% for entry in steps.diagnose_rule.output.structured_output.exception_entries %}
         - {{ entry.field }} {{ entry.operator }}{% if entry.values %} {{ entry.values | join: ", " }}{% elsif entry.value %} {{ entry.value }}{% endif %}
         {% endfor %}
-        Approving adds the exception to the rule's own exception list. It can be removed in the Detection Rules UI.
+        Approving adds the exception to the rule's own exception list, expiring automatically on {{ steps.compute_exception_expire_time.output.expire_time }}. It can be removed or extended in the Detection Rules UI.
         {% when "risk_score" %}
         Current risk score: {{ steps.fetch_rule.output.risk_score }}
         Current severity: {{ steps.fetch_rule.output.severity }}
@@ -776,8 +776,9 @@ steps:
         Proposed query preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
         {% endif %}
         {% else %}
-        No backtest: this rule is not a query rule, or uses a data view, timestamp
-        override, or alert suppression, which the preview API cannot reproduce.
+        No backtest: this rule is not a plain query rule (saved query, data view,
+        timestamp override, or alert suppression are not supported by the preview),
+        or the proposed exception could not be converted into a preview filter.
         Approving still applies the proposed change, so judge it on the change itself
         and the false positives above rather than on a simulated alert count.
         {% endif %}

@@ -9,36 +9,38 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
+import { exceptionEntrySchema } from '@kbn/securitysolution-exceptions-common/workflows';
 
 export const BuildExceptionEntriesFilterStepId = 'security.buildExceptionEntriesFilter' as const;
 
-// Mirrors the exception_entries shape rule_tuning_review.yaml's diagnose_rule step already
-// asks the diagnosing agent to return, so a proposed exception can be turned into a filter
-// without the agent (or the workflow author) needing to know about the underlying
-// match/match_any/wildcard/exists entry types the exceptions system stores these as.
-const entryBase = z.object({
-  field: z.string().min(1).max(1024),
-});
+const UNSUPPORTED_OPERATORS: readonly string[] = ['is_in_list', 'is_not_in_list'];
 
+// Reuses the flat entry shape the exception-creation steps take (not a z.union:
+// unions in step input schemas break workflow validation for template-string
+// inputs, see bulk_action_schemas.ts). Value-list operators are rejected: this
+// step builds the filter itself and cannot resolve a value list.
 export const buildExceptionEntriesFilterInputSchema = z.object({
   entries: z
-    .array(
-      z.union([
-        entryBase.extend({
-          operator: z.enum(['is', 'is_not', 'matches', 'does_not_match']),
-          value: z.string().min(1).max(1024),
-        }),
-        entryBase.extend({
-          operator: z.enum(['is_one_of', 'is_not_one_of']),
-          values: z.array(z.string().min(1).max(1024)).min(1).max(1000),
-        }),
-        entryBase.extend({
-          operator: z.enum(['exists', 'does_not_exist']),
-        }),
-      ])
-    )
+    .array(exceptionEntrySchema)
     .min(1)
     .max(100)
+    .superRefine((entries, ctx) => {
+      entries.forEach((entry, index) => {
+        if (UNSUPPORTED_OPERATORS.includes(entry.operator)) {
+          ctx.addIssue({
+            code: 'custom',
+            path: [index, 'operator'],
+            message: i18n.translate(
+              'xpack.securitySolution.workflows.steps.buildExceptionEntriesFilter.listOperatorUnsupported',
+              {
+                defaultMessage:
+                  'Value-list conditions (`is_in_list` / `is_not_in_list`) are not supported when building an exception filter',
+              }
+            ),
+          });
+        }
+      });
+    })
     .describe('Proposed exception entries, ANDed together as one exception item would be'),
   existing_filters: z
     .array(z.record(z.string(), z.unknown()))

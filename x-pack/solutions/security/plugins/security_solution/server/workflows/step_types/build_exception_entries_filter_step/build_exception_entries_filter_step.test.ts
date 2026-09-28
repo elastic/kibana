@@ -7,14 +7,14 @@
 
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { buildExceptionEntriesFilterStepDefinition } from './build_exception_entries_filter_step';
-import { buildExceptionEntriesFilterInputSchema } from '../../../../common/workflows/step_types/build_exception_entries_filter_step/build_exception_entries_filter_step_common';
+import type { buildExceptionEntriesFilterInputSchema } from '../../../../common/workflows/step_types/build_exception_entries_filter_step/build_exception_entries_filter_step_common';
 
 type Context = StepHandlerContext<typeof buildExceptionEntriesFilterInputSchema>;
 
+// Raw input on purpose: the engine renders `context.input` without running
+// inputSchema.parse(), so the handler must validate for itself.
 const runHandler = async (userInput: unknown) => {
-  const context = {
-    input: buildExceptionEntriesFilterInputSchema.parse(userInput),
-  } as unknown as Context;
+  const context = { input: userInput } as unknown as Context;
   const result = await buildExceptionEntriesFilterStepDefinition.handler(context);
   if (!result.output) {
     throw new Error('handler did not return output');
@@ -126,5 +126,37 @@ describe('buildExceptionEntriesFilterStepDefinition', () => {
     });
 
     expect(output.filters).toHaveLength(1);
+  });
+
+  it('rejects empty entries instead of building a filter that excludes everything', async () => {
+    await expect(runHandler({ entries: [] })).rejects.toMatchObject({
+      type: 'ValidationError',
+    });
+  });
+
+  it('rejects unknown operators', async () => {
+    await expect(
+      runHandler({ entries: [{ field: 'host.name', operator: 'resembles', value: 'x' }] })
+    ).rejects.toMatchObject({ type: 'ValidationError' });
+  });
+
+  it('rejects value-list operators, which need a list client this step does not have', async () => {
+    await expect(
+      runHandler({
+        entries: [
+          {
+            field: 'source.ip',
+            operator: 'is_in_list',
+            list: { id: 'scanner_ips', type: 'ip' },
+          },
+        ],
+      })
+    ).rejects.toMatchObject({ type: 'ValidationError' });
+  });
+
+  it('rejects entries missing the operand their operator requires', async () => {
+    await expect(
+      runHandler({ entries: [{ field: 'host.name', operator: 'is' }] })
+    ).rejects.toMatchObject({ type: 'ValidationError' });
   });
 });
