@@ -26,6 +26,12 @@ const selectorAriaLabel = i18n.translate(
   { defaultMessage: 'Choose who to talk to' }
 );
 
+const getButtonAriaLabel = (mode: string) =>
+  i18n.translate('xpack.agentBuilder.conversationInput.triggerModeSelector.buttonAriaLabel', {
+    defaultMessage: 'Choose who to talk to, {mode}',
+    values: { mode },
+  });
+
 const triggerModeOptions = [ChatTriggerMode.Always, ChatTriggerMode.Never] as const;
 
 interface TriggerModeSelectorProps {
@@ -53,6 +59,7 @@ export const TriggerModeSelector: React.FC<TriggerModeSelectorProps> = ({
           size="s"
           iconType="chevronSingleDown"
           iconSide="right"
+          aria-label={getButtonAriaLabel(triggerModeLabels[triggerMode])}
           data-test-subj="agentBuilderTriggerModeSelectorButton"
           onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
         >
