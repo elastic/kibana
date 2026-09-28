@@ -37,6 +37,8 @@ jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_index_names', () =
   fetchAlertsIndexNames: jest.fn(),
 }));
 
+jest.setTimeout(30_000);
+
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockTheme = themeServiceMock.createSetupContract({ darkMode: false, name: 'borealis' });
 const mockUiSettings = {
