@@ -20,7 +20,7 @@ consts:
     category: respond
     impact: medium
     reversible: false
-    approvalPolicy: always-gate
+    approvalPolicy: autonomy-dependent
   actionLabel: Suspend process
   # Sentinel id used only to probe Actions-log privilege before suspending.
   # A 404 means the privilege is present; anything else must fail closed.

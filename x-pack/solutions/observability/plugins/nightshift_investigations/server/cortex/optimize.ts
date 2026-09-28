@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { InferenceClient } from '@kbn/inference-common';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import {
   CORTEX_EDIT_ACTIONS,
   CORTEX_ENTITY_TYPES,
@@ -111,10 +111,8 @@ const normalizeProposal = (value: unknown): CortexEditProposal | undefined => {
 
 export const createLlmProposeCortexEdits = ({
   inferenceClient,
-  connectorId,
 }: {
-  inferenceClient: InferenceClient;
-  connectorId: string;
+  inferenceClient: BoundInferenceClient;
 }): ProposeCortexEdits => {
   return async ({ transcript, catalog }) => {
     const catalogLines =
@@ -132,7 +130,6 @@ export const createLlmProposeCortexEdits = ({
 
     const response = await inferenceClient.output({
       id: 'nightshift_cortex_optimize',
-      connectorId,
       system: `You maintain a team-wide wiki called Cortex. After an investigation, propose a small set of durable page edits.
 
 Rules:
