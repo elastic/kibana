@@ -85,7 +85,7 @@ describe('<ExpandablePanel />', () => {
       const callback = jest.fn();
       const props = {
         ...defaultProps,
-        header: { ...defaultProps.header, link: { callback } },
+        header: { ...defaultProps.header, link: { callback, tooltip: 'test tooltip' } },
       };
       const { getByRole } = render(
         <ThemeProvider>
