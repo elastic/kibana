@@ -88,11 +88,11 @@ describe('SelectSeverity', () => {
 
     // Should show the selectable options with threshold ranges
     expect(getAllByRole('option').map((option) => option.textContent)).toEqual([
-      '0-3',
-      '3-25',
-      '25-50',
-      '50-75',
-      '75-100',
+      '0-3. Checked option.',
+      '3-25. Checked option.',
+      '25-50. Checked option.',
+      '50-75. Checked option.',
+      '75-100. Checked option.',
     ]);
   });
 
