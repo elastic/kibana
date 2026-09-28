@@ -33,6 +33,10 @@ The **Search messages** action requires a user token and is not available when u
 ::::
 
 ## Receive Slack events [slack-v2-inbound-events]
+```{applies_to}
+serverless: unavailable
+stack: preview 9.6+
+```
 
 The connector can start a workflow from a Slack Events API `event_callback`. A saved Slack connector does not receive events until **Receive events** is turned on for that connector.
 
