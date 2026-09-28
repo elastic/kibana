@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import type { SelectedSource } from '../components/source_picker';
 import { areSourceSelectionsEqual, toSelectedSources } from '../utils/sources';
@@ -39,6 +39,11 @@ export const useSourcesEditor = ({
     selectedSources: SelectedSource[];
   }>();
   const { saveSources, isSaving } = useSaveAiIndexSources();
+
+  // Discard a stale session if the route switches to a different AI index.
+  useEffect(() => {
+    setSession(undefined);
+  }, [aiIndex?.id]);
 
   const startEditing = useCallback(() => {
     const initialSources = toSelectedSources(aiIndex?.sources ?? []);

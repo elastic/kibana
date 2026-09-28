@@ -618,11 +618,11 @@ describe('AiIndexDetailPage', () => {
     renderWithProviders(services);
 
     expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddDescriptionButton')).not.toBeInTheDocument();
 
     await waitForAiIndexDetailLoaded();
 
-    expect(screen.getByTestId('contextEditDescriptionButton')).toBeEnabled();
+    expect(screen.getByTestId('contextAddDescriptionButton')).toBeEnabled();
 
     expect(screen.getByTestId('contextEditAutomationsButton')).toBeEnabled();
   });
@@ -774,7 +774,7 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
 
     expect(screen.queryByTestId('contextAiIndexDetailManagedBadge')).not.toBeInTheDocument();
-    expect(screen.getByTestId('contextEditDescriptionButton')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAddDescriptionButton')).toBeInTheDocument();
     expect(screen.getByTestId('contextEditSourcesButton')).toBeInTheDocument();
 
     expect(screen.getByTestId('contextEditAutomationsButton')).toBeInTheDocument();

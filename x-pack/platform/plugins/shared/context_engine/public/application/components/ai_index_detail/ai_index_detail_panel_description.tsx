@@ -13,7 +13,6 @@ interface AiIndexDetailPanelDescriptionProps {
   'data-test-subj'?: string;
 }
 
-/** Subtitle under a panel title: consistent spacing and typography across detail sections. */
 export const AiIndexDetailPanelDescription = ({
   children,
   'data-test-subj': dataTestSubj,

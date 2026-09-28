@@ -37,7 +37,7 @@ interface SourcesPanelProps {
 }
 
 export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: SourcesPanelProps) => {
-  const sources = aiIndex?.sources ?? [];
+  const sources = useMemo(() => aiIndex?.sources ?? [], [aiIndex?.sources]);
   const { startEditing, editing } = useSourcesEditor({ aiIndex, onSaved });
   const hasSources = sources.length > 0;
 

@@ -97,7 +97,7 @@ export const AutomationsPanel = ({
   return (
     <EuiPanel hasBorder paddingSize="l">
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
-        <EuiFlexItem css={{ minWidth: 0 }}>
+        <EuiFlexItem>
           <EuiTitle size="s">
             <h2>
               {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.title', {

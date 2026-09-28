@@ -99,4 +99,15 @@ describe('useSourcesEditor', () => {
 
     expect(result.current.editing).toBeUndefined();
   });
+
+  it('drops the session when the AI index id changes', () => {
+    const { result, rerender } = renderEditor();
+
+    act(() => result.current.startEditing());
+    expect(result.current.editing).toBeDefined();
+
+    rerender({ aiIndex: { ...aiIndex, id: 'another-ai-index' } });
+
+    expect(result.current.editing).toBeUndefined();
+  });
 });
