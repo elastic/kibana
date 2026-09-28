@@ -65,7 +65,9 @@ export const getEntityFilterTerms = (filters: EntityFilters): EntityFilterTerm[]
 
 export const getEntityFilterESQL = (filters: EntityFilters): string[] =>
   FILTER_FIELDS.filter((key) => filters[key].length).map((key) => {
-    const quoted = (filters[key] as string[]).map((v) => `"${v.replace(/["\\]/g, '\\$&')}"`).join(', ');
+    const quoted = (filters[key] as string[])
+      .map((v) => `"${v.replace(/["\\]/g, '\\$&')}"`)
+      .join(', ');
     return `| WHERE ${FILTER_ES_FIELDS[key]} IN (${quoted})`;
   });
 

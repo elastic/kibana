@@ -80,10 +80,7 @@ export const useAlertBasedTiles = ({
     useResolvedLatestEntitiesIndexName(spaceId);
 
   const isEnabled =
-    !skip &&
-    !isIndexLoading &&
-    Boolean(euidApi) &&
-    Boolean(resolvedIndex?.indexName);
+    !skip && !isIndexLoading && Boolean(euidApi) && Boolean(resolvedIndex?.indexName);
 
   const query = useMemo(() => {
     if (!resolvedIndex?.indexName || !euidApi) return null;

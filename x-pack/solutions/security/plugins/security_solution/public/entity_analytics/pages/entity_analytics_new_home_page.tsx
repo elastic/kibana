@@ -127,29 +127,54 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     watchlistedCount,
     watchlistedEntityIds,
     isLoading: alertBasedLoading,
-  } = useAlertBasedTiles({ spaceId: resolvedSpaceId, timeRange, entityFilters, skip: skipUntilSpaceKnown });
+  } = useAlertBasedTiles({
+    spaceId: resolvedSpaceId,
+    timeRange,
+    entityFilters,
+    skip: skipUntilSpaceKnown,
+  });
   const {
     count: anomaliesCount,
     entityIds: anomaliesEntityIds,
     isLoading: anomaliesLoading,
-  } = useEntitiesWithAnomaliesCount({ spaceId: resolvedSpaceId, timeRange, entityFilters, skip: skipUntilSpaceKnown });
+  } = useEntitiesWithAnomaliesCount({
+    spaceId: resolvedSpaceId,
+    timeRange,
+    entityFilters,
+    skip: skipUntilSpaceKnown,
+  });
   const {
     count: newEntityCount,
     entityIds: newEntityEntityIds,
     isLoading: newEntityLoading,
-  } = useNewEntityCount({ spaceId: resolvedSpaceId, timeRange, entityFilters, skip: skipUntilSpaceKnown });
+  } = useNewEntityCount({
+    spaceId: resolvedSpaceId,
+    timeRange,
+    entityFilters,
+    skip: skipUntilSpaceKnown,
+  });
   const {
     count: riskMoversCount,
     entityIds: riskMoversEntityIds,
     isLoading: riskMoversLoading,
     isMissingIndex: riskMoversMissingIndex,
-  } = useRiskMoversCount({ spaceId: resolvedSpaceId, timeRange, entityFilters, skip: skipUntilSpaceKnown });
+  } = useRiskMoversCount({
+    spaceId: resolvedSpaceId,
+    timeRange,
+    entityFilters,
+    skip: skipUntilSpaceKnown,
+  });
   const {
     count: newlyHCCount,
     entityIds: newlyHCEntityIds,
     isLoading: newlyHCLoading,
     isMissingIndex: newlyHCMissingIndex,
-  } = useNewlyHighCriticalCount({ spaceId: resolvedSpaceId, timeRange, entityFilters, skip: skipUntilSpaceKnown });
+  } = useNewlyHighCriticalCount({
+    spaceId: resolvedSpaceId,
+    timeRange,
+    entityFilters,
+    skip: skipUntilSpaceKnown,
+  });
 
   const handleFilterForCard = useCallback((cardId: ActiveFilter['cardId']) => {
     setActiveFilter((prev) =>
