@@ -1095,6 +1095,27 @@ agentBuilder.conversationTemplates.registerTemplateUIDefinition('investigation',
 }));
 ```
 
+### Conversation details menu actions
+
+`openConversationDetails` accepts optional `menuActions`, rendered as icon buttons in the flyout
+menu bar before the close button. Each entry is an `EuiFlyoutMenuAction` (`iconType`,
+`aria-label`, and `onClick` or `href`, plus optional `toolTipContent`, `isDisabled` and
+`isLoading`). They are fixed when the flyout opens:
+
+```tsx
+agentBuilder.openConversationDetails({
+  conversationId,
+  menuActions: [
+    {
+      iconType: 'link',
+      'aria-label': copyLinkLabel,
+      toolTipContent: copyLinkLabel,
+      onClick: () => copyToClipboard(getShareUrl(conversationId)),
+    },
+  ],
+});
+```
+
 ### Rules
 
 - **Display name and icon**: `name` is the template's localized display name, shown in the conversation UI (title badge, conversation lists). `icon` is optional; the UI falls back to a default icon without it, and to the raw template id when no UI definition is registered at all.

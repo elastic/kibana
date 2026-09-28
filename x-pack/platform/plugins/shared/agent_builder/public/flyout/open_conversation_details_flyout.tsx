@@ -8,6 +8,7 @@
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { htmlIdGenerator } from '@elastic/eui';
+import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { ConversationsService } from '../services/conversations/conversations_service';
@@ -22,6 +23,7 @@ export interface OpenConversationDetailsFlyoutOptions {
   conversationTemplatesService: ConversationTemplatesService;
   conversationId: string;
   onClose?: () => void;
+  menuActions?: EuiFlyoutMenuAction[];
 }
 
 export const openConversationDetailsFlyout = async ({
@@ -30,6 +32,7 @@ export const openConversationDetailsFlyout = async ({
   conversationTemplatesService,
   conversationId,
   onClose,
+  menuActions,
 }: OpenConversationDetailsFlyoutOptions): Promise<() => void> => {
   const titleId = generateTitleId();
   const queryClient = new QueryClient();
@@ -49,7 +52,7 @@ export const openConversationDetailsFlyout = async ({
     {
       size: 's',
       flyoutMenuDisplayMode: 'always',
-      flyoutMenuProps: {},
+      flyoutMenuProps: { trailingActions: menuActions },
       type: 'push',
       paddingSize: 'm',
       role: 'region',
