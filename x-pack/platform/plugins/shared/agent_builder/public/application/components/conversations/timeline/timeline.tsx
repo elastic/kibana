@@ -11,6 +11,7 @@ import moment from 'moment';
 import type { AgentDefinition, VersionedAttachment } from '@kbn/agent-builder-common';
 import { UserMessageEvent } from './items/user_message_event';
 import { AttachmentEvent } from './items/attachment_event';
+import { CustomEvent } from './items/custom_event';
 import { AgentTurn } from './agent_turn';
 import { ConversationDateDivider } from './conversation_date_divider';
 import type { TimelineItem } from './types';
@@ -21,6 +22,8 @@ interface TimelineProps {
   conversationAttachments?: VersionedAttachment[];
   /** True while an answered prompt's resume is in flight; spins the last turn's avatar. */
   isResuming?: boolean;
+  /** True while an execution is in flight in this conversation; passed to custom event renderers. */
+  isStreaming?: boolean;
 }
 
 const itemDate = (item: TimelineItem): string =>
@@ -31,6 +34,7 @@ export const Timeline: React.FC<TimelineProps> = ({
   agent,
   conversationAttachments,
   isResuming = false,
+  isStreaming = false,
 }) => {
   const startsNewDateGroup = (index: number): boolean => {
     const previous = items[index - 1];
@@ -74,6 +78,9 @@ export const Timeline: React.FC<TimelineProps> = ({
               content = (
                 <AttachmentEvent item={item} conversationAttachments={conversationAttachments} />
               );
+              break;
+            case 'customEvent':
+              content = <CustomEvent item={item} isStreaming={isStreaming} />;
               break;
             default:
               content = null;

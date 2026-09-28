@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useState } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { UserAvatar, UserProfilesPopover, UserToolTip } from '@kbn/user-profile-components';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { ESCALATION_QUEUE_LABELS } from './translations';
@@ -50,7 +50,7 @@ interface AssignToUsersProps {
  * full replacement selection.
  *
  * Rendering rules:
- * - `canManage: false` → read-only avatar stack (or "Unassigned"), no picker.
+ * - `canManage: false` → read-only avatar stack (empty when unassigned), no picker.
  * - `isProfilesLoading: true` → picker button disabled; prevents a change that
  *   would silently drop unresolved UIDs from the replace-in-full payload.
  */
@@ -78,22 +78,13 @@ export const AssignToUsers = memo<AssignToUsersProps>(
       [onChange]
     );
 
-    const avatarStack =
-      selected.length === 0 ? (
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {ESCALATION_QUEUE_LABELS.unassigned}
-          </EuiText>
-        </EuiFlexItem>
-      ) : (
-        selected.map((profile) => (
-          <EuiFlexItem key={profile.uid} grow={false}>
-            <UserToolTip user={profile.user} avatar={profile.data?.avatar}>
-              <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
-            </UserToolTip>
-          </EuiFlexItem>
-        ))
-      );
+    const avatarStack = selected.map((profile) => (
+      <EuiFlexItem key={profile.uid} grow={false}>
+        <UserToolTip user={profile.user} avatar={profile.data?.avatar}>
+          <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
+        </UserToolTip>
+      </EuiFlexItem>
+    ));
 
     if (!canManage) {
       return (

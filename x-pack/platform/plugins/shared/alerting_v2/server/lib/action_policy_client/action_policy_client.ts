@@ -43,6 +43,8 @@ import { ActionPolicySavedObjectServiceScopedToken } from '../services/action_po
 import type { ActionPolicySavedObjectServiceContract } from '../services/action_policy_saved_object_service/types';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
 import { ApiKeyService } from '../services/api_key_service/api_key_service';
+import type { LicenseServiceContract } from '../services/license_service/license_service';
+import { LicenseServiceToken } from '../services/license_service/tokens';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -144,6 +146,7 @@ export class ActionPolicyClient {
     private readonly esoClient: EncryptedSavedObjectsClient,
     @inject(ActionPolicyNamespaceToken)
     private readonly namespace: string | undefined,
+    @inject(LicenseServiceToken) private readonly licenseService: LicenseServiceContract,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
     this.logger = loggerService.forSubsystem('actionPolicyClient');
@@ -224,9 +227,10 @@ export class ActionPolicyClient {
   }
 
   public async createActionPolicy(params: CreateActionPolicyParams): Promise<ActionPolicyResponse> {
+    await this.licenseService.assertActionPoliciesLicense();
     const parsed = this.parseActionPolicyData(createActionPolicyDataSchema, params.data, 'create');
 
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const actor = await this.userService.getCurrentActor();
     const now = new Date().toISOString();
 
     const apiKeyAttrs = await this.apiKeyService.create(getActionPolicyApiKeyName(parsed.name));
@@ -234,9 +238,9 @@ export class ActionPolicyClient {
     const attributes = buildCreateActionPolicyAttributes({
       data: parsed,
       auth: apiKeyAttrs,
-      createdBy: userProfileUid,
+      createdBy: actor,
       createdAt: now,
-      updatedBy: userProfileUid,
+      updatedBy: actor,
       updatedAt: now,
     });
 
@@ -308,9 +312,10 @@ export class ActionPolicyClient {
   }
 
   public async updateActionPolicy(params: UpdateActionPolicyParams): Promise<ActionPolicyResponse> {
+    await this.licenseService.assertActionPoliciesLicense();
     const parsed = this.parseActionPolicyData(updateActionPolicyDataSchema, params.data, 'update');
 
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const actor = await this.userService.getCurrentActor();
     const now = new Date().toISOString();
 
     const { attrs: existingPolicy } = await this.getExistingActionPolicy(params.options.id);
@@ -324,7 +329,7 @@ export class ActionPolicyClient {
       existing: existingPolicy,
       update: parsed,
       auth: apiKeyAttrs,
-      updatedBy: userProfileUid,
+      updatedBy: actor,
       updatedAt: now,
     });
 
@@ -408,13 +413,13 @@ export class ActionPolicyClient {
     const evaluatedCount = allPolicies.items.length;
     return {
       items,
-      total: allPolicies.total,
       evaluated_count: evaluatedCount,
       is_truncated: allPolicies.total > evaluatedCount,
     };
   }
 
   public async enableActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
+    await this.licenseService.assertActionPoliciesLicense();
     return this.updatePolicyState(id, { enabled: true });
   }
 
@@ -433,11 +438,19 @@ export class ActionPolicyClient {
     return this.updatePolicyState(id, { snoozedUntil: null });
   }
 
-  public async updateActionPolicyApiKey({ id }: UpdateActionPolicyApiKeyParams): Promise<void> {
+  public async updateActionPolicyApiKey({
+    id,
+  }: UpdateActionPolicyApiKeyParams): Promise<ActionPolicyResponse> {
+    await this.rotateApiKey(id);
+
+    return this.getActionPolicy({ id });
+  }
+
+  private async rotateApiKey(id: string): Promise<void> {
     const { attrs: existingPolicy } = await this.getExistingActionPolicy(id);
 
     const oldAuth = await this.getDecryptedAuth(id);
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const actor = await this.userService.getCurrentActor();
     const now = new Date().toISOString();
     const apiKeyAttrs = await this.apiKeyService.create(
       getActionPolicyApiKeyName(existingPolicy.name)
@@ -448,7 +461,7 @@ export class ActionPolicyClient {
         id,
         attrs: {
           ...toApiKeyAttributes(apiKeyAttrs),
-          updatedBy: userProfileUid,
+          updatedBy: actor,
           updatedAt: now,
         },
       });
@@ -463,6 +476,7 @@ export class ActionPolicyClient {
   public async bulkEnableActionPolicies({
     ids,
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
+    await this.licenseService.assertActionPoliciesLicense();
     return this.executeBulkUpdate(ids, { enabled: true });
   }
 
@@ -542,15 +556,17 @@ export class ActionPolicyClient {
     ids,
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
     // Each id rotates its own API key (SO get + decrypt + key create + write),
-    // so the work is per-item rather than a single SO round-trip. Fan out with a
-    // bounded concurrency; failures are isolated per id inside the mapper so one
-    // bad policy never aborts the rest of the batch. `pMap` preserves input
-    // order, keeping the `errors` ordering deterministic.
+    // so the work is per-item rather than a single SO round-trip. Rotate
+    // directly rather than through `updateActionPolicyApiKey`, whose trailing
+    // read only exists to build a body this response does not carry. Fan out
+    // with a bounded concurrency; failures are isolated per id inside the mapper
+    // so one bad policy never aborts the rest of the batch. `pMap` preserves
+    // input order, keeping the `errors` ordering deterministic.
     const results = await pMap(
       ids,
       async (id): Promise<ActionPolicyBulkError | null> => {
         try {
-          await this.updateActionPolicyApiKey({ id });
+          await this.rotateApiKey(id);
           return null;
         } catch (e) {
           return bulkErrorFromThrown(id, e);
@@ -578,14 +594,14 @@ export class ActionPolicyClient {
       return { affected_count: 0, errors: [] };
     }
 
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const actor = await this.userService.getCurrentActor();
     const now = new Date().toISOString();
 
     const objects = ids.map((id) => ({
       id,
       attrs: {
         ...stateUpdate,
-        updatedBy: userProfileUid,
+        updatedBy: actor,
         updatedAt: now,
       },
     }));
@@ -832,7 +848,7 @@ export class ActionPolicyClient {
       validateDateString(stateUpdate.snoozedUntil);
     }
 
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const actor = await this.userService.getCurrentActor();
     const now = new Date().toISOString();
 
     try {
@@ -840,7 +856,7 @@ export class ActionPolicyClient {
         id,
         attrs: {
           ...stateUpdate,
-          updatedBy: userProfileUid,
+          updatedBy: actor,
           updatedAt: now,
         },
       });
@@ -864,6 +880,7 @@ export class ActionPolicyClient {
     id: string;
     data: CreateActionPolicyDataInput;
   }): Promise<{ policy: ActionPolicyResponse; created: boolean }> {
+    await this.licenseService.assertActionPoliciesLicense();
     // Validate up front so a bad body never spends an API key allocation or
     // even consults the SO store.
     const parsed = this.parseActionPolicyData(createActionPolicyDataSchema, data, 'upsert');
@@ -875,7 +892,7 @@ export class ActionPolicyClient {
       return { policy, created: true };
     }
 
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const actor = await this.userService.getCurrentActor();
     const now = new Date().toISOString();
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingActionPolicy(
@@ -899,7 +916,7 @@ export class ActionPolicyClient {
         auth: apiKeyAttrs,
         createdBy: existingAttrs.createdBy,
         createdAt: existingAttrs.createdAt,
-        updatedBy: userProfileUid,
+        updatedBy: actor,
         updatedAt: now,
       }),
       enabled: existingAttrs.enabled,

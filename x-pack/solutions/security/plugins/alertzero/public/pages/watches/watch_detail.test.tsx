@@ -12,6 +12,7 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import { MemoryRouter, Route, Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import {
+  RULE_TUNING_DEFAULT_EXTRAS,
   SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
@@ -29,10 +30,14 @@ import {
 } from '@kbn/alertzero-common';
 import { WatchDetailPage } from './watch_detail';
 import * as settingsI18n from './settings_translations';
+import { useCanWriteAlertZero } from '../../hooks/use_can_write_alertzero';
 import { useWatch } from '../../hooks/use_watches_api';
 import { useUpdateWorker, useWorkers } from '../../hooks/use_workers_api';
 
 jest.mock('../../hooks/use_alertzero_doc_title', () => ({ useAlertZeroDocTitle: jest.fn() }));
+jest.mock('../../hooks/use_can_write_alertzero', () => ({
+  useCanWriteAlertZero: jest.fn(() => true),
+}));
 jest.mock('../../hooks/use_watches_api');
 jest.mock('../../hooks/use_workers_api');
 jest.mock('./components/watches_section_layout', () => ({
@@ -100,6 +105,7 @@ jest.mock('./components/watches_section_layout', () => ({
 const mockUseWatch = jest.mocked(useWatch);
 const mockUseWorkers = jest.mocked(useWorkers);
 const mockUseUpdateWorker = jest.mocked(useUpdateWorker);
+const mockUseCanWriteAlertZero = jest.mocked(useCanWriteAlertZero);
 
 const createWorker = (
   overrides: Partial<Worker> & Pick<Worker, 'id' | 'name' | 'watchIds'>
@@ -147,6 +153,9 @@ const huntWorker = createWorker({
   watchIds: [SYSTEM_SECURITY_WATCH_HUNT_ID],
 });
 
+/** Complete Rule Tuning extras; cases vary the window and keep the FP thresholds at default. */
+const RULE_TUNING_EXTRAS = { ...RULE_TUNING_DEFAULT_EXTRAS, analysisWindowDays: 14 };
+
 const detectionWorkers: Worker[] = [
   createWorker({
     id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
@@ -156,7 +165,7 @@ const detectionWorkers: Worker[] = [
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
       autonomy: 'manual',
       scheduleInterval: '2h',
-      extras: { analysisWindowDays: 14 },
+      extras: RULE_TUNING_EXTRAS,
     },
   }),
   createWorker({
@@ -197,6 +206,7 @@ const renderWatch = (watchId: string, workers: Worker[]) => {
 describe('WatchDetailPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseCanWriteAlertZero.mockReturnValue(true);
   });
 
   it('shows Floor Workers with per-Worker enablement and autonomy, and no Watch switch', () => {
@@ -706,18 +716,24 @@ describe('WatchDetailPage', () => {
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
     expect(mutateAsync).toHaveBeenCalledWith({
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-      patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: 1 },
+      patch: {
+        settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 } },
+        settingsRevision: 1,
+      },
     });
   });
 
-  it('enables Save while the analysis window is being typed and saves the latest value', async () => {
+  it('enables Save once the analysis window is committed on blur and saves that value', async () => {
     const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
     const field = screen.getByTestId('alertZeroAnalysisWindowDays');
     const save = screen.getByTestId('alertZeroWatchSettingsSave');
 
+    // Keystrokes stay local: "2" on the way to "21" must not reach the draft.
     fireEvent.change(field, { target: { value: '2' } });
-    expect(save).toBeEnabled();
+    expect(save).toBeDisabled();
     fireEvent.change(field, { target: { value: '21' } });
+    expect(save).toBeDisabled();
+    fireEvent.blur(field);
     expect(save).toBeEnabled();
     expect(mutateAsync).not.toHaveBeenCalled();
 
@@ -726,7 +742,10 @@ describe('WatchDetailPage', () => {
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
     expect(mutateAsync).toHaveBeenCalledWith({
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-      patch: { settings: { extras: { analysisWindowDays: 21 } }, settingsRevision: null },
+      patch: {
+        settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 21 } },
+        settingsRevision: null,
+      },
     });
   });
 
@@ -765,6 +784,7 @@ describe('WatchDetailPage', () => {
     );
 
     fireEvent.change(window, { target: { value: '7' } });
+    fireEvent.blur(window);
     fireEvent.change(interval, { target: { value: '6' } });
     expect(screen.getByTestId('alertZeroWatchSettingsDiscard')).toBeEnabled();
 
@@ -791,6 +811,7 @@ describe('WatchDetailPage', () => {
 
     // A valid edit elsewhere makes the page dirty, so Save would otherwise be live.
     fireEvent.change(window, { target: { value: '7' } });
+    fireEvent.blur(window);
     expect(save).toBeEnabled();
 
     fireEvent.change(interval, { target: { value: '1.9' } });
@@ -868,8 +889,33 @@ describe('WatchDetailPage', () => {
     // Uninstalled Worker: the draft's revision is null and is sent as such.
     expect(mutateAsync).toHaveBeenCalledWith({
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-      patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: null },
+      patch: {
+        settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 } },
+        settingsRevision: null,
+      },
     });
+  });
+
+  it('locks worker settings and hides save when the user cannot write', () => {
+    mockUseCanWriteAlertZero.mockReturnValue(false);
+    renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+
+    expect(screen.queryByTestId('alertZeroWatchSettingsSave')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertZeroWatchSettingsDiscard')).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId(
+        `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      )
+    ).toBeDisabled();
+    expect(
+      within(
+        within(
+          screen.getByTestId(
+            `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+          )
+        ).getByTestId('alertZeroAutonomyCard-manual')
+      ).getByRole('radio')
+    ).toBeDisabled();
   });
 
   it('resets collapsed accordion state when navigating to a different Watch, not just on remount', () => {
