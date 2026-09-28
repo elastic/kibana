@@ -295,30 +295,12 @@ steps:
               - name: park_for_privileged
                 type: loop.continue
 
-      # The loop's only adopt, and the reason every branch below reads as a
-      # plain sequence: a revision appended while the gate was parked moves the
-      # chain head, and `updateProposal` refuses a superseded row.
-      #
-      # Placement carries the invariant. After `authorize_decision`, so an
-      # unprivileged resumer re-parks before this reads the chain; before every
-      # branch that writes, so all of them settle the live head.
-      - name: get_last_revision
-        type: proposals.getLatestRevision
-        with:
-          proposalId: '{{ variables.current_proposal_id }}'
-
-      - name: adopt_last_revision
-        type: data.set
-        with:
-          current_proposal_id: '{{ steps.get_last_revision.output.proposalId }}'
-          # The revision's own input, not the trigger's: an analyst who
-          # approved a corrected revision approved those parameters.
-          action_input: '${{ steps.get_last_revision.output.actionInput }}'
-
-      # The only expiry path. The gate's timeout is the time left on the
-      # deadline, so a proposal nobody answered in time arrives here; one that
-      # was already expired when it reached the gate parked for a second and
-      # arrives here too.
+      # Timeout before the YAML adopt. `getLatestRevision` asserts read under
+      # the resumer's API key; after a denied resume that key may lack it, and
+      # failing here would strand the parent on a `failed` execution even though
+      # the workflow-level fallback can still expire the record.
+      # `settleIncompleteProposal` adopts the live head itself and skips both
+      # manage and read checks.
       #
       # Must precede `handle_dismissal`: a timed-out gate answers blank,
       # leaving `gate_approved` false, which that branch would otherwise record
@@ -329,8 +311,6 @@ steps:
         steps:
           # `expired`, not `failed`: the gate's timeout is the remaining
           # deadline, so a gate that times out has reached it by construction.
-          # settleIncompleteProposal skips manage_proposals so a denied resumer's
-          # key on the task cannot strand the record here.
           - name: record_gate_expiry
             type: proposals.settleIncompleteProposal
             with:
@@ -344,6 +324,27 @@ steps:
               final_status: expired
           - name: break_gate_expiry
             type: loop.break
+
+      # The answered path's only adopt, and the reason every branch below reads
+      # as a plain sequence: a revision appended while the gate was parked moves
+      # the chain head, and `updateProposal` refuses a superseded row.
+      #
+      # Placement carries the invariant. After `authorize_decision`, so an
+      # unprivileged resumer re-parks before this reads the chain; after the
+      # timeout branch, so a denied resumer's key never hits `assertCanRead` on
+      # expiry; before every answered-path write, so they all settle the live head.
+      - name: get_last_revision
+        type: proposals.getLatestRevision
+        with:
+          proposalId: '{{ variables.current_proposal_id }}'
+
+      - name: adopt_last_revision
+        type: data.set
+        with:
+          current_proposal_id: '{{ steps.get_last_revision.output.proposalId }}'
+          # The revision's own input, not the trigger's: an analyst who
+          # approved a corrected revision approved those parameters.
+          action_input: '${{ steps.get_last_revision.output.actionInput }}'
 
       - name: handle_dismissal
         type: if

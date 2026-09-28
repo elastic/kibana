@@ -458,8 +458,9 @@ describe('create-investigation-proposal workflow', () => {
       ]) {
         expect(body.indexOf(branch)).toBeGreaterThan(checkIndex);
       }
-      // The chain read waits for the check too: an unauthorized resumer is
-      // re-parked before anything reads on its behalf.
+      // The answered-path chain read waits for the check too: an unauthorized
+      // resumer is re-parked before anything reads on its behalf. Timeout
+      // settles without this read (see below).
       expect(body.indexOf('get_last_revision')).toBeGreaterThan(checkIndex);
     });
 
@@ -514,7 +515,7 @@ describe('create-investigation-proposal workflow', () => {
     });
 
     it('carries the timeout out of the gate branch as a variable, since the output is evicted', () => {
-      // `handle_gate_timeout` runs past the single adopt, where
+      // `handle_gate_timeout` runs after the gate branch, where
       // `steps.await_decision` is no longer readable, so `resolve_gate` has to
       // hand the failure on the same way it hands on the answer.
       const gateBranchOrder = (findStep(workflow.steps, 'gate_branch')?.steps ?? []).map(
@@ -598,30 +599,25 @@ describe('create-investigation-proposal workflow', () => {
       );
     });
 
-    it('routes every write in the loop through that one adopt', () => {
-      // It sits after both decision paths — `gate_branch` carries the autonomy
-      // one in its `else` — and before every branch that writes. That is the
-      // only reason those branches can be read as a plain sequence.
+    it('routes every answered-path write through the YAML adopt; timeout settles without it', () => {
+      // Timeout must not hit `getLatestRevision`'s `assertCanRead` under a
+      // denied resumer's key — `settleIncompleteProposal` adopts itself.
+      // Answered-path writes still need the YAML adopt so they settle the live
+      // head as a plain sequence.
       const body = (loop().steps ?? []).map(({ name }) => name);
       const adopt = body.indexOf('adopt_last_revision');
 
+      expect(body.indexOf('handle_gate_timeout')).toBeLessThan(adopt);
       expect(adopt).toBeGreaterThan(body.indexOf('gate_branch'));
-      for (const write of [
-        'handle_gate_timeout',
-        'handle_dismissal',
-        'approve_without_action',
-        'approve_with_action',
-      ]) {
+      for (const write of ['handle_dismissal', 'approve_without_action', 'approve_with_action']) {
         expect(body.indexOf(write)).toBeGreaterThan(adopt);
       }
     });
 
     it('reads the chain once in the YAML; the incomplete-settle step adopts internally', () => {
-      // The loop still needs an explicit adopt before every write. The
-      // workflow-level fallback and the incomplete-settle call sites adopt
-      // inside `settleIncompleteProposal` instead — workflow-level fallback
-      // step names are engine-prefixed, so a YAML get-then-update chain cannot
-      // reference its own outputs.
+      // The answered path still needs an explicit adopt before its writes.
+      // Timeout, attempt-budget exhaustion, and the workflow-level fallback
+      // adopt inside `settleIncompleteProposal` instead.
       const reads = allSteps()
         .filter(({ type }) => type === 'proposals.getLatestRevision')
         .map(({ name }) => name);

@@ -734,7 +734,7 @@ describe('proposals.settleIncompleteProposal step', () => {
     );
 
     expect(service.getLatestRevision).toHaveBeenCalledWith('proposal-1', SPACE_ID);
-    expect(service.get).toHaveBeenCalledWith('proposal-2', SPACE_ID);
+    expect(service.get).toHaveBeenCalledWith('proposal-2', SPACE_ID, FAKE_REQUEST);
     expect(service.update).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'proposal-2', status: 'expired', executionError: 'timed out' }),
       SPACE_ID
