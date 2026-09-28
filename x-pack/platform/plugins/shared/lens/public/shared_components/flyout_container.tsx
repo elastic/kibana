@@ -67,6 +67,7 @@ export function FlyoutContainer({
   overrideContainerCss?: Interpolation<Theme>;
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
+  const [isAnimationComplete, setIsAnimationComplete] = useState(false);
   const euiThemeContext = useEuiTheme();
 
   const closeFlyout = useCallback(() => {
@@ -87,6 +88,12 @@ export function FlyoutContainer({
       };
     }
   }, [isInlineEditing, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setIsAnimationComplete(false);
+    }
+  }, [isOpen]);
 
   if (!isOpen) {
     return null;
@@ -111,6 +118,7 @@ export function FlyoutContainer({
           ref={panelContainerRef}
           role="dialog"
           aria-labelledby="lnsDimensionContainerTitle"
+          data-test-subj={`lnsDimensionContainer-${isAnimationComplete ? 'ready' : 'animating'}`}
           css={[
             css`
               box-shadow: ${hideShadow ? 'none !important' : 'inherit'};
@@ -119,7 +127,10 @@ export function FlyoutContainer({
             dimensionContainerStyles.self(euiThemeContext),
             overrideContainerCss,
           ]}
-          onAnimationEnd={() => {
+          onAnimationEnd={(event) => {
+            if (event.target === event.currentTarget) {
+              setIsAnimationComplete(true);
+            }
             if (isOpen && !isInlineEditing) {
               // EuiFocusTrap interferes with animating elements with absolute position:
               // running this onAnimationEnd, otherwise the flyout pushes content when animating.

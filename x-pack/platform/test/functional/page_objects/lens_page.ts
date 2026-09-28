@@ -966,6 +966,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await button.click();
       }
     },
+    /**
+     * Opens the layer settings flyout and waits for its open animation to finish, so the
+     * following interaction is not dispatched at coordinates the sliding panel has left behind.
+     */
+    async openLayerSettings() {
+      await testSubjects.click('lnsLayerSettings');
+      await testSubjects.existOrFail('lnsDimensionContainer-ready', { timeout: 30_000 });
+    },
+
     async closeFlyoutWithBackButton() {
       await retry.try(async () => {
         if (await testSubjects.exists('lns-indexPattern-dimensionContainerBack')) {
