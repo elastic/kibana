@@ -23,6 +23,12 @@ jest.doMock('./adapters/inference_endpoint', () => ({
   inferenceEndpointAdapter: inferenceEndpointAdapterMock,
 }));
 
+export const getConnectorByIdMock = jest.fn();
+
+jest.doMock('../util/get_connector_by_id', () => ({
+  getConnectorById: getConnectorByIdMock,
+}));
+
 export const getInferenceExecutorMock = jest.fn();
 export const resolveInferenceEndpointMock = jest.fn();
 export const createInferenceEndpointExecutorMock = jest.fn();

@@ -6,6 +6,7 @@
  */
 
 import {
+  getConnectorByIdMock,
   getInferenceExecutorMock,
   getInferenceAdapterMock,
   resolveInferenceEndpointMock,
@@ -104,6 +105,7 @@ describe('createChatCompleteApi', () => {
   });
 
   afterEach(() => {
+    getConnectorByIdMock.mockReset();
     getInferenceExecutorMock.mockReset();
     getInferenceAdapterMock.mockReset();
     mockEsClient.get.mockClear();
@@ -748,6 +750,50 @@ describe('createChatCompleteApi', () => {
 
       expect(response.content).toBe('endpoint-chunk');
       expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledTimes(1);
+    });
+
+    it('allows a stack connector id that resolves to the default inference endpoint', async () => {
+      getConnectorByIdMock.mockResolvedValue({ connectorId: 'my-endpoint' });
+      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = jest.fn().mockResolvedValue('my-endpoint');
+      const chatCompleteWithCheck = createChatCompleteWithCheck({
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+      });
+
+      const response = await chatCompleteWithCheck({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(response.content).toBe('chunk-1');
+      expect(getConnectorByIdMock).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorId: 'connectorId' })
+      );
+    });
+
+    it('blocks the call when resolving the requested connector fails', async () => {
+      getConnectorByIdMock.mockRejectedValue(new Error('not found'));
+      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = jest.fn().mockResolvedValue('my-endpoint');
+      const chatCompleteWithCheck = createChatCompleteWithCheck({
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+      });
+
+      await expect(
+        chatCompleteWithCheck({
+          connectorId: 'connectorId',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        })
+      ).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.requestError,
+        message: expect.stringContaining('not allowed'),
+      });
+
+      expect(inferenceAdapter.chatComplete).not.toHaveBeenCalled();
     });
 
     it('fails closed when reading the setting fails', async () => {

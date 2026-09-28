@@ -48,6 +48,7 @@ import { addAnonymizationInstruction } from './anonymization/add_anonymization_i
 import type { RegexWorkerService } from './anonymization/regex_worker_service';
 import type { InferenceAnonymizationOptions } from '../inference_client/anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
+import { getConnectorById } from '../util/get_connector_by_id';
 import { prepareAnonymization } from './prepare_anonymization';
 import type { TokenUsageLogger } from '../token_usage';
 import { handleTokenUsageLogging, buildTokenUsageContext } from '../token_usage';
@@ -353,6 +354,8 @@ function resolveAndCreatePipeline({
       connectorId,
       isDefaultConnectorOnly,
       getDefaultConnectorId,
+      resolveConnectorId: async () =>
+        (await getConnectorById({ connectorId, actions, request, esClient, logger })).connectorId,
       logger,
     }).then(() => endpointIdCache.has(connectorId))
   ).pipe(
@@ -502,11 +505,13 @@ async function throwIfConnectorNotAllowed({
   connectorId,
   isDefaultConnectorOnly,
   getDefaultConnectorId,
+  resolveConnectorId,
   logger,
 }: {
   connectorId: string;
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
+  resolveConnectorId: () => Promise<string>;
   logger: Logger;
 }): Promise<void> {
   if (!isDefaultConnectorOnly || !getDefaultConnectorId) {
@@ -525,6 +530,14 @@ async function throwIfConnectorNotAllowed({
   }
   if (connectorId === defaultConnectorId) {
     return;
+  }
+  // a `.inference` stack connector id resolves to its underlying inference endpoint,
+  // which is what the default connector id refers to
+  if (defaultConnectorId) {
+    const resolvedConnectorId = await resolveConnectorId().catch(() => undefined);
+    if (resolvedConnectorId === defaultConnectorId) {
+      return;
+    }
   }
   throw createInferenceRequestError(
     `Connector "${connectorId}" is not allowed: Kibana is configured to only allow the default AI connector${
