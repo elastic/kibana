@@ -346,7 +346,7 @@ export function KnowledgeIndicatorsTable() {
       >
         <EuiInMemoryTable<KnowledgeIndicator>
           css={css`
-            min-width: 700px;
+            min-width: 1100px;
 
             & thead tr {
               background-color: ${euiTheme.colors.backgroundBaseSubdued};
