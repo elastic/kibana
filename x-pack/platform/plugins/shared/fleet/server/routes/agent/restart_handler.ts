@@ -9,10 +9,7 @@ import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type { PostAgentRestartResponse } from '../../../common/types';
-import type {
-  PostAgentRestartRequestSchema,
-  PostBulkAgentRestartRequestSchema,
-} from '../../types';
+import type { PostAgentRestartRequestSchema, PostBulkAgentRestartRequestSchema } from '../../types';
 import { getAgentById } from '../../services/agents';
 import * as AgentService from '../../services/agents';
 import { defaultIngestErrorHandler } from '../../errors';

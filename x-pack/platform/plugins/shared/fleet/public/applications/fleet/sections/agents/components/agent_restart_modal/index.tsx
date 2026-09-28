@@ -10,7 +10,11 @@ import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { sendPostAgentRestart, sendPostBulkAgentRestart, useStartServices } from '../../../../hooks';
+import {
+  sendPostAgentRestart,
+  sendPostBulkAgentRestart,
+  useStartServices,
+} from '../../../../hooks';
 import type { Agent } from '../../../../types';
 
 export interface AgentRestartModalProps {
