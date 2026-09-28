@@ -57,7 +57,9 @@ describe('article context selection', () => {
     expect(selected.text.length).toBeLessThan(text.length);
     expect(selected.text.length).toBeLessThanOrEqual(Math.floor(text.length / 2));
     // Each retained window must be readable, not a single character around a marker.
-    const windows = selected.text.split('\n\n[... source text omitted for context capacity ...]\n\n');
+    const windows = selected.text.split(
+      '\n\n[... source text omitted for context capacity ...]\n\n'
+    );
     expect(windows.length).toBeGreaterThanOrEqual(2);
     expect(windows.every((window) => window.length >= 24)).toBe(true);
     expect(selected.text).toContain('START_');

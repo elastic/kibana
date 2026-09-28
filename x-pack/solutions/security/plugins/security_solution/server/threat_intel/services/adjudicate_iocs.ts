@@ -198,12 +198,10 @@ export const prepareIocAdjudication = (
 export const boundIocAdjudicationForOverflow = (
   prepared: PreparedIocAdjudication
 ): PreparedIocAdjudication => {
-  const kept = prepared.reviewable
-    .slice(0, OVERFLOW_MAX_SEMANTIC_CANDIDATES)
-    .map((candidate) => ({
-      ...candidate,
-      context: candidate.context.slice(0, OVERFLOW_CONTEXT_CHARS),
-    }));
+  const kept = prepared.reviewable.slice(0, OVERFLOW_MAX_SEMANTIC_CANDIDATES).map((candidate) => ({
+    ...candidate,
+    context: candidate.context.slice(0, OVERFLOW_CONTEXT_CHARS),
+  }));
   const skipped = prepared.reviewable.slice(OVERFLOW_MAX_SEMANTIC_CANDIDATES);
   if (skipped.length === 0) {
     return { ...prepared, reviewable: kept };

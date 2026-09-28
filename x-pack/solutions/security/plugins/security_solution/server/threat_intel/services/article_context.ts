@@ -67,8 +67,7 @@ const selectFittingWindows = (text: string, budget: number): ArticleContext | un
     const windows: string[] = [];
 
     for (let index = 0; index < count; index++) {
-      const start =
-        index === count - 1 ? maxStart : Math.round((maxStart * index) / (count - 1));
+      const start = index === count - 1 ? maxStart : Math.round((maxStart * index) / (count - 1));
       windows.push(text.slice(start, start + windowChars));
     }
 
