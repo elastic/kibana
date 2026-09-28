@@ -61,6 +61,8 @@ export function CasesTableServiceProvider(
   // view the test leaves the list in.
   const CASE_ROWS_SELECTOR =
     '[data-test-subj^="cases-table-row-"],[data-test-subj^="cases-list-item-clickable-"]';
+  const CASE_LIST_LOADING_SELECTOR =
+    '[data-test-subj="cases-table-loading"],[data-test-subj="cases-list-loading"]';
 
   return {
     /**
@@ -214,7 +216,7 @@ export function CasesTableServiceProvider(
     },
 
     async waitForTableToFinishLoading() {
-      await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
+      await find.waitForDeletedByCssSelector(CASE_LIST_LOADING_SELECTOR, 5000);
     },
 
     async getCaseById(caseId: string) {
@@ -309,6 +311,9 @@ export function CasesTableServiceProvider(
 
     async refreshTable() {
       await testSubjects.click('superDatePickerApplyTimeButton');
+      // A fast retry can refresh again before the previous request has rendered its results.
+      await find.existsByCssSelector(CASE_LIST_LOADING_SELECTOR, 500);
+      await find.waitForDeletedByCssSelector(CASE_LIST_LOADING_SELECTOR, 10000);
     },
 
     async openRowActions(index: number) {

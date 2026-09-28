@@ -10,7 +10,6 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
@@ -71,12 +70,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilTabIsLoaded();
 
-      await retry.waitFor('the export popover to be opened', async () => {
-        if (!(await PageObjects.exports.isExportPopoverOpen())) {
-          await PageObjects.appMenu.clickMenuItem('exportTopNavButton');
-        }
-        return await PageObjects.exports.isExportPopoverOpen();
-      });
+      expect(await PageObjects.exports.clickExportTopNavButton()).to.be(true);
+      await testSubjects.existOrFail('exportPopoverPanel', { timeout: 10000 });
 
       expect(await PageObjects.exports.isPopoverItemEnabled('CSV')).to.be(true);
       expect(await PageObjects.exports.isPopoverItemEnabled('scheduledReports')).to.be(true);
