@@ -17,12 +17,14 @@ describe('registerAttachmentUiDefinitions', () => {
 
   const resolveSecurityCanvasContext = jest.fn();
   const getSpaceId = jest.fn().mockResolvedValue('default');
+  const mockData = { search: { search: jest.fn() } };
 
   const register = () =>
     registerAttachmentUiDefinitions({
       attachments: mockAttachments,
       resolveSecurityCanvasContext,
       getSpaceId,
+      data: mockData as never,
     });
 
   beforeEach(() => {

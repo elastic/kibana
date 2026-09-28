@@ -9,12 +9,13 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Observable, of } from 'rxjs';
+import type { ISearchGeneric } from '@kbn/search-types';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { renderAlertSection, renderAlertsSection } from './summary_rows';
 
 // Stub the lazy flyout opener so it records calls synchronously (no Suspense/lazy boundary).
-const mockFlyoutOpener = jest.fn(() => null);
+const mockFlyoutOpener = jest.fn((_props: unknown) => null);
 jest.mock('./open_flyout_on_mount', () => ({
   AttachmentSummaryFlyoutOpener: (props: unknown) => mockFlyoutOpener(props),
 }));
@@ -51,7 +52,7 @@ jest.mock('@kbn/agentic-investigations-common', () => ({
 
 const makeSearch = (
   alertHits: Array<{ _id: string; _index?: string; _source: Record<string, unknown> }>
-) =>
+): ISearchGeneric =>
   jest.fn(() =>
     of({
       rawResponse: {
@@ -60,7 +61,7 @@ const makeSearch = (
         },
       },
     })
-  );
+  ) as unknown as ISearchGeneric;
 
 const resolveSecurityCanvasContext = jest.fn();
 const getSpaceId = jest.fn().mockResolvedValue('default');
@@ -326,7 +327,7 @@ describe('renderAlertsSection', () => {
         new Observable((s) => {
           s.error(new Error('network error'));
         })
-    );
+    ) as unknown as ISearchGeneric;
 
     renderSection(
       renderAlertsSection({

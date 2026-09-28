@@ -25,9 +25,6 @@ const mockLabelOverflow = ({
   return () => spies.forEach((spy) => spy.mockRestore());
 };
 
-const expectLabel = (expected: string) =>
-  expect(screen.getByTestId('attachmentSummaryRowLabel')).toHaveTextContent(expected);
-
 describe('AttachmentSummaryRow', () => {
   it('stays read-only when onClick is absent', () => {
     render(<AttachmentSummaryRow label="3 alerts" typeName="Alert" />);
