@@ -22,12 +22,12 @@ const isV2AlertingAsset = (asset: Pick<AlertingAsset, 'attributes'>): boolean =>
 
 const ALERTING_ENGINE_CLASSIC_BADGE = i18n.translate(
   'xpack.fleet.epm.assets.alertingEngineClassicBadgeLabel',
-  { defaultMessage: 'Classic' }
+  { defaultMessage: 'Standard' }
 );
 
 const ALERTING_ENGINE_V2_BADGE = i18n.translate(
   'xpack.fleet.epm.assets.alertingEngineV2BadgeLabel',
-  { defaultMessage: 'v2' }
+  { defaultMessage: 'ES|QL' }
 );
 
 const ALERTING_ENGINE_CLASSIC_ARIA_LABEL = i18n.translate(

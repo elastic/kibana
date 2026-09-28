@@ -193,7 +193,7 @@ describe('AlertingPage', () => {
     );
     expect(mockGetRuleLibraryRedirectUrl).toHaveBeenCalledWith({ templateId: 'template-2' });
     expect(screen.queryByText('[System] Logs template')).not.toBeInTheDocument();
-    expect(screen.getByTestId('fleetAssetsAccordion.engineBadge.v2')).toHaveTextContent('v2');
+    expect(screen.getByTestId('fleetAssetsAccordion.engineBadge.v2')).toHaveTextContent('ES|QL');
     expect(screen.queryByTestId('fleetAssetsAccordion.engineBadge.v1')).not.toBeInTheDocument();
   });
 
@@ -212,7 +212,7 @@ describe('AlertingPage', () => {
       '/mock/app/management/insightsAndAlerting/triggersActions/create/template/template-1'
     );
     expect(screen.queryByText('[System] Metrics template')).not.toBeInTheDocument();
-    expect(screen.getByTestId('fleetAssetsAccordion.engineBadge.v1')).toHaveTextContent('Classic');
+    expect(screen.getByTestId('fleetAssetsAccordion.engineBadge.v1')).toHaveTextContent('Standard');
     expect(screen.queryByTestId('fleetAssetsAccordion.engineBadge.v2')).not.toBeInTheDocument();
   });
 
