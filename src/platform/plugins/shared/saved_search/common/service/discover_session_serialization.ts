@@ -18,6 +18,7 @@ import type {
   DocumentsDisplayMode,
   JsonModeSettings,
 } from '@kbn/unified-data-table';
+import type { DiscoverGridImplementation } from '@kbn/discover-session-constants';
 import type { DiscoverSessionAttributes } from '../../server';
 import type { DiscoverSession, SortOrder } from '../types';
 
@@ -70,6 +71,7 @@ export const serializeDiscoverSession = (
         density: tab.density,
         documentsDisplayMode: tab.documentsDisplayMode,
         jsonModeSettings: tab.jsonModeSettings,
+        gridImplementation: tab.gridImplementation,
         visContext: tab.visContext,
         controlGroupJson: tab.controlGroupJson,
         tabTypeState: tab.tabTypeState,
@@ -134,6 +136,7 @@ export const deserializeDiscoverSession = ({
     density: tab.attributes.density as DataGridDensity,
     documentsDisplayMode: tab.attributes.documentsDisplayMode as DocumentsDisplayMode,
     jsonModeSettings: tab.attributes.jsonModeSettings as JsonModeSettings,
+    gridImplementation: tab.attributes.gridImplementation as DiscoverGridImplementation | undefined,
     visContext: tab.attributes.visContext,
     controlGroupJson: tab.attributes.controlGroupJson,
     tabTypeState: tab.attributes.tabTypeState,

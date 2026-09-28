@@ -87,6 +87,7 @@ export function fromStoredSearchEmbeddableByRef(
     density,
     documentsDisplayMode,
     jsonModeSettings,
+    gridImplementation,
     grid,
     selectedTabId,
     savedObjectId,
@@ -143,6 +144,7 @@ export function fromStoredSearchEmbeddableByValue(
     density,
     documentsDisplayMode,
     jsonModeSettings,
+    gridImplementation,
     grid,
     attributes,
     title,
@@ -318,6 +320,7 @@ export function toDiscoverSessionEmbeddableOverrides(
     documentsDisplayMode,
     jsonModeSettings,
     grid,
+    gridImplementation,
   } = storedState;
   return {
     ...(sort && { sort: fromStoredSort(sort) }),
@@ -330,6 +333,7 @@ export function toDiscoverSessionEmbeddableOverrides(
     ...(headerRowHeight && { header_row_height: fromStoredRowHeight(headerRowHeight) }),
     ...(density && { density }),
     ...(documentsDisplayMode && { documents_display_mode: documentsDisplayMode }),
+    ...(gridImplementation && { grid_implementation: gridImplementation }),
     ...fromStoredJsonModeSettings(jsonModeSettings),
   };
 }
@@ -347,6 +351,7 @@ export function fromDiscoverSessionEmbeddableOverrides(
     header_row_height: headerRowHeight,
     density,
     documents_display_mode: documentsDisplayMode,
+    grid_implementation: gridImplementation,
   } = apiState;
   const jsonModeSettings = toStoredJsonModeSettings(apiState);
   return {
@@ -358,6 +363,7 @@ export function fromDiscoverSessionEmbeddableOverrides(
     ...(headerRowHeight && { headerRowHeight: toStoredHeight(headerRowHeight) }),
     ...(density && { density }),
     ...(documentsDisplayMode && { documentsDisplayMode }),
+    ...(gridImplementation && { gridImplementation }),
     ...(jsonModeSettings && { jsonModeSettings }),
     ...(Object.keys(columnSettings ?? {}).length && { grid: toStoredGrid(columnSettings) }),
   };
