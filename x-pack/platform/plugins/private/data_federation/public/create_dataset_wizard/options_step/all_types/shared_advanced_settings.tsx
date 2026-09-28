@@ -54,12 +54,7 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
       </EuiFormRow>
 
       <EuiFormRow
-        label={
-          <FormRowLabelWithInfo
-            label={createDatasetWizardStrings.settingsPartitionDetectionLabel}
-            infoText={createDatasetWizardStrings.settingsPartitionDetectionDescription}
-          />
-        }
+        label={createDatasetWizardStrings.settingsPartitionDetectionLabel}
         fullWidth
       >
         <PartitionDetectionSelect control={control} />

@@ -9,12 +9,10 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import {
   EuiAccordion,
-  EuiCode,
   EuiFieldText,
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
@@ -62,12 +60,6 @@ const SCHEMA_RESOLUTION_OPTIONS = [
     text: createDatasetWizardStrings.settingsSchemaResolutionUnionByName,
   },
 ];
-
-const helpTextDefault = (valueLabel: string) => (
-  <EuiText size="xs" color="subdued">
-    <EuiCode>{valueLabel}</EuiCode> {createDatasetWizardStrings.byDefaultSuffix}
-  </EuiText>
-);
 
 const HIVE_PARTITIONING_OPTIONS = [
   { value: '', text: createDatasetWizardStrings.settingsHivePartitioningPlaceholder },
@@ -418,7 +410,7 @@ function CsvTsvCoreSettings({ control }: { control: Control<CreateDatasetFormVal
       <EuiSpacer size="m" />
       <EuiFormRow
         label={createDatasetWizardStrings.settingsDelimiterLabel}
-        helpText={helpTextDefault(format === 'tsv' ? '\\t' : ',')}
+        helpText={createDatasetWizardStrings.settingsDelimiterHelp}
         fullWidth
         isInvalid={Boolean(delimiterState.error)}
         error={delimiterState.error?.message}
@@ -432,11 +424,7 @@ function CsvTsvCoreSettings({ control }: { control: Control<CreateDatasetFormVal
       </EuiFormRow>
       <EuiFormRow
         label={createDatasetWizardStrings.settingsModeLabel}
-        helpText={helpTextDefault(
-          format === 'tsv'
-            ? createDatasetWizardStrings.settingsModePlain
-            : createDatasetWizardStrings.settingsModeQuoted
-        )}
+        helpText={createDatasetWizardStrings.settingsQuoteModeDescription}
         fullWidth
       >
         <QuoteMode
@@ -446,7 +434,11 @@ function CsvTsvCoreSettings({ control }: { control: Control<CreateDatasetFormVal
           defaultValue={format === 'tsv' ? 'plain' : 'quoted'}
         />
       </EuiFormRow>
-      <EuiFormRow label={createDatasetWizardStrings.settingsHeaderRowLabel} fullWidth>
+      <EuiFormRow
+        label={createDatasetWizardStrings.settingsHeaderRowLabel}
+        helpText={createDatasetWizardStrings.settingsHeaderRowHelp}
+        fullWidth
+      >
         <HeaderRow
           value={headerRowField.value}
           onChange={(next: DatasetBooleanFormValue) => headerRowField.onChange(next)}

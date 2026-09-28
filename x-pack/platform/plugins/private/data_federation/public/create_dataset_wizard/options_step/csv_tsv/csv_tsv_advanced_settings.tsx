@@ -7,35 +7,20 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCode, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiCode, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
-import { useController, useWatch } from 'react-hook-form';
+import { useController } from 'react-hook-form';
 
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
 import {
-  DEFAULT_COLUMN_PREFIX,
-  DEFAULT_CSV_ESCAPE,
-  DEFAULT_CSV_QUOTE,
   validateEscapeCharacter,
   validateQuoteCharacter,
   type CreateDatasetFormValues,
-  type DatasetFormatFormValue,
 } from '../../create_dataset_form_state';
 import { FormRowLabelWithInfo } from '../../components/form_row_label_with_info';
 import { TrimSpaces } from './fields/trim_spaces';
 
-const helpTextDefault = (valueLabel: string) => (
-  <EuiText size="xs" color="subdued">
-    <EuiCode>{valueLabel}</EuiCode> {createDatasetWizardStrings.byDefaultSuffix}
-  </EuiText>
-);
-
 export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
-  const format: DatasetFormatFormValue = useWatch({ control, name: 'settings.format' });
-  const isCsv = format === 'csv';
-  const quoteDefaultLabel = isCsv ? DEFAULT_CSV_QUOTE : createDatasetWizardStrings.noneLabel;
-  const escapeDefaultLabel = isCsv ? DEFAULT_CSV_ESCAPE : createDatasetWizardStrings.noneLabel;
-
   const { field: quoteField, fieldState: quoteState } = useController({
     name: 'settings.quote',
     control,
@@ -158,13 +143,8 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
         />
       </EuiFormRow>
       <EuiFormRow
-        label={
-          <FormRowLabelWithInfo
-            label={createDatasetWizardStrings.settingsTrimSpacesLabel}
-            infoText={createDatasetWizardStrings.settingsTrimSpacesHelp}
-          />
-        }
-        helpText={helpTextDefault(createDatasetWizardStrings.falseLabel)}
+        label={createDatasetWizardStrings.settingsTrimSpacesLabel}
+        helpText={createDatasetWizardStrings.settingsTrimSpacesHelp}
         fullWidth
       >
         <TrimSpaces

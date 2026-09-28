@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiCode, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiCode, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -45,11 +45,7 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
             infoText={createDatasetWizardStrings.settingsDelimiterDescription}
           />
         }
-        helpText={
-          <EuiText size="xs" color="subdued">
-            <EuiCode>{format === 'tsv' ? '\\t' : ','}</EuiCode> {createDatasetWizardStrings.byDefaultSuffix}
-          </EuiText>
-        }
+        helpText={createDatasetWizardStrings.settingsDelimiterHelp}
         fullWidth
         isInvalid={Boolean(delimiterState.error)}
         error={delimiterState.error?.message}

@@ -11,6 +11,7 @@ import { act, fireEvent, render, waitFor, within } from '@testing-library/react'
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { I18nProvider } from '@kbn/i18n-react';
 import { CreateDatasetAdditionalSettings, CreateDatasetSettings } from './create_dataset_settings';
 import type { CreateDatasetFormValues, DatasetFormatFormValue } from '../create_dataset_form_state';
 import { emptyCreateDatasetSettingsFormValues } from '../create_dataset_form_state';
@@ -53,12 +54,14 @@ const renderSettings = () => {
     const settings = useWatch({ control, name: 'settings' });
 
     return (
-      <EuiProvider>
-        <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-          <CreateDatasetSettings control={control} />
-          <div data-test-subj="settingsValue">{JSON.stringify(settings)}</div>
-        </KibanaContextProvider>
-      </EuiProvider>
+      <I18nProvider>
+        <EuiProvider>
+          <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+            <CreateDatasetSettings control={control} />
+            <div data-test-subj="settingsValue">{JSON.stringify(settings)}</div>
+          </KibanaContextProvider>
+        </EuiProvider>
+      </I18nProvider>
     );
   };
 
@@ -289,13 +292,15 @@ const renderAdditionalSettings = (format: DatasetFormatFormValue = '') => {
     });
 
     return (
-      <EuiProvider>
-        <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-          <FormProvider {...methods}>
-            <CreateDatasetAdditionalSettings control={methods.control} />
-          </FormProvider>
-        </KibanaContextProvider>
-      </EuiProvider>
+      <I18nProvider>
+        <EuiProvider>
+          <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+            <FormProvider {...methods}>
+              <CreateDatasetAdditionalSettings control={methods.control} />
+            </FormProvider>
+          </KibanaContextProvider>
+        </EuiProvider>
+      </I18nProvider>
     );
   };
 
@@ -359,10 +364,7 @@ describe('CreateDatasetAdditionalSettings', () => {
     const trimSpacesRow = trimSpacesField.closest('.euiFormRow');
     expect(trimSpacesRow).not.toBeNull();
     expect(
-      within(trimSpacesRow as HTMLElement).getByText(createDatasetWizardStrings.falseLabel)
-    ).toBeInTheDocument();
-    expect(
-      within(trimSpacesRow as HTMLElement).getByText(createDatasetWizardStrings.byDefaultSuffix)
+      within(trimSpacesRow as HTMLElement).getByText(createDatasetWizardStrings.settingsTrimSpacesHelp)
     ).toBeInTheDocument();
     // `Trim spaces` defaults to false, represented by an empty selection (placeholder shown).
     expect(
@@ -379,9 +381,7 @@ describe('CreateDatasetAdditionalSettings', () => {
     const quoteRow = quoteField.closest('.euiFormRow');
     expect(quoteRow).not.toBeNull();
     expect(within(quoteRow as HTMLElement).getByText('"')).toBeInTheDocument();
-    expect(
-      within(quoteRow as HTMLElement).getByText(createDatasetWizardStrings.byDefaultSuffix)
-    ).toBeInTheDocument();
+    expect(within(quoteRow as HTMLElement).getByText(/Defaults to/)).toBeInTheDocument();
     const columnPrefixField = getByTestId('createDatasetSettingsColumnPrefix') as HTMLInputElement;
     expect(columnPrefixField).toHaveValue('');
     expect(columnPrefixField).toHaveAttribute(
@@ -390,9 +390,8 @@ describe('CreateDatasetAdditionalSettings', () => {
     );
     const columnPrefixRow = columnPrefixField.closest('.euiFormRow');
     expect(columnPrefixRow).not.toBeNull();
-    expect(within(columnPrefixRow as HTMLElement).getByText('col')).toBeInTheDocument();
     expect(
-      within(columnPrefixRow as HTMLElement).getByText(createDatasetWizardStrings.byDefaultSuffix)
+      within(columnPrefixRow as HTMLElement).getByText(/Prefix for generated field names/)
     ).toBeInTheDocument();
     const escapeField = getByTestId('createDatasetSettingsEscape') as HTMLInputElement;
     expect(escapeField).toHaveValue('');
@@ -403,9 +402,7 @@ describe('CreateDatasetAdditionalSettings', () => {
     const escapeRow = escapeField.closest('.euiFormRow');
     expect(escapeRow).not.toBeNull();
     expect(within(escapeRow as HTMLElement).getByText('\\')).toBeInTheDocument();
-    expect(
-      within(escapeRow as HTMLElement).getByText(createDatasetWizardStrings.byDefaultSuffix)
-    ).toBeInTheDocument();
+    expect(within(escapeRow as HTMLElement).getByText(/Defaults to/)).toBeInTheDocument();
     // API-only / passthrough-only fields are never shown in the UI
     expect(queryByTestId('createDatasetSettingsSchemaSampleSize')).toBeNull();
     expect(queryByTestId('createDatasetSettingsComment')).toBeNull();
@@ -424,22 +421,12 @@ describe('CreateDatasetAdditionalSettings', () => {
     const quoteField = getByTestId('createDatasetSettingsQuote') as HTMLInputElement;
     const quoteRow = quoteField.closest('.euiFormRow');
     expect(quoteRow).not.toBeNull();
-    expect(
-      within(quoteRow as HTMLElement).getByText(createDatasetWizardStrings.noneLabel)
-    ).toBeInTheDocument();
-    expect(
-      within(quoteRow as HTMLElement).getByText(createDatasetWizardStrings.byDefaultSuffix)
-    ).toBeInTheDocument();
+    expect(within(quoteRow as HTMLElement).getByText(/Defaults to/)).toBeInTheDocument();
 
     const escapeField = getByTestId('createDatasetSettingsEscape') as HTMLInputElement;
     const escapeRow = escapeField.closest('.euiFormRow');
     expect(escapeRow).not.toBeNull();
-    expect(
-      within(escapeRow as HTMLElement).getByText(createDatasetWizardStrings.noneLabel)
-    ).toBeInTheDocument();
-    expect(
-      within(escapeRow as HTMLElement).getByText(createDatasetWizardStrings.byDefaultSuffix)
-    ).toBeInTheDocument();
+    expect(within(escapeRow as HTMLElement).getByText(/Defaults to/)).toBeInTheDocument();
   });
 
   it('shows ndjson common settings and no ndjson advanced settings when ndjson is selected', () => {
@@ -484,20 +471,22 @@ describe('CreateDatasetAdditionalSettings', () => {
       });
 
       return (
-        <EuiProvider>
-          <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-            <FormProvider {...methods}>
-              <button
-                type="button"
-                data-test-subj="validateSettings"
-                onClick={() => methods.trigger('settings.partition_path')}
-              >
-                Validate
-              </button>
-              <CreateDatasetAdditionalSettings control={methods.control} />
-            </FormProvider>
-          </KibanaContextProvider>
-        </EuiProvider>
+        <I18nProvider>
+          <EuiProvider>
+            <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+              <FormProvider {...methods}>
+                <button
+                  type="button"
+                  data-test-subj="validateSettings"
+                  onClick={() => methods.trigger('settings.partition_path')}
+                >
+                  Validate
+                </button>
+                <CreateDatasetAdditionalSettings control={methods.control} />
+              </FormProvider>
+            </KibanaContextProvider>
+          </EuiProvider>
+        </I18nProvider>
       );
     };
 

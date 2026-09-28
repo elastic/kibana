@@ -123,9 +123,11 @@ describe('MappingEditor', () => {
       const [value, setValue] = React.useState<MappingEditorValue>({ dynamic: true, fields: [] });
 
       return (
-        <EuiProvider>
-          <MappingEditor value={value} onChange={setValue} docLinks={docLinksMock} />
-        </EuiProvider>
+        <I18nProvider>
+          <EuiProvider>
+            <MappingEditor value={value} onChange={setValue} docLinks={docLinksMock} />
+          </EuiProvider>
+        </I18nProvider>
       );
     };
 
