@@ -12,6 +12,7 @@ import {
   ALERT_EVENTS_DATA_STREAM,
   ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH,
 } from '@kbn/alerting-v2-constants';
+import { MAX_KQL_LENGTH } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_ALERTS_READ_ROLE, apiTest, NO_ACCESS_ROLE } from '../fixtures';
 
 const RULE_ID_A = 'matcher-suggestions-rule-a';
@@ -131,10 +132,13 @@ apiTest.describe('Rule event fields suggestions API', { tag: '@local-stateful-cl
   apiTest(
     'validation: rejects matcher longer than the schema limit with a 400',
     async ({ apiClient }) => {
-      const response = await apiClient.get(ruleEventFieldsUrl({ matcher: 'a'.repeat(2049) }), {
-        headers: adminHeaders,
-        responseType: 'json',
-      });
+      const response = await apiClient.get(
+        ruleEventFieldsUrl({ matcher: 'a'.repeat(MAX_KQL_LENGTH + 1) }),
+        {
+          headers: adminHeaders,
+          responseType: 'json',
+        }
+      );
 
       expect(response).toHaveStatusCode(400);
       expect(response.body.code).toBe('BAD_REQUEST');

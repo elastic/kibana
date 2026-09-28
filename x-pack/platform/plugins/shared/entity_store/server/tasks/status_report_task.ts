@@ -36,6 +36,7 @@ import {
 import { executeEsqlQuery } from '../infra/elasticsearch/esql';
 import { wrapTaskRun } from '../telemetry/traces';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution_context';
 
 const config = TasksConfig[EntityStoreTaskType.enum.statusReport];
 
@@ -267,11 +268,10 @@ export function registerStatusReportTask({
           run: async () => {
             const [coreStart] = await core.getStartServices();
             return coreStart.executionContext.withContext(
-              {
-                type: 'security_solution',
-                name: 'entity_analytics-entity_store_status_report_task',
-                id: taskInstance.id,
-              },
+              buildEaExecutionContext(
+                EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_STATUS_REPORT_TASK,
+                taskInstance.id
+              ),
               () =>
                 wrapTaskRun({
                   spanName: 'entityStore.task.status_report.run',

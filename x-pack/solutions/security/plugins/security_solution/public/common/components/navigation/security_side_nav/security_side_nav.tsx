@@ -301,12 +301,12 @@ const usePanelBottomOffset = (): string | undefined => {
 export const SecuritySideNav: React.FC = () => {
   const {
     settings: { client },
-    featureFlags: { getBooleanValue },
+    featureFlags,
   } = useKibana().services;
 
   const chatExperience = useObservable(client.get$(AI_CHAT_EXPERIENCE_TYPE));
   const enableAlertsAndAttacksAlignment = useIsAlertsAndAttacksAlignmentEnabled();
-  const isAgentBuilderNavAtTop = getBooleanValue(AGENT_BUILDER_NAV_AT_TOP_FLAG, false);
+  const isAgentBuilderNavAtTop = featureFlags.useBooleanValue(AGENT_BUILDER_NAV_AT_TOP_FLAG, false);
   const items = useSolutionSideNavItems(chatExperience);
   const selectedId = useSelectedId();
   const panelTopOffset = usePanelTopOffset();

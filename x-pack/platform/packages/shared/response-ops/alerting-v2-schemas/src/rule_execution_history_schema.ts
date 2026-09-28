@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { arrayOrSingleSchema, queryIntSchema } from './common';
+import { arrayOrSingleSchema, ESTIMATED_COUNT_NOTE, queryIntSchema } from './common';
 import {
   ID_MAX_LENGTH,
   EXECUTION_HISTORY_MAX_PER_PAGE,
@@ -52,14 +52,14 @@ const ruleIdArraySchema = arrayOrSingleSchema(
 export const listRuleExecutionsRequestSchema = z
   .object({
     rule_ids: ruleIdArraySchema.optional().describe(`Rule id filter. `),
-    outcome: outcomeArraySchema.optional().describe('Outcome filter. '),
+    outcomes: outcomeArraySchema.optional().describe('Outcome filter. '),
     from: z.iso
       .datetime()
       .optional()
       .describe('Inclusive ISO datetime lower bound on event.start.'),
     to: z.iso.datetime().optional().describe('Inclusive ISO datetime upper bound on event.start.'),
-    sort: z
-      .enum(['started_at', 'duration'])
+    sort_field: z
+      .enum(['started_at', 'duration_ms'])
       .default('started_at')
       .describe('Sort field. Defaults to started_at.'),
     sort_order: z.enum(['asc', 'desc']).default('desc').describe('Sort direction.'),
@@ -85,11 +85,20 @@ export const ruleExecutionViewSchema = z
       version: z.number().int().nullable(),
     }),
     space_id: z.string(),
-    started_at: z.string(),
-    ended_at: z.string(),
+    started_at: z.iso.datetime(),
+    ended_at: z.iso.datetime(),
     timings: z.object({
-      duration: z.number().int().nonnegative(),
-      scheduled_delay: z.number().int(),
+      duration_ms: z
+        .number()
+        .int()
+        .nonnegative()
+        .describe('Wall-clock duration of the run, in milliseconds.'),
+      scheduled_delay_ms: z
+        .number()
+        .int()
+        .describe(
+          'Delay between the scheduled run time and the actual start, in milliseconds. Negative when the run started ahead of its scheduled time.'
+        ),
     }),
     outcome: ruleExecutionOutcomeSchema,
     reason: z.string().nullable(),
@@ -107,7 +116,11 @@ export type RuleExecutionView = z.infer<typeof ruleExecutionViewSchema>;
 export const listRuleExecutionsResponseSchema = z
   .object({
     items: z.array(ruleExecutionViewSchema),
-    total: z.number().int().nonnegative(),
+    total: z
+      .number()
+      .int()
+      .nonnegative()
+      .describe(`The number of rule executions matching the query. ${ESTIMATED_COUNT_NOTE}`),
     page: z.number().int().min(1),
     per_page: z.number().int().min(0),
   })
