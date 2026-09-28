@@ -53,6 +53,8 @@ import { FlyoutAccordion } from '@kbn/flyout-sections';
 | `tooltip` | `ReactNode` | — | Tooltip shown from the icon. |
 | `action` | `FlyoutSectionAction` | — | Link aligned to the right of the title row. |
 | `initialIsOpen` | `boolean` | `false` | Opens after the initial render. |
+| `isLoading` | `boolean` | `false` | Replaces the title action and the content with a loading spinner. |
+| `isLoadingMessage` | `boolean \| ReactNode` | `false` | Shows a loading message in place of the content while `isLoading`; pass a node to customize it. |
 | `hasBorder` | `boolean` | `true` | Wraps content in an outlined `EuiPanel`. |
 | `data-test-subj` | `string` | — | Test subject on the `EuiAccordion` element. |
 | `children` | `ReactNode` | — | Accordion body. |

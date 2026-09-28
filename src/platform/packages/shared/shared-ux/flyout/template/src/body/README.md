@@ -42,7 +42,7 @@ The body stays mounted across tab switches, and each callout is memoized, so a s
 ```
 
 - **`Body.Section`** — takes `title`, and optional `icon`, `tooltip`, `action`, `hasBorder`, `id`, `data-test-subj`. Renders a `<section>` with an `<h4>` title, named by that title so assistive tech exposes it as a region. `id` seeds the section's DOM id and is generated when omitted.
-- **`Body.Accordion`** — the collapsible variant. Same title-row props plus `initialIsOpen`; `id` seeds the toggle's DOM id and is generated when omitted. Its content is always outlined, so it takes no `hasBorder`.
+- **`Body.Accordion`** — the collapsible variant. Same title-row props plus `initialIsOpen`, and `isLoading` / `isLoadingMessage` for content that is still loading; `id` seeds the toggle's DOM id and is generated when omitted. Its content is always outlined, so it takes no `hasBorder`.
 - **`Subsection`** — reached as `Body.Section.Subsection` or `Body.Accordion.Subsection` (the same component; it is not exposed as `Body.Subsection`). Takes `title`, `id`, `data-test-subj`, and renders an `<h5>`. `id` lands on the wrapper as a link or scroll target; unlike a section, a subsection is not named as its own region.
 
 An `id` also doubles as the part's identity within its parent, so it must be unique among sibling parts of the same kind.

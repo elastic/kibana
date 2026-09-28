@@ -324,6 +324,27 @@ describe('FlyoutTemplate body accordions', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Extra action' }));
     expect(onClick).toHaveBeenCalled();
   });
+
+  it('replaces the accordion action and content with a loading state', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.Accordion
+            title="Errors"
+            action={{ label: 'Extra action', onClick: noop }}
+            isLoading
+            isLoadingMessage="Loading errors"
+          >
+            error list
+          </FlyoutTemplate.Body.Accordion>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.queryByRole('button', { name: 'Extra action' })).not.toBeInTheDocument();
+    expect(screen.getByText('Loading errors')).toBeInTheDocument();
+    expect(screen.queryByText('error list')).not.toBeInTheDocument();
+  });
 });
 
 describe('FlyoutTemplate body subsections', () => {

@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { FlyoutTemplate } from './flyout_template';
 
 const noop = () => {};
@@ -92,6 +93,57 @@ describe('FlyoutTemplate footer', () => {
 
     expect(screen.getByTestId('secondaryDiscard')).toHaveAttribute('data-foo', 'secondaryFoo');
     expect(screen.getByTestId('secondaryText')).toBeInTheDocument();
+  });
+
+  it('shows an action tooltip on hover', async () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+        <FlyoutTemplate.Footer>
+          <FlyoutTemplate.Footer.SecondaryAction
+            label="Discard"
+            onClick={noop}
+            tooltip="Discards unsaved edits"
+          />
+        </FlyoutTemplate.Footer>
+      </FlyoutTemplate>
+    );
+
+    await userEvent.hover(screen.getByRole('button', { name: 'Discard' }));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Discards unsaved edits');
+  });
+
+  it('keeps a disabled action with a tooltip hoverable through aria-disabled', async () => {
+    const onClick = jest.fn();
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+        <FlyoutTemplate.Footer>
+          <FlyoutTemplate.Footer.PrimaryAction
+            label="Save"
+            onClick={onClick}
+            isDisabled
+            tooltip="Fix the errors to save"
+          />
+        </FlyoutTemplate.Footer>
+      </FlyoutTemplate>
+    );
+
+    const button = screen.getByRole('button', { name: 'Save' });
+    expect(button).toHaveAttribute('aria-disabled', 'true');
+    expect(button).not.toBeDisabled();
+
+    // EUI gives an aria-disabled button `pointer-events: none`, so the pointer lands on the
+    // tooltip anchor around it, as it does in a browser.
+    await userEvent.hover(button.parentElement!);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Fix the errors to save');
+
+    await userEvent.setup({ pointerEventsCheck: 0 }).click(button);
+    expect(onClick).not.toHaveBeenCalled();
   });
 
   it('renders the menu trigger to the right of the secondary action', () => {

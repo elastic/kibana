@@ -201,6 +201,18 @@ describe('FlyoutTemplate header blocks', () => {
       <FlyoutTemplate.Header.Badge key={index}>{`Badge ${index + 1}`}</FlyoutTemplate.Header.Badge>
     ));
 
+  it('derives the meta and info block test subjects from the header test subject', () => {
+    renderHeader(
+      <>
+        <FlyoutTemplate.Header.MetaBlock title="Owner">Platform</FlyoutTemplate.Header.MetaBlock>
+        <FlyoutTemplate.Header.InfoBlock title="Risk score">90</FlyoutTemplate.Header.InfoBlock>
+      </>
+    );
+
+    expect(screen.getByTestId('myFlyoutHeaderMetaBlocks')).toHaveTextContent('Platform');
+    expect(screen.getByTestId('myFlyoutHeaderInfoBlocks')).toHaveTextContent('90');
+  });
+
   it('renders a MetaBlock as a title/value pair', () => {
     renderHeader(
       <FlyoutTemplate.Header.MetaBlock title="Last updated" data-test-subj="metaUpdated">

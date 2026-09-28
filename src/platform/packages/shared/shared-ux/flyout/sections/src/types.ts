@@ -8,7 +8,7 @@
  */
 
 import type { MouseEventHandler, ReactNode } from 'react';
-import type { EuiIconProps } from '@elastic/eui';
+import type { EuiAccordionProps, EuiIconProps } from '@elastic/eui';
 
 interface FlyoutSectionActionBase {
   label: ReactNode;
@@ -60,7 +60,13 @@ export interface FlyoutSubsectionProps {
   children?: ReactNode;
 }
 
-export interface FlyoutAccordionProps {
+/**
+ * `EuiAccordion` props forwarded as-is. The accordion builds its toggle, owns its open state, and
+ * fixes its layout, so the rest of `EuiAccordionProps` is not offered.
+ */
+type ForwardedAccordionProps = Pick<EuiAccordionProps, 'isLoading' | 'isLoadingMessage'>;
+
+export interface FlyoutAccordionProps extends ForwardedAccordionProps {
   /** Seeds the accordion's internal DOM id; auto-generated when omitted. */
   id?: string;
   /** Accordion title, styled to match a section title. */

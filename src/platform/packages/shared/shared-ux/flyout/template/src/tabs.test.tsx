@@ -11,6 +11,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FlyoutTemplate } from './flyout_template';
+import type { FlyoutTabProps } from './types';
 
 const noop = () => {};
 
@@ -38,6 +39,52 @@ describe('FlyoutTemplate tabs', () => {
     expect(screen.getByRole('tablist')).toBeInTheDocument();
     expect(screen.getAllByRole('tab')).toHaveLength(2);
     expect(screen.getByRole('tabpanel')).toBeInTheDocument();
+  });
+
+  it('names the tab bar and forwards its test subject', () => {
+    render(
+      <FlyoutTemplate
+        onClose={noop}
+        session="never"
+        tabs={TABS}
+        tabBarProps={{ 'aria-label': 'Alert views', 'data-test-subj': 'alertTabs' }}
+      >
+        <FlyoutTemplate.Header title="Alert" />
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.TabPanel tabId="overview">
+            <span>overview content</span>
+          </FlyoutTemplate.Body.TabPanel>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByRole('tablist', { name: 'Alert views' })).toHaveAttribute(
+      'data-test-subj',
+      'alertTabs'
+    );
+  });
+
+  it('derives the tab bar test subject from the header test subject', () => {
+    render(
+      <FlyoutTemplate onClose={noop} session="never" data-test-subj="myFlyout" tabs={TABS}>
+        <FlyoutTemplate.Header title="Alert" />
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.TabPanel tabId="overview">
+            <span>overview content</span>
+          </FlyoutTemplate.Body.TabPanel>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByRole('tablist')).toHaveAttribute('data-test-subj', 'myFlyoutHeaderTabs');
+  });
+
+  it('does not accept an href on a tab, since tabs only select a body tab panel', () => {
+    const tabs: FlyoutTabProps[] = [
+      // @ts-expect-error href is not a tab prop
+      { id: 'overview', label: 'Overview', href: '/overview' },
+    ];
+    expect(tabs).toHaveLength(1);
   });
 
   it('selects the first tab by default (uncontrolled)', () => {

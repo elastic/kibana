@@ -52,7 +52,7 @@ Tab selection props also live on the root: `selectedTabId` (controlled), `defaul
 
 All three `label` props are `string`, not `ReactNode`.
 
-`PrimaryAction` and `SecondaryAction` accept `label`, `onClick`, an optional `id`, any `data-*` attributes, and the remaining `EuiButton` props such as `iconType`, `iconSide`, `isLoading`, `isDisabled`, `contentProps`, and `textProps`. Both are typed from EUI's button-only props, so an action always renders a button and the anchor props are not reachable. The template owns appearance and sizing: `children`, `color`, `element`, `fill`, `fullWidth`, `size`, and `buttonRef` are not accepted, and `flush` is not offered on `SecondaryAction`. `PrimaryAction` also takes `minWidth`, which `EuiButtonEmpty` does not support. The `id` is forwarded to the button element.
+`PrimaryAction` and `SecondaryAction` accept `label`, `onClick`, an optional `id`, any `data-*` attributes, and the remaining `EuiButton` props such as `iconType`, `iconSide`, `isLoading`, `isDisabled`, `contentProps`, and `textProps`. An optional `tooltip` wraps the button in an `EuiToolTip`, e.g. to explain why it is disabled; a disabled action with a tooltip defaults `hasAriaDisabled` to true, since a natively disabled button fires no pointer events and the tooltip could never open. Both are typed from EUI's button-only props, so an action always renders a button and the anchor props are not reachable. The template owns appearance and sizing: `children`, `color`, `element`, `fill`, `fullWidth`, `size`, and `buttonRef` are not accepted, and `flush` is not offered on `SecondaryAction`. `PrimaryAction` also takes `minWidth`, which `EuiButtonEmpty` does not support. The `id` is forwarded to the button element.
 
 ### Primary action menu
 
@@ -116,7 +116,7 @@ The template sets `children`, `fill`, `iconType`, `iconSide`, `element`, `aria-h
 
 ## Tabs
 
-Pass `tabs` to the root to render a tab bar at the bottom of the header. Each entry takes an `id` (the logical tab id used to match a `Body.TabPanel`, distinct from the auto-generated DOM `id`) and a `label`. It also accepts any `data-*` attributes and the rest of `EuiTabProps` (such as `disabled`, `prepend`, `append`, `className`, `css`, `aria-label`, `data-test-subj`). The template owns `aria-controls`, `children`, `isSelected`, and `onClick`, so an entry cannot set them: selection derives from the root and clicks route through `onTabChange`. Declare a `Body.TabPanel` for each tab id; the template wires the `tab`/`tabpanel` accessibility relationship and mounts only the selected panel.
+Pass `tabs` to the root to render a tab bar at the bottom of the header. Each entry takes an `id` (the logical tab id used to match a `Body.TabPanel`, distinct from the auto-generated DOM `id`) and a `label`. It also accepts any `data-*` attributes and the rest of `EuiTabProps` (such as `disabled`, `prepend`, `append`, `className`, `css`, `aria-label`, `data-test-subj`). The template owns `aria-controls`, `children`, `isSelected`, and `onClick`, so an entry cannot set them: selection derives from the root and clicks route through `onTabChange`. A tab only selects its `Body.TabPanel`, so it takes no `href`. Pass `tabBarProps` to the root to give the tab bar an `aria-label` and a `data-test-subj`. Declare a `Body.TabPanel` for each tab id; the template wires the `tab`/`tabpanel` accessibility relationship and mounts only the selected panel.
 
 ```tsx
 <FlyoutTemplate
@@ -167,6 +167,17 @@ Zone subjects derive from the root `data-test-subj` prop with a zone suffix, and
 | Header | `${root}Header` | `FlyoutTemplate.Header` `data-test-subj` |
 | Body | `${root}Body` | `FlyoutTemplate.Body` `data-test-subj` |
 | Footer | `${root}Footer` | `FlyoutTemplate.Footer` `data-test-subj` |
+
+The groups the template renders inside a zone derive from that zone's subject with a further suffix. Without a zone subject they keep a fixed default.
+
+| Group | Derived subject | Default |
+| --- | --- | --- |
+| Callout banner | `${body}Banner` | `flyoutBodyBanner` |
+| Meta blocks | `${header}MetaBlocks` | `metablocks-container` |
+| Info blocks | `${header}InfoBlocks` | `infoBlocks` |
+| Tab bar | `${header}Tabs` | none |
+
+The root `tabBarProps` `data-test-subj` overrides the tab bar's derived subject.
 
 Footer action buttons are not derived; their `data-test-subj` passes through to the button as given.
 
