@@ -12,7 +12,7 @@ pageLoadAssetSize:
   aiops: 586
   alerting: 8789
   alertingVTwo: 24358
-  alertzero: 18893
+  alertzero: 21199
   apm: 35746
   apmShared: 2226
   apmSourcesAccess: 1174
@@ -127,7 +127,7 @@ pageLoadAssetSize:
   management: 10296
   maps: 1201
   mapsEms: 3256
-  metricsDataAccess: 1947
+  metricsDataAccess: 2418
   mitreAttack: 2022
   ml: 950
   monitoring: 22416
