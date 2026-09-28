@@ -390,9 +390,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       /**
-       * Migration recommendation: MIGRATE TO JEST. Disabling Save while its confirmation modal
-       * is open is transient editor state; cover it in src/platform/plugins/shared/data_view_editor/
-       * public/components/footer/footer.test.tsx by rendering submitDisabled.
+       * Migration recommendation: MIGRATE TO SCOUT. This clicks Save in the editor, waits for the
+       * real confirmation modal, and proves the editor prevents a second submission. Rendering a
+       * Footer with submitDisabled in Jest would not verify that the editor sets that state.
        */
       it('should disable Save button after pressing', async function () {
         await PageObjects.settings.clickEditIndexButton();

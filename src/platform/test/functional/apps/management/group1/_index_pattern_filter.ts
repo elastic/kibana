@@ -72,8 +72,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     /**
-     * Migration recommendation: DELETE. indexed_fields_table/indexed_fields_table.test.tsx already
-     * verifies the runtime schema filter and its visible/hidden field result.
+     * Migration recommendation: MIGRATE TO SCOUT. This creates a runtime field through the UI,
+     * then proves it reaches the indexed-fields list and runtime schema filter. The component Jest
+     * test uses prebuilt fields, so it cannot cover that editor-to-list integration.
      */
     it('should filter indexed fields by schema type', async function () {
       await PageObjects.settings.navigateToDataViewById(logstashDataViewId);

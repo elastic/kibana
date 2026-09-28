@@ -87,9 +87,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     /**
-     * Migration recommendation: MIGRATE TO JEST. Field-count isolation is data-view model and
-     * field-editor state behavior; add the two-field regression to data_views/common/data_views/
-     * data_view.test.ts, which already covers field counts.
+     * Migration recommendation: MIGRATE TO SCOUT. This saves popularity for two fields, reloads
+     * Kibana, and verifies both persisted values independently. A model test, or the single-field
+     * reload scenario above, cannot catch one saved field overwriting the other's persisted value.
      */
     it('changing popularity for one field does not affect the other', async function () {
       expect(await PageObjects.settings.getPopularity()).to.be('1');
