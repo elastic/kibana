@@ -14,7 +14,8 @@ import {
 } from '@kbn/core-security-server';
 import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
 import { KibanaActionStepImpl } from './kibana_action_step';
-import { CallKibanaApiResponseTooLargeError } from '../lib/call_kibana_api';
+import type { CallKibanaApiParams } from '../lib/call_kibana_api';
+import { callKibanaApi, CallKibanaApiResponseTooLargeError } from '../lib/call_kibana_api';
 import { WorkflowTemplatingEngine } from '../templating_engine';
 import {
   EVENT_CHAIN_DEPTH_HEADER,
@@ -129,7 +130,10 @@ describe('KibanaActionStepImpl', () => {
         headers: { authorization: 'ApiKey test-key' },
       }),
     };
-    runtime = { contextManager } as unknown as StepExecutionRuntime;
+    runtime = {
+      contextManager,
+      abortController: new AbortController(),
+    } as unknown as StepExecutionRuntime;
   });
 
   afterEach(() => {
@@ -159,32 +163,32 @@ describe('KibanaActionStepImpl', () => {
       );
     });
 
-    it('JSON-encodes a scalar string for +json media types and leaves jsonl raw', async () => {
+    it.each([
+      ['application/vnd.api+json; charset=utf-8', '"hello"'],
+      ['application/jsonl', 'hello'],
+    ])('encodes a scalar string body sent as %s to %s', async (contentType, expectedBody) => {
       step = createStep({
         request: {
           method: 'POST',
           path: '/api/test',
           body: 'hello',
-          headers: { 'Content-Type': 'application/vnd.api+json; charset=utf-8' },
+          headers: { 'Content-Type': contentType },
         },
       });
       await (step as any)._run();
       expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
-        expect.objectContaining({ body: '"hello"' })
+        expect.objectContaining({ body: expectedBody })
       );
+    });
 
-      contextManager.callKibanaApi.mockClear();
-      step = createStep({
-        request: {
-          method: 'POST',
-          path: '/api/test',
-          body: 'hello',
-          headers: { 'Content-Type': 'application/jsonl' },
-        },
-      });
+    it('bounds the call by the step abort signal and the legacy headers timeout', async () => {
+      step = createStep({ request: { method: 'GET', path: '/api/test' } });
       await (step as any)._run();
       expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
-        expect.objectContaining({ body: 'hello' })
+        expect.objectContaining({
+          signal: runtime.abortController.signal,
+          timeout: 300_000,
+        })
       );
     });
 
@@ -231,36 +235,6 @@ describe('KibanaActionStepImpl', () => {
       const result = await (step as any)._run();
       expect(result.error).toBeDefined();
       expect(result.error.message).toContain('size limit');
-    });
-
-    it('does not prefix raw request paths that have no current-space prefix', async () => {
-      contextManager.getWorkflowSpaceId.mockReturnValue('custom');
-      step = createStep({ request: { method: 'GET', path: '/api/test' } });
-      await (step as any)._run();
-      expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
-        expect.objectContaining({ path: '/api/test' })
-      );
-    });
-
-    it('strips an existing current-space prefix from raw request paths', async () => {
-      contextManager.getWorkflowSpaceId.mockReturnValue('custom');
-      step = createStep({ request: { method: 'GET', path: '/s/custom/api/test' } });
-      await (step as any)._run();
-      expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
-        expect.objectContaining({ path: '/api/test' })
-      );
-    });
-
-    it('strips an existing current-space prefix from form_data paths', async () => {
-      contextManager.getWorkflowSpaceId.mockReturnValue('custom');
-      step = createStep({
-        path: '/s/custom/api/test',
-        form_data: { file: { content: 'hello', filename: 'a.txt' } },
-      });
-      await (step as any)._run();
-      expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
-        expect.objectContaining({ path: '/api/test' })
-      );
     });
 
     it('encodes binary form_data content as a Blob', async () => {
@@ -312,6 +286,105 @@ describe('KibanaActionStepImpl', () => {
       expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
         expect.objectContaining({ target: 'local' })
       );
+    });
+  });
+
+  describe('Core self-client through callKibanaApi', () => {
+    const selfFetch = jest.fn();
+
+    beforeEach(() => {
+      contextManager.getWorkflowSpaceId.mockReturnValue('custom');
+      selfFetch.mockImplementation(async () => ({
+        request: { url: 'http://localhost:5601/api/test' },
+        response: new Response(JSON.stringify({ ok: true }), {
+          headers: { 'content-type': 'application/json' },
+        }),
+      }));
+      const coreStart = contextManager.getCoreStart();
+      coreStart.http.selfClient = { asScoped: jest.fn(() => ({ fetch: selfFetch })) };
+      contextManager.callKibanaApi.mockImplementation((params: CallKibanaApiParams) =>
+        callKibanaApi(
+          { fakeRequest: contextManager.getFakeRequest(), coreStart, spaceId: 'custom' },
+          params
+        )
+      );
+    });
+
+    it.each([
+      [
+        'a raw path',
+        { request: { method: 'GET', path: '/api/cases' } },
+        'kibana.request',
+        '/api/cases',
+      ],
+      [
+        'a raw path in another space',
+        { request: { method: 'GET', path: '/s/other/api/cases' } },
+        'kibana.request',
+        '/s/other/api/cases',
+      ],
+      [
+        'a raw path in the workflow space',
+        { request: { method: 'GET', path: '/s/custom/api/cases' } },
+        'kibana.request',
+        '/s/custom/api/cases',
+      ],
+      [
+        'a form_data path in another space',
+        {
+          path: '/s/other/api/saved_objects/_import',
+          form_data: { file: { content: 'hello', filename: 'a.ndjson' } },
+        },
+        'kibana.request',
+        '/s/other/api/saved_objects/_import',
+      ],
+      [
+        'a generated connector path',
+        { title: 'Test Case', description: 'Test Description', owner: 'securitySolution' },
+        'kibana.createCase',
+        '/s/custom/api/cases',
+      ],
+    ])('sends %s to the same route as legacy fetch', async (_, withValue, stepType, routePath) => {
+      mockGetBooleanValue.mockResolvedValue(false);
+      await (createStep(withValue, stepType) as any)._run();
+      expect(global.fetch).toHaveBeenCalledWith(
+        `https://localhost:5601${routePath}`,
+        expect.any(Object)
+      );
+
+      mockGetBooleanValue.mockResolvedValue(true);
+      const result = await (createStep(withValue, stepType) as any)._run();
+      expect(result.error).toBeUndefined();
+      expect(selfFetch).toHaveBeenCalledTimes(1);
+      expect(selfFetch.mock.calls[0][0]).toBe(`/base${routePath}`);
+    });
+
+    it('passes the step abort signal and the legacy headers timeout to Core', async () => {
+      await (createStep({ request: { method: 'GET', path: '/api/test' } }) as any)._run();
+      const options = selfFetch.mock.calls[0][1];
+      expect(options.timeout).toBe(300_000);
+      expect(options.signal).toBe(runtime.abortController.signal);
+    });
+
+    it('warns about and drops headers that Kibana sets', async () => {
+      const result = await (
+        createStep({
+          request: {
+            method: 'GET',
+            path: '/api/test',
+            headers: { 'kbn-version': '9.0.0', Cookie: 'sid=1', 'x-custom': 'kept' },
+          },
+        }) as any
+      )._run();
+      expect(result.error).toBeUndefined();
+      expect(workflowLogger.logWarn).toHaveBeenCalledWith(
+        'Ignoring headers that Kibana sets for Kibana steps: kbn-version, Cookie.',
+        expect.objectContaining({ tags: ['kibana'] })
+      );
+      const { headers } = selfFetch.mock.calls[0][1];
+      expect(headers).not.toHaveProperty('kbn-version');
+      expect(headers).not.toHaveProperty('Cookie');
+      expect(headers['x-custom']).toBe('kept');
     });
   });
 
@@ -842,19 +915,6 @@ describe('KibanaActionStepImpl', () => {
       expect(contextManager.callKibanaApi).toHaveBeenCalled();
       expect(global.fetch).not.toHaveBeenCalled();
       expect(mockGetBooleanValue).toHaveBeenCalled();
-    });
-
-    it('does not double-prefix generated non-default-space paths', async () => {
-      contextManager.getWorkflowSpaceId.mockReturnValue('custom');
-      step = createStep(
-        { title: 'Test Case', description: 'Test Description', owner: 'securitySolution' },
-        'kibana.createCase'
-      );
-      await (step as any)._run();
-      expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
-        expect.objectContaining({ method: 'POST', path: '/api/cases' })
-      );
-      expect(global.fetch).not.toHaveBeenCalled();
     });
 
     it('builds generated connector requests through the self-client adapter', async () => {

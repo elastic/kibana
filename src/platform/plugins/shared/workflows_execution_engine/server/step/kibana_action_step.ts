@@ -27,6 +27,7 @@ import {
   type BufferedRawBody,
   CallKibanaApiResponseTooLargeError,
   type CallKibanaApiResult,
+  isIgnoredCallerHeader,
   KibanaApiCallError,
 } from '../lib/call_kibana_api';
 import { getInternalUiamCallerAttestationHeaders } from '../lib/get_internal_uiam_caller_attestation_headers';
@@ -51,6 +52,12 @@ type FetcherOptions = NonNullable<z.infer<typeof FetcherConfigSchema>> & {
   // Allow additional undici Agent options to be passed through
   [key: string]: any;
 };
+
+/**
+ * Legacy fetch used undici's default 300s wait for response headers. The step `timeout` and
+ * workflow cancellation abort sooner through the step's abort signal.
+ */
+const KIBANA_STEP_RESPONSE_HEADERS_TIMEOUT_MS = 300_000;
 
 /**
  * Describes a single field in a multipart/form-data upload.
@@ -215,14 +222,8 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     // Core's scoped self client owns redirect/TLS/dispatcher policy. YAML `fetcher` is
     // accepted for compatibility and warned above; it is never applied.
     const { fetcher: _fetcherOptions, ...cleanParams } = params;
-    // `callKibanaApi` owns the workflow-space prefix, so strip an existing current-space prefix
-    // from paths that already carry one (raw `request`/`form_data` paths were historically
-    // forwarded unchanged, and generated connector paths are built space-prefixed).
-    const currentSpacePrefix = spaceId && spaceId !== 'default' ? `/s/${spaceId}` : '';
-    const stripCurrentSpacePrefix = (path: string) =>
-      currentSpacePrefix && path.startsWith(`${currentSpacePrefix}/`)
-        ? path.slice(currentSpacePrefix.length)
-        : path;
+    // Paths match the legacy transport: raw `request`/`form_data` paths are Kibana-root paths sent
+    // unchanged, and generated connector paths already include the workflow space.
     let requestConfig: {
       method: string;
       path: string;
@@ -237,23 +238,12 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     }
     if (cleanParams.request) {
       const { method = 'GET', path, body, query, headers } = cleanParams.request;
-      requestConfig = { method, path: stripCurrentSpacePrefix(path), body, query, headers };
+      requestConfig = { method, path, body, query, headers };
     } else if (cleanParams.form_data) {
       const { form_data, method = 'POST', path, query, headers } = cleanParams;
-      requestConfig = {
-        method,
-        path: stripCurrentSpacePrefix(path),
-        query,
-        headers,
-        rawBody: this.buildFormData(form_data),
-      };
+      requestConfig = { method, path, query, headers, rawBody: this.buildFormData(form_data) };
     } else {
-      const { method, path, body, query, headers } = buildKibanaRequest(
-        stepType,
-        cleanParams,
-        spaceId
-      );
-      requestConfig = { method, path: stripCurrentSpacePrefix(path), body, query, headers };
+      requestConfig = buildKibanaRequest(stepType, cleanParams, spaceId);
     }
 
     const normalizedMethod = requestConfig.method?.toUpperCase();
@@ -265,12 +255,25 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       );
     }
 
+    const ignoredHeaders = Object.keys(requestConfig.headers ?? {}).filter(isIgnoredCallerHeader);
+    if (ignoredHeaders.length > 0) {
+      this.workflowLogger.logWarn(
+        `Ignoring headers that Kibana sets for Kibana steps: ${ignoredHeaders.join(', ')}.`,
+        {
+          event: { action: 'kibana-action' },
+          tags: ['kibana'],
+          labels: { step_type: stepType },
+        }
+      );
+    }
+
     const contextManager = this.stepExecutionRuntime.contextManager;
     let result: CallKibanaApiResult;
     try {
       result = await contextManager.callKibanaApi({
         method: normalizedMethod as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
         path: requestConfig.path,
+        prefixSpace: false,
         body:
           requestConfig.rawBody === undefined
             ? this.selfClientBody(requestConfig.body, requestConfig.headers)
@@ -280,6 +283,8 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
         headers: requestConfig.headers,
         maxResponseBytes: this.getMaxResponseBytes(),
         target,
+        signal: this.stepExecutionRuntime.abortController.signal,
+        timeout: KIBANA_STEP_RESPONSE_HEADERS_TIMEOUT_MS,
       });
     } catch (error) {
       if (error instanceof CallKibanaApiResponseTooLargeError) {

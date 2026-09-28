@@ -65,11 +65,16 @@ export interface CallKibanaApiParams {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   target?: 'local';
   /**
-   * Space-relative route path starting with `/`, e.g. `/api/cases`. When `deps.spaceId`
-   * is a non-default space, it is prefixed with `/s/{spaceId}` automatically; pass the
-   * path without a space segment.
+   * Route path starting with `/`, e.g. `/api/cases`. By default the path is space-relative:
+   * when `deps.spaceId` is a non-default space, it is prefixed with `/s/{spaceId}`.
    */
   path: string;
+  /**
+   * Set to `false` to send `path` as a Kibana-root path without adding the workflow space, so
+   * `/api/cases` targets the default space and `/s/other/api/cases` targets `other`.
+   * Defaults to `true`.
+   */
+  prefixSpace?: boolean;
   body?: unknown;
   /** Buffered non-JSON body, mutually exclusive with `body` (used for FormData uploads). */
   rawBody?: BufferedRawBody | null;
@@ -81,6 +86,11 @@ export interface CallKibanaApiParams {
    */
   headers?: Record<string, string>;
   signal?: AbortSignal;
+  /**
+   * Milliseconds to wait for response headers, including same-origin redirects. Defaults to
+   * Core's self client timeout.
+   */
+  timeout?: number;
   /** Optional per-call response size cap. */
   maxResponseBytes?: number;
 }
@@ -146,6 +156,10 @@ const isCoreProtectedSelfCallHeader = (name: string): boolean => {
   );
 };
 
+/** Returns true for caller header names that {@link callKibanaApi} drops before dispatch. */
+export const isIgnoredCallerHeader = (name: string): boolean =>
+  RESERVED_HEADER_NAMES.has(name.toLowerCase()) || isCoreProtectedSelfCallHeader(name);
+
 const stripReservedHeaders = (
   headers: Record<string, string> | undefined,
   isFormData: boolean
@@ -153,11 +167,8 @@ const stripReservedHeaders = (
   if (!headers) return {};
   const out: Record<string, string> = {};
   for (const [name, value] of Object.entries(headers)) {
-    const normalizedName = name.toLowerCase();
     const reserved =
-      RESERVED_HEADER_NAMES.has(normalizedName) ||
-      isCoreProtectedSelfCallHeader(normalizedName) ||
-      (isFormData && normalizedName === 'content-type');
+      isIgnoredCallerHeader(name) || (isFormData && name.toLowerCase() === 'content-type');
     if (!reserved) {
       out[name] = value;
     }
@@ -231,7 +242,7 @@ const stringifyErrorBodyForMessage = (body: unknown): string => {
     : text;
 };
 
-const validateSpaceRelativePath = (path: string): void => {
+const validateKibanaApiPath = (path: string): void => {
   // Query and fragment are not path segments. `foo%2Fbar` in a query is a value, not traversal.
   const pathname = path.split(/[?#]/, 1)[0];
   if (
@@ -306,10 +317,12 @@ export async function callKibanaApi<T = unknown>(
     ...getOutboundEventChainHeaders(fakeRequest, workflowRunId),
   };
 
-  // Callers provide space-relative paths; this helper owns the space prefix exactly once. The
-  // server base path stays outermost.
-  validateSpaceRelativePath(params.path);
-  const path = coreStart.http.basePath.prepend(applySpacePrefix(params.path, spaceId));
+  // Space-relative paths get the workflow space prefix exactly once. The server base path stays
+  // outermost.
+  validateKibanaApiPath(params.path);
+  const routePath =
+    params.prefixSpace === false ? params.path : applySpacePrefix(params.path, spaceId);
+  const path = coreStart.http.basePath.prepend(routePath);
   const { request, response } = await coreStart.http.selfClient.asScoped(fakeRequest).fetch(path, {
     method: params.method,
     target: params.target,
@@ -325,6 +338,7 @@ export async function callKibanaApi<T = unknown>(
     // false, so the string above must already include `server.basePath` when configured.
     prependBasePath: false,
     signal: params.signal,
+    timeout: params.timeout,
   });
 
   // `Response.ok` is true only for 2xx; treat 304 Not Modified as a successful response with no body

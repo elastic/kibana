@@ -295,6 +295,24 @@ describe('callKibanaApi', () => {
     expect(options.prependBasePath).toBe(false);
   });
 
+  it.each(['/api/cases', '/s/other/api/cases', '/s/my-space/api/cases'])(
+    'sends %s unchanged under the base path when prefixSpace is false',
+    async (path) => {
+      mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+      await callKibanaApi(
+        {
+          fakeRequest: createFakeRequest(),
+          coreStart: createCoreStart({ serverBasePath: '/my-base-path' }),
+          spaceId: 'my-space',
+        },
+        { method: 'GET', path, prefixSpace: false }
+      );
+
+      expect(mockSelfFetch.mock.calls[0][0]).toBe(`/my-base-path${path}`);
+    }
+  );
+
   it('does not prefix the path for the default space', async () => {
     mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
 
@@ -719,6 +737,17 @@ describe('callKibanaApi', () => {
     );
 
     expect(lastFetchOptions().signal).toBe(controller.signal);
+  });
+
+  it('forwards the timeout to the self client', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      { method: 'GET', path: '/api/foo', timeout: 300_000 }
+    );
+
+    expect(lastFetchOptions().timeout).toBe(300_000);
   });
 
   it('throws CallKibanaApiResponseTooLargeError when body exceeds maxResponseBytes', async () => {
