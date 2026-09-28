@@ -319,7 +319,8 @@ const takeWithinBudget = (units: RenderedUnit[], budget: number): RenderedUnit[]
 /**
  * The LLM half of the summary. Each request is: system prompt, the running summary as prior
  * context, a chunk of covered cycles rendered as they are sent (preceded by its round's user
- * message when it starts mid-round), the user's current request and the instruction with the
+ * message when it starts mid-round), with the user's current request placed before the first
+ * current-run cycle (after the chunk when there is none), and the instruction with the
  * programmatic tool list.
  * Requests are budgeted on their rendered size: the fixed part is measured per request, the chunk
  * is sized against what is left of `budget.historyBudget`, and the request is re-measured,
@@ -359,14 +360,19 @@ const generateLlmSummary = async ({
       ? [roundUserMessage(first.unit, conversation)]
       : [];
 
-  const renderRequest = (chunk: RenderedUnit[], prior?: CompactionSummary): BaseMessage[] => [
-    new SystemMessage(COMPACTION_SYSTEM_PROMPT),
-    ...(prior ? compactionSummaryMessages(prior) : []),
-    ...chunkLead(chunk),
-    ...chunk.flatMap(({ messages }) => messages),
-    createUserMessage(userMessage),
-    new HumanMessage(instruction),
-  ];
+  const renderRequest = (chunk: RenderedUnit[], prior?: CompactionSummary): BaseMessage[] => {
+    const firstCurrent = chunk.findIndex(({ unit }) => unit.kind === 'current_cycle');
+    const requestAt = firstCurrent < 0 ? chunk.length : firstCurrent;
+    return [
+      new SystemMessage(COMPACTION_SYSTEM_PROMPT),
+      ...(prior ? compactionSummaryMessages(prior) : []),
+      ...chunkLead(chunk),
+      ...chunk.slice(0, requestAt).flatMap(({ messages }) => messages),
+      createUserMessage(userMessage),
+      ...chunk.slice(requestAt).flatMap(({ messages }) => messages),
+      new HumanMessage(instruction),
+    ];
+  };
 
   let prior = existingSummary;
   let remaining = covered;

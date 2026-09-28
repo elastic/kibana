@@ -271,6 +271,30 @@ describe('compactContext', () => {
     expect(result?.summarizedCycleCount).toBe(2);
   });
 
+  it('places the current request before the first current-run cycle it summarizes', async () => {
+    const { invoke, deps } = setup();
+    const conversation = conversationOf(
+      timelineFromRounds([
+        {
+          id: 'A',
+          input: { message: 'hello A', attachments: [] },
+          steps: [call('a', BIG)],
+          response: { message: 'answer A' },
+        },
+      ])
+    );
+    const steps = ['x1', 'x2', 'x3'].map((id) => call(id, BIG));
+    const result = await compact({ conversation, run: run(steps), tailCapTokens: 20_000 }, deps);
+
+    expect(result?.summary.summarized_up_to).toEqual({ round_id: 'current', tool_call_id: 'x1' });
+    const request = requestText(invoke, 0);
+    const answerAt = request.indexOf('answer A');
+    const requestAt = request.indexOf('CURRENT_REQUEST');
+    expect(answerAt).toBeGreaterThan(-1);
+    expect(requestAt).toBeGreaterThan(answerAt);
+    expect(request.indexOf('r-x1')).toBeGreaterThan(requestAt);
+  });
+
   it('stops the covered range at the last cycle with a persisted anchor', async () => {
     const { invoke, deps } = setup();
     const steps = ['x1', 'x2', 'x3', 'x4'].map((id) => call(id, BIG));
