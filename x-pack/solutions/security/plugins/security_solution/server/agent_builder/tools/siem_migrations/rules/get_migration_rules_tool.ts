@@ -93,13 +93,13 @@ const projectRule = (rule: GetRuleMigrationRulesResponse['data'][number]) => ({
   },
   elastic_rule: rule.elastic_rule
     ? {
-      id: rule.elastic_rule.id,
-      title: rule.elastic_rule.title,
-      prebuilt_rule_id: rule.elastic_rule.prebuilt_rule_id,
-      integration_ids: rule.elastic_rule.integration_ids,
-      query: rule.elastic_rule.query,
-      query_language: rule.elastic_rule.query_language,
-    }
+        id: rule.elastic_rule.id,
+        title: rule.elastic_rule.title,
+        prebuilt_rule_id: rule.elastic_rule.prebuilt_rule_id,
+        integration_ids: rule.elastic_rule.integration_ids,
+        query: rule.elastic_rule.query,
+        query_language: rule.elastic_rule.query_language,
+      }
     : undefined,
   translation_result: rule.translation_result,
   status: rule.status,

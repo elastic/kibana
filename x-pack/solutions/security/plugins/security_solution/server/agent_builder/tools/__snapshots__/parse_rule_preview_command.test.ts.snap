@@ -7,21 +7,27 @@ Object {
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages --anomaly-threshold is out of range (> 100) 1`] = `
+exports[
+  `parseRulePreviewCommand — snapshots: error messages --anomaly-threshold is out of range (> 100) 1`
+] = `
 Object {
   "kind": "error",
   "message": "--anomaly-threshold must be an integer between 0 and 100, got \\"999\\"",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages --threat-mapping is a JSON object (not an array) 1`] = `
+exports[
+  `parseRulePreviewCommand — snapshots: error messages --threat-mapping is a JSON object (not an array) 1`
+] = `
 Object {
   "kind": "error",
   "message": "--threat-mapping must be a JSON array",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages --threat-mapping is invalid JSON 1`] = `
+exports[
+  `parseRulePreviewCommand — snapshots: error messages --threat-mapping is invalid JSON 1`
+] = `
 Object {
   "kind": "error",
   "message": "--threat-mapping: invalid JSON — not-json",
@@ -56,21 +62,27 @@ Object {
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages machine_learning missing --anomaly-threshold 1`] = `
+exports[
+  `parseRulePreviewCommand — snapshots: error messages machine_learning missing --anomaly-threshold 1`
+] = `
 Object {
   "kind": "error",
   "message": "Missing required argument: anomaly-threshold",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages machine_learning missing --job-id 1`] = `
+exports[
+  `parseRulePreviewCommand — snapshots: error messages machine_learning missing --job-id 1`
+] = `
 Object {
   "kind": "error",
   "message": "Missing required argument: job-id",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages new_terms missing --history-window-start 1`] = `
+exports[
+  `parseRulePreviewCommand — snapshots: error messages new_terms missing --history-window-start 1`
+] = `
 Object {
   "kind": "error",
   "message": "Missing required argument: history-window-start",
@@ -91,7 +103,9 @@ Object {
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages threat_match missing --threat-mapping 1`] = `
+exports[
+  `parseRulePreviewCommand — snapshots: error messages threat_match missing --threat-mapping 1`
+] = `
 Object {
   "kind": "error",
   "message": "Missing required argument: threat-mapping",
@@ -105,14 +119,18 @@ Object {
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages threshold missing --threshold-value 1`] = `
+exports[
+  `parseRulePreviewCommand — snapshots: error messages threshold missing --threshold-value 1`
+] = `
 Object {
   "kind": "error",
   "message": "Missing required argument: threshold-value",
 }
 `;
 
-exports[`parseRulePreviewCommand — snapshots: error messages unknown flag on known subcommand 1`] = `
+exports[
+  `parseRulePreviewCommand — snapshots: error messages unknown flag on known subcommand 1`
+] = `
 Object {
   "kind": "error",
   "message": "Unknown argument: bogus",
