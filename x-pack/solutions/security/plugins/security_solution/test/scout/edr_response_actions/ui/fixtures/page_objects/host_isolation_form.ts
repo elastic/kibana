@@ -14,8 +14,8 @@ export class HostIsolationFormPage {
   public readonly comment: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.form = page.testSubj.locator('endpointHostIsolationForm');
-    this.comment = page.testSubj.locator('host_isolation_comment');
+    this.form = this.page.testSubj.locator('endpointHostIsolationForm');
+    this.comment = this.page.testSubj.locator('host_isolation_comment');
   }
 
   async fillComment(comment: string): Promise<void> {
