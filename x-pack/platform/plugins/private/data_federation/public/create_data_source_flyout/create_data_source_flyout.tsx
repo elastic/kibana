@@ -324,13 +324,6 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               inputRef={descriptionField.ref}
             />
           </EuiFormRow>
-          {dataSourceType !== 's3' && (
-            <CreateDataSourceFlyoutTypeSettingsS3Region
-              control={control}
-              unregister={unregister}
-              isRequired={!isEditMode}
-            />
-          )}
           <CreateDataSourceFlyoutTypeSettingsBlock
             control={control}
             dataSourceType={dataSourceType}
