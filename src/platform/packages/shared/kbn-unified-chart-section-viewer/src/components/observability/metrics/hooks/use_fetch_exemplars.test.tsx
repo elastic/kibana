@@ -29,6 +29,7 @@ import React from 'react';
 import { act, render, renderHook, waitFor } from '@testing-library/react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { Filter } from '@kbn/es-query';
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
@@ -52,6 +53,9 @@ const TEST_FILTERS: Filter[] = [
     meta: { key: 'attributes.http.route' },
     query: { match_phrase: { 'attributes.http.route': '/orders' } },
   },
+];
+const TEST_ESQL_VARIABLES: ESQLControlVariable[] = [
+  { key: 'service', value: 'checkout-service', type: ESQLVariableType.VALUES },
 ];
 const TEST_ESQL_QUERY =
   'FROM exemplars-generic.otel-default | WHERE metric_name == "http.server.request.duration" | KEEP @timestamp, metric_name, value, trace.id, span.id | SORT @timestamp DESC | LIMIT 500';
@@ -84,6 +88,7 @@ const createParams = (
     } as unknown as DataView,
     timeRange: { from: 'now-15m', to: 'now' },
     filters: TEST_FILTERS,
+    esqlVariables: TEST_ESQL_VARIABLES,
   }),
   services: {
     data: { search: { search: jest.fn() } },
@@ -246,10 +251,34 @@ describe('useFetchExemplars', () => {
       dataView: params.fetchParams.dataView,
       timeRange: params.fetchParams.timeRange,
       filters: TEST_FILTERS,
+      variables: TEST_ESQL_VARIABLES,
       uiSettings: params.services.uiSettings,
       profileId: TEST_PROFILE_ID,
       executionContextName: MetricsExecutionContextName.EXEMPLARS,
     });
+  });
+
+  it('drops the previous rows while a refetch is in flight', async () => {
+    const params = createParams();
+    const { result, rerender } = renderHook(
+      (props: UseFetchExemplarsParams) => useFetchExemplars(props),
+      { initialProps: params }
+    );
+    await waitFor(() => expect(result.current).toBeDefined());
+
+    mockExecuteEsqlQuery.mockReturnValueOnce(new Promise(() => {}));
+    rerender({
+      ...params,
+      fetchParams: {
+        ...params.fetchParams,
+        lastReloadRequestTime: params.fetchParams.lastReloadRequestTime + 1,
+        timeRange: { ...params.fetchParams.timeRange },
+      },
+    });
+    await flushAsync();
+
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
+    expect(result.current).toBeUndefined();
   });
 
   it('probes again under the new fetch id when the Discover fetch changes', async () => {

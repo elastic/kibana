@@ -43,8 +43,9 @@ interface CachedProbe {
 
 /**
  * Shares one exemplars availability probe between every chart in the grid for each Discover
- * fetch. The probe never rejects: a failure is reported once through `onError` and resolves to
- * an empty set.
+ * fetch, including an empty or failed result, so charts mounted later in the same fetch (the
+ * next grid page) do not probe again. The probe never rejects: a failure is reported once
+ * through `onError` and resolves to an empty set.
  */
 export const ExemplarsAvailabilityProvider = ({ children }: { children: React.ReactNode }) => {
   const cachedProbe = useRef<CachedProbe | undefined>(undefined);
@@ -62,16 +63,7 @@ export const ExemplarsAvailabilityProvider = ({ children }: { children: React.Re
         }
         return NO_METRICS;
       });
-      const entry: CachedProbe = { fetchId, request };
-      cachedProbe.current = entry;
-
-      // The exemplars stream is created on the first exemplar write, so an empty or failed
-      // result may be transient. Only a non-empty result stays cached for this fetch.
-      void request.then((metricsByStream) => {
-        if (metricsByStream.size === 0 && cachedProbe.current === entry) {
-          cachedProbe.current = undefined;
-        }
-      });
+      cachedProbe.current = { fetchId, request };
 
       return request;
     },

@@ -91,13 +91,15 @@ describe('ExemplarsAvailabilityProvider', () => {
     expect(mockFetch).toHaveBeenCalledTimes(2);
   });
 
-  it('does not cache an empty result', async () => {
+  it('caches an empty result for the same fetch and probes again on the next one', async () => {
     mockFetch.mockResolvedValue(new Map());
     const probe = renderProbe();
 
     expect((await probe({ ...requestParams, fetchId, onError: jest.fn() })).size).toBe(0);
     await probe({ ...requestParams, fetchId, onError: jest.fn() });
+    expect(mockFetch).toHaveBeenCalledTimes(1);
 
+    await probe({ ...requestParams, fetchId: fetchId + 1, onError: jest.fn() });
     expect(mockFetch).toHaveBeenCalledTimes(2);
   });
 
@@ -111,7 +113,7 @@ describe('ExemplarsAvailabilityProvider', () => {
   describe('when the probe fails', () => {
     const probeError = new Error('verification_exception: Unknown index');
 
-    it('reports once across concurrent callers, resolves both to an empty set, and retries later', async () => {
+    it('reports once across concurrent callers, resolves both to an empty set, and retries on the next fetch', async () => {
       mockFetch.mockRejectedValueOnce(probeError);
       const probe = renderProbe();
       const firstOnError = jest.fn();
@@ -129,6 +131,9 @@ describe('ExemplarsAvailabilityProvider', () => {
       expect(secondOnError).not.toHaveBeenCalled();
 
       await probe({ ...requestParams, fetchId, onError: jest.fn() });
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+
+      await probe({ ...requestParams, fetchId: fetchId + 1, onError: jest.fn() });
       expect(mockFetch).toHaveBeenCalledTimes(2);
     });
 

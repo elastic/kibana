@@ -95,6 +95,8 @@ export const useFetchExemplars = ({
           dataView,
           timeRange: fetchParams.timeRange,
           filters: fetchParams.filters,
+          // The copied `WHERE` clauses may reference Discover control variables (`?service`).
+          variables: fetchParams.esqlVariables,
           uiSettings,
           profileId,
           executionContextName: MetricsExecutionContextName.EXEMPLARS,
@@ -118,12 +120,15 @@ export const useFetchExemplars = ({
       search,
       fetchParams.timeRange,
       fetchParams.filters,
+      fetchParams.esqlVariables,
       fetchParams.lastReloadRequestTime,
       uiSettings,
       profileId,
       reportError,
       probeExemplarsAvailability,
-    ]
+    ],
+    // Drop the previous rows as soon as a refetch starts so stale exemplars never render.
+    { clearValueOnNext: true }
   );
 
   return value;
