@@ -5,14 +5,27 @@
  * 2.0.
  */
 
-import { EuiFlyoutHeader, EuiLink, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlyoutHeader,
+  EuiLink,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { SERVICE_FLYOUT_EBT_ACTIONS, SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { ServiceBadges } from './service_badges';
 import { SERVICE_FLYOUT_TABS, type ServiceFlyoutTabId } from '..';
 import { useServiceFlyoutLinks } from '../hooks/use_service_flyout_links';
 import { useServiceFlyoutContext } from '../service_flyout_context';
+
+const TITLE_LINK_TOOLTIP = i18n.translate('xpack.apm.serviceFlyout.titleLinkTooltip', {
+  defaultMessage: 'Open service overview',
+});
 
 interface ServiceFlyoutHeaderProps {
   title: string;
@@ -30,23 +43,27 @@ export function ServiceFlyoutHeader({
   const { capabilities } = useServiceFlyoutContext();
   const { apm } = useServiceFlyoutLinks();
   const serviceOverviewHref = apm.overviewTab;
-  const showServiceNameLink = capabilities.header?.serviceNameLink ?? false;
+  const showServiceNameLink = Boolean(
+    serviceOverviewHref && (capabilities.header?.serviceNameLink ?? false)
+  );
 
   return (
     <EuiFlyoutHeader>
       <EuiTitle size="s">
         <h2 id={titleId} data-test-subj="serviceFlyoutTitle">
           {showServiceNameLink ? (
-            <EuiLink
-              href={serviceOverviewHref}
-              data-test-subj="serviceFlyoutTitleLink"
-              {...getEbtProps({
-                action: EBT_CLICK_ACTIONS.VIEW_SERVICE,
-                element: SERVICE_FLYOUT_EBT_ELEMENTS.TITLE,
-              })}
-            >
-              {title}
-            </EuiLink>
+            <EuiToolTip content={TITLE_LINK_TOOLTIP} position="bottom">
+              <EuiLink
+                href={serviceOverviewHref}
+                data-test-subj="serviceFlyoutTitleLink"
+                {...getEbtProps({
+                  action: EBT_CLICK_ACTIONS.VIEW_SERVICE,
+                  element: SERVICE_FLYOUT_EBT_ELEMENTS.TITLE,
+                })}
+              >
+                {title}
+              </EuiLink>
+            </EuiToolTip>
           ) : (
             title
           )}

@@ -7,14 +7,13 @@
 
 import { ExecutionStatus } from '@kbn/workflows';
 import type { InvestigationStatus } from '../../common';
+import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_investigation_workflow_execution';
 import { InvestigationStaleWriteError } from '../storage';
 import type { InvestigationPatch } from '../storage';
 import {
   EXECUTION_LOOKUP_BATCH_SIZE,
   FALLBACK_ERRORS,
   MAX_CANDIDATES,
-  MISSING_EXECUTION_ERROR,
-  MISSING_EXECUTION_GRACE_PERIOD_MS,
   NON_TERMINAL_INVESTIGATION_STATUSES,
   PAGE_SIZE,
 } from './investigation_reconciliation_types';
@@ -105,40 +104,31 @@ const toInvestigationStatus = (
 
 const toReconciliationOutcome = ({
   execution,
-  investigationCreatedAt,
 }: {
   execution: ExecutionSummary | undefined;
-  investigationCreatedAt: string;
 }): ReconciliationOutcome | undefined => {
-  if (execution) {
-    const reconciledStatus = toInvestigationStatus(execution.status);
-    if (!reconciledStatus) {
-      return undefined;
-    }
-    return {
-      reconciledStatus,
-      completedAt: execution.finishedAt ?? new Date().toISOString(),
-      ...(reconciledStatus === 'failed' && {
-        errorMessage: execution.error?.message ?? FALLBACK_ERRORS[execution.status],
-      }),
-    };
+  if (!execution || !isInvestigationWorkflowExecution(execution)) {
+    return undefined;
   }
 
-  const createdAtMs = Date.parse(investigationCreatedAt);
-  if (isNaN(createdAtMs) || Date.now() - createdAtMs < MISSING_EXECUTION_GRACE_PERIOD_MS) {
+  const reconciledStatus = toInvestigationStatus(execution.status);
+  if (!reconciledStatus) {
     return undefined;
   }
   return {
-    reconciledStatus: 'failed',
-    completedAt: new Date().toISOString(),
-    errorMessage: MISSING_EXECUTION_ERROR,
+    reconciledStatus,
+    completedAt: execution.finishedAt ?? new Date().toISOString(),
+    ...(reconciledStatus === 'failed' && {
+      errorMessage: execution.error?.message ?? FALLBACK_ERRORS[execution.status],
+    }),
   };
 };
 
 /**
  * Corrects investigations left in a non-terminal status by a workflow execution that has already
  * settled — the engine cancels or times out a run before its `persist_investigation_*` step can
- * write the outcome. Only the status is corrected; no lifecycle trigger is emitted.
+ * write the outcome. Executions from removed workflows and missing execution documents are left
+ * untouched. Only the status is corrected; no lifecycle trigger is emitted.
  */
 export const reconcileInvestigationStatuses = async ({
   investigationSweepRepository,
@@ -168,8 +158,7 @@ export const reconcileInvestigationStatuses = async ({
           spaceId
         );
       } catch (error) {
-        // Not treated as "these executions are missing": that would settle healthy investigations
-        // as failed once they aged past the grace period. The next run retries.
+        /** A failed lookup is not treated as a missing execution; the next run retries. */
         logger.warn(`Failed to read workflow executions in space "${spaceId}": ${error.message}`);
         continue;
       }
@@ -179,9 +168,9 @@ export const reconcileInvestigationStatuses = async ({
           return { scanned, reconciled };
         }
 
-        const { id, version, created_at: investigationCreatedAt } = candidate.investigation;
+        const { id, version } = candidate.investigation;
         const execution = executions.get(id);
-        const outcome = toReconciliationOutcome({ execution, investigationCreatedAt });
+        const outcome = toReconciliationOutcome({ execution });
 
         if (!outcome) {
           continue;

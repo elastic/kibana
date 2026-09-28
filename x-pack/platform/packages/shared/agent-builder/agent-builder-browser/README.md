@@ -5,7 +5,8 @@ Browser-side types and utilities for the agentBuilder framework.
 ## Registering a custom conversation event type
 
 Custom event types must be registered on **both** sides — the server controls persistence and
-validation; the browser controls rendering.
+validation; the browser controls rendering. The browser does not validate `data`: it renders the
+stored event as-is.
 
 ### Server side (`plugin.ts` → `setup`)
 
@@ -46,18 +47,18 @@ export default MyNoteRenderer; // default export required for React.lazy()
 ```tsx
 import React, { Suspense, lazy } from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
-import { z } from '@kbn/zod/v4';
 import type { ConversationEventUIDefinition } from '@kbn/agent-builder-browser';
 
 // Fetched on first render, not at plugin start.
 const MyNoteRenderer = lazy(() => import('./my_note_renderer'));
 
-export const myNoteDefinition: ConversationEventUIDefinition = {
+interface MyNoteData {
+  title?: string;
+  text: string;
+}
+
+export const myNoteDefinition: ConversationEventUIDefinition<'my_plugin.note', MyNoteData> = {
   type: 'my_plugin.note',
-  payloadSchema: z.object({
-    title: z.string().max(256).optional(),
-    text: z.string().max(1000),
-  }),
   render: (event) => (
     <Suspense fallback={<EuiSkeletonText lines={2} />}>
       <MyNoteRenderer data={event.data} />
@@ -83,4 +84,7 @@ startDeps.agentBuilder.conversationEvents.register(myNoteDefinition);
   - Must not contain `::` (the internal id-generation delimiter).
   - Must not be one of the reserved words (`execution`, `step`).
   - Must not shadow a built-in timeline event type (`user_message`, `agent_message`, etc.).
-- **`getHeader` is optional.** Omit them for events that don't need header rendered.
+- **The server validates `data` on write.** The browser renders an event only when its type has a
+  registered UI definition; otherwise nothing is shown. Share the payload type with the server
+  (for example `z.infer` of the server schema) to type `event.data`.
+- **`getHeader` is optional.** Omit it for events that don't need a header rendered.
