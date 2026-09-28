@@ -14,7 +14,6 @@ import {
   type Span,
 } from '@opentelemetry/api';
 import { withInferenceContext } from '@kbn/inference-tracing';
-import { JUDGE_SPAN_NAME_PREFIX } from '@kbn/evals-common';
 
 /** OpenTelemetry's sentinel for "no valid trace" (a non-recording / no-op span). */
 const INVALID_TRACE_ID = '00000000000000000000000000000000';
@@ -92,13 +91,11 @@ export const withEvalsTaskSpan = <T>(name: string, run: () => Promise<T>): Promi
   withEvalsRootSpan(name, { 'task.name': name }, run);
 
 /**
- * Prefix for LLM-as-a-judge root span names (`judge · <evaluator>`). Re-exported
- * from `@kbn/evals-common` (the single source of truth shared with the offline
- * evals executor) so the Tracing routes can identify judge spans by name and keep
- * them visible while excluding other evaluator root spans (see
- * `EXCLUDE_NON_JUDGE_EVALUATOR_ROOTS`).
+ * Prefix for LLM-as-a-judge root span names (`judge · <evaluator>`). Exported so
+ * the Tracing routes can identify judge spans by name and keep them visible while
+ * excluding other evaluator root spans (see `EXCLUDE_NON_JUDGE_EVALUATOR_ROOTS`).
  */
-export { JUDGE_SPAN_NAME_PREFIX };
+export const JUDGE_SPAN_NAME_PREFIX = 'judge · ';
 
 /**
  * Wraps an LLM-as-a-judge evaluator in its own root span named

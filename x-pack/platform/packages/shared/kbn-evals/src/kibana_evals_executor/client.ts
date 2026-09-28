@@ -209,14 +209,9 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                     'dataset.id': datasetId,
                   },
                 },
-                async (span) => {
+                async () => {
+                  const _traceId = getCurrentTraceId();
                   const _taskOutput = await task(example);
-                  // Read the trace id from *this* task span rather than the ambient active
-                  // span. Under concurrent (pMap) runs the active-span lookup can surface a
-                  // sibling run's id if the async context leaks, whereas the span handed to
-                  // this callback is always the one started for this run. Fall back to the
-                  // active-span lookup only when tracing produced no span for this call.
-                  const _traceId = span?.spanContext().traceId ?? getCurrentTraceId();
                   return {
                     taskOutput: _taskOutput,
                     traceId: _traceId,
@@ -226,33 +221,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
 
               // Prefer the trace id the task itself surfaced (e.g. converse's response
               // trace_id) over the eval client's own task-span trace id. See #276308.
-              const taskSurfacedTraceId = (taskOutput as { traceId?: string })?.traceId;
-              const taskOrClientTraceId = taskSurfacedTraceId || traceId;
-
-              // When the task did not surface its own trace id, stamp the per-run task-span
-              // id back onto the output so the recorded `run.output.traceId` and `run.traceId`
-              // are the same deterministic per-run value (the identity investigation.spec.ts
-              // asserts as `run.traceId === output.traceId`). Build a per-run output object
-              // instead of mutating the task-owned return value in place: a task that reuses (or
-              // freezes) one output object across examples/repetitions would otherwise leak the
-              // first run's id onto every run (or throw on a frozen object). Clone while
-              // preserving the original shape (arrays stay arrays, prototypes are kept) so we do
-              // not reshape the task output; `TaskOutput` is `unknown`, so array outputs are
-              // valid. We never overwrite a trace id the task already surfaced, and we leave the
-              // output untouched otherwise.
-              const runOutput =
-                taskOrClientTraceId &&
-                !taskSurfacedTraceId &&
-                taskOutput &&
-                typeof taskOutput === 'object'
-                  ? Object.assign(
-                      Array.isArray(taskOutput)
-                        ? []
-                        : Object.create(Object.getPrototypeOf(taskOutput)),
-                      taskOutput,
-                      { traceId: taskOrClientTraceId }
-                    )
-                  : taskOutput;
+              const taskOrClientTraceId = (taskOutput as { traceId?: string })?.traceId || traceId;
 
               runs[runKey] = {
                 exampleIndex,
@@ -260,7 +229,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 input: example.input,
                 expected: example.output ?? null,
                 metadata: example.metadata ?? {},
-                output: runOutput,
+                output: taskOutput,
                 traceId: taskOrClientTraceId,
               };
 
@@ -276,7 +245,8 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                   const { result, evaluatorTraceId } = await withEvaluatorSpan(
                     evaluator.name,
                     {},
-                    async (span) => {
+                    async () => {
+                      const _traceId = getCurrentTraceId();
                       const _result = await evaluator.evaluate({
                         input: example.input,
                         output: {
@@ -286,17 +256,11 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                         expected: example.output ?? null,
                         metadata: example.metadata ?? {},
                       });
-                      // As with the task span, derive the id from this evaluator span so
-                      // concurrent evaluations can't record a sibling's (stale) trace id.
-                      const _traceId = span?.spanContext().traceId ?? getCurrentTraceId();
                       return {
                         result: _result,
                         evaluatorTraceId: _traceId,
                       };
-                    },
-                    // LLM judges get a `judge · <name>` root span so their traces
-                    // clear the Tracing UI's non-judge evaluator-root filter.
-                    { kind: evaluator.kind }
+                    }
                   );
                   this.options.log.info(
                     `✅ Evaluator "${evaluator.name}" on run (exampleIndex=${exampleIndex}, repetition=${rep}) completed`
