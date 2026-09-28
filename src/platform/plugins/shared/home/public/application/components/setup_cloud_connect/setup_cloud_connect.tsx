@@ -51,8 +51,6 @@ export const SetupCloudConnect: FC<Props> = ({ application }) => {
         <EuiFlexItem grow={false} css={illustrationFrame}>
           <EuiIllustration
             type={api}
-            fullWidth={false}
-            css={illustrationGraphic}
             alt={i18n.translate('home.setupCloudConnect.illustration.alt.text', {
               defaultMessage: 'Illustration for Cloud Connect setup',
             })}
@@ -87,20 +85,6 @@ export const SetupCloudConnect: FC<Props> = ({ application }) => {
   );
 };
 
-// Keep the illustration at its authored size instead of letting the SVG grow.
 const illustrationFrame = css({
-  '&&.euiFlexItem': {
-    flexBasis: 128,
-    flexGrow: 0,
-    inlineSize: 128,
-  },
-});
-
-const illustrationGraphic = css({
-  '&&': {
-    inlineSize: 128,
-    svg: {
-      inlineSize: 128,
-    },
-  },
+  inlineSize: 128,
 });
