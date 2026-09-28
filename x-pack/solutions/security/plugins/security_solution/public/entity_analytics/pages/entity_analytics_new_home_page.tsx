@@ -119,6 +119,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   );
 
   const resolvedSpaceId = spaceId ?? 'default';
+  const skipUntilSpaceKnown = !spaceId;
 
   const {
     alertsCount,
@@ -126,29 +127,29 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     watchlistedCount,
     watchlistedEntityIds,
     isLoading: alertBasedLoading,
-  } = useAlertBasedTiles({ spaceId: resolvedSpaceId, timeRange, entityFilters });
+  } = useAlertBasedTiles({ spaceId: resolvedSpaceId, timeRange, entityFilters, skip: skipUntilSpaceKnown });
   const {
     count: anomaliesCount,
     entityIds: anomaliesEntityIds,
     isLoading: anomaliesLoading,
-  } = useEntitiesWithAnomaliesCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
+  } = useEntitiesWithAnomaliesCount({ spaceId: resolvedSpaceId, timeRange, entityFilters, skip: skipUntilSpaceKnown });
   const {
     count: newEntityCount,
     entityIds: newEntityEntityIds,
     isLoading: newEntityLoading,
-  } = useNewEntityCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
+  } = useNewEntityCount({ spaceId: resolvedSpaceId, timeRange, entityFilters, skip: skipUntilSpaceKnown });
   const {
     count: riskMoversCount,
     entityIds: riskMoversEntityIds,
     isLoading: riskMoversLoading,
     isMissingIndex: riskMoversMissingIndex,
-  } = useRiskMoversCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
+  } = useRiskMoversCount({ spaceId: resolvedSpaceId, timeRange, entityFilters, skip: skipUntilSpaceKnown });
   const {
     count: newlyHCCount,
     entityIds: newlyHCEntityIds,
     isLoading: newlyHCLoading,
     isMissingIndex: newlyHCMissingIndex,
-  } = useNewlyHighCriticalCount({ spaceId: resolvedSpaceId, timeRange, entityFilters });
+  } = useNewlyHighCriticalCount({ spaceId: resolvedSpaceId, timeRange, entityFilters, skip: skipUntilSpaceKnown });
 
   const handleFilterForCard = useCallback((cardId: ActiveFilter['cardId']) => {
     setActiveFilter((prev) =>
