@@ -140,7 +140,10 @@ class RenderBugBodyTest(unittest.TestCase):
         self.assertIn("Table lists entities in range", body)
         self.assertIn("TypeError: cannot read map of undefined", body)
         self.assertIn("t2_analyst", body)
+        self.assertIn("**Role required to reproduce:**", body)
         self.assertIn("/tmp/session/screenshots/ea-flow1.png", body)
+        self.assertNotIn("**Deployment:**", body)
+        self.assertNotIn("**Spaces:**", body)
         self.assertIn("**Browser and Browser OS versions:**", body)
         self.assertIn("Chrome / macos", body)
         self.assertNotIn("**Kibana version:**", body)
@@ -151,6 +154,7 @@ class RenderBugBodyTest(unittest.TestCase):
         self.assertNotIn("**Server OS version:**", body)
         self.assertNotIn("**Elastic Endpoint version:**", body)
         self.assertNotIn("**Feature flags:**", body)
+        self.assertNotIn("**Preconditions:**", body)
         self.assertNotIn("**Describe the bug:**\n\n**Version", body)
 
     def test_optional_environment_headings_only_when_needed(self):
@@ -174,6 +178,9 @@ class RenderBugBodyTest(unittest.TestCase):
         self.assertNotIn("**Browser and Browser OS versions:**", body)
         self.assertNotIn("**Feature flags:**", body)
         self.assertNotIn("**Any additional information:**", body)
+        self.assertNotIn("**Role required to reproduce:**", body)
+        self.assertNotIn("**Deployment:**", body)
+        self.assertNotIn("**Spaces:**", body)
 
     def test_feature_flags_heading_only_when_named(self):
         finding = {
@@ -189,6 +196,46 @@ class RenderBugBodyTest(unittest.TestCase):
         body = render_bug_body(finding, config)
         self.assertIn("**Feature flags:**", body)
         self.assertIn("securitySolution:entityStoreDisabled: on", body)
+
+    def test_always_ask_fields_render_when_present(self):
+        finding = {
+            "current_behavior": "broken",
+            "expected_behavior": "works",
+            "steps_followed": ["click"],
+            "role": "t2_analyst",
+            "deployment": "both",
+            "spaces": ["default", "custom"],
+            "feature_flags": {"securitySolution:foo": True},
+            "feature_flag_setup": "Enable in Advanced Settings",
+        }
+        body = render_bug_body(finding, {})
+        self.assertIn("**Deployment:**", body)
+        self.assertIn("ECH and serverless", body)
+        self.assertIn("**Role required to reproduce:**", body)
+        self.assertIn("t2_analyst", body)
+        self.assertIn("**Spaces:**", body)
+        self.assertIn("default, custom", body)
+        self.assertIn("Setup: Enable in Advanced Settings", body)
+
+    def test_preconditions_heading_only_when_needed(self):
+        finding = {
+            "current_behavior": "broken",
+            "expected_behavior": "works",
+            "steps_followed": ["click"],
+            "preconditions": ["Fleet enrolled", "Sample logs installed"],
+        }
+        body = render_bug_body(finding, {})
+        self.assertIn("**Preconditions:**", body)
+        self.assertIn("Fleet enrolled", body)
+        empty = render_bug_body(
+            {
+                "current_behavior": "broken",
+                "expected_behavior": "works",
+                "steps_followed": ["click"],
+            },
+            {},
+        )
+        self.assertNotIn("**Preconditions:**", empty)
 
 
 class UploadEvidenceTest(unittest.TestCase):
@@ -454,6 +501,13 @@ class SkillProtocolTest(unittest.TestCase):
         self.assertIn("exact flag id", self.text.lower())
         self.assertIn("recording", self.text.lower())
         self.assertIn("snapshots", self.text.lower())
+        self.assertIn("Always ask if missing", self.text)
+        self.assertIn("serverless", self.text.lower())
+        self.assertIn("specific role", self.text.lower())
+        self.assertIn("default space", self.text.lower())
+        self.assertIn("Preconditions:", self.text)
+        self.assertIn("Standalone environment setup", self.text)
+        self.assertIn("exact error message", self.text.lower())
 
 
 if __name__ == "__main__":

@@ -1,9 +1,11 @@
 <!--
+Always ask if missing (do not file until answered or the human says unknown):
+feature flag + how to enable it; ECH / serverless / both; role to reproduce;
+default vs custom space.
 Omit Server OS version, Browser and Browser OS versions, and Elastic Endpoint
 version unless the pack has a value.
-Include Feature flags with the exact flag id (and on/off) when the behaviour
-is behind a flag; write "No feature flag (default/GA)" only when that was
-confirmed. Omit Role/Flow/Level unless present.
+Include Preconditions only when the repro needs setup before the first step.
+Never describe a failure only as an unspecified error; quote the exact message.
 Functional Area and Screenshots headings are not used.
 -->
 
@@ -13,6 +15,12 @@ Functional Area and Screenshots headings are not used.
 
 **Feature flags:**
 
+**Deployment:**
+
+**Role required to reproduce:**
+
+**Spaces:**
+
 **Server OS version:**
 
 **Browser and Browser OS versions:**
@@ -20,6 +28,8 @@ Functional Area and Screenshots headings are not used.
 **Elastic Endpoint version:**
 
 **Original install method (e.g. download page, yum, from source, etc.):**
+
+**Preconditions:**
 
 **Steps to reproduce:**
 

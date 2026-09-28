@@ -14,6 +14,8 @@ Help produce a **good Security Solution bug report**, then write it to GitHub on
 
 Do not offer to file anything on your own initiative. Do not invent steps, expected behaviour, versions, or feature-flag names.
 
+Never describe a failure only as an unspecified error. Put the **exact error message** (toast, flyout, console, stack) in **Current behaviour** and in **Errors in browser console** / **Logs** when that is where it showed up. If the message is not in the pack or on screen, ask for it.
+
 Repo: `elastic/kibana`. Body template: this skill's `templates/bug-report.md` (not `.github/ISSUE_TEMPLATE/Bug_report.md`). Follow `.agents/skills/kbn-github` (explicit confirm, then `gh`).
 
 `disable-model-invocation: true` — run only when someone asks to file a bug or to comment on an existing ticket.
@@ -23,9 +25,33 @@ Repo: `elastic/kibana`. Body template: this skill's `templates/bug-report.md` (n
 - Headings from `templates/bug-report.md`.
 - **Version** (stack). **Original install method** when known (`from source (dev)` for local/scout).
 - **Steps to reproduce**, **Current behaviour (with screenshots and recordings)**, **Expected behavior**.
-- **Feature flags:** when the behaviour is behind a flag, name the **exact flag id** and whether it is on or off. If you confirmed the feature is default/GA, write `No feature flag (default/GA)`. Never guess a flag name — ask. Omit the heading only when flags were not discussed and the pack has none.
+- **Feature flags:** exact flag id, on/off, and **how to enable it**. If confirmed default/GA, write `No feature flag (default/GA)`.
+- **Deployment:** ECH, serverless, or both.
+- **Role required to reproduce:** specific Kibana/Security role, or none / any.
+- **Spaces:** default space, custom space, or both.
+- **Preconditions:** only when the repro needs setup before step 1 (data, integrations, flags already covered above, users, index state). Omit the heading when there are none.
 - Omit **Server OS version**, **Browser and Browser OS versions**, and **Elastic Endpoint version** unless the pack has a value.
 - Ask one question at a time for missing steps, expected, current behaviour, or version. Do not pad with `_unknown_` while a human can still answer.
+
+## Always ask if missing
+
+Do not treat the draft as complete (and do not ask for a write-yes) until these are answered or the human says they do not know. Ask one at a time. Do not invent answers.
+
+1. Is the functionality behind a **feature flag**? If yes: exact flag id, on/off, and how to set it up.
+2. Does the bug happen on **ECH**, **serverless**, or **both**?
+3. Is a **specific role** required to reproduce?
+4. Can it be reproduced in the **default space**, a **custom space**, or **both**?
+
+## Standalone environment setup
+
+When the human is **not** handing over an exploratory-tester pack, ask what a reproducer needs in order to set up the environment — one question at a time, only what is still unknown:
+
+- How they installed / which deployment they used (if not already answered)
+- Sample data, fleet, integrations, endpoint, or other products that must be present
+- Users, privileges, or spaces beyond the always-ask role/space questions
+- Anything else that belongs under **Preconditions:**
+
+Do not assume a local or Scout session. Write the answers into **Preconditions:** when they are needed to reproduce.
 
 ## Inputs
 
@@ -44,7 +70,7 @@ Given a recording and stills:
 1. Watch them. Draft steps, current behaviour, and expected if the UI makes it obvious. Quote what was on screen; do not invent clicks you did not see.
 2. Put screenshot and recording paths under **Current behaviour (with screenshots and recordings):**. Attach the files on write.
 3. Use a visible route or UI area for `Team:*` inference.
-4. Ask for what media cannot provide: version, flag id, console/network, server OS, endpoint version, expected if unclear.
+4. Ask for what media cannot provide: version, the always-ask items above, console/network, server OS, endpoint version, expected if unclear.
 5. If the video is unreadable or too long to trust, say so and ask for a still of the failure.
 
 If the input is already finding JSON + config, map it with `render-body`. If the input is media or prose, draft markdown that matches `templates/bug-report.md` (you may call `render-body` once you have JSON).
