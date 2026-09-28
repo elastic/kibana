@@ -318,6 +318,41 @@ describe('createExecuteConnectorSubActionTool', () => {
     expect(mockExecute).not.toHaveBeenCalled();
   });
 
+  it('returns error when sub-action has isTool: false (workflow-only action)', async () => {
+    getConnectorSpecMock.mockReturnValue({
+      metadata: {
+        id: '.slack2',
+        displayName: 'Slack',
+        description: 'Slack connector',
+        minimumLicense: 'enterprise' as const,
+        supportedFeatureIds: [],
+      },
+      actions: {
+        searchMessages: { isTool: true, scope: 'read' as const, input: {} as any, handler: jest.fn() },
+        archiveChannel: {
+          isTool: false,
+          scope: 'destroy' as const,
+          input: {} as any,
+          handler: jest.fn(),
+        },
+      },
+      test: { handler: jest.fn(), enabled: false },
+    });
+
+    const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+    const result = await tool.handler(
+      { connectorId: 'conn-123', subAction: 'archiveChannel', params: {} },
+      mockContext
+    );
+
+    expect((result as ToolHandlerStandardReturn).results).toHaveLength(1);
+    expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.error);
+    expect(
+      ((result as ToolHandlerStandardReturn).results[0] as ErrorResult).data.message
+    ).toContain('is not available as an agent tool');
+    expect(mockExecute).not.toHaveBeenCalled();
+  });
+
   it('returns error when connector resolution fails', async () => {
     mockGet.mockRejectedValue(new Error('Saved object not found'));
 
