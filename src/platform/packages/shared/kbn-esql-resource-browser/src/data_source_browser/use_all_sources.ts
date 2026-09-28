@@ -122,12 +122,32 @@ export const useAllSources = ({
       }
     };
 
-    // Merges datasets and views in once they arrive, rather than holding back the base sources.
+    // Appends datasets and views as each request settles, so the slower one does not delay the
+    // other. EuiSelectable renders its loading message instead of the list, so the browser loads
+    // only while the list is empty.
     const appendOptionalSources = async (base: ESQLSourceResult[]) => {
-      const [datasets, views] = await Promise.all([fetchDatasets(), fetchViews()]);
-      if (isMountedRef.current && isEffectActive) {
-        setAllSources(mergeSources(base, datasets, views));
-      }
+      const optional: Record<'datasets' | 'views', ESQLSourceResult[]> = {
+        datasets: [],
+        views: [],
+      };
+
+      const append = (key: 'datasets' | 'views', sources: ESQLSourceResult[]) => {
+        if (!sources.length || !isMountedRef.current || !isEffectActive) return;
+        optional[key] = sources;
+        // Rebuilding from the base keeps the order stable whichever request settles first.
+        setAllSources(mergeSources(base, optional.datasets, optional.views));
+        setIsLoading(false);
+      };
+
+      // Also clears the loading state a previous run left behind when it was cleaned up mid-flight.
+      setIsLoading(base.length === 0);
+
+      await Promise.all([
+        fetchDatasets().then((sources) => append('datasets', sources)),
+        fetchViews().then((sources) => append('views', sources)),
+      ]);
+
+      if (isMountedRef.current && isEffectActive) setIsLoading(false);
     };
 
     if (preloadedSources !== undefined) {
@@ -151,17 +171,15 @@ export const useAllSources = ({
           const fetched = (await getSources?.()) ?? [];
           if (isMountedRef.current && isEffectActive) {
             setAllSources(fetched);
-            // With nothing to show yet, stay in the loading state until the optional sources
-            // land, so the empty message is not rendered over a list that is still filling.
-            if (fetched.length === 0) {
-              await appendOptionalSources(fetched);
-            } else {
-              appendOptionalSources(fetched);
-            }
+            await appendOptionalSources(fetched);
           }
         }
       } catch {
-        if (isMountedRef.current && isEffectActive) setAllSources([]);
+        if (isMountedRef.current && isEffectActive) {
+          setAllSources([]);
+          // Datasets and views are independent of getSources, so they can still fill the browser.
+          if (!isTimeseries) await appendOptionalSources([]);
+        }
       } finally {
         if (isMountedRef.current && isEffectActive) setIsLoading(false);
       }

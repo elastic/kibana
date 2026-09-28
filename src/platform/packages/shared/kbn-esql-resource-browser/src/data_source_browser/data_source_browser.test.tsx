@@ -50,9 +50,15 @@ const mockViews = (result: EsqlViewsResult) => {
 
 const http = {};
 
-const renderBrowser = ({ onSelect = jest.fn() }: { onSelect?: jest.Mock } = {}) => {
+const renderBrowser = ({
+  onSelect = jest.fn(),
+  esql,
+}: {
+  onSelect?: jest.Mock;
+  esql?: { enrichViews?: (views: EsqlView[]) => Promise<EsqlView[]> };
+} = {}) => {
   render(
-    <KibanaContextProvider services={{ core: { http, application: { capabilities: {} } } }}>
+    <KibanaContextProvider services={{ core: { http, application: { capabilities: {} } }, esql }}>
       <DataSourceBrowser
         isOpen
         isTimeseries={false}
@@ -107,6 +113,20 @@ describe('DataSourceBrowser views', () => {
 
     expect(viewsCallContext).toEqual({ forceRefresh: true });
     expect(getViewsMock).toHaveBeenCalledWith(http);
+  });
+
+  it('keeps listing the views when enriching them fails', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    renderBrowser({
+      esql: { enrichViews: jest.fn().mockRejectedValue(new Error('Streams unavailable')) },
+    });
+
+    expect(
+      await getResourceList().findByRole('option', { name: /errors_view/ })
+    ).toBeInTheDocument();
+    expect(getResourceList().getByRole('option', { name: /latency_view/ })).toBeInTheDocument();
+    expect(consoleError).toHaveBeenCalled();
+    consoleError.mockRestore();
   });
 
   it('labels views with the dedicated view source type', async () => {

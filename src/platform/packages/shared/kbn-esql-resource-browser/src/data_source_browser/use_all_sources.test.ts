@@ -236,6 +236,65 @@ describe('useAllSources', () => {
       consoleError.mockRestore();
     });
 
+    it('still lists views when getSources rejects', async () => {
+      const params = makeParams({
+        getSources: jest.fn().mockRejectedValue(new Error('Failed to fetch the sources')),
+      });
+      const { result } = renderHook(() => useAllSources(params));
+
+      await waitFor(() => expect(result.current.allSources.map((s) => s.name)).toContain('view-1'));
+
+      expect(result.current.allSources.map((s) => s.name)).not.toContain('my-index');
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+    });
+
+    it('lists views without waiting for a slow datasets request', async () => {
+      let resolveDatasets: (result: EsqlDatasetsResult) => void = () => {};
+      const getDatasets = jest.fn(
+        () =>
+          new Promise<EsqlDatasetsResult>((resolve) => {
+            resolveDatasets = resolve;
+          })
+      );
+      const params = makeParams({ getDatasets });
+      const { result } = renderHook(() => useAllSources(params));
+
+      await waitFor(() => expect(result.current.allSources.map((s) => s.name)).toContain('view-1'));
+      expect(result.current.allSources.map((s) => s.name)).not.toContain('ds-1');
+
+      await act(async () => resolveDatasets(mockDataset));
+
+      await waitFor(() => expect(result.current.allSources.map((s) => s.name)).toContain('ds-1'));
+      // Late datasets must not overwrite the views, nor change the order they merge in.
+      expect(result.current.allSources.map((s) => s.name)).toEqual([
+        'my-index',
+        'ds-1',
+        'ds-2',
+        'view-1',
+        'view-2',
+      ]);
+    });
+
+    it('stops loading as soon as views arrive for an empty base list', async () => {
+      let resolveDatasets: (result: EsqlDatasetsResult) => void = () => {};
+      const getDatasets = jest.fn(
+        () =>
+          new Promise<EsqlDatasetsResult>((resolve) => {
+            resolveDatasets = resolve;
+          })
+      );
+      const params = makeParams({ getSources: jest.fn().mockResolvedValue([]), getDatasets });
+      const { result } = renderHook(() => useAllSources(params));
+
+      // Loading until the datasets settle would hide the views that already arrived.
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(result.current.allSources.map((s) => s.name)).toContain('view-1');
+
+      await act(async () => resolveDatasets(mockDataset));
+
+      expect(result.current.allSources.map((s) => s.name)).toContain('ds-1');
+    });
+
     it('tolerates a views response that carries no views array', async () => {
       const params = makeParams({ getViews: jest.fn().mockResolvedValue({}) });
       const { result } = renderHook(() => useAllSources(params));
@@ -275,7 +334,11 @@ describe('useAllSources', () => {
             resolveViews = resolve;
           })
       );
-      const params = makeParams({ getSources: jest.fn().mockResolvedValue([]), getViews });
+      const params = makeParams({
+        getSources: jest.fn().mockResolvedValue([]),
+        getDatasets: jest.fn().mockResolvedValue({ datasets: [] }),
+        getViews,
+      });
       const { result } = renderHook(() => useAllSources(params));
 
       await waitFor(() => expect(getViews).toHaveBeenCalled());
@@ -287,6 +350,56 @@ describe('useAllSources', () => {
 
       await waitFor(() => expect(result.current.isLoading).toBe(false));
       expect(result.current.allSources.map((s) => s.name)).toContain('view-1');
+    });
+
+    it('keeps loading while views arrive for an empty preloaded list', async () => {
+      let resolveViews: (result: EsqlViewsResult) => void = () => {};
+      const getViews = jest.fn(
+        () =>
+          new Promise<EsqlViewsResult>((resolve) => {
+            resolveViews = resolve;
+          })
+      );
+      const params = makeParams({
+        preloadedSources: [],
+        getDatasets: jest.fn().mockResolvedValue({ datasets: [] }),
+        getViews,
+      });
+      const { result } = renderHook(() => useAllSources(params));
+
+      // Autocomplete can preload an empty list.
+      await waitFor(() => expect(result.current.isLoading).toBe(true));
+      expect(result.current.allSources).toEqual([]);
+
+      await act(async () => resolveViews(mockViews));
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(result.current.allSources.map((s) => s.name)).toContain('view-1');
+      expect(params.getSources).not.toHaveBeenCalled();
+    });
+
+    it('stops loading when reopened with preloaded sources while a views request is in flight', async () => {
+      const getViews = jest.fn(() => new Promise<EsqlViewsResult>(() => {}));
+      const params = makeParams({
+        preloadedSources: [],
+        getDatasets: jest.fn().mockResolvedValue({ datasets: [] }),
+        getViews,
+      });
+      const { result, rerender } = renderHook(
+        (props: UseAllSourcesParams) => useAllSources(props),
+        {
+          initialProps: params,
+        }
+      );
+
+      await waitFor(() => expect(result.current.isLoading).toBe(true));
+
+      // Closing abandons the request, so the reopen has to clear the loading state it left.
+      rerender({ ...params, isOpen: false });
+      rerender({ ...params, preloadedSources: [mockIndex] });
+
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.allSources.map((s) => s.name)).toContain('my-index');
     });
 
     it('works without getViews provided', async () => {
