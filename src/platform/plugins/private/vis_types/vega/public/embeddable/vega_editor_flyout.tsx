@@ -29,6 +29,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import { isEqual } from 'lodash';
 import type { VegaByValueState } from '../../server';
 import { getDataViews } from '../services';
+import { vegaTitleInWizard } from '../vega_icon';
 import type { VegaEmbeddableApi } from './vega_embeddable';
 
 type PanelSearch = Omit<QueryState, 'time' | 'refreshInterval'>;
@@ -179,7 +180,7 @@ export const VegaEditorFlyout = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id={ariaLabelledBy}>Vega</h2>
+          <h2 id={ariaLabelledBy}>{vegaTitleInWizard}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="editorFlyoutBody">
