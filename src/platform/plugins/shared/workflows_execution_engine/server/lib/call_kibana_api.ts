@@ -18,7 +18,6 @@ import {
   KibanaApiCallError,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/workflows-extensions/server';
-import { getInternalUiamCallerAttestationHeaders } from './get_internal_uiam_caller_attestation_headers';
 import { isTextContentType, readResponseStream } from '../utils/http_response';
 
 export { KibanaApiCallError } from '@kbn/workflows-extensions/server';
@@ -252,10 +251,10 @@ const validateSpaceRelativePath = (path: string): void => {
  * intentionally kept narrow (no multipart, no fetcher options, no streaming).
  *
  * Transport is Core's HTTP self client (`coreStart.http.selfClient`): it owns URL resolution,
- * forwarding the scoped request's `authorization`, and stamping `x-elastic-internal-origin` /
- * `kbn-version`, so this helper only supplies the headers Core does not manage (custom + event-chain
- * + the UIAM attestation) and keeps its own response-shaping contract (size cap, binary handling,
- * structured {@link KibanaApiCallError}).
+ * forwarding the scoped request's `authorization`, stamping `x-elastic-internal-origin` /
+ * `kbn-version`, and the UIAM internal-caller attestation. This helper only supplies the headers
+ * Core does not manage (custom + event-chain) and keeps its own response-shaping contract (size
+ * cap, binary handling, structured {@link KibanaApiCallError}).
  */
 export async function callKibanaApi<T = unknown>(
   deps: CallKibanaApiDeps,
@@ -284,7 +283,6 @@ export async function callKibanaApi<T = unknown>(
       : {}),
     ...callerHeaders,
     ...getOutboundEventChainHeaders(fakeRequest, workflowRunId),
-    ...getInternalUiamCallerAttestationHeaders(coreStart, fakeRequest),
   };
 
   // Callers provide space-relative paths; this helper owns the space prefix exactly once. The

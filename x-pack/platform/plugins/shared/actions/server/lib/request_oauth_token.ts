@@ -25,6 +25,10 @@ export interface TokenResponseOptions {
   tokenType?: string;
 }
 
+interface TokenRequestOptions extends TokenResponseOptions {
+  bodyFormat?: 'form' | 'json';
+}
+
 /**
  * Builds a TokenResponseOptions from a bag of optional fields.
  * Returns undefined when no custom options are set (all callers get default behavior).
@@ -62,7 +66,7 @@ export async function requestOAuthToken<T>(
   logger: Logger,
   bodyRequest: AsApiContract<T>,
   useBasicAuth: boolean = false,
-  tokenResponseOptions?: TokenResponseOptions
+  options?: TokenRequestOptions
 ): Promise<OAuthTokenResponse> {
   const axiosInstance = axios.create();
 
@@ -88,13 +92,17 @@ export async function requestOAuthToken<T>(
     url: tokenUrl,
     method: 'post',
     logger,
-    data: qs.stringify(requestData),
+    data: options?.bodyFormat === 'json' ? JSON.stringify(requestData) : qs.stringify(requestData),
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+      'Content-Type':
+        options?.bodyFormat === 'json'
+          ? 'application/json'
+          : 'application/x-www-form-urlencoded; charset=UTF-8',
       Accept: 'application/json',
     },
     ...(basicAuth ? { auth: basicAuth } : {}),
     configurationUtilities,
+    ...(grantType === 'password' ? { maxRedirects: 0 } : {}),
     validateStatus: () => true,
   });
 
@@ -108,11 +116,11 @@ export async function requestOAuthToken<T>(
       );
     }
 
-    const accessTokenField = tokenResponseOptions?.accessTokenPath ?? 'access_token';
-    const tokenTypeField = tokenResponseOptions?.tokenTypePath ?? 'token_type';
+    const accessTokenField = options?.accessTokenPath ?? 'access_token';
+    const tokenTypeField = options?.tokenTypePath ?? 'token_type';
 
     const accessToken = get(res.data, accessTokenField);
-    const tokenType = tokenResponseOptions?.tokenType ?? get(res.data, tokenTypeField);
+    const tokenType = options?.tokenType ?? get(res.data, tokenTypeField);
 
     if (!accessToken) {
       logger.warn(
@@ -120,7 +128,7 @@ export async function requestOAuthToken<T>(
       );
       throw new Error('OAuth token response is missing required field (access_token).');
     }
-    if (!tokenType) {
+    if (typeof tokenType !== 'string' || !tokenType) {
       logger.warn(
         `OAuth token response from ${tokenUrl} is missing token_type (path: ${tokenTypeField}).`
       );
@@ -149,6 +157,11 @@ export async function requestOAuthToken<T>(
         siblingOrRoot('refresh_expires_in') ?? siblingOrRoot('refresh_token_expires_in'),
     };
   } else {
+    if (grantType === 'password') {
+      const message = `OAuth password token request failed (HTTP ${res.status}).`;
+      logger.warn(message);
+      throw new Error(message);
+    }
     const errString = stableStringify(res.data);
     logger.warn(`error thrown getting the access token from ${tokenUrl}: ${errString}`);
     throw new Error(errString);
