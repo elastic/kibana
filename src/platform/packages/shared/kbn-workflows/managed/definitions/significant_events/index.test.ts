@@ -13,6 +13,7 @@ import {
   SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW,
 } from '.';
 import { SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW } from './knowledge_indicators';
+import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 interface WorkflowStep {
   name: string;
@@ -24,8 +25,12 @@ interface WorkflowStep {
   steps?: WorkflowStep[];
   with?: {
     path?: string;
-    body?: { trigger_feedback?: string; runId?: string };
-    inputs?: { context?: { trigger_type?: string } };
+    body?: Record<string, unknown> & { runId?: string };
+    subject_type?: string;
+    subject_id?: string;
+    trigger_type?: string;
+    message?: string;
+    stream_names?: string;
     written_rule_uuids?: string;
   };
   foreach?: string;
@@ -60,7 +65,7 @@ const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(20);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(21);
   });
 
   it('bootstraps per-space cleanup before discovery work', () => {
@@ -75,10 +80,50 @@ describe('significant events persistence workflow contracts', () => {
   });
 
   it('marks discovery-triggered investigations as automatic', () => {
-    const triggerStep = requireStep(discovery, 'trigger_investigation') as {
-      with?: { inputs?: { context?: { trigger_type?: string } } };
-    };
-    expect(triggerStep.with?.inputs?.context?.trigger_type).toBe('automatic');
+    const triggerStep = requireStep(discovery, 'trigger_investigation');
+    expect(triggerStep).toMatchObject({
+      type: 'nightshift.triggerInvestigation',
+      with: {
+        subject_type: 'significant_event',
+        subject_id: '{{ foreach.item.event_id }}',
+        trigger_type: 'automatic',
+      },
+      'on-failure': { continue: true },
+    });
+    expect(triggerStep.with?.message).toContain('Probable cause:');
+    expect(triggerStep.with?.stream_names).toContain('stream_names');
+  });
+
+  it('bounds the discovery investigation message below the trigger input limit', () => {
+    const message = requireStep(discovery, 'trigger_investigation').with?.message;
+    if (!message) throw new Error('Expected trigger_investigation message');
+
+    const renderedMessage = createWorkflowLiquidEngine().parseAndRenderSync(message, {
+      steps: {
+        resolve_open_event: {
+          output: {
+            hits: {
+              hits: [
+                {
+                  _source: {
+                    title: 'T'.repeat(512),
+                    summary: 'S'.repeat(10_000),
+                    symptom_hypothesis: 'H'.repeat(10_000),
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+    });
+
+    expect(renderedMessage.length).toBeLessThanOrEqual(10_000);
+    expect(renderedMessage).toContain('T'.repeat(512));
+    expect(renderedMessage).toContain('S'.repeat(7000));
+    expect(renderedMessage).not.toContain('S'.repeat(7001));
+    expect(renderedMessage).toContain(`Probable cause: ${'H'.repeat(2000)}`);
+    expect(renderedMessage).not.toContain('...');
   });
 
   it('attributes discovery agent calls to Nightshift', () => {
@@ -109,17 +154,19 @@ describe('significant events persistence workflow contracts', () => {
     );
   });
 
-  it('applies completed investigation feedback only to Significant Events', () => {
+  it('attaches completed investigations only to Significant Events', () => {
     expect(investigationCompleted.triggers).toEqual([
       {
         type: 'nightshift-investigations.completed',
         on: { condition: 'event.subject.type: "significant_event"' },
       },
     ]);
-    const getInvestigation = requireStep(investigationCompleted, 'get_investigation');
     const attach = requireStep(investigationCompleted, 'attach_completed_investigation');
-    expect(getInvestigation.with?.path).toContain('/internal/nightshift/investigations/');
     expect(attach.with?.path).toContain('/internal/significant_events/events/');
-    expect(attach.with?.body?.trigger_feedback).toContain('output.trigger_feedback');
+    expect(attach.with?.body).toEqual({
+      workflow_execution_id: '{{ event.investigation_id }}',
+      started_at: '{{ event.started_at }}',
+      completed_at: '{{ event.completed_at }}',
+    });
   });
 });

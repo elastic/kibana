@@ -182,7 +182,7 @@ describe('proposalAttachmentType', () => {
 
       const representation = await represent(type);
 
-      expect(get).toHaveBeenCalledWith('proposal-1', SPACE_ID);
+      expect(get).toHaveBeenCalledWith('proposal-1', SPACE_ID, REQUEST);
       expect(representation).toEqual({
         type: 'text',
         value: expect.stringContaining('Status: no_action'),
@@ -245,7 +245,7 @@ describe('proposalAttachmentType', () => {
 
       await represent(type, attachment({ origin: undefined, data: { proposalId: 'proposal-9' } }));
 
-      expect(get).toHaveBeenCalledWith('proposal-9', SPACE_ID);
+      expect(get).toHaveBeenCalledWith('proposal-9', SPACE_ID, REQUEST);
     });
 
     // The service reads as the internal user, and the public attachment API

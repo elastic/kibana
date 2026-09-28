@@ -15,4 +15,10 @@ export {
   createMainFlyoutDescriptionItems,
 } from './flyout_description_items';
 
+export { headerBlocks } from './flyout_header_blocks';
+
+export { FOOTER_MENU_PANELS } from './flyout_footer_menu';
+
+export { returnFocusToTrigger } from './return_focus';
+
 export const FLYOUT_MIN_WIDTH = 300;

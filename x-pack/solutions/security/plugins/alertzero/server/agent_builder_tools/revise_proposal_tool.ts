@@ -56,7 +56,7 @@ export const reviseProposalTool = (
   id: ALERTZERO_PROPOSALS_REVISE_TOOL_ID,
   type: ToolType.builtin,
   description:
-    "Revise a pending investigation proposal at the analyst's request. Creates a new pending proposal with the same rootProposalId and revision incremented by one; supersedes points to the predecessor, which becomes superseded (not dismissed) and points forward through supersededBy. Read the current proposal attachment first. Each revision must stand alone: preserve its full comment and actionInput and apply only the requested changes, never replace the comment with a change summary. The actionWorkflowId cannot change. This does not approve or execute the proposal or release its approval gate. Returns the successor id and revision; read its attachment to verify and render the new card.",
+    "Revise a pending investigation proposal at the analyst's request. Creates a new pending proposal with the same rootProposalId and revision incremented by one; supersedes points to the predecessor, which becomes superseded (not dismissed) and points forward through supersededBy. Read the current proposal attachment first. Each revision must stand alone: preserve its full comment and actionInput and apply only the requested changes, never replace the comment with a change summary. The actionWorkflowId cannot change. This does not approve or execute the proposal or release its approval gate. Returns the successor id and revision; Agent Builder automatically renders the new card. To inspect it when available, use attachments.list and attachments.read with the listed attachment_id.",
   annotations: {
     title: 'Revise AlertZero Proposal',
     readOnlyHint: false,

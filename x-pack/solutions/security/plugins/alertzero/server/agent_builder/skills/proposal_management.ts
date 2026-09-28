@@ -46,8 +46,8 @@ does not increment revision; never initiate a retry through this skill.
 
 ## Read before editing
 
-1. Read the proposal attachment using attachment_read. If needed, locate it with
-   attachment_list. The attachment ID is for reading/rendering; the proposal data's
+1. Read the proposal attachment using attachments.read. If needed, locate it with
+   attachments.list. The attachment ID is for reading/rendering; the proposal data's
    id is the proposalId supplied to the revision tool.
 2. Inspect status, decision, expired, rootProposalId, revision, supersedes, and
    supersededBy. Missing optional history fields on older records are not values
@@ -97,12 +97,14 @@ turning it into a heading. Put any explanation of the edit in the chat response.
 
 ## Verify and respond
 
-Read the successor attachment using the returned proposalId to find it. Verify
-the updated comment and actionInput and the revision links. Use its attachment ID
-in <render_attachment id="ATTACHMENT_ID" />. Summarize the changes separately in chat
-and explain that the new revision awaits a human decision. If the attachment is
-not yet available, report that limitation rather than confusing the proposal ID
-with an attachment ID or retrying the revision.
+Agent Builder automatically renders the successor attachment. Summarize the changes
+separately in chat and explain that the new revision awaits a human decision.
+To inspect a proposal in the conversation, use attachments.list, then attachments.read
+with a listed attachment_id. Match the proposal data's id to the returned proposalId.
+If the successor is available, verify its comment, actionInput, and revision links.
+If it is absent from the tool's list, base the response on the successful revision
+result and distinguish that success from attachment verification being unavailable
+in this turn.
 Never approve, dismiss, execute, or directly update proposal attachments or storage.
 `,
   });
