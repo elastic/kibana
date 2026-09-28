@@ -76,7 +76,9 @@ export function DelimiterSelect({
       presetOptions={presetOptions}
       getCustomLabel={toDisplayLabel}
       // Don't trim: allow whitespace delimiters (e.g. a single space).
-      isValidCustomOption={(searchValue: string) => Boolean(searchValue) && searchValue.length === 1}
+      isValidCustomOption={(searchValue: string) =>
+        Boolean(searchValue) && searchValue.length === 1
+      }
       placeholder={createDatasetWizardStrings.settingsDelimiterPlaceholder}
       data-test-subj="createDatasetSettingsDelimiter"
       fullWidth
@@ -84,4 +86,3 @@ export function DelimiterSelect({
     />
   );
 }
-

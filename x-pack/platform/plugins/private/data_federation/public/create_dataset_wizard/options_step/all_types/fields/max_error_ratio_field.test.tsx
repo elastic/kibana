@@ -67,4 +67,3 @@ describe('MaxErrorRatioField', () => {
     expect(queryByText(createDatasetWizardStrings.settingsMaxErrorRatioInvalid)).toBeNull();
   });
 });
-

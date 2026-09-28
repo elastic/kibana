@@ -11,7 +11,10 @@ import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
-import { validateMaxErrors, type CreateDatasetFormValues } from '../../../create_dataset_form_state';
+import {
+  validateMaxErrors,
+  type CreateDatasetFormValues,
+} from '../../../create_dataset_form_state';
 import { FormRowLabelWithInfo } from '../../../components/form_row_label_with_info';
 
 const helpTextDefault = (valueLabel: string) => (
@@ -63,4 +66,3 @@ export function MaxErrorsField({ control }: { control: Control<CreateDatasetForm
     </EuiFormRow>
   );
 }
-

@@ -177,4 +177,3 @@ export const SchemaResolutionField = React.memo(({ isDisabled }: { isDisabled?: 
 });
 
 SchemaResolutionField.displayName = 'SchemaResolutionField';
-

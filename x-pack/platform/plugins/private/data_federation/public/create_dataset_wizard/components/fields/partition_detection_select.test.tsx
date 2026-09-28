@@ -50,8 +50,7 @@ describe('PartitionDetectionSelect', () => {
     });
 
     const candidates = getAllByTestId('createDatasetSettingsPartitionDetectionOption-template');
-    const option =
-      candidates.find((el) => el.getAttribute('role') === 'option') ?? candidates[0];
+    const option = candidates.find((el) => el.getAttribute('role') === 'option') ?? candidates[0];
 
     await act(async () => {
       fireEvent.click(option);
@@ -60,4 +59,3 @@ describe('PartitionDetectionSelect', () => {
     expect(getByTestId('partitionDetectionValue')).toHaveTextContent('template');
   });
 });
-

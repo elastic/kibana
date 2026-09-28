@@ -53,7 +53,11 @@ const LATE_MATERIALIZATION_OPTIONS = [
   },
 ] satisfies Array<EuiSuperSelectOption<DatasetBooleanFormValue>>;
 
-export function LateMaterializationSelect({ control }: { control: Control<CreateDatasetFormValues> }) {
+export function LateMaterializationSelect({
+  control,
+}: {
+  control: Control<CreateDatasetFormValues>;
+}) {
   const { field: lateMaterializationField } = useController({
     name: 'settings.late_materialization',
     control,
@@ -72,4 +76,3 @@ export function LateMaterializationSelect({ control }: { control: Control<Create
     />
   );
 }
-

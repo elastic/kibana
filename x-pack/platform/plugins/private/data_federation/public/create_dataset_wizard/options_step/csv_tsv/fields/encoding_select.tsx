@@ -53,4 +53,3 @@ export function EncodingSelect({ control }: { control: Control<CreateDatasetForm
     />
   );
 }
-

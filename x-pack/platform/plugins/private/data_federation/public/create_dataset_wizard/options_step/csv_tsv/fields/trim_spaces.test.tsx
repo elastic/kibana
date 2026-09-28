@@ -57,4 +57,3 @@ describe('TrimSpaces', () => {
     expect(onChange).toHaveBeenCalledWith(false);
   });
 });
-

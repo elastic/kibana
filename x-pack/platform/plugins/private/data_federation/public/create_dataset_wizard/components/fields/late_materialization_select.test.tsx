@@ -55,4 +55,3 @@ describe('LateMaterializationSelect', () => {
     expect(getByTestId('lateMaterializationValue')).toHaveTextContent('false');
   });
 });
-

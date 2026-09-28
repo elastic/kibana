@@ -17,7 +17,12 @@ const renderComponent = () => {
     const [delimiter, setDelimiter] = useState('');
     return (
       <>
-        <DelimiterSelect value={delimiter} onChange={setDelimiter} onBlur={() => {}} defaultValue="," />
+        <DelimiterSelect
+          value={delimiter}
+          onChange={setDelimiter}
+          onBlur={() => {}}
+          defaultValue=","
+        />
         <div data-test-subj="delimiterValue">{delimiter}</div>
       </>
     );
@@ -44,8 +49,7 @@ describe('DelimiterSelect', () => {
     const candidates = await waitFor(() =>
       getAllByTestId('createDatasetSettingsDelimiterOption-semicolon')
     );
-    const option =
-      candidates.find((el) => el.getAttribute('role') === 'option') ?? candidates[0];
+    const option = candidates.find((el) => el.getAttribute('role') === 'option') ?? candidates[0];
 
     await act(async () => {
       fireEvent.click(option);
@@ -54,4 +58,3 @@ describe('DelimiterSelect', () => {
     expect(getByTestId('delimiterValue')).toHaveTextContent(';');
   });
 });
-
