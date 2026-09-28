@@ -314,8 +314,27 @@ describe('Slack inbound events', () => {
     expect(result.events[0]?.payload).not.toHaveProperty('inviter');
   });
 
+  it('acks Slack url_verification without emitting', async () => {
+    await expect(
+      events.handleEvents(
+        createContext({
+          type: 'url_verification',
+          token: 'slack-verification-token',
+          challenge: '3eZbrw1aBm2rZgRNFdxV2595E9CY3gmdALWMmHkvFXO7tYXAYM8P',
+        })
+      )
+    ).resolves.toEqual({
+      type: 'http',
+      httpResponse: {
+        status: 200,
+        body: { challenge: '3eZbrw1aBm2rZgRNFdxV2595E9CY3gmdALWMmHkvFXO7tYXAYM8P' },
+      },
+    });
+  });
+
   it.each([
-    ['url verification', { type: 'url_verification', challenge: 'abc' }],
+    ['url verification without a challenge', { type: 'url_verification', token: 'ignored' }],
+    ['url verification with an empty challenge', { type: 'url_verification', challenge: '' }],
     ['uncatalogued event', callback({ type: 'app_home_opened', user: 'U123' })],
     ['message without a channel', callback({ type: 'message', ts: '1.0', user: 'U123' })],
     ['non-object body', null],

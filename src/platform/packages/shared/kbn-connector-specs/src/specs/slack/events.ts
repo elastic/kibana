@@ -39,6 +39,7 @@ const SLACK_EVENT_ID_MAX = 128;
 const SLACK_EVENT_NAME_MAX = 256;
 const SLACK_EVENT_TEXT_MAX = 40_000;
 const SLACK_EVENT_EMAIL_MAX = 320;
+const SLACK_URL_VERIFICATION_CHALLENGE_MAX = 1024;
 
 const slackId = (description: string) =>
   z.string().min(1).max(SLACK_EVENT_ID_MAX).describe(description);
@@ -395,9 +396,37 @@ const parseSlackCallback = (
   };
 };
 
+/**
+ * Slack Request URL check: `{ type: "url_verification", challenge }`.
+ */
+const getUrlVerificationChallenge = (rawBody: Record<string, unknown>): string | undefined => {
+  if (rawBody.type !== 'url_verification') {
+    return undefined;
+  }
+  const { challenge } = rawBody;
+  if (typeof challenge !== 'string' || challenge.length === 0) {
+    return undefined;
+  }
+  if (challenge.length > SLACK_URL_VERIFICATION_CHALLENGE_MAX) {
+    return undefined;
+  }
+  return challenge;
+};
+
 const handleSlackEvents = async (ctx: ConnectorIngressContext): Promise<HandleEventsResult> => {
   if (!isPlainObject(ctx.rawBody)) {
     return { type: 'emit', events: [] };
+  }
+
+  const challenge = getUrlVerificationChallenge(ctx.rawBody);
+  if (challenge !== undefined) {
+    return {
+      type: 'http',
+      httpResponse: {
+        status: 200,
+        body: { challenge },
+      },
+    };
   }
 
   const parsed = parseSlackCallback(ctx.rawBody);

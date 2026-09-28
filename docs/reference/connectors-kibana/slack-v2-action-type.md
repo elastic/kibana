@@ -49,6 +49,8 @@ The connector can start a workflow from a Slack Events API `event_callback`. A s
 
 `threadId`, `sender`, `text`, `subtype`, and `botId` are present only when Slack sends them. The same applies to `channel` on a shared file, `userId` on a file made public, and `inviter` on a channel join. An event type that is not in this table does not start a workflow.
 
+Slack's Request URL check sends `url_verification`. The connector responds with HTTP 200 and `{ "challenge": "<value>" }` and does not start a workflow.
+
 Example `app_mention` body:
 
 ```json
