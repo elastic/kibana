@@ -1214,6 +1214,35 @@ describe('eventsWriteBulkHandler — eventSearchClient (flag-aware read path)', 
     expect(eventClient.findByEventId).toHaveBeenCalledWith('existing-event-id');
   });
 
+  it('suppresses write when .rule-events returns no hits but canonical client finds a matching active event', async () => {
+    const activeEvent = makeStoredEvent('checkout__latency-active');
+    const eventSearchClient: jest.Mocked<SignificantEventsReadClient> = {
+      findLatestPaginated: jest.fn(),
+      findLatestByCurrentStatePaginated: jest.fn(),
+      // .rule-events lags — no hits here
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+      findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
+    };
+    const eventClient = makeEventClient({
+      // canonical write store has the active event
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [activeEvent] }),
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventClient,
+      eventSearchClient,
+      // no event_id → dedup candidate
+      inputs: [{ ...baseInput }],
+    });
+
+    expect(results[0]).toMatchObject({
+      written: false,
+      skipped: true,
+      reason: 'existing_active_event',
+    });
+    expect(eventClient.bulkCreate).not.toHaveBeenCalled();
+  });
+
   it('uses the canonical event UUID for continuation lineage when eventSearchClient has a synthetic UUID', async () => {
     const eventId = 'existing-event-id';
     const eventSearchClient: jest.Mocked<SignificantEventsReadClient> = {
