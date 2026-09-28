@@ -462,6 +462,18 @@ export const ALERTING_LOG_CODES = {
    * failed. The rule run itself already completed.
    */
   RULE_EXECUTION_EVENT_PUBLISH_FAILED: 'RULE_EXECUTION_EVENT_PUBLISH_FAILED',
+  /**
+   * `METADATA _id, _index, _version` could not be injected into a
+   * non-aggregating rule query. The original query ran unchanged, so its
+   * rule events were written without deduplication.
+   */
+  RULE_EXECUTION_DEDUP_METADATA_INJECTION_FAILED: 'RULE_EXECUTION_DEDUP_METADATA_INJECTION_FAILED',
+  /**
+   * The `ids` pre-check against `.rule-events` failed for a chunk of
+   * candidate rule events. The chunk was kept; duplicates in it still collide
+   * on `_id` at write time.
+   */
+  RULE_EXECUTION_DEDUP_PRECHECK_FAILED: 'RULE_EXECUTION_DEDUP_PRECHECK_FAILED',
   /** A run hit `maxGroupsPerExecution`; groups past the cap were dropped. */
   RULE_EXECUTION_MAX_GROUPS_EXCEEDED: 'RULE_EXECUTION_MAX_GROUPS_EXCEEDED',
   /**

@@ -76,6 +76,104 @@ function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');
 }
 
+/**
+ * Deterministic `.rule-events` `_id` for a rule event produced from a source
+ * document.
+ *
+ * Mirrors the detection engine's ES|QL alert identity: the source document's
+ * `_index`, `_id` and `_version` together with the space and rule ids, plus
+ * the values of any `MV_EXPAND`ed columns so each expanded row keeps its own
+ * identity. Two runs that match the same, unchanged source document therefore
+ * produce the same `_id`; `FilterDuplicateEventsStep` drops the second before
+ * the director sees it, and anything that slips past collides on the bulk
+ * `create` in `StoreAlertEventsStep`. A re-indexed document has a new
+ * `_version` and so a new `_id`, and alerts again.
+ *
+ * Pure; never throws. Callers decide *whether* an event qualifies via
+ * {@link resolveRuleEventId}; this function only encodes the identity.
+ */
+export function buildRuleEventId({
+  spaceId,
+  ruleId,
+  sourceId,
+  sourceIndex,
+  sourceVersion,
+  expandedValues = [],
+}: {
+  spaceId: string;
+  ruleId: string;
+  sourceId: string;
+  sourceIndex: string;
+  sourceVersion: string;
+  /** Values of the `MV_EXPAND`ed columns for this row, in query order. */
+  expandedValues?: readonly unknown[];
+}): string {
+  const expansion = expandedValues.length > 0 ? `|${stableStringify(expandedValues)}` : '';
+  return sha256(`${spaceId}|${ruleId}|${sourceIndex}|${sourceId}|${sourceVersion}${expansion}`);
+}
+
+/**
+ * Resolves the deterministic `_id` for a rule event, or `undefined` when
+ * Elasticsearch should generate one.
+ *
+ * Callers must only invoke this for runs whose query
+ * `planDeduplicationQuery` judged eligible (`state.deduplication.eligible`);
+ * eligibility is a property of the query, not of a row, and is decided
+ * upstream so that an aggregating query or one that reassigns `_id` is never
+ * deduplicated no matter what its rows contain. Within an eligible run an
+ * event still qualifies only when it is a `breached` event carrying the
+ * complete injected identity — a string `_id`, a string `_index` and a
+ * `_version` — plus a value for every `mvExpandFields` column. Anything
+ * short of that (`recovered` / `no_data` / continued-breach events, or a row
+ * unexpectedly missing a column) falls back to an Elasticsearch-generated id
+ * and is written exactly as before deduplication existed.
+ *
+ * `mvExpandFields` (from `state.deduplication`) names the columns whose
+ * per-row values are folded into the id so `MV_EXPAND`ed rows from one
+ * document do not collide.
+ *
+ * Used at both deduplication points: `FilterDuplicateEventsStep` resolves ids
+ * to pre-check `.rule-events`, and `StoreAlertEventsStep` passes it as
+ * `getDocumentId` for the bulk `create`. Computing from the event's own
+ * fields (rather than a side map) is what keeps the two in agreement across
+ * the director's object transformations.
+ *
+ * Pure; never throws. Returning `undefined` is not an error path — it is the
+ * normal outcome for every event that is not a source-document breach.
+ */
+export function resolveRuleEventId(
+  event: AlertEvent,
+  mvExpandFields: readonly string[] = []
+): string | undefined {
+  const ruleId = event.rule?.id;
+  const sourceId = event.data?._id;
+  const sourceIndex = event.data?._index;
+  const sourceVersion = event.data?._version;
+
+  const expandedValues = mvExpandFields.map((field) => event.data?.[field]);
+
+  const hasSourceIdentity =
+    event.status === 'breached' &&
+    ruleId != null &&
+    typeof sourceId === 'string' &&
+    sourceId !== '' &&
+    typeof sourceIndex === 'string' &&
+    sourceIndex !== '' &&
+    (typeof sourceVersion === 'number' || typeof sourceVersion === 'string') &&
+    expandedValues.every((value) => value !== undefined);
+
+  return hasSourceIdentity
+    ? buildRuleEventId({
+        spaceId: event.space_id,
+        ruleId,
+        sourceId,
+        sourceIndex,
+        sourceVersion: String(sourceVersion),
+        expandedValues,
+      })
+    : undefined;
+}
+
 export const buildExecutionUuid = ({
   ruleId,
   spaceId,

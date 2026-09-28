@@ -98,7 +98,7 @@ Each run starts with Task Manager task params:
 3. streams state through the ordered steps
 4. halts early on domain reasons when appropriate
 
-`.rule-events` writes are append-only and issued with `refresh: false`, so there is **no** end-of-run refresh: a run never reads back its own freshly written events. Documents become searchable via Elasticsearch's periodic `refresh_interval`. Downstream state resolution (director, dispatcher) instead relies on `LAST(status, @timestamp)` over previously persisted events, so the last-written event for a group wins once it is visible. This is what lets the absence-based classification defer to stream end without depending on within-run read-after-write visibility.
+`.rule-events` writes are append-only and issued with `refresh: false`, so there is **no** end-of-run refresh: a run never reads back its own freshly written events. Documents become searchable via Elasticsearch's periodic `refresh_interval`. Downstream state resolution (director, dispatcher) instead relies on `LAST(status, @timestamp)` over previously persisted events, so the last-written event for a group wins once it is visible. This is what lets the absence-based classification defer to stream end without depending on within-run read-after-write visibility. It also means the duplicate pre-check in `FilterDuplicateEventsStep` cannot see documents written earlier in the same run; see "Rule-event deduplication".
 
 ## Rule configuration
 
@@ -175,6 +175,7 @@ Formats are strategies under [`services/query_service/formats`](../services/quer
 | `queryPayload` | `ExecuteRuleQueryStep` | ES\|QL query/filter/params for the current run. |
 | `esqlRowBatch` | `ExecuteRuleQueryStep` | One streamed batch of ES\|QL rows. |
 | `alertEventsBatch` | Event-creation steps and director | Materialized rule events for the current batch. |
+| `deduplication` | `ExecuteRuleQueryStep` | Whether this run's rule events are `eligible` for deterministic ids, and the `MV_EXPAND` columns folded into them. Absent means not eligible. |
 | `activeGroups` | `FetchActiveGroupsStep` | The rule's active groups, fetched once for every `kind: 'alert'` rule (bounded by `maxGroupsPerExecution`) so the group cap never drops one; reused by `CreateAlertEventsStep` and `ClassifyAbsentGroupsStep`. |
 
 ## Execution steps
@@ -187,13 +188,30 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 | 2 | `FetchRuleStep` | Load the current rule saved object. |
 | 3 | `ValidateRuleStep` | Halt early if the rule cannot run, for example because it is disabled. |
 | 4 | `FetchActiveGroupsStep` | Fetch the rule's active groups once for every `kind: 'alert'` rule (bounded by `maxGroupsPerExecution`) and thread them onto `state.activeGroups`. |
-| 5 | `ExecuteRuleQueryStep` | Build and run ES\|QL, emitting streamed row batches. |
+| 5 | `ExecuteRuleQueryStep` | Build and run ES\|QL, emitting streamed row batches. Injects `METADATA _id, _index, _version` into non-aggregating queries. |
 | 6 | `CreateAlertEventsStep` | Turn a row batch into breached rule events (per batch). |
 | 7 | `ClassifyAbsentGroupsStep` | Forward every breach batch unchanged while accumulating the full-run breach set. Once the stream drains, run the data-presence and recovery queries once and emit recovery / `no_data` / continued-`breached` events for the active groups absent from that set, as a single final batch. No-op for `signal` rules and when both `recovery_strategy` and `no_data_strategy` are `'none'`. |
-| 8 | `DirectorStep` | Enrich alert-type events with episode state. |
-| 9 | `StoreAlertEventsStep` | Persist the batch into `.rule-events`. |
+| 8 | `FilterDuplicateEventsStep` | Drop breached events whose deterministic `_id` already exists in `.rule-events`. |
+| 9 | `DirectorStep` | Enrich alert-type events with episode state. |
+| 10 | `StoreAlertEventsStep` | Persist the batch into `.rule-events`, using the deterministic `_id` where one applies. |
 
 The rule executor runs whenever the plugin is enabled (`xpack.alerting_v2.enabled`). The `alerting:v2:enabled` advanced setting gates only the user-facing surface (UI + APIs), not core engine execution, so rules keep producing events even while the UI and APIs stay hidden.
+
+## Rule-event deduplication
+
+Rules run on lookback windows that overlap on purpose, so a non-aggregating query re-matches the same source documents on consecutive runs. The executor deduplicates those re-matches the same way the detection engine's ES|QL rule type does:
+
+1. `ExecuteRuleQueryStep` runs `planDeduplicationQuery` on the breach query and threads the result on `state.deduplication`. Eligibility is decided from the query, never inferred from rows, and mirrors what the detection engine's ES|QL rule type deduplicates: only non-aggregating `FROM` queries whose rows are still source documents. A query is **not eligible** — and runs untouched, with every event written on every run as before — when it contains `STATS`, when its source is not `FROM` (`ROW`, `TS`), when any command drops (including any wildcard `DROP`), renames or reassigns `_id`, `_index` or `_version`, or when a command after an `MV_EXPAND` does the same to the expanded column. Authors are not expected to aggregate on or manipulate these columns. When eligible, `METADATA _id, _index, _version` is upserted into the `FROM` and the metadata columns are appended to every `KEEP` so they survive projection. `MV_EXPAND`ed columns are not added to `KEEP` (a `KEEP` may precede the `EVAL` that creates them), so an author who projects an expanded column away gets Elasticsearch-generated ids for those rows — the same boundary as the detection engine, minus its row collapse. A query the parser cannot transform runs unchanged as not eligible.
+2. `resolveRuleEventId` in `build_alert_events.ts`, called only for eligible runs, gives a `breached` event whose row carries the complete injected identity a deterministic id: `sha256(space_id | rule.id | _index | _id | _version [| MV_EXPAND values])`. The values of the `MV_EXPAND`ed columns are folded in so each expanded row from one document keeps its own identity, as the detection engine's `generateAlertId` does. Recovered / no_data / continued-breach events, and any row unexpectedly missing one of the columns, fall back to an Elasticsearch-generated id.
+3. `FilterDuplicateEventsStep`, when the run is eligible, runs an `ids` query against `.rule-events` and drops events that already exist, so the director and metrics only see rows that will persist. It sits after `ClassifyAbsentGroupsStep`, which has already recorded the group as breaching for the absence check, and before the director so episode state matches what is written.
+4. `StoreAlertEventsStep`, when the run is eligible, passes the same id as the bulk `create` `_id`. Anything the pre-check could not see, including documents written earlier in the same run, collides here with a 409. `StorageService` treats 409s as expected and `PersistedRuleEventsRecorder` counts them into `ruleEventsDeduplicated` alongside the pre-check drops.
+
+A re-indexed source document has a new `_version` and therefore a new id, so an updated document alerts again. Aggregating queries are never deduplicated because their rows are not documents.
+
+Known limitations, both shared with the detection engine's ES|QL rule type:
+
+- Any wildcard `DROP` (including patterns that cannot match the metadata, such as `DROP labels.*`) makes a rule ineligible, so it runs without deduplication. See `hasColumnMatching` in `deduplication_query.ts`.
+- `MV_EXPAND` is the only fan-out command whose rows get a distinct identity. A one-to-many `LOOKUP JOIN` (or `FORK`) produces rows that share the source document's `_id`/`_index`/`_version`, so only the first row per document is persisted and the rest are counted as deduplicated. ES|QL exposes no per-row identity for those commands today.
 
 ## How recovery and no-data fit together
 

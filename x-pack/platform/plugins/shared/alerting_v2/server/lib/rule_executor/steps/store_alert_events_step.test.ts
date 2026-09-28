@@ -7,6 +7,7 @@
 
 import { StoreAlertEventsStep } from './store_alert_events';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { resolveRuleEventId } from '../build_alert_events';
 import {
   collectStreamResults,
   createPipelineStream,
@@ -164,6 +165,60 @@ describe('StoreAlertEventsStep', () => {
       expect(result.meta?.observations?.bulkIndexResult?.errors[0].document).toBe(
         alertEventsBatch[1]
       );
+    });
+
+    it('uses the deterministic rule-event id as the create _id when the run is eligible', async () => {
+      const sourceEvent = createAlertEvent({
+        status: 'breached',
+        data: { _id: 'doc-1', _index: 'logs-000001', _version: 1, 'host.name': 'a' },
+      });
+      const recovered = createAlertEvent({ status: 'recovered', data: {} });
+
+      const mockBulkResponse = {
+        items: [{ create: { _id: 'x', status: 201 } }, { create: { _id: 'y', status: 201 } }],
+        errors: false,
+      };
+
+      // @ts-expect-error - not all BulkResponseItem fields are used
+      mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
+
+      const state = createRulePipelineState({
+        alertEventsBatch: [sourceEvent, recovered],
+        deduplication: { eligible: true, mvExpandFields: [] },
+      });
+      await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+      const operations = mockEsClient.bulk.mock.calls[0][0].operations as Array<
+        Record<string, Record<string, unknown>>
+      >;
+      expect(operations[0].create._id).toBe(resolveRuleEventId(sourceEvent));
+      expect(operations[2].create._id).toBeUndefined();
+    });
+
+    it('lets Elasticsearch generate ids when the run is not eligible', async () => {
+      const sourceEvent = createAlertEvent({
+        status: 'breached',
+        data: { _id: 'doc-1', _index: 'logs-000001', _version: 1, 'host.name': 'a' },
+      });
+
+      const mockBulkResponse = {
+        items: [{ create: { _id: 'x', status: 201 } }],
+        errors: false,
+      };
+
+      // @ts-expect-error - not all BulkResponseItem fields are used
+      mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
+
+      const state = createRulePipelineState({
+        alertEventsBatch: [sourceEvent],
+        deduplication: { eligible: false, mvExpandFields: [] },
+      });
+      await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+      const operations = mockEsClient.bulk.mock.calls[0][0].operations as Array<
+        Record<string, Record<string, unknown>>
+      >;
+      expect(operations[0].create._id).toBeUndefined();
     });
 
     it('halts with state_not_ready when alertEventsBatch is missing from state', async () => {
