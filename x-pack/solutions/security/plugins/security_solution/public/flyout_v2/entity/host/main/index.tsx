@@ -441,7 +441,8 @@ export const Host: FC<HostProps> = memo(function Host({
             onAssetCriticalityChange={onAssetCriticalityChanged}
             isPreviewMode={false}
             entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
-            skipRiskAndCriticality={noEntityInStore}
+            noEntityInStore={noEntityInStore}
+            entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
             onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons
