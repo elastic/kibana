@@ -34,6 +34,7 @@ export const ScanFailureCallout: React.FC = () => {
 
   return (
     <EuiCallOut
+      announceOnMount
       title={SCAN_FAILURE_TITLE}
       color="danger"
       iconType="warning"
