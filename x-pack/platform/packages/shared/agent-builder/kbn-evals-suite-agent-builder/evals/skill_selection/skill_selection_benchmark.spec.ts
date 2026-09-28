@@ -8,7 +8,10 @@
 import { evaluate as evalsBase, getSpaceIdsFromEnv } from '@kbn/evals';
 import { tags } from '@kbn/scout';
 import { AgentBuilderEvaluationChatClient } from '../../src/chat_client';
-import { preSelectionEvaluator, skillSelectionEvaluator } from '../../src/skill_selection_evaluators';
+import {
+  preSelectionEvaluator,
+  skillSelectionEvaluator,
+} from '../../src/skill_selection_evaluators';
 import type { BenchmarkExample } from './benchmark_dataset';
 import {
   ALERT_ANALYSIS_EXAMPLES,

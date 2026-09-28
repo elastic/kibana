@@ -150,11 +150,14 @@ export const preSelectionEvaluator: Evaluator = {
       (expected as BenchmarkExample['output']) ?? {};
 
     if (!expectedSkill && !shouldNotActivateSkill) {
-      return { score: 1, label: 'SKIP', explanation: 'No skill routing assertion in expected output' };
+      return {
+        score: 1,
+        label: 'SKIP',
+        explanation: 'No skill routing assertion in expected output',
+      };
     }
 
-    const steps =
-      (output as { steps?: Array<Record<string, unknown>> })?.steps ?? [];
+    const steps = (output as { steps?: Array<Record<string, unknown>> })?.steps ?? [];
     const preSelectStep = steps.find(
       (s) => s.type === 'relevant_skills' && s.source === 'implicit'
     );
@@ -168,9 +171,8 @@ export const preSelectionEvaluator: Evaluator = {
       };
     }
 
-    const surfaced = (
-      (preSelectStep.skills as Array<{ id?: string; name?: string; path?: string }>) ?? []
-    );
+    const surfaced =
+      (preSelectStep.skills as Array<{ id?: string; name?: string; path?: string }>) ?? [];
     const surfacedNames = surfaced.flatMap((s) =>
       [s.id, s.name, s.path].filter((v): v is string => typeof v === 'string')
     );
@@ -182,8 +184,12 @@ export const preSelectionEvaluator: Evaluator = {
         score: found ? 1 : 0,
         label: found ? 'PASS' : 'FAIL',
         explanation: found
-          ? `Skill '${expectedSkill}' was surfaced in pre-selection. Skills shown: ${surfacedIds.join(', ')}`
-          : `Skill '${expectedSkill}' was NOT surfaced in pre-selection. Skills shown: ${surfacedIds.join(', ') || 'none'}`,
+          ? `Skill '${expectedSkill}' was surfaced in pre-selection. Skills shown: ${surfacedIds.join(
+              ', '
+            )}`
+          : `Skill '${expectedSkill}' was NOT surfaced in pre-selection. Skills shown: ${
+              surfacedIds.join(', ') || 'none'
+            }`,
         metadata: { expectedSkill, surfacedSkillIds: surfacedIds, found },
       };
     }
@@ -194,8 +200,12 @@ export const preSelectionEvaluator: Evaluator = {
       score: passed ? 1 : 0,
       label: passed ? 'PASS' : 'FAIL',
       explanation: passed
-        ? `Skill '${shouldNotActivateSkill}' correctly absent from pre-selection. Skills shown: ${surfacedIds.join(', ') || 'none'}`
-        : `Skill '${shouldNotActivateSkill}' incorrectly surfaced in pre-selection. Skills shown: ${surfacedIds.join(', ')}`,
+        ? `Skill '${shouldNotActivateSkill}' correctly absent from pre-selection. Skills shown: ${
+            surfacedIds.join(', ') || 'none'
+          }`
+        : `Skill '${shouldNotActivateSkill}' incorrectly surfaced in pre-selection. Skills shown: ${surfacedIds.join(
+            ', '
+          )}`,
       metadata: { shouldNotActivateSkill, surfacedSkillIds: surfacedIds, activated },
     };
   },
