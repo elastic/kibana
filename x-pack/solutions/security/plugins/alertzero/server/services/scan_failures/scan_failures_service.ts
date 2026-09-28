@@ -184,18 +184,24 @@ export class ScanFailuresService {
     }
 
     const pendingLoads = new Map<string, Promise<WorkflowExecutionDto | null>>();
+    let lookupFailed = false;
     const loadExecution = (executionId: string) => {
       const pending = pendingLoads.get(executionId);
       if (pending) {
         return pending;
       }
-      const next = executions.getWorkflowExecution(executionId, spaceId, request).catch(() => null);
+      const next = executions.getWorkflowExecution(executionId, spaceId, request).catch(() => {
+        // A missing parent is null. A thrown lookup is not, or one failed child
+        // would make the other Workers look like the complete set.
+        lookupFailed = true;
+        return null;
+      });
       pendingLoads.set(executionId, next);
       return next;
     };
 
     try {
-      return await collectScanFailures(
+      const failures = await collectScanFailures(
         (page) =>
           executions.searchFailedManagedExecutions(
             { page, size: SCAN_FAILURE_PAGE_SIZE },
@@ -204,6 +210,7 @@ export class ScanFailuresService {
           ),
         loadExecution
       );
+      return lookupFailed ? { ...failures, unknown: true } : failures;
     } catch (error) {
       this.logger.warn(
         `Scan failure query failed: ${error instanceof Error ? error.message : String(error)}`

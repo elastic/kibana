@@ -264,6 +264,60 @@ describe('ScanFailuresService', () => {
     });
   });
 
+  it('keeps Workers it could attribute when a parent lookup throws', async () => {
+    const search = jest.fn(async () => ({
+      results: [
+        execution(ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, undefined, {
+          id: 'triage-run',
+          triggeredBy: 'manual',
+        }),
+        execution(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID, undefined, {
+          id: 'review-run',
+          triggeredBy: WORKFLOW_STEP,
+          parentId: 'attack-discovery-run',
+        }),
+      ],
+      total: 2,
+    }));
+    const logger = loggerMock.create();
+    const executions: FailedExecutionSearch = {
+      searchFailedManagedExecutions: search,
+      getWorkflowExecution: jest.fn(async () => {
+        throw new Error('workflows down');
+      }),
+    };
+    const service = new ScanFailuresService(executions, logger);
+
+    await expect(service.list(request, 'default')).resolves.toEqual({
+      workers: [
+        {
+          workerId: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+          watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
+        },
+      ],
+      unknown: true,
+    });
+  });
+
+  it('skips a child whose parent execution is missing', async () => {
+    const search = jest.fn(async () => ({
+      results: [
+        execution(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID, undefined, {
+          id: 'review-run',
+          triggeredBy: WORKFLOW_STEP,
+          parentId: 'gone',
+        }),
+      ],
+      total: 1,
+    }));
+    const { service } = createService(search);
+
+    await expect(service.list(request, 'default')).resolves.toEqual({
+      workers: [],
+      unknown: false,
+    });
+  });
+
   it('skips a shared workflow that was not started by a Worker', async () => {
     const search = jest.fn(
       async () =>
