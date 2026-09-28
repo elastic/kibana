@@ -42,18 +42,23 @@ export const getWorkflowPermissions = (
   profileId: string | undefined,
   isAdmin = false
 ): WorkflowPermissions => {
-  if (isAdmin) return { read: true, execute: true, edit: true, manage: true };
   const { access_control: accessControl, owner_id: ownerId } = workflow;
+  const can = (roles: readonly WorkflowAccessControlRole[]) =>
+    hasEntityAccess({
+      accessControl: accessControl ?? { access_mode: 'public', entries: [] },
+      ownerId,
+      profileId,
+      roles,
+      isAdmin,
+    });
   if (!accessControl || accessControl.access_mode === 'public') {
     return {
       read: true,
       execute: true,
       edit: true,
-      manage: Boolean(profileId && profileId === ownerId),
+      manage: can([]),
     };
   }
-  const can = (roles: readonly WorkflowAccessControlRole[]) =>
-    hasEntityAccess({ accessControl, ownerId, profileId, roles });
   return {
     read: can(WORKFLOW_ACCESS_CONTROL_ROLES),
     execute: can(['executor', 'editor']),

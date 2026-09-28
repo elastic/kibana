@@ -12,7 +12,7 @@ import { randomBytes } from 'node:crypto';
 
 import pMap from 'p-map';
 import type { KibanaRequest } from '@kbn/core/server';
-import { buildEntityReadAccessQuery } from '@kbn/entity-access-control';
+import { buildEntityReadAccessQuery, isEntityAccessControlAdmin } from '@kbn/entity-access-control';
 import { isNotFoundError } from '@kbn/es-errors';
 import {
   DEFAULT_MAX_RETRIES,
@@ -31,11 +31,7 @@ import {
   type WorkflowDetailDto,
   type WorkflowYaml,
 } from '@kbn/workflows';
-import {
-  buildWorkflowFilters,
-  GLOBAL_WORKFLOW_SPACE_ID,
-  isWorkflowAdmin,
-} from '@kbn/workflows/server';
+import { buildWorkflowFilters, GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 
 import { InvalidYamlSchemaError, WorkflowConflictError } from '@kbn/workflows-yaml';
@@ -917,7 +913,7 @@ export class WorkflowCrudService {
     const authenticatedUser = getAuthenticatedUser(request, this.deps.getSecurity());
     const profileId =
       (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined;
-    const isAdmin = await isWorkflowAdmin(this.deps.getCoreStart(), request);
+    const isAdmin = await isEntityAccessControlAdmin(this.deps.getCoreStart(), request);
     const now = new Date();
     const validationErrors: string[] = [];
     let shouldUpdateScheduler = false;
@@ -1110,7 +1106,7 @@ export class WorkflowCrudService {
     const profileId = request
       ? (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined
       : undefined;
-    const isAdmin = await isWorkflowAdmin(this.deps.getCoreStart(), request);
+    const isAdmin = await isEntityAccessControlAdmin(this.deps.getCoreStart(), request);
     const deletionOptions = { ...options, profileId, isAdmin };
     const bindings = this.deps.getServiceAccountBindings?.();
     if (!bindings) return this.deleteWorkflowDocuments(ids, spaceId, deletionOptions);
@@ -1321,7 +1317,7 @@ export class WorkflowCrudService {
     const profileId = request
       ? (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined
       : undefined;
-    const isAdmin = await isWorkflowAdmin(this.deps.getCoreStart(), request);
+    const isAdmin = await isEntityAccessControlAdmin(this.deps.getCoreStart(), request);
     let canModifyBoundWorkflows = !request;
     if (request && this.deps.getServiceAccountBindings?.()?.isEnabled()) {
       const privileges = await this.deps
@@ -1333,14 +1329,13 @@ export class WorkflowCrudService {
     const result = await disableAllWorkflows({
       ...(request
         ? {
-            accessControlFilter: isAdmin
-              ? { match_all: {} }
-              : buildEntityReadAccessQuery({
-                  profileId,
-                  ownerField: 'owner_id',
-                  accessControlField: 'access_control',
-                  includeMissing: true,
-                }),
+            accessControlFilter: buildEntityReadAccessQuery({
+              profileId,
+              isAdmin,
+              ownerField: 'owner_id',
+              accessControlField: 'access_control',
+              includeMissing: true,
+            }),
             assertCanEdit: (workflow: WorkflowProperties) =>
               assertWorkflowOperation(workflow, 'edit', profileId, isAdmin),
           }
@@ -1481,7 +1476,7 @@ export class WorkflowCrudService {
 
     const client = this.deps.workflowStorage.getClient();
     const { profileId } = params;
-    const isAdmin = await isWorkflowAdmin(this.deps.getCoreStart(), params.request);
+    const isAdmin = await isEntityAccessControlAdmin(this.deps.getCoreStart(), params.request);
     const { refreshed: occHits } = await fetchOccHitsByIds(
       client,
       entries.map((entry) => entry.id)

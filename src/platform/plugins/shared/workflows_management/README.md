@@ -423,8 +423,8 @@ Builder conversations: `access_mode` and `entries` with `type`, profile `id`,
 | Viewer | Yes | No | No | No |
 
 These permissions also require the corresponding feature privileges in the space.
-The administrator override requires wildcard Elasticsearch application privileges
-across resources, as held by `superuser`. Workflows All and Kibana feature
+The shared `@kbn/entity-access-control` administrator override requires wildcard
+Elasticsearch application privileges across resources, as held by `superuser`. Workflows All and Kibana feature
 privileges alone do not grant the override. Checks use the caller's credentials,
 including API-key restrictions. Administrators can recover access after an owner
 is offboarded. Updating access preserves the existing owner. An administrator

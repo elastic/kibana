@@ -10,6 +10,8 @@
 import { z } from '@kbn/zod/v4';
 import type { estypes } from '@elastic/elasticsearch';
 
+export { isEntityAccessControlAdmin } from './is_entity_access_control_admin';
+
 export class InvalidAccessControlError extends Error {}
 
 export const ACCESS_CONTROL_MAX_ENTRIES = 100;
@@ -94,14 +96,16 @@ export const hasEntityAccess = <Role extends string>({
   profileId,
   roles,
   allowPublic = false,
+  isAdmin = false,
 }: {
   accessControl: AccessControl<Role>;
   ownerId: string | undefined;
   profileId: string | undefined;
   roles: readonly Role[];
   allowPublic?: boolean;
+  isAdmin?: boolean;
 }): boolean => {
-  if (profileId && ownerId === profileId) {
+  if (isAdmin || (profileId && ownerId === profileId)) {
     return true;
   }
   if (allowPublic && accessControl.access_mode === 'public') {
@@ -121,39 +125,44 @@ export const buildEntityReadAccessQuery = ({
   ownerField,
   accessControlField,
   includeMissing = false,
+  isAdmin = false,
 }: {
   profileId?: string;
   ownerField: string;
   accessControlField: string;
   includeMissing?: boolean;
-}): estypes.QueryDslQueryContainer => ({
-  bool: {
-    should: [
-      { term: { [`${accessControlField}.access_mode`]: 'public' } },
-      ...(includeMissing
-        ? [{ bool: { must_not: { exists: { field: `${accessControlField}.access_mode` } } } }]
-        : []),
-      ...(profileId
-        ? [
-            { term: { [ownerField]: profileId } },
-            {
-              nested: {
-                path: `${accessControlField}.entries`,
-                ignore_unmapped: true,
-                score_mode: 'none' as const,
-                query: {
-                  bool: {
-                    filter: [
-                      { term: { [`${accessControlField}.entries.type`]: 'user' } },
-                      { term: { [`${accessControlField}.entries.id`]: profileId } },
-                    ],
+  isAdmin?: boolean;
+}): estypes.QueryDslQueryContainer => {
+  if (isAdmin) return { match_all: {} };
+  return {
+    bool: {
+      should: [
+        { term: { [`${accessControlField}.access_mode`]: 'public' } },
+        ...(includeMissing
+          ? [{ bool: { must_not: { exists: { field: `${accessControlField}.access_mode` } } } }]
+          : []),
+        ...(profileId
+          ? [
+              { term: { [ownerField]: profileId } },
+              {
+                nested: {
+                  path: `${accessControlField}.entries`,
+                  ignore_unmapped: true,
+                  score_mode: 'none' as const,
+                  query: {
+                    bool: {
+                      filter: [
+                        { term: { [`${accessControlField}.entries.type`]: 'user' } },
+                        { term: { [`${accessControlField}.entries.id`]: profileId } },
+                      ],
+                    },
                   },
                 },
               },
-            },
-          ]
-        : []),
-    ],
-    minimum_should_match: 1,
-  },
-});
+            ]
+          : []),
+      ],
+      minimum_should_match: 1,
+    },
+  };
+};

@@ -10,7 +10,7 @@
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 
 /** Checks wildcard application privileges with the caller's credentials, including API-key limits. */
-export const isWorkflowAdmin = async (
+export const isEntityAccessControlAdmin = async (
   core: Pick<CoreStart, 'elasticsearch'>,
   request?: KibanaRequest
 ): Promise<boolean> => {
@@ -24,7 +24,7 @@ export const isWorkflowAdmin = async (
             application: 'kibana-.kibana',
             resources: ['*'],
             // An unregistered privilege excludes ordinary Kibana feature and base privileges.
-            privileges: ['workflows:admin'],
+            privileges: ['entity_access_control:admin'],
           },
         ],
       });

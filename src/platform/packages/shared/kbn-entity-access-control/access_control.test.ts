@@ -86,6 +86,33 @@ describe('entity access control', () => {
       })
     ).toBe(expected);
   });
+  it.each(['private', 'public'] as const)(
+    'allows administrators to manage %s entities without an owner profile or entry',
+    (accessMode) => {
+      expect(
+        hasEntityAccess({
+          accessControl: { ...privateAcl, access_mode: accessMode },
+          ownerId: 'owner',
+          profileId: undefined,
+          roles: [],
+          isAdmin: true,
+        })
+      ).toBe(true);
+    }
+  );
+  it('does not treat a consumer role named admin as an administrator override', () => {
+    expect(
+      hasEntityAccess({
+        accessControl: {
+          access_mode: 'private',
+          entries: [{ ...member, role: 'admin', added_at: now }],
+        },
+        ownerId: 'owner',
+        profileId: member.id,
+        roles: [],
+      })
+    ).toBe(false);
+  });
   it('grants public access only when the operation permits it', () => {
     const accessControl = { ...privateAcl, access_mode: 'public' as const };
     expect(
@@ -132,6 +159,15 @@ describe('entity access control', () => {
         },
       },
     });
+  });
+  it('includes all entities in the ACL filter for administrators', () => {
+    expect(
+      buildEntityReadAccessQuery({
+        ownerField: 'owner',
+        accessControlField: 'access',
+        isAdmin: true,
+      })
+    ).toEqual({ match_all: {} });
   });
   it('requires an explicit migration policy to include missing ACLs in searches', () => {
     const query = buildEntityReadAccessQuery({ ownerField: 'owner', accessControlField: 'access' });

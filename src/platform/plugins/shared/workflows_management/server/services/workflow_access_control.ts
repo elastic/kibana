@@ -12,6 +12,7 @@ import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import {
   buildEntityReadAccessQuery,
   InvalidAccessControlError,
+  isEntityAccessControlAdmin,
   prepareAccessControl,
 } from '@kbn/entity-access-control';
 import type { AccessControlInput } from '@kbn/entity-access-control';
@@ -31,7 +32,7 @@ import type {
   WorkflowPermissions,
 } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
-import { GLOBAL_WORKFLOW_SPACE_ID, isWorkflowAdmin } from '@kbn/workflows/server';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { WorkflowAccessDeniedError } from './workflow_access_denied_error';
 import type { WorkflowCrudService } from './workflow_crud_service';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
@@ -90,7 +91,7 @@ export class WorkflowAccessControlService {
     if (!request) return false;
     let check = this.adminChecks.get(request);
     if (!check) {
-      check = isWorkflowAdmin(this.core, request);
+      check = isEntityAccessControlAdmin(this.core, request);
       this.adminChecks.set(request, check);
     }
     return check;
@@ -139,8 +140,8 @@ export class WorkflowAccessControlService {
   }
 
   async readFilter(request?: KibanaRequest) {
-    if (await this.isAdmin(request)) return { match_all: {} };
     return buildEntityReadAccessQuery({
+      isAdmin: await this.isAdmin(request),
       profileId: request ? await this.getProfileId(request) : undefined,
       ownerField: 'owner_id',
       accessControlField: 'access_control',
@@ -171,7 +172,7 @@ export class WorkflowAccessControlService {
     spaceId: string,
     request?: KibanaRequest
   ): Promise<estypes.QueryDslQueryContainer> {
-    if (await this.isAdmin(request)) return { match_all: {} };
+    if (await this.isAdmin(request)) return this.readFilter(request);
     const profileId = request ? await this.getProfileId(request) : undefined;
     const client = this.core.elasticsearch.client.asInternalUser;
     let pitId: string;
@@ -242,16 +243,8 @@ export class WorkflowAccessControlService {
     const stored = await this.crud.getWorkflowDocumentWithVersion(id, spaceId);
     if (!stored) throw new WorkflowNotFoundError(id);
     const { source: existing, seqNo, primaryTerm } = stored;
-    const legacyOwner =
-      !existing.owner_id &&
-      !existing.access_control &&
-      this.core.security.authc.getCurrentUser(request)?.username === existing.createdBy;
     const ownerId = existing.owner_id ?? profileId;
-    if (
-      !ownerId ||
-      existing.managed ||
-      (!legacyOwner && existing.owner_id !== profileId && !(await this.isAdmin(request)))
-    ) {
+    if (!ownerId || existing.managed || !(await this.permissions(existing, request)).manage) {
       throw new WorkflowAccessDeniedError();
     }
     if (access_mode === 'private') {

@@ -8,9 +8,9 @@
  */
 
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import { isEntityAccessControlAdmin } from '@kbn/entity-access-control';
 import { getWorkflowPermissions } from '@kbn/workflows';
 import type { WorkflowAccessSubject } from '@kbn/workflows';
-import { isWorkflowAdmin } from '@kbn/workflows/server';
 import { getWorkflowOriginalRequest } from '../service_account_execution';
 
 export const hasWorkflowAccess = async (
@@ -25,8 +25,10 @@ export const hasWorkflowAccess = async (
           request: getWorkflowOriginalRequest(request),
         })) ?? undefined
       : undefined;
-  return (
-    getWorkflowPermissions(workflow, profileId)[operation] ||
-    (await isWorkflowAdmin(core, getWorkflowOriginalRequest(request)))
-  );
+  if (getWorkflowPermissions(workflow, profileId)[operation]) return true;
+  return getWorkflowPermissions(
+    workflow,
+    profileId,
+    await isEntityAccessControlAdmin(core, getWorkflowOriginalRequest(request))
+  )[operation];
 };

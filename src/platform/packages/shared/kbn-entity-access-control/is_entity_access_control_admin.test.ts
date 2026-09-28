@@ -8,9 +8,9 @@
  */
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import { isWorkflowAdmin } from './is_workflow_admin';
+import { isEntityAccessControlAdmin } from './is_entity_access_control_admin';
 
-describe('isWorkflowAdmin', () => {
+describe('isEntityAccessControlAdmin', () => {
   const request = httpServerMock.createKibanaRequest();
 
   it.each([true, false])('uses caller privileges: %s', async (allowed) => {
@@ -23,11 +23,15 @@ describe('isWorkflowAdmin', () => {
       cluster: {},
       index: {},
     });
-    expect(await isWorkflowAdmin(core, request)).toBe(allowed);
+    expect(await isEntityAccessControlAdmin(core, request)).toBe(allowed);
     expect(core.elasticsearch.client.asScoped).toHaveBeenCalledWith(request);
     expect(client.security.hasPrivileges).toHaveBeenCalledWith({
       application: [
-        { application: 'kibana-.kibana', resources: ['*'], privileges: ['workflows:admin'] },
+        {
+          application: 'kibana-.kibana',
+          resources: ['*'],
+          privileges: ['entity_access_control:admin'],
+        },
       ],
     });
     expect(core.elasticsearch.client.asInternalUser.security.hasPrivileges).not.toHaveBeenCalled();
@@ -35,7 +39,7 @@ describe('isWorkflowAdmin', () => {
 
   it('does not grant an override without a request', async () => {
     const core = coreMock.createStart();
-    expect(await isWorkflowAdmin(core)).toBe(false);
+    expect(await isEntityAccessControlAdmin(core)).toBe(false);
     expect(core.elasticsearch.client.asScoped).not.toHaveBeenCalled();
   });
 
@@ -44,6 +48,6 @@ describe('isWorkflowAdmin', () => {
     jest
       .spyOn(core.elasticsearch.client.asScoped(request).asCurrentUser.security, 'hasPrivileges')
       .mockRejectedValue(new Error('unavailable'));
-    expect(await isWorkflowAdmin(core, request)).toBe(false);
+    expect(await isEntityAccessControlAdmin(core, request)).toBe(false);
   });
 });

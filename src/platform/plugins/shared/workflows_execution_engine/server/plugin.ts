@@ -19,6 +19,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { isEntityAccessControlAdmin } from '@kbn/entity-access-control';
 import {
   ExecutionStatus,
   getWorkflowPermissions,
@@ -37,7 +38,6 @@ import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
-import { isWorkflowAdmin } from '@kbn/workflows/server';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import { maybeDrainConcurrencyQueueBeforeEnqueue } from './concurrency/concurrency_queue_drainer';
 import { handleConcurrencyBlockedExecution } from './concurrency/maybe_schedule_dormant_queued_run';
@@ -1570,7 +1570,7 @@ export class WorkflowsExecutionEnginePlugin
         ? (await coreStart.userProfile.getCurrentProfileId({ request })) ?? undefined
         : undefined;
 
-      const isAdmin = hasPrivateWorkflows && (await isWorkflowAdmin(coreStart, request));
+      const isAdmin = hasPrivateWorkflows && (await isEntityAccessControlAdmin(coreStart, request));
 
       interface PreparedItem {
         idx: number;
