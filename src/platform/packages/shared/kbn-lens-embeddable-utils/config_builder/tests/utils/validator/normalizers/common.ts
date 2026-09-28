@@ -1371,12 +1371,11 @@ export const getCommonNormalizer = <T extends LensAttributes>(
             // apply defaults
             layer.sampling = layer.sampling ?? LENS_SAMPLING_DEFAULT_VALUE;
 
-            // `indexPatternId` is a runtime only field (`FormBasedPrivateState`) that leaked into some
-            // legacy dashboard SOs. On persist `extractReferences` strips it into the
-            // `indexpattern-datasource-layer-*` reference, and on load `injectReferences` reconstructs it
-            // from that reference. It is never part of `FormBasedPersistedState`. The transform mirrors
-            // this by resolving the data view from references (`resolveDataViewId`). Drop the leaked
-            // value since the reference is the source of truth.
+            // `indexPatternId` is a runtime-only `FormBasedLayer` field, omitted from
+            // `FormBasedPersistedState`, that leaked into by-value panels.
+            // - `extractReferences` moves it onto the `indexpattern-datasource-layer-*` reference.
+            // - `resolveDataViewId` prefers the same reference and falls back to this inline id
+            //   only when the reference is absent.
             if ('indexPatternId' in layer) {
               delete layer.indexPatternId;
             }
@@ -1489,9 +1488,9 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               }
             }
           }
-          // `currentIndexPatternId` is a runtime only field (`FormBasedPrivateState`) that leaked into
-          // some legacy dashboard SOs. It is recomputed at load by `initializeState` and never part of
-          // `FormBasedPersistedState`, so the transform never emits it.
+
+          // `currentIndexPatternId` is a runtime-only `FormBasedPrivateState` field that leaked into
+          // by-value panels. `loadInitialState` recomputes it. The transform never emits it.
           if ('currentIndexPatternId' in ds) {
             delete ds.currentIndexPatternId;
           }
