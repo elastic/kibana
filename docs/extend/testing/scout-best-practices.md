@@ -311,7 +311,7 @@ test('returns 403 when missing read privilege', async ({ apiClient }) => {
 
 ## Organize test suites by role and user flow [organize-test-suites-by-role-and-user-flow]
 
-Prefer “one role + one flow per file” and keep spec files small — roughly 4–5 short tests, or 2–3 when scenarios are longer (lean toward the lower end once any single scenario runs longer than ~30s). The test runner balances work at the spec-file level, so small files parallelize better (an oversized file becomes a single-worker bottleneck) and limit blast radius: skipping one flaky test drops only its small group rather than a whole large suite. See [parallel execution](../testing/parallelism.md). Put shared login/navigation in `beforeEach`.
+Prefer “one role + one flow per file.” Judge suite size by **spec duration**, not a test-count cap. Most Scout specs finish within about a minute. The test runner balances work at the spec-file level, so a longer file becomes a single-worker bottleneck and a larger skip blast radius. See [parallel execution](../testing/parallelism.md). Put shared login/navigation in `beforeEach`. A small `for` loop or shared describe helper that is still one role + one flow can stay in one file — split when the generated suite is large or the rows are different flows.
 
 :::::{dropdown} Example
 

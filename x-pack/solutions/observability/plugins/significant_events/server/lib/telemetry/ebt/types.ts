@@ -18,8 +18,8 @@ interface KnowledgeIndicatorQueriesGeneratedProps {
   duration_ms: number;
   stream_name: string;
   stream_type: StreamType;
-  tool_usage: SignificantEventsToolUsage;
-  external_content_tool_continuations: number;
+  tool_usage?: SignificantEventsToolUsage;
+  external_content_tool_continuations?: number;
 }
 
 interface KnowledgeIndicatorFeaturesIdentifiedProps {

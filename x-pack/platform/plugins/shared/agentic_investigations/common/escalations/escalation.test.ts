@@ -155,7 +155,7 @@ describe('updateEscalationRequestSchema', () => {
 
   it('rejects an empty body (no field provided)', () => {
     expect(() => updateEscalationRequestSchema.parse({})).toThrow(
-      /at least one of title, linked_investigations, or status must be provided/
+      /at least one of title or linked_investigations must be provided/
     );
   });
 
