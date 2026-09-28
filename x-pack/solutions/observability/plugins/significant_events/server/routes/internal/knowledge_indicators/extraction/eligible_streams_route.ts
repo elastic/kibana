@@ -136,7 +136,7 @@ const eligibleStreamsRoute = createServerRoute({
         request,
       }),
     ]);
-    const executions = await streamsKIsOnboardingClient.getRecentExecutions();
+    const executions = await streamsKIsOnboardingClient.getRecentExecutions(request);
 
     const intervalHours =
       query.extractionIntervalHours ?? intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS;

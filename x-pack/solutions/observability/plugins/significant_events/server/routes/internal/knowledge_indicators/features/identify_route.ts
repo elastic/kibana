@@ -138,7 +138,7 @@ const prepareInferredSamplingRoute = createServerRoute({
     const {
       start = now - MS_PER_DAY,
       end = now,
-      runId = uuidv4(),
+      runId,
       iteration = 1,
       sampleSize = tuningConfig.sample_size,
       entityFilteredRatio = tuningConfig.entity_filtered_ratio,
@@ -146,6 +146,7 @@ const prepareInferredSamplingRoute = createServerRoute({
       maxEntityFilters = tuningConfig.max_entity_filters,
       samplingTimeoutMs = tuningConfig.sampling_timeout_ms,
     } = params.body ?? {};
+    const resolvedRunId = runId?.trim() || uuidv4();
 
     const [{ source }, kiClient] = await Promise.all([
       sourcesClient.get(streamName),
@@ -159,7 +160,7 @@ const prepareInferredSamplingRoute = createServerRoute({
       samplingSource: source.view_name,
       start,
       end,
-      runId,
+      runId: resolvedRunId,
       logger: routeLogger,
       sampleSize,
       entityFilteredRatio,
@@ -221,13 +222,14 @@ const identifyInferredFeaturesRoute = createServerRoute({
     const now = Date.now();
     const {
       connectorId: connectorIdOverride,
-      runId = uuidv4(),
+      runId,
       iteration,
       documents,
       samplingTelemetry,
       maxExcludedFeaturesInPrompt = tuningConfig.max_excluded_features_in_prompt,
       maxPreviouslyIdentifiedFeatures,
     } = params.body;
+    const resolvedRunId = runId?.trim() || uuidv4();
     const { totalFilters, filtersCapped, hasFilteredDocuments } = samplingTelemetry;
 
     const [connectorId, { source }, kiClient] = await Promise.all([
@@ -253,7 +255,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         logger: routeLogger,
         signal: getRequestAbortSignal(request),
         streamName: source.id,
-        runId,
+        runId: resolvedRunId,
         documents,
         totalFilters,
         filtersCapped,
@@ -284,7 +286,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       telemetry.trackFeaturesIdentified(
         buildTelemetry(
           {
-            run_id: runId,
+            run_id: resolvedRunId,
             connector_id: connectorId,
             iteration: iteration ?? 1,
             source_id: source.id,

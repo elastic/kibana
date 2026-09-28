@@ -53,6 +53,7 @@ describe('ki_queries_validate tool', () => {
     description: 'Detects failures',
     category: 'error' as const,
     severity_score: 60,
+    expects_matches: true,
     feature_ids: ['feature-1'],
   };
 
@@ -63,6 +64,7 @@ describe('ki_queries_validate tool', () => {
     description: 'Detects failures',
     category: 'error',
     severity_score: 60,
+    expects_matches: true,
     features: [{ id: 'feature-1', run_id: 'run-1' }],
   };
 
@@ -105,14 +107,21 @@ describe('ki_queries_validate tool', () => {
       logger,
     });
 
-  it('bounds its input', () => {
+  it('bounds its input and keeps evaluation intent optional', () => {
     const tool = createTool();
     if (!('schema' in tool)) {
       throw new Error('Expected a schema-backed tool registration');
     }
 
+    const { expects_matches: _expectsMatches, ...withoutIntent } = candidate;
     expect(tool.schema.safeParse({ slug: 'logs.test', queries: [candidate] }).success).toBe(true);
-    expect(tool.schema.safeParse({ slug: 'logs.test', queries: [] }).success).toBe(false);
+    expect(tool.schema.safeParse({ slug: 'logs.test', queries: [withoutIntent] }).success).toBe(
+      true
+    );
+    expect(tool.schema.safeParse({ slug: 'logs.test', queries: [] }).success).toBe(true);
+    expect(
+      tool.schema.safeParse({ slug: 'logs.test', queries: Array(101).fill(candidate) }).success
+    ).toBe(false);
   });
 
   it('resolves an analysis target, queries KI state, and returns validated results', async () => {
@@ -126,7 +135,7 @@ describe('ki_queries_validate tool', () => {
     }
 
     expect(getFeatures).toHaveBeenCalledWith('logs.test', {
-      id: ['feature-1'],
+      featureIds: ['feature-1'],
       excludedType: ['log_samples'],
     });
     expect(createQueryValidationContextMock).toHaveBeenCalledWith(
@@ -149,24 +158,82 @@ describe('ki_queries_validate tool', () => {
         queryValidationTimeoutMs: 12_000,
       })
     );
+    expect(validateKIQueriesMock.mock.calls[0][0]).not.toHaveProperty('requireQueryIntent');
+    expect(validateKIQueriesMock.mock.calls[0][0]).toHaveProperty('collectQueryAttempts', true);
     expect(result.results).toEqual([
       {
         type: 'other',
         data: {
-          queries: [{ query: candidate, valid: true, status: 'Added' }],
           slug: 'logs.test',
           title: 'logs.test',
           view_name: '$.nightshift.sources.default.logs.test',
-          accepted_queries: [
+          queries: [{ query: candidate, valid: true, status: 'Added' }],
+          finalized: true,
+          finalized_queries: [
             {
               type: 'match',
               esql: { query: 'FROM logs.test | WHERE message:"failure"' },
               title: 'Failures',
               description: 'Detects failures',
+              category: 'error',
               severity_score: 60,
+              expects_matches: true,
               features: [{ id: 'feature-1', run_id: 'run-1' }],
             },
           ],
+        },
+      },
+    ]);
+  });
+
+  it('does not finalize a batch containing rejected queries', async () => {
+    validateKIQueriesMock.mockResolvedValueOnce({
+      results: [{ query: candidate, valid: false, status: 'Failed to add' }],
+      acceptedQueries: [],
+      hasIntentFailures: false,
+      hasNonIntentFailures: true,
+    });
+
+    const result = await invokeHandler(
+      createTool(),
+      { target_id: 'logs.test', queries: [candidate] },
+      createMockToolContext()
+    );
+    if (!('results' in result)) {
+      throw new Error('Expected a standard tool result');
+    }
+
+    expect(result.results).toEqual([
+      {
+        type: 'other',
+        data: {
+          target_id: 'logs.test',
+          queries: [{ query: candidate, valid: false, status: 'Failed to add' }],
+          finalized: false,
+        },
+      },
+    ]);
+  });
+
+  it('finalizes an explicit empty batch without loading target state', async () => {
+    const result = await invokeHandler(
+      createTool(),
+      { target_id: 'logs.test', queries: [] },
+      createMockToolContext()
+    );
+    if (!('results' in result)) {
+      throw new Error('Expected a standard tool result');
+    }
+
+    expect(getScopedClients).not.toHaveBeenCalled();
+    expect(result.results).toEqual([
+      {
+        type: 'other',
+        data: {
+          target_id: 'logs.test',
+          queries: [],
+          finalized: true,
+          finalized_queries: [],
         },
       },
     ]);

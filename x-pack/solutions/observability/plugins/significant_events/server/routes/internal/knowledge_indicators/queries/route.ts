@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import pLimit from 'p-limit';
+import { v4 as uuidv4 } from 'uuid';
 import type {
   QueriesGetResponse,
   QueriesOccurrencesGetResponse,
@@ -54,9 +55,6 @@ import { validateEsqlQueryForSourceOrThrow } from '../../../../lib/significant_e
 const RECONCILE_STREAM_CONCURRENCY = 3;
 // Manual repair endpoint: keep each request small so operators batch large migrations explicitly.
 const RECONCILE_MAX_STREAMS = 10;
-// Leave five minutes under the route's idle-socket limit for an in-flight
-// validation call and the agent's forced-completion turn to finish.
-const QUERY_GENERATION_MAX_DURATION_MS = 300_000;
 
 const dateFromString = makeIsoDateFromString('ISO 8601 datetime');
 
@@ -608,19 +606,7 @@ const generateQueriesRoute = createServerRoute({
           .describe(
             'Optional connector ID override. When omitted the connector is resolved via the Inference Feature Registry.'
           ),
-        maxExistingQueriesForContext: z
-          .number()
-          .optional()
-          .describe('Max number of existing queries to include as context for the LLM.'),
-        queryValidationTimeoutMs: z
-          .number()
-          .int()
-          .min(1_000)
-          .max(240_000)
-          .optional()
-          .describe(
-            'Per-query deadline (ms) for the ES|QL validation step. When omitted the server-side tuning default is used.'
-          ),
+        runId: z.string().trim().min(1).max(MAX_ID_LENGTH).optional(),
       })
       .nullish(),
   }),
@@ -658,11 +644,12 @@ const generateQueriesRoute = createServerRoute({
     await assertNotPaused({ maintenanceService, request });
 
     const { streamName } = params.path;
-    const {
-      connectorId,
-      maxExistingQueriesForContext,
-      queryValidationTimeoutMs = tuningConfig.query_validation_timeout_ms,
-    } = params.body ?? {};
+    const { connectorId, runId } = params.body ?? {};
+    const resolvedRunId = runId?.trim() || uuidv4();
+
+    if (!server.agentBuilder) {
+      throw new Error('Agent Builder is required to generate significant events queries');
+    }
 
     const [{ source }, kiClient] = await Promise.all([
       sourcesClient.get(streamName),
@@ -673,22 +660,17 @@ const generateQueriesRoute = createServerRoute({
       {
         source,
         connectorId,
-        maxExistingQueriesForContext,
-        maxDurationMs: QUERY_GENERATION_MAX_DURATION_MS,
-        queryValidationTimeoutMs,
+        runId: resolvedRunId,
       },
       {
         inferenceClient,
         kiClient,
-        esClient: scopedClusterClient.asCurrentUser,
-        streamDataEsClient,
-        featureFlags: server.core.featureFlags,
+        agentBuilder: server.agentBuilder,
         searchInferenceEndpoints: server.searchInferenceEndpoints,
         request,
         logger: logger.get('significant_events_queries_generation'),
         signal: getRequestAbortSignal(request),
         telemetry,
-        agentBuilderTools: server.agentBuilder?.tools,
       }
     );
 

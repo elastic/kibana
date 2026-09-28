@@ -559,6 +559,22 @@
       "approvedBy": "@elastic/security-defend-workflows",
       "oasdiffId": "response-property-one-of-added",
       "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/agent_builder/agents",
+      "method": "post",
+      "reason": "AI index ID maxLength reduced from 256 to 244 so the `v-ai-index-<id>` view name fits an Elasticsearch index name. ai_indices is behind the Context Engine feature flag.",
+      "approvedBy": "@elastic/workchat-eng",
+      "oasdiffId": "request-property-max-length-decreased",
+      "prUrl": "https://github.com/elastic/kibana/pull/291134"
+    },
+    {
+      "path": "/api/agent_builder/agents/{id}",
+      "method": "put",
+      "reason": "AI index ID maxLength reduced from 256 to 244 so the `v-ai-index-<id>` view name fits an Elasticsearch index name. ai_indices is behind the Context Engine feature flag.",
+      "approvedBy": "@elastic/workchat-eng",
+      "oasdiffId": "request-property-max-length-decreased",
+      "prUrl": "https://github.com/elastic/kibana/pull/291134"
     }
   ]
 }

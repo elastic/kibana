@@ -21,7 +21,7 @@ describe('cancelKiIdentificationToolHandler', () => {
     };
     const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
-      managementApi: managementApi as never,
+      managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry,
     });
     const request = httpServerMock.createKibanaRequest();
@@ -50,7 +50,7 @@ describe('cancelKiIdentificationToolHandler', () => {
     };
     const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
-      managementApi: managementApi as never,
+      managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry,
     });
     const request = httpServerMock.createKibanaRequest();

@@ -1,9 +1,37 @@
 {
-  "sha1": "98a9c04998eeec00ce5382fa3f8cd7e03b17cf28",
+  "sha1": "09390f72a79f07483d924ccfa15f671502541086",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "a002a5dadd7e00b-cbb70278009f3c9",
+      "title": "Onboarding Authenticate and Deploy step policy cleanup same-package: removing a service updates the shared policy (PUT, not DELETE) for the surviving service — cleanup-only when survivor already deployed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
+        "line": 109,
+        "column": 11
+      }
+    },
+    {
+      "id": "a002a5dadd7e00b-38c32bacf1bd50b",
+      "title": "Onboarding Authenticate and Deploy step agent-based cleanup: removing a service updates the shared package policy for the surviving service (PUT, not DELETE)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
+        "line": 196,
+        "column": 24
+      }
+    },
     {
       "id": "a002a5dadd7e00b-8a982de270c8a77",
       "title": "Onboarding Authenticate and Deploy step deploy fires POST /api/fleet/managed_integrations and shows success state",
@@ -14,8 +42,36 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
-        "line": 108,
-        "column": 30
+        "line": 337,
+        "column": 11
+      }
+    },
+    {
+      "id": "bf49e6d67d9de6a-1fa71fd1e9b5e47",
+      "title": "Onboarding Authenticate and Deploy step — AWS identity federation flag OFF offers only access keys as an authentication method",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_aws_identity_federation_disabled.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "f15e544ef42c485-d507e5e70302bb3",
+      "title": "Onboarding Authenticate and Deploy step — AWS identity federation flag ON offers identity federation as an authentication method",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_aws_identity_federation_enabled.spec.ts",
+        "line": 39,
+        "column": 7
       }
     },
     {
