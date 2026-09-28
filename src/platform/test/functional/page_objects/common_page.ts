@@ -495,7 +495,7 @@ export class CommonPageObject extends FtrService {
   }
 
   async isFatalErrorScreen() {
-    return await this.testSubjects.exists('fatalErrorScreen', { timeout: 0 });
+    return await this.testSubjects.exists('fatalErrorScreen');
   }
 
   async waitForTopNavToBeVisible() {

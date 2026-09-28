@@ -23,17 +23,15 @@ export class AppsMenuService extends FtrService {
     await this.awaitGlobalLoadingIndicatorHidden();
   }
 
-  private async isGlobalLoadingIndicatorVisible() {
-    this.log.debug('isGlobalLoadingIndicatorVisible');
-    return await this.testSubjects.waitForExists('globalLoadingIndicator', { timeout: 1500 });
-  }
-
   private async awaitGlobalLoadingIndicatorHidden() {
     // The loading indicator is debounced by 250ms. Give an in-flight request one complete
     // debounce window to make it visible, but do not delay after a visible load has completed.
-    const loadingIndicatorAppeared = await this.testSubjects.exists('globalLoadingIndicator', {
-      timeout: LOADING_INDICATOR_APPEARANCE_TIMEOUT_MS,
-    });
+    const loadingIndicatorAppeared = await this.testSubjects.waitForExists(
+      'globalLoadingIndicator',
+      {
+        timeout: LOADING_INDICATOR_APPEARANCE_TIMEOUT_MS,
+      }
+    );
     if (!loadingIndicatorAppeared) {
       return;
     }
@@ -59,7 +57,7 @@ export class AppsMenuService extends FtrService {
   }
 
   public async openCollapsibleNav() {
-    if (!(await this.testSubjects.exists('collapsibleNav', { timeout: 0 }))) {
+    if (!(await this.testSubjects.exists('collapsibleNav'))) {
       await this.testSubjects.click('toggleNavButton');
     }
     await this.testSubjects.existOrFail('collapsibleNav');

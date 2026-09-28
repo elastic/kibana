@@ -62,7 +62,7 @@ export class TimePickerPageObject extends FtrService {
    * EuiSuperDatePicker. Cache by app path because different apps may use
    * different picker variants within the same test suite.
    */
-  private async isNewDateRangePicker(): Promise<boolean> {
+  public async isNewDateRangePicker(): Promise<boolean> {
     const appPath = new URL(await this.browser.getCurrentUrl()).pathname;
     if (this.detectedPickerVariant?.appPath === appPath) {
       return this.detectedPickerVariant.isNew;
