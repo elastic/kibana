@@ -210,7 +210,6 @@ const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationR
     hypotheses: record.hypotheses,
     recommendations: recommendations.success ? recommendations.data : undefined,
     blind_spots: blindSpots.success ? blindSpots.data : undefined,
-    timeline: timeline.success ? timeline.data : undefined,
     conversation_id: record.conversation_id,
     impact: record.impact,
   };
@@ -386,7 +385,11 @@ export class NightshiftInvestigationsClient {
     const spaceId = this.getSpaceId();
 
     const workflowId = NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID;
-    const workflow = await this.workflowsManagement.management.getWorkflow(workflowId, spaceId);
+    const workflow = await this.workflowsManagement.management.getWorkflow(
+      workflowId,
+      spaceId,
+      this.request
+    );
 
     if (!workflow?.definition) {
       this.logger.error(
@@ -529,7 +532,7 @@ export class NightshiftInvestigationsClient {
     const execution = await this.workflowsManagement.management.getWorkflowExecution(
       investigationId,
       spaceId,
-      { includeOutput: false }
+      { includeOutput: false, request: this.request }
     );
 
     if (!execution || !isInvestigationWorkflowExecution(execution)) {
