@@ -99,10 +99,11 @@ describe('Embeddable helpers', () => {
       // Plugin setup always initializes the builder, whatever the flag value.
       await setLensBuilder(false);
       const services = getServices();
+      const esql = 'FROM logs | STATS count = COUNT(*)';
       const flatApiConfig = {
         type: 'metric',
         title: 'Total requests',
-        data_source: { type: 'esql', query: 'FROM logs | STATS count = COUNT(*)' },
+        data_source: { type: 'esql', query: esql },
         metrics: [{ type: 'primary', column: 'count' }],
         sampling: 1,
         ignore_global_filters: false,
@@ -114,6 +115,16 @@ describe('Embeddable helpers', () => {
       expect(runtimeState.attributes.visualizationType).toBe('lnsMetric');
       expect(runtimeState).not.toHaveProperty('data_source');
       expect(runtimeState).not.toHaveProperty('metrics');
+
+      const { state } = runtimeState.attributes;
+      const layers = Object.values(
+        getStructuredDatasourceStates(state.datasourceStates).textBased?.layers ?? {}
+      );
+      expect(layers).toHaveLength(1);
+      const [{ query, columns }] = layers;
+      expect(query).toEqual({ esql });
+      const { metricAccessor } = state.visualization as { metricAccessor?: string };
+      expect(columns.find(({ columnId }) => columnId === metricAccessor)?.fieldName).toBe('count');
     });
 
     it('should fallback to an empty Lens doc if the saved object is not found', async () => {
