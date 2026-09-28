@@ -152,6 +152,7 @@ Use operations[] to:
             esClient,
           }),
           resolveAttachmentPanel: createAttachmentPanelResolver({ attachments }),
+          esClient: esClient.asCurrentUser,
         });
 
         // Data-aware default time range computation

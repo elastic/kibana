@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ResolvedCustomContentTemplate } from '@kbn/custom-content-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { z } from '@kbn/zod/v4';
 import type { ResolvePanelContent } from './panels';
@@ -44,6 +45,7 @@ export interface OperationExecutionContext {
   resolvePanelContent?: ResolvePanelContent;
   resolveCustomContentTemplate?: ResolveCustomContentTemplate;
   resolveAttachmentPanel?: ResolveAttachmentPanel;
+  esClient?: ElasticsearchClient;
 }
 
 export interface OperationHandlerParams<TOperation> {

@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-genai-utils'
   - '@kbn/agent-builder-visualizations-server'
   - '@kbn/agent-builder-visualizations-common'
   - '@kbn/custom-content-common'
