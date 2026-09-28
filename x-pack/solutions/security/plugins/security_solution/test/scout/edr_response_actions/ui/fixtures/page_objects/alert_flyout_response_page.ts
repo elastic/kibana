@@ -18,22 +18,18 @@ export class AlertFlyoutResponsePage {
   readonly alertsTable: Locator;
   readonly expandEvent: Locator;
   readonly flyoutTitle: Locator;
-  readonly responseSection: Locator;
   readonly responseSectionHeader: Locator;
   readonly responseButton: Locator;
   readonly responseDetails: Locator;
   readonly tableSection: Locator;
-  readonly refreshQuery: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.tableSection = this.page.testSubj.locator('alerts-page-table-section');
-    this.refreshQuery = this.page.testSubj
-      .locator('alerts-page-content')
-      .getByTestId('querySubmitButton');
     this.alertsTable = this.page.testSubj.locator('alertsTableIsLoaded');
     this.expandEvent = this.alertsTable.getByTestId('expand-event');
     this.flyoutTitle = this.page.testSubj.locator('securitySolutionFlyoutAlertTitleText');
-    this.responseSection = this.page.testSubj.locator('securitySolutionFlyoutResponseSection');
+    // ExpandableSection never renders the section id itself. It only renders
+    // the header and content suffixes.
     this.responseSectionHeader = this.page.testSubj.locator(
       'securitySolutionFlyoutResponseSectionHeader'
     );
@@ -49,35 +45,33 @@ export class AlertFlyoutResponsePage {
     });
     // Charts render before list-index init finishes. Until that init completes,
     // the alerts table returns null, so the grid is absent even when the
-    // summary already shows the alert. Refresh until the grid mounts.
-    await this.tableSection.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
-    await this.tableSection.scrollIntoViewIfNeeded();
+    // summary already shows the alert. Action checks such as isEnabled() use
+    // the default 10s timeout and throw out of the poll, so only visibility is checked.
     await expect
       .poll(
         async () => {
-          if (await this.alertsTable.isVisible()) {
-            return true;
-          }
-          if (await this.refreshQuery.isEnabled()) {
-            await this.refreshQuery.click();
-          }
-          await this.tableSection.scrollIntoViewIfNeeded();
-          return false;
+          await this.tableSection.scrollIntoViewIfNeeded({ timeout: 1_000 }).catch(() => undefined);
+          return this.alertsTable.isVisible();
         },
-        { timeout: APP_LOAD_TIMEOUT_MS, intervals: [2_000] }
+        { timeout: APP_LOAD_TIMEOUT_MS, intervals: [1_000] }
       )
       .toBe(true);
-    await this.expandEvent.click();
+    await this.expandEvent.click({ timeout: APP_LOAD_TIMEOUT_MS });
     await this.flyoutTitle.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
   }
 
   async openResponseDetails(): Promise<void> {
-    await this.responseSection.waitFor({ state: 'visible' });
+    await this.responseSectionHeader.waitFor({
+      state: 'visible',
+      timeout: APP_LOAD_TIMEOUT_MS,
+    });
+    await this.responseSectionHeader.scrollIntoViewIfNeeded({ timeout: APP_LOAD_TIMEOUT_MS });
+    // The section is collapsed by default, so the Response button is not mounted yet.
     if (!(await this.responseButton.isVisible())) {
-      await this.responseSectionHeader.click();
-      await this.responseButton.waitFor({ state: 'visible' });
+      await this.responseSectionHeader.click({ timeout: APP_LOAD_TIMEOUT_MS });
+      await this.responseButton.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
     }
-    await this.responseButton.click();
-    await this.responseDetails.waitFor({ state: 'visible' });
+    await this.responseButton.click({ timeout: APP_LOAD_TIMEOUT_MS });
+    await this.responseDetails.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
   }
 }
