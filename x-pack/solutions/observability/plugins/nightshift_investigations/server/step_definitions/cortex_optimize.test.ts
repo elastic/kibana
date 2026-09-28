@@ -34,7 +34,10 @@ describe('cortexOptimizeStepDefinition', () => {
       input,
       rawInput: input,
       contextManager: {
-        getContext: jest.fn().mockReturnValue({ workflow: { spaceId: 'default' } }),
+        getContext: jest.fn().mockReturnValue({
+          workflow: { spaceId: 'default' },
+          execution: { id: 'execution-1' },
+        }),
         getFakeRequest,
         getScopedEsClient,
         renderInputTemplate: jest.fn((val) => val),
@@ -71,6 +74,7 @@ describe('cortexOptimizeStepDefinition', () => {
       assistantMessage: 'Redis evictions.',
       esClient,
       spaceId: 'default',
+      interactionId: 'execution-1',
       signal: expect.any(AbortSignal),
       analytics,
       conversationId: 'conv-1',
