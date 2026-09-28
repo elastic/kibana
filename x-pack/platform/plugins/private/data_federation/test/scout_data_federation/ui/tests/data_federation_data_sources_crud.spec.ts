@@ -60,7 +60,6 @@ test.describe('ES|QL Data Federation — data sources CRUD', { tag: tags.statefu
       await pageObjects.dataFederation.createS3DataSource({
         name: createdDataSourceName,
         description: initialDescription,
-        region: 'us-east-1',
         accessKey: S3_ACCESS_KEY,
         secretKey: S3_SECRET_KEY,
       });
