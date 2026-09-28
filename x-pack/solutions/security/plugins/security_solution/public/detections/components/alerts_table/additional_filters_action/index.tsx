@@ -50,9 +50,6 @@ export const AdditionalFiltersAction = ({
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-  const togglePopover = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
-
   const UtilityBarAdditionalFiltersContent = useCallback(
     () => (
       <UtilityBarFlexGroup direction="column" gutterSize="none">
@@ -61,7 +58,7 @@ export const AdditionalFiltersAction = ({
             id="showBuildingBlockAlertsCheckbox"
             aria-label="showBuildingBlockAlerts"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              closePopover();
+              setIsPopoverOpen(false);
               onShowBuildingBlockAlertsChanged(e.target.checked);
             }}
             checked={showBuildingBlockAlerts}
@@ -75,7 +72,7 @@ export const AdditionalFiltersAction = ({
             id="showOnlyThreatIndicatorAlertsCheckbox"
             aria-label="showOnlyThreatIndicatorAlerts"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              closePopover();
+              setIsPopoverOpen(false);
               onShowOnlyThreatIndicatorAlertsChanged(e.target.checked);
             }}
             checked={showOnlyThreatIndicatorAlerts}
@@ -89,7 +86,6 @@ export const AdditionalFiltersAction = ({
     [
       onShowBuildingBlockAlertsChanged,
       onShowOnlyThreatIndicatorAlertsChanged,
-      closePopover,
       showBuildingBlockAlerts,
       showOnlyThreatIndicatorAlerts,
     ]
@@ -110,7 +106,7 @@ export const AdditionalFiltersAction = ({
           iconSide="right"
           iconSize="s"
           iconType="chevronSingleDown"
-          onClick={togglePopover}
+          onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
           size="xs"
           css={{ fontWeight: 'normal' }}
         >
@@ -128,7 +124,7 @@ export const AdditionalFiltersAction = ({
           </CenterText>
         </EuiButtonEmpty>
       }
-      closePopover={closePopover}
+      closePopover={() => setIsPopoverOpen(false)}
       isOpen={isPopoverOpen}
       ownFocus
     >
