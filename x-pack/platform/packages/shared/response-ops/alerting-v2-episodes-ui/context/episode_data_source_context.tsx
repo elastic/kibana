@@ -5,23 +5,39 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, type PropsWithChildren } from 'react';
+import React, { createContext, useContext, useMemo, type PropsWithChildren } from 'react';
 import type { EpisodeDataSource } from '../types/episode_data_source';
 
-const EpisodeDataSourceContext = createContext<EpisodeDataSource | undefined>(undefined);
+interface EpisodeDataSourceContextValue {
+  dataSource?: EpisodeDataSource;
+  queryV2Source: boolean;
+}
+
+const EpisodeDataSourceContext = createContext<EpisodeDataSourceContextValue>({
+  queryV2Source: true,
+});
 
 export interface EpisodeDataSourceProviderProps {
   dataSource?: EpisodeDataSource;
+  /**
+   * Whether to query the v2 episodes source. Hosts derive this from the user's
+   * `alerting_v2_alerts` read capability; when `false`, only `dataSource` is queried.
+   */
+  queryV2Source?: boolean;
 }
 
 export const EpisodeDataSourceProvider = ({
   dataSource,
+  queryV2Source = true,
   children,
-}: PropsWithChildren<EpisodeDataSourceProviderProps>) => (
-  <EpisodeDataSourceContext.Provider value={dataSource}>
-    {children}
-  </EpisodeDataSourceContext.Provider>
-);
+}: PropsWithChildren<EpisodeDataSourceProviderProps>) => {
+  const value = useMemo(() => ({ dataSource, queryV2Source }), [dataSource, queryV2Source]);
+  return (
+    <EpisodeDataSourceContext.Provider value={value}>{children}</EpisodeDataSourceContext.Provider>
+  );
+};
 
 export const useAdditionalEpisodesDataSource = (): EpisodeDataSource | undefined =>
-  useContext(EpisodeDataSourceContext);
+  useContext(EpisodeDataSourceContext).dataSource;
+
+export const useQueryV2Source = (): boolean => useContext(EpisodeDataSourceContext).queryV2Source;

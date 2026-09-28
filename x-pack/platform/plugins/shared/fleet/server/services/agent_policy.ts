@@ -124,6 +124,7 @@ import { fullAgentConfigMapToYaml } from '../../common/services/agent_cm_to_yaml
 import {
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
+  DEFAULT_DOWNLOAD_SOURCE_REFERENCE,
 } from '../constants';
 
 import {
@@ -299,6 +300,7 @@ class AgentPolicyService {
         getAllowedOutputTypesForAgentPolicy({ ...existingAgentPolicy, ...agentPolicy })
       );
     }
+    agentPolicy = this.normalizeDownloadSourceFields(agentPolicy);
     await soClient
       .update<AgentPolicySOAttributes>(savedObjectType, id, {
         ...agentPolicy,
@@ -1195,6 +1197,7 @@ class AgentPolicyService {
           'data_output_id',
           'monitoring_output_id',
           'download_source_id',
+          'download_source_ids',
           'fleet_server_host_id',
           'supports_agentless',
           'global_data_tags',
@@ -1878,6 +1881,7 @@ class AgentPolicyService {
       throwOnAgentlessError?: boolean;
       throwOnAnyError?: boolean;
       agentVersions?: string[];
+      spaceId?: string;
     }
   ) {
     return withActiveSpan(
@@ -1912,7 +1916,9 @@ class AgentPolicyService {
           });
         }
 
-        const policies = await agentPolicyService.getByIds(soClient, agentPolicyIds);
+        const policies = await agentPolicyService.getByIds(soClient, agentPolicyIds, {
+          ...(options?.spaceId ? { spaceId: options.spaceId } : {}),
+        });
         const policiesMap = keyBy(policies, 'id');
 
         logger.debug(`Retrieving full agent policies`);
@@ -1926,6 +1932,7 @@ class AgentPolicyService {
             agentPolicyService
               .getFullAgentPolicy(soClient, agentPolicyId, {
                 agentPolicy: agentPolicies?.find((policy) => policy.id === agentPolicyId),
+                ...(options?.spaceId ? { spaceId: options.spaceId } : {}),
               })
               .then((response) => {
                 if (!response) {
@@ -2014,7 +2021,8 @@ class AgentPolicyService {
               soClient,
               fleetServerPolicy,
               fullPolicy,
-              agentVersionsToUse
+              agentVersionsToUse,
+              options?.spaceId ? { spaceId: options.spaceId } : {}
             );
             fleetServerPolicies.push(...versionSpecificPolicies);
           }
@@ -2360,6 +2368,7 @@ class AgentPolicyService {
       agentPolicy?: AgentPolicy;
       agentVersion?: string;
       redactProxySecrets?: boolean;
+      spaceId?: string;
     }
   ): Promise<FullAgentPolicy | null> {
     const span = apm.startSpan(
@@ -2384,8 +2393,8 @@ class AgentPolicyService {
         .getInternalUserSOClientWithoutSpaceExtension()
         .find<AgentPolicySOAttributes>({
           type: savedObjectType,
-          fields: ['revision', 'download_source_id'],
-          searchFields: ['download_source_id'],
+          fields: ['revision', 'download_source_id', 'download_source_ids'],
+          searchFields: ['download_source_id', 'download_source_ids'],
           search: escapeSearchQueryPhrase(downloadSourceId),
           perPage: SO_SEARCH_LIMIT,
           namespaces: ['*'],
@@ -2407,6 +2416,9 @@ class AgentPolicyService {
                 agentPolicy.download_source_id === downloadSourceId
                   ? null
                   : agentPolicy.download_source_id,
+              download_source_ids: agentPolicy.download_source_ids?.filter(
+                (id) => id !== downloadSourceId
+              ),
             }
           ),
         {
@@ -2423,7 +2435,7 @@ class AgentPolicyService {
       .getInternalUserSOClientWithoutSpaceExtension()
       .find<AgentPolicySOAttributes>({
         type: savedObjectType,
-        filter: `(${savedObjectType}.attributes.download_source_id:${escapedId})`,
+        filter: `(${savedObjectType}.attributes.download_source_id:${escapedId}) OR (${savedObjectType}.attributes.download_source_ids:${escapedId})`,
         fields: ['id'],
         perPage: 1,
         namespaces: ['*'],
@@ -2440,16 +2452,25 @@ class AgentPolicyService {
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
     const savedObjectType = await getAgentPolicySavedObjectType();
     const escapedId = escapeSearchQueryPhrase(downloadSourceId);
-    const filterClauses = [`(${savedObjectType}.attributes.download_source_id:${escapedId})`];
+    const filterClauses = [
+      `(${savedObjectType}.attributes.download_source_id:${escapedId})`,
+      `(${savedObjectType}.attributes.download_source_ids:${escapedId})`,
+    ];
     if (options?.isDefault) {
       filterClauses.push(`(NOT ${savedObjectType}.attributes.download_source_id:*)`);
+      // Policies holding a slot for whichever source is default track it by reference
+      filterClauses.push(
+        `(${savedObjectType}.attributes.download_source_ids:${escapeSearchQueryPhrase(
+          DEFAULT_DOWNLOAD_SOURCE_REFERENCE
+        )})`
+      );
     }
     const filter = filterClauses.join(' OR ');
 
     const currentPolicies =
       await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
         type: savedObjectType,
-        fields: ['revision', 'download_source_id', 'namespaces'],
+        fields: ['revision', 'download_source_id', 'download_source_ids', 'namespaces'],
         filter,
         perPage: SO_SEARCH_LIMIT,
         namespaces: ['*'],
@@ -2821,11 +2842,34 @@ class AgentPolicyService {
     return { policiesWithSingleAP, policiesWithMultipleAP };
   }
 
+  private normalizeDownloadSourceFields<T extends Partial<AgentPolicySOAttributes>>(
+    agentPolicy: T
+  ): T {
+    if ('download_source_ids' in agentPolicy) {
+      // Deduplicate while preserving order (first occurrence wins).
+      const deduped = [...new Set(agentPolicy.download_source_ids ?? [])];
+      // Keep download_source_id in sync with the primary entry so older nodes
+      // that only read this field compile the correct sourceURI during rolling upgrades.
+      return {
+        ...agentPolicy,
+        download_source_ids: deduped,
+        download_source_id: deduped[0] ?? null,
+      };
+    }
+    if ('download_source_id' in agentPolicy) {
+      return {
+        ...agentPolicy,
+        download_source_ids: agentPolicy.download_source_id ? [agentPolicy.download_source_id] : [],
+      };
+    }
+    return agentPolicy;
+  }
+
   private prepareAsNewSo(
     agentPolicy: NewAgentPolicy,
     options: { username?: string }
   ): AgentPolicySOAttributes {
-    const { space_ids: _, ...baseAgentPolicySo } = agentPolicy;
+    const { space_ids: _, ...baseAgentPolicySo } = this.normalizeDownloadSourceFields(agentPolicy);
     const now = new Date().toISOString();
     return {
       ...baseAgentPolicySo,

@@ -21,10 +21,7 @@ import {
   extractReferences,
   validateActions,
 } from '../../../../rules_client/lib';
-import {
-  addMissingUiamKeyTagIfNeeded,
-  apiKeyAsRuleDomainProperties,
-} from '../../../../rules_client/common';
+import { apiKeyAsRuleDomainProperties } from '../../../../rules_client/common';
 import type { BulkOperationError } from '../../../../rules_client/types';
 import type { RuleParams } from '../../types';
 import { transformRuleDomainToRuleAttributes } from '../../transforms';
@@ -103,20 +100,11 @@ export const prepareRule = async <Params extends RuleParams>({
     const throttle = data.throttle ?? null;
     const { systemActions: _sa, actions: _a, ...restData } = data;
 
-    const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
-      data.tags,
-      apiKeyProps.uiamApiKey,
-      context.isServerless,
-      context.shouldGrantUiam,
-      context.apiKeyType
-    );
-
     const ruleAttributes = transformRuleDomainToRuleAttributes({
       actionsWithRefs,
       artifactsWithRefs,
       rule: {
         ...restData,
-        tags: tagsWithUiamCheck,
         ...apiKeyProps,
         enabled: data.enabled,
         id,

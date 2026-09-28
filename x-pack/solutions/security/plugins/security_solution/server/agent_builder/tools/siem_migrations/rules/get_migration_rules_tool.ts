@@ -58,7 +58,7 @@ const schema = GetRuleMigrationRulesRequestQuery.extend({
     .default(50)
     .describe('Number of rules per page (1-200).'),
   search_term: z.string().max(500).optional(),
-  ids: z.array(NonEmptyString).max(200).optional(),
+  ids: z.array(NonEmptyString).min(1).max(200).optional(),
   sort_field: z
     .enum(SORT_FIELDS)
     .optional()
@@ -82,6 +82,7 @@ const projectRule = (rule: GetRuleMigrationRulesResponse['data'][number]) => ({
   },
   elastic_rule: rule.elastic_rule
     ? {
+        id: rule.elastic_rule.id,
         title: rule.elastic_rule.title,
         prebuilt_rule_id: rule.elastic_rule.prebuilt_rule_id,
         integration_ids: rule.elastic_rule.integration_ids,
@@ -114,7 +115,7 @@ export const getMigrationRulesTool = (
 Supports filtering by translation result, installed/prebuilt, search term, or explicit ids.
 Pagination is zero-based.
 
-Returns projected fields only (id, original title, vendor, translated title, prebuilt rule id, integration ids, translation result, status) — not full rule bodies.
+Returns projected fields only (migration item id, original title, vendor, installed Elastic rule id, translated title, prebuilt rule id, integration ids, translation result, status) — not full rule bodies.
 
 Read-only.`,
     schema,

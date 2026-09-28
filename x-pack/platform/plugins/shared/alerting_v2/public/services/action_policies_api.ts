@@ -98,7 +98,7 @@ export class ActionPoliciesApi {
   }
 
   public async updateActionPolicyApiKey(id: string) {
-    await this.http.post(buildActionPolicyPath(id, '_update_api_key'));
+    return this.http.post<ActionPolicyResponse>(buildActionPolicyPath(id, '_update_api_key'));
   }
 
   public async bulkDeleteActionPolicies(ids: string[]) {

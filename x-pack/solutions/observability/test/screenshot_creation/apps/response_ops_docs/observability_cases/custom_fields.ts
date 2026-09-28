@@ -23,7 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // rather than inline on the Case Settings page. The settings page itself is
       // the redesigned panel (`casesRedesign.settings` defaults ON), which renders
       // `cases-redesign-settings-panel` instead of the legacy `case-configure-title`.
-      await cases.navigation.navigateToApp('observability/cases', 'cases-all-title');
+      await cases.navigation.navigateToApp('observability/cases');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('configure-case-button');
       await pageObjects.header.waitUntilLoadingHasFinished();
