@@ -659,6 +659,7 @@ describe('AnalyticsService', () => {
         conversationId: 'conversation-1',
         executionId: 'execution-1',
         modelProvider,
+        conversationAttachments: [],
         telemetry: telemetry(),
       });
 
@@ -682,10 +683,37 @@ describe('AnalyticsService', () => {
       );
     });
 
+    it('resolves user image attachments from refs, as round_complete does', () => {
+      const conversationAttachments: VersionedAttachment[] = [
+        { id: 'image-1', type: AttachmentType.image, versions: [], current_version: 1 },
+      ];
+
+      service.reportExecutionComplete({
+        agentId: 'my-agent',
+        modelProvider,
+        conversationAttachments,
+        telemetry: telemetry({
+          roundTotals: buildRound({
+            input: {
+              message: 'what is this?',
+              attachment_refs: [
+                { attachment_id: 'image-1', version: 1, actor: ATTACHMENT_REF_ACTOR.user },
+                { attachment_id: 'image-1', version: 1, actor: ATTACHMENT_REF_ACTOR.agent },
+              ],
+            },
+          }),
+        }),
+      });
+
+      const [, payload] = analytics.reportEvent.mock.calls[0];
+      expect(payload).toEqual(expect.objectContaining({ attachments: [AttachmentType.image] }));
+    });
+
     it('marks a pause and carries the prompt types it paused on', () => {
       service.reportExecutionComplete({
         agentId: 'my-agent',
         modelProvider,
+        conversationAttachments: [],
         telemetry: telemetry({
           isRoundTerminal: false,
           isResume: false,
@@ -709,6 +737,7 @@ describe('AnalyticsService', () => {
       service.reportExecutionComplete({
         agentId: 'my-agent',
         modelProvider,
+        conversationAttachments: [],
         telemetry: telemetry({ isResume: false, executionIndex: 0 }),
       });
 
@@ -722,6 +751,7 @@ describe('AnalyticsService', () => {
       service.reportExecutionComplete({
         agentId: 'my-agent',
         modelProvider,
+        conversationAttachments: [],
         telemetry: telemetry({ humanLatencyMs: 30_000 }),
       });
 
@@ -738,6 +768,7 @@ describe('AnalyticsService', () => {
         service.reportExecutionComplete({
           agentId: 'my-agent',
           modelProvider,
+          conversationAttachments: [],
           telemetry: telemetry(),
         })
       ).not.toThrow();

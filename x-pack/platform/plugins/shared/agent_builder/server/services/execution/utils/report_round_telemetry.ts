@@ -215,6 +215,7 @@ export const reportRoundTelemetry = ({
   try {
     const telemetry = buildExecutionTelemetry({ event, conversation, nextInput, logger });
     const { roundTotals, roundId, roundCount, executionIndex } = telemetry;
+    const conversationAttachments = event.data.attachments ?? conversation.attachments ?? [];
 
     // Billing is per turn, so exactly one record per round, emitted when the turn answers and
     // carrying the turn's totals. A pause is not a billable turn: it has produced no response yet,
@@ -249,6 +250,7 @@ export const reportRoundTelemetry = ({
       executionId,
       modelProvider,
       telemetry,
+      conversationAttachments,
     });
 
     // Counts rounds started, so a round abandoned at a pause still counts once.
@@ -265,7 +267,7 @@ export const reportRoundTelemetry = ({
         modelProvider,
         round: roundTotals,
         roundCount,
-        conversationAttachments: event.data.attachments ?? conversation.attachments ?? [],
+        conversationAttachments,
       });
     }
   } catch (error) {

@@ -48,6 +48,31 @@ import {
 } from './utils';
 
 /**
+ * Attachment types on a round's input. Inline attachments carry their own type; user image uploads
+ * arrive as refs and have to be resolved against the conversation's attachment snapshot.
+ */
+const inputAttachmentTypes = (
+  round: ConversationRound,
+  conversationAttachments: VersionedAttachment[]
+): string[] | undefined => {
+  const attachmentTypeById = new Map(conversationAttachments.map(({ id, type }) => [id, type]));
+  const imageAttachmentIds = new Set(
+    round.input.attachment_refs
+      ?.filter(({ actor }) => actor === ATTACHMENT_REF_ACTOR.user)
+      .filter(
+        ({ attachment_id: attachmentId }) =>
+          attachmentTypeById.get(attachmentId) === AttachmentType.image
+      )
+      .map(({ attachment_id: attachmentId }) => attachmentId) ?? []
+  );
+  const types = [
+    ...(round.input.attachments?.map(({ type }) => type || 'unknown') ?? []),
+    ...Array.from(imageAttachmentIds, () => AttachmentType.image),
+  ];
+  return types.length > 0 ? types : undefined;
+};
+
+/**
  * Server-side analytics wrapper for Agent Builder telemetry.
  *
  * This service centralizes event type registration and reporting for
@@ -301,23 +326,7 @@ export class AnalyticsService {
         return results.length > 0 && results.every((r) => r.type === ToolResultType.error);
       });
 
-      const conversationAttachmentTypes = new Map(
-        conversationAttachments.map(({ id, type }) => [id, type])
-      );
-      const imageAttachmentIds = new Set(
-        round.input.attachment_refs
-          ?.filter(({ actor }) => actor === ATTACHMENT_REF_ACTOR.user)
-          .filter(
-            ({ attachment_id: attachmentId }) =>
-              conversationAttachmentTypes.get(attachmentId) === AttachmentType.image
-          )
-          .map(({ attachment_id: attachmentId }) => attachmentId) ?? []
-      );
-      const attachmentTypes = [
-        ...(round.input.attachments?.map(({ type }) => type || 'unknown') ?? []),
-        ...Array.from(imageAttachmentIds, () => AttachmentType.image),
-      ];
-      const attachments = attachmentTypes.length > 0 ? attachmentTypes : undefined;
+      const attachments = inputAttachmentTypes(round, conversationAttachments);
       this.analytics.reportEvent<ReportRoundCompleteParams>(
         AGENT_BUILDER_EVENT_TYPES.RoundComplete,
         {
@@ -361,12 +370,14 @@ export class AnalyticsService {
     executionId,
     modelProvider,
     telemetry,
+    conversationAttachments,
   }: {
     agentId: string;
     conversationId?: string;
     executionId?: string;
     modelProvider: ModelProvider;
     telemetry: ExecutionTelemetry;
+    conversationAttachments: VersionedAttachment[];
   }): void {
     try {
       const { executionRound, roundTotals } = telemetry;
@@ -376,9 +387,7 @@ export class AnalyticsService {
       const toolCallErrors = toolCallSteps.filter(
         ({ results }) => results.length > 0 && results.every((r) => r.type === ToolResultType.error)
       );
-      const attachments = roundTotals.input.attachments?.length
-        ? roundTotals.input.attachments.map((a) => a.type || 'unknown')
-        : undefined;
+      const attachments = inputAttachmentTypes(roundTotals, conversationAttachments);
 
       this.analytics.reportEvent<ReportExecutionCompleteParams>(
         AGENT_BUILDER_EVENT_TYPES.ExecutionComplete,
