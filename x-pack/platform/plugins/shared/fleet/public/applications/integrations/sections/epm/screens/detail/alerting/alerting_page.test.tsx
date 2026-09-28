@@ -185,9 +185,7 @@ describe('AlertingPage', () => {
       screen.getByTestId('fleetAssetsAccordion.button.alerting_rule_template')
     ).toBeInTheDocument();
     expect(screen.getByTestId('fleetAlertingEngineTab-v2')).toHaveTextContent('ES|QL Rules');
-    expect(screen.getByTestId('fleetAlertingEngineTab-v1')).toHaveTextContent(
-      'Standard Rules'
-    );
+    expect(screen.getByTestId('fleetAlertingEngineTab-v1')).toHaveTextContent('Standard Rules');
     expect(screen.getByText('[System] Metrics template')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: '[System] Metrics template' })).toHaveAttribute(
       'href',
