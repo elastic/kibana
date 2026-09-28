@@ -54,8 +54,27 @@ export const ActionPolicyFormFlyout = ({
     onSubmitUpdate: onUpdate ?? noop,
   });
 
+  const handleClose = () => {
+    if (!isLoading) {
+      onClose();
+    }
+  };
+
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby={FLYOUT_TITLE_ID} size="fill" ownFocus>
+    <EuiFlyout
+      onClose={handleClose}
+      aria-labelledby={FLYOUT_TITLE_ID}
+      size="fill"
+      ownFocus
+      outsideClickCloses={isLoading ? false : undefined}
+      hideCloseButton={isLoading}
+      onKeyDownCapture={(event: React.KeyboardEvent<HTMLDivElement>) => {
+        if (isLoading && event.key === 'Escape') {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m" id={FLYOUT_TITLE_ID}>
           <h2 data-test-subj="title">
@@ -96,7 +115,11 @@ export const ActionPolicyFormFlyout = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose} isLoading={isLoading} data-test-subj="cancelButton">
+            <EuiButtonEmpty
+              onClick={handleClose}
+              isLoading={isLoading}
+              data-test-subj="cancelButton"
+            >
               <FormattedMessage
                 id="xpack.alertingV2.actionPolicy.formFlyout.cancel"
                 defaultMessage="Cancel"

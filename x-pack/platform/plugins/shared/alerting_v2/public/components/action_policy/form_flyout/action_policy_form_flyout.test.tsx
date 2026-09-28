@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -129,11 +129,13 @@ const renderFlyout = ({
   onSave,
   onUpdate,
   initialValues,
+  isLoading = false,
 }: {
   onClose?: jest.Mock;
   onSave?: jest.Mock;
   onUpdate?: jest.Mock;
   initialValues?: ActionPolicyResponse;
+  isLoading?: boolean;
 }) => {
   return render(
     <I18nProvider>
@@ -142,6 +144,7 @@ const renderFlyout = ({
         onSave={onSave}
         onUpdate={onUpdate}
         initialValues={initialValues}
+        isLoading={isLoading}
       />
     </I18nProvider>
   );
@@ -159,6 +162,19 @@ describe('ActionPolicyFormFlyout', () => {
 
     await user.click(screen.getByTestId(TEST_SUBJ.cancelButton));
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('blocks closing while saving', () => {
+    const onClose = jest.fn();
+
+    renderFlyout({ onClose, onSave: jest.fn(), isLoading: true });
+
+    expect(screen.queryByTestId('euiFlyoutCloseButton')).not.toBeInTheDocument();
+    expect(screen.getByTestId(TEST_SUBJ.cancelButton)).toBeDisabled();
+
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   it('renders the inline simple workflow builder alongside the existing-workflow selector', () => {
