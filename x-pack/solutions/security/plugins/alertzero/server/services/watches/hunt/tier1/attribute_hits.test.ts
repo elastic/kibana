@@ -151,6 +151,13 @@ describe('isTier1SearchableIoc', () => {
     expect(isTier1SearchableIoc({ type: 'hash', value: 'a'.repeat(length) })).toBe(true);
   });
 
+  it('trims before measuring, as huntForThreat does, so a padded md5 still counts and a padded short hash does not', () => {
+    expect(isTier1SearchableIoc({ type: 'hash', value: ` ${'a'.repeat(32)}` })).toBe(true);
+    expect(isTier1SearchableIoc({ type: 'hash', value: `${'a'.repeat(6)}${' '.repeat(26)}` })).toBe(
+      false
+    );
+  });
+
   it('rejects a hash of a length no algorithm produces, since buildIocShould emits no clause for it', () => {
     expect(isTier1SearchableIoc({ type: 'hash', value: 'abcdef' })).toBe(false);
   });

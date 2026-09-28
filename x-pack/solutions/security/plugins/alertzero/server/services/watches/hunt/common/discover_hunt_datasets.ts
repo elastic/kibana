@@ -6,7 +6,6 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { listSearchSources } from '@kbn/agent-builder-genai-utils';
 
 export interface DiscoveredDataset {
   /** Searchable glob for Tier 1/2, e.g. 'logs-okta.system-*' */
@@ -27,7 +26,9 @@ export interface DiscoveredDataset {
    * `windows-defender`), `logs-windows-*` would also match `logs-windows-defender-*`, so
    * the entry searches its own namespaces instead: `logs-windows-default*`, one per
    * backing stream. The trailing `*` keeps Tier 2's allowlist probe working, which
-   * needs a wildcard-bearing pattern to cover the dated backing indices.
+   * needs a wildcard-bearing pattern to cover the dated backing indices. One case stays
+   * ambiguous and is logged: a sibling whose dataset name extends a full stream name
+   * (`windows-default` beside stream `logs-windows-default`).
    */
   search_patterns: string[];
 }
@@ -36,15 +37,6 @@ export const HUNT_DISCOVERY_PATTERN = 'logs-*';
 
 /** Agent-internal datasets never worth hunting; dropped from discovery. */
 export const INTERNAL_DATASET_PREFIXES = ['elastic_agent', 'fleet_server'];
-
-/**
- * Cap on data streams returned by `listSearchSources`. It counts data streams
- * (one per dataset per namespace), not datasets, so namespaces multiply against
- * it, and truncation drops the alphabetical tail before dedupe, silently making
- * those datasets unmatchable. It must sit well above the largest expected
- * estate; the truncation warning logged below is the signal to raise it further.
- */
-const DISCOVERY_PER_TYPE_LIMIT = 2000;
 
 /**
  * Splits a data stream name into its `{type}-{dataset}-{namespace}` parts: type
@@ -103,18 +95,19 @@ export const discoverHuntDatasets = async ({
 }): Promise<DiscoveredDataset[]> => {
   let dataStreamNames: string[];
   try {
-    const sources = await listSearchSources({
-      esClient,
-      pattern,
-      perTypeLimit: DISCOVERY_PER_TYPE_LIMIT,
-      includeHidden: false,
+    // `_resolve/index` directly rather than through `listSearchSources`: that helper
+    // caps each result type and truncates silently past the cap, and a truncated list
+    // would let a broad scope read as complete while the dataset holding the hit was
+    // never seen. The resolve API returns every stream the caller may see; hidden
+    // (dot-prefixed) streams are the only ones dropped.
+    const resolved = await esClient.indices.resolveIndex({
+      name: [pattern],
+      allow_no_indices: true,
+      expand_wildcards: ['open'],
     });
-    dataStreamNames = sources.data_streams.map((stream) => stream.name);
-    // `listSearchSources` truncates silently past `perTypeLimit`; a shrunken option
-    // list means a real dataset can never be matched, so say so.
-    for (const warning of sources.warnings ?? []) {
-      logger?.warn(`Hunt dataset discovery for pattern "${pattern}": ${warning}`);
-    }
+    dataStreamNames = resolved.data_streams
+      .map((stream) => stream.name)
+      .filter((name) => !name.startsWith('.'));
   } catch (err) {
     logger?.warn(
       `Hunt dataset discovery failed for pattern "${pattern}": ${
@@ -146,12 +139,34 @@ export const discoverHuntDatasets = async ({
 
   const datasets = Array.from(byPattern.values());
   for (const entry of datasets) {
-    const overMatchesSibling = datasets.some(
+    const siblings = datasets.filter(
       (other) => other !== entry && other.dataset.startsWith(`${entry.dataset}-`)
     );
-    entry.search_patterns = overMatchesSibling
-      ? entry.data_streams.map((stream) => `${stream}*`)
-      : [entry.index_pattern];
+    if (siblings.length === 0) {
+      entry.search_patterns = [entry.index_pattern];
+      continue;
+    }
+    entry.search_patterns = entry.data_streams.map((stream) => `${stream}*`);
+    // Residual case no wildcard can isolate: a sibling whose dataset name extends one of
+    // this entry's full stream names (`windows-default` beside stream `logs-windows-default`).
+    // Concrete stream names are not an option, since Tier 1's hit bar globs required
+    // patterns against dated backing indices and Tier 2's allowlist probe needs a
+    // wildcard, so the pattern stays and the overlap is made visible instead.
+    for (const stream of entry.data_streams) {
+      const parsed = parseDataStreamName(stream);
+      const leaking = parsed
+        ? siblings.filter((other) =>
+            other.dataset.startsWith(`${parsed.dataset}-${parsed.namespace}`)
+          )
+        : [];
+      if (leaking.length > 0) {
+        logger?.warn(
+          `Hunt dataset discovery cannot isolate ${stream}* from sibling dataset(s) ${leaking
+            .map((other) => other.dataset)
+            .join(', ')}; a hit there would count for ${entry.dataset}`
+        );
+      }
+    }
   }
 
   return datasets.sort((a, b) => a.index_pattern.localeCompare(b.index_pattern));

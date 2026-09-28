@@ -7,36 +7,28 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { listSearchSources } from '@kbn/agent-builder-genai-utils';
 import {
   HUNT_DISCOVERY_PATTERN,
   discoverHuntDatasets,
   parseDataStreamName,
 } from './discover_hunt_datasets';
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
-  listSearchSources: jest.fn(),
-}));
+const resolveIndexMock = jest.fn();
+const esClient = {
+  indices: { resolveIndex: resolveIndexMock },
+} as unknown as ElasticsearchClient;
 
-const listSearchSourcesMock = listSearchSources as jest.MockedFunction<typeof listSearchSources>;
-
-const esClient = {} as ElasticsearchClient;
-
-type ListSourcesResponse = Awaited<ReturnType<typeof listSearchSources>>;
-
-// Only `data_streams[].name` is read; the enum `type` tag is irrelevant here.
+// Only `data_streams[].name` is read.
 const mockDataStreams = (names: string[]) => {
-  listSearchSourcesMock.mockResolvedValue({
+  resolveIndexMock.mockResolvedValue({
     indices: [],
     aliases: [],
-    datasets: [],
     data_streams: names.map((name) => ({
-      type: 'data_stream',
       name,
-      indices: [`.ds-${name}-000001`],
+      backing_indices: [`.ds-${name}-2026.09.01-000001`],
       timestamp_field: '@timestamp',
     })),
-  } as unknown as ListSourcesResponse);
+  });
 };
 
 describe('parseDataStreamName', () => {
@@ -80,7 +72,7 @@ describe('parseDataStreamName', () => {
 
 describe('discoverHuntDatasets', () => {
   beforeEach(() => {
-    listSearchSourcesMock.mockReset();
+    resolveIndexMock.mockReset();
   });
 
   it('returns one entry per dataset with vendor and index pattern', async () => {
@@ -184,28 +176,29 @@ describe('discoverHuntDatasets', () => {
     ]);
   });
 
-  it('passes the default pattern and discovery options to listSearchSources', async () => {
+  it('resolves the default pattern against open, non-hidden targets with no result cap', async () => {
     mockDataStreams([]);
-
     await discoverHuntDatasets({ esClient });
-
-    expect(listSearchSourcesMock).toHaveBeenCalledTimes(1);
-    expect(listSearchSourcesMock).toHaveBeenCalledWith({
-      esClient,
-      pattern: HUNT_DISCOVERY_PATTERN,
-      perTypeLimit: 2000,
-      includeHidden: false,
+    expect(resolveIndexMock).toHaveBeenCalledTimes(1);
+    expect(resolveIndexMock).toHaveBeenCalledWith({
+      name: [HUNT_DISCOVERY_PATTERN],
+      allow_no_indices: true,
+      expand_wildcards: ['open'],
     });
   });
 
-  it('passes a custom pattern through to listSearchSources', async () => {
+  it('passes a custom pattern through', async () => {
     mockDataStreams([]);
-
-    await discoverHuntDatasets({ esClient, pattern: 'logs-okta.*' });
-
-    expect(listSearchSourcesMock).toHaveBeenCalledWith(
-      expect.objectContaining({ pattern: 'logs-okta.*' })
+    await discoverHuntDatasets({ esClient, pattern: 'logs-okta*' });
+    expect(resolveIndexMock).toHaveBeenCalledWith(
+      expect.objectContaining({ name: ['logs-okta*'] })
     );
+  });
+
+  it('drops hidden, dot-prefixed data streams', async () => {
+    mockDataStreams(['.logs-hidden.system-default', 'logs-okta.system-default']);
+    const datasets = await discoverHuntDatasets({ esClient });
+    expect(datasets.map((d) => d.dataset)).toEqual(['okta.system']);
   });
 
   it('returns an empty list when nothing matches', async () => {
@@ -214,25 +207,26 @@ describe('discoverHuntDatasets', () => {
     await expect(discoverHuntDatasets({ esClient })).resolves.toEqual([]);
   });
 
-  it('logs the truncation warnings listSearchSources reports', async () => {
+  it('warns when a sibling dataset extends a full stream name, since no wildcard can isolate it', async () => {
     const logger = loggerMock.create();
-    listSearchSourcesMock.mockResolvedValue({
-      indices: [],
-      aliases: [],
-      datasets: [],
-      data_streams: [],
-      warnings: ['DataStreams results truncated to 2000 elements - Total result count was 2612'],
-    } as unknown as ListSourcesResponse);
+    mockDataStreams(['logs-windows-default', 'logs-windows-default-prod']);
 
-    await discoverHuntDatasets({ esClient, logger });
+    const datasets = await discoverHuntDatasets({ esClient, logger });
+    const windows = datasets.find((d) => d.dataset === 'windows');
 
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('truncated to 2000'));
+    // Best available pattern is kept; the overlap is surfaced rather than hidden.
+    expect(windows?.search_patterns).toEqual(['logs-windows-default*']);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'cannot isolate logs-windows-default* from sibling dataset(s) windows-default'
+      )
+    );
   });
 
-  it('logs a warning and rethrows when listSearchSources fails', async () => {
+  it('logs a warning and rethrows when the resolve call fails', async () => {
     const logger = loggerMock.create();
     const error = new Error('cluster unavailable');
-    listSearchSourcesMock.mockRejectedValue(error);
+    resolveIndexMock.mockRejectedValue(error);
 
     await expect(discoverHuntDatasets({ esClient, logger })).rejects.toBe(error);
     expect(logger.warn).toHaveBeenCalledTimes(1);
@@ -241,7 +235,7 @@ describe('discoverHuntDatasets', () => {
 
   it('rethrows without a logger', async () => {
     const error = new Error('boom');
-    listSearchSourcesMock.mockRejectedValue(error);
+    resolveIndexMock.mockRejectedValue(error);
 
     await expect(discoverHuntDatasets({ esClient })).rejects.toBe(error);
   });

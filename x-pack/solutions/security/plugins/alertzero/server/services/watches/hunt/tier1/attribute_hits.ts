@@ -214,5 +214,6 @@ export const attributeHits = (
  */
 export const isTier1SearchableIoc = ({ type, value }: HuntIoc): boolean =>
   type === 'hash'
-    ? HASH_ALGO_BY_LENGTH[value.length] !== undefined
+    ? // `huntForThreat` trims every value before choosing the algorithm; judge the same string.
+      HASH_ALGO_BY_LENGTH[value.trim().length] !== undefined
     : (IOC_FIELDS_BY_TYPE[type] ?? []).length > 0;
