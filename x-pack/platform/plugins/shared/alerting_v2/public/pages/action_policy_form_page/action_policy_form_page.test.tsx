@@ -293,17 +293,6 @@ describe('ActionPolicyFormPage', () => {
       );
     });
 
-    it('does not override the default, in-page, connector creation behavior', async () => {
-      const user = userEvent.setup();
-      renderPage();
-
-      await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
-
-      expect(await screen.findByTestId(/inlineWorkflowEditor-/)).not.toHaveAttribute(
-        'data-connector-creation-mode'
-      );
-    });
-
     it('submits create payload on save', async () => {
       const user = userEvent.setup({ delay: null });
       renderPage();

@@ -122,9 +122,9 @@ describe('LinkedActionPoliciesStep', () => {
     const user = userEvent.setup();
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [],
-      total: 0,
       evaluatedCount: 0,
       isTruncated: false,
     });
@@ -154,16 +154,14 @@ describe('LinkedActionPoliciesStep', () => {
   it('disables action policy creation when the license does not allow it', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [],
-      total: 0,
       evaluatedCount: 0,
       isTruncated: false,
     });
 
-    const CreateActionPolicyFormFlyout = () => (
-      <div data-test-subj="actionPolicyFormFlyout" />
-    );
+    const CreateActionPolicyFormFlyout = () => <div data-test-subj="actionPolicyFormFlyout" />;
 
     renderComponent({ canCreateActionPolicy: false, CreateActionPolicyFormFlyout });
 

@@ -34,7 +34,11 @@ export const WorkflowSelector = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedQuery = useDebouncedValue(searchQuery, 300);
 
-  const { data: workflowsData, isLoading, refetch } = useFetchWorkflows({
+  const {
+    data: workflowsData,
+    isLoading,
+    refetch,
+  } = useFetchWorkflows({
     query: debouncedQuery,
     isEnabled: isWorkflowsEnabled,
   });

@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  isHttpFetchError,
-  type HttpStart,
-  type ResponseErrorBody,
-} from '@kbn/core-http-browser';
+import { isHttpFetchError, type HttpStart, type ResponseErrorBody } from '@kbn/core-http-browser';
 import { useQuery } from '@kbn/react-query';
 import type { MatchActionPoliciesResponse, MatchedActionPolicy } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_INTERNAL_ACTION_POLICY_MATCH_API_PATH } from '@kbn/alerting-v2-constants';
