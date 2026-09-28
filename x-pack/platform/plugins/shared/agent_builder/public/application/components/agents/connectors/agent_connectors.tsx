@@ -145,7 +145,13 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
   return (
     <PageWrapper>
       {showCustomizeEmptyState ? (
-        <ConnectorsCustomizeEmptyState canEditAgent={canEditAgent} onAddFromLibrary={openLibrary} />
+        <ConnectorsCustomizeEmptyState
+          canEditAgent={canEditAgent}
+          hasAllPrivileges={hasAllPrivileges}
+          isAddDisabled={isAddDisabled}
+          onAddFromLibrary={openLibrary}
+          onCreateNew={openCreateFlyout}
+        />
       ) : (
         <>
           <div css={styles.header}>
