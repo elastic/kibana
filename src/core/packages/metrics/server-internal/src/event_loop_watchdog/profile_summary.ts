@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { sanitize } from './sanitize';
 import type { ProfileFrame, ProfileSummary } from './types';
 
 /** Minimal subset of the V8 `Profiler.Profile` shape used here. Times are microseconds. */
@@ -55,7 +56,7 @@ export const sanitizeLocation = (url: string, lineNumber: number, root: string):
   } else if (!path.startsWith('node:')) {
     path = path.slice(path.lastIndexOf('/') + 1);
   }
-  return lineNumber >= 0 ? `${path}:${lineNumber + 1}` : path;
+  return sanitize(lineNumber >= 0 ? `${path}:${lineNumber + 1}` : path);
 };
 
 const round = (value: number) => Math.round(value * 10) / 10;
@@ -90,7 +91,9 @@ export const summarizeProfile = (
     if (!node || node.callFrame.functionName === ROOT) return undefined;
     const { functionName, url, lineNumber } = node.callFrame;
     const location = sanitizeLocation(url, lineNumber, sanitizeRoot);
-    return `${functionName || '(anonymous)'}${location ? ` (${location})` : ''}`;
+    return sanitize(
+      `${sanitize(functionName || '(anonymous)')}${location ? ` (${location})` : ''}`
+    );
   };
   const callersOf = (nodeId: number): string[] => {
     const callers: string[] = [];
@@ -135,7 +138,7 @@ export const summarizeProfile = (
   for (const [nodeId, us] of selfUs) {
     const node = nodesById.get(nodeId);
     if (!node) continue;
-    const functionName = node.callFrame.functionName || '(anonymous)';
+    const functionName = sanitize(node.callFrame.functionName || '(anonymous)');
     const location = sanitizeLocation(node.callFrame.url, node.callFrame.lineNumber, sanitizeRoot);
     const key = `${functionName}\u0000${location}`;
     const frame = aggregated.get(key) ?? {

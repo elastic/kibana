@@ -32,6 +32,12 @@ import type {
 
 const hrUs = (): number => Number(process.hrtime.bigint() / 1000n);
 
+/**
+ * Maximum reports waiting on inspector responses. Bounds retained block state should the
+ * inspector stop responding; further reports are dropped (and counted) instead of queued.
+ */
+const MAX_PENDING_REPORTS = 10;
+
 interface Capture {
   requestedAtUs: number;
   startAckUs?: number;
@@ -189,10 +195,17 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
   // Only block-end reporting awaits the inspector. The ending block's state is detached
   // synchronously so that a subsequent block cannot be confused with it while reports are queued.
   let reports: Promise<void> = Promise.resolve();
+  let pendingReports = 0;
+  let droppedReports = 0;
   const onBlockEnd = (event: Extract<DetectorEvent, { type: 'block-end' }>) => {
     const current = block;
     block = undefined;
-    if (!current) return;
+    if (!current || (!current.capture && !event.report)) return;
+    if (pendingReports >= MAX_PENDING_REPORTS) {
+      droppedReports++;
+      reportError('reports dropped', new Error('inspector responses are pending for too long'));
+      return;
+    }
 
     const endedAtUs = hrUs();
     const endedAtMs = Date.now();
@@ -201,16 +214,24 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
     const cpuRatio = wallUs > 0 ? Math.round(((cpu.user + cpu.system) / wallUs) * 100) / 100 : 0;
     const toEpochMs = (us: number) => Math.round(endedAtMs - (endedAtUs - us) / 1000);
 
+    pendingReports++;
     reports = reports
       .then(async () => {
         if (current.capture) {
           await stopCapture(current.capture);
           captureInFlight = false;
         }
-        if (event.report)
-          post({ type: 'report', report: buildReport(current, event, cpuRatio, toEpochMs) });
+        if (event.report) {
+          const report = buildReport(current, event, cpuRatio, toEpochMs);
+          report.suppressedBlocks += droppedReports;
+          droppedReports = 0;
+          post({ type: 'report', report });
+        }
       })
-      .catch((error) => reportError('reporting failed', error));
+      .catch((error) => reportError('reporting failed', error))
+      .finally(() => {
+        pendingReports--;
+      });
   };
 
   const buildReport = (

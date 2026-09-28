@@ -48,6 +48,33 @@ describe('sanitizeLocation', () => {
   });
 });
 
+describe('summarizeProfile sanitisation', () => {
+  it('replaces control characters and caps frame names', () => {
+    const profile: CpuProfile = {
+      nodes: [
+        { ...node(1, '(root)'), children: [2] },
+        { ...node(2, 'caller\nFAKE LOG LINE', '', -1), children: [3] },
+        node(3, `evil\r\n${'x'.repeat(1000)}`, `file://${ROOT}/src/a\n.js`, 0),
+      ],
+      startTime: 1_000_000,
+      endTime: 1_100_000,
+      samples: Array(100).fill(3),
+      timeDeltas: Array(100).fill(1000),
+    };
+    const [frame] = summarizeProfile(profile, {
+      sanitizeRoot: ROOT,
+      maxFrames: 1,
+      windowStartUs: 900_000,
+      windowEndUs: 1_200_000,
+      startAckUs: 1_000_000,
+    }).frames;
+    expect(frame.functionName.startsWith('evil??x')).toBe(true);
+    expect(frame.functionName).toHaveLength(256);
+    expect(frame.location).toBe('src/a?.js:1');
+    expect(frame.callers).toEqual(['caller?FAKE LOG LINE']);
+  });
+});
+
 describe('summarizeProfile', () => {
   const options = { sanitizeRoot: ROOT, maxFrames: 2 };
 
