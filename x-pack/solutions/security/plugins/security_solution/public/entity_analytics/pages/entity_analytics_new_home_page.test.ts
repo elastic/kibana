@@ -17,26 +17,13 @@ describe('toTermsFilter', () => {
     expect(result).toEqual({ terms: { 'entity.id': ['host:web01', 'user:alice@okta'] } });
   });
 
-  it('passes through arrays with 500 or fewer IDs unchanged', () => {
-    const ids = Array.from({ length: 500 }, (_, i) => `host:web${i}`);
-    const result = toTermsFilter(ids);
-    expect((result as { terms: { 'entity.id': string[] } }).terms['entity.id']).toHaveLength(500);
-  });
-
-  it('caps at 500 IDs when more than 500 are provided', () => {
+  it('passes all IDs through regardless of count', () => {
     const ids = Array.from({ length: 600 }, (_, i) => `host:web${i}`);
-    const result = toTermsFilter(ids);
-    const capped = (result as { terms: { 'entity.id': string[] } }).terms['entity.id'];
-    expect(capped).toHaveLength(500);
-    expect(capped[0]).toBe('host:web0');
-    expect(capped[499]).toBe('host:web499');
+    expect(toTermsFilter(ids)).toEqual({ terms: { 'entity.id': ids } });
   });
 
-  it('preserves order when capping — first 500 are kept, not sampled', () => {
-    const ids = Array.from({ length: 501 }, (_, i) => `entity:${i}`);
-    const result = toTermsFilter(ids);
-    const kept = (result as { terms: { 'entity.id': string[] } }).terms['entity.id'];
-    expect(kept).not.toContain('entity:500');
-    expect(kept).toContain('entity:499');
+  it('preserves order of IDs', () => {
+    const ids = ['entity:2', 'entity:0', 'entity:1'];
+    expect(toTermsFilter(ids)).toEqual({ terms: { 'entity.id': ids } });
   });
 });
