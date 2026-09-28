@@ -13,7 +13,8 @@ import { installRegisteredWorker, workerRegistry } from './worker_registry';
  * Rewrites installed Worker documents that are missing extras or schedule keys, filling those
  * keys from the current defaults. Reconciliation re-renders from the stored values and does not
  * fill them, so this has to run before `ready()` or the upgrade keeps the old shape. A document
- * that is still invalid after the fill is left alone.
+ * that is still invalid after the fill is left alone. The install is bound to the listed document
+ * version, so a settings save that landed after the list is not overwritten.
  */
 export const applyMissingInstalledWorkerSettings = async (
   client: PluginScopedManagedWorkflowsApi,
@@ -59,6 +60,7 @@ export const applyMissingInstalledWorkerSettings = async (
         spaceId: state.spaceId,
         workflowId: state.workflowId,
         values: filled,
+        expectedDocumentVersion: state.documentVersion,
       });
       logger.info(
         `Reinstalled AlertZero worker "${state.workflowId}" in space "${state.spaceId}" with missing settings filled from defaults`

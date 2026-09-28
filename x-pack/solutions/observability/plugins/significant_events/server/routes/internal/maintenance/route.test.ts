@@ -76,3 +76,38 @@ describe('cleanup workflow bootstrap route', () => {
     );
   });
 });
+
+describe('pause, resume, and status routes', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('keeps pause and status reachable while the feature flag is off, but not resume', async () => {
+    const licensing = {};
+    const server = { core: { security: { authc: { getCurrentUser: jest.fn() } } } };
+    const handlerParams = {
+      request: {},
+      server,
+      getScopedClients: jest.fn().mockResolvedValue({ licensing }),
+      maintenanceService: {
+        pause: jest.fn(),
+        resume: jest.fn(),
+        getStatus: jest.fn(),
+      },
+    };
+    const accessChecks = [
+      'POST /internal/significant_events/maintenance/_pause',
+      'GET /internal/significant_events/maintenance/_status',
+      'POST /internal/significant_events/maintenance/_resume',
+    ] as const;
+
+    for (const endpoint of accessChecks) {
+      const { handler } = internalMaintenanceRoutes[endpoint];
+      await handler(handlerParams as unknown as Parameters<typeof handler>[0]);
+    }
+
+    expect(jest.mocked(assertSignificantEventsAccess).mock.calls).toEqual([
+      [{ server, licensing, ignore: ['feature_flag'] }],
+      [{ server, licensing, ignore: ['feature_flag'] }],
+      [{ server, licensing }],
+    ]);
+  });
+});
