@@ -7,7 +7,7 @@
 import type { RecursivePartial } from '@elastic/eui';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { merge } from 'lodash';
-import type { ProfilingESClient } from './profiling_es_client';
+import type { ProfilingESClient } from '../../utils/profiling_es_client';
 
 export interface ProfilingSetupOptions {
   client: ProfilingESClient;

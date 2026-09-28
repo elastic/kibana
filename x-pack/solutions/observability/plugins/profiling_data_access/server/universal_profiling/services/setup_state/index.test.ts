@@ -6,7 +6,7 @@
  */
 
 import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
-import type { RegisterServicesParams } from '../register_services';
+import type { RegisterServicesParams } from '../../../services/register_services';
 import * as setupStateModule from '.';
 import { cloudSetupState } from './cloud_setup_state';
 import { selfManagedSetupState } from './self_managed_setup_state';

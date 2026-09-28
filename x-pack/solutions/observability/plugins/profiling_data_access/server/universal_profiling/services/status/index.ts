@@ -7,10 +7,10 @@
 
 import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ProfilingStatus } from '@kbn/profiling-utils';
-import { areCloudResourcesSetup } from '../../../common/cloud_setup';
-import type { SetupState } from '../../../common/setup';
-import { areResourcesSetup } from '../../../common/setup';
-import type { RegisterServicesParams } from '../register_services';
+import { areCloudResourcesSetup } from '../../lib/cloud_setup';
+import type { SetupState } from '../../lib/setup';
+import { areResourcesSetup } from '../../lib/setup';
+import type { RegisterServicesParams } from '../../../services/register_services';
 import { getCloudSetupState, getSelfManagedSetupState } from '../setup_state';
 
 export interface HasSetupParams {

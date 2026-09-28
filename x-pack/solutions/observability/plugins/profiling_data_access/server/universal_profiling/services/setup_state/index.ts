@@ -6,9 +6,9 @@
  */
 import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { CloudSetupState } from '../../../common/cloud_setup';
-import type { SetupState } from '../../../common/setup';
-import type { RegisterServicesParams } from '../register_services';
+import type { CloudSetupState } from '../../lib/cloud_setup';
+import type { SetupState } from '../../lib/setup';
+import type { RegisterServicesParams } from '../../../services/register_services';
 import { cloudSetupState } from './cloud_setup_state';
 import { selfManagedSetupState } from './self_managed_setup_state';
 

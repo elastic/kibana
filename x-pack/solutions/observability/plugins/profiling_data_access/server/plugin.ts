@@ -8,6 +8,8 @@
 import type {
   CoreSetup,
   CoreStart,
+  ElasticsearchClient,
+  KibanaRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
@@ -15,6 +17,7 @@ import type {
 import type { ProfilingConfig } from '.';
 import { registerServices } from './services/register_services';
 import { createProfilingEsClient } from './utils/create_profiling_es_client';
+import type { ProfilingESClient } from './utils/profiling_es_client';
 import type { ProfilingPluginStartDeps } from './types';
 
 export type ProfilingDataAccessPluginSetup = ReturnType<ProfilingDataAccessPlugin['setup']>;
@@ -39,14 +42,22 @@ export class ProfilingDataAccessPlugin implements Plugin {
         })
       : undefined;
 
-    const services = registerServices({
-      createProfilingEsClient: ({ esClient: defaultEsClient }) => {
-        const esClient = profilingSpecificEsClient
-          ? profilingSpecificEsClient.asInternalUser
-          : defaultEsClient;
+    const createProfilingEsClientWithRedirect = ({
+      esClient: defaultEsClient,
+      request,
+    }: {
+      esClient: ElasticsearchClient;
+      request?: KibanaRequest;
+    }): ProfilingESClient => {
+      const remoteEsClient = request
+        ? profilingSpecificEsClient?.asScoped(request).asInternalUser
+        : profilingSpecificEsClient?.asInternalUser;
 
-        return createProfilingEsClient({ esClient });
-      },
+      return createProfilingEsClient({ esClient: remoteEsClient ?? defaultEsClient, request });
+    };
+
+    const services = registerServices({
+      createProfilingEsClient: createProfilingEsClientWithRedirect,
       logger: this.logger,
       deps: {
         fleet: plugins.fleet,
@@ -57,6 +68,7 @@ export class ProfilingDataAccessPlugin implements Plugin {
     // called after all plugins are set up
     return {
       services,
+      createProfilingEsClient: createProfilingEsClientWithRedirect,
     };
   }
 }

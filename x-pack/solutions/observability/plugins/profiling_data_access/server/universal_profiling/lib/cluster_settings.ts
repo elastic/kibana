@@ -34,7 +34,7 @@ export async function validateResourceManagement({
   client,
 }: ProfilingSetupOptions): Promise<PartialSetupState> {
   try {
-    const statusResponse = await client.profilingStatus();
+    const statusResponse = await client.universalProfiling.status();
     return {
       resource_management: {
         enabled: statusResponse.resource_management.enabled,

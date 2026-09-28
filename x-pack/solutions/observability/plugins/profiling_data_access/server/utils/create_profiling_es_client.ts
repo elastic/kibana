@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type {
   BaseFlameGraph,
@@ -13,14 +13,35 @@ import type {
   ProfilingStatusResponse,
   StackTraceResponse,
 } from '@kbn/profiling-utils';
-import type { ProfilingESClient } from '../../common/profiling_es_client';
-import { unwrapEsResponse } from './unwrap_es_response';
+import { unwrapEsResponse } from '@kbn/observability-plugin/server';
+import type { ProfilingESClient } from './profiling_es_client';
 import { withProfilingSpan } from './with_profiling_span';
 
+const PROFILING_STATUS_TIMEOUT_SECONDS = 60;
+
+const cancelEsRequestOnAbort = <T>(
+  promise: Promise<T>,
+  controller: AbortController,
+  request?: KibanaRequest
+): Promise<T> => {
+  if (!request) {
+    return promise;
+  }
+
+  const subscription = request.events.aborted$.subscribe(() => {
+    controller.abort();
+  });
+
+  return promise.finally(() => subscription.unsubscribe());
+};
+
+/** Creates a profiling ES client; when `request` is given, ES requests are cancelled if it's aborted. */
 export function createProfilingEsClient({
   esClient,
+  request,
 }: {
   esClient: ElasticsearchClient;
+  request?: KibanaRequest;
 }): ProfilingESClient {
   return {
     search<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
@@ -30,12 +51,16 @@ export function createProfilingEsClient({
       const controller = new AbortController();
 
       const promise = withProfilingSpan(operationName, () => {
-        return esClient.search(searchRequest, {
-          signal: controller.signal,
-          meta: true,
-        }) as unknown as Promise<{
-          body: InferSearchResponseOf<TDocument, TSearchRequest>;
-        }>;
+        return cancelEsRequestOnAbort(
+          esClient.search(searchRequest, {
+            signal: controller.signal,
+            meta: true,
+          }) as unknown as Promise<{
+            body: InferSearchResponseOf<TDocument, TSearchRequest>;
+          }>,
+          controller,
+          request
+        );
       });
 
       return unwrapEsResponse(promise);
@@ -56,53 +81,37 @@ export function createProfilingEsClient({
     }) {
       const controller = new AbortController();
       const promise = withProfilingSpan('_profiling/stacktraces', () => {
-        return esClient.transport.request(
-          {
-            method: 'POST',
-            path: encodeURI('/_profiling/stacktraces'),
-            body: {
-              query,
-              sample_size: sampleSize,
-              requested_duration: durationSeconds,
-              co2_per_kwh: co2PerKWH,
-              per_core_watt_x86: pervCPUWattX86,
-              per_core_watt_arm64: pervCPUWattArm64,
-              datacenter_pue: datacenterPUE,
-              aws_cost_factor: awsCostDiscountRate,
-              cost_per_core_hour: costPervCPUPerHour,
-              azure_cost_factor: azureCostDiscountRate,
-              indices,
-              stacktrace_ids_field: stacktraceIdsField,
+        return cancelEsRequestOnAbort(
+          esClient.transport.request(
+            {
+              method: 'POST',
+              path: encodeURI('/_profiling/stacktraces'),
+              body: {
+                query,
+                sample_size: sampleSize,
+                requested_duration: durationSeconds,
+                co2_per_kwh: co2PerKWH,
+                per_core_watt_x86: pervCPUWattX86,
+                per_core_watt_arm64: pervCPUWattArm64,
+                datacenter_pue: datacenterPUE,
+                aws_cost_factor: awsCostDiscountRate,
+                cost_per_core_hour: costPervCPUPerHour,
+                azure_cost_factor: azureCostDiscountRate,
+                indices,
+                stacktrace_ids_field: stacktraceIdsField,
+              },
             },
-          },
-          {
-            signal: controller.signal,
-            meta: true,
-          }
+            {
+              signal: controller.signal,
+              meta: true,
+            }
+          ),
+          controller,
+          request
         );
       });
 
       return unwrapEsResponse(promise) as Promise<StackTraceResponse>;
-    },
-    profilingStatus({ waitForResourcesCreated = false } = {}) {
-      const controller = new AbortController();
-
-      const promise = withProfilingSpan('_profiling/status', () => {
-        return esClient.transport.request(
-          {
-            method: 'GET',
-            path: encodeURI(
-              `/_profiling/status?wait_for_resources_created=${waitForResourcesCreated}`
-            ),
-          },
-          {
-            signal: controller.signal,
-            meta: true,
-          }
-        );
-      });
-
-      return unwrapEsResponse(promise) as Promise<ProfilingStatusResponse>;
     },
     getEsClient() {
       return esClient;
@@ -198,6 +207,45 @@ export function createProfilingEsClient({
         );
       });
       return unwrapEsResponse(promise) as Promise<ESTopNFunctions>;
+    },
+    universalProfiling: {
+      status({ waitForResourcesCreated = false } = {}) {
+        const controller = new AbortController();
+
+        // Waiting for resources to be created can take a while, so give ES more time and retry on timeouts.
+        const waitTimeout = waitForResourcesCreated
+          ? `&timeout=${PROFILING_STATUS_TIMEOUT_SECONDS + 5}s`
+          : '';
+        const waitOptions = waitForResourcesCreated
+          ? {
+              requestTimeout: PROFILING_STATUS_TIMEOUT_SECONDS * 1000,
+              maxRetries: 5,
+              retryOnTimeout: true,
+            }
+          : {};
+
+        const promise = withProfilingSpan('_profiling/status', () => {
+          return cancelEsRequestOnAbort(
+            esClient.transport.request(
+              {
+                method: 'GET',
+                path: encodeURI(
+                  `/_profiling/status?wait_for_resources_created=${waitForResourcesCreated}${waitTimeout}`
+                ),
+              },
+              {
+                signal: controller.signal,
+                meta: true,
+                ...waitOptions,
+              }
+            ),
+            controller,
+            request
+          );
+        });
+
+        return unwrapEsResponse(promise) as Promise<ProfilingStatusResponse>;
+      },
     },
   };
 }
