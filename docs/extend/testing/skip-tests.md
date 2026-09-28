@@ -81,3 +81,5 @@ test.describe('Stateful classic feature', { tag: tags.stateful.classic }, () => 
 ```
 
 See [Deployment tags](./deployment-tags.md) for shortcuts and patterns.
+
+A matching tag does not override project exclusions. The built-in Cloud projects also [exclude certain spec filenames](./deployment-tags.md#scout-deployment-tags-cloud-exclusions), so a test can be omitted from a Cloud run without an explicit `test.skip()`.

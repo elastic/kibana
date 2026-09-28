@@ -20,7 +20,7 @@ Scout is Kibana's **modern UI and API test framework** built on [Playwright](htt
 ## Scout benefits [scout-main-features]
 
 - **Parallel execution**: run UI suites in [parallel](./parallelism.md) against the same deployment.
-- **Selective testing**: PR builds run only the Scout tests scoped to changed modules, cutting CI time.
+- **Selective testing**: PR builds can limit Scout runs to affected configs or modules, cutting CI time. See [how selection works](#scout-faq-selective-testing).
 - **Co-located tests**: keep tests close to [plugin code](./setup-scout.md) for easier iteration and maintenance.
 - **Deployment-agnostic**: write tests once, then use [tags](./deployment-tags.md) to declare where they should run (stateful/serverless).
 - **Fixture-based**: [fixtures](./fixtures.md) cover auth, data setup, clients, and common workflows.
@@ -85,11 +85,19 @@ Often yes, especially with [parallel test execution](./parallelism.md) and selec
 
 #### Q: What is selective testing? [scout-faq-selective-testing]
 
-In PR builds, Scout automatically detects which modules changed and runs only the relevant tests, reducing CI time. You can confirm your tests ran by looking for the `affected Scout:` prefix on Buildkite steps. See PR [#261510](https://github.com/elastic/kibana/pull/261510) for details.
+Scout uses the changed files to narrow the eligible tests in PR builds:
+
+- **Critical Scout files**, or disabling selective testing, select the full eligible set.
+- **Changes confined to Scout UI/API test scopes** select the configs that own the changed files. Markdown files, READMEs, and changelogs are ignored for this decision. Changes under a Scout `fixtures/` directory use dependency-based selection because other modules can import those fixtures.
+- **Other changes** select configs in affected modules, including downstream consumers. This can include multiple namespaces within a module.
+
+Deployment tags, [CI test channels](./setup-scout.md#scout-test-channels), and [project exclusions](./deployment-tags.md#scout-deployment-tags-selection) still apply in every mode.
+
+Current PR builds group tests into Buildkite steps named `Scout Lane #<number> - <arch>-<domain> / <config-set>`. Check the lane's logs and test results for your config and suite to confirm they ran; a lane label alone does not show which tests executed.
 
 #### Q: Why is it a good idea for tests to be close to the plugin code? [scout-faq-colocation]
 
-It’s easier to iterate and maintain, and it enables selective testing: PR builds automatically run only the Scout tests for affected modules.
+It’s easier to iterate and maintain, and it lets [selective testing](#scout-faq-selective-testing) map changes to the configs and modules that own the tests.
 
 #### Q: Can I use FTR services in Scout (for example, `esArchiver`)? [scout-faq-ftr-services]
 
