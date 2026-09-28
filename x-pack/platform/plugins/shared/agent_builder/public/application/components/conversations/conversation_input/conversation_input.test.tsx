@@ -29,6 +29,7 @@ import { useMessageEditor } from './message_editor';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { ChatTriggerMode } from '../../../../../common/http_api/chat';
+import { useInputDraft } from '../../../hooks/use_input_draft';
 
 jest.mock('../../../hooks/use_conversation_stream', () => ({
   useConversationStream: jest.fn(),
@@ -122,6 +123,19 @@ jest.mock('../../../hooks/use_agent_builder_service', () => ({
 jest.mock('../../../hooks/use_experimental_features', () => ({
   useExperimentalFeatures: jest.fn(),
 }));
+jest.mock('../../../hooks/use_current_user', () => ({
+  useCurrentUser: jest
+    .fn()
+    .mockReturnValue({ currentUser: { user: { username: 'test-user' } }, isLoading: false }),
+}));
+jest.mock('../../../hooks/use_input_draft', () => ({
+  useInputDraft: jest
+    .fn()
+    .mockReturnValue({ draft: null, saveDraft: jest.fn(), clearDraft: jest.fn() }),
+}));
+jest.mock('../../../context/active_space_context', () => ({
+  useActiveSpaceId: jest.fn().mockReturnValue('default'),
+}));
 jest.mock('@kbn/agent-builder-browser', () => ({
   CONVERSATION_INPUT_SHELL_RADIUS: 16,
   ConversationInputShell: ({
@@ -157,6 +171,7 @@ const mockedUseToasts = jest.mocked(useToasts);
 const mockedUseMessageEditor = jest.mocked(useMessageEditor);
 const mockedUseAgentBuilderServices = jest.mocked(useAgentBuilderServices);
 const mockedUseExperimentalFeatures = jest.mocked(useExperimentalFeatures);
+const mockedUseInputDraft = jest.mocked(useInputDraft);
 
 const submitMessage = jest.fn();
 const sendUserMessage = jest.fn();
@@ -463,6 +478,83 @@ describe('ConversationInput', () => {
       fireEvent.click(screen.getByTestId('mock-remove-attachment-a1'));
 
       expect(removeAttachment).toHaveBeenCalledWith(0);
+    });
+  });
+
+  describe('draft persistence', () => {
+    it('hydrates the editor with a saved draft on mount', () => {
+      mockedUseInputDraft.mockReturnValue({
+        draft: 'saved draft text',
+        saveDraft: jest.fn(),
+        clearDraft: jest.fn(),
+      });
+
+      renderInput(<ConversationInput />);
+
+      expect(editorController.setContent).toHaveBeenCalledWith('saved draft text');
+    });
+
+    it('does not hydrate draft when initialMessage is present', () => {
+      mockedUseInputDraft.mockReturnValue({
+        draft: 'stale draft',
+        saveDraft: jest.fn(),
+        clearDraft: jest.fn(),
+      });
+      mockedUseConversationContext.mockReturnValue({
+        attachments: [],
+        upsertAttachments: jest.fn(),
+        removeAttachment: jest.fn(),
+        resetAttachments: jest.fn(),
+        isEmbeddedContext: false,
+        conversationActions: {} as never,
+        initialMessage: 'pre-filled message',
+        autoSendInitialMessage: false,
+      } as never);
+
+      renderInput(<ConversationInput />);
+
+      expect(editorController.setContent).not.toHaveBeenCalledWith('stale draft');
+    });
+
+    it('clears the draft on submit via the default path', () => {
+      const clearDraft = jest.fn();
+      mockedUseInputDraft.mockReturnValue({ draft: null, saveDraft: jest.fn(), clearDraft });
+
+      renderInput(<ConversationInput />);
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      expect(clearDraft).toHaveBeenCalledTimes(1);
+    });
+
+    it('clears the draft on submit with trigger mode Never', async () => {
+      const clearDraft = jest.fn();
+      mockedUseConversationId.mockReturnValue('conv-1');
+      mockedUseIsSharedConversation.mockReturnValue(true);
+      mockedUseInputDraft.mockReturnValue({ draft: null, saveDraft: jest.fn(), clearDraft });
+
+      renderInput(<ConversationInput />);
+      fireEvent.change(screen.getByTestId('mock-trigger-mode-selector'), {
+        target: { value: 'never' },
+      });
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      await waitFor(() => expect(clearDraft).toHaveBeenCalledTimes(1));
+    });
+
+    it('clears the editor when switching to a conversation with no saved draft', () => {
+      mockedUseInputDraft.mockReturnValue({
+        draft: null,
+        saveDraft: jest.fn(),
+        clearDraft: jest.fn(),
+      });
+
+      const { rerender } = renderInput(<ConversationInput />);
+      editorController.clear.mockClear();
+
+      mockedUseConversationId.mockReturnValue('conv-2');
+      rerender(<ConversationInput />);
+
+      expect(editorController.clear).toHaveBeenCalledTimes(1);
     });
   });
 });

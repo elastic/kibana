@@ -6,6 +6,7 @@
 - [AWS CloudWatch](/reference/connectors-kibana/aws-cloudwatch-action-type.md): List and suppress alarms, query metrics and Logs Insights, and retrieve log events from AWS CloudWatch.
 - [AWS X-Ray](/reference/connectors-kibana/aws-x-ray-action-type.md): Retrieve X-Ray insights, service graphs, and trace summaries and details for distributed tracing.
 - [Azure Blob Storage](/reference/connectors-kibana/azure-blob-action-type.md): List containers and blobs, and retrieve blob content from Azure Blob Storage.
+- [Azure Functions](/reference/connectors-kibana/azure-functions-action-type.md): Invoke HTTP-triggered functions, read function keys, and start, stop, or restart function apps.
 - [Azure Monitor](/reference/connectors-kibana/azure-monitor-action-type.md): List and triage alerts, query metrics and logs, and control alert rules in Azure Monitor.
 - [BigQuery](/reference/connectors-kibana/bigquery-action-type.md): Run GoogleSQL queries and retrieve results from Google BigQuery.
 - [Box](/reference/connectors-kibana/box-action-type.md): Search files and folders, read content, and query enterprise content using Box AI.
@@ -16,6 +17,7 @@
 - [Datadog](/reference/connectors-kibana/datadog-action-type.md): List and mute monitors, manage downtimes and incidents, post events, and query metrics and logs.
 - [Dropbox](/reference/connectors-kibana/dropbox-action-type.md): Search files and folders, retrieve file content and metadata, and manage shared links in Dropbox.
 - [Dynatrace](/reference/connectors-kibana/dynatrace-action-type.md): Triage Davis problems, ingest events, query metrics and entities, and manage maintenance windows.
+- [Elasticsearch](/reference/connectors-kibana/elasticsearch-action-type.md): Search, index, and manage documents, retrieve mappings and aliases, and run ES|QL queries in Elasticsearch.
 - [Firecrawl](/reference/connectors-kibana/firecrawl-action-type.md): Scrape, search, map, and crawl the web using the Firecrawl API.
 - [Figma](/reference/connectors-kibana/figma-action-type.md): Browse design files, inspect structure, render nodes as images, and explore team projects in Figma.
 - [GitHub](/reference/connectors-kibana/github-action-type.md): Search code, issues, and pull requests, and access repository contents and metadata from GitHub.
