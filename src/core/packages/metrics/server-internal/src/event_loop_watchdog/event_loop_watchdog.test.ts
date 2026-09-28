@@ -128,7 +128,7 @@ describe('EventLoopWatchdog', () => {
       cpuRatio: 0.99,
       liveNotices: 0,
       suppressedBlocks: 0,
-      candidates: [{ kind: 'task', type: 'a', id: '1', runningForMs: 5 }],
+      candidates: [{ kind: 'task', type: 'a', id: '1', startedBeforeBlockMs: 5 }],
       omittedCandidates: 0,
       profile: { verdict: 'unavailable', reason: 'no profile captured', frames: [] },
     };

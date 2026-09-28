@@ -71,7 +71,7 @@ export const summarizeProfile = (
   const profiledFromUs = Math.max(windowStartUs, profile.startTime - offset);
   const profiledUs = windowEndUs - profiledFromUs;
 
-  if (profiledUs <= 0) {
+  if (profiledUs < MIN_SAMPLED_US) {
     return {
       verdict: 'inconclusive',
       reason:

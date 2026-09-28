@@ -55,8 +55,8 @@ export interface Candidate {
   kind: Activity['kind'];
   type: string;
   id: string;
-  /** How long the activity had been running when the block was detected. */
-  runningForMs: number;
+  /** How long before the (estimated) block start the activity started. */
+  startedBeforeBlockMs: number;
 }
 
 export interface ProfileFrame {

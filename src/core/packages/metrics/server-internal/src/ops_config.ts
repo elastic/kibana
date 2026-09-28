@@ -9,7 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
-import moment, { type Duration } from 'moment';
+import type { Duration } from 'moment';
 
 /** @internal */
 export const OPS_CONFIG_PATH = 'ops' as const;
@@ -52,15 +52,16 @@ export interface OpsConfigType {
   eventLoopWatchdog: EventLoopWatchdogConfigType;
 }
 
-const boundedDuration = (defaultValue: string, min: string, max: string) =>
+const SECOND = 1_000;
+const MINUTE = 60 * SECOND;
+
+const boundedDuration = (defaultValue: string, minMs: number, maxMs: number) =>
   schema.duration({
     defaultValue,
     validate: (value) => {
       const ms = value.asMilliseconds();
-      const minMs = moment.duration(min).asMilliseconds();
-      const maxMs = moment.duration(max).asMilliseconds();
       if (ms < minMs || ms > maxMs) {
-        return `must be between ${min} and ${max}`;
+        return `must be between ${minMs}ms and ${maxMs}ms`;
       }
     },
   });
@@ -72,12 +73,12 @@ const configSchema = schema.object({
     cpuAcctPath: schema.maybe(schema.string()),
   }),
   eventLoopWatchdog: schema.object({
-    threshold: boundedDuration('500ms', '50ms', '1m'),
-    heartbeatInterval: boundedDuration('100ms', '10ms', '10s'),
-    liveNoticeInterval: boundedDuration('5s', '100ms', '5m'),
+    threshold: boundedDuration('500ms', 50, MINUTE),
+    heartbeatInterval: boundedDuration('100ms', 10, 10 * SECOND),
+    liveNoticeInterval: boundedDuration('5s', 100, 5 * MINUTE),
     maxLiveNoticesPerBlock: schema.number({ defaultValue: 12, min: 1, max: 100 }),
-    maxProfileDuration: boundedDuration('10s', '100ms', '1m'),
-    profileCooldown: boundedDuration('1m', '0s', '1h'),
+    maxProfileDuration: boundedDuration('10s', 100, MINUTE),
+    profileCooldown: boundedDuration('1m', 0, 60 * MINUTE),
     maxCandidates: schema.number({ defaultValue: 10, min: 1, max: 100 }),
   }),
 });

@@ -90,14 +90,16 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
     }
   };
 
-  const snapshotCandidates = (now: number): Pick<Block, 'candidates' | 'omittedCandidates'> => {
+  const snapshotCandidates = (
+    blockStartedAt: number
+  ): Pick<Block, 'candidates' | 'omittedCandidates'> => {
     const all = [...activities.values()]
       .sort((a, b) => a.startedAt - b.startedAt)
       .map(({ kind, type, id, startedAt }) => ({
         kind,
         type,
         id,
-        runningForMs: Math.max(0, now - startedAt),
+        startedBeforeBlockMs: Math.max(0, blockStartedAt - startedAt),
       }));
     return {
       candidates: all.slice(0, options.maxCandidates),
@@ -156,12 +158,13 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
 
   const onBlockStart = (event: Extract<DetectorEvent, { type: 'block-start' }>) => {
     const now = Date.now();
+    const blockStartedAt = now - (event.detectedAt - event.startedAt);
     const current: Block = {
       startedAtUs: event.startedAt * 1000,
       detectedAtUs: event.detectedAt * 1000,
       detectedAt: now,
       cpuAtDetection: process.cpuUsage(),
-      ...snapshotCandidates(now),
+      ...snapshotCandidates(blockStartedAt),
     };
     block = current;
 

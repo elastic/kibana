@@ -628,9 +628,7 @@ describe('ExecutionContextService', () => {
 
     it('allows a single observer and clears it on stop', () => {
       const { service, setupContract, observer } = setup(true);
-      expect(() => setupContract.registerActivityObserver(jest.fn())).toThrow(
-        /already registered/
-      );
+      expect(() => setupContract.registerActivityObserver(jest.fn())).toThrow(/already registered/);
       service.stop();
       setupContract.withContext(context, () => undefined);
       expect(observer).not.toHaveBeenCalled();

@@ -82,9 +82,7 @@ describe('summarizeProfile', () => {
       windowEndUs: 1_900_000,
       startAckUs: 2_000_000,
     });
-    expect(summary).toEqual(
-      expect.objectContaining({ verdict: 'inconclusive', frames: [] })
-    );
+    expect(summary).toEqual(expect.objectContaining({ verdict: 'inconclusive', frames: [] }));
     expect(summary.reason).toMatch(/after the block ended/);
   });
 

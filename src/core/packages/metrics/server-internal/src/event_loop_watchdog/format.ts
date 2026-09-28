@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EcsVersion } from '@elastic/ecs';
 import type { BlockReport, Candidate, LiveNoticeFormat } from './types';
 
 export interface LiveNotice {
@@ -20,7 +21,10 @@ export interface LiveNotice {
 export const formatCandidates = (candidates: Candidate[], omitted: number): string => {
   if (candidates.length === 0) return 'none tracked';
   const listed = candidates
-    .map(({ kind, type, id, runningForMs }) => `${kind} ${type} [${id}] (running ${runningForMs}ms)`)
+    .map(
+      ({ kind, type, id, startedBeforeBlockMs }) =>
+        `${kind} ${type} [${id}] (started ${startedBeforeBlockMs}ms before the block)`
+    )
     .join(', ');
   return omitted > 0 ? `${listed} and ${omitted} more` : listed;
 };
@@ -45,7 +49,7 @@ export const formatReportMessage = (report: BlockReport): string => {
       ? ` Top frames: ${profile.frames
           .map(
             ({ functionName, location, selfTimeMs, selfPercent, callers }) =>
-              `${functionName} (${location}) ${selfTimeMs}ms ${selfPercent}%${
+              `${functionName}${location ? ` (${location})` : ''} ${selfTimeMs}ms ${selfPercent}%${
                 callers.length > 0 ? ` via ${callers.join(' < ')}` : ''
               }`
           )
@@ -78,10 +82,10 @@ export const formatLogLine = (
   if (format === 'json') {
     return `${JSON.stringify({
       '@timestamp': now.toISOString(),
-      ecs: { version: '8.11.0' },
+      ecs: { version: EcsVersion },
       log: { level: 'WARN', logger: loggerName },
       message,
-      process: { pid: process.pid },
+      process: { pid: process.pid, uptime: process.uptime() },
       ...meta,
     })}\n`;
   }

@@ -62,8 +62,10 @@ describe('EventLoopWatchdog (real worker)', () => {
 
   const reports = (): BlockReport[] =>
     logger.warn.mock.calls
-      .map(([, meta]) => (meta as { kibana?: { event_loop_watchdog?: BlockReport } } | undefined))
-      .flatMap((meta) => (meta?.kibana?.event_loop_watchdog ? [meta.kibana.event_loop_watchdog] : []));
+      .map(([, meta]) => meta as { kibana?: { event_loop_watchdog?: BlockReport } } | undefined)
+      .flatMap((meta) =>
+        meta?.kibana?.event_loop_watchdog ? [meta.kibana.event_loop_watchdog] : []
+      );
 
   const nextReport = (count: number) =>
     waitFor(() => (reports().length >= count ? reports()[count - 1] : undefined));
@@ -180,7 +182,10 @@ describe('EventLoopWatchdog (real worker)', () => {
     deliberatelyBlockTheEventLoop(500);
     const second = await nextReport(2);
     expect(second.profile).toEqual(
-      expect.objectContaining({ verdict: 'unavailable', reason: expect.stringMatching(/rate limit/) })
+      expect.objectContaining({
+        verdict: 'unavailable',
+        reason: expect.stringMatching(/rate limit/),
+      })
     );
   });
 
