@@ -19,6 +19,7 @@ import { createWorkflowContextRegistry } from '../../../../common/lib/create_wor
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import {
   selectConnectorsLoadState,
+  selectIsWorkflowManaged,
   selectWorkflows,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -42,6 +43,7 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
   const connectorsData = useAvailableConnectors();
   const connectorsLoadState = useSelector(selectConnectorsLoadState);
   const workflows = useSelector(selectWorkflows);
+  const isCurrentWorkflowManaged = useSelector(selectIsWorkflowManaged);
   const { application, http, data, licensing, workflowsExtensions } = useKibana().services;
   const registry = useMemo(
     () => createWorkflowContextRegistry(workflowsExtensions),
@@ -66,10 +68,19 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
         absolute: true,
       }),
       workflows,
+      isCurrentWorkflowManaged,
       getPropertyHandler,
       esqlCallbacks: esqlCallbacksRef.current,
     }),
-    [application, connectorsData, connectorsLoadState, getPropertyHandler, registry, workflows]
+    [
+      application,
+      connectorsData,
+      connectorsLoadState,
+      getPropertyHandler,
+      isCurrentWorkflowManaged,
+      registry,
+      workflows,
+    ]
   );
 }
 

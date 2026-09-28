@@ -18,6 +18,8 @@ export interface WorkflowsMap {
     id: string;
     name: string;
     managed?: boolean;
+    /** Whether a `workflow.execute` step in an unmanaged workflow may call this one. */
+    callableByUnmanaged?: boolean;
     inputsSchema?: JsonModelSchemaType;
   };
 }

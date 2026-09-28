@@ -21,6 +21,10 @@ export const selectWorkflow = createSelector(selectDetail, (detail) => detail.wo
 export const selectYamlString = createSelector(selectDetail, (detail) => detail.yamlString);
 
 export const selectWorkflowId = createSelector(selectWorkflow, (workflow) => workflow?.id);
+export const selectIsWorkflowManaged = createSelector(
+  selectWorkflow,
+  (workflow) => workflow?.managed === true
+);
 export const selectIsEnabled = createSelector(selectWorkflow, (workflow) => !!workflow?.enabled);
 export const selectWorkflowName = createSelector(selectWorkflow, (workflow) => workflow?.name);
 export const selectWorkflowTags = createSelector(

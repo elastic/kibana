@@ -42,7 +42,13 @@ function getWorkflowsFromStore(
     if (workflow.id === currentWorkflowId) {
       return false;
     }
-    if (workflow.managed === true && !isCurrentWorkflowManaged) {
+    // A managed workflow is only reachable from an unmanaged parent when it opted in, so the rest
+    // stay out of the list even though the lookup holds them for validation.
+    if (
+      workflow.managed === true &&
+      !isCurrentWorkflowManaged &&
+      workflow.callableByUnmanaged !== true
+    ) {
       return false;
     }
     if (!lowerSearchPrefix) {

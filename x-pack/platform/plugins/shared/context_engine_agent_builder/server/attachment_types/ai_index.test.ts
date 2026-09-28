@@ -13,7 +13,10 @@ import {
   CONTEXT_ENGINE_SIGNALS_SKILL_ID,
   KI_RETRIEVAL_SKILL_ID,
 } from '../../common/agent_builder_skills';
-import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../common/agent_builder_tools';
+import {
+  CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID,
+  CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
+} from '../../common/agent_builder_tools';
 import { createAiIndexAttachmentType } from './ai_index';
 
 describe('createAiIndexAttachmentType', () => {
@@ -35,7 +38,10 @@ describe('createAiIndexAttachmentType', () => {
   it('registers the expected attachment type id', () => {
     expect(attachmentType.id).toBe('platform.context_engine.ai_index');
     expect(attachmentType.isReadonly).toBe(true);
-    expect(attachmentType.getTools?.()).toEqual([CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID]);
+    expect(attachmentType.getTools?.()).toEqual([
+      CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID,
+      CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
+    ]);
   });
 
   it('validates attachment data', async () => {
@@ -55,7 +61,9 @@ describe('createAiIndexAttachmentType', () => {
     expect(description).toContain(ANALYZE_AND_IMPROVE_SKILL_ID);
     expect(description).toContain(AI_INDEX_AUTOMATIONS_SKILL_ID);
     expect(description).toContain(AI_INDEX_SOURCES_SKILL_ID);
+    expect(description).toContain(CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID);
     expect(description).toContain(CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID);
+    expect(description).toMatch(/Calling the tool again replaces/);
   });
 
   it('scopes evidence by what the user chose: data alone for a fresh index, signals only with traces or automations', () => {
@@ -80,7 +88,7 @@ describe('createAiIndexAttachmentType', () => {
     const description = attachmentType.getAgentDescription?.();
 
     expect(description).toContain('ask_user_question');
-    expect(description).toMatch(/Build a new automation through a subagent/);
+    expect(description).toMatch(/build a new automation through a subagent/);
     expect(description).toMatch(/Report what the subagent came back with/);
   });
 
@@ -165,7 +173,10 @@ describe('createAiIndexAttachmentType', () => {
   it('makes the tool the thing that runs the automation, not the agent', () => {
     const description = attachmentType.getAgentDescription?.();
 
-    expect(description).toMatch(/The tool starts that run itself once the dialog is accepted/);
+    expect(description).toMatch(
+      /save_automation starts that run itself once the dialog is accepted/
+    );
+    expect(description).toMatch(/Do not look for `run\.started` on it/);
     expect(description).toMatch(/execution id to poll rather than a finished result/);
   });
 

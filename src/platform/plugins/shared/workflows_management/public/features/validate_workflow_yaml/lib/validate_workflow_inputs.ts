@@ -316,6 +316,34 @@ function createWorkflowNotFoundResult(
   };
 }
 
+function createWorkflowNotCallableResult(
+  step: StepInfo,
+  workflowId: string,
+  lineCounter: LineCounter
+): YamlValidationResult | null {
+  const workflowIdProp = step.propInfos['with.workflow-id'];
+  if (!workflowIdProp) return null;
+  const valueRange = workflowIdProp.valueNode?.range ?? workflowIdProp.keyNode?.range;
+  if (!valueRange) return null;
+  const startPos = lineCounter.linePos(valueRange[0]);
+  const endPos = lineCounter.linePos(valueRange[1]);
+  return {
+    id: `workflow-inputs-not-callable-${step.stepId}`,
+    severity: 'error',
+    message: i18n.translate('workflows.validateWorkflowInputs.workflowNotCallable', {
+      defaultMessage: 'Workflow "{workflowId}" is managed and cannot be called from this workflow',
+      values: { workflowId },
+    }),
+    owner: 'workflow-inputs-validation',
+    ruleId: 'targetWorkflowNotCallable',
+    startLineNumber: startPos.line,
+    startColumn: startPos.col,
+    endLineNumber: endPos.line,
+    endColumn: endPos.col,
+    hoverMessage: null,
+  };
+}
+
 function getStepValidationContext(
   step: StepInfo,
   workflows: WorkflowsResponse['workflows']
@@ -337,7 +365,9 @@ function getStepValidationContext(
 export function validateWorkflowInputs(
   workflowLookup: WorkflowLookup,
   workflows: WorkflowsResponse | null,
-  lineCounter: LineCounter
+  lineCounter: LineCounter,
+  // Optional because omitting it can only tighten validation, never loosen it.
+  isCurrentWorkflowManaged: boolean = false
 ): YamlValidationResult[] {
   if (!workflows) return [];
 
@@ -347,21 +377,34 @@ export function validateWorkflowInputs(
 
   const results: YamlValidationResult[] = [];
   for (const step of steps) {
-    const ctx = getStepValidationContext(step, workflows.workflows);
-    if (ctx) {
-      results.push(...validateStepInputs(ctx.step, ctx.childWorkflow, ctx.schema, lineCounter));
+    const workflowIdProp = step.propInfos['with.workflow-id'];
+    const workflowId = workflowIdProp ? getValueFromValueNode(workflowIdProp.valueNode) : undefined;
+    const isResolvableId =
+      typeof workflowId === 'string' && workflowId.length > 0 && !isDynamicValue(workflowId);
+    const target = isResolvableId ? workflows.workflows[workflowId] : undefined;
+
+    // The engine refuses a managed target from an unmanaged parent unless it opted in, so the
+    // editor says so here rather than letting the step fail at run time.
+    const isUncallableManagedTarget =
+      target?.managed === true && !isCurrentWorkflowManaged && target.callableByUnmanaged !== true;
+
+    if (isUncallableManagedTarget) {
+      const notCallableResult = createWorkflowNotCallableResult(
+        step,
+        workflowId as string,
+        lineCounter
+      );
+      if (notCallableResult) results.push(notCallableResult);
     } else {
-      const workflowIdProp = step.propInfos['with.workflow-id'];
-      const workflowId = workflowIdProp
-        ? getValueFromValueNode(workflowIdProp.valueNode)
-        : undefined;
-      if (
-        typeof workflowId === 'string' &&
-        workflowId.length > 0 &&
-        !isDynamicValue(workflowId) &&
-        !workflows.workflows[workflowId]
-      ) {
-        const notFoundResult = createWorkflowNotFoundResult(step, workflowId, lineCounter);
+      const ctx = getStepValidationContext(step, workflows.workflows);
+      if (ctx) {
+        results.push(...validateStepInputs(ctx.step, ctx.childWorkflow, ctx.schema, lineCounter));
+      } else if (isResolvableId && !target) {
+        const notFoundResult = createWorkflowNotFoundResult(
+          step,
+          workflowId as string,
+          lineCounter
+        );
         if (notFoundResult) results.push(notFoundResult);
       }
     }

@@ -32,11 +32,16 @@ import type { KiVerifierWorkflowRunner } from './ki_verification';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
 import { registerSignalRoutes } from './routes/signals';
+import { registerDataStreamsRoutes } from './routes/data_streams';
 import type {
   FeedbackAnalysisScheduleService,
   WorkflowEnablementApi,
 } from './feedback_analysis/schedule';
 import { createFeedbackAnalysisScheduleService } from './feedback_analysis/schedule';
+import {
+  CONTEXT_ENGINE_WORKFLOW_OWNER,
+  installManagedWorkflows,
+} from './managed_workflows/install';
 import { AiIndexDataReadService } from './ai_indices/data_read_service';
 import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
@@ -46,14 +51,10 @@ import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
 import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
 import { createVerifyKiStepDefinition } from './step_types/verify_ki_step';
-import { createVerifyKi } from './step_types/verify_ki';
 import { registerStepDefinitions } from './step_types';
 import { ContextEngineAnalyticsService } from './telemetry';
 import { isContextEngineEnabledInSpace } from './utils/is_context_engine_enabled_in_space';
 import { resolveSpaceId } from './utils/resolve_space_id';
-
-/** Must match the `pluginId` on the managed workflow definition. */
-const CONTEXT_ENGINE_WORKFLOW_OWNER = 'contextEngine';
 
 export class ContextEnginePlugin
   implements
@@ -123,21 +124,12 @@ export class ContextEnginePlugin
       return hasAllRequested;
     };
 
-    const verifyKi = createVerifyKi({
-      getAuditLogger: async (request) => {
-        const [coreStart] = await coreSetup.getStartServices();
-        return coreStart.security.audit.asScoped(request);
-      },
-      workflowVerifierDeps: {
+    setupDeps.workflowsExtensions.registerStepDefinition(
+      createVerifyKiStepDefinition(coreSetup, this.logger.get('context_steps'), analyticsService, {
         getWorkflowsManagement: () => this.workflowsManagementApiPromise,
         checkExecutePrivilege: (request, spaceId) =>
           checkApiPrivileges(request, spaceId, WorkflowsManagementOperationPrivileges.execute),
-      },
-      analyticsService,
-      logger: this.logger.get('context_steps'),
-    });
-    setupDeps.workflowsExtensions.registerStepDefinition(
-      createVerifyKiStepDefinition(coreSetup, verifyKi)
+      })
     );
 
     coreSetup.uiSettings.registerGlobal({
@@ -260,7 +252,6 @@ export class ContextEnginePlugin
       getAiIndexService,
       isContextEngineEnabled,
       checkWritePrivilege,
-      verifyKi,
       feedbackAnalysis: {
         getAiIndexService,
         getImprovementsService,
@@ -285,6 +276,9 @@ export class ContextEnginePlugin
       // Reads the current value at request time (assigned in start(), after this setup() runs).
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
     });
+
+    // Read-only internal API backing the AI index trace picker's data stream search.
+    registerDataStreamsRoutes({ router });
 
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),
@@ -385,6 +379,11 @@ export class ContextEnginePlugin
       getManagedWorkflowsClient: () =>
         startDeps.workflowsExtensions.initManagedWorkflowsClient(CONTEXT_ENGINE_WORKFLOW_OWNER),
       ...(this.workflowsManagement ? { workflowsManagement: this.workflowsManagement } : {}),
+    });
+
+    void installManagedWorkflows({
+      workflowsExtensions: startDeps.workflowsExtensions,
+      logger: this.logger,
     });
 
     const soClient = coreStart.savedObjects.createInternalRepository();

@@ -89,6 +89,8 @@ function createWorkflowsResponse(
     name: string;
     properties?: Record<string, JSONSchema7>;
     required?: string[];
+    managed?: boolean;
+    callableByUnmanaged?: boolean;
   }>
 ): WorkflowsResponse {
   const workflows: WorkflowsResponse['workflows'] = {};
@@ -96,6 +98,8 @@ function createWorkflowsResponse(
     workflows[entry.id] = {
       id: entry.id,
       name: entry.name,
+      managed: entry.managed,
+      callableByUnmanaged: entry.callableByUnmanaged,
       inputsSchema: entry.properties
         ? ({
             properties: entry.properties,
@@ -169,6 +173,59 @@ describe('validateWorkflowInputs', () => {
       expect(results[0].message).toContain('Workflow not found');
       expect(results[0].message).toContain('non-existent-wf');
       expect(results[0].owner).toBe('workflow-inputs-validation');
+    });
+  });
+
+  describe('when the target is managed', () => {
+    const managedTargetLookup = (): WorkflowLookup => ({
+      steps: {
+        'my-step': createWorkflowExecuteStep('my-step', 'managed-wf', { field1: 'value' }),
+      },
+    });
+
+    it('reports it as not callable from an unmanaged parent, rather than as missing', () => {
+      const workflows = createWorkflowsResponse([
+        { id: 'managed-wf', name: 'Managed Workflow', managed: true },
+      ]);
+
+      const results = validateWorkflowInputs(managedTargetLookup(), workflows, mockLineCounter);
+
+      expect(results).toHaveLength(1);
+      expect(results[0].severity).toBe('error');
+      expect(results[0].ruleId).toBe('targetWorkflowNotCallable');
+      expect(results[0].message).toContain('managed-wf');
+      // The old message pointed authors at a typo; the id is real and the rule is what blocks it.
+      expect(results[0].message).not.toContain('not found');
+    });
+
+    it('accepts it when it opted in to unmanaged callers', () => {
+      const workflows = createWorkflowsResponse([
+        {
+          id: 'managed-wf',
+          name: 'Managed Workflow',
+          managed: true,
+          callableByUnmanaged: true,
+        },
+      ]);
+
+      const results = validateWorkflowInputs(managedTargetLookup(), workflows, mockLineCounter);
+
+      expect(results).toHaveLength(0);
+    });
+
+    it('accepts any managed target when the parent is itself managed', () => {
+      const workflows = createWorkflowsResponse([
+        { id: 'managed-wf', name: 'Managed Workflow', managed: true },
+      ]);
+
+      const results = validateWorkflowInputs(
+        managedTargetLookup(),
+        workflows,
+        mockLineCounter,
+        true
+      );
+
+      expect(results).toHaveLength(0);
     });
   });
 
