@@ -33,7 +33,7 @@ import { css } from '@emotion/css';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useHistory, useLocation } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
-import type { Direction, ComparisonResult } from '@kbn/evals-common';
+import type { Direction, ComparisonResult, MetricType, StatisticalTestId } from '@kbn/evals-common';
 import {
   useCompareExperiments,
   useEvalsTraceFetcher,
@@ -110,7 +110,39 @@ const DIRECTION_HINTS: Record<Direction, string> = {
   neutral: i18n.DIFF_NEUTRAL_DIRECTION,
 };
 
-const DiffValue: React.FC<{ diff: number; direction: Direction }> = ({ diff, direction }) => {
+const TEST_LABELS: Record<StatisticalTestId, string> = {
+  paired_t: i18n.TEST_LABEL_PAIRED_T,
+  wilcoxon_signed_rank: i18n.TEST_LABEL_WILCOXON,
+  mcnemar: i18n.TEST_LABEL_MCNEMAR,
+};
+
+const METRIC_TYPE_LABELS: Record<MetricType, string> = {
+  binary: i18n.METRIC_TYPE_LABEL_BINARY,
+  continuous_bounded: i18n.METRIC_TYPE_LABEL_CONTINUOUS_BOUNDED,
+  continuous_unbounded: i18n.METRIC_TYPE_LABEL_CONTINUOUS_UNBOUNDED,
+  count: i18n.METRIC_TYPE_LABEL_COUNT,
+  ordinal_k: i18n.METRIC_TYPE_LABEL_ORDINAL,
+};
+
+const TestValue: React.FC<{
+  metricType: MetricType;
+  hypothesisTest: ComparisonResult['hypothesisTest'];
+}> = ({ metricType, hypothesisTest }) => {
+  const label = TEST_LABELS[hypothesisTest.id];
+  return (
+    <EuiToolTip
+      content={i18n.getTestTooltip(label, METRIC_TYPE_LABELS[metricType], hypothesisTest.method)}
+    >
+      <span tabIndex={0}>{label}</span>
+    </EuiToolTip>
+  );
+};
+
+const DiffValue: React.FC<{
+  diff: number;
+  direction: Direction;
+  discordantPairs?: ComparisonResult['hypothesisTest']['discordantPairs'];
+}> = ({ diff, direction, discordantPairs }) => {
   const { euiTheme } = useEuiTheme();
   if (!Number.isFinite(diff)) return <span>-</span>;
 
@@ -127,7 +159,10 @@ const DiffValue: React.FC<{ diff: number; direction: Direction }> = ({ diff, dir
       : improved
       ? i18n.DIFF_IMPROVED
       : i18n.DIFF_REGRESSED;
-  const tooltip = verdictHint ? `${verdictHint} · ${directionHint}` : directionHint;
+  const discordantHint = discordantPairs
+    ? i18n.getDiscordantPairsHint(discordantPairs.targetOnly, discordantPairs.baselineOnly)
+    : null;
+  const tooltip = [verdictHint, directionHint, discordantHint].filter(Boolean).join(' · ');
 
   return (
     <EuiToolTip content={tooltip}>
@@ -664,6 +699,9 @@ export const CompareExperimentsPage: React.FC = () => {
       'Mean target',
       'Diff',
       'Direction',
+      'Metric type',
+      'Test',
+      'Method',
       'p-value',
       'Significant',
       'Outcome',
@@ -684,6 +722,9 @@ export const CompareExperimentsPage: React.FC = () => {
         r.meanTarget.toFixed(4),
         diff.toFixed(4),
         r.direction,
+        r.metricType,
+        r.hypothesisTest.id,
+        r.hypothesisTest.method ?? '',
         r.pValue !== null && Number.isFinite(r.pValue) ? r.pValue.toFixed(6) : '',
         significant ? 'Yes' : 'No',
         outcome,
@@ -759,9 +800,16 @@ export const CompareExperimentsPage: React.FC = () => {
           <DiffValue
             diff={computeCompareDiff(item.meanTarget, item.meanBaseline)}
             direction={item.direction}
+            discordantPairs={item.hypothesisTest.discordantPairs}
           />
         ),
         align: 'right' as const,
+      },
+      {
+        name: i18n.COLUMN_TEST,
+        render: (item: ComparisonResult) => (
+          <TestValue metricType={item.metricType} hypothesisTest={item.hypothesisTest} />
+        ),
       },
       {
         field: 'pValue',

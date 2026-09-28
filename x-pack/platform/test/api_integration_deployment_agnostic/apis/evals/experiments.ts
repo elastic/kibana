@@ -46,6 +46,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const datasetId = `dataset-${suiteId}`;
     const datasetName = `Dataset ${suiteId}`;
     const evaluatorName = 'correctness';
+    const binaryEvaluatorName = 'pass';
     const exampleIds = ['example-1', 'example-2', 'example-3'];
     const largePayloadExampleId = 'large-example';
     const largePayloadSize = 8192;
@@ -83,7 +84,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .replace('{exampleId}', encodeURIComponent(exampleId))
         .replace('{repetitionIndex}', '0');
 
-    const ingest = async (experimentId: string, scoresByExample: number[]) => {
+    const ingest = async (
+      experimentId: string,
+      scoresByExample: number[],
+      scoreEvaluatorName = evaluatorName
+    ) => {
       const body = buildScoresRequestBody({
         experimentId,
         suiteId,
@@ -93,7 +98,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             exampleIndex: index,
             datasetId,
             datasetName,
-            evaluatorName,
+            evaluatorName: scoreEvaluatorName,
             score: scoresByExample[index],
           })
         ),
@@ -140,6 +145,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       viewerClient = await getEvalsApiClientForRole(roleScopedSupertest, 'viewer');
       await ingest(baselineExperimentId, [1, 0.5, 0]);
       await ingest(targetExperimentId, [0.8, 0.6, 0.4]);
+      await ingest(baselineExperimentId, [1, 0, 0], binaryEvaluatorName);
+      await ingest(targetExperimentId, [1, 1, 0], binaryEvaluatorName);
       await ingestLargePayloadExperiment();
     });
 
@@ -230,7 +237,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { body } = await adminClient.get(path).expect(200);
 
         const scoresResponse = body as GetEvaluationExperimentScoresResponse;
-        expect(scoresResponse.total).to.eql(3);
+        expect(scoresResponse.total).to.eql(6);
         expect(
           scoresResponse.scores.every((score) => score.experiment_id === baselineExperimentId)
         ).to.be(true);
@@ -403,14 +410,41 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(200);
 
         const comparison = body as CompareExperimentsResponse;
-        expect(comparison.pairing.totalPairs).to.eql(3);
-        expect(comparison.results.length).to.be.greaterThan(0);
+        expect(comparison.pairing.totalPairs).to.eql(6);
+        expect(comparison.results.length).to.eql(2);
 
         const evaluatorResult = comparison.results.find(
           (result) => result.datasetId === datasetId && result.evaluatorName === evaluatorName
         );
         expect(evaluatorResult).to.not.be(undefined);
         expect(evaluatorResult?.sampleSize).to.eql(3);
+        expect(evaluatorResult?.metricType).to.eql('continuous_bounded');
+        expect(evaluatorResult?.hypothesisTest.id).to.eql('wilcoxon_signed_rank');
+        expect(evaluatorResult?.hypothesisTest.discordantPairs).to.be(undefined);
+      });
+
+      it('runs McNemar on pass/fail evaluators and reports the discordant pairs', async () => {
+        const { body } = await adminClient
+          .get(EVALS_EXPERIMENTS_COMPARE_URL)
+          .query({
+            type: 'experiment',
+            baseline_id: baselineExperimentId,
+            target_id: targetExperimentId,
+          })
+          .expect(200);
+
+        const comparison = body as CompareExperimentsResponse;
+        const binaryResult = comparison.results.find(
+          (result) => result.datasetId === datasetId && result.evaluatorName === binaryEvaluatorName
+        );
+        expect(binaryResult).to.not.be(undefined);
+        expect(binaryResult?.metricType).to.eql('binary');
+        expect(binaryResult?.hypothesisTest.id).to.eql('mcnemar');
+        expect(binaryResult?.hypothesisTest.method).to.eql('mid-p');
+        expect(binaryResult?.hypothesisTest.discordantPairs).to.eql({
+          targetOnly: 1,
+          baselineOnly: 0,
+        });
       });
 
       it('returns 404 when a compared experiment has no scores', async () => {

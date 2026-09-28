@@ -15,7 +15,7 @@ import { EvalsClient } from '../../utils/evals_client';
 import { getEvaluationsKbnClient } from '../../utils/evaluations_kbn_client';
 import { getSpaceIdsFromEnv } from '../../utils/space_ids';
 import { readSpaceIdsFlag } from '../run_helpers';
-import { formatPairedTTestReport } from '../../utils/reporting/compare_report';
+import { formatCompareReport } from '../../utils/reporting/compare_report';
 import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
 
 const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
@@ -320,7 +320,7 @@ export const compareCmd: Command<void> = {
         process.stdout.write(markdown + '\n');
       }
     } else {
-      const report = formatPairedTTestReport({
+      const report = formatCompareReport({
         targetExperimentId,
         baselineExperimentId,
         results,

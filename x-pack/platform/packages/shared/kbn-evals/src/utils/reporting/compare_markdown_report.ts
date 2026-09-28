@@ -7,6 +7,7 @@
 
 import { isImproved } from '@kbn/evals-common';
 import type { Direction, ComparisonResult } from '@kbn/evals-common';
+import { formatDiscordantPairs, getTestLabel } from './test_label';
 
 const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
 const STALENESS_WARNING_DAYS = 3;
@@ -123,6 +124,9 @@ export function formatMarkdownCompareReport({
   }
 
   lines.push(`Significance threshold: p < ${significanceThreshold}`);
+  lines.push(
+    'Test per row is chosen from the scores: McNemar for pass/fail, otherwise Wilcoxon signed-rank (paired t-test when n ≥ 30 and differences look normal).'
+  );
   lines.push('');
 
   lines.push('**Summary**');
@@ -177,9 +181,9 @@ export function formatMarkdownCompareReport({
   const renderTable = (rows: ComparisonResult[]) => {
     const tableLines: string[] = [];
     tableLines.push(
-      `| Dataset | Evaluator | N | Mean (PR) | Mean (${baselineBranch}) | Diff | p-value | Sig | Outcome |`
+      `| Dataset | Evaluator | N | Mean (PR) | Mean (${baselineBranch}) | Diff | Test | p-value | Sig | Outcome |`
     );
-    tableLines.push('| --- | --- | --- | --- | --- | --- | --- | --- | --- |');
+    tableLines.push('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
     rows.forEach((r) => {
       const delta = r.meanTarget - r.meanBaseline;
       const cols = [
@@ -188,7 +192,8 @@ export function formatMarkdownCompareReport({
         String(r.sampleSize),
         formatNumber(r.meanTarget),
         formatNumber(r.meanBaseline),
-        formatDifference(delta),
+        formatDifference(delta) + formatDiscordantPairs(r.hypothesisTest),
+        getTestLabel(r.hypothesisTest.id),
         formatPValue(r.pValue),
         formatSig(r.pValue, significanceThreshold),
         formatOutcome(delta, r.direction, r.pValue, significanceThreshold),

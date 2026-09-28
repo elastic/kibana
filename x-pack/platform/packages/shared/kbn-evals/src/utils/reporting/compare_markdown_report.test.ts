@@ -42,6 +42,34 @@ describe('formatMarkdownCompareReport', () => {
     expect(output).toContain('Yes');
   });
 
+  it('renders the test column and explains how tests are chosen', () => {
+    const output = formatMarkdownCompareReport({
+      targetExperimentId: 'exp-a',
+      baselineExperimentId: 'exp-b',
+      results: [
+        makeResult({ evaluatorName: 'Criteria' }),
+        makeResult({
+          evaluatorName: 'Pass',
+          metricType: 'binary',
+          hypothesisTest: {
+            id: 'mcnemar',
+            method: 'mid-p',
+            statistic: 0,
+            discordantPairs: { targetOnly: 3, baselineOnly: 0 },
+          },
+        }),
+      ],
+    });
+
+    expect(output).toContain('| Diff | Test | p-value |');
+    expect(output).toContain('Test per row is chosen from the scores');
+    const lines = output.split('\n');
+    expect(lines.find((line) => line.includes('| Criteria |'))).toContain('| Wilcoxon |');
+    expect(lines.find((line) => line.includes('| Pass |'))).toContain(
+      '| +0.10 (3 up, 0 down) | McNemar |'
+    );
+  });
+
   it('reports no significant regressions when all p-values are above threshold', () => {
     const output = formatMarkdownCompareReport({
       targetExperimentId: 'exp-a',

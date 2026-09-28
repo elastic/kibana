@@ -230,7 +230,7 @@ The endpoint requires `read_evals` and current-user read access to `traces-*` an
 
 The plugin UI is organized into four navigation tabs:
 
-- **Experiments** — paginated listing of evaluation experiments, detail view with per-evaluator stats, and a comparison view with paired t-test results. The **New experiment** flow launches or saves workflow-based runs and streams live progress on the detail page (see [Workflow-based experiment execution](#workflow-based-experiment-execution)).
+- **Experiments** — paginated listing of evaluation experiments, detail view with per-evaluator stats, and a comparison view that runs a paired hypothesis test per evaluator (McNemar for pass/fail scores, Wilcoxon signed-rank or paired t-test otherwise). The **New experiment** flow launches or saves workflow-based runs and streams live progress on the detail page (see [Workflow-based experiment execution](#workflow-based-experiment-execution)).
 - **Datasets** — manage evaluation datasets and examples (CRUD, JSON editor), tag and set the maturity of a dataset, and filter the listing by tag or maturity
 - **Tracing** — browse tracing projects with metrics, drill into individual traces with a waterfall view
 - **Remotes** — configure remote Kibana instances for cross-cluster dataset management
