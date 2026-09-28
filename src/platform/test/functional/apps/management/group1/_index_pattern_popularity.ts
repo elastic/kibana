@@ -11,10 +11,9 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 /**
- * Migration recommendation: MIXED. Delete the initial-value assertion because the field-editor
- * Jest integration test already covers it. Move cancel and per-field isolation to that Jest
- * integration surface; keep only the reload-persistence scenario in Scout because it validates a
- * saved data view across an application reload.
+ * Migration recommendation: MIXED. Move input update and cancel behavior to the field-editor
+ * Jest integration surface. Keep the one- and two-field reload-persistence scenarios in Scout
+ * because they validate saved data-view metadata through a real application reload.
  */
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -48,8 +47,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     /**
-     * Migration recommendation: DELETE. data_view_field_editor/__jest__/client_integration/
-     * field_editor_flyout_content.test.ts already verifies the editor displays existing popularity.
+     * Migration recommendation: MIGRATE TO JEST. This only writes the popularity input and reads
+     * it back. Extend data_view_field_editor/__jest__/client_integration/
+     * field_editor_flyout_content.test.ts with the zero-to-one input-update assertion.
      */
     it('should update the popularity input', async function () {
       const popularity = await PageObjects.settings.getPopularity();

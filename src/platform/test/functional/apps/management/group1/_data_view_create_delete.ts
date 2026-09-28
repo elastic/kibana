@@ -13,8 +13,8 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 /**
  * Migration recommendation: MIXED. Retain Scout coverage for creation, edit, deletion, routing,
- * and persisted advanced settings. Move local form validation, static table structure, and
- * transient save-button state to Jest. The existing create_data_view_wizard.spec.ts covers only
+ * and persisted advanced settings. Move local form validation and static table structure to Jest.
+ * The existing create_data_view_wizard.spec.ts covers only
  * data-stream creation and navigation; it does not cover these index-pattern flows. A
  * near-identical serverless FTR suite exists at
  * x-pack/platform/test/serverless/functional/test_suites/management/data_views/
@@ -126,10 +126,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       /**
-       * Migration recommendation: MIGRATE TO JEST. Resetting a selected timestamp when the
-       * replacement source has none is editor state-management logic; extend
-       * src/platform/plugins/shared/data_view_editor/public/components/form_fields/
-       * timestamp_field.test.ts with mocked source metadata.
+       * Migration recommendation: MIGRATE TO SCOUT. In addition to resetting the editor state,
+       * this saves the data view and confirms its detail page has no current time field. A mocked
+       * timestamp component cannot prove the cleared value reaches Kibana persistence.
        */
       it('correctly resets time field after index pattern changes', async function () {
         await PageObjects.settings.clickKibanaIndexPatterns();
@@ -161,10 +160,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('special character handling', () => {
       /**
-       * Migration recommendation: MIGRATE TO JEST. The unmatched-pattern message is rendered by
-       * preview_panel/status_message; add a Unicode-title case to
-       * src/platform/plugins/shared/data_view_editor/public/components/preview_panel/
-       * status_message/status_message.test.tsx rather than booting Kibana.
+       * Migration recommendation: MIGRATE TO SCOUT. Entering a Unicode expression in the editor
+       * and resolving its unmatched-source status exercises the actual input, asynchronous source
+       * lookup, and rendered result. A status-message test with mocked props would miss that path.
        */
       it('should handle special charaters in template input', async () => {
         await PageObjects.settings.clickAddNewIndexPatternButton();

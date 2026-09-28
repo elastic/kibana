@@ -11,12 +11,11 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 /**
- * Migration recommendation: MIXED. Delete type, schema, and text filtering because
- * indexed_fields_table.test.tsx already covers the same filtering behavior. Move the conflict
- * button's filter-reset behavior to a Jest component test. The nearly identical serverless FTR
- * suite at x-pack/platform/test/serverless/functional/test_suites/management/data_views/
- * _index_pattern_filter.ts should be deleted alongside this one after the retained behavior is
- * covered at the appropriate layer.
+ * Migration recommendation: MIXED. Move type and text filter control behavior to Jest. Retain
+ * the runtime-field and mapping-conflict flows in Scout because they integrate the editor with
+ * real Elasticsearch data. The nearly identical serverless FTR suite at
+ * x-pack/platform/test/serverless/functional/test_suites/management/data_views/
+ * _index_pattern_filter.ts should be deleted after the behaviors are covered at these layers.
  */
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -42,8 +41,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     /**
-     * Migration recommendation: DELETE. indexed_fields_table/indexed_fields_table.test.tsx already
-     * verifies filtering by field type; the FTR variation only changes mocks to logstash data.
+     * Migration recommendation: MIGRATE TO JEST. The table test verifies the filtered result, but
+     * not the filter control that sets it. Add interactions for keyword and long to a new
+     * tabs.test.tsx beside edit_index_pattern/tabs/tabs.tsx with deterministic fields.
      */
     it('should filter indexed fields by type', async function () {
       await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
@@ -106,8 +106,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     /**
-     * Migration recommendation: DELETE. indexed_fields_table/indexed_fields_table.test.tsx already
-     * verifies query-bar filtering. The exact logstash names and tab count add no coverage.
+     * Migration recommendation: MIGRATE TO JEST. The table test verifies the filtered result, but
+     * not typing and clearing the Tabs search control. Add those interactions to the new
+     * edit_index_pattern/tabs/tabs.test.tsx with deterministic fields.
      */
     it('should filter indexed fields when searched', async function () {
       await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
@@ -151,9 +152,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     /**
-     * Migration recommendation: MIGRATE TO JEST. Conflict rendering is already covered by the
-     * indexed-fields table tests; add this button's filter-reset and conflict-only assertions to
-     * indexed_fields_table/indexed_fields_table.test.tsx with mocked conflicting fields.
+     * Migration recommendation: MIGRATE TO SCOUT. This creates an actual Elasticsearch mapping
+     * conflict, refreshes the data view, and surfaces the View conflicts action. A Jest test can
+     * cover the filter reset separately, but mocked conflicting fields cannot replace this flow.
      */
     it('should set "conflict" filter when "View conflicts" button is pressed', async function () {
       const additionalIndexWithWrongMapping = 'logstash-wrong';
