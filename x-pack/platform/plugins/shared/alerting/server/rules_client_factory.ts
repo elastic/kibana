@@ -200,7 +200,12 @@ export class RulesClientFactory {
 
   /**
    * Attempts to create a UIAM API key when shouldGrantUiam is true and the request has UIAM credentials.
-   * Logs errors and returns undefined if grant fails or credentials are missing/invalid.
+   *
+   * While rules still run with ES API keys (`apiKeyType === 'es'`), every failure is logged and
+   * swallowed so the rule write proceeds with only an ES API key. Once rules run with UIAM keys
+   * (`apiKeyType === 'uiam'`), a rule saved without one cannot search across projects, so a
+   * failed grant fails the rule write instead of degrading silently. Requests without UIAM
+   * credentials are always skipped (never sent to UIAM): a UIAM key can never be minted for them.
    */
   private async createUiamApiKey(
     request: KibanaRequest,
@@ -209,8 +214,11 @@ export class RulesClientFactory {
     if (!this.shouldGrantUiam) {
       return;
     }
+    const uiamKeyIsRequired = this.apiKeyType === ApiKeyType.UIAM;
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
     if (!authorizationHeader || !isUiamCredential(authorizationHeader)) {
+      // A non-UIAM credential means the caller is not a Cloud user (e.g. an operator), so a
+      // UIAM key can never be minted for them; skip the UIAM grant.
       this.logger.error(
         `Failed to create UIAM API key for alerting rule : ${name}: Invalid or missing UIAM credentials`,
         {
@@ -219,15 +227,13 @@ export class RulesClientFactory {
       );
       return;
     }
+
     try {
       const result = await this.securityService.authc.apiKeys.uiam?.grant(request, {
         name: `uiam-${name}`,
       });
       if (!result) {
-        this.logger.error(`Failed to create UIAM API key for alerting rule : ${name}`, {
-          tags: UIAM_LOGS_GRANT_TAGS,
-        });
-        return;
+        throw new Error(`Failed to create a Cloud API key for alerting rule : ${name}`);
       }
       return result;
     } catch (err) {
@@ -239,6 +245,9 @@ export class RulesClientFactory {
           error: { stack_trace: err.stack },
         }
       );
+      if (uiamKeyIsRequired) {
+        throw err;
+      }
       return;
     }
   }

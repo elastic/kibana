@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useAlertingRulesCache } from './use_alerting_rules_cache';
+import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
+import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -16,6 +19,8 @@ jest.mock('react-use/lib/useAsync', () => ({
   __esModule: true,
   default: jest.fn((fn: () => Promise<void>) => {
     const result = fn();
+    // The real hook captures rejections as `error`; swallow them so they don't go unhandled.
+    result.catch(() => {});
     return { loading: false, error: undefined, value: result };
   }),
 }));
@@ -142,5 +147,84 @@ describe('useAlertingRulesCache', () => {
     rerender({ ruleIds: [presentRuleId, missingRuleId] });
 
     expect(mockHttp.get).toHaveBeenCalledTimes(callsAfterFirstFetch);
+  });
+
+  it('resolves rules only from the additional source when queryV2Source is false', async () => {
+    const ruleId = 'classic-rule';
+    const classicRule = {
+      id: ruleId,
+      metadata: { name: 'Classic Rule' },
+    } as unknown as FindRulesResponse['items'][number];
+    const dataSource = createTestEpisodeSource({
+      resolveRules: jest.fn().mockResolvedValue([classicRule]),
+    });
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(
+        EpisodeDataSourceProvider,
+        { dataSource, queryV2Source: false },
+        children
+      );
+
+    const { result } = renderHook(
+      () => useAlertingRulesCache({ ruleIds: [ruleId], services: { http: mockHttp } }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.rulesCache).toEqual({ [ruleId]: classicRule }));
+    expect(mockHttp.get).not.toHaveBeenCalled();
+  });
+
+  it('falls back to the additional source when the v2 rules lookup is forbidden', async () => {
+    const ruleId = 'classic-rule';
+    const classicRule = {
+      id: ruleId,
+      metadata: { name: 'Classic Rule' },
+    } as unknown as FindRulesResponse['items'][number];
+    mockHttp.get.mockRejectedValue({
+      name: 'Error',
+      message: 'Forbidden',
+      response: { status: 403 },
+    });
+    const dataSource = createTestEpisodeSource({
+      resolveRules: jest.fn().mockResolvedValue([classicRule]),
+    });
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(EpisodeDataSourceProvider, { dataSource }, children);
+
+    const { result } = renderHook(
+      () => useAlertingRulesCache({ ruleIds: [ruleId], services: { http: mockHttp } }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.rulesCache).toEqual({ [ruleId]: classicRule }));
+    expect(mockHttp.get).toHaveBeenCalled();
+    expect(dataSource.resolveRules).toHaveBeenCalledWith(
+      expect.objectContaining({ ids: [ruleId] })
+    );
+  });
+
+  it('does not cache rule ids as missing when the v2 rules lookup is unavailable', async () => {
+    const ruleId = 'v2-rule';
+    mockHttp.get.mockRejectedValue({
+      name: 'Error',
+      message: 'Service Unavailable',
+      response: { status: 503 },
+    });
+    const dataSource = createTestEpisodeSource({ resolveRules: jest.fn().mockResolvedValue([]) });
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(EpisodeDataSourceProvider, { dataSource }, children);
+
+    const { rerender } = renderHook(
+      ({ ruleIds }: { ruleIds: string[] }) =>
+        useAlertingRulesCache({ ruleIds, services: { http: mockHttp } }),
+      { wrapper, initialProps: { ruleIds: [ruleId] } }
+    );
+
+    await waitFor(() => expect(mockHttp.get).toHaveBeenCalledTimes(1));
+    expect(dataSource.resolveRules).not.toHaveBeenCalled();
+
+    rerender({ ruleIds: [ruleId] });
+
+    await waitFor(() => expect(mockHttp.get).toHaveBeenCalledTimes(2));
   });
 });
