@@ -20,8 +20,8 @@ const overlaps = (source: string, dest: string): boolean =>
   globToRegExp(source).test(dest) || globToRegExp(dest).test(source);
 
 /**
- * Applies the view's lifecycle pipeline to a query that reads a managed backing store, which has
- * no view because the space filter only applies to it directly.
+ * Applies the view's lifecycle pipeline to a query that reads a managed backing store. Managed AI
+ * indices have no view: the space filter runs on a view's output, where nested fields are absent.
  */
 export const applyManagedLifecycle = (query: string, managedDests: string[]): string => {
   const dests = managedDests.flatMap((dest) => dest.split(','));
