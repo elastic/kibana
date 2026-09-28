@@ -191,7 +191,7 @@ export function useSingleAgentMenuItems({
               defaultMessage="Restart agent"
             />
           ),
-          icon: 'importAction',
+          icon: 'refresh',
           disabled: !agent.active || agentPolicy?.supports_agentless === true,
           onClick: () => {
             callbacks.onRestartClick();

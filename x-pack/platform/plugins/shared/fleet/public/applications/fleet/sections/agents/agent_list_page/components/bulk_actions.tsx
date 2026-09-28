@@ -284,7 +284,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             values={{ agentCount }}
           />
         ),
-        icon: 'importAction',
+        icon: 'refresh',
         disabled: !authz.fleet.allAgents,
         onClick: () => {
           setIsRestartModalOpen(true);

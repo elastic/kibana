@@ -51,6 +51,7 @@ function renderTableRowActions({
       onChangeAgentPrivilegeLevelClick={jest.fn()}
       onViewAgentJsonClick={jest.fn()}
       onRollbackClick={jest.fn()}
+      onRestartClick={jest.fn()}
       onViewAgentPolicyClick={jest.fn()}
     />
   );
@@ -765,6 +766,64 @@ describe('TableRowActions', () => {
       });
 
       expect(res).toBe(null);
+    });
+  });
+
+  describe('Restart agent action', () => {
+    it('should render restart button for active non-agentless agent', async () => {
+      const { utils } = renderTableRowActions({
+        agent: { active: true, status: 'online', local_metadata: {} } as any,
+        agentPolicy: { is_managed: false, supports_agentless: false } as AgentPolicy,
+      });
+
+      expect(utils.getByTestId('agentRestartBtn')).toBeInTheDocument();
+      expect(utils.getByTestId('agentRestartBtn')).toBeEnabled();
+    });
+
+    it('should render restart button disabled for agentless policy', async () => {
+      const { utils } = renderTableRowActions({
+        agent: { active: true, status: 'online', local_metadata: {} } as any,
+        agentPolicy: { is_managed: false, supports_agentless: true } as AgentPolicy,
+      });
+
+      expect(utils.getByTestId('agentRestartBtn')).toBeDisabled();
+    });
+
+    it('should render restart button disabled for inactive agent', async () => {
+      const { utils } = renderTableRowActions({
+        agent: { active: false, status: 'unenrolled', local_metadata: {} } as any,
+        agentPolicy: { is_managed: false, supports_agentless: false } as AgentPolicy,
+      });
+
+      expect(utils.getByTestId('agentRestartBtn')).toBeDisabled();
+    });
+
+    it('should call onRestartClick when clicked', async () => {
+      const onRestartClick = jest.fn();
+      const renderer = createFleetTestRendererMock();
+      const { getByTestId } = renderer.render(
+        <TableRowActions
+          agent={{ active: true, status: 'online', local_metadata: {} } as any}
+          agentPolicy={{ is_managed: false, supports_agentless: false } as AgentPolicy}
+          onAddRemoveTagsClick={jest.fn()}
+          onReassignClick={jest.fn()}
+          onRequestDiagnosticsClick={jest.fn()}
+          onUnenrollClick={jest.fn()}
+          onUpgradeClick={jest.fn()}
+          onGetUninstallCommandClick={jest.fn()}
+          onMigrateAgentClick={jest.fn()}
+          onChangeAgentPrivilegeLevelClick={jest.fn()}
+          onViewAgentJsonClick={jest.fn()}
+          onRollbackClick={jest.fn()}
+          onRestartClick={onRestartClick}
+          onViewAgentPolicyClick={jest.fn()}
+        />
+      );
+
+      fireEvent.click(getByTestId('agentActionsBtn'));
+      fireEvent.click(getByTestId('agentRestartBtn'));
+
+      expect(onRestartClick).toHaveBeenCalledTimes(1);
     });
   });
 });
