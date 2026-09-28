@@ -39,19 +39,23 @@ export const validateReasoningLevel = async ({
   savedObjects: SavedObjectsServiceStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }): Promise<void> => {
-  const resolvedConnectorId = await resolveSelectedConnectorId({
+  const connector = await resolveSelectedConnectorId({
     request,
     connectorId,
     uiSettings,
     savedObjects,
     inference,
     searchInferenceEndpoints,
-  });
-  if (!resolvedConnectorId) {
+  })
+    .then((resolvedConnectorId) =>
+      resolvedConnectorId ? inference.getConnectorById(resolvedConnectorId, request) : undefined
+    )
+    // Skips the check when the connector cannot be resolved
+    .catch(() => undefined);
+  if (!connector) {
     return;
   }
 
-  const connector = await inference.getConnectorById(resolvedConnectorId, request);
   const supportedLevels = getSupportedReasoningEffortLevels(connector);
   if (supportedLevels === undefined || supportedLevels.includes(reasoningLevel)) {
     return;

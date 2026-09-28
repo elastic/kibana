@@ -80,6 +80,25 @@ describe('validateReasoningLevel', () => {
     expect(inference.getConnectorById).not.toHaveBeenCalled();
   });
 
+  it('skips validation when connector resolution fails', async () => {
+    const { inference, params } = createParams();
+    resolveSelectedConnectorIdMock.mockRejectedValue(
+      new Error('Connector ID [requested-connector] does not match the configured default')
+    );
+
+    await expect(validateReasoningLevel(params)).resolves.toBeUndefined();
+    expect(inference.getConnectorById).not.toHaveBeenCalled();
+  });
+
+  it('skips validation when the resolved connector does not exist', async () => {
+    const { inference, params } = createParams();
+    inference.getConnectorById.mockRejectedValue(
+      new Error("No connector or inference endpoint found for ID 'resolved-connector'")
+    );
+
+    await expect(validateReasoningLevel(params)).resolves.toBeUndefined();
+  });
+
   it.each<{ description: string; connector: InferenceConnector }>([
     {
       description: 'any level for non-EIS connectors',
