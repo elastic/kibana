@@ -315,6 +315,58 @@ describe('sharedBulk', () => {
     expect(esClient.indices.refresh).toHaveBeenCalledWith({ index: [INDEX] });
   });
 
+  it('stamps id from _id when updater source projection omits it', async () => {
+    const { esClient, logger } = createSetup();
+    const updater = jest.fn((current: { id: string; status: string }) =>
+      current.status === 'queued' ? { status: 'pending' } : 'noop'
+    );
+
+    esClient.mget.mockResolvedValue({
+      docs: [
+        {
+          _id: 'a',
+          _index: INDEX,
+          found: true,
+          _source: { status: 'queued' },
+          _seq_no: 0,
+          _primary_term: 1,
+        },
+      ],
+    } as never);
+    esClient.bulk.mockResolvedValue({
+      errors: false,
+      items: [
+        {
+          update: {
+            _id: 'a',
+            _index: INDEX,
+            result: 'updated',
+            _seq_no: 1,
+            _primary_term: 1,
+          },
+        },
+      ],
+    } as never);
+
+    await sharedBulk<{ id: string; status: string }>(
+      esClient,
+      {
+        items: [
+          {
+            operation: 'update',
+            documentId: 'a',
+            sourceFields: ['id', 'status'],
+            updater,
+          },
+        ],
+      },
+      logger,
+      [INDEX]
+    );
+
+    expect(updater).toHaveBeenCalledWith({ id: 'a', status: 'queued' });
+  });
+
   it('throws when a response item has no _id', async () => {
     const { esClient, logger } = createSetup();
     esClient.bulk.mockResolvedValue({
