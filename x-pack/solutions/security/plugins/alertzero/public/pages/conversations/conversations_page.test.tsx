@@ -237,6 +237,10 @@ const renderPage = (
   { capabilities = {} }: { capabilities?: Record<string, unknown> } = {}
 ) => {
   const core = coreMock.createStart();
+  core.application.capabilities = {
+    ...core.application.capabilities,
+    alertzero: { show: true, write: true },
+  };
   // The real service returns a URL; the mock returns undefined, which would silently drop the
   // chat control's href and make the link assertions vacuous.
   core.application.getUrlForApp.mockImplementation(

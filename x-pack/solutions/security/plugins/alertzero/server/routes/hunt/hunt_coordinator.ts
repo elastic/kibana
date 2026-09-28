@@ -19,6 +19,7 @@ import { InvalidHuntWindowError } from '../../services/watches/hunt/common/asser
 import { huntCoordinator } from '../../services/watches/hunt/hunt_coordinator';
 import { parseTechnologyInput } from '../../services/watches/hunt/common/resolve_index_scope';
 import { resolveScopedModel } from './lib/scoped_model';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
 
 export const HUNT_COORDINATOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_coordinator` as const;
@@ -55,7 +56,7 @@ export const registerHuntCoordinatorRoute = ({
           },
         },
       },
-      async (context, request, response) => {
+      withAlertZeroEnabled(async (context, request, response) => {
         try {
           const core = await context.core;
           const spaceId = getSpaceId(request);
@@ -141,6 +142,6 @@ export const registerHuntCoordinatorRoute = ({
             body: { message: 'Hunt coordinator failed' },
           });
         }
-      }
+      })
     );
 };

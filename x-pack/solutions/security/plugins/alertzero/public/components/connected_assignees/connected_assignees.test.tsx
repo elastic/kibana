@@ -78,6 +78,10 @@ const renderPicker = (
 ) => {
   const { capabilities = { manageEscalations: true, manageInvestigations: true }, ...rest } = props;
   const core = coreMock.createStart();
+  core.application.capabilities = {
+    ...core.application.capabilities,
+    alertzero: { show: true, write: true },
+  };
   (core.application.capabilities as Record<string, unknown>).agenticInvestigations = capabilities;
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 

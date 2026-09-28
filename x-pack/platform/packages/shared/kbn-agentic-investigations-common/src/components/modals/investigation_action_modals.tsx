@@ -51,6 +51,7 @@ export interface InvestigationActionModalsProps<
    * host that opens one with no mutation to call cannot leave it stuck open.
    */
   onConfirmApproval?: (proposal: TProposal) => Promise<void>;
+  readOnly?: boolean;
   /**
    * Records a dismissal from the approval modal. Omitted by hosts that cannot capture one,
    * which also hides the Dismiss button rather than leaving it inert.
@@ -103,6 +104,7 @@ export const InvestigationActionModals = <TProposal extends ApprovalProposal = A
   initialAssignee,
   investigation,
   approvalProposal,
+  readOnly,
   onCloseAction,
   onCloseApproval,
   onConfirmApproval,
@@ -117,6 +119,7 @@ export const InvestigationActionModals = <TProposal extends ApprovalProposal = A
     {approvalProposal ? (
       <ApprovalModal
         proposal={approvalProposal}
+        readOnly={readOnly}
         onConfirm={async () => {
           if (onConfirmApproval) {
             await onConfirmApproval(approvalProposal);

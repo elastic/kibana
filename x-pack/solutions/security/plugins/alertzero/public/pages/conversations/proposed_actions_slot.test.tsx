@@ -126,8 +126,26 @@ describe('ProposedActionsSlot', () => {
       data: null,
     } as unknown as ReturnType<typeof useCurrentUserProfile>);
     mockUseKibana.mockReturnValue({
-      services: { notifications: { toasts: { addDanger } } },
+      services: {
+        application: { capabilities: { alertzero: { show: true, write: true } } },
+        notifications: { toasts: { addDanger } },
+      },
     } as unknown as ReturnType<typeof useKibana>);
+  });
+
+  it('allows reading proposal details without granting decision access', () => {
+    mockUseKibana.mockReturnValue({
+      services: {
+        application: { capabilities: { alertzero: { show: true, write: false } } },
+        notifications: { toasts: { addDanger } },
+      },
+    } as ReturnType<typeof useKibana>);
+    mockConversationProposalsPage([mockProposal]);
+    renderSlot();
+    fireEvent.click(screen.getByText('Isolate cfo-mbp-14 — host isolation'));
+    expect(screen.getByRole('button', { name: 'Approve' })).toBeDisabled();
+    expect(approveMutateAsync).not.toHaveBeenCalled();
+    expect(dismissMutateAsync).not.toHaveBeenCalled();
   });
 
   it('renders a proposed-action button for each proposal, decided or not', () => {

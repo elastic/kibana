@@ -10,6 +10,7 @@ import { getAgenticInvestigationsCapabilities } from './use_agentic_investigatio
 
 const caps = (overrides: object = {}): Capabilities =>
   ({
+    alertzero: { show: true, write: true },
     navLinks: {},
     management: {},
     catalogue: {},
@@ -66,6 +67,23 @@ describe('getAgenticInvestigationsCapabilities', () => {
       showEscalations: true,
       manageEscalations: true,
       manageInvestigations: true,
+    });
+  });
+  it('requires AlertZero write as well as the dependent feature privileges', () => {
+    const capabilities = caps({
+      showEscalations: true,
+      manageEscalations: true,
+      manageInvestigations: true,
+    });
+    expect(
+      getAgenticInvestigationsCapabilities({
+        ...capabilities,
+        alertzero: { show: true, write: false },
+      })
+    ).toEqual({
+      showEscalations: true,
+      manageEscalations: false,
+      manageInvestigations: false,
     });
   });
 });

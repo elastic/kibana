@@ -12,6 +12,7 @@ import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../..
 import { InvalidHuntWindowError } from '../../services/watches/hunt/common/assert_hunt_window';
 import { resolveIndexScope } from '../../services/watches/hunt/common/resolve_index_scope';
 import { huntForThreat } from '../../services/watches/hunt/tier1/hunt_for_threat';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
 
 export const HUNT_FOR_THREAT_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_for_threat` as const;
@@ -42,7 +43,7 @@ export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: Route
           },
         },
       },
-      async (context, request, response) => {
+      withAlertZeroEnabled(async (context, request, response) => {
         try {
           const { technology, iocs, techniques, time_range, size } = request.body;
           const spaceId = getSpaceId(request);
@@ -89,6 +90,6 @@ export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: Route
             body: { message: 'Failed to run hunt_for_threat' },
           });
         }
-      }
+      })
     );
 };

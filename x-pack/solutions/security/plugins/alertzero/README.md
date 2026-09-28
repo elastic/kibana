@@ -4,15 +4,15 @@ Security Watch investigation queue and catalog behind the `securitySolution:enab
 
 ## Enablement
 
-### Prerequisite: `xpack.agenticInvestigations.enabled`
+### Runtime dependencies
 
-AlertZero lists `agenticInvestigations` in `requiredPlugins`, so Kibana will not load the AlertZero plugin at all when `agenticInvestigations` is disabled. That plugin defaults to `false`, so on a stock deployment neither of the two gates below has any effect until this is set first:
+AlertZero's upgrade and access-denied screens can load when Agent Builder, Proposals, or Agentic Investigations is disabled. These plugins are optional dependencies of the shell, but all three are required to run the feature. For example, enable Agentic Investigations with:
 
 ```yaml
 xpack.agenticInvestigations.enabled: true
 ```
 
-Both gates described below are skipped — and the advanced setting is never registered — unless this prerequisite is satisfied.
+When a runtime dependency is absent, AlertZero does not register its managed-workflow owner or start feature services. Eligible users see an unavailable screen and the APIs return 503. An insufficient subscription still shows the appropriate upgrade gate first.
 
 ### Two independent gates, with different scopes and different jobs
 
@@ -32,7 +32,7 @@ It controls four things. Enabling takes effect live, but **disabling takes full 
 | Browser app `/app/alertzero` | Registered but `AppStatus.inaccessible`; every page renders core's "Application unavailable" |
 | Security solution navigation | AlertZero nodes disappear — core empties `visibleIn` and `deepLinks` for an inaccessible app, and chrome drops nav nodes whose link has no nav link. The navigation trees hold no check of their own |
 | HTTP `/internal/alertzero/*` | `404`, via the `withAlertZeroEnabled` wrapper on every route |
-| Agent Builder Investigation template and its tabs | Absent from the next page load. Agent Builder's conversation template contract has no deregistration counterpart, so a session that already registered them keeps them until it reloads; in that window opening one raises an error instead of loading an investigation |
+| Agent Builder Investigation template and its tabs | Absent from the next page load. Agent Builder's conversation template contract has no deregistration counterpart, so a session that already registered them keeps them until it reloads; in that window AlertZero-provided content shows the disabled gate instead of loading feature data |
 
 ### `xpack.alertzero.enabled` — the deployment kill switch
 
@@ -48,6 +48,20 @@ AlertZero reads live data only. To work on the UI without waiting for Workers to
 
 Everything in the table below is skipped when it is off — including registration of the advanced setting itself, which is why `withAlertZeroEnabled` can never read an unregistered key.
 
+
+### Subscription and authorization
+
+UI and HTTP API access additionally require:
+
+- ECH: an available, active license supporting Enterprise.
+- Serverless: the **Security** product's **Complete** tier. Security Serverless supplies this entitlement through `setServerlessTierAvailable` on the server setup and browser start contracts. Other products' Complete tiers do not qualify.
+- AlertZero **Read** to view content and **All** for write actions. Existing dependent-feature privileges, such as managed-workflow update access, are still required.
+
+An insufficient subscription shows an environment-specific upgrade screen. Missing Read access removes AlertZero navigation and deep links while keeping direct URLs mountable for the access-denied screen. Read-only users cannot edit worker settings or submit proposal decisions in AlertZero. The application boundary prevents feature content from mounting until access is resolved and responds to license changes.
+
+Every AlertZero HTTP route uses `withAlertZeroEnabled` to check the per-space setting and subscription before running its handler, alongside declarative read/write authorization. Setting-off requests return 404 for otherwise authorized callers; subscription and authorization failures return 403.
+
+These availability checks gate **UI and API access only**. They do not stop, disable, or unschedule background work when a subscription changes.
 
 ### Worker lifecycle
 

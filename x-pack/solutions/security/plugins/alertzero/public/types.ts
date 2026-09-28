@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { AgenticInvestigationsPublicPluginStart } from '@kbn/agentic-investigations-plugin/public';
+import type { ProposalsPublicPluginStart } from '@kbn/proposals-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -17,8 +21,11 @@ export interface AlertZeroClientConfig {
 export type AlertZeroSetupDependencies = Record<string, never>;
 
 export interface AlertZeroStartDependencies {
-  /** Required plugin, see `requiredPlugins` in kibana.jsonc. */
-  agentBuilder: AgentBuilderPluginStart;
+  licensing: LicensingPluginStart;
+  cloud?: CloudStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  agenticInvestigations?: AgenticInvestigationsPublicPluginStart;
+  proposals?: ProposalsPublicPluginStart;
   spaces?: SpacesPluginStart;
   share?: SharePluginStart;
   workflowsManagement?: WorkflowsPublicPluginStart;
@@ -31,4 +38,6 @@ export interface AlertZeroStartDependencies {
 export interface AlertZeroPublicSetup {
   enabled: boolean;
 }
-export type AlertZeroPublicStart = Record<string, never>;
+export interface AlertZeroPublicStart {
+  setServerlessTierAvailable: (available: boolean) => void;
+}

@@ -27,6 +27,7 @@ import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { ProposedActionButton } from '@kbn/agentic-investigations-common';
+import { useCanWriteAlertZero } from '../../hooks/use_can_write_alertzero';
 import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
 import { decisionErrorMessage } from './decision_errors';
 import {
@@ -59,6 +60,7 @@ const ProposedActionRow = ({
   approve,
   dismiss,
 }: ProposedActionRowProps) => {
+  const canWrite = useCanWriteAlertZero();
   const isApproving = useIsApprovingProposal(proposal.id);
   const isDeclining = useIsDecliningProposal(proposal.id);
 
@@ -66,6 +68,7 @@ const ProposedActionRow = ({
     <EuiFlexItem>
       <ProposedActionButton
         proposal={proposal}
+        readOnly={!canWrite}
         isSubmitting={isApproving ? 'applying' : isDeclining ? 'declining' : undefined}
         onConfirm={async () => {
           try {

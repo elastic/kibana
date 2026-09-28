@@ -20,6 +20,7 @@ import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 import type { ApprovalProposal } from './types';
 
 export interface ApprovalModalProps {
+  readOnly?: boolean;
   alwaysAllow?: {
     id: string;
     label: React.ReactNode;
@@ -55,6 +56,7 @@ export interface ApprovalModalProps {
  */
 export const ApprovalModal = memo<ApprovalModalProps>(
   ({
+    readOnly = false,
     alwaysAllow,
     proposal,
     onConfirm,
@@ -92,7 +94,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
           primaryAction={{
             label: APPROVAL_MODAL_TRANSLATIONS.approve,
             onClick: onConfirm,
-            isDisabled: isExpired,
+            isDisabled: isExpired || readOnly,
             'data-test-subj': dataTestSubj ? `${dataTestSubj}-confirm` : undefined,
           }}
           secondaryActions={
@@ -103,7 +105,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
                     iconType: 'cross',
                     color: 'text',
                     onClick: onDismiss,
-                    isDisabled: isExpired,
+                    isDisabled: isExpired || readOnly,
                     'data-test-subj': dataTestSubj ? `${dataTestSubj}-dismiss` : undefined,
                   },
                 ]

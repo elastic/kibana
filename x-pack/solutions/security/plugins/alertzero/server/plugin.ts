@@ -16,6 +16,7 @@ import {
 } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { getSubscriptionAvailability } from '../common/availability';
 import {
   ALERTZERO_API_PRIVILEGE_READ,
   ALERTZERO_API_PRIVILEGE_WRITE,
@@ -24,6 +25,7 @@ import {
 } from '../common/constants';
 import type { AlertZeroConfig } from './config';
 import type {
+  AlertZeroRequestHandlerContext,
   AlertZeroPluginSetup,
   AlertZeroPluginStart,
   AlertZeroSetupDependencies,
@@ -56,6 +58,12 @@ export class AlertZeroPlugin
 {
   private readonly logger: Logger;
   private readonly config: AlertZeroConfig;
+  private readonly isServerless: boolean;
+  private serverlessTierAvailable = false;
+
+  private readonly setServerlessTierAvailable = (available: boolean): void => {
+    this.serverlessTierAvailable = available;
+  };
   private spaces?: AlertZeroStartDependencies['spaces'];
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
 
@@ -65,19 +73,23 @@ export class AlertZeroPlugin
   private workersService?: WorkersService;
   private conversationProposalsService?: ConversationProposalsService;
   private proposals?: AlertZeroStartDependencies['proposals'];
-  private agentBuilderConversations?: AlertZeroStartDependencies['agentBuilder']['conversations'];
+  private agentBuilderConversations?: NonNullable<
+    AlertZeroStartDependencies['agentBuilder']
+  >['conversations'];
   private huntServices?: HuntServices;
 
   constructor(context: PluginInitializerContext<AlertZeroConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
 
   setup(
     coreSetup: CoreSetup<AlertZeroStartDependencies, AlertZeroPluginStart>,
     {
       agentBuilder,
-      proposals: _proposalsSetup,
+      proposals,
+      agenticInvestigations,
       features,
       searchInferenceEndpoints,
       workflowsExtensions,
@@ -86,7 +98,7 @@ export class AlertZeroPlugin
   ): AlertZeroPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('AlertZero plugin is disabled');
-      return { isEnabled: false };
+      return { isEnabled: false, setServerlessTierAvailable: this.setServerlessTierAvailable };
     }
 
     this.logger.info('Setting up AlertZero plugin');
@@ -97,34 +109,39 @@ export class AlertZeroPlugin
 
     this.workflowsManagementApi = workflowsManagement.management;
 
-    registerOwner({ workflowsExtensions });
-    registerAgentType(agentBuilder);
-    registerAttachments(agentBuilder);
+    if (agentBuilder && proposals && agenticInvestigations) {
+      registerOwner({ workflowsExtensions });
+      registerAgentType(agentBuilder);
+      registerAttachments(agentBuilder);
+      // Registered in setup so the builtin tool is available to Agent Builder before
+      // the first agent run; the handler resolves the service lazily like the routes do.
+      agentBuilder.tools.register({
+        ...listActionsTool(() => this.requireActionsService()),
+      });
+      agentBuilder.tools.register({
+        ...reviseProposalTool(() => this.requireProposals()),
+      });
+    }
+
     registerAlertZeroInferenceFeatures(searchInferenceEndpoints, this.logger.get('inference'));
-    // Registered in setup so the builtin tool is available to Agent Builder before
-    // the first agent run; the handler resolves the service lazily like the routes do.
-    agentBuilder.tools.register({
-      ...listActionsTool(() => this.requireActionsService()),
-    });
-    agentBuilder.tools.register({
-      ...reviseProposalTool(() => this.requireProposals()),
-    });
 
     features.registerKibanaFeature({
       id: ALERTZERO_FEATURE_ID,
       name: ALERTZERO_PLUGIN_NAME,
       order: 1101,
+      minimumLicense: 'enterprise',
       category: DEFAULT_APP_CATEGORIES.security,
-      app: ['kibana', ALERTZERO_FEATURE_ID],
+      // Keep the app mountable for upgrade and access-denied screens; APIs enforce privileges.
+      app: ['kibana'],
       privileges: {
         all: {
-          app: ['kibana', ALERTZERO_FEATURE_ID],
+          app: ['kibana'],
           api: [ALERTZERO_API_PRIVILEGE_READ, ALERTZERO_API_PRIVILEGE_WRITE],
           savedObject: { all: [], read: [] },
           ui: ['show', 'write'],
         },
         read: {
-          app: ['kibana', ALERTZERO_FEATURE_ID],
+          app: ['kibana'],
           api: [ALERTZERO_API_PRIVILEGE_READ],
           savedObject: { all: [], read: [] },
           ui: ['show'],
@@ -132,7 +149,18 @@ export class AlertZeroPlugin
       },
     });
 
-    const router = coreSetup.http.createRouter();
+    coreSetup.http.registerRouteHandlerContext<AlertZeroRequestHandlerContext, 'alertzero'>(
+      'alertzero',
+      async (context) => ({
+        hasRequiredDependencies: Boolean(agentBuilder && proposals && agenticInvestigations),
+        subscription: getSubscriptionAvailability({
+          isServerless: this.isServerless,
+          serverlessTierAvailable: this.serverlessTierAvailable,
+          license: this.isServerless ? undefined : (await context.licensing).license,
+        }),
+      })
+    );
+    const router = coreSetup.http.createRouter<AlertZeroRequestHandlerContext>();
 
     registerRoutes({
       router,
@@ -146,7 +174,7 @@ export class AlertZeroPlugin
       getHuntServices: () => this.requireHuntServices(),
     });
 
-    return { isEnabled: true };
+    return { isEnabled: true, setServerlessTierAvailable: this.setServerlessTierAvailable };
   }
 
   start(_core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
@@ -158,11 +186,12 @@ export class AlertZeroPlugin
       return {};
     }
 
-    void ensureAgentSafe({
-      agentBuilder: plugins.agentBuilder,
-      spaceId: DEFAULT_SPACE_ID,
-      logger: this.logger,
-    });
+    const { agentBuilder, agenticInvestigations, proposals } = plugins;
+    // Optional dependencies allow the upgrade shell to load without starting feature work.
+    if (!agentBuilder || !proposals || !agenticInvestigations) {
+      return {};
+    }
+    void ensureAgentSafe({ agentBuilder, spaceId: DEFAULT_SPACE_ID, logger: this.logger });
 
     const management = this.workflowsManagementApi
       ? new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi)
@@ -170,9 +199,7 @@ export class AlertZeroPlugin
     const managedWorkflows = initializeManagedWorkflows({
       workflowsExtensions: plugins.workflowsExtensions,
       logger: this.logger,
-      ensureAgentForSpace: plugins.agentBuilder
-        ? (spaceId) => ensureAgent({ agentBuilder: plugins.agentBuilder!, spaceId })
-        : undefined,
+      ensureAgentForSpace: (spaceId) => ensureAgent({ agentBuilder, spaceId }),
     }).catch((error) => {
       this.logger.error(
         `AlertZero managed workflow initialization failed: ${
@@ -183,10 +210,10 @@ export class AlertZeroPlugin
     });
 
     this.conversationProposalsService = new ConversationProposalsService(
-      plugins.proposals.getProposalsService(),
-      plugins.agentBuilder,
+      proposals.getProposalsService(),
+      agentBuilder,
       this.logger,
-      plugins.agenticInvestigations.getImpactClient
+      agenticInvestigations.getImpactClient
     );
 
     this.watchesService = new WatchesService();
@@ -198,16 +225,14 @@ export class AlertZeroPlugin
       this.logger
     );
     this.workersService = new WorkersService(management, managedWorkflows, this.logger, {
-      ensureAgentForSpace: plugins.agentBuilder
-        ? (spaceId) =>
-            ensureAgentSafe({ agentBuilder: plugins.agentBuilder!, spaceId, logger: this.logger })
-        : undefined,
-      agentBuilder: plugins.agentBuilder,
+      ensureAgentForSpace: (spaceId) =>
+        ensureAgentSafe({ agentBuilder, spaceId, logger: this.logger }),
+      agentBuilder,
       agentTypes: [agentType],
     });
 
     this.huntServices = {
-      getProposalsService: plugins.proposals.getProposalsService,
+      getProposalsService: () => this.requireProposals().getProposalsService(),
       getInference: () => plugins.inference,
       getSearchInferenceEndpoints: () => plugins.searchInferenceEndpoints,
     };
@@ -230,7 +255,7 @@ export class AlertZeroPlugin
     return this.requireStarted(this.actionsService, 'Actions service');
   }
 
-  private requireProposals(): AlertZeroStartDependencies['proposals'] {
+  private requireProposals(): NonNullable<AlertZeroStartDependencies['proposals']> {
     return this.requireStarted(this.proposals, 'proposals plugin start contract');
   }
 
@@ -242,7 +267,9 @@ export class AlertZeroPlugin
     return this.requireStarted(this.conversationProposalsService, 'ConversationProposalsService');
   }
 
-  private requireAgentBuilderConversations(): AlertZeroStartDependencies['agentBuilder']['conversations'] {
+  private requireAgentBuilderConversations(): NonNullable<
+    AlertZeroStartDependencies['agentBuilder']
+  >['conversations'] {
     return this.requireStarted(this.agentBuilderConversations, 'agentBuilder.conversations');
   }
 

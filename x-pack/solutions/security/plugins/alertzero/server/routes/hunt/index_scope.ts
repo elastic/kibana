@@ -17,6 +17,7 @@ import {
   HUNT_TECHNOLOGIES,
   resolveIndexScope,
 } from '../../services/watches/hunt/common/resolve_index_scope';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
 
 export const HUNT_INDEX_SCOPE_URL = `${HUNT_INTERNAL_ROUTE_BASE}/index_scope` as const;
@@ -48,7 +49,7 @@ export const registerHuntIndexScopeRoute = ({ router, logger, getSpaceId }: Rout
           },
         },
       },
-      async (context, request, response) => {
+      withAlertZeroEnabled(async (context, request, response) => {
         try {
           const { technology } = request.query;
           const spaceId = getSpaceId(request);
@@ -67,6 +68,6 @@ export const registerHuntIndexScopeRoute = ({ router, logger, getSpaceId }: Rout
             body: { message: 'Failed to resolve hunt index scope' },
           });
         }
-      }
+      })
     );
 };

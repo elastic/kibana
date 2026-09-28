@@ -32,6 +32,7 @@ import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { useAssignInvestigation } from '@kbn/agentic-investigations-plugin/public';
+import { useCanWriteAlertZero } from '../../hooks/use_can_write_alertzero';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
 import { useStatusSignal } from '../../components/connected_status/use_status_signal';
 import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
@@ -165,6 +166,7 @@ export const ConversationsPage: React.FC = () => {
     services: { notifications },
   } = useKibana<CoreStart>();
 
+  const canWrite = useCanWriteAlertZero();
   const { manageEscalations: canManageEscalations, manageInvestigations: canManageInvestigations } =
     useAgenticInvestigationsCapabilities();
 
@@ -337,6 +339,7 @@ export const ConversationsPage: React.FC = () => {
         initialAssignee={actionInvestigation?.assignee}
         investigation={actionInvestigation}
         approvalProposal={selectedProposal}
+        readOnly={!canWrite}
         onCloseAction={closeModal}
         onCloseApproval={closeApproval}
         onConfirmApproval={confirmApproval}
@@ -399,7 +402,7 @@ export const ConversationsPage: React.FC = () => {
               section={section}
               entityFilter={effectiveEntityFilter}
               selectedConversationId={selectedConversationId}
-              onClickRecommendedAction={onClickRecommendedAction}
+              onClickRecommendedAction={canWrite ? onClickRecommendedAction : undefined}
               onClickAction={onClickAction}
               onClickCard={onClickCard}
               onOpenChat={openChatForProposal}

@@ -29,6 +29,7 @@ export interface DismissProposalParams {
 }
 
 export interface ProposedActionButtonProps {
+  readOnly?: boolean;
   /** Same shape the card's recommended-action menu item reads its proposal from. */
   proposal: ApprovalProposal;
   /** Commits the approval — pass the mutation's own promise (`mutateAsync`). */
@@ -80,6 +81,7 @@ const PENDING_BADGE = {
  */
 export const ProposedActionButton = memo<ProposedActionButtonProps>(
   ({
+    readOnly = false,
     proposal,
     onConfirm,
     onDismiss,
@@ -209,6 +211,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
         {isModalOpen && (
           <ApprovalModal
             proposal={proposal}
+            readOnly={readOnly}
             onConfirm={onConfirm}
             onClose={closeModal}
             onDismiss={onDismiss ? openDismissModal : undefined}

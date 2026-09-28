@@ -109,6 +109,10 @@ const assignMutate = jest.fn().mockResolvedValue({});
 
 const renderPage = (overrides: { capabilities?: object } = {}) => {
   const core = coreMock.createStart();
+  core.application.capabilities = {
+    ...core.application.capabilities,
+    alertzero: { show: true, write: true },
+  };
   // Grant both show and manage by default.
   (core.application.capabilities as Record<string, unknown>).agenticInvestigations = {
     showEscalations: true,
