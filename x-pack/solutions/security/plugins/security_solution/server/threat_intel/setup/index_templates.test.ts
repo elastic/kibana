@@ -304,12 +304,10 @@ describe('index_templates — migrations', () => {
 
   it('repairs a partial Diamond context mapping missing char leaves', async () => {
     const mappings = fullyMigratedReportMappings();
-    delete (
-      mappings.properties.extracted.properties.diamond.properties as Record<string, unknown>
-    ).context_chars;
-    delete (
-      mappings.properties.extracted.properties.diamond.properties as Record<string, unknown>
-    ).source_chars;
+    delete (mappings.properties.extracted.properties.diamond.properties as Record<string, unknown>)
+      .context_chars;
+    delete (mappings.properties.extracted.properties.diamond.properties as Record<string, unknown>)
+      .source_chars;
 
     const { patchedPaths } = await runMigrations({ reportMappings: mappings });
 

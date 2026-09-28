@@ -7,10 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
-import {
-  ChatCompletionErrorCode,
-  InferenceTaskError,
-} from '@kbn/inference-common';
+import { ChatCompletionErrorCode, InferenceTaskError } from '@kbn/inference-common';
 import { enrichTaxonomy, taxonomyOutputSchema } from './enrich_taxonomy';
 
 const validOutput = {

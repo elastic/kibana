@@ -118,9 +118,11 @@ describe('materializeArticle', () => {
       `${'Full technical analysis of the campaign. '.repeat(40)}` +
       `The C2 returned HTTP access denied on the first probe, then served the payload. ` +
       `${'Additional IOC and TTP detail follows. '.repeat(20)}`;
-    const fetchFn = jest.fn().mockResolvedValue(
-      new Response(JSON.stringify({ data: { markdown: analysis } }), { status: 200 })
-    ) as typeof fetch;
+    const fetchFn = jest
+      .fn()
+      .mockResolvedValue(
+        new Response(JSON.stringify({ data: { markdown: analysis } }), { status: 200 })
+      ) as typeof fetch;
     const result = await run({}, fetchFn);
 
     expect(result.materialization.status).toBe('rendered');
