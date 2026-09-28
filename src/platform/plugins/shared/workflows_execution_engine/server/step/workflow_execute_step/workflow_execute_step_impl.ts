@@ -205,7 +205,6 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
   }
 
   private isManagedParentExecution(): boolean {
-    return true;
     const { workflowExecution } = this.init.stepExecutionRuntime;
     return workflowExecution.managed === true;
   }
