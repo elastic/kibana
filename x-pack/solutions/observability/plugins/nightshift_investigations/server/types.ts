@@ -29,6 +29,7 @@ import type {
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { NightshiftInvestigationsClient } from './client/investigations_client';
+import type { DeleteAllInvestigationsResult } from './storage';
 import type { TriggerEmitter } from './workflows/triggers/emit';
 
 export interface InvestigationQuotaResult {
@@ -44,6 +45,8 @@ export interface NightshiftInvestigationsServerSetup {
 export interface NightshiftInvestigationsServerStart {
   getInvestigationsClient: (request: KibanaRequest) => NightshiftInvestigationsClient;
   isInvestigationAvailable: (request: KibanaRequest) => Promise<boolean>;
+  /** Deletes investigations in every space; callers must authorize this destructive operation. */
+  deleteAllInvestigations: () => Promise<DeleteAllInvestigationsResult>;
 }
 
 export interface NightshiftInvestigationsSetupDeps {

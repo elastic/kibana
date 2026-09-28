@@ -30,26 +30,22 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     consumersToVerify: Set<string>;
   }) {
     it('navigates to the rules page', async () => {
-      await retry.try(async () => {
-        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
-        expect(await testSubjects.exists('manageRulesPageButton')).toBeTruthy();
-        await testSubjects.click('manageRulesPageButton');
-      });
+      await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+      await testSubjects.existOrFail('manageRulesPageButton', { timeout: 10000 });
+      await testSubjects.click('manageRulesPageButton');
+      await testSubjects.existOrFail('createRuleButton', { timeout: 10000 });
     });
 
     it('should open the rule creation flyout', async () => {
-      await retry.try(async () => {
-        await testSubjects.click('createRuleButton');
-        const isCreateRuleFlyoutVisible = await testSubjects.exists('ruleTypeModal');
-        expect(isCreateRuleFlyoutVisible).toBe(true);
-      });
+      await testSubjects.click('createRuleButton');
+      await testSubjects.existOrFail('ruleTypeModal', { timeout: 10000 });
     });
 
     it('should click the custom threshold rule type', async () => {
       await testSubjects.click('observability.rules.custom_threshold-SelectOption');
       const ruleType = await testSubjects.getVisibleText('ruleDefinitionHeaderRuleTypeName');
       expect(ruleType).toEqual('Custom threshold');
-      await testSubjects.exists('selectDataViewExpression');
+      await testSubjects.existOrFail('selectDataViewExpression');
     });
 
     it('should create a new custom threshold rule', async () => {
@@ -82,11 +78,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(areConsumersEqual).toBe(true);
       });
 
+      await testSubjects.click('rulePageFooterSaveButton');
+      await testSubjects.existOrFail('confirmModalConfirmButton');
+      await testSubjects.click('confirmModalConfirmButton');
       await retry.try(async () => {
-        await testSubjects.click('rulePageFooterSaveButton');
-        const doesConfirmModalExist = await testSubjects.exists('confirmModalConfirmButton');
-        expect(doesConfirmModalExist).toBe(true);
-        await testSubjects.click('confirmModalConfirmButton');
         const name = await testSubjects.getVisibleText('appHeaderTitle');
         expect(name).toEqual(ruleName);
       });

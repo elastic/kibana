@@ -5,13 +5,20 @@
  * 2.0.
  */
 import type { SyntheticsRestApiRouteFactory } from '../types';
-import { syntheticsServiceAPIKeySavedObject } from '../../saved_objects/service_api_key';
+import {
+  privateLocationShardingAPIKeySavedObject,
+  syntheticsServiceAPIKeySavedObject,
+} from '../../saved_objects/service_api_key';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import {
   generateAndSaveServiceAPIKey,
   getAPIKeyForSyntheticsService,
   getSyntheticsEnablement,
 } from '../../synthetics_service/get_api_key';
+import {
+  generateAndSavePrivateLocationShardingApiKey,
+  getPrivateLocationShardingApiKey,
+} from '../../synthetics_service/private_location/get_sharding_api_key';
 
 export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
@@ -41,6 +48,29 @@ export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = () =>
     }
     const regenerationRequired = !isEnabled || !isValid;
     const shouldEnableApiKey = server.config.service?.manifestUrl || server.config.service?.devUrl;
+    if (!shouldEnableApiKey && !isValid) {
+      const shardingApiKey = await getPrivateLocationShardingApiKey({ server });
+      if (shardingApiKey.apiKey && !shardingApiKey.isValid) {
+        await privateLocationShardingAPIKeySavedObject.delete(savedObjectsClient);
+        await security.authc.apiKeys.invalidateAsInternalUser({
+          ids: [shardingApiKey.apiKey.id],
+        });
+      }
+      if (!shardingApiKey.isValid) {
+        try {
+          await generateAndSavePrivateLocationShardingApiKey({
+            request,
+            savedObjectsClient,
+            server,
+          });
+        } catch (error) {
+          server.logger.debug(
+            `Unable to create private location sharding API key: ${error.message}`
+          );
+        }
+      }
+      return { ...result, isServiceAllowed };
+    }
     if (canEnable && regenerationRequired && shouldEnableApiKey) {
       await generateAndSaveServiceAPIKey({
         request,
@@ -79,9 +109,14 @@ export const disableSyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
     const { apiKey } = await getAPIKeyForSyntheticsService({
       server,
     });
+    const { apiKey: shardingApiKey } = await getPrivateLocationShardingApiKey({ server });
     await syntheticsServiceAPIKeySavedObject.delete(savedObjectsClient);
+    await privateLocationShardingAPIKeySavedObject.delete(savedObjectsClient);
     if (apiKey?.id) {
       await security.authc.apiKeys?.invalidateAsInternalUser({ ids: [apiKey.id] });
+    }
+    if (shardingApiKey?.id) {
+      await security.authc.apiKeys.invalidateAsInternalUser({ ids: [shardingApiKey.id] });
     }
     return response.ok({});
   },

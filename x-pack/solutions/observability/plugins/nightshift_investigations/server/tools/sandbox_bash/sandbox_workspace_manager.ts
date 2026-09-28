@@ -10,6 +10,7 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { SandboxSecretsClient } from '../../sandbox_secrets';
 import type { SandboxCallContext } from './tool_utils';
+import { authorizeConnector } from './connector_authorization';
 import { writeConnectorManifest } from './connector_manifest';
 import { writeElasticManifest } from './elastic_manifest';
 
@@ -23,6 +24,7 @@ import { writeElasticManifest } from './elastic_manifest';
 export const createSandboxWorkspaceManager = ({
   getDeps,
   telemetryConnectorId,
+  telemetryReadableIndices,
   logger,
 }: {
   getDeps: () => {
@@ -31,6 +33,7 @@ export const createSandboxWorkspaceManager = ({
   };
   /** When set, `/workspace/elastic.md` is (re-)seeded alongside the connector manifest. */
   telemetryConnectorId?: string;
+  telemetryReadableIndices?: string;
   logger: Logger;
 }) => {
   const lastWorkspaceKeys = new Map<SandboxSession, string>();
@@ -58,18 +61,34 @@ export const createSandboxWorkspaceManager = ({
     }): Promise<void> {
       const { actions, sandboxSecretsClient } = getDeps();
       const secretKeys = await listSecretKeys(sandboxSecretsClient, callContext);
-
-      const currentKey = JSON.stringify({
-        connectors: [...callContext.allowedConnectorIds].sort(),
-        secretKeys: [...secretKeys].sort(),
-      });
-      const lastKey = lastWorkspaceKeys.get(session);
-
-      if (!session.isReset && lastKey === currentKey) return;
-
       const getActionsClient = actions
         ? (req: KibanaRequest) => actions.getActionsClientWithRequest(req)
         : undefined;
+      const telemetryAuthorization = telemetryConnectorId
+        ? await authorizeConnector(telemetryConnectorId, callContext, actions)
+        : undefined;
+      const canUseTelemetry = Boolean(
+        telemetryAuthorization && !('errorMessage' in telemetryAuthorization)
+      );
+      const currentKey = JSON.stringify({
+        connectorIds: [...callContext.allowedConnectorIds].sort(),
+        secretKeys: [...secretKeys].sort(),
+        canUseTelemetry,
+      });
+      const lastKey = lastWorkspaceKeys.get(session);
+      if (!session.isReset && lastKey === currentKey) return;
+
+      if (!canUseTelemetry) {
+        lastWorkspaceKeys.delete(session);
+        // Clear previously seeded hints on revocation; a failed clear must block file access.
+        const [result] = await session.writeFiles([
+          {
+            path: '/workspace/elastic.md',
+            content: Buffer.from('No telemetry connector is available.\n'),
+          },
+        ]);
+        if (!result?.success) throw new Error('Failed to clear sandbox telemetry guidance');
+      }
 
       try {
         await writeConnectorManifest({
@@ -79,17 +98,18 @@ export const createSandboxWorkspaceManager = ({
           secretKeys,
           logger,
         });
+        if (telemetryConnectorId && canUseTelemetry) {
+          await writeElasticManifest({
+            session,
+            connectorId: telemetryConnectorId,
+            readableIndices: telemetryReadableIndices,
+            logger,
+          });
+        }
         lastWorkspaceKeys.set(session, currentKey);
       } catch (err) {
-        logger.warn(`Connector manifest write failed: ${(err as Error).message}`);
-      }
-
-      if (telemetryConnectorId) {
-        try {
-          await writeElasticManifest({ session, connectorId: telemetryConnectorId, logger });
-        } catch (err) {
-          logger.warn(`Elastic manifest write failed: ${(err as Error).message}`);
-        }
+        lastWorkspaceKeys.delete(session);
+        logger.warn(`Sandbox manifest write failed: ${(err as Error).message}`);
       }
     },
   };
