@@ -31,6 +31,7 @@ import { AgentRequestDiagnosticsModal } from '../../components/agent_request_dia
 import { useExportCSV } from '../hooks/export_csv';
 import { AgentExportCSVModal } from '../../components/agent_export_csv_modal';
 import { AgentRollbackModal } from '../../components/agent_rollback_modal';
+import { AgentRestartModal } from '../../components/agent_restart_modal';
 
 import type { SelectionMode } from './types';
 import { TagsAddRemove } from './tags_add_remove';
@@ -97,6 +98,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const [isAgentPrivilegeChangeModalOpen, setIsAgentPrivilegeChangeModalOpen] =
     useState<boolean>(false);
   const [isRollbackModalOpen, setIsRollbackModalOpen] = useState<boolean>(false);
+  const [isRestartModalOpen, setIsRestartModalOpen] = useState<boolean>(false);
   const [isRemoveCollectorModalOpen, setIsRemoveCollectorModalOpen] = useState<boolean>(false);
 
   // update the query removing the "managed" agents in any state (unenrolled, offline, etc)
@@ -272,6 +274,22 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: false });
         },
         'data-test-subj': 'agentBulkActionsUpgrade',
+      },
+      {
+        id: 'restart',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.agentBulkActions.restartAgents"
+            defaultMessage="Restart {agentCount, plural, one {# agent} other {# agents}}"
+            values={{ agentCount }}
+          />
+        ),
+        icon: 'importAction',
+        disabled: !authz.fleet.allAgents,
+        onClick: () => {
+          setIsRestartModalOpen(true);
+        },
+        'data-test-subj': 'agentBulkActionsRestart',
       },
       // Upgrade management submenu
       {
@@ -555,6 +573,17 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             agentCount={agentCount}
             onClose={() => {
               setIsRollbackModalOpen(false);
+            }}
+          />
+        </EuiPortal>
+      )}
+      {isRestartModalOpen && (
+        <EuiPortal>
+          <AgentRestartModal
+            agents={agents}
+            agentCount={agentCount}
+            onClose={() => {
+              setIsRestartModalOpen(false);
             }}
           />
         </EuiPortal>

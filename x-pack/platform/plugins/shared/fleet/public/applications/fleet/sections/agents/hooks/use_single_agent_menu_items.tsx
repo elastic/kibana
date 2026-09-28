@@ -44,6 +44,7 @@ export interface SingleAgentMenuCallbacks {
   onUnenrollClick: () => void;
   onUninstallClick: () => void;
   onRollbackClick: () => void;
+  onRestartClick: () => void;
   onRemoveCollectorClick?: () => void;
 }
 
@@ -181,6 +182,21 @@ export function useSingleAgentMenuItems({
             callbacks.onUpgradeClick();
           },
           'data-test-subj': 'upgradeBtn',
+        },
+        {
+          id: 'restart',
+          name: (
+            <FormattedMessage
+              id="xpack.fleet.agentList.restartOneButton"
+              defaultMessage="Restart agent"
+            />
+          ),
+          icon: 'importAction',
+          disabled: !agent.active || agentPolicy?.supports_agentless === true,
+          onClick: () => {
+            callbacks.onRestartClick();
+          },
+          'data-test-subj': 'agentRestartBtn',
         }
       );
     }

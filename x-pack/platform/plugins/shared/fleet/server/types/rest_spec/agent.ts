@@ -1035,6 +1035,24 @@ export const PostBulkAgentRollbackRequestSchema = {
   }),
 };
 
+export const PostAgentRestartRequestSchema = {
+  params: schema.object({
+    agentId: schema.string({
+      meta: { description: 'The agent ID to restart' },
+    }),
+  }),
+};
+
+export const PostAgentRestartResponseSchema = ActionIdOrMessageSchema;
+
+export const PostBulkAgentRestartRequestSchema = {
+  body: schema.object({
+    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    batchSize: schema.maybe(schema.number()),
+    includeInactive: schema.boolean({ defaultValue: false }),
+  }),
+};
+
 export const PostBulkAgentRollbackResponseSchema = schema.oneOf([
   schema.object({
     actionIds: schema.arrayOf(schema.string({ maxLength: 36 }), { maxSize: 10000 }),

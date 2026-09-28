@@ -67,6 +67,9 @@ import {
   PostBulkActionResponseSchema,
   PostBulkAgentRollbackRequestSchema,
   PostBulkAgentRollbackResponseSchema,
+  PostAgentRestartRequestSchema,
+  PostAgentRestartResponseSchema,
+  PostBulkAgentRestartRequestSchema,
   PostBulkUpdateAgentTagsRequestSchema,
   PostCancelActionRequestSchema,
   PostNewAgentActionResponseSchema,
@@ -120,6 +123,7 @@ import {
   changeAgentPrivilegeLevelHandler,
 } from './change_privilege_level_handlers';
 import { bulkRollbackAgentHandler, rollbackAgentHandler } from './rollback_handlers';
+import { bulkRestartAgentsHandler, restartAgentHandler } from './restart_handler';
 import { generateReportHandler } from './generate_report_handler';
 
 export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
@@ -1657,4 +1661,82 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         bulkRollbackAgentHandler
       );
   }
+
+  // Restart agent
+  router.versioned
+    .post({
+      path: AGENT_API_ROUTES.RESTART_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
+      },
+      summary: `Restart an agent`,
+      description: `Restart an Elastic Agent.`,
+      options: {
+        tags: ['oas-tag:Elastic Agent actions'],
+        availability: {
+          since: '8.18.0',
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: PostAgentRestartRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => PostAgentRestartResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      restartAgentHandler
+    );
+
+  // Bulk restart agents
+  router.versioned
+    .post({
+      path: AGENT_API_ROUTES.BULK_RESTART_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
+      },
+      summary: `Bulk restart agents`,
+      description: `Restart multiple Elastic Agents.`,
+      options: {
+        tags: ['oas-tag:Elastic Agent actions'],
+        availability: {
+          since: '8.18.0',
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: PostBulkAgentRestartRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => PostAgentRestartResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      bulkRestartAgentsHandler
+    );
 };

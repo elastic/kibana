@@ -179,6 +179,26 @@ export interface PostBulkAgentRollbackRequest {
 
 export type PostBulkAgentRollbackResponse = { actionIds: string[] } | BulkAgentActionDryRun;
 
+export interface PostAgentRestartRequest {
+  params: {
+    agentId: string;
+  };
+}
+
+export interface PostAgentRestartResponse {
+  actionId: string;
+}
+
+export interface PostBulkAgentRestartRequest {
+  body: {
+    agents: string[] | string;
+    batchSize?: number;
+    includeInactive?: boolean;
+  };
+}
+
+export type PostBulkAgentRestartResponse = { actionIds: string[] };
+
 export interface PostAgentReassignRequest {
   params: {
     agentId: string;
