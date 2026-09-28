@@ -89,6 +89,114 @@ describe('spec connector edit flyout Test tab', () => {
     });
   });
 
+  it('keeps save disabled when a dual spec connector is opened unchanged', async () => {
+    const datadogSchema = {
+      type: 'object',
+      properties: {
+        config: {
+          type: 'object',
+          properties: {
+            site: {
+              default: 'datadoghq.com',
+              label: 'Datadog site',
+              type: 'string',
+              enum: ['datadoghq.com', 'datadoghq.eu'],
+            },
+          },
+          required: ['site'],
+          additionalProperties: false,
+        },
+        secrets: {
+          oneOf: [
+            {
+              type: 'object',
+              properties: {
+                username: {
+                  type: 'string',
+                  minLength: 1,
+                  label: 'API Key',
+                },
+                password: {
+                  type: 'string',
+                  minLength: 1,
+                  sensitive: true,
+                  label: 'Application Key',
+                },
+                authType: {
+                  type: 'string',
+                  const: 'basic',
+                },
+              },
+              required: ['username', 'password', 'authType'],
+              additionalProperties: false,
+              label: 'API and Application keys',
+            },
+          ],
+          label: 'Authentication',
+        },
+      },
+      required: ['config', 'secrets'],
+      additionalProperties: false,
+    };
+    appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
+    appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue({
+      metadata: {
+        id: '.datadog',
+        display_name: 'Datadog',
+        description: 'Datadog',
+        minimum_license: 'enterprise',
+        supported_feature_ids: ['workflows'],
+        is_technical_preview: true,
+      },
+      schema: datadogSchema,
+      is_testable: true,
+    });
+    const datadogConnector = createMockActionConnector({
+      id: 'dd',
+      name: 'dd',
+      actionTypeId: '.datadog',
+      isInboundEventsEnabled: true,
+      isDeprecated: false,
+      authMode: 'shared',
+      config: { site: 'datadoghq.com', authType: 'basic' },
+      secrets: {},
+    });
+
+    appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        connector={datadogConnector}
+        onClose={onClose}
+        onConnectorUpdated={onConnectorUpdated}
+      />
+    );
+
+    expect(await screen.findByTestId('inbound-events-enabled-switch')).toBeChecked();
+    expect(screen.getByTestId('edit-connector-flyout-save-btn')).toBeDisabled();
+    expect(screen.getByTestId('generator-field-secrets-username')).toHaveAttribute(
+      'autocomplete',
+      'new-password'
+    );
+    expect(screen.getByTestId('generator-field-secrets-password')).toHaveAttribute(
+      'autocomplete',
+      'new-password'
+    );
+
+    await userEvent.click(screen.getByTestId('edit-connector-flyout-close-btn'));
+
+    expect(screen.queryByText('Discard unsaved changes to connector?')).not.toBeInTheDocument();
+    expect(onClose).toHaveBeenCalledTimes(1);
+
+    await userEvent.type(screen.getByTestId('nameInput'), ' updated');
+
+    expect(screen.getByTestId('edit-connector-flyout-save-btn')).toBeEnabled();
+
+    await userEvent.click(screen.getByTestId('edit-connector-flyout-close-btn'));
+
+    expect(screen.getByText('Discard unsaved changes to connector?')).toBeInTheDocument();
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it('renders the test form for an opted-in spec connector without throwing', async () => {
     appMockRenderer.render(
       <EditConnectorFlyout

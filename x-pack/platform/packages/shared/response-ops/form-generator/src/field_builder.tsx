@@ -157,6 +157,10 @@ export const renderField = ({ field, meta = defaultMeta }: RenderFieldProps) => 
 
   // getWidgetComponent might update meta information, therefore we get the meta after calling it
   const { label, helpText, disabled, placeholder } = getMeta(schema);
+  // Saved secrets are omitted on edit, so these inputs start empty. Browsers then
+  // autofill username/password and the form treats that as a user edit.
+  const blockBrowserAutofill =
+    formConfig.isEdit === true && (path === 'secrets' || path.startsWith('secrets.'));
 
   return (
     <React.Fragment key={path}>
@@ -187,6 +191,7 @@ export const renderField = ({ field, meta = defaultMeta }: RenderFieldProps) => 
             disabled: formConfig.disabled || disabled,
             placeholder,
             ['data-test-subj']: `generator-field-${path.replace(/\./g, '-')}`,
+            ...(blockBrowserAutofill ? { autoComplete: 'new-password' } : {}),
           },
         }}
       />

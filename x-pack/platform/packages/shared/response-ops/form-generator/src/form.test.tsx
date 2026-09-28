@@ -21,7 +21,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 interface TestFormWrapperProps {
   schema: z.ZodObject<z.ZodRawShape>;
   onSubmit?: (data: { data: unknown }) => void;
-  formConfig?: { disabled?: boolean };
+  formConfig?: { disabled?: boolean; isEdit?: boolean };
 }
 
 const TestFormWrapper = ({ schema, onSubmit, formConfig }: TestFormWrapperProps) => {
@@ -71,6 +71,41 @@ describe('Form', () => {
     expect(screen.getByPlaceholderText('Enter username')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Enter email')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Submit' })).toBeInTheDocument();
+  });
+
+  it('blocks browser autofill on secret fields while editing', () => {
+    const schema = z.object({
+      secrets: z.object({
+        username: z.string().meta({ label: 'API Key' }),
+        password: z.string().meta({ label: 'Application Key', sensitive: true }),
+      }),
+    });
+
+    render(<TestFormWrapper schema={schema} formConfig={{ isEdit: true }} />, { wrapper });
+
+    expect(screen.getByTestId('generator-field-secrets-username')).toHaveAttribute(
+      'autocomplete',
+      'new-password'
+    );
+    expect(screen.getByTestId('generator-field-secrets-password')).toHaveAttribute(
+      'autocomplete',
+      'new-password'
+    );
+  });
+
+  it('leaves secret field autocomplete unset when creating a connector', () => {
+    const schema = z.object({
+      secrets: z.object({
+        password: z.string().meta({ label: 'Application Key', sensitive: true }),
+      }),
+    });
+
+    render(<TestFormWrapper schema={schema} />, { wrapper });
+
+    expect(screen.getByTestId('generator-field-secrets-password')).not.toHaveAttribute(
+      'autocomplete',
+      'new-password'
+    );
   });
 
   it('renders a form with password field', () => {
