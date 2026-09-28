@@ -83,12 +83,21 @@ export const buildWorkflowExecutionDocument = (
     workflowId: workflow.id,
     ...pickManagedWorkflowFields(workflow),
     isTestRun: workflow.isTestRun,
+    isEphemeral: workflow.isEphemeral,
     workflowDefinition: workflow.definition,
     yaml: workflow.yaml,
     context,
     status: missingIdentity ? ExecutionStatus.FAILED : ExecutionStatus.PENDING,
     createdAt: now.toISOString(),
     executedBy: authenticatedUser ?? UNKNOWN_EXECUTION_IDENTITY,
+    ...(workflow.definition?.settings?.run_as
+      ? {
+          effectiveIdentity: {
+            type: 'service_account' as const,
+            id: workflow.definition.settings.run_as,
+          },
+        }
+      : {}),
     triggeredBy,
     ...(missingIdentity
       ? {

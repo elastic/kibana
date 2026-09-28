@@ -36,13 +36,13 @@ Tab selection props also live on the root: `selectedTabId` (controlled), `defaul
 **`FlyoutTemplate.Header`** renders three stacked regions: an always-visible title row, a collapsible region holding the description, and an always-visible trailing region with the full-bleed bottom divider. See [`src/header/README.md`](src/header/README.md) for header blocks (MetaBlock, Badge, InfoBlock) and collapse behavior.
 
 - `title` — required `ReactNode`. Rendered as an `<h3>` carrying a generated id.
-- `titleIcon` — EUI icon type rendered after the title. Without `titleTooltip` it is decorative (`aria-hidden`).
+- `titleIcon` — EUI icon type rendered after the title, in both the expanded and the compact layout. Without `titleTooltip` it is decorative (`aria-hidden`).
 - `titleTooltip` — when set, the title icon becomes a focusable `EuiIconTip` using `titleIcon` as its type, defaulting to `info`.
 - `description` — arbitrary `ReactNode` rendered below the title in subdued text. Not wrapped in a `<p>`, so block content is valid.
 - `collapsed` — renders the compact layout permanently, regardless of scroll position.
 - `children` — `Header.MetaBlock`, `Header.Badge`, and `Header.InfoBlock` parts. Free-form content (arbitrary elements, components, bare text) is not rendered, and the assembly library warns in development about unrecognized children.
 
-**`FlyoutTemplate.Body`** renders `Body.Section`, `Body.Accordion`, and `Body.TabPanel` parts alongside arbitrary passthrough content inside `EuiFlyoutBody`, in source order. Passthrough children manage their own layout; the template adds no sectioning, titling, or dividers around them. See [`src/body/README.md`](src/body/README.md) for sections and unstructured content, and [Tabs](#tabs) below.
+**`FlyoutTemplate.Body`** renders `Body.Section`, `Body.Accordion`, and `Body.TabPanel` parts alongside arbitrary passthrough content inside `EuiFlyoutBody`, in source order. `Body.Callout` parts render as a stack in the body's banner, above that content. Passthrough children manage their own layout; the template adds no sectioning, titling, or dividers around them. See [`src/body/README.md`](src/body/README.md) for callouts, sections, and unstructured content, and [Tabs](#tabs) below.
 
 **`FlyoutTemplate.Footer`** renders a primary and secondary action right-aligned inside `EuiFlyoutFooter`, secondary first. If no action is present, the footer is omitted entirely — no default Cancel button is added. Only the first instance of each action is rendered; for `PrimaryActionMenu` specifically, the first instance that actually has panels wins. `PrimaryAction` and `PrimaryActionMenu` are mutually exclusive. An empty `panels` array on `PrimaryActionMenu` counts as absent, so a lone empty menu omits the footer without warning.
 

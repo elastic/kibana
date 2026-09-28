@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SignificantEventsServer } from '../../types';
@@ -40,7 +41,7 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
   };
   const grantAsInternalUser = jest.fn();
   const invalidateAsInternalUser = jest.fn().mockResolvedValue({});
-  const getBooleanValue = jest.fn().mockResolvedValue(featureFlagEnabled);
+  const getBooleanValue$ = jest.fn().mockReturnValue(of(featureFlagEnabled));
   const logger = {
     warn: jest.fn(),
     error: jest.fn(),
@@ -89,7 +90,7 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
     relayClient: hasRelayClient ? { startInstall, fetchClaim, unbind } : undefined,
     core: {
       savedObjects: { getScopedClient: jest.fn().mockReturnValue(soClient) },
-      featureFlags: { getBooleanValue },
+      featureFlags: { getBooleanValue$ },
       http: { basePath: { publicBaseUrl: 'https://kibana.test' }, getServerInfo: jest.fn() },
     },
     licensing: { getLicense },
@@ -107,7 +108,7 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
     logger,
     grantAsInternalUser,
     invalidateAsInternalUser,
-    getBooleanValue,
+    getBooleanValue$,
     inMemoryConnectors,
     registerDynamicConnector,
     unregisterDynamicConnector,
