@@ -47,7 +47,8 @@ const MAX_IOC_VALUE_LENGTH = MAX_URL_LENGTH;
  * cannot fail extract/enrich validation after a successful pushIoc.
  */
 const MAX_IOC_DEFANGED_LENGTH = MAX_IOC_VALUE_LENGTH * 3;
-const MAX_IOC_TIER_BASIS_LENGTH = 512;
+/** Shared by request/response validation and reconcile prefixing. */
+export const MAX_IOC_TIER_BASIS_LENGTH = 512;
 
 export const extractedIocSchema = schema.object({
   type: oneOfLiterals(IOC_TYPES),

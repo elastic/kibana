@@ -6,8 +6,15 @@
  */
 
 import { createHash } from 'node:crypto';
+import { MAX_IOC_TIER_BASIS_LENGTH } from '../../../common/threat_intel/contracts/enrichment';
 import type { ExtractedIoc, ExtractIocsResult, IocTier } from './extract_iocs';
 import { refang } from './extract_iocs';
+
+const SEMANTIC_INDICATOR_PREFIX = 'semantic_indicator:';
+
+/** Prefix an approved candidate's basis without exceeding response schema bounds. */
+const semanticIndicatorBasis = (basis: string): string =>
+  `${SEMANTIC_INDICATOR_PREFIX}${basis}`.slice(0, MAX_IOC_TIER_BASIS_LENGTH);
 
 const MAX_SEMANTIC_CANDIDATES = 300;
 /** Cap for the overflow-retry prompt so candidate values alone cannot re-overflow. */
@@ -224,7 +231,7 @@ export const reconcileIocAdjudication = (
   const output = [...prepared.output];
   for (const candidate of prepared.reviewable) {
     output[candidate.originalIndex] = approvedIds.has(candidate.id)
-      ? { ...candidate.ioc, tier_basis: `semantic_indicator:${candidate.ioc.tier_basis}` }
+      ? { ...candidate.ioc, tier_basis: semanticIndicatorBasis(candidate.ioc.tier_basis) }
       : downgrade(candidate.ioc, 'semantic_reference');
   }
 

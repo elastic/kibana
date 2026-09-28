@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_IOC_TIER_BASIS_LENGTH } from '../../../common/threat_intel/contracts/enrichment';
 import type { ExtractedIoc } from './extract_iocs';
 import {
   boundIocAdjudicationForOverflow,
@@ -121,6 +122,18 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(prepared.reviewable).toHaveLength(1);
     expect(prepared.reviewable[0].context).toContain('dropper fetched');
     expect(prepared.reviewable[0].context).toContain(canonical);
+  });
+
+  it('keeps an approved tier_basis within the response schema bound', () => {
+    const longBasis = 'b'.repeat(MAX_IOC_TIER_BASIS_LENGTH);
+    const prepared = prepareIocAdjudication({
+      text: 'The attacker downloaded https://evil.example/payload.',
+      iocs: [candidate('https://evil.example/payload', { tier_basis: longBasis })],
+    });
+    const result = reconcileIocAdjudication(prepared, new Set([0]));
+
+    expect(result.iocs[0].tier_basis.startsWith('semantic_indicator:')).toBe(true);
+    expect(result.iocs[0].tier_basis.length).toBe(MAX_IOC_TIER_BASIS_LENGTH);
   });
 
   it('bounds candidate count and context for overflow retry', () => {
