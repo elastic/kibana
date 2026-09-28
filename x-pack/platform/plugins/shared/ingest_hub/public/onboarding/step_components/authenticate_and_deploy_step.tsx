@@ -266,14 +266,19 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // deploy attempt with zero failedInstances must not enable Next while drift is unresolved.
   // driftSettled gates both: Next must not enable while the SO fetch is in flight, because the
   // response could flip isDirty=true and make isMiDone false again.
-  const isMiDone =
-    driftSettled &&
-    ((isAlreadyDeployed && !isDirty) ||
-      (deployAttempted && !isDeploying && failedInstances.length === 0 && !isDirty));
   // hasFailed is NOT gated on deployAttempted: if the hook is seeded with persisted failures on
   // remount (after navigating Back/Next), the callout and Retry must still appear even though no
   // deploy was attempted in this component lifetime.
   const hasFailed = !isDeploying && failedInstances.length > 0;
+  // hasFailed is checked in the isAlreadyDeployed arm: a partial dirty redeploy (one policy
+  // PUT succeeds, another fails) leaves failedInstances set. If the user then reverts their
+  // settings in Step 2, the drift check clears isDirty (session matches the unwritten SO), but
+  // failedInstances still reflects the in-flight Fleet state. Allowing Next here would let the
+  // user skip past the unresolved failure; the retry path clears failedInstances on success.
+  const isMiDone =
+    driftSettled &&
+    ((isAlreadyDeployed && !isDirty && !hasFailed) ||
+      (deployAttempted && !isDeploying && failedInstances.length === 0 && !isDirty));
 
   const handleDeployClick = useCallback(() => {
     setDeployAttempted(true);

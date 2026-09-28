@@ -283,10 +283,13 @@ export function useMiDeploy({
               namespace,
               authenticateAndDeployStep,
               servicesMap: servicesMap ?? new Map(),
-              // Only override the connector when auth actually changed. Without this gate a
-              // service-var-only redeploy would silently re-attach the wizard's connector over
-              // one reassigned by an operator since the wizard last ran.
-              ...(isAuthDirty
+              // Override the connector when auth changed or when deploying with static keys.
+              // Static keys never use a cloud connector; any connector attached externally after
+              // the original deploy must be cleared on redeploy so credentials take effect.
+              // Without the static_keys guard, a key-replacement that doesn't set isAuthDirty
+              // (same authMethod/connectorId in the SO comparison) would silently preserve a
+              // connector that was attached by an operator after the initial deploy.
+              ...(isAuthDirty || authenticateAndDeployStep.authMethod === 'static_keys'
                 ? { overrideCloudConnector: authenticateAndDeployStep.connectorId ?? null }
                 : {}),
             })

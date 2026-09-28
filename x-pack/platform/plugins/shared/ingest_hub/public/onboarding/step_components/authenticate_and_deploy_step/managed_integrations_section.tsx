@@ -94,6 +94,7 @@ export function ManagedIntegrationsSection({
     setStaticKeys,
     clearStagedStaticKeys,
     setPendingIacTemplate,
+    setAuthMethod,
     authenticateAndDeployStep,
   } = useOnboardingFlow();
   const { connectorId: initialConnectorId } = authenticateAndDeployStep;
@@ -331,6 +332,14 @@ export function ManagedIntegrationsSection({
                       setIsDeployReady(false);
                       if (id === 'access_keys') {
                         setConnectorId(undefined);
+                        // In static-key edit mode, restore authMethod so drift clears and Next
+                        // re-enables if the user reverts without deploying.
+                        if (isStaticKeysEditMode) setAuthMethod('static_keys');
+                      } else if (isStaticKeysEditMode) {
+                        // Switching to identity federation while currently deployed with static keys:
+                        // update authMethod so the drift check detects the pending auth change and
+                        // marks isDirty, blocking Next until the user selects a connector and deploys.
+                        setAuthMethod('identity_federation');
                       }
                     }}
                     data-test-subj="managedIntegrationsSection-preferredMethodRadio"
