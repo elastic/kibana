@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { EntityUpdateClient } from '@kbn/entity-store/server';
+import type { RelationshipsClient } from '@kbn/entity-store/server';
 
 import type { RelationshipIntegrationConfig } from './types';
 import { buildActorDiscoveryQuery } from './build_actor_discovery_query';
@@ -74,15 +74,16 @@ const hasRepopulatableSource = async (
 
 /**
  * Clears every relationship key the config writes, for the configured entity
- * source. Returns the total number of entity documents updated, or throws on
- * transport failure (caller handles the error and skips the integration).
+ * source. Returns the entity documents updated and matched, summed across keys,
+ * or throws on transport failure (caller handles the error and skips the
+ * integration).
  */
 const clearConfiguredRelationships = async (
   config: RelationshipIntegrationConfig,
   entitySource: string,
-  crudClient: EntityUpdateClient,
+  relationshipsClient: RelationshipsClient,
   signal: AbortSignal | undefined
-): Promise<number> => {
+): Promise<{ updated: number; total: number }> => {
   const relationshipKeys =
     config.kind === 'bucketed'
       ? [
@@ -91,16 +92,18 @@ const clearConfiguredRelationships = async (
         ]
       : [config.relationshipKey];
 
-  let totalCleared = 0;
+  const cleared = { updated: 0, total: 0 };
   for (const relationshipKey of relationshipKeys) {
-    const { updated } = await crudClient.clearRelationshipIds({
+    const { updated, total } = await relationshipsClient.clearRelationshipIds({
       entitySource,
       relationshipKey,
       signal,
     });
-    totalCleared += updated;
+
+    cleared.updated += updated;
+    cleared.total += total;
   }
-  return totalCleared;
+  return cleared;
 };
 
 /**
@@ -113,12 +116,12 @@ const clearConfiguredRelationships = async (
  * cluster, or a feed that stopped longer ago than the lookback window would
  * otherwise wipe every relationship with nothing left to restore it.
  */
-export const runPreRunReset = async (
+export const preRunReset = async (
   config: RelationshipIntegrationConfig,
   esClient: ElasticsearchClient,
   logger: Logger,
   namespace: string,
-  crudClient: EntityUpdateClient,
+  relationshipsClient: RelationshipsClient,
   signal: AbortSignal | undefined,
   transportOpts: TransportOptions | undefined,
   logPrefix: string
@@ -142,18 +145,27 @@ export const runPreRunReset = async (
     return 'empty';
   }
 
+  const clearStartMs = Date.now();
   try {
-    const totalCleared = await clearConfiguredRelationships(
+    const { updated, total } = await clearConfiguredRelationships(
       config,
       entitySource,
-      crudClient,
+      relationshipsClient,
       signal
     );
+    logger.debug(
+      `${logPrefix} [pre-run-reset] clearConfiguredRelationships done ` +
+        `updated=${updated} total=${total} durationMs=${Date.now() - clearStartMs}`
+    );
     logger.info(
-      `${logPrefix} Pre-run reset cleared relationships on ${totalCleared} ${entitySource} entities`
+      `${logPrefix} Pre-run reset cleared relationships on ${updated} of ${total} matched ${entitySource} entities`
     );
     return 'proceed';
   } catch (err) {
+    logger.debug(
+      `${logPrefix} [pre-run-reset] clearConfiguredRelationships failed ` +
+        `durationMs=${Date.now() - clearStartMs} error=${errMsg(err)}`
+    );
     // Populating on top of a half-cleared state is worse than leaving the
     // previous run's data in place, so skip this integration entirely.
     logger.error(`${logPrefix} Relationship reset failed, skipping integration: ${errMsg(err)}`);

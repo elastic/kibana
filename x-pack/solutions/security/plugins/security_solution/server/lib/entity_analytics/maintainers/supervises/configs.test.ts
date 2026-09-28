@@ -6,7 +6,10 @@
  */
 
 import { SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS, buildSupervisesConfigs } from './configs';
-import { buildActorDiscoveryQuery } from '../engine/build_actor_discovery_query';
+import {
+  buildActorDiscoveryQuery,
+  getPageActorValues,
+} from '../engine/build_actor_discovery_query';
 import { buildTargetsPerActorQuery } from '../engine/build_targets_per_actor_query';
 import { COMPOSITE_PAGE_SIZE } from '../engine/constants';
 import type { OverrideRelationshipIntegrationConfig } from '../engine/types';
@@ -260,10 +263,15 @@ describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
   });
 
   describe('golden snapshots', () => {
+    // Only configs with `scopeToPageActorValues` read these; the engine passes them per page.
+    const pageActorValues = ['__manager_email__', '__manager_id__'];
+
     it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
       '$id: targets-per-actor ES|QL is locked (no watermark)',
       (config) => {
-        expect(buildTargetsPerActorQuery(config, '__namespace__')).toMatchSnapshot();
+        expect(
+          buildTargetsPerActorQuery(config, '__namespace__', pageActorValues)
+        ).toMatchSnapshot();
       }
     );
 
@@ -273,7 +281,7 @@ describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
         const config = buildSupervisesConfigs('2026-06-01T00:00:00.000Z').find(
           (c) => c.id === id
         ) as OverrideRelationshipIntegrationConfig;
-        expect(config.esqlQueryOverride('__namespace__')).toMatchSnapshot();
+        expect(config.esqlQueryOverride('__namespace__', pageActorValues)).toMatchSnapshot();
       }
     );
   });
@@ -390,6 +398,8 @@ describe('workday (log-inverted) supervises config', () => {
     // one-way, so any grouped row the LIMIT discards is never revisited and
     // those managers' reports are silently never written.
     const actorFieldCount = 2;
+    // Default `esql.query.result_truncation_max_size`; a higher LIMIT is capped silently.
+    const ESQL_RESULT_CAP = 10_000;
 
     it('caps Step 2 rows above the Step 1 page size, not at it', () => {
       const query = getWorkdayConfig().esqlQueryOverride('default');
@@ -399,6 +409,30 @@ describe('workday (log-inverted) supervises config', () => {
       // Guards the specific regression: reusing COMPOSITE_PAGE_SIZE here would
       // drop up to half the actors on a saturated page.
       expect(limit).not.toBe(COMPOSITE_PAGE_SIZE);
+    });
+
+    it('scopes Step 2 to the page actor values, which bounds the rows by the page', () => {
+      // Without the scope, a document matched through one manager field brings
+      // in its other field's value from another page, and rows have no bound.
+      expect(getWorkdayConfig().scopeToPageActorValues).toBe(true);
+    });
+
+    it("fits a saturated page's actor values under both the LIMIT and the ES|QL result cap", () => {
+      // Worst case: every bucket carries a distinct email and a distinct id.
+      const buckets = Array.from({ length: COMPOSITE_PAGE_SIZE }, (_, i) => ({
+        key: {
+          'workday.user.Manager_Email': `manager${i}@corp`,
+          'workday.user.Manager_ID': `id${i}`,
+        },
+        doc_count: 1,
+      }));
+      const config = getWorkdayConfig();
+      const pageActorValues = getPageActorValues(config, buckets);
+      const limit = Number(/\| LIMIT (\d+)/.exec(config.esqlQueryOverride('default'))?.[1]);
+
+      expect(pageActorValues).toHaveLength(COMPOSITE_PAGE_SIZE * actorFieldCount);
+      expect(pageActorValues.length).toBeLessThanOrEqual(limit);
+      expect(limit).toBeLessThanOrEqual(ESQL_RESULT_CAP);
     });
 
     it('scales the cap with every field unioned into the actor key', () => {

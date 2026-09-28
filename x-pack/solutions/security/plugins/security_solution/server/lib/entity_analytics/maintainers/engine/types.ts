@@ -293,7 +293,23 @@ export interface BucketedRelationshipIntegrationConfig
 export interface OverrideRelationshipIntegrationConfig extends RelationshipIntegrationBase {
   kind: 'override';
   relationshipKey: EntityRelationshipKey;
-  esqlQueryOverride: (namespace: string) => string;
+  /**
+   * `pageActorValues` is passed only when `scopeToPageActorValues` is set; the
+   * query must then reference exactly one positional `?` param per value.
+   */
+  esqlQueryOverride: (namespace: string, pageActorValues?: readonly string[]) => string;
+  /**
+   * When true, the engine passes the page's distinct actor values (every non-null
+   * `customActor.fields` value across the page's buckets, see `getPageActorValues`)
+   * to `esqlQueryOverride` and binds the same array, in order, as ES|QL positional
+   * params.
+   *
+   * For overrides whose Step 2 can emit actors that are not page buckets: the
+   * page filter is an OR across actor fields, so a document matched through one
+   * field also contributes its other fields' values. Filtering the grouped rows
+   * to the page's values bounds the row count by the page instead of by the data.
+   */
+  scopeToPageActorValues?: true;
 }
 
 /**

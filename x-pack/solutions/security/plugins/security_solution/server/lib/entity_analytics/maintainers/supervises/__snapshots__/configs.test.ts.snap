@@ -107,7 +107,9 @@ TRUE, _euid_branch_1_formula, NULL))
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
     AND actorUserId != \\"user:@workday\\"
     AND actorUserId RLIKE \\".+:.+@.+\\"
-| STATS supervises = VALUES(targetEntityId) BY actorUserId
+| STATS supervises = VALUES(targetEntityId) BY actorUserId, managerKey
+| WHERE managerKey IN (?, ?)
+| DROP managerKey
 | LIMIT 7000"
 `;
 
@@ -146,6 +148,8 @@ TRUE, _euid_branch_1_formula, NULL))
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
     AND actorUserId != \\"user:@workday\\"
     AND actorUserId RLIKE \\".+:.+@.+\\"
-| STATS supervises = VALUES(targetEntityId) BY actorUserId
+| STATS supervises = VALUES(targetEntityId) BY actorUserId, managerKey
+| WHERE managerKey IN (?, ?)
+| DROP managerKey
 | LIMIT 7000"
 `;

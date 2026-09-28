@@ -109,15 +109,15 @@ const WORKDAY_ENTITY_SOURCE = 'workday';
 /**
  * Step 2 row cap for the Workday config.
  *
- * Unlike every other maintainer, this config's actor EUID is NOT a function of a
- * single identity field: `MV_EXPAND managerKey` turns one composite bucket
- * `(Manager_Email, Manager_ID)` into up to two distinct `actorUserId` groups.
- * That breaks the "EUID collapse" invariant documented in
- * `engine/build_actor_discovery_query.ts`, which the shared `COMPOSITE_PAGE_SIZE`
- * limit assumes — a full page of 3500 buckets can produce up to 7000 grouped
- * rows, and a 3500 limit would silently discard half of them. Composite paging is
- * one-way (`after_key`), so the dropped actors are never revisited and their
- * reports are simply never written.
+ * Every row is one actor, and `scopeToPageActorValues` keeps only actors whose
+ * manager value is one of the page's bucket values. A bucket
+ * `(Manager_Email, Manager_ID)` carries at most one value per field, so a page
+ * yields at most `COMPOSITE_PAGE_SIZE × WORKDAY_ACTOR_EXPANSION_FACTOR` rows and
+ * this LIMIT never truncates. Composite paging is one-way (`after_key`), so a
+ * truncated row would be a manager whose reports are never written.
+ *
+ * Must stay ≤ 10,000: ES|QL silently caps any higher LIMIT at
+ * `esql.query.result_truncation_max_size`.
  *
  * The factor is the number of fields unioned into `managerKey`; keep it in sync
  * if another manager identifier is added.
@@ -144,10 +144,13 @@ const WORKDAY_INGESTED_LOOKBACK_ESQL = `NOW() - ${WORKDAY_INGESTED_LOOKBACK_DAYS
  * `kind: 'override'` config — the standard builder only `MV_EXPAND`s the target,
  * so a multi-valued actor would mis-group under `STATS ... BY actorUserId`.
  *
- * Expanding the actor also makes this the one config where a Step 1 bucket can
- * yield more than one `actorUserId`, so the Step 2 row cap is
- * `WORKDAY_ESQL_LIMIT` rather than the shared `COMPOSITE_PAGE_SIZE`. See that
- * constant for why reusing the page size silently drops managers.
+ * Expanding the actor also means a document matched through one manager field
+ * contributes its other field's value, which can belong to another page (a
+ * manager whose email changed within the window, or an email on a page
+ * boundary). Those rows have no bound, so the grouped rows are filtered to the
+ * page's own values (`scopeToPageActorValues`). Nothing is lost: every document
+ * naming a value matches the page filter on that value's own page, so its full
+ * set of reports is built there. See `WORKDAY_ESQL_LIMIT` for the resulting cap.
  *
  * **Latest-row collapse is load-bearing, not an optimisation.** The CEL input
  * re-fetches the whole inventory on every poll, so the index accumulates one
@@ -165,12 +168,13 @@ const WORKDAY_INGESTED_LOOKBACK_ESQL = `NOW() - ${WORKDAY_INGESTED_LOOKBACK_DAYS
  * passes `buildActorPageFilter` (`Manager_Email IN (…) OR Manager_ID IN (…)`) as
  * the ES|QL `filter` parameter, which applies at the source, before this query's
  * `STATS`. So `LAST` only ever sees a worker's snapshots whose manager is in the
- * page being processed. Cross-page reassignments and manager removals (both
- * previously tracked as open gaps) are now handled by the pre-run reset:
- * `resetRelationshipsBeforeRun` clears all Workday `supervises` edges once per
- * integration run, before pagination starts, so each run repopulates from a clean
- * slate. A run that fails partway leaves the relationship *incomplete* until the
- * next clean run — temporarily incomplete rather than permanently incorrect.
+ * page being processed. When a worker moves between managers on different pages,
+ * the previous manager's page sees only the old snapshot and attributes the
+ * worker to them again, until that snapshot leaves the `event.ingested` window.
+ * `resetRelationshipsBeforeRun` clears all Workday `supervises` relationships
+ * once per integration run, before pagination starts, so that staleness lasts at
+ * most the window instead of forever. A run that fails partway leaves the
+ * relationship *incomplete* until the next clean run.
  * https://github.com/elastic/kibana/issues/292358 remains open for event-stream
  * sources, where absence carries no information and clearing would erase real
  * observations.
@@ -187,11 +191,9 @@ const WORKDAY_INGESTED_LOOKBACK_ESQL = `NOW() - ${WORKDAY_INGESTED_LOOKBACK_DAYS
  * Snapshot semantics alone are not enough to retract, though. An authoritative
  * write (including `{ ids: [] }`, which `engine/update_entities.ts` deliberately
  * never emits) is only safe when the run holds the actor's *complete* target set
- * at write time. The engine streams writes per composite page, and this config's
- * `MV_EXPAND` + row cap mean a saturated page can return an incomplete group —
- * so an authoritative write over truncated output would delete real
- * relationships rather than merely leave stale ones. Any retraction work here
- * must resolve that first.
+ * at write time. The engine streams writes per composite page, and the per-page
+ * collapse above can still attribute a worker to a previous manager, so any
+ * retraction work here must resolve that first.
  *
  * `Worker_s_Manager` is deliberately unused: it is a display name
  * ("Alex Manager (000687)"), not a resolvable identifier.
@@ -201,6 +203,7 @@ const WORKDAY_INGESTED_LOOKBACK_ESQL = `NOW() - ${WORKDAY_INGESTED_LOOKBACK_DAYS
  */
 function buildWorkdaySupervisesEsqlQuery(
   namespace: string,
+  pageActorValues: readonly string[],
   lastProcessedTimestamp?: string
 ): string {
   const logIndex = `logs-workday.user-${namespace}`;
@@ -216,6 +219,11 @@ function buildWorkdaySupervisesEsqlQuery(
   const ingestedClause = lastProcessedTimestamp
     ? `\n    AND event.ingested >= ${WORKDAY_INGESTED_LOOKBACK_ESQL}`
     : '';
+  // `actorUserId` is derived from `managerKey` alone, so grouping by both groups
+  // exactly as by `actorUserId`; `managerKey` is kept so the page scope can
+  // compare raw values. Scoping after the final STATS checks one row per actor
+  // instead of one per expanded worker row.
+  const pageActorParams = pageActorValues.map(() => '?').join(', ');
 
   return `FROM ${logIndex}
 | WHERE (${WORKDAY_MANAGER_EMAIL_FIELD} IS NOT NULL OR ${WORKDAY_MANAGER_ID_FIELD} IS NOT NULL)${ingestedClause}
@@ -228,7 +236,9 @@ function buildWorkdaySupervisesEsqlQuery(
 | WHERE COALESCE(${ENGINE_COLUMNS.actor}, "") != ""
     AND ${ENGINE_COLUMNS.actor} != "user:@${WORKDAY_NAMESPACE}"
     AND ${ENGINE_COLUMNS.actor} RLIKE ".+:.+@.+"
-| STATS ${RELATIONSHIP_KEY} = VALUES(targetEntityId) BY ${ENGINE_COLUMNS.actor}
+| STATS ${RELATIONSHIP_KEY} = VALUES(targetEntityId) BY ${ENGINE_COLUMNS.actor}, managerKey
+| WHERE managerKey IN (${pageActorParams})
+| DROP managerKey
 | LIMIT ${WORKDAY_ESQL_LIMIT}`;
 }
 
@@ -246,6 +256,8 @@ function buildWorkdaySupervisesConfig(
     customActor: {
       fields: [WORKDAY_MANAGER_EMAIL_FIELD, WORKDAY_MANAGER_ID_FIELD],
     },
+    // Required for the Step 2 row bound; see `WORKDAY_ESQL_LIMIT`.
+    scopeToPageActorValues: true,
     // @timestamp is Hire_Date, so the engine's 30d lookback would select only
     // recently-hired workers. Replaced by the event.ingested window below.
     disableLookbackWindow: true,
@@ -272,7 +284,8 @@ function buildWorkdaySupervisesConfig(
         ? [{ range: { 'event.ingested': { gte: WORKDAY_INGESTED_LOOKBACK_DSL } } }]
         : []),
     ],
-    esqlQueryOverride: (ns) => buildWorkdaySupervisesEsqlQuery(ns, lastProcessedTimestamp),
+    esqlQueryOverride: (ns, pageActorValues = []) =>
+      buildWorkdaySupervisesEsqlQuery(ns, pageActorValues, lastProcessedTimestamp),
   };
 }
 

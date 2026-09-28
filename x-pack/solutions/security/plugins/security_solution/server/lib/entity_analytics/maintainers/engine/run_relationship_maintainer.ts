@@ -9,7 +9,11 @@ import { randomUUID } from 'crypto';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { EntityUpdateClient, EntityMetadataClient } from '@kbn/entity-store/server';
+import type {
+  EntityUpdateClient,
+  EntityMetadataClient,
+  RelationshipsClient,
+} from '@kbn/entity-store/server';
 
 import type {
   RelationshipIntegrationConfig,
@@ -21,8 +25,9 @@ import {
   buildActorDiscoveryQuery,
   buildActorPageFilter,
   buildLookbackFilter,
+  getPageActorValues,
 } from './build_actor_discovery_query';
-import { runPreRunReset } from './run_pre_run_reset';
+import { preRunReset } from './pre_run_reset';
 import { isIndexNotFound, errMsg } from './es_errors';
 import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
 import { parseTargetsPerActorRows } from './parse_targets_per_actor_rows';
@@ -117,9 +122,17 @@ async function fetchTargetsForActors(
       filter: [...buildLookbackFilter(config), buildActorPageFilter(config, buckets)],
     },
   };
+  const pageActorValues =
+    config.kind === 'override' && config.scopeToPageActorValues
+      ? getPageActorValues(config, buckets)
+      : undefined;
   try {
     const result = await esClient.esql.query(
-      { query: buildTargetsPerActorQuery(config, namespace), filter: esqlFilter },
+      {
+        query: buildTargetsPerActorQuery(config, namespace, pageActorValues),
+        filter: esqlFilter,
+        ...(pageActorValues ? { params: pageActorValues } : {}),
+      },
       transportOpts
     );
     // Defense in depth: ES|QL responses are typed loosely on the client,
@@ -164,6 +177,7 @@ async function runIntegration(
   namespace: string,
   crudClient: EntityUpdateClient,
   entityMetadataClient: EntityMetadataClient,
+  relationshipsClient: RelationshipsClient,
   signal: AbortSignal | undefined,
   metadataContext: { scanId: string; observedAt: string },
   requestTimeoutMs: number | undefined,
@@ -203,12 +217,12 @@ async function runIntegration(
     docsFailed: 0,
   };
 
-  const resetOutcome = await runPreRunReset(
+  const resetOutcome = await preRunReset(
     config,
     esClient,
     logger,
     namespace,
-    crudClient,
+    relationshipsClient,
     signal,
     transportOpts,
     logPrefix
@@ -300,7 +314,8 @@ async function runIntegration(
           pageRecords,
           esClient,
           namespace,
-          config.validateTargetIds
+          config.validateTargetIds,
+          logPrefix
         );
         // Accumulate the entity write immediately — BEFORE the metadata write,
         // which can throw. These entities are already durable in the store, so
@@ -416,6 +431,7 @@ export const runRelationshipMaintainer = async ({
   namespace,
   crudClient,
   entityMetadataClient,
+  relationshipsClient,
   integrations,
   maintainerName,
   signal,
@@ -428,6 +444,8 @@ export const runRelationshipMaintainer = async ({
   namespace: string;
   crudClient: EntityUpdateClient;
   entityMetadataClient: EntityMetadataClient;
+  /** Used only by integrations that set `resetRelationshipsBeforeRun`. */
+  relationshipsClient: RelationshipsClient;
   integrations: RelationshipIntegrationConfig[];
   /** Identifies which maintainer is running — embedded in per-integration completion logs for unambiguous attribution. */
   maintainerName: RelationshipMaintainerName;
@@ -525,6 +543,7 @@ export const runRelationshipMaintainer = async ({
       namespace,
       crudClient,
       entityMetadataClient,
+      relationshipsClient,
       signal,
       metadataContext,
       requestTimeoutMs,
