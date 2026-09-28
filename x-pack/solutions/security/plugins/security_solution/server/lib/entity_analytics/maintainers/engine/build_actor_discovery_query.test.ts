@@ -7,7 +7,11 @@
 
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 
-import { buildActorDiscoveryQuery, buildActorPageFilter } from './build_actor_discovery_query';
+import {
+  buildActorDiscoveryQuery,
+  buildActorPageFilter,
+  getPageActorValues,
+} from './build_actor_discovery_query';
 import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
 import { COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS } from '../communicates_with/configs';
 import { ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS } from '../accesses/configs';
@@ -387,6 +391,52 @@ describe('buildActorPageFilter (page filter)', () => {
       expect(byField['user.name']).toBeUndefined();
       expect(byField['user.email']).toBeUndefined();
     });
+  });
+});
+
+describe('getPageActorValues', () => {
+  const managerConfig: RelationshipIntegrationConfig = {
+    ...accessesConfig,
+    customActor: { fields: ['manager.email', 'manager.id'] },
+  };
+
+  it('returns the distinct non-null values across every actor field and bucket', () => {
+    const buckets: CompositeBucket[] = [
+      { key: { 'manager.email': 'bob@corp', 'manager.id': '001' }, doc_count: 1 },
+      { key: { 'manager.email': 'bob@corp', 'manager.id': '002' }, doc_count: 1 },
+      { key: { 'manager.email': null, 'manager.id': '003' }, doc_count: 1 },
+      { key: { 'manager.email': 'carol@corp', 'manager.id': null }, doc_count: 1 },
+    ];
+    expect(getPageActorValues(managerConfig, buckets).sort()).toEqual([
+      '001',
+      '002',
+      '003',
+      'bob@corp',
+      'carol@corp',
+    ]);
+  });
+
+  it('returns exactly the values the page filter narrows Step 2 to', () => {
+    const buckets: CompositeBucket[] = [
+      { key: { 'manager.email': 'bob@corp', 'manager.id': '001' }, doc_count: 1 },
+      { key: { 'manager.email': null, 'manager.id': '002' }, doc_count: 1 },
+    ];
+    const filter = buildActorPageFilter(managerConfig, buckets) as {
+      bool: { should: Array<{ terms: Record<string, string[]> }> };
+    };
+    const filterValues = filter.bool.should.flatMap((clause) => Object.values(clause.terms).flat());
+    expect(getPageActorValues(managerConfig, buckets).sort()).toEqual(filterValues.sort());
+  });
+
+  it('reads only the declared actor fields', () => {
+    const buckets: CompositeBucket[] = [
+      { key: { 'manager.email': 'bob@corp', 'user.name': 'alice' }, doc_count: 1 },
+    ];
+    expect(getPageActorValues(managerConfig, buckets)).toEqual(['bob@corp']);
+  });
+
+  it('returns no values for an empty page', () => {
+    expect(getPageActorValues(managerConfig, [])).toEqual([]);
   });
 });
 
