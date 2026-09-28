@@ -574,8 +574,7 @@ export function useMiDeploy({
       // the settings update has now succeeded so they are no longer failed.
       const deployedSet = new Set(deployedTargets);
       const previouslyFailed = getLatestFailedInstances().filter(
-        (id) =>
-          !deployedSet.has(id) && !(dirtyUpdateApplied && id in policyIdsByInstance)
+        (id) => !deployedSet.has(id) && !(dirtyUpdateApplied && id in policyIdsByInstance)
       );
       const mergedFailed = [...previouslyFailed, ...newFailed];
 
