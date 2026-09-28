@@ -125,9 +125,7 @@ describe('FeedbackBody', () => {
 
     const form = screen.getByTestId('feedbackEmailInput').closest('form') as HTMLFormElement;
     expect(form).not.toBeNull();
-    // fireEvent.submit returns false when the event's default was prevented.
-    // Without the form's onSubmit preventDefault this returns true and the browser
-    // would perform a full-page navigation on implicit Enter submission.
+    // fireEvent.submit returns false when the event default was prevented.
     expect(fireEvent.submit(form)).toBe(false);
   });
 });
