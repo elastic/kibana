@@ -59,6 +59,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     data: currentConfiguration,
     isLoading: loadingCaseConfigure,
     isFetching: isFetchingCaseConfigure,
+    isError: isErrorCaseConfigure,
     refetch: refetchCaseConfigure,
   } = useGetCaseConfiguration();
 
@@ -81,7 +82,10 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
   } = usePersistConfiguration();
 
   const isLoadingCaseConfiguration =
-    loadingCaseConfigure || isFetchingCaseConfigure || isPersistingConfiguration;
+    loadingCaseConfigure ||
+    isFetchingCaseConfigure ||
+    isErrorCaseConfigure ||
+    isPersistingConfiguration;
 
   const {
     isLoading: isLoadingConnectors,
