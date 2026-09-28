@@ -7,6 +7,12 @@ on:
       - labeled
       - unlabeled
 
+# Adding v9.6.0 (and any filled-in release label) starts another run. Cancel the
+# in-debounce run so only the latest label set opens backport PRs.
+concurrency:
+  group: on-merge-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   on-merge:
     name: 'Label and Backport'
@@ -16,7 +22,10 @@ jobs:
         (github.event.action == 'closed' ||
           (github.event.action == 'labeled' &&
             (github.event.label.name == 'backport:all-open' ||
-              github.event.label.name == 'backport:version')) ||
+              github.event.label.name == 'backport:version' ||
+              (startsWith(github.event.label.name, 'v') &&
+                contains(github.event.label.name, '.') &&
+                contains(github.event.pull_request.labels.*.name, 'backport:version')))) ||
           (github.event.action == 'unlabeled' &&
             github.event.label.name == 'backport:skip' &&
             (contains(github.event.pull_request.labels.*.name, 'backport:all-open') ||
