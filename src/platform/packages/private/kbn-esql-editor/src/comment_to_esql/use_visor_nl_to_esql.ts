@@ -53,7 +53,7 @@ export const useVisorNlToEsql = ({
     []
   );
 
-  const { showReview, cleanup } = useReplaceReview({
+  const { showReview, reject } = useReplaceReview({
     editorRef,
     editorModel,
     euiTheme,
@@ -70,7 +70,9 @@ export const useVisorNlToEsql = ({
       const model = editorModel.current;
       if (!editor || !model) return;
 
-      cleanup();
+      // Revert any outstanding review so the next plan is against the original query,
+      // not leftover generated lines from the previous result.
+      reject();
 
       generatedContentRef.current = generatedContent;
 
@@ -113,7 +115,7 @@ export const useVisorNlToEsql = ({
 
       showReview(plan.review);
     },
-    [editorRef, editorModel, cleanup, showReview, onAfterInsert]
+    [editorRef, editorModel, reject, showReview, onAfterInsert]
   );
 
   return { showVisorReview };
