@@ -770,26 +770,31 @@ export class ManifestManager {
     );
 
     const allPolicyIds = await this.listEndpointPolicyIds();
-    let results: ArtifactsBuildResult[];
-    try {
-      results = await Promise.all([
-        this.buildExceptionListArtifacts(allPolicyIds, isEndpointExceptionsPerPolicyEnabled),
-        this.buildTrustedAppsArtifacts(allPolicyIds),
-        this.buildEventFiltersArtifacts(allPolicyIds),
-        this.buildHostIsolationExceptionsArtifacts(allPolicyIds),
-        this.buildBlocklistArtifacts(allPolicyIds),
-        ...(this.experimentalFeatures.trustedDevices
-          ? [this.buildTrustedDevicesArtifacts(allPolicyIds)]
-          : []),
-        ...(this.experimentalFeatures.customYaraSignaturesEnabled
-          ? [this.buildCustomYaraSignaturesArtifacts(allPolicyIds)]
-          : []),
-      ]);
-    } finally {
-      // Clear on success and failure: the manager is reused on every packager run, and a
-      // rejected Promise.all (e.g. exhausted libyara retries) would otherwise leave the
-      // snapshot in place for the next build.
-      this.cachedExceptionsListsByOs.clear();
+
+    // Wait for every started builder to finish, then clear, then rethrow.
+    const settled = await Promise.allSettled([
+      this.buildExceptionListArtifacts(allPolicyIds, isEndpointExceptionsPerPolicyEnabled),
+      this.buildTrustedAppsArtifacts(allPolicyIds),
+      this.buildEventFiltersArtifacts(allPolicyIds),
+      this.buildHostIsolationExceptionsArtifacts(allPolicyIds),
+      this.buildBlocklistArtifacts(allPolicyIds),
+      ...(this.experimentalFeatures.trustedDevices
+        ? [this.buildTrustedDevicesArtifacts(allPolicyIds)]
+        : []),
+      ...(this.experimentalFeatures.customYaraSignaturesEnabled
+        ? [this.buildCustomYaraSignaturesArtifacts(allPolicyIds)]
+        : []),
+    ]);
+
+    // Clear on success and failure: the manager is reused on every packager run.
+    this.cachedExceptionsListsByOs.clear();
+
+    const results: ArtifactsBuildResult[] = [];
+    for (const result of settled) {
+      if (result.status === 'rejected') {
+        throw result.reason;
+      }
+      results.push(result.value);
     }
 
     const manifest = new Manifest({

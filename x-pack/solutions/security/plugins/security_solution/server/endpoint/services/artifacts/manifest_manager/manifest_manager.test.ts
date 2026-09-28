@@ -30,6 +30,7 @@ import {
 
 import {
   buildManifestManagerContextMock,
+  createExceptionListResponse,
   mockFindExceptionListItemResponses,
 } from './manifest_manager.mock';
 
@@ -1543,6 +1544,106 @@ describe('ManifestManager', () => {
 
       expect(getArtifactObject(yaraWindowsArtifact!)).toStrictEqual({ entries: [] });
       expect(mockValidateYaraRule).toHaveBeenCalledTimes(3);
+    });
+
+    test('does not keep exception lists that finish loading after a sibling builder fails', async () => {
+      const yaraRuleText = 'rule Example { condition: true }';
+      const yaraListItem = getExceptionListItemSchemaMock({
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: yaraRuleText,
+          },
+        ],
+      });
+      const staleTrustedApp = getExceptionListItemSchemaMock({
+        list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+        entries: [
+          { type: 'match', operator: 'included', field: 'path', value: 'stale-trusted-app' },
+        ],
+      });
+
+      let releaseTrustedAppsFetch: () => void = () => {};
+      const trustedAppsGate = new Promise<void>((resolve) => {
+        releaseTrustedAppsFetch = resolve;
+      });
+      let resolveTrustedAppsFetchDoneCallback: () => void = () => {};
+      const trustedAppsFetchDoneCallback = new Promise<void>((resolve) => {
+        resolveTrustedAppsFetchDoneCallback = resolve;
+      });
+      const findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id]: { windows: [yaraListItem] },
+      });
+
+      const context = buildManifestManagerContextMock({
+        experimentalFeatures: ['customYaraSignaturesEnabled'],
+      });
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = jest.fn(async (...args) => {
+        const options = args[0] as { listId?: string };
+        if (options?.listId === ENDPOINT_ARTIFACT_LISTS.trustedApps.id) {
+          // gated fetch for Trusted Apps
+          await trustedAppsGate;
+          resolveTrustedAppsFetchDoneCallback();
+          return createExceptionListResponse([staleTrustedApp]);
+        }
+        return findExceptionListItem(...args);
+      });
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      mockValidateYaraRule.mockRejectedValue(
+        new YaraEngineUnavailableError('libyara WASM allocation failed')
+      );
+
+      const yieldToEventLoop = () => new Promise<void>((resolve) => setImmediate(resolve));
+      const failedBuild = manifestManager.buildNewManifest();
+
+      // Hold trusted apps until YARA has exhausted retries. With Promise.all + finally,
+      // rejection clears the cache while this fetch is still gated; releasing afterward
+      // can refill the map. allSettled waits for this sibling before clearing.
+      for (
+        let safetyCap = 0;
+        safetyCap < 50 && mockValidateYaraRule.mock.calls.length < 3;
+        safetyCap++
+      ) {
+        await yieldToEventLoop();
+      }
+      expect(mockValidateYaraRule).toHaveBeenCalledTimes(3);
+      // Let Promise.all's rejection + finally run (no-op yet under allSettled).
+      await yieldToEventLoop();
+
+      releaseTrustedAppsFetch();
+      await trustedAppsFetchDoneCallback;
+      // Allow getCachedExceptions to .set() after the awaited list fetch returns.
+      await yieldToEventLoop();
+
+      await expect(failedBuild).rejects.toBeInstanceOf(YaraEngineUnavailableError);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
+      mockValidateYaraRule.mockResolvedValue({
+        errors: [],
+        warnings: [],
+        errorCount: 0,
+        warningCount: 0,
+        rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
+      });
+
+      const manifest = await manifestManager.buildNewManifest();
+      const trustedAppsWindowsArtifact = manifest
+        .getAllArtifacts()
+        .find((artifact) => artifact.identifier === ARTIFACT_NAME_TRUSTED_APPS_WINDOWS);
+
+      expect(getArtifactObject(trustedAppsWindowsArtifact!)).toStrictEqual({ entries: [] });
     });
   });
 
