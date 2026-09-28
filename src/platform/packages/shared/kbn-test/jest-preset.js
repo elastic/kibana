@@ -24,8 +24,6 @@ const scoutReporter = [
 
 /** @type {import("@jest/types").Config.InitialOptions} */
 module.exports = {
-  retryTimes: process.env.CI ? 3 : 0,
-
   // The directory where Jest should output its coverage files
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
 
@@ -82,7 +80,10 @@ module.exports = {
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/mocks.kbn_i18n_react.js',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/mocks.vega.js',
     process.env.CI
-      ? '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/disable_console_logs.js'
+      ? [
+          '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/disable_console_logs.js',
+          '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/retry_on_ci.js',
+        ]
       : [],
   ].flat(),
 
