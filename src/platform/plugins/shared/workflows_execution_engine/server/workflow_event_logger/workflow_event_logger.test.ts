@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
+import type { WorkflowEventLoggerContext, WorkflowEventLoggerOptions } from './types';
 import { WorkflowEventLogger } from './workflow_event_logger';
+import { WorkflowEventQueue } from './workflow_event_queue';
 import { createCircuitBreakerError } from '../__fixtures__/circuit_breaker_error';
 import type { LogsRepository, WorkflowLogEvent } from '../repositories/logs_repository';
 import { WorkflowTaskManagerAbortError } from '../workflow_task_shutdown';
@@ -19,11 +22,24 @@ const createLogsRepositoryMock = () =>
     createLogs: jest.fn(),
   } as unknown as jest.Mocked<LogsRepository>);
 
+const createLoggerUnderTest = (
+  logsRepository: jest.Mocked<LogsRepository>,
+  logger: Logger,
+  context: WorkflowEventLoggerContext = {},
+  options: WorkflowEventLoggerOptions = {}
+) => {
+  const eventQueue = new WorkflowEventQueue(logsRepository, logger);
+  return {
+    eventQueue,
+    workflowLogger: new WorkflowEventLogger(logger, eventQueue, context, options),
+  };
+};
+
 describe('WorkflowEventLogger', () => {
   it('logs info events and preserves context fields', async () => {
     const logsRepository = createLogsRepositoryMock();
     const logger = loggerMock.create();
-    const workflowLogger = new WorkflowEventLogger(logsRepository, logger, {
+    const { workflowLogger, eventQueue } = createLoggerUnderTest(logsRepository, logger, {
       workflowId: 'wf-1',
       executionId: 'exec-1',
       stepId: 'step-1',
@@ -35,7 +51,7 @@ describe('WorkflowEventLogger', () => {
     });
 
     workflowLogger.logInfo('hello', { tags: ['tag-1'] });
-    await workflowLogger.eventQueue.flush();
+    await eventQueue.flush();
 
     expect(logsRepository.createLogs).toHaveBeenCalledTimes(1);
     const events = (logsRepository.createLogs as jest.Mock).mock.calls[0][0] as WorkflowLogEvent[];
@@ -65,11 +81,11 @@ describe('WorkflowEventLogger', () => {
     (logsRepository.createLogs as jest.Mock)
       .mockRejectedValueOnce(new Error('index-fail'))
       .mockResolvedValueOnce(undefined);
-    const workflowLogger = new WorkflowEventLogger(logsRepository, logger);
+    const { workflowLogger, eventQueue } = createLoggerUnderTest(logsRepository, logger);
 
     workflowLogger.logError('failure', new Error('boom'));
-    await workflowLogger.eventQueue.flush();
-    await workflowLogger.eventQueue.flush();
+    await eventQueue.flush();
+    await eventQueue.flush();
 
     expect(logsRepository.createLogs).toHaveBeenCalledTimes(2);
     expect(logger.error).toHaveBeenCalledWith(
@@ -91,12 +107,12 @@ describe('WorkflowEventLogger', () => {
     const logsRepository = createLogsRepositoryMock();
     const logger = loggerMock.create();
     logsRepository.createLogs.mockRejectedValueOnce(new Error('task-aborted'));
-    const workflowLogger = new WorkflowEventLogger(logsRepository, logger);
+    const { workflowLogger, eventQueue } = createLoggerUnderTest(logsRepository, logger);
     const signal = AbortSignal.abort(new WorkflowTaskManagerAbortError());
 
     workflowLogger.logInfo('best effort');
-    await workflowLogger.eventQueue.flush({ signal });
-    await workflowLogger.eventQueue.flush();
+    await eventQueue.flush({ signal });
+    await eventQueue.flush();
 
     expect(logsRepository.createLogs).toHaveBeenCalledTimes(1);
     expect(logger.error).not.toHaveBeenCalled();
@@ -110,13 +126,13 @@ describe('WorkflowEventLogger', () => {
     const logsRepository = createLogsRepositoryMock();
     const logger = loggerMock.create();
     logsRepository.createLogs.mockRejectedValueOnce(new Error('cancelled'));
-    const workflowLogger = new WorkflowEventLogger(logsRepository, logger);
+    const { workflowLogger, eventQueue } = createLoggerUnderTest(logsRepository, logger);
     const controller = new AbortController();
     controller.abort(new Error('user cancellation'));
 
     workflowLogger.logInfo('retryable');
-    await workflowLogger.eventQueue.flush({ signal: controller.signal });
-    await workflowLogger.eventQueue.flush();
+    await eventQueue.flush({ signal: controller.signal });
+    await eventQueue.flush();
 
     expect(logsRepository.createLogs).toHaveBeenCalledTimes(2);
     expect(logger.error).toHaveBeenCalledWith(
@@ -128,12 +144,9 @@ describe('WorkflowEventLogger', () => {
   it('writes to console logger when enabled', () => {
     const logsRepository = createLogsRepositoryMock();
     const logger = loggerMock.create();
-    const workflowLogger = new WorkflowEventLogger(
-      logsRepository,
-      logger,
-      {},
-      { enableConsoleLogging: true }
-    );
+    const { workflowLogger } = createLoggerUnderTest(logsRepository, logger, {}, {
+      enableConsoleLogging: true,
+    });
 
     workflowLogger.logWarn('watch out');
     workflowLogger.logDebug('debugging');
@@ -147,7 +160,7 @@ describe('WorkflowEventLogger', () => {
   it('creates step loggers and tracks timing events', async () => {
     const logsRepository = createLogsRepositoryMock();
     const logger = loggerMock.create();
-    const workflowLogger = new WorkflowEventLogger(logsRepository, logger, {
+    const { workflowLogger, eventQueue } = createLoggerUnderTest(logsRepository, logger, {
       workflowId: 'wf-1',
       executionId: 'exec-1',
       stepId: 'parent-step',
@@ -157,7 +170,7 @@ describe('WorkflowEventLogger', () => {
     const timingEvent = { event: { action: 'poll' } } as WorkflowLogEvent;
     stepLogger.startTiming(timingEvent);
     stepLogger.stopTiming(timingEvent);
-    await workflowLogger.eventQueue.flush();
+    await eventQueue.flush();
 
     const events = (logsRepository.createLogs as jest.Mock).mock.calls[0][0] as WorkflowLogEvent[];
     expect(events).toHaveLength(2);
@@ -171,7 +184,7 @@ describe('WorkflowEventLogger', () => {
   it('drains step logger events when the parent flushes', async () => {
     const logsRepository = createLogsRepositoryMock();
     const logger = loggerMock.create();
-    const workflowLogger = new WorkflowEventLogger(logsRepository, logger, {
+    const { workflowLogger, eventQueue } = createLoggerUnderTest(logsRepository, logger, {
       workflowId: 'wf-1',
       executionId: 'exec-1',
     });
@@ -179,7 +192,7 @@ describe('WorkflowEventLogger', () => {
 
     workflowLogger.logInfo('workflow started');
     stepLogger.logInfo('step started');
-    await workflowLogger.eventQueue.flush();
+    await eventQueue.flush();
 
     const events = (logsRepository.createLogs as jest.Mock).mock.calls[0][0] as WorkflowLogEvent[];
     expect(events.map((event) => event.message)).toEqual(['workflow started', 'step started']);
@@ -196,14 +209,14 @@ describe('WorkflowEventLogger', () => {
           releaseFlush = resolve;
         })
     );
-    const workflowLogger = new WorkflowEventLogger(logsRepository, logger, {
+    const { workflowLogger, eventQueue } = createLoggerUnderTest(logsRepository, logger, {
       workflowId: 'wf-1',
       executionId: 'exec-1',
     });
     const stepLogger = workflowLogger.createStepLogger('step-exec-2', 'step-2', 'My Step', 'wait');
 
     stepLogger.logInfo('before flush');
-    const flushPromise = workflowLogger.eventQueue.flush();
+    const flushPromise = eventQueue.flush();
     stepLogger.logInfo('during flush');
     releaseFlush?.();
     await flushPromise;
@@ -212,7 +225,7 @@ describe('WorkflowEventLogger', () => {
       .calls[0][0] as WorkflowLogEvent[];
     expect(firstBatch.map((event) => event.message)).toEqual(['before flush']);
 
-    await workflowLogger.eventQueue.flush();
+    await eventQueue.flush();
 
     const secondBatch = (logsRepository.createLogs as jest.Mock).mock
       .calls[1][0] as WorkflowLogEvent[];
@@ -239,12 +252,15 @@ describe('WorkflowEventQueue.flush — circuit breaker resilience', () => {
     logsRepository.createLogs.mockRejectedValueOnce(createCircuitBreakerError());
     const logger = loggerMock.create();
 
-    const eventLogger = new WorkflowEventLogger(logsRepository, logger);
+    const { workflowLogger: eventLogger, eventQueue } = createLoggerUnderTest(
+      logsRepository,
+      logger
+    );
 
     eventLogger.logInfo('first');
     eventLogger.logInfo('second');
 
-    await expect(eventLogger.eventQueue.flush()).resolves.toBeUndefined();
+    await expect(eventQueue.flush()).resolves.toBeUndefined();
 
     expect(logsRepository.createLogs).toHaveBeenCalledTimes(1);
     expect(logsRepository.createLogs.mock.calls[0][0]).toHaveLength(2);
@@ -261,13 +277,16 @@ describe('WorkflowEventQueue.flush — circuit breaker resilience', () => {
       .mockResolvedValueOnce(undefined);
     const logger = loggerMock.create();
 
-    const eventLogger = new WorkflowEventLogger(logsRepository, logger);
+    const { workflowLogger: eventLogger, eventQueue } = createLoggerUnderTest(
+      logsRepository,
+      logger
+    );
 
     eventLogger.logInfo('event-a');
-    await eventLogger.eventQueue.flush();
+    await eventQueue.flush();
 
     eventLogger.logInfo('event-b');
-    await eventLogger.eventQueue.flush();
+    await eventQueue.flush();
 
     expect(logsRepository.createLogs).toHaveBeenCalledTimes(2);
     const secondFlushBatch = logsRepository.createLogs.mock.calls[1][0];
@@ -281,14 +300,17 @@ describe('WorkflowEventQueue.flush — circuit breaker resilience', () => {
     logsRepository.createLogs.mockRejectedValue(createCircuitBreakerError());
     const logger = loggerMock.create();
 
-    const eventLogger = new WorkflowEventLogger(logsRepository, logger);
+    const { workflowLogger: eventLogger, eventQueue } = createLoggerUnderTest(
+      logsRepository,
+      logger
+    );
 
     const onUnhandled = jest.fn();
     process.on('unhandledRejection', onUnhandled);
 
     try {
       eventLogger.logInfo('boom');
-      await eventLogger.eventQueue.flush();
+      await eventQueue.flush();
       await new Promise((resolve) => setImmediate(resolve));
 
       expect(onUnhandled).not.toHaveBeenCalled();

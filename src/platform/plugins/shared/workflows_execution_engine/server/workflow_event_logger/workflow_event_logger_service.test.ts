@@ -8,19 +8,31 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { DataStreamsStart } from '@kbn/core-data-streams-server';
+import type { LogsRepository } from '../repositories/logs_repository';
 import { WorkflowEventLoggerService } from './workflow_event_logger_service';
+import { WorkflowEventQueue } from './workflow_event_queue';
 
 const createLoggerMock = () =>
   ({
     error: jest.fn(),
   } as unknown as Logger);
 
+const createService = (
+  logsRepository: LogsRepository,
+  logger: Logger = createLoggerMock(),
+  enableConsoleLogging = false
+) =>
+  new WorkflowEventLoggerService(
+    logsRepository,
+    logger,
+    new WorkflowEventQueue(logsRepository, logger),
+    enableConsoleLogging
+  );
+
 describe('WorkflowEventLoggerService', () => {
   it('maps paging fields for repository search helpers', async () => {
-    const service = new WorkflowEventLoggerService({} as DataStreamsStart, createLoggerMock());
     const repository = { searchLogs: jest.fn().mockResolvedValue({ total: 0, logs: [] }) };
-    (service as any).logsRepository = repository;
+    const service = createService(repository as unknown as LogsRepository);
 
     await service.getExecutionLogs({
       executionId: 'exec-1',
@@ -40,7 +52,7 @@ describe('WorkflowEventLoggerService', () => {
 
   it('throws validation errors for missing required params', async () => {
     const logger = createLoggerMock();
-    const service = new WorkflowEventLoggerService({} as DataStreamsStart, logger);
+    const service = createService({} as LogsRepository, logger);
 
     expect(() => service.getExecutionLogs({} as any)).toThrow(
       'Execution logs: Execution ID is required'
@@ -55,11 +67,7 @@ describe('WorkflowEventLoggerService', () => {
   });
 
   it('returns contextual logger instances from convenience factories', () => {
-    const service = new WorkflowEventLoggerService(
-      {} as DataStreamsStart,
-      createLoggerMock(),
-      true
-    );
+    const service = createService({} as LogsRepository, createLoggerMock(), true);
     const createLoggerSpy = jest.spyOn(service, 'createLogger');
 
     service.createWorkflowLogger('wf-1', 'workflow');
@@ -87,10 +95,9 @@ describe('WorkflowEventLoggerService', () => {
 
   it('rethrows repository failures from getRecentLogs', async () => {
     const logger = createLoggerMock();
-    const service = new WorkflowEventLoggerService({} as DataStreamsStart, logger);
     const repositoryError = new Error('repository down');
     const repository = { getRecentLogs: jest.fn().mockRejectedValue(repositoryError) };
-    (service as any).logsRepository = repository;
+    const service = createService(repository as unknown as LogsRepository, logger);
 
     await expect(service.getRecentLogs(10)).rejects.toThrow(repositoryError);
     expect(repository.getRecentLogs).toHaveBeenCalledWith(10);

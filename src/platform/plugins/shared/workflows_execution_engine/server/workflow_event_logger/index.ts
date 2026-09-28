@@ -8,6 +8,7 @@
  */
 
 export { WorkflowEventLoggerService } from './workflow_event_logger_service';
+export { WorkflowEventQueue } from './workflow_event_queue';
 
 export type {
   WorkflowEventLoggerContext,

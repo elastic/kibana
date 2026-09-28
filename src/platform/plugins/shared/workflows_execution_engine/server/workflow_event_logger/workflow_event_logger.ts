@@ -15,18 +15,17 @@ import type {
   WorkflowEventLoggerContext,
   WorkflowEventLoggerOptions,
 } from './types';
-import { WorkflowEventQueue } from './workflow_event_queue';
-import type { LogsRepository, WorkflowLogEvent } from '../repositories/logs_repository';
+import type { WorkflowEventQueue } from './workflow_event_queue';
+import type { WorkflowLogEvent } from '../repositories/logs_repository';
 
 export class WorkflowEventLogger implements IWorkflowEventLogger {
   private timings: Map<string, Date> = new Map();
 
   constructor(
-    private logsRepository: LogsRepository,
     private logger: Logger,
+    private eventQueue: WorkflowEventQueue,
     private context: WorkflowEventLoggerContext = {},
-    private options: WorkflowEventLoggerOptions = {},
-    public readonly eventQueue: WorkflowEventQueue = new WorkflowEventQueue(logsRepository, logger)
+    private options: WorkflowEventLoggerOptions = {}
   ) {}
 
   public logEvent(eventProperties: Partial<WorkflowLogEvent>): void {
@@ -161,8 +160,8 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     stepType?: string
   ): IWorkflowEventLogger {
     return new WorkflowEventLogger(
-      this.logsRepository,
       this.logger,
+      this.eventQueue,
       {
         ...this.context,
         stepExecutionId,
@@ -170,8 +169,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
         stepName,
         stepType,
       },
-      this.options,
-      this.eventQueue
+      this.options
     );
   }
 
