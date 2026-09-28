@@ -137,54 +137,19 @@ export function ManagedIntegrationsSection({
   // Re-seed from session so the user doesn't have to re-enter credentials they already provided
   // (e.g. after navigating Back/Forward or adding a new service without changing auth).
   // isStaticKeysEditMode intentionally skips the seed: the replace-flow requires new credentials.
-  // Identity federation with an existing connector is ready immediately — the form calls
-  // onReadyChange(false) if the connector turns out to be broken.
+  // isDeployReady is authoritative — set to true only when the form explicitly reports ready.
+  // Do not seed true from connectorId: if the IaC key check fails, the form will not emit a
+  // second false (it was already false internally), so the seed would leave Deploy enabled for
+  // an invalid connector.
   const [isDeployReady, setIsDeployReady] = useState(() => {
     if (isStaticKeysEditMode) return false;
-    if (authenticateAndDeployStep.connectorId) return true;
+    if (authenticateAndDeployStep.connectorId) return false;
     const keys = authenticateAndDeployStep.staticKeys;
     return Boolean(keys?.access_key_id && keys?.secret_access_key);
   });
-  // Tracks whether the connector that was in session at (or after) initial mount is still the
-  // active one — i.e. the user has not picked a different connector since the page loaded.
-  // Used to: (a) suppress transient onReadyChange(false) from the identity federation form while
-  // it re-validates an already-known-good connector, and (b) drive the isDirty bypass on the
-  // Deploy button. Both are reset when the user actively selects a new connector or switches
-  // auth method, so a freshly-chosen connector always requires form validation before Deploy.
-  const connectorPreloaded = useRef(!!initialConnectorId && !isStaticKeysEditMode);
-  // Reactive mirror of connectorPreloaded for use in JSX (refs can't drive rendering).
-  const [isConnectorPreloaded, setIsConnectorPreloaded] = useState(
-    !!initialConnectorId && !isStaticKeysEditMode
-  );
-  // Track whether the user has actively changed the connector so the useEffect below can
-  // distinguish hydration (should restore preloaded state) from a user pick (should not).
-  const userChangedConnector = useRef(false);
-  // After session hydration the parent re-renders with a populated connectorId. If the component
-  // mounted before hydration (connectorId was undefined) we need to set the preloaded flag now.
-  useEffect(() => {
-    if (initialConnectorId && !isStaticKeysEditMode && !userChangedConnector.current) {
-      connectorPreloaded.current = true;
-      setIsConnectorPreloaded(true);
-    }
-  }, [initialConnectorId, isStaticKeysEditMode]);
-
-  const handleIdentityFedReadyChange = useCallback((ready: boolean) => {
-    if (connectorPreloaded.current && !ready) {
-      // Suppress the loading flash (form calls false on mount while re-validating a known-good
-      // connector). Clear the flag so a second false — meaning the connector is actually invalid —
-      // still reaches setIsDeployReady and disables the button.
-      connectorPreloaded.current = false;
-      setIsConnectorPreloaded(false);
-      return;
-    }
-    setIsDeployReady(ready);
-  }, []);
 
   const handleIdentityFedConnectorChange = useCallback(
     (id: string | undefined, name?: string) => {
-      userChangedConnector.current = true;
-      connectorPreloaded.current = false;
-      setIsConnectorPreloaded(false);
       setConnectorId(id, name);
     },
     [setConnectorId]
@@ -344,9 +309,6 @@ export function ManagedIntegrationsSection({
                       setPreferredMethod(id as PreferredMethod);
                       setIsDeployReady(false);
                       if (id === 'access_keys') {
-                        userChangedConnector.current = true;
-                        connectorPreloaded.current = false;
-                        setIsConnectorPreloaded(false);
                         setConnectorId(undefined);
                       }
                     }}
@@ -364,7 +326,7 @@ export function ManagedIntegrationsSection({
                   cloud={services.cloud}
                   iacTemplateUrl={iacTemplateUrl}
                   integrations={iacIntegrations}
-                  onReadyChange={handleIdentityFedReadyChange}
+                  onReadyChange={setIsDeployReady}
                   onConnectorIdChange={handleIdentityFedConnectorChange}
                   onIacTemplateRecorded={handleIacTemplateRecorded}
                   initialConnectorId={initialConnectorId}
@@ -434,11 +396,6 @@ export function ManagedIntegrationsSection({
                   isDeploying ||
                   (!isDeployReady &&
                     !isCleanupOnly &&
-                    !(
-                      isDirty &&
-                      preferredMethod === 'identity_federation' &&
-                      isConnectorPreloaded
-                    ) &&
                     !(
                       isDirty &&
                       isStaticKeysEditMode &&

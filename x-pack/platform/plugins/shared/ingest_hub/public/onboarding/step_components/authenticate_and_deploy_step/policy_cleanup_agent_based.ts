@@ -156,7 +156,9 @@ export async function updateAgentBasedPolicy(
   // The legacy schema accepts `enabled` at the top level but requires inputs as an array.
   // The simplified schema accepts record inputs but rejects unknown top-level keys like `enabled`.
   // Use simplified consistently — `enabled` is intentionally omitted.
-  await sendUpdatePackagePolicy(policyId, {
+  // sendUpdatePackagePolicy resolves with { error } on HTTP failure rather than rejecting.
+  // Throw explicitly so Promise.allSettled callers can detect the failure.
+  const updateResult = await sendUpdatePackagePolicy(policyId, {
     name: policyName,
     namespace: policyNamespace,
     package: { name: packageName, version: pkgVersion },
@@ -164,4 +166,7 @@ export async function updateAgentBasedPolicy(
     inputs,
     policy_ids: existingPolicyIds ?? selectedAgentPolicyIds,
   } as unknown as Parameters<typeof sendUpdatePackagePolicy>[1]);
+  if (updateResult.error) {
+    throw updateResult.error;
+  }
 }

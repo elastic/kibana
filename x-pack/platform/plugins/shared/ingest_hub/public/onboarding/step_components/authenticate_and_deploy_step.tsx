@@ -178,11 +178,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         // was suppressed in static-key mode entirely, leaving isDirty=true even after the user
         // reverted their service-var changes and came back to Step 3.
         updateDetectAndReviewStep({ isDirty: dirty || replaceFormDirtyRef.current });
+        // Settle only after a successful compare. A failed or empty fetch leaves driftSettled=false
+        // so Next stays blocked rather than enabling with a stale (default false) isDirty value.
+        setDriftSettled(true);
       })
-      .catch(() => {})
-      .finally(() => {
-        if (thisId === driftCheckIdRef.current) setDriftSettled(true);
-      });
+      .catch(() => {});
     // serviceSettings.serviceVars and globalRegion are intentionally captured from the closure:
     // service-var and region changes come from Step 2 navigation (full remount), not same-step
     // edits. Only auth mutations (connector swap, authMethod change) happen in this component's
@@ -625,7 +625,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     (hasAnyEcf && !isEcfDone) ||
     isSavingSO ||
     (showAgentSection && isAgentDeploying) ||
-    (showAgentSection && !isAgentDone && !isAgentNextReady);
+    (showAgentSection && !isAgentDone && !(driftSettled && isAgentNextReady));
 
   return (
     <div data-test-subj="onboardingStep-authenticate-and-deploy">
