@@ -472,7 +472,10 @@ const normalizeReferences = <T extends LensAttributes>(
           (filterRefNames.has(reference.name) || reference.name.startsWith('filter-index-pattern-'))
         );
       })
-      // ignore current index pattern reference
+      // The 7.10 SO migration created an `indexpattern-datasource-current-indexpattern` reference
+      // from `currentIndexPatternId`. Nothing consumes it: `injectReferences` only looks up
+      // `indexpattern-datasource-layer-*` refs, and `loadInitialState` recomputes
+      // `currentIndexPatternId` from scratch. The transform never emits it either.
       .filter((reference) => {
         return !(
           reference.type === 'index-pattern' &&
