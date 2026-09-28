@@ -38,9 +38,7 @@ const OutputSchema = z.object({
 });
 
 export type AddUserMessageInputSchema = typeof InputSchema;
-export type AddUserMessageOutputSchema = typeof OutputSchema;
-
-export type AddUserMessageStepInput = z.infer<typeof InputSchema>;
+type AddUserMessageOutputSchema = typeof OutputSchema;
 
 export const addUserMessageStepCommonDefinition: CommonStepDefinition<
   AddUserMessageInputSchema,
