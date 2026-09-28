@@ -30,19 +30,21 @@ export interface SeededAutomatedResponseActionsRule {
 }
 
 /**
- * Runs `uname` on the enrolled VM so Endpoint emits a process event after the
- * detection rule is enabled.
+ * Starts a long-lived `sleep` on the enrolled VM so Endpoint emits a process
+ * event after the detection rule is enabled. Kill-process targets that alert's
+ * `process.pid`, so the process must still be running when the rule fires.
  *
  * CI uses `vagrant ssh -- <command>`, which forwards extra args to the SSH
  * client. Short flags such as `-t` or `-c` are eaten there (exit 255) and never
- * run on the guest, so this command must not take flags.
+ * run on the guest. `systemd-run` returns immediately; a bare `sleep 600`
+ * would block `exec` for the whole interval.
  */
 export const triggerMatchingProcessEvent = async (hostname: string): Promise<void> => {
-  await getHostVmClient(hostname).exec('uname');
+  await getHostVmClient(hostname).exec('sudo systemd-run sleep 600');
 };
 
 /**
- * Creates an enabled query rule that fires on uname process events from the
+ * Creates an enabled query rule that fires on sleep process events from the
  * enrolled Endpoint agent and attaches isolate / suspend-process / kill-process.
  *
  * Call `triggerMatchingProcessEvent` after this so a matching process event
@@ -63,7 +65,7 @@ export const createEnabledRuleWithAutomatedResponseActions = async (
       index: SECURITY_INDEX_PATTERNS,
       filters: [],
       language: 'kuery',
-      query: `agent.id: "${agentId}" and process.name: "uname"`,
+      query: `agent.id: "${agentId}" and process.name: "sleep"`,
       author: [],
       false_positives: [],
       references: [],
