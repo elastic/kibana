@@ -20,6 +20,9 @@ spaceTest.describe(
     tag: tags.stateful.classic,
   },
   () => {
+    // Isolate, release, and the agent-status poll do not fit in the default 60s.
+    spaceTest.setTimeout(240_000);
+
     let seeded: (SeededHostAlert & { cleanup: () => Promise<void> }) | undefined;
     let caseId: string | undefined;
     let cleanupCase: (() => Promise<void>) | undefined;
@@ -82,6 +85,11 @@ spaceTest.describe(
           await documentFlyout.openTakeActionMenu();
           await documentFlyout.clickTakeActionItem('isolate-host-action-item');
           await hostIsolation.fillComment(isolateComment);
+          // caseIds is empty until this lookup returns. Confirming earlier submits
+          // the action without adding the comment to the case.
+          await expect(
+            hostIsolation.form.getByText('1 case associated with this host')
+          ).toBeVisible();
           const action = await captureEndpointAction(page, 'isolate', () =>
             hostIsolation.confirm()
           );
@@ -89,6 +97,7 @@ spaceTest.describe(
             page.getByText(`Isolation on host ${host.hostname} successfully submitted`)
           ).toBeVisible();
           await hostIsolation.waitUntilClosed();
+          await page.gotoApp(`security/cases/${attachedCaseId}`);
           await expect(activity).toContainText(isolateComment);
           await completeHostAction({ esClient, config, action });
           await waitForHostIsolation({
@@ -104,6 +113,9 @@ spaceTest.describe(
           await documentFlyout.openTakeActionMenu();
           await documentFlyout.clickTakeActionItem('isolate-host-action-item');
           await hostIsolation.fillComment(releaseComment);
+          await expect(
+            hostIsolation.form.getByText('1 case associated with this host')
+          ).toBeVisible();
           const action = await captureEndpointAction(page, 'unisolate', () =>
             hostIsolation.confirm()
           );
@@ -111,6 +123,7 @@ spaceTest.describe(
             page.getByText(`Release on host ${host.hostname} successfully submitted`)
           ).toBeVisible();
           await hostIsolation.waitUntilClosed();
+          await page.gotoApp(`security/cases/${attachedCaseId}`);
           await completeHostAction({ esClient, config, action });
           await expect(activity).toContainText(isolateComment);
           await expect(activity).toContainText(releaseComment);

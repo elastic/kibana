@@ -21,6 +21,9 @@ spaceTest.describe(
     tag: tags.stateful.classic,
   },
   () => {
+    // Isolate, release, and the agent-status polls do not fit in the default 60s.
+    spaceTest.setTimeout(240_000);
+
     let seededHost: (SeededHostAlert & { cleanup: () => Promise<void> }) | undefined;
 
     spaceTest.beforeAll(async ({ esClient, kbnClient, scoutSpace, config }) => {
@@ -50,13 +53,30 @@ spaceTest.describe(
         }
         const host = seededHost;
 
-        const { documentFlyout, hostIsolation } = pageObjects;
+        const { alertsTablePage, documentFlyout, hostIsolation } = pageObjects;
         const isolateComment = `Isolating ${host.hostname}`;
         const releaseComment = `Releasing ${host.hostname}`;
         const agentStatus = page.testSubj.locator(AGENT_STATUS_CELL);
 
+        const openAlertFlyout = async () => {
+          await alertsTablePage.navigate();
+          // The summary charts fill the viewport and the events table stays unmounted
+          // until they are collapsed.
+          const charts = page.testSubj.locator('alerts-charts-panel');
+          const chartsToggle = charts.getByTestId('query-toggle-header');
+          if (
+            (await chartsToggle.count()) > 0 &&
+            (await chartsToggle.getAttribute('aria-expanded')) === 'true'
+          ) {
+            await chartsToggle.click();
+          }
+          await alertsTablePage.waitForRuleAlert(host.ruleName);
+          await alertsTablePage.expandAlertDetailsFlyout(host.ruleName);
+          await documentFlyout.waitForAlertFlyout();
+        };
+
         await spaceTest.step('isolate the host from the alert flyout', async () => {
-          await documentFlyout.openForRule(host.ruleName);
+          await openAlertFlyout();
           await documentFlyout.openTakeActionMenu();
           await documentFlyout.clickTakeActionItem('isolate-host-action-item');
           await hostIsolation.fillComment(isolateComment);
@@ -77,7 +97,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('the reopened flyout shows the host as isolated', async () => {
-          await documentFlyout.openForRule(host.ruleName);
+          await openAlertFlyout();
           await expect(agentStatus).toContainText('Isolated');
         });
 
@@ -104,7 +124,7 @@ spaceTest.describe(
         await spaceTest.step(
           'the reopened flyout no longer shows the host as isolated',
           async () => {
-            await documentFlyout.openForRule(host.ruleName);
+            await openAlertFlyout();
             await expect(agentStatus).toBeVisible();
             await expect(agentStatus).not.toContainText('Isolated');
           }
