@@ -61,7 +61,7 @@ export function getConnectorInstancesForType(
   const customStepSelectionHandler = getCustomStepConnectorIdSelectionHandler(stepType);
   const connectorTypes = customStepSelectionHandler?.connectorTypes ?? [stepType];
   if (
-    connectorTypes.includes('inference.unified_completion') &&
+    connectorTypes.some((connectorType) => connectorType.startsWith('inference.')) &&
     customStepSelectionHandler?.inferenceFeatureId
   ) {
     return inferenceConnectorInstances?.get(customStepSelectionHandler.inferenceFeatureId) ?? [];

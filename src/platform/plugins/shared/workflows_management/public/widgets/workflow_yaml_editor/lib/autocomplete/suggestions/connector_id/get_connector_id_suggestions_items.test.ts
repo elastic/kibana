@@ -269,30 +269,33 @@ describe('getConnectorInstancesForType', () => {
     expect(result[0].connectorType).toBe('.slack');
   });
 
-  it('should return inference endpoints configured for the step feature', () => {
-    getCustomStepConnectorIdSelectionHandler.mockReturnValue({
-      connectorTypes: ['inference.unified_completion'],
-      inferenceFeatureId: 'ai_summarize',
-    });
-    const inferenceConnectorInstances = new Map([
-      [
-        'ai_summarize',
+  it.each(['inference.unified_completion', 'inference.completion', 'inference.rerank'])(
+    'should return inference endpoints configured for the step feature for %s',
+    (connectorType) => {
+      getCustomStepConnectorIdSelectionHandler.mockReturnValue({
+        connectorTypes: [connectorType],
+        inferenceFeatureId: 'ai_summarize',
+      });
+      const inferenceConnectorInstances = new Map([
         [
-          {
-            id: 'endpoint-id',
-            name: 'Inference endpoint',
-            isPreconfigured: false,
-            isDeprecated: false,
-            isInferenceEndpoint: true,
-          },
+          'ai_summarize',
+          [
+            {
+              id: 'endpoint-id',
+              name: 'Inference endpoint',
+              isPreconfigured: false,
+              isDeprecated: false,
+              isInferenceEndpoint: true,
+            },
+          ],
         ],
-      ],
-    ]);
+      ]);
 
-    expect(
-      getConnectorInstancesForType('ai.summarize', undefined, inferenceConnectorInstances)
-    ).toEqual([expect.objectContaining({ id: 'endpoint-id', isInferenceEndpoint: true })]);
-  });
+      expect(
+        getConnectorInstancesForType('ai.summarize', undefined, inferenceConnectorInstances)
+      ).toEqual([expect.objectContaining({ id: 'endpoint-id', isInferenceEndpoint: true })]);
+    }
+  );
 
   it('should return empty array when no matching connector type is found', () => {
     const dynamicConnectorTypes = createMockDynamicConnectorTypes();
