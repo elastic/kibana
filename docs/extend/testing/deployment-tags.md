@@ -147,7 +147,7 @@ lands.
 | ------------------------- | ------------ |
 | `tags.serverless.vectordb` | VectorDB     |
 
-This expands to `@local-serverless-vectordb` and `@cloud-serverless-vectordb`. VectorDB is included in `tags.serverless.all`, but not in `tags.deploymentAgnostic`; add its explicit tags when the test needs VectorDB coverage.
+This expands to `@local-serverless-vectordb` and `@cloud-serverless-vectordb`. VectorDB is included in `tags.serverless.all`, but not in `tags.deploymentAgnostic` (this project type doesn't have a stateful counterpart). Add its explicit tags when the test needs VectorDB coverage.
 
 ### `tags.performance` [scout-deployment-tags-performance]
 
