@@ -19,12 +19,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
@@ -58,7 +58,7 @@ const CheckboxCell: React.FC<CheckboxCellProps> = React.memo(
   ({ policyId, policyName, checked, disabled, isShardAssigned, onToggle }) => {
     const handleChange = useCallback(() => onToggle(policyId), [onToggle, policyId]);
 
-    const tooltipAnchorProps = useMemo(
+    const tipAnchorProps = useMemo(
       () => ({ 'data-test-subj': `shardAssignedTooltip-${policyId}` }),
       [policyId]
     );
@@ -80,10 +80,25 @@ const CheckboxCell: React.FC<CheckboxCellProps> = React.memo(
       return checkbox;
     }
 
+    // The reason sits on its own focusable trigger rather than on the disabled
+    // checkbox: a disabled input takes no focus, so a tooltip wrapping it is
+    // unreachable by keyboard and screen readers.
     return (
-      <EuiToolTip content={shardAssignedTooltip} position="right" anchorProps={tooltipAnchorProps}>
-        {checkbox}
-      </EuiToolTip>
+      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+        <EuiFlexItem grow={false}>{checkbox}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            type="question"
+            position="right"
+            content={shardAssignedTooltip}
+            anchorProps={tipAnchorProps}
+            aria-label={i18n.translate('xpack.osquery.pack.policyList.shardAssignedIconAriaLabel', {
+              defaultMessage: 'Why {name} cannot be selected',
+              values: { name: policyName },
+            })}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 );
@@ -267,7 +282,7 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
     () => [
       {
         name: '',
-        width: '40px',
+        width: '64px',
         render: (item: PolicyRow) => {
           const isShardAssigned = shardKeySet.has(item.id) && !selectedSet.has(item.id);
 
@@ -428,7 +443,7 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
       body={
         <FormattedMessage
           id="xpack.osquery.pack.policyList.noSearchResultsBody"
-          defaultMessage="Policies are matched by name. Clear or change the search to see the full list."
+          defaultMessage="Policies are matched by name or description. Clear or change the search to see the full list."
         />
       }
     />

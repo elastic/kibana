@@ -271,6 +271,12 @@ describe('PolicyAssignmentList', () => {
       fireEvent.change(searchInput, { target: { value: 'no-such-policy' } });
 
       expect(screen.getByText('No policies match your search')).toBeInTheDocument();
+      // The copy must name every searched field, description included.
+      expect(
+        screen.getByText(
+          'Policies are matched by name or description. Clear or change the search to see the full list.'
+        )
+      ).toBeInTheDocument();
       // Zero-policies empty copy is only for a successful empty Fleet response.
       expect(screen.queryByText('No agent policies found')).not.toBeInTheDocument();
     });
@@ -480,6 +486,21 @@ describe('PolicyAssignmentList', () => {
 
       expect(screen.getByTestId('shardAssignedTooltip-policy-2')).toBeInTheDocument();
       expect(screen.queryByTestId('shardAssignedTooltip-policy-1')).not.toBeInTheDocument();
+    });
+
+    it('exposes the shard explanation on a focusable, named trigger', () => {
+      // The checkbox itself is disabled and therefore unfocusable, so the
+      // reason must be reachable without it.
+      render(<FormWrapper defaultValues={{ policy_ids: [], shards: { 'policy-2': 50 } }} />);
+
+      const trigger = screen
+        .getByTestId('shardAssignedTooltip-policy-2')
+        .querySelector('[tabindex="0"]');
+
+      expect(trigger).not.toBeNull();
+      // Kibana's Jest environment stubs EUI icons and renders `aria-label` as
+      // the stub's text content, so the name is asserted on the trigger itself.
+      expect(trigger).toHaveTextContent('Why Beta Policy cannot be selected');
     });
 
     it('does not add a shard policy id via checkbox', () => {
