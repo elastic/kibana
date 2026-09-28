@@ -75,6 +75,10 @@ interface BucketStats {
   failedBuckets: number;
   appliedBuckets: number;
   examinedBuckets: number;
+  oversized101To1000: number;
+  oversized1001To10000: number;
+  oversizedOver10000: number;
+  oversizedLargestGroup: number;
 }
 
 const emptyStats = (): BucketStats => ({
@@ -90,7 +94,25 @@ const emptyStats = (): BucketStats => ({
   failedBuckets: 0,
   appliedBuckets: 0,
   examinedBuckets: 0,
+  oversized101To1000: 0,
+  oversized1001To10000: 0,
+  oversizedOver10000: 0,
+  oversizedLargestGroup: 0,
 });
+
+const recordOversizedGroup = (stats: BucketStats, groupSize: number): void => {
+  stats.skippedOversizedBuckets++;
+  if (groupSize > stats.oversizedLargestGroup) {
+    stats.oversizedLargestGroup = groupSize;
+  }
+  if (groupSize <= 1000) {
+    stats.oversized101To1000++;
+  } else if (groupSize <= 10000) {
+    stats.oversized1001To10000++;
+  } else {
+    stats.oversizedOver10000++;
+  }
+};
 
 export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerRuleState> {
   const { state, namespace, esClient, logger, resolutionClient, signal, telemetry, spec, ruleId } =
@@ -182,6 +204,11 @@ export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerR
       { name: 'cascades_blocked', count: stats.cascadesBlocked },
       { name: 'ambiguous_skips', count: stats.skippedAmbiguousBuckets },
       { name: 'oversized_skips', count: stats.skippedOversizedBuckets },
+      { name: 'oversized_101_1000', count: stats.oversized101To1000 },
+      { name: 'oversized_1001_10000', count: stats.oversized1001To10000 },
+      { name: 'oversized_over_10000', count: stats.oversizedOver10000 },
+      // oversized_largest_group is a size (max declined groupSize), not a count of buckets.
+      { name: 'oversized_largest_group', count: stats.oversizedLargestGroup },
       { name: 'noop_skips', count: stats.skippedNoopBuckets },
       { name: 'blocked_skips', count: stats.skippedBlockedBuckets },
       { name: 'stale_overlap_skips', count: stats.skippedStaleOverlapBuckets },
@@ -244,7 +271,7 @@ async function resolveMatchGroup(
   stats.examinedBuckets++;
 
   if (row.groupSize > GROUP_SIZE_CEILING) {
-    stats.skippedOversizedBuckets++;
+    recordOversizedGroup(stats, row.groupSize);
     logger.warn(
       `${ruleId}: declining oversized bucket '${row.matchValue}' with ${row.groupSize} entities (ceiling ${GROUP_SIZE_CEILING})`
     );

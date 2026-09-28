@@ -487,7 +487,57 @@ describe('runEsqlMatcherRule', () => {
 
     expect(mockCascadeLink).not.toHaveBeenCalled();
     expect(result.lastRun?.skippedOversizedBuckets).toBe(1);
+    expect(result.lastRun).not.toHaveProperty('oversizedLargestGroup');
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('oversized bucket'));
+  });
+
+  it('bins declined oversized group sizes and reports the largest in telemetry', async () => {
+    const telemetry = { report: jest.fn() };
+    (mockEsClient.esql.query as jest.Mock)
+      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
+      .mockResolvedValueOnce(
+        esqlResponse(
+          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
+          [
+            groupRow({
+              matchValue: 'helpdesk@corp.com',
+              unresolvedIds: ['user-1', 'user-2'],
+              namespaces: ['okta', 'entra_id'],
+              unresolvedCount: 2,
+              groupSize: 150,
+            }),
+            groupRow({
+              matchValue: 'scanner@corp.com',
+              unresolvedIds: ['user-a', 'user-b'],
+              namespaces: ['okta', 'entra_id'],
+              unresolvedCount: 2,
+              groupSize: 12_000,
+            }),
+          ]
+        )
+      );
+
+    const result = await runEsqlMatcherRule(
+      createDeps(createInitialState(), mockEsClient, mockResolutionClient, {
+        telemetry,
+        pageSize: 10,
+      })
+    );
+
+    expect(mockCascadeLink).not.toHaveBeenCalled();
+    expect(result.lastRun?.skippedOversizedBuckets).toBe(2);
+    expect(result.lastRun).not.toHaveProperty('oversizedLargestGroup');
+    expect(telemetry.report).toHaveBeenCalledWith(
+      expect.objectContaining({
+        breakdown: expect.arrayContaining([
+          { name: 'oversized_skips', count: 2 },
+          { name: 'oversized_101_1000', count: 1 },
+          { name: 'oversized_1001_10000', count: 0 },
+          { name: 'oversized_over_10000', count: 1 },
+          { name: 'oversized_largest_group', count: 12_000 },
+        ]),
+      })
+    );
   });
 
   it('cascade-links unresolved members onto the namespace-priority target', async () => {
@@ -852,6 +902,10 @@ describe('runEsqlMatcherRule', () => {
           { name: 'cascades_blocked', count: 0 },
           { name: 'ambiguous_skips', count: 0 },
           { name: 'oversized_skips', count: 0 },
+          { name: 'oversized_101_1000', count: 0 },
+          { name: 'oversized_1001_10000', count: 0 },
+          { name: 'oversized_over_10000', count: 0 },
+          { name: 'oversized_largest_group', count: 0 },
           { name: 'noop_skips', count: 0 },
           { name: 'blocked_skips', count: 0 },
           { name: 'stale_overlap_skips', count: 0 },
