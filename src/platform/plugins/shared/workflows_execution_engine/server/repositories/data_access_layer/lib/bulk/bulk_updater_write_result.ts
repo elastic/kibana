@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BulkItemResponse } from '../types';
+import type { BulkItemResponse } from '../../types';
 
 export type BulkUpdaterWriteResult = 'updated' | 'noop' | 'not_found';
 

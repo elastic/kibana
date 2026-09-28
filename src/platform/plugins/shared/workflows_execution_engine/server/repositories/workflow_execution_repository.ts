@@ -15,7 +15,7 @@ import {
   NonTerminalExecutionStatuses,
 } from '@kbn/workflows';
 import type { WorkflowExecutionsDataClient } from './data_access_layer';
-import { getBulkUpdaterWriteResult } from './data_access_layer/lib/bulk_updater_write_result';
+import { getBulkUpdaterWriteResult } from './data_access_layer/lib/bulk/bulk_updater_write_result';
 
 /**
  * An execution document is written by several independent writers while the run is in flight:

@@ -9,8 +9,17 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
+  BulkOperation,
+  DocumentVersion,
+  QueueItem,
+  Sendable,
+  Settled,
+  SharedBulkItem,
+  SharedBulkRequestOptions,
+  UpdaterSource,
+} from './types';
 import {
-  type BulkItem,
   type BulkItemResponse,
   type BulkItemResult,
   type BulkPlainItem,
@@ -18,18 +27,9 @@ import {
   type BulkResponse,
   type BulkUpdaterItem,
   isBulkUpdaterItem,
-} from '../types';
+} from '../../types';
 
-export type SharedBulkItem<TExecution extends { id: string }> = BulkPlainItem<TExecution>;
-
-export interface SharedBulkRequestOptions<TExecution extends { id: string }>
-  extends BulkRequestOptions<TExecution> {
-  items: SharedBulkItem<TExecution>[];
-}
-
-type BulkOperation<TExecution extends { id: string }> = NonNullable<
-  estypes.BulkRequest<TExecution, Partial<TExecution> & { id: string }>['operations']
->[number];
+export type { SharedBulkItem, SharedBulkRequestOptions } from './types';
 
 const toBulkOperations = <TExecution extends { id: string }>(
   item: SharedBulkItem<TExecution>
@@ -77,35 +77,6 @@ const toBulkOperations = <TExecution extends { id: string }>(
       throw new Error(`Invalid operation: ${(item as SharedBulkItem<TExecution>).operation}`);
   }
 };
-
-interface QueueItem<TExecution extends { id: string }> {
-  item: BulkItem<TExecution>;
-  originalIndex: number;
-  remainingRetries: number;
-}
-
-interface DocumentVersion {
-  index: string;
-  seqNo: number;
-  primaryTerm: number;
-}
-
-interface UpdaterSource<TExecution extends { id: string }> {
-  source: TExecution;
-  seqNo: number;
-  primaryTerm: number;
-  index: string;
-}
-
-interface Sendable<TExecution extends { id: string }> {
-  qi: QueueItem<TExecution>;
-  plainItem: BulkPlainItem<TExecution>;
-}
-
-interface Settled {
-  originalIndex: number;
-  response: BulkItemResponse;
-}
 
 const fetchFreshVersions = async (
   esClient: ElasticsearchClient,
@@ -174,14 +145,14 @@ const refreshWrittenIndexes = async (
     return;
   }
 
-  const indexes = [
-    ...new Set(
+  const indexes = Array.from(
+    new Set(
       result
         .filter((item) => item?.result === 'updated' || item?.result === 'created')
         .map((item) => item?.index)
         .filter((index): index is string => typeof index === 'string' && index.length > 0)
-    ),
-  ];
+    )
+  );
 
   if (indexes.length === 0) {
     return;
@@ -403,7 +374,7 @@ export async function sharedBulk<TExecution extends { id: string }>(params: {
   let queuedItems: Array<QueueItem<TExecution>> = request.items.map((item, index) => ({
     item,
     originalIndex: index,
-    remainingRetries: item.operation === 'create' ? 0 : (item.retryOnConflict ?? 0),
+    remainingRetries: item.operation === 'create' ? 0 : item.retryOnConflict ?? 0,
   }));
 
   const result = new Array<BulkItemResponse>(request.items.length);
