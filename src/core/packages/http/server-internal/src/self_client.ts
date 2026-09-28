@@ -332,7 +332,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     const hostname =
       serverInfo.hostname === '0.0.0.0' || serverInfo.hostname === '::'
         ? 'localhost'
-        : serverInfo.hostname;
+        : formatUrlHostname(serverInfo.hostname);
 
     return new URL(`${serverInfo.protocol}://${hostname}:${serverInfo.port}`);
   }
@@ -616,6 +616,14 @@ const fetchRedirectHop = async (
   }
   visited.add(visitKey);
   return fetch(currentRequest.clone(), fetchInit);
+};
+
+/** Bracket bare IPv6 hosts so `new URL` accepts listener addresses such as `::1`. */
+const formatUrlHostname = (hostname: string): string => {
+  if (hostname.includes(':') && !hostname.startsWith('[')) {
+    return `[${hostname}]`;
+  }
+  return hostname;
 };
 
 const validateFetchArguments = <TRequestBody>(

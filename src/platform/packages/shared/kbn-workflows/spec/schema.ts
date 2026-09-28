@@ -432,6 +432,10 @@ export type DataSetStep = z.infer<typeof DataSetStepSchema>;
 export const IGNORED_KIBANA_FETCHER_SETTING_MESSAGE =
   'The "fetcher" setting is deprecated and some options are already ignored. Please remove this setting. Configure self HTTP routing, TLS, and redirects with `server.selfHttp`. Use `max-step-size` for response limits.';
 
+/** Editor schema copy. Unlike the warning above, this is shown while the self client is still off. */
+const KIBANA_FETCHER_SCHEMA_DESCRIPTION =
+  'Deprecated. Still applied unless Kibana steps use the Core self HTTP client. When that client is in use, these options are ignored: configure routing, TLS, and redirects with `server.selfHttp`, and use `max-step-size` for response limits.';
+
 const FetcherConfigObjectSchema = z
   .object({
     skip_ssl_verification: z
@@ -458,7 +462,7 @@ export const FetcherConfigSchema = FetcherConfigObjectSchema.optional();
 export const KibanaFetcherConfigSchema = FetcherConfigObjectSchema.meta({
   $id: 'kibanaFetcher',
   deprecated: true,
-  description: IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
+  description: KIBANA_FETCHER_SCHEMA_DESCRIPTION,
 }).optional();
 
 // Single source of truth for the kibana.request HTTP method enum (mirrors the `http` step's

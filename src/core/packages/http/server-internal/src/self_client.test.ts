@@ -47,6 +47,7 @@ const createClient = ({
   publicBaseUrl = 'https://kibana.example.com/base',
   authHeaders = { authorization: 'test-auth-token' },
   authRequestHeaders: suppliedAuthRequestHeaders,
+  hostname = '0.0.0.0',
   target = 'auto',
   getHttpConfig = jest.fn().mockReturnValue({
     ssl: { enabled: false, requestCert: false },
@@ -61,6 +62,7 @@ const createClient = ({
   target?: 'auto' | 'local';
   getHttpConfig?: jest.MockedFunction<() => HttpConfig>;
   serverProtocol?: 'http' | 'https';
+  hostname?: string;
   getUiamAttestationGetter?: () => SelfClientUiamAttestationGetter | undefined;
 } = {}) => {
   const authRequestHeaders =
@@ -82,7 +84,7 @@ const createClient = ({
     },
     getServerInfo: jest.fn().mockReturnValue({
       name: 'kibana',
-      hostname: '0.0.0.0',
+      hostname,
       port: 5601,
       protocol: serverProtocol,
     }),
@@ -133,6 +135,16 @@ describe('InternalHttpSelfScopedClient', () => {
     await self.asScoped(createRequest()).fetch('/api/status', { target: 'local' });
     const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
     expect(request.url).toBe('http://localhost:5601/base/s/my-space/api/status');
+  });
+
+  it('brackets an IPv6 listener address on the local target', async () => {
+    const { self } = createClient({
+      hostname: '::1',
+      publicBaseUrl: 'https://public.example.com/base',
+    });
+    await self.asScoped(createRequest()).fetch('/api/status', { target: 'local' });
+    const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    expect(request.url).toBe('http://[::1]:5601/base/s/my-space/api/status');
   });
 
   it('calls publicBaseUrl with request base path, query, auth headers, and self markers', async () => {

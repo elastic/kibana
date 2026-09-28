@@ -479,7 +479,12 @@ describe('callKibanaApi', () => {
         headers: {
           Authorization: 'Bearer attacker',
           'content-type': 'text/plain',
+          cookie: 'sid=1',
+          host: 'evil.example',
+          'kbn-version': '0.0.0',
+          'x-kbn-self-call': 'false',
           'x-elastic-internal-origin': 'spoof',
+          'x-elastic-internal-origin-request': 'spoof',
           'x-kibana-event-chain-depth': '99',
           'x-custom-trace-id': 'trace-1',
         },
@@ -490,7 +495,12 @@ describe('callKibanaApi', () => {
     // Core owns authorization; the explicit caller content type is preserved for JSON requests.
     expect(headers.Authorization).toBeUndefined();
     expect(headers['content-type']).toBe('text/plain');
+    expect(headers.cookie).toBeUndefined();
+    expect(headers.host).toBeUndefined();
+    expect(headers['kbn-version']).toBeUndefined();
+    expect(headers['x-kbn-self-call']).toBeUndefined();
     expect(headers['x-elastic-internal-origin']).toBeUndefined();
+    expect(headers['x-elastic-internal-origin-request']).toBeUndefined();
     // Engine-stamped, not caller-forgeable.
     expect(headers['x-kibana-event-chain-depth']).toBeUndefined();
     // Genuinely custom headers pass through untouched.

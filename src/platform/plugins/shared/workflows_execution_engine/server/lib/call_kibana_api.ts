@@ -114,9 +114,9 @@ export interface CallKibanaApiDeps {
 }
 
 /**
- * Headers managed by the helper. Any caller-supplied value for these keys is dropped to keep
- * authentication, internal-origin marking, event-chain propagation, and content negotiation
- * under the engine's control.
+ * Headers managed by the helper or rejected by Core's self client. Any caller-supplied value
+ * for these keys is dropped so authentication, internal-origin marking, event-chain
+ * propagation, and content negotiation stay under the engine's control.
  */
 const RESERVED_HEADER_NAMES = new Set([
   'authorization',
@@ -129,6 +129,23 @@ const RESERVED_HEADER_NAMES = new Set([
   'x-kibana-workflow-execution-id',
 ]);
 
+/**
+ * Mirrors `isProtectedHeader` in Core `self_client.ts`. Caller YAML that includes these names
+ * must be dropped here; the self client rejects them before dispatch.
+ */
+const isCoreProtectedSelfCallHeader = (name: string): boolean => {
+  const lowerName = name.toLowerCase();
+  return (
+    lowerName === 'authorization' ||
+    lowerName === 'cookie' ||
+    lowerName === 'host' ||
+    lowerName.startsWith('kbn-') ||
+    lowerName === 'x-kbn-self-call' ||
+    lowerName.startsWith('x-elastic-internal-') ||
+    lowerName === UIAM_INTERNAL_CALLER_ATTESTATION_HEADER.toLowerCase()
+  );
+};
+
 const stripReservedHeaders = (
   headers: Record<string, string> | undefined,
   isFormData: boolean
@@ -136,9 +153,11 @@ const stripReservedHeaders = (
   if (!headers) return {};
   const out: Record<string, string> = {};
   for (const [name, value] of Object.entries(headers)) {
+    const normalizedName = name.toLowerCase();
     const reserved =
-      RESERVED_HEADER_NAMES.has(name.toLowerCase()) ||
-      (isFormData && name.toLowerCase() === 'content-type');
+      RESERVED_HEADER_NAMES.has(normalizedName) ||
+      isCoreProtectedSelfCallHeader(normalizedName) ||
+      (isFormData && normalizedName === 'content-type');
     if (!reserved) {
       out[name] = value;
     }
