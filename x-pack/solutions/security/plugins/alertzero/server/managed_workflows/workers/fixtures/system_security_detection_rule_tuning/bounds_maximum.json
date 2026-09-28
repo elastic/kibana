@@ -1,0 +1,10 @@
+{
+  "settingsVersion": 1,
+  "autonomyLevel": "manual",
+  "scheduleInterval": "2h",
+  "extras": {
+    "analysisWindowDays": 30,
+    "fpCountThreshold": 100,
+    "fpRateThresholdPct": 100
+  }
+}

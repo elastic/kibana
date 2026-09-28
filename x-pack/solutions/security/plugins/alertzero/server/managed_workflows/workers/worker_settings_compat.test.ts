@@ -7,9 +7,13 @@
 
 import { readdirSync, readFileSync } from 'fs';
 import { resolve } from 'path';
-import { SYSTEM_SECURITY_WORKER_IDS } from '@kbn/alertzero-common';
+import {
+  getAllowedAutonomyLevels,
+  SYSTEM_SECURITY_WORKER_IDS,
+  type WatchAutonomyLevel,
+} from '@kbn/alertzero-common';
 import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
-import { createWorkerSettingsRegistration } from './worker_settings';
+import { createWorkerSettingsRegistration, toTemplateValues } from './worker_settings';
 
 type RegisteredWorkerId = (typeof SYSTEM_SECURITY_WORKER_IDS)[number];
 
@@ -23,6 +27,21 @@ const BREAKING_CHANGE_EXITS = `a migration under ${MIGRATION_ISSUE}, or a coordi
 const FIXTURE_FAILURE_HINT = `A deliberate breaking change to stored Worker settings needs an explicit decision: ${BREAKING_CHANGE_EXITS}. Edit this fixture only as that acknowledgement.`;
 
 const VERSION_TRIPWIRE_HINT = `A deliberate breaking change to stored Worker settings needs an explicit decision: ${BREAKING_CHANGE_EXITS}. A settings version bump is one such change.`;
+
+/**
+ * Every autonomy level each Worker has ever allowed. Add, never remove. Generated from the
+ * declaration, this list would shrink with a narrowing and the removed level would disappear.
+ */
+const STORED_AUTONOMY_LEVELS = {
+  'system-security-detection-rule-creation': ['manual', 'assisted'],
+  'system-security-detection-rule-tuning': ['manual', 'assisted'],
+  'system-security-floor-alert-triage': ['manual', 'assisted', 'supervised'],
+  'system-security-floor-attack-discovery': ['manual', 'supervised'],
+  'system-security-forensics-endpoint-analysis': ['manual'],
+  'system-security-hunt-continuous-threat-hunt': ['manual', 'assisted', 'supervised'],
+} as const satisfies Record<RegisteredWorkerId, readonly WatchAutonomyLevel[]>;
+
+const STORED_VALUE_EXITS = `Narrowing the allowed levels breaks documents that stored the removed level. The exits are: keep the stored value and change only the label, a migration under ${MIGRATION_ISSUE}, or a coordinated pre-customer reset (plugin README, "Pre-customer state").`;
 
 interface StoredFixture {
   workerId: RegisteredWorkerId;
@@ -44,6 +63,30 @@ const loadFixtures = (workerId: RegisteredWorkerId): StoredFixture[] => {
 };
 
 const ALL_FIXTURES = SYSTEM_SECURITY_WORKER_IDS.flatMap((workerId) => loadFixtures(workerId));
+
+const currentFixture = (workerId: RegisteredWorkerId): StoredFixture => {
+  const current = ALL_FIXTURES.find(
+    (fixture) => fixture.workerId === workerId && fixture.name === 'current.json'
+  );
+  if (!current) {
+    throw new Error(`Worker "${workerId}" is missing current.json`);
+  }
+  return current;
+};
+
+/** One document per recorded level, copied from current.json with only the level swapped. */
+const STORED_AUTONOMY_DOCUMENTS: StoredFixture[] = SYSTEM_SECURITY_WORKER_IDS.flatMap(
+  (workerId) => {
+    const current = currentFixture(workerId);
+    return STORED_AUTONOMY_LEVELS[workerId].map((autonomyLevel) => ({
+      workerId,
+      name: `stored autonomy ${autonomyLevel}`,
+      values: { ...current.values, autonomyLevel },
+    }));
+  }
+);
+
+const DOCUMENTS_THAT_MUST_READ = [...ALL_FIXTURES, ...STORED_AUTONOMY_DOCUMENTS];
 
 /**
  * Substrings the rendered YAML must contain. Literals, not values imported from the defaults
@@ -85,6 +128,18 @@ const LITERAL_RENDERED_VALUES: Record<string, readonly string[]> = {
     '"fpCountThreshold":4',
     '"fpRateThresholdPct":80',
   ],
+  // Edges of each bounded Rule Tuning field. A tightened bound moves one of these out of range.
+  // The trailing delimiter keeps `"analysisWindowDays":1` from matching `14`.
+  'system-security-detection-rule-tuning/bounds_minimum.json': [
+    '"analysisWindowDays":1,',
+    '"fpCountThreshold":2,',
+    '"fpRateThresholdPct":0}',
+  ],
+  'system-security-detection-rule-tuning/bounds_maximum.json': [
+    '"analysisWindowDays":30,',
+    '"fpCountThreshold":100,',
+    '"fpRateThresholdPct":100}',
+  ],
   'system-security-detection-rule-creation/current.json': [
     'settingsVersion: 1',
     'autonomy: "assisted"',
@@ -106,6 +161,59 @@ const getYamlTemplate = (workerId: RegisteredWorkerId) => {
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const valuesEqual = (left: unknown, right: unknown): boolean => {
+  if (Object.is(left, right)) {
+    return true;
+  }
+  if (isRecord(left) && isRecord(right)) {
+    const leftKeys = Object.keys(left);
+    const rightKeys = Object.keys(right);
+    return (
+      leftKeys.length === rightKeys.length &&
+      leftKeys.every((key) => Object.hasOwn(right, key) && valuesEqual(left[key], right[key]))
+    );
+  }
+  return false;
+};
+
+/**
+ * Keys the document did not store may be filled. A key it did store must survive both the read
+ * (what the page shows and a save would write) and the startup fill (what the workflow runs).
+ */
+const changedStoredValues = (
+  stored: Record<string, unknown>,
+  readBack: Record<string, unknown>,
+  kept: Record<string, unknown>
+): string[] => {
+  const lines: string[] = [];
+  for (const [key, storedValue] of Object.entries(stored)) {
+    if (isRecord(storedValue)) {
+      const readChild = readBack[key];
+      const keptChild = kept[key];
+      if (!isRecord(readChild) || !isRecord(keptChild)) {
+        lines.push(
+          `${key} stored ${JSON.stringify(storedValue)}, read ${JSON.stringify(
+            readBack[key]
+          )}, startup ${JSON.stringify(kept[key])}`
+        );
+        continue;
+      }
+      for (const nested of changedStoredValues(storedValue, readChild, keptChild)) {
+        lines.push(`${key}.${nested}`);
+      }
+      continue;
+    }
+    if (!valuesEqual(readBack[key], storedValue) || !valuesEqual(kept[key], storedValue)) {
+      lines.push(
+        `${key} stored ${JSON.stringify(storedValue)}, read ${JSON.stringify(
+          readBack[key]
+        )}, startup ${JSON.stringify(kept[key])}`
+      );
+    }
+  }
+  return lines;
+};
 
 const storedKeyPaths = (values: Record<string, unknown>): string[][] => {
   const paths: string[][] = [];
@@ -240,6 +348,49 @@ describe('stored Worker settings compatibility', () => {
             .join(
               ', '
             )} on "${workerId}" fixture "${name}" left the rendered YAML unchanged. Skipping a startup fill when the document version moved is safe only when every stored key reaches the YAML.`
+        );
+      }
+    }
+  );
+
+  it.each([...SYSTEM_SECURITY_WORKER_IDS])(
+    '%s records every autonomy level its declaration allows',
+    (workerId) => {
+      const missing = getAllowedAutonomyLevels(workerId).filter(
+        (level) => !(STORED_AUTONOMY_LEVELS[workerId] as readonly string[]).includes(level)
+      );
+      if (missing.length > 0) {
+        throw new Error(
+          `Worker "${workerId}" allows ${missing.join(
+            ', '
+          )}, which STORED_AUTONOMY_LEVELS does not list. Add it here.`
+        );
+      }
+    }
+  );
+
+  it.each(DOCUMENTS_THAT_MUST_READ)(
+    '$workerId $name: a read returns the stored value',
+    ({ workerId, name, values }) => {
+      const registration = createWorkerSettingsRegistration(workerId);
+      let settings: ReturnType<typeof registration.toSettings>;
+      try {
+        settings = registration.toSettings(values);
+      } catch (error) {
+        const detail = error instanceof Error ? error.message : String(error);
+        // A removed autonomy level fails here. Any other rejection is the stored-shape check.
+        const hint = detail.includes('autonomy') ? STORED_VALUE_EXITS : FIXTURE_FAILURE_HINT;
+        throw new Error(`toSettings rejected "${name}" for "${workerId}": ${detail}\n\n${hint}`);
+      }
+
+      const readBack = toTemplateValues(workerId, settings);
+      const kept = registration.withMissingDefaults(values);
+      const changed = changedStoredValues(values, readBack, kept);
+      if (changed.length > 0) {
+        throw new Error(
+          `Reading "${workerId}" document "${name}" changed a stored value: ${changed.join(
+            '; '
+          )}.\n\n${STORED_VALUE_EXITS}`
         );
       }
     }

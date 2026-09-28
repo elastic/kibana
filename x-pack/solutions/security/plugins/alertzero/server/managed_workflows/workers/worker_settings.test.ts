@@ -164,16 +164,14 @@ describe('createWorkerSettingsRegistration', () => {
       ).toThrow(/settings are invalid: autonomy/);
     });
 
-    it('reads a stored level this Worker no longer offers as the closest one it does', () => {
-      // Attack Discovery dropped its assisted gate; a document written while it existed must not
-      // strand the Worker as unreadable, and must not be read as MORE autonomous than stored.
-      expect(
+    it('rejects a stored level this Worker does not allow', () => {
+      expect(() =>
         registration.toSettings({
           settingsVersion: 1,
           autonomyLevel: 'assisted',
           scheduleInterval: '24h',
         })
-      ).toEqual({ workerId: AD_WORKER_ID, autonomy: 'manual', scheduleInterval: '24h' });
+      ).toThrow(/settings are invalid: autonomy/);
     });
 
     it('leaves a stored level this Worker does offer alone', () => {
@@ -324,27 +322,6 @@ describe('createWorkerSettingsRegistration', () => {
 
     it('leaves a complete extras object untouched', () => {
       expect(registration.withMissingDefaults(storedDefaults)).toBe(storedDefaults);
-    });
-
-    it('reads a stored supervised level as assisted, the closest level it still offers', () => {
-      // Rule Tuning has no unattended level: the document written while it did stays readable.
-      expect(registration.toSettings({ ...storedDefaults, autonomyLevel: 'supervised' })).toEqual({
-        workerId: RULE_TUNING_WORKER_ID,
-        autonomy: 'assisted',
-        scheduleInterval: '2h',
-        extras: defaultExtras,
-      });
-    });
-
-    it('persists the projected level on the next save, so the document heals', () => {
-      expect(
-        registration.applyPatch(
-          { ...storedDefaults, autonomyLevel: 'supervised' },
-          { scheduleInterval: '6h' }
-        )
-      ).toEqual({
-        values: { ...storedDefaults, autonomyLevel: 'assisted', scheduleInterval: '6h' },
-      });
     });
 
     it('fills every extras key when the stored object is empty', () => {
