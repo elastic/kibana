@@ -117,8 +117,10 @@ actual documented behavior — flag them even without live access to the API, ba
   `maxRedirects: 0`. Axios follows redirects by default and strips only the *standard* authorization
   headers on a cross-host redirect, so a service that answers with an auth redirect forwards a live
   credential to the target host. This is a credential-leak path, not a robustness nit — treat it as high
-  severity. No test that mocks the HTTP client will surface it. `jenkins.ts` and `threatq.ts` are the
-  in-repo precedent. The 3xx should come back as a result with its `Location` intact.
+  severity. No test that mocks the HTTP client will surface it. The 3xx should come back as a result with
+  its `Location` intact, which needs a `validateStatus` accepting 3xx *as well* — `maxRedirects: 0` alone
+  leaves Axios's default `validateStatus` to reject it, so the handler throws and the caller never sees
+  the `Location`. `jenkins.ts` sets both and is the in-repo precedent.
 - **Non-2xx responses swallowed as exceptions**: Axios rejects every non-2xx status, so an action that
   proxies a call to caller-controlled code or a caller-named route takes the `catch` path when the service
   deliberately answers `400`, `409`, or `500`. The caller then gets a connector error instead of the
@@ -133,9 +135,16 @@ actual documented behavior — flag them even without live access to the API, ba
   `response.data.value`/`.items`/`.results` without following the vendor's continuation field
   (`nextLink`, `next`, `next_cursor`, a `Link` header). A partial inventory presented as complete is worse
   for an agent than an error. Check every list action *and* the connectivity `test` handler if it reports
-  a count. Where a helper exists, confirm it requests an absolute continuation URL as-is (re-applying
-  `params` corrupts a URL that already carries an api-version and skip token), caps the page count, and
-  reports the cap in the result (e.g. `truncated: true`).
+  a count. Where a helper exists, confirm it caps the page count and reports the cap in the result (e.g.
+  `truncated: true`), and that it preserves the continuation URL's own query string rather than
+  re-applying `params` — that corrupts a URL already carrying an api-version and a skip token.
+- **A cross-host continuation link followed with the authenticated client**: Treat this as high severity.
+  A vendor-supplied absolute `nextLink` is caller-untrusted data, and `ctx.client` carries the
+  connector's credentials. Axios strips a standard authorization header on a cross-host *redirect*, but
+  an explicit new request to an absolute URL gets no such protection, so an attacker-influenced link
+  sends the credentials to the host it names and can reach an internal address. Flag any pagination
+  helper that passes a continuation URL to `ctx.client` with no origin check against the request it sent
+  (or an explicitly allowed host).
 - **"At least one of" update inputs**: If every field on an update-action's input schema is optional, check
   for a `.refine()` (or equivalent) requiring at least one to be set. Without it, a call with no fields set
   silently no-ops instead of erroring.
@@ -175,13 +184,21 @@ actual documented behavior — flag them even without live access to the API, ba
 
 ### LLM Descriptions and Skill Content
 
-- **`scope` classified from the action name instead of the request**: Every `isTool: true` action needs an
-  explicit `scope`, and it must reflect what the request does to the service. Flag a `scope: 'read'` on an
-  action whose handler issues a `POST`/`PATCH`/`PUT`, even when the name reads like a read — a
-  `listSyncFunctionTriggers`-style route can re-synchronize deployed state. `scope` is the signal an
-  orchestration layer uses to decide whether an action is safe during read-only exploration, so a
-  mutating operation marked `read` is the worst case. Cross-check each action's `scope` against its HTTP
-  method and the vendor's documented side effect, not against its name.
+- **`scope` classified from the action name instead of the documented side effect**: Every `isTool: true`
+  action needs an explicit `scope`, and it must reflect what the request does to the service. `scope` is
+  the signal an orchestration layer uses to decide whether an action is safe during read-only
+  exploration, so a mutating operation marked `read` is the worst case.
+
+  A read-sounding name is not evidence of a read: `listSyncFunctionTriggers` is a `POST` that
+  re-synchronizes an app's deployed trigger metadata, and shipped as `scope: 'read'`.
+
+  A `POST` is not evidence of a mutation either. A GraphQL query, a search route with a body, and a
+  bulk-read endpoint are all read-only `POST`s, and many shipped specs correctly pair `scope: 'read'`
+  with one. Relabelling those `destroy` would hide safe queries from read-only exploration — the
+  opposite failure.
+
+  So treat a `scope: 'read'` on a `POST`/`PUT`/`PATCH` as a prompt to check the vendor's documented
+  behaviour for that route, and flag it only when the documentation says the call changes state.
 - **A disproven vendor behaviour fixed in only one place**: When the diff (or its commit history) shows
   that live testing disproved a documented response shape, check that *every* place encoding the old
   assumption was corrected — the action `description`, the `scope`, the test mock, the auth `helpText`,

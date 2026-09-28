@@ -152,7 +152,7 @@ forbidden non-null assertion (`@typescript-eslint/no-non-null-assertion`) in a t
 `Connector.action!.handler` — that a code-reading self-review or an AI PR reviewer can miss, and that
 otherwise only surface once CI's lint step fails the build.
 
-Unit tests that mock `ctx.client`/`ctx.request` yourself cannot catch bugs where the mock encodes the same
+Unit tests that mock `ctx.client` yourself cannot catch bugs where the mock encodes the same
 wrong assumption as the handler (e.g. asserting on the axios default array-param serialization when the
 vendor actually needs a different form, or asserting that an optional modifier param is sent as a query
 param when the vendor actually expects it in the body). For any handler you flagged during vendor API
@@ -181,16 +181,19 @@ Before treating the connector as done, re-read the whole diff once, end to end, 
 
 - Any `isTool: true` action missing a `scope` field — every tool action must have one
 - A `scope` that looks wrong: a "get"/"list"/"search" action marked `write` or `destroy`, or an update/delete/patch action marked `read`
-- A `scope: 'read'` on an action whose request is a `POST`/`PATCH` — check what the route does to the
-  service rather than trusting a read-sounding action name
+- A `scope: 'read'` on an action whose request is a `POST`/`PATCH` — read the vendor's documentation for
+  that route and keep `read` when it only reads (a GraphQL query and a search-with-a-body are read-only
+  `POST`s); change it when the documentation says the call changes state
 - Any request carrying a credential in a custom header (`x-api-key`, `x-functions-key`, `private-token`)
-  without `maxRedirects: 0` — axios forwards a custom header across a cross-host redirect
+  without both `maxRedirects: 0` and a `validateStatus` that accepts the 3xx — axios forwards a custom
+  header across a cross-host redirect, and rejects the 3xx by default
 - An action that proxies a call to caller-controlled code or a caller-named route, with no
   `validateStatus` — a deliberate non-2xx answer becomes a connector error the agent cannot inspect
 - A status code used as the sole evidence for a classification (e.g. treating every 401/403 as a bad
   credential) — the service's own authorization responses are indistinguishable by status
 - A list action that reads `response.data.value` (or equivalent) without following the vendor's
-  continuation link
+  continuation link, or that follows an absolute continuation URL with `ctx.client` without checking its
+  origin first — that sends the connector's credentials to whatever host the link names
 - A size bound measured with `.length` on a serialized string where the message says "bytes"
 - A regex guarding a URL path that has only been tested for what it accepts, never for what it must reject
 - Handlers still typed with implicit `any` (missing the `input: XInput` annotation)

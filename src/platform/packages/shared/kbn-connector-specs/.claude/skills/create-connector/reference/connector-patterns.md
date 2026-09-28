@@ -84,7 +84,7 @@ export const YourConnector: ConnectorSpec = {
       description: 'Search items by keyword. Returns a ranked list of matching results with IDs and summaries.',
       input: SearchInputSchema,
       handler: async (ctx, input: SearchInput) => {
-        const response = await ctx.request({ method: 'GET', url: '/search', params: input });
+        const response = await ctx.client.request({ method: 'GET', url: '/search', params: input });
         return response.data;
       },
     },
@@ -98,7 +98,7 @@ export const YourConnector: ConnectorSpec = {
         // path segment — schemas typically only bound length, not character set, so
         // an id/slug containing "/", "?", "#", or a space would otherwise corrupt
         // the request path.
-        const response = await ctx.request({
+        const response = await ctx.client.request({
           method: 'GET',
           url: `/items/${encodeURIComponent(input.id)}`,
         });
@@ -119,7 +119,7 @@ export const YourConnector: ConnectorSpec = {
     enabled: true,
     description: 'Verifies the connection by calling a cheap, read-only endpoint.',
     handler: async (ctx) => {
-      await ctx.request({ method: 'GET', url: '/ping' });
+      await ctx.client.request({ method: 'GET', url: '/ping' });
       return {};
     },
   },
@@ -233,9 +233,10 @@ export const YourMcpConnector: ConnectorSpec = {
 
 ## HTTP Response Handling in Handlers
 
-`ctx.request` is Axios-backed, and three of its defaults are wrong for a connector action. Each one
-produces a bug that type-checks, lints, and passes mocked unit tests — a mock returns whatever you tell
-it to, so none of these surface until a real service responds.
+`ctx.client` is the authenticated `AxiosInstance` (`ActionContext.client` in `src/connector_spec.ts`), and
+three of its defaults are wrong for a connector action. Each one produces a bug that type-checks, lints,
+and passes mocked unit tests — a mock returns whatever you tell it to, so none of these surface until a
+real service responds.
 
 ### Do not let a request follow redirects when it carries a credential in a custom header
 
@@ -243,20 +244,22 @@ Axios follows redirects by default and strips only the *standard* authorization 
 redirect. A credential in a vendor-specific header (`x-functions-key`, `x-api-key`, `private-token`) is
 forwarded to whatever host the redirect names — a live credential leak to a third party.
 
-Set `maxRedirects: 0` on any request that sends a credential in a custom header, and return the 3xx with
-its `Location` intact so the caller can decide:
+Set `maxRedirects: 0` on any request that sends a credential in a custom header. `maxRedirects: 0` alone
+is not enough to return the 3xx: Axios's default `validateStatus` rejects it, so the handler throws and
+the caller never sees the `Location`. Accept the 3xx explicitly as well:
 
+```typescript
 const response = await ctx.client.request({
-const response = await ctx.request({
   method,
   url: `https://${host}/${path}`,
   headers: { 'x-functions-key': input.functionKey },
   maxRedirects: 0,
+  validateStatus: (status: number) => status >= 200 && status < 400,
 });
 ```
 
-`jenkins.ts` and `threatq.ts` already handle redirects this way. This is not theoretical: a function app
-that redirects to its identity provider forwards the key there.
+`jenkins.ts` sets both, for this reason. This is not theoretical: a function app that redirects to its
+identity provider forwards the key there.
 
 ### Return the service's HTTP response as a result, not an exception
 
@@ -286,10 +289,25 @@ response envelope for a continuation field (`nextLink`, `next`, `next_cursor`, a
 follow it in a helper shared by every list action, including the connectivity `test` handler if it counts
 anything.
 
-Two details that are easy to get wrong:
+Three details that are easy to get wrong:
 
-- A continuation URL is usually absolute and already carries the api-version and a skip token. Request it
-  as-is; re-applying your own `params` corrupts it.
+- **Check the origin of a continuation URL before requesting it.** A vendor-supplied absolute link is
+  caller-untrusted data, and `ctx.client` carries the connector's credentials. Axios strips a standard
+  authorization header on a cross-host *redirect*, but an explicit new request gets no such protection,
+  so an attacker-influenced `nextLink` sends the credentials to the host it names and can reach an
+  internal address. Confirm the link's origin matches the request you sent (or an explicitly allowed
+  host) and stop paginating if it does not:
+
+  ```typescript
+  const { origin } = new URL(url, baseUrl);
+  if (new URL(nextLink).origin !== origin) {
+    break;
+  }
+  ```
+
+- A continuation URL is usually absolute and already carries the api-version and a skip token, so do not
+  re-apply your own `params` — that corrupts it. Preserve its query string as the vendor gave it, once
+  the origin check above passes.
 - Cap the number of pages followed, and report the cap in the result (e.g. `truncated: true`) so an agent
   narrows its query rather than treating a capped list as complete.
 
