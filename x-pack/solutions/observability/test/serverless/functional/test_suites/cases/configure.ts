@@ -30,7 +30,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     await header.waitUntilLoadingHasFinished();
 
     await retry.waitFor('the configuration page to load', async () => {
-      return testSubjects.exists('cases-redesign-settings-panel');
+      return testSubjects.exists('cases-settings-panel');
     });
   };
 

@@ -64,17 +64,16 @@ export function CasesTableServiceProvider(
 
   return {
     /**
-     * Whether the redesign card list view is currently rendered (as opposed to the legacy/redesign
-     * table view which reuses `cases-table`).
+     * Whether the card list view is currently rendered (as opposed to the table view which reuses `cases-table`).
      */
     async isCardListView() {
       return await testSubjects.exists('cases-list-view');
     },
 
     /**
-     * Ensures the cases list is showing the table view. The redesign defaults to a card list whose
-     * table view reuses the legacy `cases-table` DOM and bulk/row controls, so switching to it lets
-     * the table-based helpers below work unchanged. No-op in the legacy design (no view toggle).
+     * Ensures the cases list is showing the table view. The app defaults to a card list whose table
+     * view reuses the `cases-table` DOM and bulk/row controls, so switching to it lets the
+     * table-based helpers below work unchanged.
      */
     async ensureTableView() {
       await header.waitUntilLoadingHasFinished();
@@ -85,7 +84,7 @@ export function CasesTableServiceProvider(
         if (await testSubjects.exists('cases-table')) {
           return true;
         }
-        // `table` is the EuiButtonGroup option id rendered by the redesign list view toggle.
+        // `table` is the EuiButtonGroup option id for the list view toggle.
         if (await testSubjects.exists('table')) {
           await testSubjects.click('table');
           await header.waitUntilLoadingHasFinished();

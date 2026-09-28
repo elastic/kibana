@@ -203,6 +203,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/207704
+    // TODO before unskipping: update stale selectors inside this block —
+    // case-view-status-action-button, header-page-supplements, and
+    // case-view-status-dropdown are absent from the redesign DOM.
     describe.skip('draft comments', () => {
       createOneCaseBeforeEachDeleteAllAfterEach(getPageObject, getService);
 

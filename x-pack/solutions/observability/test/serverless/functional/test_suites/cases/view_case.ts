@@ -66,6 +66,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/239300
+    // TODO before unskipping: update stale selectors inside this block —
+    // editable-title-header-value/editable-title-input-field/editable-title-submit-btn
+    // are absent from the redesign DOM; use appHeaderTitle* equivalents instead.
     describe.skip('properties', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
@@ -300,6 +303,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/240911
+    // TODO before unskipping: update stale assertions inside this block —
+    // the redesign uses a single user-actions-list (not two); replace the
+    // two-list length/li-count assertions with the before/after count model
+    // used in the platform group1/view_case.ts pagination suite.
     describe.skip('pagination', () => {
       let createdCase: any;
 
