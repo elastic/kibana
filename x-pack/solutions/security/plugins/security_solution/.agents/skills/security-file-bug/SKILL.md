@@ -45,7 +45,7 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/secur
   --jsonl "$SESSION_DIR/findings.jsonl" --title "$FINDING_TITLE"
 ```
 
-Then `check-pack`, `infer-deployment`, `scan-sensitive`, `render-body` with `$SESSION_DIR/config.json`. Path B create always includes `sec-eng-prod:exploratory-tester` (`write --finding`).
+Then `check-pack`, `infer-deployment`, `scan-sensitive`, `render-body` with `$SESSION_DIR/config.json`. Keep `source: exploratory-tester` on that JSON. Path B create always includes `sec-eng-prod:exploratory-tester` (`write --finding`).
 
 ## Fileable checklist
 

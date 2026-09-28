@@ -84,20 +84,9 @@ Given a recording and stills:
 4. Ask for what media cannot provide: version, the always-ask items, console/network, server OS, endpoint version, expected if unclear.
 5. If the video is unreadable or too long to trust, say so and ask for a still of the failure.
 
-## Path A — from scratch
+## Path B pack (collect steps live in SKILL.md)
 
-Paste, recording, snapshots, bug-fixer report, or “create a bug” with no tester pack.
-
-1. Interview and/or watch media. Do not invent.
-2. Draft the body **by hand** to match `templates/bug-report.md`.
-3. Run always-ask + environment-setup + vague follow-ups for anything still missing. Hard stop after each question.
-4. `infer-team` then `format-title`.
-
-## Path B extras
-
-`from-findings` sets `source: exploratory-tester` — keep it. Still run always-ask for gaps. If `check-pack` is thin, run environment-setup / vague follow-ups; do not re-ask what the finding already states. After answers, **edit the draft markdown** (do not throw away media mapping). Re-run `render-body` only if you update the JSON and want a clean rebuild.
-
-On create, labels must include `bug`, `Team:*`, and **`sec-eng-prod:exploratory-tester`**. `write --finding` adds that last label if it is missing. On comment / reopen, `write` also `--add-label`s it onto `#N`. Do not drop it.
+`from-findings` sets `source: exploratory-tester` — keep it. After answers, **edit the draft markdown** (do not throw away media mapping). Re-run `render-body` only if you update the JSON and want a clean rebuild.
 
 ## Existing `#N`
 

@@ -1197,6 +1197,13 @@ class SkillProtocolTest(unittest.TestCase):
         self.assertIn("Environment setup questions", self.text)
         self.assertIn("exact error message", self.text.lower())
 
+    def test_path_steps_live_in_skill_only(self):
+        drafting = (SKILL_ROOT / "references" / "drafting.md").read_text(encoding="utf-8")
+        self.assertIn("Path A — from scratch", self.skill)
+        self.assertIn("Path B — exploratory-tester pack", self.skill)
+        self.assertNotIn("Path A — from scratch", drafting)
+        self.assertNotIn("1. Interview and/or watch media", drafting)
+
     def test_two_collect_paths(self):
         self.assertIn("Two collect paths", self.text)
         self.assertIn("Path A — from scratch", self.text)
