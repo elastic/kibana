@@ -6,7 +6,7 @@
  */
 
 import type { DataSetWithName, Dataset, DatasetSettings } from '../common';
-import { getDataSetByIdApiPath } from '../common';
+import { DATA_SET_BY_ID_PATH } from '../common';
 
 export interface DatasetRequest {
   method: 'PUT';
@@ -36,6 +36,6 @@ export const buildDatasetRequestBody = ({
 
 export const buildDatasetRequest = (dataSet: DataSetWithName): DatasetRequest => ({
   method: 'PUT',
-  path: getDataSetByIdApiPath(dataSet.name.trim()),
+  path: DATA_SET_BY_ID_PATH.replace('{id}', encodeURIComponent(dataSet.name.trim())),
   body: buildDatasetRequestBody(dataSet),
 });
