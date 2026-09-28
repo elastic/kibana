@@ -45,6 +45,8 @@ const ELASTIC_APPS_SLACK_CONNECTOR_NAME = 'Slack (Elastic app)';
 /** Stable name for the user-managed account Relay assumes on Serverless. */
 const RELAY_SERVICE_ACCOUNT_NAME = 'nightshift-relay-agent-builder';
 
+const RELAY_SERVICE_ACCOUNT_ROLES = ['editor']; // TODO check if we could do better
+
 /**
  * Selects the server-owned Relay platform assumer. The id (`relay-service`) is
  * resolved inside the security plugin; this call cannot name another principal.
@@ -407,6 +409,7 @@ export class SlackAppService {
       : (
           await serviceAccounts.create(request, {
             name: RELAY_SERVICE_ACCOUNT_NAME,
+            roles: RELAY_SERVICE_ACCOUNT_ROLES,
             trustedPlatformAssumers: RELAY_PLATFORM_ASSUMERS,
           })
         ).id;
