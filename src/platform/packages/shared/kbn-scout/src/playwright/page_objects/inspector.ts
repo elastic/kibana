@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMenu, type Locator, type ScoutPage } from '@kbn/scout';
+import type { Locator } from '@playwright/test';
+import type { ScoutPage } from '..';
+import { AppMenu } from './app_menu';
+import { KibanaCodeEditorWrapper } from '../ui_components';
 
 export type InspectorView = 'Requests' | 'Data';
 
@@ -16,8 +19,10 @@ const VIEW_CHOOSER_TEST_SUBJECTS: Record<InspectorView, string> = {
   Data: 'inspectorViewChooserData',
 };
 
-export class Inspector {
+export class InspectorPage {
   private readonly appMenu: AppMenu;
+  private readonly codeEditor: KibanaCodeEditorWrapper;
+
   public readonly panel: Locator;
   public readonly closeButton: Locator;
   public readonly viewChooser: Locator;
@@ -36,6 +41,8 @@ export class Inspector {
 
   constructor(private readonly page: ScoutPage) {
     this.appMenu = new AppMenu(page);
+    this.codeEditor = new KibanaCodeEditorWrapper(page);
+
     this.panel = page.testSubj.locator('inspectorPanel');
     this.closeButton = page.testSubj.locator('euiFlyoutCloseButton');
     this.viewChooser = page.testSubj.locator('inspectorViewChooser');
@@ -53,12 +60,31 @@ export class Inspector {
     };
   }
 
-  async open(openButtonTestSubj: string = 'openInspectorButton') {
+  async open(openButtonTestSubj: string = 'openInspectorButton'): Promise<void> {
     await this.appMenu.clickItem(openButtonTestSubj);
     await this.panel.waitFor({ state: 'visible' });
   }
 
-  async setTablePageSize(size: number) {
+  async close(): Promise<void> {
+    await this.closeButton.click();
+    await this.panel.waitFor({ state: 'hidden' });
+  }
+
+  async openInspectorView(view: InspectorView): Promise<void> {
+    await this.panel.waitFor({ state: 'visible' });
+    await this.viewChooser.click();
+    await this.page.testSubj.click(VIEW_CHOOSER_TEST_SUBJECTS[view]);
+  }
+
+  async openInspectorRequestsView(): Promise<void> {
+    await this.openInspectorView('Requests');
+  }
+
+  async openRequestsStatisticsTab(): Promise<void> {
+    await this.requests.statisticsTab.click();
+  }
+
+  async setTablePageSize(size: number): Promise<void> {
     await this.tablePaginationPopoverButton.click();
     const option = this.page.testSubj.locator(`tablePagination-${size}-rows`);
     await option.click();
@@ -67,7 +93,7 @@ export class Inspector {
   }
 
   /** Switches the inspector table to the given 0-based page and waits until it is current. */
-  async goToTablePage(pageIndex: number) {
+  async goToTablePage(pageIndex: number): Promise<void> {
     const pageButton = this.page.testSubj.locator(`pagination-button-${pageIndex}`);
     await pageButton.click();
     await this.page
@@ -75,24 +101,9 @@ export class Inspector {
       .waitFor({ state: 'visible' });
   }
 
-  async close() {
-    await this.closeButton.click();
-    await this.panel.waitFor({ state: 'hidden' });
-  }
-
   async getRequestTimestamp(): Promise<string> {
     await this.panel.waitFor({ state: 'visible' });
     return this.requests.timestamp.innerText();
-  }
-
-  async openInspectorView(view: InspectorView) {
-    await this.panel.waitFor({ state: 'visible' });
-    await this.viewChooser.click();
-    await this.page.testSubj.click(VIEW_CHOOSER_TEST_SUBJECTS[view]);
-  }
-
-  async openInspectorRequestsView() {
-    await this.openInspectorView('Requests');
   }
 
   /**
@@ -112,8 +123,7 @@ export class Inspector {
 
   /**
    * The names of the requests listed by the open inspector's request chooser,
-   * in the order they are offered. Leaves the chooser closed, since its open
-   * list covers the request detail tabs.
+   * in the order they are offered. Leaves the chooser closed.
    */
   async getRequestNames(): Promise<string[]> {
     const names = await this.page.components
@@ -130,10 +140,6 @@ export class Inspector {
     return parseFloat((await badge.innerText()).replace('ms', ''));
   }
 
-  async openRequestsStatisticsTab() {
-    await this.requests.statisticsTab.click();
-  }
-
   async getTableData(): Promise<string[][]> {
     await this.panel.locator('tbody').waitFor({ state: 'visible' });
     const tableRows = this.panel.locator('tbody tr');
@@ -146,5 +152,16 @@ export class Inspector {
         })
       )
     );
+  }
+
+  /**
+   * Clicks the Response tab, reads the Monaco editor content, and returns the
+   * parsed JSON response object.
+   */
+  async getResponse(): Promise<Record<string, any>> {
+    await this.page.testSubj.locator('inspectorRequestDetailResponse').click();
+    await this.codeEditor.waitCodeEditorReady('inspectorRequestCodeViewerContainer');
+    const responseString = await this.codeEditor.getCodeEditorValue();
+    return JSON.parse(responseString);
   }
 }
