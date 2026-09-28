@@ -227,17 +227,27 @@ export const clearEqlInTimeline = () => {
   cy.get(EQL_QUERY_VALIDATION_LABEL).should('not.exist');
 };
 
-export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
+export const addFilter = (filter: TimelineFilter): void => {
   cy.get(ADD_FILTER).click();
-  cy.get(TIMELINE_FILTER_FIELD).should('not.be.disabled');
-  cy.get(TIMELINE_FILTER_FIELD).type(`${filter.field}{downarrow}{enter}`);
-  cy.get(TIMELINE_FILTER_OPERATOR).should('not.be.disabled');
-  cy.get(TIMELINE_FILTER_OPERATOR).type(`${filter.operator}{downarrow}{enter}`);
-  if (filter.operator !== 'exists') {
-    cy.get(TIMELINE_FILTER_VALUE).type(`${filter.value}{enter}`);
-  }
-  cy.get(SAVE_FILTER_BTN).should('not.be.disabled');
-  return cy.get(SAVE_FILTER_BTN).click();
+  // Field combobox sometimes re-renders and drops the selection under load (see #259682).
+  // Retry until the operator input enables, which only happens after a field is committed.
+  cy.waitUntil(() => {
+    cy.get(TIMELINE_FILTER_FIELD).should('be.enabled');
+    cy.get(TIMELINE_FILTER_FIELD).focus();
+    cy.get(TIMELINE_FILTER_FIELD).invoke('val', ''); // .clear() not working well
+    cy.get(TIMELINE_FILTER_FIELD).type(`${filter.field}{downarrow}{enter}`);
+    return cy.get(TIMELINE_FILTER_OPERATOR).then(($el) => !$el.attr('disabled'));
+  }).then(() => {
+    cy.get(TIMELINE_FILTER_OPERATOR).type(`${filter.operator}{downarrow}{enter}`);
+
+    if (filter.operator !== 'exists' && filter.value) {
+      cy.get(TIMELINE_FILTER_VALUE).type(filter.value);
+    }
+
+    cy.get(SAVE_FILTER_BTN).should('not.be.disabled');
+    cy.get(SAVE_FILTER_BTN).click();
+    cy.get(SAVE_FILTER_BTN).should('not.exist');
+  });
 };
 
 export const changeTimelineQueryLanguage = (language: 'kuery' | 'lucene') => {

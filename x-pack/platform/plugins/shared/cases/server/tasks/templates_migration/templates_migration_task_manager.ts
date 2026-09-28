@@ -286,6 +286,12 @@ export class TemplatesMigrationTaskManager {
     // one-shot task.
     if (backfill.complete && !phase1HasErrors) {
       await this.notifyCaseBackfillComplete(hadRealBackfillWork, executionId);
+      if (hadRealBackfillWork) {
+        this.migrationUsageCounter?.incrementCounter({
+          counterName: 'migrationCompleted',
+          incrementBy: 1,
+        });
+      }
       return { state: {}, shouldDeleteTask: true };
     }
 
