@@ -1,0 +1,344 @@
+openapi: 3.0.0
+info:
+  title: AlertZero hunt coordinator route
+  version: '1'
+paths:
+  /internal/alertzero/hunt/hunt_coordinator:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: HuntCoordinator
+      description: >-
+        Chains Tier 1 into Tier 2 with tier2_when gating and no-model
+        degradation. Returns completed_successfully so the calling workflow
+        decides whether to write the per-space evidence[] element.
+      summary: Run the hunt coordinator
+      tags:
+        - AlertZero API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [trigger]
+              additionalProperties: false
+              properties:
+                report_id:
+                  type: string
+                  minLength: 1
+                  maxLength: 512
+                run_id:
+                  type: string
+                  minLength: 1
+                  maxLength: 128
+                  description: >-
+                    Run id supplied by the Worker fan-out so every child of one
+                    sweep shares it, which is what the packaging barrier and the
+                    conclusion dedupe key off. The route mints one only when the
+                    caller has no sweep to tie the run to.
+                technology:
+                  type: string
+                  maxLength: 64
+                  nullable: true
+                  description: >-
+                    One of the HuntTechnology values to pin the hunt to that
+                    technology's index scope. Omit it, or send null or an empty
+                    string (a workflow renders an unset input as ""), and the
+                    coordinator resolves every known technology and hunts the ones
+                    whose required indices exist in the space. Any other value is a
+                    400. Kept a plain string because a workflow caller cannot omit
+                    the key.
+                text:
+                  type: string
+                  maxLength: 200000
+                iocs:
+                  type: array
+                  maxItems: 100
+                  items:
+                    $ref: '../components/hunt.schema.yaml#/components/schemas/HuntIoc'
+                techniques:
+                  type: array
+                  maxItems: 100
+                  items:
+                    type: string
+                    minLength: 1
+                    maxLength: 32
+                time_range:
+                  type: object
+                  required: [from, to]
+                  properties:
+                    from:
+                      type: string
+                      minLength: 1
+                      maxLength: 64
+                    to:
+                      type: string
+                      minLength: 1
+                      maxLength: 64
+                size:
+                  type: integer
+                  minimum: 1
+                  maximum: 100
+                max_assets:
+                  type: integer
+                  minimum: 1
+                  maximum: 200
+                llm_confidence_threshold:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                tier2_when:
+                  type: string
+                  enum: [on_hits, always, never]
+                max_tier2_sample_events:
+                  type: integer
+                  minimum: 1
+                  maximum: 50
+                trigger:
+                  type: string
+                  enum: [manual, scheduled]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - run_id
+                  - technologies
+                  - tier1
+                  - message
+                  - next_step
+                  - has_confirmed_hit
+                  - completeness
+                  - completed_successfully
+                properties:
+                  status:
+                    $ref: '#/components/schemas/HuntCoordinatorStatus'
+                  report_id:
+                    type: string
+                  run_id:
+                    type: string
+                  technologies:
+                    type: array
+                    description: >-
+                      Technologies whose indices the hunt ran against. Empty when
+                      the scope was blocked.
+                    items:
+                      $ref: '../components/hunt.schema.yaml#/components/schemas/HuntTechnology'
+                  tier1:
+                    allOf:
+                      - $ref: '../components/hunt.schema.yaml#/components/schemas/HuntForThreatResult'
+                      - type: object
+                        required: [tier]
+                        properties:
+                          tier:
+                            type: integer
+                            enum: [1]
+                  tier2:
+                    type: object
+                    nullable: true
+                    required:
+                      - status
+                      - behaviors
+                      - indexed_behaviors
+                      - next_step
+                      - has_hit
+                    properties:
+                      status:
+                        type: string
+                        enum: [no_behaviors_found, no_behaviors_validated, behaviors_proposed]
+                      report_id:
+                        type: string
+                      behaviors:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - technique_id
+                            - evidence_quote
+                            - llm_confidence
+                            - confidence
+                            - technique_name
+                            - reference
+                            - tactic_ids
+                            - proposed_esql_rule
+                            - rule_name
+                            - severity
+                            - risk_score
+                          properties:
+                            technique_id:
+                              type: string
+                            evidence_quote:
+                              type: string
+                            llm_confidence:
+                              type: number
+                            confidence:
+                              type: number
+                            technique_name:
+                              type: string
+                            reference:
+                              type: string
+                            tactic_ids:
+                              type: array
+                              items:
+                                type: string
+                            parent_technique_id:
+                              type: string
+                            proposed_esql_rule:
+                              type: string
+                            rule_name:
+                              type: string
+                            severity:
+                              type: string
+                              enum: [critical, high, medium, low]
+                            risk_score:
+                              type: number
+                            execution:
+                              type: object
+                              required: [executed, row_count, hit]
+                              properties:
+                                executed:
+                                  type: boolean
+                                  description: >-
+                                    True when dry-run passed and an execute call
+                                    was attempted.
+                                row_count:
+                                  type: integer
+                                  minimum: 0
+                                  description: >-
+                                    Rows remaining after the required-index
+                                    filter.
+                                hit:
+                                  type: boolean
+                                  description: >-
+                                    True when at least one required-index row
+                                    was returned.
+                                inconclusive_reason:
+                                  $ref: '../components/hunt.schema.yaml#/components/schemas/HuntIncompleteReason'
+                                  description: >-
+                                    Why this behavior's result is not a reliable
+                                    statement about the environment. Absent means
+                                    it is. Present means `hit: false` records that
+                                    nothing was learned, not that nothing is there.
+                            affected_hosts:
+                              type: array
+                              description: >-
+                                Distinct host.name values from required-index
+                                rows, capped at 20.
+                              items:
+                                type: string
+                            affected_users:
+                              type: array
+                              description: >-
+                                Distinct user.name values from required-index
+                                rows, capped at 20.
+                              items:
+                                type: string
+                            affected_hosts_truncated:
+                              type: boolean
+                              description: >-
+                                True when more than 20 distinct hosts were seen.
+                            affected_users_truncated:
+                              type: boolean
+                              description: >-
+                                True when more than 20 distinct users were seen.
+                            hits:
+                              type: array
+                              maxItems: 50
+                              description: >-
+                                Required-index execute rows as Discover refs
+                                (`id` + `index` + optional `timestamp`). Same
+                                shape as Tier 1 `hits[]`. Consumed by the SSE
+                                mapper into `events[]` / `alerts[]`.
+                              items:
+                                $ref: '../components/hunt.schema.yaml#/components/schemas/HuntForThreatHit'
+                      indexed_behaviors:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - id
+                            - technique_id
+                            - description
+                            - llm_confidence
+                            - confidence
+                          properties:
+                            id:
+                              type: string
+                            technique_id:
+                              type: string
+                            description:
+                              type: string
+                            telemetry_targets:
+                              type: array
+                              items:
+                                type: string
+                            llm_confidence:
+                              type: number
+                            confidence:
+                              type: number
+                      incomplete:
+                        type: array
+                        description: >-
+                          Every technique Tier 2 was asked about but could not
+                          corroborate, each with why. Absent or empty means every
+                          extracted technique was searched.
+                        items:
+                          $ref: '../components/hunt.schema.yaml#/components/schemas/HuntIncompleteness'
+                      message:
+                        type: string
+                      next_step:
+                        type: string
+                      has_hit:
+                        type: boolean
+                        description: >-
+                          True when any behavior's execute path found at least
+                          one row in a required index. Independent of Tier 1.
+                      tier:
+                        type: integer
+                        enum: [2]
+                  tier2_skipped_reason:
+                    type: string
+                  message:
+                    type: string
+                  next_step:
+                    type: string
+                  has_confirmed_hit:
+                    type: boolean
+                    description: >-
+                      True when Tier 1 confirmed a required-index hit or any
+                      Tier 2 behavior executed with a required-index hit.
+                      Callers that gate SSE emit or packaging on the hit bar
+                      must read this field, not tier1.has_confirmed_hit alone.
+                  completeness:
+                    $ref: '../components/hunt.schema.yaml#/components/schemas/HuntCompleteness'
+                    description: >-
+                      Whether the run covered what it was asked to. Read this
+                      rather than `completed_successfully` when deciding what to
+                      record: a run can finish without errors and still have
+                      searched almost nothing, and the difference between
+                      `complete` and `incomplete_final` is the difference between
+                      "the environment is clean" and "we could not look".
+                      `tier1.incomplete` and `tier2.incomplete` say which gaps
+                      produced it.
+                  completed_successfully:
+                    type: boolean
+                    description: >-
+                      Whether the report should stay eligible for a later run.
+                      Derived from `completeness`: false only for
+                      `incomplete_retryable`, where repeating the run could cover
+                      what this one missed. True for `incomplete_final` as well as
+                      `complete`, because a deterministic gap returns identically
+                      every run, so retrying only re-spends the budget. A caller
+                      that writes "clean" off this flag alone will record a clean
+                      environment for a run that could not search it — use
+                      `completeness` for that.
+components:
+  schemas:
+    HuntCoordinatorStatus:
+      type: string
+      enum: [blocked, tier1_only, tier1_and_tier2, tier2_only_skipped]

@@ -364,6 +364,11 @@ paths:
                             type: string
                             description: The observable type label.
                             example: My observable type
+                    extractObservables:
+                      type: boolean
+                      description: |
+                        Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+                      example: true
                     owner:
                       $ref: '#/components/schemas/owner'
                     templates:
@@ -549,6 +554,11 @@ paths:
                           type: string
                           description: The observable type label.
                           example: My observable type
+                  extractObservables:
+                    type: boolean
+                    description: |
+                      Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+                    example: true
                   owner:
                     $ref: '#/components/schemas/owner'
                   templates:
@@ -736,6 +746,11 @@ paths:
                           type: string
                           description: The observable type label.
                           example: My observable type
+                  extractObservables:
+                    type: boolean
+                    description: |
+                      Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+                    example: true
                   owner:
                     $ref: '#/components/schemas/owner'
                   templates:
@@ -2745,9 +2760,9 @@ components:
           example: true
         extractObservables:
           description: |
-            When true, observables (e.g. IPs, hashes, URLs) are automatically extracted from case comments. Optional; defaults to false when omitted.
+            When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), an omitted value resolves to `false` regardless of the space configuration.
           type: boolean
-          example: false
+          example: true
     case_severity:
       type: string
       description: The severity of the case.
@@ -3806,6 +3821,10 @@ components:
                 enum:
                   - text
                   - toggle
+        extractObservables:
+          type: boolean
+          description: |
+            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.
         owner:
           $ref: '#/components/schemas/owner'
         templates:
@@ -3881,6 +3900,10 @@ components:
                 enum:
                   - text
                   - toggle
+        extractObservables:
+          type: boolean
+          description: |
+            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
         templates:
           $ref: '#/components/schemas/templates'
         version:
@@ -5406,6 +5429,7 @@ components:
               required: false
               type: text
           observableTypes: []
+          extractObservables: true
           owner: cases
           created_at: '2024-07-01T17:07:17.767Z'
           created_by:
@@ -5509,6 +5533,7 @@ components:
             description: A description of the template.
             tags:
               - Template tag 1
+        extractObservables: true
         owner: cases
         created_at: '2024-07-01T17:07:17.767Z'
         created_by:
@@ -5573,6 +5598,7 @@ components:
             label: my-toggle
             required: false
             type: toggle
+        extractObservables: true
         owner: cases
         created_at: '2024-07-01T17:07:17.767Z'
         created_by:
