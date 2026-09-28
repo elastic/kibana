@@ -9,6 +9,7 @@
 
 import * as authTypeSpecs from './all_auth_types';
 import * as connectorsSpecs from './all_specs';
+import { LICENSE_TYPE } from '@kbn/licensing-types';
 import type { AuthTypeDef, ConnectorSpec, NormalizedAuthType } from './connector_spec';
 import { ConnectorIconsMap } from './connector_icons_map';
 import { getSchemaForAuthType } from './lib';
@@ -39,6 +40,9 @@ describe('connector spec contracts', () => {
     expect(metadata.id.length).toBeLessThanOrEqual(MAX_CONNECTOR_TYPE_ID_LENGTH);
     expect(metadata.displayName.trim()).not.toHaveLength(0);
     expect(metadata.description.trim()).not.toHaveLength(0);
+    // The actions plugin rejects a third party action type below a gold license at
+    // registration time, which makes Kibana exit on startup. Catch it here instead.
+    expect(LICENSE_TYPE[metadata.minimumLicense]).toBeGreaterThanOrEqual(LICENSE_TYPE.gold);
     // supportedFeatureIds may be [] for support-only connectors (not yet feature-enabled).
     // Non-empty entries must be valid feature ID strings.
     if (metadata.supportedFeatureIds.length > 0) {
