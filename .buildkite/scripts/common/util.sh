@@ -223,10 +223,7 @@ download_tmp_artifact() {
   done
 
   if [[ "$use_gcs" == "true" ]]; then
-    if "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}" \
-      && gcloud storage cp \
-        "gs://kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}/tmp/builds/${build_id}/${artifact_name}" \
-        "${dest_dir}/${artifact_name}"; then
+    if download_tmp_artifact_from_gcs "$artifact_name" "$dest_dir" "$build_id"; then
       return 0
     fi
     echo "GCS download failed for ${artifact_name} from kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION} (build ${build_id})."
@@ -238,15 +235,15 @@ download_tmp_artifact() {
 
 upload_tmp_artifact() {
   local local_path="$1" artifact_name="$2" build_id="$3"
-  local region pids=() failures=0
+  local region pids=() failures=0 token_file
 
-  if ! "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}"; then
+  if ! token_file="$(create_gcs_access_token_file "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}")"; then
     echo "Service account activation failed; skipping GCS upload of ${artifact_name}. Same-region downloads will fall back to the buildkite artifact." >&2
     return 0
   fi
 
   for region in "${GCS_CI_ARTIFACT_REGIONS[@]}"; do
-    upload_tmp_artifact_to_region "$local_path" "$artifact_name" "$build_id" "$region" &
+    upload_tmp_artifact_to_region "$local_path" "$artifact_name" "$build_id" "$region" "$token_file" &
     pids+=("$!")
   done
 
@@ -255,6 +252,7 @@ upload_tmp_artifact() {
       failures=$((failures + 1))
     fi
   done
+  rm -rf "$(dirname "$token_file")"
 
   if [[ "$failures" -gt 0 ]]; then
     echo "GCS upload of ${artifact_name} failed for ${failures}/${#GCS_CI_ARTIFACT_REGIONS[@]} bucket(s); same-region downloads will fall back to the buildkite artifact." >&2
@@ -264,11 +262,44 @@ upload_tmp_artifact() {
 }
 
 upload_tmp_artifact_to_region() {
-  local local_path="$1" artifact_name="$2" build_id="$3" region="$4"
+  local local_path="$1" artifact_name="$2" build_id="$3" region="$4" token_file="$5"
 
-  retry 3 5 env CLOUDSDK_STORAGE_PARALLEL_COMPOSITE_UPLOAD_ENABLED=False gcloud storage cp \
-    "$local_path" \
-    "gs://kibana-ci-artifacts-${region}/tmp/builds/${build_id}/${artifact_name}"
+  CLOUDSDK_STORAGE_PARALLEL_COMPOSITE_UPLOAD_ENABLED=False \
+    retry 3 5 gcloud_with_access_token "$token_file" storage cp \
+      "$local_path" \
+      "gs://kibana-ci-artifacts-${region}/tmp/builds/${build_id}/${artifact_name}"
+}
+
+download_tmp_artifact_from_gcs() {
+  local artifact_name="$1" dest_dir="$2" build_id="$3"
+  local bucket="kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}" token_file status=0
+
+  token_file="$(create_gcs_access_token_file "$bucket")" || return 1
+  gcloud_with_access_token "$token_file" storage cp \
+    "gs://${bucket}/tmp/builds/${build_id}/${artifact_name}" \
+    "${dest_dir}/${artifact_name}" || status=$?
+  rm -rf "$(dirname "$token_file")"
+  return "$status"
+}
+
+# Mints one impersonated access token and prints its file path, so gcloud storage workers share it instead of each exchanging a Workload Identity token.
+create_gcs_access_token_file() {
+  local bucket="$1" token_dir
+
+  "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "$bucket" >&2 || return 1
+  token_dir="$(mktemp -d -t gcs-token-XXXXXX)"
+  if ! gcloud auth print-access-token > "$token_dir/access_token" || [[ ! -s "$token_dir/access_token" ]]; then
+    rm -rf "$token_dir"
+    return 1
+  fi
+  echo "$token_dir/access_token"
+}
+
+# Impersonation must be off here: gcloud applies it before reading the token file, which would restart per-worker token requests.
+gcloud_with_access_token() {
+  local token_file="$1"
+  shift
+  CLOUDSDK_AUTH_ACCESS_TOKEN_FILE="$token_file" CLOUDSDK_AUTH_IMPERSONATE_SERVICE_ACCOUNT= gcloud "$@"
 }
 
 print_if_dry_run() {
