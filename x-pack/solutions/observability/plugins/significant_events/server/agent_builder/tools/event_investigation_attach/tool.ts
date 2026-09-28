@@ -52,39 +52,39 @@ const eventInvestigationAttachSchema = z
         )
       )
       .optional(),
-  workflow_execution_id: z
-    .string()
-    .max(MAX_ID_LENGTH)
-    .describe(
+    workflow_execution_id: z
+      .string()
+      .max(MAX_ID_LENGTH)
+      .describe(
+        i18n.translate(
+          'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.workflowExecutionId',
+          {
+            defaultMessage:
+              'The investigation workflow execution id returned by execute_workflow. Used to fetch detailed RCA data.',
+          }
+        )
+      ),
+    started_at: z.iso.datetime({ offset: true }).describe(
       i18n.translate(
-        'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.workflowExecutionId',
+        'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.startedAt',
         {
           defaultMessage:
-            'The investigation workflow execution id returned by execute_workflow. Used to fetch detailed RCA data.',
+            'ISO-8601 datetime when the investigation started. Read from the workflow execution returned by execute_workflow.',
         }
       )
     ),
-  started_at: z.iso.datetime({ offset: true }).describe(
-    i18n.translate(
-      'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.startedAt',
-      {
-        defaultMessage:
-          'ISO-8601 datetime when the investigation started. Read from the workflow execution returned by execute_workflow.',
-      }
-    )
-  ),
-  completed_at: z.iso
-    .datetime({ offset: true })
-    .optional()
-    .describe(
-      i18n.translate(
-        'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.completedAt',
-        {
-          defaultMessage:
-            'ISO-8601 datetime when the investigation completed. Omit while the investigation is still running.',
-        }
-      )
-    ),
+    completed_at: z.iso
+      .datetime({ offset: true })
+      .optional()
+      .describe(
+        i18n.translate(
+          'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.completedAt',
+          {
+            defaultMessage:
+              'ISO-8601 datetime when the investigation completed. Omit while the investigation is still running.',
+          }
+        )
+      ),
   })
   .refine((data) => data.event_id !== undefined || data.event_uuid !== undefined, {
     message: 'Either event_id or event_uuid must be provided',
