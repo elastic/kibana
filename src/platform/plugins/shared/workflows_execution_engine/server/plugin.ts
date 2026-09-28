@@ -37,6 +37,7 @@ import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
+import { isWorkflowAdmin } from '@kbn/workflows/server';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import { maybeDrainConcurrencyQueueBeforeEnqueue } from './concurrency/concurrency_queue_drainer';
 import { handleConcurrencyBlockedExecution } from './concurrency/maybe_schedule_dormant_queued_run';
@@ -1569,6 +1570,8 @@ export class WorkflowsExecutionEnginePlugin
         ? (await coreStart.userProfile.getCurrentProfileId({ request })) ?? undefined
         : undefined;
 
+      const isAdmin = hasPrivateWorkflows && (await isWorkflowAdmin(coreStart, request));
+
       interface PreparedItem {
         idx: number;
         workflowExecution: Partial<EsWorkflowExecution>;
@@ -1581,7 +1584,7 @@ export class WorkflowsExecutionEnginePlugin
           if (!item.workflow.isEphemeral) {
             const spaceId = spaceIdFor(item);
             const state = executionStates.get(`${spaceId}:${item.workflow.id}`);
-            if (state && !getWorkflowPermissions(state, profileId).execute) {
+            if (state && !getWorkflowPermissions(state, profileId, isAdmin).execute) {
               throw new Error('You do not have permission to execute this workflow.');
             }
             if (!state?.enabled) {

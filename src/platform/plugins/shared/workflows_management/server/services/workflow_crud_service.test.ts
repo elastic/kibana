@@ -3148,12 +3148,122 @@ describe('WorkflowCrudService', () => {
   });
 });
 
+describe('WorkflowCrudService administrator writes', () => {
+  it.each([true, false])(
+    'checks the override on edits and bulk overwrites: %s',
+    async (isAdmin) => {
+      const core = coreMock.createStart();
+      const request = httpServerMock.createKibanaRequest();
+      core.userProfile.getCurrentProfileId.mockResolvedValue('non-owner');
+      jest
+        .spyOn(core.elasticsearch.client.asScoped(request).asCurrentUser.security, 'hasPrivileges')
+        .mockResolvedValue({
+          username: 'caller',
+          has_all_requested: isAdmin,
+          application: {},
+          cluster: {},
+          index: {},
+        });
+      const { deps, client } = makeDeps(undefined, { getCoreStart: () => core });
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            occSearchHit('private-workflow', {
+              owner_id: 'owner',
+              access_control: { access_mode: 'private', entries: [] },
+            }),
+          ],
+        },
+      });
+      const service = new WorkflowCrudService(deps);
+      const update = service.updateWorkflow(
+        'private-workflow',
+        { enabled: false },
+        'default',
+        request
+      );
+      if (isAdmin) {
+        await expect(update).resolves.toMatchObject({ id: 'private-workflow' });
+        expect(client.index).toHaveBeenCalledWith(
+          expect.objectContaining({
+            document: expect.objectContaining({ owner_id: 'owner', enabled: false }),
+          })
+        );
+      } else {
+        await expect(update).rejects.toThrow();
+        expect(client.index).not.toHaveBeenCalled();
+      }
+      const imported = await service.bulkCreateWorkflows(
+        [
+          {
+            id: 'private-workflow',
+            yaml: `name: Updated
+enabled: false
+triggers:
+  - type: manual
+steps:
+  - name: step
+    type: console
+    with:
+      message: updated
+`,
+          },
+        ],
+        'default',
+        request,
+        { overwrite: true }
+      );
+      expect(imported.created).toHaveLength(isAdmin ? 1 : 0);
+      expect(imported.failed).toHaveLength(isAdmin ? 0 : 1);
+      if (isAdmin) expect(imported.created[0].owner_id).toBe('owner');
+    }
+  );
+
+  it.each([true, false])(
+    'applies the override to disable-all reads and writes: %s',
+    async (isAdmin) => {
+      const core = coreMock.createStart();
+      const request = httpServerMock.createKibanaRequest();
+      core.userProfile.getCurrentProfileId.mockResolvedValue('non-owner');
+      jest
+        .spyOn(core.elasticsearch.client.asScoped(request).asCurrentUser.security, 'hasPrivileges')
+        .mockResolvedValue({
+          username: 'caller',
+          has_all_requested: isAdmin,
+          application: {},
+          cluster: {},
+          index: {},
+        });
+      const { deps } = makeDeps(undefined, { getCoreStart: () => core });
+      mockedDisableAllWorkflowsLib
+        .mockReset()
+        .mockImplementation(async ({ assertCanEdit, accessControlFilter }) => {
+          if (isAdmin) expect(accessControlFilter).toEqual({ match_all: {} });
+          else expect(accessControlFilter).not.toEqual({ match_all: {} });
+          const check = () =>
+            assertCanEdit?.(
+              makeSource({
+                owner_id: 'owner',
+                access_control: { access_mode: 'private', entries: [] },
+              })
+            );
+          if (isAdmin) expect(check).not.toThrow();
+          else expect(check).toThrow();
+          return { total: 0, disabled: 0, failures: [], disabledWorkflows: [] };
+        });
+      await new WorkflowCrudService(deps).disableAllWorkflows('default', request);
+      expect(mockedDisableAllWorkflowsLib).toHaveBeenCalledTimes(1);
+    }
+  );
+});
+
 describe('WorkflowCrudService force deletion access', () => {
   it.each([
     ['legacy', undefined, 'another-user', true],
     ['public non-owner', { access_mode: 'public', entries: [] }, 'another-user', true],
     ['public API key', { access_mode: 'public', entries: [] }, undefined, true],
     ['private owner', { access_mode: 'private', entries: [] }, 'owner', true],
+    ['private administrator', { access_mode: 'private', entries: [] }, 'admin', true],
     ['private non-owner', { access_mode: 'private', entries: [] }, 'another-user', false],
     [
       'private editor',
@@ -3174,6 +3284,19 @@ describe('WorkflowCrudService force deletion access', () => {
   ] as const)('%s', async (_, accessControl, profileId, allowed) => {
     const core = coreMock.createStart();
     core.userProfile.getCurrentProfileId.mockResolvedValue(profileId ?? null);
+    jest
+      .spyOn(
+        core.elasticsearch.client.asScoped(httpServerMock.createKibanaRequest()).asCurrentUser
+          .security,
+        'hasPrivileges'
+      )
+      .mockResolvedValue({
+        username: 'caller',
+        has_all_requested: profileId === 'admin',
+        application: {},
+        cluster: {},
+        index: {},
+      });
     const { deps, client } = makeDeps(undefined, { getCoreStart: () => core });
     client.search.mockResolvedValue({
       hits: {

@@ -44,6 +44,7 @@ export interface AccessControlFormProps<Role extends string> {
   onSearch: (name: string) => void;
   roles: readonly [AccessControlRoleOption<Role>, ...Array<AccessControlRoleOption<Role>>];
   publicDescription: string;
+  privateDescription?: string;
   allowPublicEntries?: boolean;
   isDisabled?: boolean;
   isSearching?: boolean;
@@ -58,7 +59,7 @@ const usersLabel = i18n.translate('entityAccessControl.usersLabel', {
 const searchLabel = i18n.translate('entityAccessControl.searchPlaceholder', {
   defaultMessage: 'Find users',
 });
-const privateDescription = i18n.translate('entityAccessControl.privateDescription', {
+const defaultPrivateDescription = i18n.translate('entityAccessControl.privateDescription', {
   defaultMessage: 'Only the owner and the selected users have access.',
 });
 
@@ -79,6 +80,7 @@ export const AccessControlForm = <Role extends string>({
   onSearch,
   roles,
   publicDescription,
+  privateDescription = defaultPrivateDescription,
   allowPublicEntries = true,
   isDisabled = false,
   isSearching = false,

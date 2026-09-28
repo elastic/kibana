@@ -101,7 +101,7 @@ describe('workflow service account execution', () => {
     expect(run).not.toHaveBeenCalled();
   });
 
-  it.each(['owner', 'unlisted'])(
+  it.each(['owner', 'unlisted', 'admin'])(
     'checks private workflow access as the original caller %s during service-account execution',
     async (profileId) => {
       const core = { ...coreMock.createStart(), security: securityServiceMock.createStart() };
@@ -115,6 +115,26 @@ describe('workflow service account execution', () => {
         actual === request ? profileId : null
       );
 
+      const callerClient = elasticsearchServiceMock.createElasticsearchClient();
+      callerClient.security.hasPrivileges.mockResolvedValue({
+        username: profileId,
+        has_all_requested: profileId === 'admin',
+        application: {},
+        cluster: {},
+        index: {},
+      });
+      const serviceClient = elasticsearchServiceMock.createElasticsearchClient();
+      serviceClient.security.hasPrivileges.mockResolvedValue({
+        username: 'service-account',
+        has_all_requested: true,
+        application: {},
+        cluster: {},
+        index: {},
+      });
+      jest.spyOn(core.elasticsearch.client, 'asScoped').mockImplementation((actual) => ({
+        ...elasticsearchServiceMock.createScopedClusterClient(),
+        asCurrentUser: actual === request ? callerClient : serviceClient,
+      }));
       const allowed = await withWorkflowExecutionIdentity(
         core,
         execution('account-a'),
@@ -127,7 +147,8 @@ describe('workflow service account execution', () => {
           )
       );
 
-      expect(allowed).toBe(profileId === 'owner');
+      expect(allowed).toBe(profileId !== 'unlisted');
+      expect(serviceClient.security.hasPrivileges).not.toHaveBeenCalled();
       expect(core.userProfile.getCurrentProfileId).toHaveBeenCalledWith({ request });
     }
   );

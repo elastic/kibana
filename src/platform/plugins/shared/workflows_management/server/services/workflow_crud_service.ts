@@ -31,7 +31,11 @@ import {
   type WorkflowDetailDto,
   type WorkflowYaml,
 } from '@kbn/workflows';
-import { buildWorkflowFilters, GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
+import {
+  buildWorkflowFilters,
+  GLOBAL_WORKFLOW_SPACE_ID,
+  isWorkflowAdmin,
+} from '@kbn/workflows/server';
 import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 
 import { InvalidYamlSchemaError, WorkflowConflictError } from '@kbn/workflows-yaml';
@@ -913,6 +917,7 @@ export class WorkflowCrudService {
     const authenticatedUser = getAuthenticatedUser(request, this.deps.getSecurity());
     const profileId =
       (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined;
+    const isAdmin = await isWorkflowAdmin(this.deps.getCoreStart(), request);
     const now = new Date();
     const validationErrors: string[] = [];
     let shouldUpdateScheduler = false;
@@ -941,7 +946,7 @@ export class WorkflowCrudService {
       request,
       getOptions: { includeDeleted: true, includeGlobal: true },
       mutate: (existingSource: WorkflowProperties) => {
-        assertWorkflowOperation(existingSource, 'edit', profileId);
+        assertWorkflowOperation(existingSource, 'edit', profileId, isAdmin);
         let updatedData: Partial<WorkflowProperties> = {
           lastUpdatedBy: authenticatedUser,
           updated_at: now.toISOString(),
@@ -1105,7 +1110,8 @@ export class WorkflowCrudService {
     const profileId = request
       ? (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined
       : undefined;
-    const deletionOptions = { ...options, profileId };
+    const isAdmin = await isWorkflowAdmin(this.deps.getCoreStart(), request);
+    const deletionOptions = { ...options, profileId, isAdmin };
     const bindings = this.deps.getServiceAccountBindings?.();
     if (!bindings) return this.deleteWorkflowDocuments(ids, spaceId, deletionOptions);
     const result: DeleteWorkflowsResponse = {
@@ -1154,7 +1160,8 @@ export class WorkflowCrudService {
           options?.force && versioned.source.access_control?.access_mode === 'private'
             ? 'manage'
             : 'edit',
-          profileId
+          profileId,
+          isAdmin
         );
         const accountId = versioned.source.definition?.settings?.run_as;
         if (batch && !accountId && !options?.force) {
@@ -1250,7 +1257,12 @@ export class WorkflowCrudService {
   private async deleteWorkflowDocuments(
     ids: string[],
     spaceId: string,
-    options?: { force?: boolean; acknowledgeAclLoss?: boolean; profileId?: string },
+    options?: {
+      force?: boolean;
+      acknowledgeAclLoss?: boolean;
+      profileId?: string;
+      isAdmin?: boolean;
+    },
     versionedWorkflow?: VersionedWorkflowDocument,
     guardedBatch?: OccWorkflowHit[],
     deferCleanup = false
@@ -1285,7 +1297,8 @@ export class WorkflowCrudService {
         assertWorkflowOperation(
           workflow,
           options?.force && workflow.access_control?.access_mode === 'private' ? 'manage' : 'edit',
-          options?.profileId
+          options?.profileId,
+          options?.isAdmin
         ),
       storage: this.deps.workflowStorage,
       workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
@@ -1308,6 +1321,7 @@ export class WorkflowCrudService {
     const profileId = request
       ? (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined
       : undefined;
+    const isAdmin = await isWorkflowAdmin(this.deps.getCoreStart(), request);
     let canModifyBoundWorkflows = !request;
     if (request && this.deps.getServiceAccountBindings?.()?.isEnabled()) {
       const privileges = await this.deps
@@ -1319,14 +1333,16 @@ export class WorkflowCrudService {
     const result = await disableAllWorkflows({
       ...(request
         ? {
-            accessControlFilter: buildEntityReadAccessQuery({
-              profileId,
-              ownerField: 'owner_id',
-              accessControlField: 'access_control',
-              includeMissing: true,
-            }),
+            accessControlFilter: isAdmin
+              ? { match_all: {} }
+              : buildEntityReadAccessQuery({
+                  profileId,
+                  ownerField: 'owner_id',
+                  accessControlField: 'access_control',
+                  includeMissing: true,
+                }),
             assertCanEdit: (workflow: WorkflowProperties) =>
-              assertWorkflowOperation(workflow, 'edit', profileId),
+              assertWorkflowOperation(workflow, 'edit', profileId, isAdmin),
           }
         : {}),
       storage: this.deps.workflowStorage,
@@ -1465,6 +1481,7 @@ export class WorkflowCrudService {
 
     const client = this.deps.workflowStorage.getClient();
     const { profileId } = params;
+    const isAdmin = await isWorkflowAdmin(this.deps.getCoreStart(), params.request);
     const { refreshed: occHits } = await fetchOccHitsByIds(
       client,
       entries.map((entry) => entry.id)
@@ -1567,7 +1584,7 @@ export class WorkflowCrudService {
             request: params.request,
             mutate: (existing) => {
               previousVersion = existing.version;
-              assertWorkflowOperation(existing, 'edit', profileId);
+              assertWorkflowOperation(existing, 'edit', profileId, isAdmin);
               return this.buildBulkOverwriteDocument(prepared, existing);
             },
           });
@@ -1593,7 +1610,7 @@ export class WorkflowCrudService {
     if (crossSpaceOverwriteEntries.length > 0) {
       for (const { entry, occHit } of crossSpaceOverwriteEntries) {
         try {
-          assertWorkflowOperation(occHit._source, 'edit', profileId);
+          assertWorkflowOperation(occHit._source, 'edit', profileId, isAdmin);
           const document = await this.writeWorkflowDocumentWithOcc(entry.id, spaceId, {
             previousDocument: occHit._source,
             request: params.request,

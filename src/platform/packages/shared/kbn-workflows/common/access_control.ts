@@ -39,8 +39,10 @@ export interface WorkflowAccessSubject {
 /** Resolves workflow ACL permissions independently of feature privileges. */
 export const getWorkflowPermissions = (
   workflow: WorkflowAccessSubject,
-  profileId: string | undefined
+  profileId: string | undefined,
+  isAdmin = false
 ): WorkflowPermissions => {
+  if (isAdmin) return { read: true, execute: true, edit: true, manage: true };
   const { access_control: accessControl, owner_id: ownerId } = workflow;
   if (!accessControl || accessControl.access_mode === 'public') {
     return {

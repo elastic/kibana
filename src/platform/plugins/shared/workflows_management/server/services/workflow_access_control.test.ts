@@ -64,6 +64,109 @@ describe('WorkflowAccessControlService', () => {
     service = new WorkflowAccessControlService(core, crud, authz);
   });
 
+  describe('administrator override', () => {
+    beforeEach(() => {
+      core.userProfile.getCurrentProfileId.mockResolvedValue('admin');
+      jest
+        .spyOn(core.elasticsearch.client.asScoped(request).asCurrentUser.security, 'hasPrivileges')
+        .mockResolvedValue({
+          username: 'admin',
+          has_all_requested: true,
+          application: {},
+          cluster: {},
+          index: {},
+        });
+    });
+
+    it('exposes private workflows, their ACL, and history to an administrator', async () => {
+      const result = await service.toDto(document, request);
+      expect(result.owner_id).toBe('owner');
+      expect(result.access_control).toEqual(document.access_control);
+      expect(result.permissions).toEqual({ read: true, execute: true, edit: true, manage: true });
+      expect(await service.readFilter(request)).toEqual({ match_all: {} });
+      expect(await service.executionFilter('default', request)).toEqual({ match_all: {} });
+      expect(
+        core.elasticsearch.client.asScoped(request).asCurrentUser.security.hasPrivileges
+      ).toHaveBeenCalledTimes(1);
+      expect(core.elasticsearch.client.asInternalUser.openPointInTime).not.toHaveBeenCalled();
+    });
+
+    it('changes access without replacing the owner or dropping the admin grant', async () => {
+      atSpace.mockResolvedValue({ hasPrivilegeUids: ['admin', 'reader'] });
+      const result = await service.update(
+        'id',
+        'default',
+        {
+          access_mode: 'private',
+          entries: [
+            { type: 'user', id: 'owner', role: 'viewer' },
+            { type: 'user', id: 'admin', role: 'editor' },
+            { type: 'user', id: 'reader', role: 'viewer' },
+          ],
+        },
+        request
+      );
+      expect(result.owner_id).toBe('owner');
+      expect(result.access_control?.entries.map(({ id }) => id)).toEqual(['admin', 'reader']);
+      expect(authz.checkUserProfilesPrivileges).toHaveBeenCalledWith(new Set(['admin']));
+      expect(authz.checkUserProfilesPrivileges).not.toHaveBeenCalledWith(new Set(['owner']));
+    });
+
+    it('can recover an owned workflow without a current profile', async () => {
+      core.userProfile.getCurrentProfileId.mockResolvedValue(null);
+      await expect(
+        service.update('id', 'default', { access_mode: 'public' }, request)
+      ).resolves.toMatchObject({
+        owner_id: 'owner',
+        access_control: { access_mode: 'public' },
+      });
+    });
+
+    it('claims an ownerless legacy workflow', async () => {
+      delete document.owner_id;
+      delete document.access_control;
+      await expect(
+        service.update('id', 'default', { access_mode: 'private' }, request)
+      ).resolves.toMatchObject({
+        owner_id: 'admin',
+        access_control: { access_mode: 'private' },
+      });
+    });
+
+    it('still rejects new grants without recipient RBAC', async () => {
+      atSpace.mockResolvedValue({ hasPrivilegeUids: [] });
+      await expect(
+        service.update(
+          'id',
+          'default',
+          {
+            access_mode: 'private',
+            entries: [{ type: 'user', id: 'reader', role: 'viewer' }],
+          },
+          request
+        )
+      ).rejects.toBeInstanceOf(InvalidAccessControlError);
+      expect(crud.writeWorkflowDocumentWithOcc).not.toHaveBeenCalled();
+    });
+
+    it('does not change managed workflow sharing', async () => {
+      document.managed = true;
+      await expect(
+        service.update('id', 'default', { access_mode: 'public' }, request)
+      ).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+      expect(crud.writeWorkflowDocumentWithOcc).not.toHaveBeenCalled();
+    });
+
+    it('does not apply the override to a read without caller context', async () => {
+      expect(await service.permissions(document)).toEqual({
+        read: false,
+        execute: false,
+        edit: false,
+        manage: false,
+      });
+    });
+  });
+
   it.each(['public', 'private'] as const)(
     'redacts %s ACL recipients from non-managers',
     async (mode) => {

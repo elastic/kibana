@@ -31,7 +31,7 @@ import type {
   WorkflowPermissions,
 } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
+import { GLOBAL_WORKFLOW_SPACE_ID, isWorkflowAdmin } from '@kbn/workflows/server';
 import { WorkflowAccessDeniedError } from './workflow_access_denied_error';
 import type { WorkflowCrudService } from './workflow_crud_service';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
@@ -51,13 +51,15 @@ const rolePrivileges = {
 export const assertWorkflowOperation = (
   workflow: WorkflowAccessSubject,
   operation: WorkflowAccessOperation,
-  profileId: string | undefined
+  profileId: string | undefined,
+  isAdmin = false
 ): void => {
-  if (!getWorkflowPermissions(workflow, profileId)[operation])
+  if (!getWorkflowPermissions(workflow, profileId, isAdmin)[operation])
     throw new WorkflowAccessDeniedError();
 };
 
 export class WorkflowAccessControlService {
+  private readonly adminChecks = new WeakMap<KibanaRequest, Promise<boolean>>();
   private readonly profileIds = new WeakMap<KibanaRequest, Promise<string | undefined>>();
   private readonly executionFilters = new WeakMap<
     KibanaRequest,
@@ -84,13 +86,29 @@ export class WorkflowAccessControlService {
     return profileId;
   }
 
+  private async isAdmin(request?: KibanaRequest): Promise<boolean> {
+    if (!request) return false;
+    let check = this.adminChecks.get(request);
+    if (!check) {
+      check = isWorkflowAdmin(this.core, request);
+      this.adminChecks.set(request, check);
+    }
+    return check;
+  }
+
   async permissions(
     workflow: WorkflowAccessSubject & { createdBy?: string },
     request?: KibanaRequest
   ): Promise<WorkflowPermissions> {
     const profileId = request ? await this.getProfileId(request) : undefined;
-    const permissions = getWorkflowPermissions(workflow, profileId);
-    if (!workflow.owner_id && !workflow.access_control && request && profileId) {
+    const permissions = getWorkflowPermissions(workflow, profileId, await this.isAdmin(request));
+    if (
+      !permissions.manage &&
+      !workflow.owner_id &&
+      !workflow.access_control &&
+      request &&
+      profileId
+    ) {
       permissions.manage =
         this.core.security.authc.getCurrentUser(request)?.username === workflow.createdBy;
     }
@@ -121,6 +139,7 @@ export class WorkflowAccessControlService {
   }
 
   async readFilter(request?: KibanaRequest) {
+    if (await this.isAdmin(request)) return { match_all: {} };
     return buildEntityReadAccessQuery({
       profileId: request ? await this.getProfileId(request) : undefined,
       ownerField: 'owner_id',
@@ -152,6 +171,7 @@ export class WorkflowAccessControlService {
     spaceId: string,
     request?: KibanaRequest
   ): Promise<estypes.QueryDslQueryContainer> {
+    if (await this.isAdmin(request)) return { match_all: {} };
     const profileId = request ? await this.getProfileId(request) : undefined;
     const client = this.core.elasticsearch.client.asInternalUser;
     let pitId: string;
@@ -217,7 +237,6 @@ export class WorkflowAccessControlService {
     request: KibanaRequest
   ): Promise<WorkflowAccessControlUpdateResponseDto> {
     const profileId = await this.getProfileId(request);
-    if (!profileId) throw new WorkflowAccessDeniedError();
     const { access_mode, entries = [] } = input;
     const { authz } = this;
     const stored = await this.crud.getWorkflowDocumentWithVersion(id, spaceId);
@@ -227,7 +246,12 @@ export class WorkflowAccessControlService {
       !existing.owner_id &&
       !existing.access_control &&
       this.core.security.authc.getCurrentUser(request)?.username === existing.createdBy;
-    if (existing.managed || (!legacyOwner && existing.owner_id !== profileId)) {
+    const ownerId = existing.owner_id ?? profileId;
+    if (
+      !ownerId ||
+      existing.managed ||
+      (!legacyOwner && existing.owner_id !== profileId && !(await this.isAdmin(request)))
+    ) {
       throw new WorkflowAccessDeniedError();
     }
     if (access_mode === 'private') {
@@ -236,7 +260,7 @@ export class WorkflowAccessControlService {
           const uids = new Set(
             entries
               .filter((entry) => {
-                if (entry.role !== role || entry.id === profileId) return false;
+                if (entry.role !== role || entry.id === ownerId) return false;
                 const previous =
                   existing.access_control?.access_mode === 'private'
                     ? existing.access_control.entries.find(({ id: uid }) => uid === entry.id)
@@ -267,7 +291,7 @@ export class WorkflowAccessControlService {
     const accessControl = prepareAccessControl({
       input,
       roles: WORKFLOW_ACCESS_CONTROL_ROLES,
-      ownerId: profileId,
+      ownerId,
       previous: existing.access_control,
     });
     const document = await this.crud.writeWorkflowDocumentWithOcc(id, spaceId, {
@@ -278,7 +302,7 @@ export class WorkflowAccessControlService {
       document: applyWorkflowVersion(
         {
           ...existing,
-          owner_id: profileId,
+          owner_id: ownerId,
           access_control: accessControl,
           updated_at: new Date().toISOString(),
           lastUpdatedBy:

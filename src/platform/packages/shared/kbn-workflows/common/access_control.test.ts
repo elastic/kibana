@@ -80,6 +80,16 @@ describe('workflow ACL permissions', () => {
       )
     ).toEqual({ read: true, execute: false, edit: false, manage: false });
   });
+  it('grants administrators every ACL operation without an owner profile', () => {
+    expect(
+      getWorkflowPermissions(
+        { owner_id: 'offboarded-owner', access_control: { access_mode: 'private', entries: [] } },
+        undefined,
+        true
+      )
+    ).toEqual({ read: true, execute: true, edit: true, manage: true });
+  });
+
   it('denies private access without a profile', () => {
     expect(
       getWorkflowPermissions(

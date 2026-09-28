@@ -314,9 +314,22 @@ describe('bulkScheduleWorkflow', () => {
     ['executor', true],
     ['viewer', false],
     ['outsider', false],
+    ['admin', true],
     [undefined, false],
   ])('checks current private ACLs for profile %s in the bulk query', async (profileId, allowed) => {
     coreStart.userProfile.getCurrentProfileId.mockResolvedValue(profileId ?? null);
+    jest
+      .spyOn(
+        coreStart.elasticsearch.client.asScoped(request).asCurrentUser.security,
+        'hasPrivileges'
+      )
+      .mockResolvedValue({
+        username: 'caller',
+        has_all_requested: profileId === 'admin',
+        application: {},
+        cluster: {},
+        index: {},
+      });
     mockGetWorkflowExecutionStates.mockResolvedValue(
       new Map([
         [

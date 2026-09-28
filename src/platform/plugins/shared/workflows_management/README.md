@@ -416,22 +416,30 @@ Builder conversations: `access_mode` and `entries` with `type`, profile `id`,
 
 | Role | View | Run | Edit and delete | Change access |
 | --- | --- | --- | --- | --- |
+| Administrator | Yes | Yes | Yes | Yes |
 | Owner | Yes | Yes | Yes | Yes |
 | Editor | Yes | Yes | Yes | No |
 | Executor | Yes | Yes | No | No |
 | Viewer | Yes | No | No | No |
 
 These permissions also require the corresponding feature privileges in the space.
-Only the owner can request user suggestions, which require Workflows Read in that
-space. New grants and permission increases require the recipient's current RBAC:
+The administrator override requires wildcard Elasticsearch application privileges
+across resources, as held by `superuser`. Workflows All and Kibana feature
+privileges alone do not grant the override. Checks use the caller's credentials,
+including API-key restrictions. Administrators can recover access after an owner
+is offboarded. Updating access preserves the existing owner. An administrator
+who first sets access on an ownerless legacy workflow becomes its owner.
+
+The owner and administrators can request user suggestions, which require
+Workflows Read in that space. New grants and permission increases require the recipient's current RBAC:
 Viewer requires Read, Executor also requires Execute, and Editor also requires
 Update. Removals, unchanged entries, and permission decreases can be saved even
 if a recipient has lost RBAC. A write conflict repeats validation against the
 latest ACL. Runtime access still requires RBAC. A rejected grant leaves the
 access settings unchanged.
 Public workflows use the existing RBAC permissions for viewing, running, editing,
-and deletion. ACL entries apply only to private workflows. The owner controls
-visibility and sharing. Managed workflows keep their existing plugin access rules.
+and deletion. ACL entries apply only to private workflows. The owner and
+administrators control visibility and sharing. Managed workflows keep their existing plugin access rules.
 
 The detail page tests workflows even when disabled. Executors test the saved YAML;
 Editors and owners can test draft YAML. Test runs do not enable the workflow.
@@ -449,8 +457,8 @@ Execution checks use the current ACL and the execution identity.
 
 Soft deletion retains the workflow document and its ACL for execution and change
 history reads.
-Only the owner can hard-delete a private workflow, and the request must include
-`force=true&acknowledgeAclLoss=true`. Public workflows retain feature RBAC and
+The owner and administrators can hard-delete a private workflow. The request must
+include `force=true&acknowledgeAclLoss=true`. Public workflows retain feature RBAC and
 require no ACL acknowledgment. Their documents are removed before best-effort
 history cleanup, and cleanup failures do not fail deletion.
 Hard deletion of a private workflow first marks it as deleted and disabled, then

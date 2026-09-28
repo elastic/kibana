@@ -10,12 +10,13 @@
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { getWorkflowPermissions } from '@kbn/workflows';
 import type { WorkflowAccessSubject } from '@kbn/workflows';
+import { isWorkflowAdmin } from '@kbn/workflows/server';
 import { getWorkflowOriginalRequest } from '../service_account_execution';
 
 export const hasWorkflowAccess = async (
   workflow: WorkflowAccessSubject,
   request: KibanaRequest,
-  core: Pick<CoreStart, 'userProfile'>,
+  core: Pick<CoreStart, 'userProfile' | 'elasticsearch'>,
   operation: 'execute' | 'edit' = 'execute'
 ): Promise<boolean> => {
   const profileId =
@@ -24,5 +25,8 @@ export const hasWorkflowAccess = async (
           request: getWorkflowOriginalRequest(request),
         })) ?? undefined
       : undefined;
-  return getWorkflowPermissions(workflow, profileId)[operation];
+  return (
+    getWorkflowPermissions(workflow, profileId)[operation] ||
+    (await isWorkflowAdmin(core, getWorkflowOriginalRequest(request)))
+  );
 };

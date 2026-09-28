@@ -184,6 +184,9 @@ export const WorkflowAccessControlModal = ({
           isSearching={isFetching}
           isDisabled={isSaving}
           allowPublicEntries={false}
+          privateDescription={i18n.translate('workflows.access.privateDescription', {
+            defaultMessage: 'Only the owner, selected users, and administrators have access.',
+          })}
           publicDescription={i18n.translate('workflows.access.publicDescription', {
             defaultMessage:
               'Access is controlled by workflow permissions in this space. User-specific restrictions apply only when this workflow is private.',
