@@ -75,10 +75,10 @@ export function createEventTool({
         message: i18n.translate(
           'xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.message',
           {
-            defaultMessage: 'Create significant event "{title}" for sources: {sources}?',
+            defaultMessage: 'Create significant event "{title}" for sources: {streams}?',
             values: {
               title: toolParams.title,
-              sources: toolParams.slugs.join(', '),
+              streams: toolParams.slugs.join(', '),
             },
           }
         ),

@@ -15,7 +15,6 @@ import type { Detection, LifecycleDetection } from '@kbn/significant-events-sche
 import { SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE } from '../../../common/significant_event_detection_attachment';
 import { lifecycleDetectionAttachmentSchema } from '../../../common/significant_event_detection_attachment_schema';
 import type { GetScopedClients } from '../../routes/types';
-import { loadSourceCatalog, presentSlug } from '../utils/resolve_source_slugs';
 
 interface CreateSignificantEventDetectionAttachmentTypeOptions {
   logger: Logger;
@@ -37,14 +36,11 @@ const toLifecycleDetection = (detection: Detection): LifecycleDetection | undefi
   };
 };
 
-export const formatDetectionAsText = (
-  detection: LifecycleDetection,
-  sourceLabel = detection.stream_name
-): string => {
+export const formatDetectionAsText = (detection: LifecycleDetection): string => {
   return [
     `Significant Events detection "${detection.rule_name}"`,
     `Detection ID: ${detection.detection_id}`,
-    `Source: ${sourceLabel}`,
+    `Stream: ${detection.stream_name}`,
     `Change point: ${detection.change_point_type}`,
     `Timestamp: ${detection['@timestamp']}`,
   ].join('\n');
@@ -122,25 +118,14 @@ export const createSignificantEventDetectionAttachmentType = ({
         return false;
       }
     },
-    format: async (attachment, context) => {
-      let sourceLabel = attachment.data.stream_name;
-      try {
-        const { sourcesClient } = await getScopedClients({ request: context.request });
-        const catalog = await loadSourceCatalog(sourcesClient);
-        sourceLabel = presentSlug(catalog, attachment.data.stream_name);
-      } catch (error) {
-        logger.warn(`Failed to resolve source slug for detection attachment: ${String(error)}`);
-      }
-
-      return {
-        getRepresentation: () => ({
-          type: 'text',
-          value: formatDetectionAsText(attachment.data, sourceLabel),
-        }),
-      };
-    },
+    format: (attachment) => ({
+      getRepresentation: () => ({
+        type: 'text',
+        value: formatDetectionAsText(attachment.data),
+      }),
+    }),
     getAgentDescription: () =>
-      'A Significant Events detection attachment represents a change-point observation from an alerting rule on a source. Use it as authoritative context about the attached detection when answering questions.',
+      'A Significant Events detection attachment represents a change-point observation from an alerting rule on a stream. Use it as authoritative context about the attached detection when answering questions.',
     getTools: () => [],
   };
 };

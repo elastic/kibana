@@ -203,6 +203,7 @@ describe('pause guard on rule-touching query routes', () => {
       params,
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
+        streamsClient: { getStream: jest.fn(), listStreams: jest.fn() },
         licensing: {},
         uiSettingsClient: {},
         getKnowledgeIndicatorClient,

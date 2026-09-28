@@ -14,22 +14,18 @@ import type { Logger } from '@kbn/core/server';
 import { featureSchema, type Feature } from '@kbn/significant-events-schema';
 import { decodeFeatureAttachmentOrigin, KI_FEATURE_ATTACHMENT_TYPE } from '../../../common';
 import type { GetScopedClients } from '../../routes/types';
-import { loadSourceCatalog, presentSlug } from '../utils/resolve_source_slugs';
 
 interface CreateSignificantEventFeatureAttachmentTypeOptions {
   logger: Logger;
   getScopedClients: GetScopedClients;
 }
 
-export const formatFeatureAsText = (
-  feature: Feature,
-  sourceLabel = feature.stream_name
-): string => {
+export const formatFeatureAsText = (feature: Feature): string => {
   const title = feature.title ?? feature.id;
   return [
     `Knowledge Indicator feature "${title}"`,
     `Feature ID: ${feature.id}`,
-    `Source: ${sourceLabel}`,
+    `Stream: ${feature.stream_name}`,
     `Type: ${feature.type}${feature.subtype ? ` (${feature.subtype})` : ''}`,
     feature.confidence > 0 ? `Confidence: ${feature.confidence}%` : undefined,
     feature.description ? `Description: ${feature.description}` : undefined,
@@ -101,25 +97,14 @@ export const createSignificantEventFeatureAttachmentType = ({
         return false;
       }
     },
-    format: async (attachment, context) => {
-      let sourceLabel = attachment.data.stream_name;
-      try {
-        const { sourcesClient } = await getScopedClients({ request: context.request });
-        const catalog = await loadSourceCatalog(sourcesClient);
-        sourceLabel = presentSlug(catalog, attachment.data.stream_name);
-      } catch (error) {
-        logger.warn(`Failed to resolve source slug for feature attachment: ${String(error)}`);
-      }
-
-      return {
-        getRepresentation: () => ({
-          type: 'text',
-          value: formatFeatureAsText(attachment.data, sourceLabel),
-        }),
-      };
-    },
+    format: (attachment) => ({
+      getRepresentation: () => ({
+        type: 'text',
+        value: formatFeatureAsText(attachment.data),
+      }),
+    }),
     getAgentDescription: () =>
-      'A Significant Events knowledge indicator feature attachment represents a discovered entity or operational pattern on a source. Use it as authoritative context about the attached feature when answering questions.',
+      'A Significant Events knowledge indicator feature attachment represents a discovered entity or operational pattern on a stream. Use it as authoritative context about the attached feature when answering questions.',
     getTools: () => [],
   };
 };
