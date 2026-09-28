@@ -28,6 +28,10 @@ export const servers: ScoutServerConfig = {
       // disabled and its routes 404. Same pattern as evals_detection_watch_rule_creation.
       '--xpack.alertzero.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',
+      // alertzero lists proposals in requiredPlugins; without it the plugin is
+      // cascade-disabled ("missing ... dependencies: [proposals]"), managed
+      // workflows never install, and the analysis run route 404s.
+      '--xpack.proposals.enabled=true',
     ],
   },
 };
