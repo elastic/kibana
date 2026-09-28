@@ -96,6 +96,18 @@ export const DURATION_PERCENTILE = 75;
 /** Timeout applied to every test step regardless of type. */
 export const TEST_STEP_TIMEOUT_MINUTES = 50;
 
+/**
+ * Agent disk sizes (GiB) per step type. `undefined` uses the agent image default;
+ * set a number to override it.
+ */
+export const AGENT_DISK_GIB: Readonly<
+  Record<'JEST_UNIT' | 'JEST_INTEGRATION' | 'FTR', number | undefined>
+> = {
+  JEST_UNIT: undefined,
+  JEST_INTEGRATION: undefined,
+  FTR: undefined,
+};
+
 /** Well-known Buildkite pipeline slugs referenced in source prioritization. */
 export const PIPELINES = {
   ON_MERGE: 'kibana-on-merge',

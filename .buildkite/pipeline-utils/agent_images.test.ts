@@ -152,6 +152,16 @@ describe('agent_images', () => {
       );
     });
 
+    it('uses custom disk size when provided', () => {
+      const config = expandAgentQueue('n2-4-spot', 200);
+
+      expect(config.diskSizeGb).toBe(200);
+    });
+
+    it('omits disk size when not provided so the image default applies', () => {
+      expect(expandAgentQueue('n2-4-spot', undefined)).not.toHaveProperty('diskSizeGb');
+    });
+
     it('returns base config for queue without spot or virt suffix', () => {
       const config = expandAgentQueue('c2-8');
 

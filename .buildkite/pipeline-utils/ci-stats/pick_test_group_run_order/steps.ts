@@ -8,7 +8,7 @@
  */
 
 import type { BuildkiteClient, BuildkiteGroupStep, BuildkiteStep } from '../../buildkite/index.ts';
-import { RETRIES, STEP_KEYS, TEST_STEP_TIMEOUT_MINUTES } from './const.ts';
+import { AGENT_DISK_GIB, RETRIES, STEP_KEYS, TEST_STEP_TIMEOUT_MINUTES } from './const.ts';
 import type { FunctionalGroup } from './types.ts';
 import { expandAgentQueue } from '#pipeline-utils';
 
@@ -17,6 +17,7 @@ interface JestStepOptions {
   label: string;
   parallelism: number;
   key: 'jest' | 'jest-integration';
+  agentDiskSize?: number;
   envFromLabels: Record<string, string>;
   dependsOn: string[];
   retryCount: number;
@@ -35,7 +36,7 @@ export function buildJestStep(opts: JestStepOptions): BuildkiteStep | undefined 
     parallelism: opts.parallelism,
     timeout_in_minutes: TEST_STEP_TIMEOUT_MINUTES,
     key: opts.key,
-    agents: expandAgentQueue('n2-4-spot'),
+    agents: expandAgentQueue('n2-4-spot', opts.agentDiskSize),
     env: opts.envFromLabels,
     depends_on: opts.dependsOn,
     retry: {
@@ -76,7 +77,7 @@ export function buildFunctionalStepGroup(
         command: opts.command,
         timeout_in_minutes: TEST_STEP_TIMEOUT_MINUTES,
         key,
-        agents: expandAgentQueue(queue),
+        agents: expandAgentQueue(queue, AGENT_DISK_GIB.FTR),
         env: {
           FTR_CONFIG_GROUP_KEY: key,
           ...opts.ftrExtraArgs,
