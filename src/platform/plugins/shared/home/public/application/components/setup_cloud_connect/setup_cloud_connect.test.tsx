@@ -17,7 +17,6 @@ jest.mock('../../kibana_services', () => ({
   }),
 }));
 
-const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 const applicationMock = {
   getUrlForApp: jest.fn(() => '/app/cloud_connect'),
   navigateToApp: jest.fn(),
@@ -31,7 +30,7 @@ describe('SetupCloudConnect', () => {
 
   test('renders as expected', () => {
     const component = shallowWithIntl(
-      <SetupCloudConnect addBasePath={addBasePathMock} application={applicationMock} />
+      <SetupCloudConnect application={applicationMock} />
     );
 
     const $button = component.find('EuiButton');
@@ -40,7 +39,7 @@ describe('SetupCloudConnect', () => {
 
   test('calls navigateToApp when button is clicked', () => {
     const component = shallowWithIntl(
-      <SetupCloudConnect addBasePath={addBasePathMock} application={applicationMock} />
+      <SetupCloudConnect application={applicationMock} />
     );
 
     const $button = component.find('EuiButton');

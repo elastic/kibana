@@ -13,12 +13,14 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
+  EuiIllustration,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { api } from '@elastic/eui-illustrations';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -27,11 +29,10 @@ import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import { getServices } from '../../kibana_services';
 
 interface Props {
-  addBasePath: (path: string) => string;
   application: ApplicationStart;
 }
 
-export const SetupCloudConnect: FC<Props> = ({ addBasePath, application }) => {
+export const SetupCloudConnect: FC<Props> = ({ application }) => {
   const { trackUiMetric } = getServices();
   const cloudConnectUrl = application.getUrlForApp('cloud_connect');
   const handleConnectClick = (e: React.MouseEvent) => {
@@ -46,13 +47,15 @@ export const SetupCloudConnect: FC<Props> = ({ addBasePath, application }) => {
 
   return (
     <EuiPanel paddingSize="l">
-      <EuiFlexGroup alignItems="center" gutterSize="xl">
-        <EuiFlexItem>
-          <EuiImage
+      <EuiFlexGroup alignItems="center" gutterSize="xl" responsive={false}>
+        <EuiFlexItem grow={false} css={illustrationFrame}>
+          <EuiIllustration
+            type={api}
+            fullWidth={false}
+            css={illustrationGraphic}
             alt={i18n.translate('home.setupCloudConnect.illustration.alt.text', {
               defaultMessage: 'Illustration for Cloud Connect setup',
             })}
-            src={addBasePath('/plugins/kibanaReact/assets/') + 'illustration_cloud_migration.png'}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -83,3 +86,21 @@ export const SetupCloudConnect: FC<Props> = ({ addBasePath, application }) => {
     </EuiPanel>
   );
 };
+
+// Keep the illustration at its authored size instead of letting the SVG grow.
+const illustrationFrame = css({
+  '&&.euiFlexItem': {
+    flexBasis: 128,
+    flexGrow: 0,
+    inlineSize: 128,
+  },
+});
+
+const illustrationGraphic = css({
+  '&&': {
+    inlineSize: 128,
+    svg: {
+      inlineSize: 128,
+    },
+  },
+});
