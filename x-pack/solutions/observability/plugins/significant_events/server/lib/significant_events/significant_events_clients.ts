@@ -75,12 +75,18 @@ export function createSignificantEventsClients({
   // write-path helpers correctly short-circuit the redundant legacy-lineage lookup (#1517).
   // This `let` is declared inside `createSignificantEventsClients` — one closure per request;
   // no cross-request state is shared.
-  let sharedEventClient: EventClient | undefined;
-  const getSharedEventClient = async (): Promise<EventClient> => {
-    if (!sharedEventClient) {
-      sharedEventClient = services.event.getClient(await buildEventClientOptions()) as EventClient;
+  // Promise-based memoization: storing the promise (not the resolved value) ensures concurrent
+  // callers racing before initialization completes all receive the same instance rather than each
+  // constructing their own, which would silently break the `eventSearchClient === eventClient`
+  // identity checks in write-path helpers.
+  let sharedEventClientPromise: Promise<EventClient> | undefined;
+  const getSharedEventClient = (): Promise<EventClient> => {
+    if (!sharedEventClientPromise) {
+      sharedEventClientPromise = buildEventClientOptions().then(
+        (opts) => services.event.getClient(opts) as EventClient
+      );
     }
-    return sharedEventClient;
+    return sharedEventClientPromise;
   };
 
   return {

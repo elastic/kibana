@@ -52,7 +52,12 @@ export const attachInvestigationToEvent = async ({
       ? latest
       : (await eventClient.findByEventId(eventId)).hits.at(-1);
   if (!latestLegacy) {
-    return { event_uuid: eventId, updated: 0, ignored: 1 };
+    // The event exists in the read store (resolvedSearchClient) but not in the write store
+    // (eventClient) — most likely a dual-write lag race. Surface a retryable error so the caller
+    // can distinguish this from a genuine not-found.
+    throw new Error(
+      `Significant event "${eventId}" exists in the read store but not the write store — possible dual-write lag, retry later`
+    );
   }
 
   const existing = latestLegacy.investigations ?? [];
