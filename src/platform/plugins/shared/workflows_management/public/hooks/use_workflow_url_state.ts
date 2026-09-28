@@ -146,7 +146,7 @@ export function useWorkflowUrlState() {
       // Update the URL without causing a full page reload. Values must be encoded: iteration and
       // case-branch ids embed author-controlled step names and case matches, and a raw `&`, `#`
       // or `+` would split or truncate the param when the URL is parsed back.
-      const newSearch = queryString.stringify(cleanParams, { encode: false });
+      const newSearch = queryString.stringify(cleanParams);
       const nextSearch = newSearch ? `?${newSearch}` : '';
       if (nextSearch === history.location.search) {
         return;
