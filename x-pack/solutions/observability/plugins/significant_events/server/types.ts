@@ -40,10 +40,6 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
-import type {
-  SearchInferenceEndpointsPluginSetup,
-  SearchInferenceEndpointsPluginStart,
-} from '@kbn/search-inference-endpoints/server';
 
 export interface SignificantEventsPluginSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
@@ -61,7 +57,6 @@ export interface SignificantEventsPluginSetupDependencies {
   cloud?: CloudSetup;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
   streams: StreamsPluginSetup;
   nightshiftInvestigations?: NightshiftInvestigationsServerSetup;
 }
@@ -78,7 +73,6 @@ export interface SignificantEventsPluginStartDependencies {
   agentBuilder?: AgentBuilderPluginStart;
   agentBuilderSml?: AgentBuilderSmlPluginStart;
   spaces?: SpacesPluginStart;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   streams: StreamsPluginStart;
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
@@ -93,7 +87,6 @@ export interface SignificantEventsServer {
   inference: InferenceServerStart;
   licensing: LicensingPluginStart;
   isServerless: boolean;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   workflowsManagement?: WorkflowsServerPluginSetup;
   agentBuilder?: AgentBuilderPluginStart;

@@ -7,14 +7,15 @@
 
 import type {
   AnalyticsServiceSetup,
+  CoreStart,
   ElasticsearchClient,
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import {
+  NightshiftModelBlockedError,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
   SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
@@ -29,6 +30,7 @@ import { createCortexTelemetry } from '../telemetry';
 import { materializeCortex } from './materialize';
 import { createLlmProposeCortexEdits, optimizeCortex } from './optimize';
 import { createCortexPageStore, type CortexPageStore } from './page_store';
+import { resolveNightshiftModelForRequest } from '../model_resolution';
 
 export const createCortexStore = ({
   esClient,
@@ -124,8 +126,11 @@ export const runCortexOptimize = async ({
   analytics,
   conversationId,
   roundId,
+  requestedConnectorId,
+  roundConnectorId,
   getInference,
-  getSearchInferenceEndpoints,
+  getSavedObjects,
+  getUiSettings,
   logger,
 }: {
   request: KibanaRequest;
@@ -140,8 +145,11 @@ export const runCortexOptimize = async ({
   analytics: AnalyticsServiceSetup;
   conversationId?: string;
   roundId?: string;
+  requestedConnectorId?: string;
+  roundConnectorId?: string;
   getInference: () => InferenceServerStart | undefined;
-  getSearchInferenceEndpoints: () => SearchInferenceEndpointsPluginStart | undefined;
+  getSavedObjects: () => CoreStart['savedObjects'] | undefined;
+  getUiSettings: () => CoreStart['uiSettings'] | undefined;
   logger: Logger;
 }): Promise<void> => {
   /**
@@ -167,20 +175,31 @@ export const runCortexOptimize = async ({
   }
 
   const inference = getInference();
-  const searchInferenceEndpoints = getSearchInferenceEndpoints();
-  if (!inference || !searchInferenceEndpoints) {
-    logger.debug('Cortex optimizer skipped — inference or connectors unavailable');
+  const savedObjects = getSavedObjects();
+  const uiSettings = getUiSettings();
+  if (!inference || !savedObjects || !uiSettings) {
+    logger.debug('Cortex optimizer skipped — model resolution is unavailable');
     return;
   }
 
-  const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
-    SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-    request
-  );
-  const connectorId = endpoints[0]?.connectorId;
-  if (!connectorId) {
-    logger.debug('Cortex optimizer skipped — no investigation inference connector');
-    return;
+  let connectorId: string;
+  try {
+    connectorId = await resolveNightshiftModelForRequest({
+      request,
+      inference,
+      savedObjects,
+      uiSettings,
+      step: 'investigation',
+      requestedId: requestedConnectorId,
+      roundConnectorId,
+      onFallback: (reason) =>
+        logger.warn(`Cortex round model is unavailable, using the default: ${reason.message}`),
+    });
+  } catch (error) {
+    if (error instanceof NightshiftModelBlockedError) {
+      logger.error(error);
+    }
+    throw error;
   }
 
   const store = createCortexStore({ esClient, logger, spaceId, signal });

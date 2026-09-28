@@ -4,19 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SignificantEventsWorkflowStatusResult } from '@kbn/significant-events-schema';
+import {
+  MAX_ID_LENGTH,
+  type SignificantEventsWorkflowStatusResult,
+} from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_error';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../utils/assert_not_paused';
+import { resolveSignificantEventsModelForRequest } from '../../../model_resolution';
 
 const discoveryExecuteRoute = createServerRoute({
   endpoint: 'POST /internal/streams/significant_events/discovery/_execute',
   params: z.object({
     body: z.discriminatedUnion('action', [
-      z.object({ action: z.literal('trigger') }),
+      z.object({
+        action: z.literal('trigger'),
+        connector_id: z
+          .string()
+          .max(MAX_ID_LENGTH)
+          .optional()
+          .describe('Optional chat model connector or inference endpoint ID for this run.'),
+      }),
       z.object({ action: z.literal('cancel') }),
     ]),
   }),
@@ -61,6 +72,16 @@ const discoveryExecuteRoute = createServerRoute({
         request,
         spaceId,
         agentBuilder: server.agentBuilder,
+        connectorId: body.connector_id,
+        resolveModel: (requestedId) =>
+          resolveSignificantEventsModelForRequest({
+            request,
+            inference: server.inference,
+            savedObjects: server.core.savedObjects,
+            uiSettings: server.core.uiSettings,
+            step: 'discovery',
+            requestedId,
+          }),
       });
       if (isNew) {
         telemetry.trackSignificantEventsDiscoveryTriggered({
