@@ -5,28 +5,74 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiFlyoutBody, EuiFlyoutHeader, EuiFlyoutResizable, EuiTitle } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import {
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiFlyoutResizable,
+  EuiSpacer,
+  EuiTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { createEsTraceFetcher, TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
+import type { TraceSpan } from '@kbn/llm-trace-waterfall';
+import { downloadFileAs } from '@kbn/share-plugin/public';
 import { useKibana } from '../../../../hooks/use_kibana';
 
-const title = i18n.translate('xpack.agentBuilder.response.traceFlyout.title', {
-  defaultMessage: 'Trace',
-});
+const labels = {
+  title: i18n.translate('xpack.agentBuilder.response.traceFlyout.title', {
+    defaultMessage: 'Trace',
+  }),
+  download: i18n.translate('xpack.agentBuilder.response.traceFlyout.download', {
+    defaultMessage: 'Download trace',
+  }),
+  fromFileCallout: i18n.translate('xpack.agentBuilder.response.traceFlyout.fromFileCallout', {
+    defaultMessage: 'Viewing a trace loaded from a file.',
+  }),
+};
 
 interface TraceFlyoutProps {
-  traceId: string;
+  traceId?: string;
+  initialSpans?: TraceSpan[];
   onClose: () => void;
 }
 
-export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, onClose }) => {
+export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, initialSpans, onClose }) => {
   const { services } = useKibana();
   const { data } = services.plugins;
   const fetchTrace = useMemo(() => createEsTraceFetcher(data.search.search), [data.search.search]);
-  const traceSpansResult = useTraceSpans(traceId, { fetchTrace });
+
+  const isFromFile = Boolean(initialSpans);
+  const traceSpansResult = useTraceSpans(isFromFile ? null : traceId ?? null, { fetchTrace });
+
+  const spans = useMemo(
+    () => (isFromFile ? initialSpans ?? [] : traceSpansResult.spans),
+    [isFromFile, initialSpans, traceSpansResult.spans]
+  );
+  const durationMs = isFromFile ? undefined : traceSpansResult.durationMs;
+  const isLoading = isFromFile ? false : traceSpansResult.isLoading;
+  const error = isFromFile ? null : traceSpansResult.error;
+
+  const handleDownload = useCallback(() => {
+    const slug = traceId
+      ? traceId
+          .replace(/[^\p{L}\p{N}]+/gu, '-') // replace non-alphanumeric chars (unicode-aware) with hyphens
+          .replace(/^-|-$/g, '') // strip leading/trailing hyphens
+          .toLowerCase()
+      : 'trace';
+    const envelope = { ...(traceId ? { trace_id: traceId } : {}), spans };
+    downloadFileAs(`trace-${slug}.json`, {
+      content: JSON.stringify(envelope, null, 2),
+      type: 'application/json',
+    });
+  }, [traceId, spans]);
 
   return (
     <EuiFlyoutResizable
@@ -48,20 +94,44 @@ export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, onClose }) =>
       `}
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
-          <h2 id="agentBuilderTraceFlyoutTitle" style={{ wordBreak: 'break-all' }}>
-            {title}: {traceId}
-          </h2>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem>
+            <EuiTitle size="s">
+              <h2 id="agentBuilderTraceFlyoutTitle" style={{ wordBreak: 'break-all' }}>
+                {labels.title}
+                {traceId ? `: ${traceId}` : ''}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={labels.download} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="download"
+                aria-label={labels.download}
+                onClick={handleDownload}
+                color="text"
+                size="s"
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <div style={{ height: '100%', padding: 16 }}>
+          {isFromFile && (
+            <>
+              <EuiCallOut announceOnMount size="s" color="primary" iconType="document">
+                {labels.fromFileCallout}
+              </EuiCallOut>
+              <EuiSpacer size="m" />
+            </>
+          )}
           <TraceWaterfall
-            spans={traceSpansResult.spans}
+            spans={spans}
             traceId={traceId}
-            durationMs={traceSpansResult.durationMs}
-            isLoading={traceSpansResult.isLoading}
-            error={traceSpansResult.error}
+            durationMs={durationMs}
+            isLoading={isLoading}
+            error={error}
           />
         </div>
       </EuiFlyoutBody>

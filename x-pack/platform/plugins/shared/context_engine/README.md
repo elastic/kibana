@@ -81,6 +81,11 @@ The query is otherwise a pass-through: it decides which indices it reads
 Elasticsearch index privileges bound what it can reach. Elasticsearch 4xx
 errors (bad ES|QL, missing index privilege) are returned with their status.
 
+Every AI index also has an ES|QL view, `v-ai-index-<id>`, that returns only
+its current, active, unexpired knowledge indicators with `governance.*`
+dropped. Data stream views keep the latest revision per `id`. The view is
+created with the AI index and deleted with it.
+
 ## Describing AI Indices
 
 `GET /api/context_engine/ai_index/{id}/_describe` is the step before writing a
@@ -166,7 +171,8 @@ privileges. Callers also need, on every backing index (`ai-index-*`):
 
 - `read` to be listed. Without it the AI Index is left out of the list; there
   is no error;
-- `read` to query, or Elasticsearch returns 403;
+- `read` to query, or Elasticsearch returns 403. Querying the view needs
+  `read` on `v-ai-index-<id>` as well as on the backing index;
 - `view_index_metadata` to describe (`_mapping` and `_field_caps`), or
   Elasticsearch returns 403. The counts aggregation also needs `read`; without
   it the two counts sections are omitted and the rest of the block is returned.
