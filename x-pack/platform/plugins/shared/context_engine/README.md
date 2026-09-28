@@ -64,9 +64,16 @@ agent prompt's AI-index catalog uses the same rule.
 ## Querying AI Indices
 
 `POST /api/context_engine/ai_index/_query` runs caller-supplied ES|QL as the
-current user. Body: `{ query, params?, limit? }`. Two things are server-owned
+current user. Body: `{ query, params?, limit? }`. Three things are server-owned
 and cannot be overridden:
 
+- **Lifecycle filter.** A query that reads a registered AI Index's backing
+  store (by name, pattern, or as one of several `FROM` targets) gets the
+  knowledge indicator lifecycle rules inserted after `FROM`: only indicators
+  whose `governance.lifecycle.status` is unset or `active` and whose
+  `expires_at` is unset or in the future are returned. On a data stream, only
+  the newest revision of each `id` is considered (`METADATA _id` is added when
+  missing). Indices outside the registry are read as-is.
 - **Space filter.** Documents are visible when they carry no
   `permissions.kibana.privileges` element (public), or when one is scoped to
   the request's space or to `*`. The space comes from the request URL
@@ -136,7 +143,8 @@ Count by type
 - `Semantic fields` lists the searchable `semantic_text` fields among those
   shown, detected from the mapping type. Omitted when there are none.
 - `Knowledge item types` and `Tags` show the top 20 `type` / `tags` values by
-  document count in the current space, one `"value": count` per line. Each
+  document count in the current space, active and unexpired only, one
+  `"value": count` per line. Each
   section is omitted unless its field is an aggregatable `keyword` — always the
   case on canonical KI indices, but a custom index that maps `type` / `tags` as
   `text`, or inconsistently across a pattern, gets no counts. One `terms`

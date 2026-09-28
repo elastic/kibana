@@ -12,6 +12,7 @@ import {
 } from '../../common/constants';
 import type { KiTypeCount } from '../../common/http_api/ai_indices';
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
+import { activeKiFilters } from './ki_lifecycle';
 import type { AiIndexField, AiIndexTagCount } from './types';
 
 const KI_TYPE_FIELD = 'type';
@@ -49,9 +50,9 @@ const isAggregatableKeyword = (fields: AiIndexField[], path: string): boolean =>
   );
 
 /**
- * Space-filtered `terms` counts on `type` / `tags`; each skipped unless an aggregatable keyword.
- * Shard failures error out rather than return undercounts. A caller without index `read` is turned
- * away by the read service before reaching here.
+ * Space- and lifecycle-filtered `terms` counts on `type` / `tags`; each skipped unless an
+ * aggregatable keyword. Shard failures error out rather than return undercounts. A caller without
+ * index `read` is turned away by the read service before reaching here.
  */
 export const describeAiIndexAggregations = async ({
   esClient,
@@ -72,7 +73,7 @@ export const describeAiIndexAggregations = async ({
     allow_partial_search_results: false,
     size: 0,
     track_total_hits: false,
-    query: buildAiIndexSpaceFilter(spaceId),
+    query: { bool: { filter: [buildAiIndexSpaceFilter(spaceId), ...activeKiFilters] } },
     aggs: {
       ...(hasType && {
         types: {

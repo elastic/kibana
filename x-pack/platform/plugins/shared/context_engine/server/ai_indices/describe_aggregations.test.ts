@@ -14,6 +14,7 @@ import {
 } from '../../common/constants';
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
 import { describeAiIndexAggregations } from './describe_aggregations';
+import { activeKiFilters } from './ki_lifecycle';
 import type { AiIndexField } from './types';
 
 const field = (path: string, aggregatable: boolean, type = 'keyword'): AiIndexField => ({
@@ -68,7 +69,7 @@ describe('describeAiIndexAggregations', () => {
     expect(Object.keys(aggs)).toEqual(['types', 'tags']);
   });
 
-  it('runs one space-filtered, hit-free, non-partial search with a terms agg per field', async () => {
+  it('runs one space- and lifecycle-filtered, hit-free, non-partial search with a terms agg per field', async () => {
     await describeAiIndexAggregations({
       ...params,
       fields: [field('type', true), field('tags', true)],
@@ -82,7 +83,7 @@ describe('describeAiIndexAggregations', () => {
       allow_partial_search_results: false,
       size: 0,
       track_total_hits: false,
-      query: buildAiIndexSpaceFilter('team-a'),
+      query: { bool: { filter: [buildAiIndexSpaceFilter('team-a'), ...activeKiFilters] } },
       aggs: {
         types: {
           terms: {
