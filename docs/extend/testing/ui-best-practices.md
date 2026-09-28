@@ -17,7 +17,7 @@ Default to [parallel UI suites](./parallelism.md) when possible. Parallel worker
 | Mode           | When to use                                                                                                               |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | **Parallel**   | UI tests (most suites), suites that share pre-ingested data (often using the [global setup hook](./global-setup-hook.md)) |
-| **Sequential** | API tests, suites that need serialized access to state that isn't space-scoped |
+| **Sequential** | API tests, UI suites that need serialized access to state that isn't space-scoped, or whose performance degrades when other workers share the same Kibana and Elasticsearch servers. |
 
 Sequential execution does not reset Elasticsearch or Kibana; earlier suites and pre-existing data can remain. Scope assertions and cleanup to your suite's data. Tests that require an empty cluster need an isolated deployment or a lower test layer that can control the state. See [Parallelism](./parallelism.md#scout-parallelism-differences).
 
