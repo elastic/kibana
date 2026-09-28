@@ -8,7 +8,7 @@
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { EvaluationExperimentSummary, EvaluationScoreDocument } from '@kbn/evals-common';
 import type { ExperimentStats } from '@kbn/evals';
-import { MAX_LIST_EXPERIMENTS, type MatrixEvalsClient } from './matrix_evals_client';
+import { type MatrixEvalsClient } from './matrix_evals_client';
 import { mergeShardDatasets, pickShardExperiments } from './merge_shard_experiments';
 import { isEisBacked, describeJudge } from './judge_provenance';
 import { resolveVerdictScore } from './scoring_policy';
@@ -147,44 +147,77 @@ export const scoresByPrefixToDatasets = (
     const matchingPrefixes = prefixes.filter(
       (p) => exampleId === p || exampleId.startsWith(`${p}-`)
     );
+    if (matchingPrefixes.length === 0) {
+      continue;
+    }
+
+    // Rejection flags depend on the document, not the prefix: compute them once and
+    // tally the suite/model ExcludedScoreCounts once per document. A doc matching both
+    // `alert` and `alert-analysis` must not double-count the model audit's 'dropped N
+    // score doc(s)' warning — only the per-prefix records tally per matching prefix.
+    const evaluatorName = doc.evaluator?.name;
+    const direction = (doc.evaluator as { direction?: string } | undefined)?.direction;
+    const judgeId = doc.evaluator?.model?.id;
+    const taskModelId = doc.task?.model?.id;
+    // An admitted provenance of "no judge id at all" is indistinguishable from a
+    // non-EIS judge when requireEisJudge is on: without this, a doc whose evaluator
+    // omitted its judge model silently contributes to a matrix that claims every
+    // score is EIS-graded.
+    const rejectedEisJudge = Boolean(
+      evaluatorName && options.requireEisJudge && (!judgeId || !isEisBacked(judgeId))
+    );
+    const rejectedSelfJudged = Boolean(
+      evaluatorName &&
+        !rejectedEisJudge &&
+        options.excludeSelfJudged &&
+        judgeId &&
+        taskModelId &&
+        describeJudge(judgeId, taskModelId).selfJudged
+    );
+    // Only maximize-direction evaluators are quality scores.
+    const rejectedNonQuality = Boolean(
+      evaluatorName && !rejectedEisJudge && !rejectedSelfJudged && direction && direction !== 'maximize'
+    );
+    if (evaluatorName) {
+      if (rejectedEisJudge) {
+        excluded.nonEis += 1;
+      }
+      if (rejectedSelfJudged) {
+        excluded.selfJudged += 1;
+      }
+      if (rejectedNonQuality) {
+        excluded.nonQuality += 1;
+      }
+    }
+    // Doc-level effective score and unmapped-verdict tally: like the rejection counts
+    // above, a doc matching several prefixes counts once, not once per prefix.
+    const admitted = Boolean(
+      evaluatorName && !rejectedEisJudge && !rejectedSelfJudged && !rejectedNonQuality
+    );
+    const score = admitted
+      ? options.useVerdictLadder
+        ? resolveVerdictScore(evaluatorName as string, doc)
+        : doc.evaluator?.score
+      : undefined;
+    if (
+      admitted &&
+      typeof score !== 'number' &&
+      options.useVerdictLadder &&
+      typeof doc.evaluator?.score === 'number'
+    ) {
+      excluded.unmappedVerdict += 1;
+    }
+
     for (const prefix of matchingPrefixes) {
-      const evaluatorName = doc.evaluator?.name;
-      const direction = (doc.evaluator as { direction?: string } | undefined)?.direction;
       if (evaluatorName) {
-        const judgeId = doc.evaluator?.model?.id;
-        const taskModelId = doc.task?.model?.id;
-        // An admitted provenance of "no judge id at all" is indistinguishable from a
-        // non-EIS judge when requireEisJudge is on: without this, a doc whose evaluator
-        // omitted its judge model silently contributes to a matrix that claims every
-        // score is EIS-graded.
-        const rejectedEisJudge = options.requireEisJudge && (!judgeId || !isEisBacked(judgeId));
         if (rejectedEisJudge) {
-          excluded.nonEis += 1;
           tallyPrefixExclusion(prefix, 'nonEis');
         }
-        const rejectedSelfJudged =
-          !rejectedEisJudge &&
-          options.excludeSelfJudged &&
-          judgeId &&
-          taskModelId &&
-          describeJudge(judgeId, taskModelId).selfJudged;
         if (rejectedSelfJudged) {
-          excluded.selfJudged += 1;
           tallyPrefixExclusion(prefix, 'selfJudged');
         }
 
-        // Only maximize-direction evaluators are quality scores.
-        const rejectedNonQuality =
-          !rejectedEisJudge && !rejectedSelfJudged && direction && direction !== 'maximize';
-        if (rejectedNonQuality) {
-          excluded.nonQuality += 1;
-        }
-
-        if (!rejectedEisJudge && !rejectedSelfJudged && !rejectedNonQuality) {
-          const score = options.useVerdictLadder
-            ? resolveVerdictScore(evaluatorName, doc)
-            : doc.evaluator?.score;
-
+        if (admitted) {
           let errTrack = erroredByPrefix.get(prefix);
           // A trace evaluator that found no spans reports 'unavailable', not 'error'.
           if (doc.evaluator?.label === 'error' || doc.evaluator?.label === 'unavailable') {
@@ -192,20 +225,18 @@ export const scoresByPrefixToDatasets = (
               errTrack = new Map();
               erroredByPrefix.set(prefix, errTrack);
             }
-            const tally = errTrack.get(evaluatorName) ?? { errored: 0, scored: 0 };
+            const tally = errTrack.get(evaluatorName as string) ?? { errored: 0, scored: 0 };
             tally.errored += 1;
-            errTrack.set(evaluatorName, tally);
+            errTrack.set(evaluatorName as string, tally);
           }
 
           if (typeof score !== 'number') {
-            if (options.useVerdictLadder && typeof doc.evaluator?.score === 'number') {
-              excluded.unmappedVerdict += 1;
-            }
+            // Unmapped verdicts were tallied once at the doc level above.
           } else {
             if (errTrack) {
-              const tally = errTrack.get(evaluatorName) ?? { errored: 0, scored: 0 };
+              const tally = errTrack.get(evaluatorName as string) ?? { errored: 0, scored: 0 };
               tally.scored += 1;
-              errTrack.set(evaluatorName, tally);
+              errTrack.set(evaluatorName as string, tally);
             }
 
             if (judgeId && taskModelId && describeJudge(judgeId, taskModelId).selfJudged) {
@@ -216,10 +247,10 @@ export const scoresByPrefixToDatasets = (
               evaluators = new Map();
               byPrefix.set(prefix, evaluators);
             }
-            const agg = evaluators.get(evaluatorName) ?? { sum: 0, count: 0 };
+            const agg = evaluators.get(evaluatorName as string) ?? { sum: 0, count: 0 };
             agg.sum += score;
             agg.count += 1;
-            evaluators.set(evaluatorName, agg);
+            evaluators.set(evaluatorName as string, agg);
           }
         }
       }
@@ -431,6 +462,8 @@ export const queryMatrixScores = async (
     const suitePrefixes = prefixesBySuite[suiteId] ?? [];
     for (const modelId of modelIds) {
       // A suite's models can be split across branches, so union every configured branch.
+      // No listing cap: pickLatestExperimentPerModel applies the lookback/as-of window,
+      // and capping discovery at one page would strand older eligible runs outside it.
       const experiments = (
         await Promise.all(
           suiteBranches.map((suiteBranch) =>
@@ -438,7 +471,6 @@ export const queryMatrixScores = async (
               suiteId,
               taskModelId: modelId,
               branch: suiteBranch,
-              limit: MAX_LIST_EXPERIMENTS,
             })
           )
         )

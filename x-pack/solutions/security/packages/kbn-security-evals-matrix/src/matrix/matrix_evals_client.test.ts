@@ -92,6 +92,36 @@ describe('MatrixEvalsClient', () => {
     expect(experiments.map(({ experiment_id: id }) => id)).toEqual(['only']);
   });
 
+  it('pages the listing to exhaustion when no limit is given', async () => {
+    // Regression: the CLI capped discovery at one page (100), stranding older runs that
+    // the lookback/--as-of selector would otherwise have picked.
+    const fullPage = () => ({
+      experiments: Array.from({ length: MAX_LIST_EXPERIMENTS }, (_, i) =>
+        experiment(`run-${i}`, 'main')
+      ),
+      total: MAX_LIST_EXPERIMENTS + 5,
+    });
+    const request = jest
+      .fn()
+      .mockResolvedValueOnce({ data: fullPage(), status: 200 })
+      .mockResolvedValueOnce({
+        data: {
+          experiments: Array.from({ length: 5 }, (_, i) => experiment(`old-${i}`, 'main')),
+          total: MAX_LIST_EXPERIMENTS + 5,
+        },
+        status: 200,
+      });
+
+    const experiments = await new MatrixEvalsClient(
+      { request } as unknown as KbnClient,
+      log
+    ).listExperiments({ suiteId: 'suite', taskModelId: 'model' });
+
+    expect(request).toHaveBeenCalledTimes(2);
+    expect(experiments).toHaveLength(MAX_LIST_EXPERIMENTS + 5);
+    expect(experiments[experiments.length - 1].experiment_id).toBe('old-4');
+  });
+
   it('sends example score filters and rethrows request failures so bounded retry can engage', async () => {
     const request = jest.fn().mockRejectedValue(new Error('boom'));
     const client = new MatrixEvalsClient({ request } as unknown as KbnClient, log);

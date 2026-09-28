@@ -27,11 +27,19 @@ const esc = (value: string): string =>
   value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 const cellValue = (cell: MatrixCell): string => {
+  // Mirror the matrix renderer: self-judged provenance must be disclosed wherever the
+  // score is published, or an axis averaging allowed self-judged datasets reads as
+  // ordinary independently judged evidence. Text marker: `cellValue` output is
+  // HTML-escaped at the call site, so a span badge would render literally.
+  const selfJudgedBadge =
+    (cell.kind === 'score' || cell.kind === 'not-recommended') && cell.selfJudged
+      ? ' (self-judged)'
+      : '';
   switch (cell.kind) {
     case 'score':
-      return cell.value.toFixed(2);
+      return `${cell.value.toFixed(2)}${selfJudgedBadge}`;
     case 'not-recommended':
-      return 'Not recommended';
+      return `Not recommended${selfJudgedBadge}`;
     case 'excluded':
       return `Excluded: ${cell.reason}`;
     case 'insufficient-coverage':

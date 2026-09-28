@@ -44,6 +44,16 @@ describe('scoring policy', () => {
       expect(applyScoringPolicy(d, { requireEisJudge: true }, noneExcluded).score).toBe(7);
     });
 
+    it('drops a doc with no judge id under requireEisJudge', () => {
+      // Regression: the trace path admitted judge-less docs the aggregation path rejected.
+      const d = doc({ model: undefined });
+      expect(applyScoringPolicy(d, { requireEisJudge: true }, noneExcluded)).toEqual({
+        score: null,
+        rejected: 'non-eis',
+      });
+      expect(applyScoringPolicy(d, {}, noneExcluded).score).toBe(7);
+    });
+
     it('drops a self-judged score only when excludeSelfJudged is set', () => {
       const d = doc({ model: { id: 'model-a' } }, 'model-a');
 

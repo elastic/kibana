@@ -259,6 +259,30 @@ const CONTRACT_EVALUATORS = new Set([
   'SkillInvoked',
 ]);
 
+const columnSelfJudged = (
+  modelScores: AggregatedModelScores,
+  column: MatrixColumnConfig
+): boolean => {
+  // Per-column, not suite-wide: only the datasets this column actually reads decide
+  // whether the published cell is self-judged (a suite mixing self-judged `alert`
+  // and independently judged `hunt` prefixes must not label `hunt` self-judged).
+  const columnDatasetIds = column.examplePrefixes
+    ? new Set(column.examplePrefixes.map((prefix) => `prefix:${prefix}`))
+    : column.datasetIds
+    ? new Set(column.datasetIds)
+    : undefined;
+  const columnSuitesAll = modelScores.suites.filter((suite) =>
+    new Set(column.suites).has(suite.suiteId)
+  );
+  return columnDatasetIds
+    ? columnSuitesAll.some((suite) =>
+        suite.datasets.some(
+          (dataset) => columnDatasetIds.has(dataset.datasetId) && dataset.selfJudged === true
+        )
+      )
+    : columnSuitesAll.some((suite) => suite.selfJudged === true);
+};
+
 const axisCell = (
   modelScores: AggregatedModelScores,
   config: MatrixConfig,
@@ -303,11 +327,17 @@ const axisCell = (
   }));
   const suppressed = [...new Set(columnEntries.flatMap((entry) => entry.errored))];
   const columnMeans = columnEntries.filter((entry) => entry.mean !== undefined);
+  // Carry provenance from the columns that actually feed the axis: an axis averaging
+  // self-judged datasets must be disclosed as self-judged, like the base/Overall cells.
+  let selfJudged = false;
   for (const { column, mean } of columnMeans) {
     if (mean === undefined) {
       return { kind: 'missing' };
     }
     hasAnyData = true;
+    if (columnSelfJudged(modelScores, column)) {
+      selfJudged = true;
+    }
     const scale = column.scale ?? config.defaultScale;
     const weight = config.overall.mode === 'weighted' ? column.weight : 1;
     weightedSum += mean * scale * weight;
@@ -328,7 +358,7 @@ const axisCell = (
   if (!hasAnyData || totalWeight === 0) {
     return { kind: 'missing' };
   }
-  return toCell(roundTo(weightedSum / totalWeight, config.decimals), config);
+  return toCell(roundTo(weightedSum / totalWeight, config.decimals), config, { selfJudged });
 };
 
 /** Weighted mean of computed cells; missing/excluded sources are skipped, "Not recommended" counts as 0 when configured. */
@@ -606,13 +636,7 @@ const buildMatrixRow = (
       // Per-column, not suite-wide: only the datasets this column actually reads decide
       // whether the published cell is self-judged (a suite mixing self-judged `alert`
       // and independently judged `hunt` prefixes must not label `hunt` self-judged).
-      selfJudged: columnDatasetIds
-        ? columnSuitesAll.some((suite) =>
-            suite.datasets.some(
-              (dataset) => columnDatasetIds.has(dataset.datasetId) && dataset.selfJudged === true
-            )
-          )
-        : columnSuitesAll.some((suite) => suite.selfJudged === true),
+      selfJudged: columnSelfJudged(modelScores, column),
       // Prefix columns read ONLY their own datasets' exclusion counts: the suite-wide
       // total belongs to the suite as a whole, and applying it via Math.max would
       // publish a genuinely missing sibling prefix (`hunt` never ran) as

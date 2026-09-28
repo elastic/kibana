@@ -20,12 +20,19 @@ import { applyScoringPolicy, type ScoringPolicy } from './scoring_policy';
 const verdictFromScoreDoc = (
   score: EvaluationScoreDocument,
   modelId: string,
-  suiteId?: string
+  suiteId?: string,
+  /**
+   * The scoring policy's effective score (e.g. the verdict-ladder grade). Agreement must
+   * compare the grade the published matrix used: two docs stored as 0.4 and 0.8 that both
+   * ladder to 1.0 agree, and comparing the raw continuous grades would report a
+   * pass/fail disagreement the matrix itself never made.
+   */
+  effectiveScore?: number
 ): JudgeVerdict | undefined => {
   const example = score.example?.id;
   const evaluator = score.evaluator?.name;
   const judgeId = score.evaluator?.model?.id;
-  const evalScore = score.evaluator?.score;
+  const evalScore = effectiveScore ?? score.evaluator?.score;
   if (!example || !evaluator || !judgeId || typeof evalScore !== 'number') {
     return undefined;
   }
@@ -279,7 +286,16 @@ const processExampleBatch = (
 
   if (judgeVerdictsOut) {
     for (const score of admitted) {
-      const verdict = verdictFromScoreDoc(score, modelId, suiteId);
+      // Under useVerdictLadder the verdict comparison must use the policy's effective
+      // grade; a doc whose verdict maps to no ladder rung contributes no verdict, like
+      // the matrix's own unmapped-verdict exclusion.
+      const policyScore = scoringPolicy?.useVerdictLadder
+        ? applyScoringPolicy(score, scoringPolicy, () => false).score
+        : undefined;
+      if (scoringPolicy?.useVerdictLadder && typeof policyScore !== 'number') {
+        continue;
+      }
+      const verdict = verdictFromScoreDoc(score, modelId, suiteId, policyScore ?? undefined);
       if (verdict) judgeVerdictsOut.push(verdict);
     }
   }

@@ -968,6 +968,37 @@ describe('buildMatrix self-judged disclosure', () => {
       (other.proprietary[0].cells['kill-chain'] as { selfJudged?: boolean }).selfJudged
     ).toBeUndefined();
   });
+
+  it('carries self-judged provenance onto the axis cells that average the flagged column', () => {
+    // Regression: the reliability axes published the same self-judged numbers without
+    // the disclosure the base cells and Overall carry.
+    const matrix = buildMatrix(
+      [
+        {
+          modelId: 'model-a',
+          provider: 'p',
+          suites: [
+            {
+              suiteId: 'suite-a',
+              experimentId: 'e1',
+              selfJudged: true,
+              datasets: [{ datasetId: 'd', datasetName: 'd', evaluators: [evaluator(0.762)] }],
+            },
+            {
+              suiteId: 'suite-b',
+              experimentId: 'e2',
+              datasets: [{ datasetId: 'd', datasetName: 'd', evaluators: [evaluator(0.8)] }],
+            },
+          ],
+        },
+      ],
+      discloseConfig
+    );
+
+    const row = matrix.proprietary[0];
+    // 'correctness' is not a contract evaluator, so it feeds the judged-quality axis.
+    expect(row.judgedQuality).toMatchObject({ kind: 'score', selfJudged: true });
+  });
 });
 
 describe('buildMatrix withheld-vs-never-ran', () => {

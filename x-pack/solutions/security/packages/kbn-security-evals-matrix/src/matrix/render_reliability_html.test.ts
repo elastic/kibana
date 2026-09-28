@@ -43,6 +43,24 @@ const matrix: Matrix = {
 };
 
 describe('renderReliabilityHtml', () => {
+  it('discloses self-judged provenance on axis cells', () => {
+    // Regression: the reliability axes published allowed self-judged averages with no
+    // marker, reading as independently judged evidence.
+    const flagged: Matrix = {
+      ...matrix,
+      proprietary: [
+        {
+          ...matrix.proprietary[0],
+          capability: { kind: 'score', value: 9, selfJudged: true },
+          judgedQuality: { kind: 'score', value: 7 },
+        },
+      ],
+    };
+    const html = renderReliabilityHtml(flagged, {});
+    expect(html).toContain('9.00 (self-judged)');
+    expect(html).not.toContain('7.00 (self-judged)');
+  });
+
   it('renders a separate reliability artifact without treating unmeasured as zero', () => {
     const html = renderReliabilityHtml(matrix, {
       'measured:example-a': { repTrails: [['search'], ['search']] },

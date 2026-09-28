@@ -30,7 +30,10 @@ export interface ListExperimentsFilters {
   suiteId?: string;
   taskModelId?: string;
   branch?: string;
-  /** Newest-first cap, clamped to {@link MAX_LIST_EXPERIMENTS}. */
+  /**
+   * Newest-first cap. Omit to page the listing to exhaustion — selectors with a
+   * lookback/`--as-of` window must see every run in the window, not one page.
+   */
   limit?: number;
 }
 
@@ -48,15 +51,16 @@ export class MatrixEvalsClient extends EvalsClient {
   async listExperiments(
     filters: ListExperimentsFilters = {}
   ): Promise<EvaluationExperimentSummary[]> {
-    const { suiteId, taskModelId, branch, limit = MAX_LIST_EXPERIMENTS } = filters;
+    const { suiteId, taskModelId, branch, limit } = filters;
     // Page until `limit` experiments are collected or the listing is exhausted. The route caps
     // `per_page` at MAX_LIST_EXPERIMENTS, so a fixed `page: 1` silently truncated discovery once
     // more than one page of runs existed for a suite/model — `--as-of` could then no longer
-    // reproduce a historical matrix.
+    // reproduce a historical matrix. Without a `limit`, exhaust the listing: the caller's
+    // selection window (lookback/as-of) decides how far back matters, not a page size.
     const perPage = MAX_LIST_EXPERIMENTS;
     const all: EvaluationExperimentSummary[] = [];
     let page = 1;
-    while (all.length < limit) {
+    while (limit === undefined || all.length < limit) {
       const { data } = await this.matrixKbnClient.request({
         path: EVALS_EXPERIMENTS_URL,
         method: 'GET',

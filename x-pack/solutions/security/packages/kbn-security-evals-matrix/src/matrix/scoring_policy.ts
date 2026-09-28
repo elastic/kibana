@@ -104,7 +104,10 @@ export function applyScoringPolicy(
   const judgeId = doc.evaluator?.model?.id;
   const taskModelId = doc.task?.model?.id;
 
-  if (policy.requireEisJudge && judgeId && !isEisBacked(judgeId)) {
+  // A doc whose evaluator omitted its judge model is indistinguishable from a non-EIS
+  // judge under requireEisJudge: admit it here and the trace path publishes a score the
+  // aggregation path (query_matrix_scores) already withheld from the matrix.
+  if (policy.requireEisJudge && (!judgeId || !isEisBacked(judgeId))) {
     return { score: null, rejected: 'non-eis' };
   }
   if (

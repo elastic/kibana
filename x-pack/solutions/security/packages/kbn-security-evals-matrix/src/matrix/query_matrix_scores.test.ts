@@ -481,6 +481,39 @@ describe('queryMatrixScores', () => {
     expect(prefixes[0].excludedSelfJudged).toBe(2);
   });
 
+  it('counts a rejected doc once even when it matches several configured prefixes', async () => {
+    // Regression: `alert-analysis-a` matched both `alert` and `alert-analysis`, and the
+    // suite/model exclusion tally incremented per matching prefix, overstating the drop.
+    const selfJudgedScore = () =>
+      ({
+        task: { model: { id: 'm1' } },
+        evaluator: { model: { id: 'm1' }, name: 'Factuality', score: 1 },
+        example: { id: 'alert-analysis-a' },
+      } as unknown as EvaluationScoreDocument);
+
+    const { client } = createClient({
+      m1: [experiment({ experiment_id: 'exp-m1', modelId: 'm1' })],
+    });
+    (client as unknown as { getExperimentScores: jest.Mock }).getExperimentScores = jest
+      .fn()
+      .mockResolvedValue([selfJudgedScore()]);
+
+    const [model] = await queryMatrixScores(client, log, {
+      suiteIds: ['suite-a'],
+      modelIds: ['m1'],
+      branch: 'main',
+      prefixesBySuite: { 'suite-a': ['alert', 'alert-analysis'] },
+      scoring: { excludeSelfJudged: true },
+    });
+
+    // Suite-level audit counts the document once...
+    expect(model.excluded?.selfJudged).toBe(1);
+    // ...while each matching prefix records its own exclusion.
+    const byId = new Map(model.suites[0].datasets.map((d) => [d.datasetId, d]));
+    expect(byId.get('prefix:alert')?.excludedSelfJudged).toBe(1);
+    expect(byId.get('prefix:alert-analysis')?.excludedSelfJudged).toBe(1);
+  });
+
   it('warns when a model ran fewer examples than its peers', async () => {
     const score = (modelId: string, exampleIndex: number) =>
       ({

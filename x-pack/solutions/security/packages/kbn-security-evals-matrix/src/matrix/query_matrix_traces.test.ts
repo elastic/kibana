@@ -300,6 +300,57 @@ describe('queryMatrixTraces example fetching', () => {
     ]);
   });
 
+  it('compares verdict-ladder grades for judge agreement, not the stored continuous score', async () => {
+    // Regression: two docs stored as 0.4 and 0.8 that both ladder to GROUNDED (1.0)
+    // were compared on their raw grades, reporting a disagreement the matrix never made.
+    const judgedDoc = (continuous: number, verdict: string, judgeId: string) =>
+      ({
+        example: { id: 'example-1' },
+        evaluator: {
+          name: 'Groundedness',
+          score: continuous,
+          model: { id: judgeId },
+          metadata: { groundednessAnalysis: { summary_verdict: verdict } },
+        },
+        metadata: { execution_id: 'exec-a' },
+        task: {
+          model: { id: 'model-x' },
+          output: { messages: [{ message: 'done' }] },
+          repetition_index: judgeId === 'judge-a' ? 0 : 1,
+        },
+      } as unknown as EvaluationScoreDocument);
+
+    const client = {
+      getExperimentScores: jest.fn(
+        async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
+      ),
+      getExampleScores: jest.fn(async () => [
+        judgedDoc(0.4, 'grounded', 'judge-a'),
+        judgedDoc(0.8, 'grounded', 'judge-b'),
+        judgedDoc(0.9, 'not-a-verdict', 'judge-c'),
+      ]),
+    };
+    const log = { debug: jest.fn(), warning: jest.fn() };
+    const judgeVerdicts: JudgeVerdict[] = [];
+
+    await queryMatrixTraces(
+      client as never,
+      log as never,
+      aggregatedFor('exec-a') as never,
+      undefined,
+      0,
+      new Map(),
+      judgeVerdicts,
+      { 'suite-1': { useVerdictLadder: true } }
+    );
+
+    // Both ladder to 1.0 (agreement), and the unmapped verdict is excluded entirely.
+    expect(judgeVerdicts.map((v) => [v.judgeId, v.score])).toEqual([
+      ['judge-a', 1],
+      ['judge-b', 1],
+    ]);
+  });
+
   it('reports runaway tool loops above the configured threshold', async () => {
     const heavy = (calls: number, trail: number): EvaluationScoreDocument =>
       ({
