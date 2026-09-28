@@ -19,13 +19,26 @@ export interface ServiceAccountSuggestion extends monaco.languages.CompletionIte
   account?: WorkflowServiceAccount;
 }
 
+const documents = new WeakMap<
+  monaco.editor.ITextModel,
+  { version: number; document: ReturnType<typeof parseDocument> }
+>();
+
+const getDocument = (model: monaco.editor.ITextModel): ReturnType<typeof parseDocument> => {
+  const version = model.getVersionId();
+  const cached = documents.get(model);
+  if (cached?.version === version) return cached.document;
+  // Use current text without reparsing it on every mouse move or waiting for debounced state.
+  const document = parseDocument(model.getValue());
+  documents.set(model, { version, document });
+  return document;
+};
+
 export const getRunAsValue = (
   model: monaco.editor.ITextModel,
   position: monaco.Position
 ): { id: string; range: monaco.IRange } | null => {
-  if (!/^\s*run_as\s*:/.test(model.getLineContent(position.lineNumber))) return null;
-  // Completion must use the current text, even before the debounced editor state catches up.
-  const document = parseDocument(model.getValue());
+  const document = getDocument(model);
   const settings = document.getIn(['settings'], true);
   if (!isMap(settings)) return null;
   const pair = settings.items.find(({ key }) => isScalar(key) && key.value === 'run_as');

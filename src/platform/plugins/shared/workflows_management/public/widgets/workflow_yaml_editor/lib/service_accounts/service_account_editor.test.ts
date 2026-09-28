@@ -27,6 +27,7 @@ const setup = (markedYaml: string) => {
   const offset = markedYaml.indexOf('|<-');
   const yaml = markedYaml.replace('|<-', '');
   const model = createFakeMonacoModel(yaml, offset);
+  model.getVersionId = jest.fn(() => 1);
   const position = model.getPositionAt(offset);
   const document = parseDocument(yaml);
   const directory: jest.Mocked<ServiceAccountDirectory> = {
@@ -69,6 +70,51 @@ describe('service account editor', () => {
     }
   );
 
+  it.each(['', 'Read', '"Read"', "'Read'"])(
+    'completes inline settings with scalar %s without changing adjacent fields or comments',
+    async (value) => {
+      const { complete, model, yaml } = setup(
+        `settings: { run_as: ${value}|<-, timezone: UTC } # preserve this comment\nsteps: []`
+      );
+      const suggestion = (await complete())?.suggestions[0];
+      if (!suggestion || !('startLineNumber' in suggestion.range))
+        throw new Error('Missing inline service account completion');
+      const start = model.getOffsetAt({
+        lineNumber: suggestion.range.startLineNumber,
+        column: suggestion.range.startColumn,
+      });
+      const end = model.getOffsetAt({
+        lineNumber: suggestion.range.endLineNumber,
+        column: suggestion.range.endColumn,
+      });
+      const changed = yaml.slice(0, start) + suggestion.insertText + yaml.slice(end);
+      expect(changed).toBe(
+        `settings: { run_as: "opaque/account-id", timezone: UTC } # preserve this comment\nsteps: []`
+      );
+      expect(parseDocument(changed).errors).toEqual([]);
+    }
+  );
+
+  it.each([
+    'settings: { timezone: UTC, run_as: "opaque/account-|<-id" }',
+    'settings: { "run_as": "opaque/account-|<-id" }',
+    'settings: { "run_\\u0061s": "opaque/account-|<-id" }',
+  ])('resolves inline account details from the settings map: %s', async (yaml) => {
+    const { editor, directory, model, position } = setup(yaml);
+    expect(await editor.getAccountAtPosition(model, position)).toMatchObject({ account });
+    expect(directory.get).toHaveBeenCalledWith(account.id);
+  });
+
+  it('resolves the current value after editing the same model', () => {
+    const { model, position } = setup('settings:\n  run_as: first|<-');
+    expect(getRunAsValue(model, position)?.id).toBe('first');
+
+    const updated = setup('settings: { run_as: "second|<-" }');
+    Object.assign(model, updated.model);
+    model.getVersionId = jest.fn(() => 2);
+    expect(getRunAsValue(model, updated.position)?.id).toBe('second');
+  });
+
   it('adds YAML separation when completing immediately after the colon', async () => {
     const { complete } = setup('settings:\n  run_as:|<-');
     expect((await complete())?.suggestions[0].insertText).toBe(` ${JSON.stringify(account.id)}`);
@@ -80,18 +126,26 @@ describe('service account editor', () => {
     'settings:\n  run_as: account # comment |<-',
     'settings:\n  ru|<-n_as: account',
     'settings:\n  run_as: |\n    multi |<-',
+    'settings: { run_as: account, timezone: U|<-TC }',
+    'settings: { run_as: account } # comment |<-',
+    'settings: { ru|<-n_as: account }',
+    '{settings: { run_as: account },|<- steps: []}',
+    'steps: [{ name: test, with: { run_as: acc|<-ount } }]',
   ])('does not offer accounts outside the root settings value', async (yaml) => {
     const { complete, directory } = setup(yaml);
     expect(await complete()).toBeNull();
     expect(directory.list).not.toHaveBeenCalled();
   });
 
-  it('does not query when disabled', async () => {
-    const { complete, directory } = setup('settings:\n  run_as: |<-');
-    directory.isEnabled.mockReturnValue(false);
-    expect(await complete()).toBeNull();
-    expect(directory.list).not.toHaveBeenCalled();
-  });
+  it.each(['settings:\n  run_as: |<-', 'settings: { run_as: |<- }'])(
+    'does not query when disabled: %s',
+    async (yaml) => {
+      const { complete, directory } = setup(yaml);
+      directory.isEnabled.mockReturnValue(false);
+      expect(await complete()).toBeNull();
+      expect(directory.list).not.toHaveBeenCalled();
+    }
+  );
 
   it('loads additional pages only on demand, preserving typed input', async () => {
     const { complete, directory, editor, position } = setup('settings:\n  run_as: Read|<-');
@@ -159,12 +213,15 @@ describe('service account editor', () => {
     });
   });
 
-  it('does not look up account details on hover when the feature is disabled', async () => {
-    const { editor, directory, model, position } = setup('settings:\n  run_as: opaque|<-');
-    directory.isEnabled.mockReturnValue(false);
-    expect(await editor.getAccountAtPosition(model, position)).toBeNull();
-    expect(directory.get).not.toHaveBeenCalled();
-  });
+  it.each(['settings:\n  run_as: opaque|<-', 'settings: { run_as: opaque|<- }'])(
+    'does not look up disabled account details: %s',
+    async (yaml) => {
+      const { editor, directory, model, position } = setup(yaml);
+      directory.isEnabled.mockReturnValue(false);
+      expect(await editor.getAccountAtPosition(model, position)).toBeNull();
+      expect(directory.get).not.toHaveBeenCalled();
+    }
+  );
 
   it('falls back to normal hover when lookup is denied or missing', async () => {
     const { editor, directory, model, position } = setup('settings:\n  run_as: opaque|<-');

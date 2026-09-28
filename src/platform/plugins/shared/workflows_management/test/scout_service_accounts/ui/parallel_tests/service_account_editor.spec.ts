@@ -20,32 +20,45 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test('selects a real account, saves its stable ID, and resolves its badge and details after reload', async ({
-      pageObjects,
-      workflowId,
-      serviceAccount,
-      apiServices,
-    }) => {
-      const editor = pageObjects.workflowEditor;
-      await editor.gotoWorkflow(workflowId);
-      await editor.openServiceAccountPicker(workflowYaml);
-      await editor.selectServiceAccount(`${serviceAccount.name} viewer`);
-      await expect
-        .poll(async () => parse(await editor.getYamlEditorValue()).settings.run_as)
-        .toBe(serviceAccount.id);
-      await editor.saveWorkflow();
-      const saved = await apiServices.workflows.getWorkflow(workflowId);
-      expect(parse(saved.yaml).settings.run_as).toBe(serviceAccount.id);
+    for (const format of ['block', 'inline'] as const) {
+      test(`selects, saves, and resolves an account with ${format} settings after reload`, async ({
+        pageObjects,
+        workflowId,
+        serviceAccount,
+        apiServices,
+      }) => {
+        const editor = pageObjects.workflowEditor;
+        await editor.gotoWorkflow(workflowId);
+        await editor.openServiceAccountPicker(workflowYaml, format);
+        await editor.selectServiceAccount(`${serviceAccount.name} viewer`);
+        await expect
+          .poll(async () => parse(await editor.getYamlEditorValue()).settings.run_as)
+          .toBe(serviceAccount.id);
+        await editor.saveWorkflow();
+        const saved = await apiServices.workflows.getWorkflow(workflowId);
+        expect(parse(saved.yaml).settings).toStrictEqual(
+          format === 'inline'
+            ? { run_as: serviceAccount.id, timezone: 'UTC' }
+            : { run_as: serviceAccount.id }
+        );
+        expect(saved.yaml).toContain(
+          format === 'inline'
+            ? `settings: { run_as: "${serviceAccount.id}", timezone: UTC }`
+            : `settings:\n  run_as: "${serviceAccount.id}"`
+        );
 
-      await editor.gotoWorkflow(workflowId);
-      await expect.poll(() => editor.getServiceAccountBadgeText()).toBe(`✓ ${serviceAccount.name}`);
-      await editor.hoverServiceAccountBadge();
-      await expect(editor.serviceAccountPopup).toContainText(serviceAccount.name);
-      await expect(editor.serviceAccountPopup).toContainText(`ID: ${serviceAccount.id}`);
-      await expect(editor.serviceAccountPopup).toContainText('viewer');
-      await expect(editor.serviceAccountPopup).toContainText('This deployment');
-      await expect(editor.serviceAccountPopup).toContainText('Enabled');
-    });
+        await editor.gotoWorkflow(workflowId);
+        await expect
+          .poll(() => editor.getServiceAccountBadgeText())
+          .toBe(`✓ ${serviceAccount.name}`);
+        await editor.hoverServiceAccountBadge();
+        await expect(editor.serviceAccountPopup).toContainText(serviceAccount.name);
+        await expect(editor.serviceAccountPopup).toContainText(`ID: ${serviceAccount.id}`);
+        await expect(editor.serviceAccountPopup).toContainText('viewer');
+        await expect(editor.serviceAccountPopup).toContainText('This deployment');
+        await expect(editor.serviceAccountPopup).toContainText('Enabled');
+      });
+    }
 
     for (const input of ['keyboard', 'mouse'] as const) {
       test(`loads the next directory page with the ${input} without changing YAML`, async ({

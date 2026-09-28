@@ -362,10 +362,18 @@ export class WorkflowEditorPage {
     return this.serviceAccountPopup.getByRole('option', { name, exact: true });
   }
 
-  async openServiceAccountPicker(yaml: string): Promise<void> {
-    await this.setYamlEditorValue(`${yaml}\nsettings:\n  run_as: `);
-    await this.setCursorToText('run_as: ');
-    await this.page.keyboard.press('End');
+  async openServiceAccountPicker(
+    yaml: string,
+    format: 'block' | 'inline' = 'block'
+  ): Promise<void> {
+    if (format === 'inline') {
+      await this.setYamlEditorValue(`${yaml}\nsettings: { run_as: , timezone: UTC }`);
+      await this.setCursorToText(', timezone:');
+    } else {
+      await this.setYamlEditorValue(`${yaml}\nsettings:\n  run_as: `);
+      await this.setCursorToText('run_as: ');
+      await this.page.keyboard.press('End');
+    }
     await this.page.keyboard.press('Control+Space');
     await this.serviceAccountPopup.getByRole('listbox', { name: 'Service accounts' }).waitFor();
   }
