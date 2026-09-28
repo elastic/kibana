@@ -10,6 +10,12 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Migration recommendation: MIGRATE TO JEST. Sorting and rendering the indexed-fields table are
+ * component behavior; add header-click and row-count coverage to
+ * indexed_fields_table/components/table/table.test.tsx, which already renders the table with
+ * deterministic field fixtures. No browser, routing, or persisted state is asserted here.
+ */
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');

@@ -10,6 +10,14 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Migration recommendation: MIXED. Delete type, schema, and text filtering because
+ * indexed_fields_table.test.tsx already covers the same filtering behavior. Move the conflict
+ * button's filter-reset behavior to a Jest component test. The nearly identical serverless FTR
+ * suite at x-pack/platform/test/serverless/functional/test_suites/management/data_views/
+ * _index_pattern_filter.ts should be deleted alongside this one after the retained behavior is
+ * covered at the appropriate layer.
+ */
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
@@ -33,6 +41,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.removeIndexPattern();
     });
 
+    /**
+     * Migration recommendation: DELETE. indexed_fields_table/indexed_fields_table.test.tsx already
+     * verifies filtering by field type; the FTR variation only changes mocks to logstash data.
+     */
     it('should filter indexed fields by type', async function () {
       await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
       await PageObjects.settings.getFieldTypes();
@@ -59,6 +71,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.clearFieldTypeFilter('long');
     });
 
+    /**
+     * Migration recommendation: DELETE. indexed_fields_table/indexed_fields_table.test.tsx already
+     * verifies the runtime schema filter and its visible/hidden field result.
+     */
     it('should filter indexed fields by schema type', async function () {
       await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
 
@@ -88,6 +104,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.settings.getFieldNames()).to.eql(unfilteredFields);
     });
 
+    /**
+     * Migration recommendation: DELETE. indexed_fields_table/indexed_fields_table.test.tsx already
+     * verifies query-bar filtering. The exact logstash names and tab count add no coverage.
+     */
     it('should filter indexed fields when searched', async function () {
       await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
 
@@ -129,6 +149,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.settings.getFieldNames()).to.eql(unfilteredFields);
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO JEST. Conflict rendering is already covered by the
+     * indexed-fields table tests; add this button's filter-reset and conflict-only assertions to
+     * indexed_fields_table/indexed_fields_table.test.tsx with mocked conflicting fields.
+     */
     it('should set "conflict" filter when "View conflicts" button is pressed', async function () {
       const additionalIndexWithWrongMapping = 'logstash-wrong';
 
