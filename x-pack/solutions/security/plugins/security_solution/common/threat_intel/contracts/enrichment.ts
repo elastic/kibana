@@ -40,12 +40,19 @@ const IOC_TIERS = ['discriminating', 'contextual', 'reference', 'denied', 'uncer
 
 /** Matches the keyword ignore_above used for IOC values on the reports index. */
 const MAX_IOC_VALUE_LENGTH = MAX_URL_LENGTH;
+/**
+ * `defangValue` expands `.` → `[.]` (+2 each) and `://` → `[:]//` (+2). Worst
+ * case is an all-dots string of `MAX_IOC_VALUE_LENGTH`, which triples in size.
+ * Keep the response bound above that so a near-limit URL with `defang: true`
+ * cannot fail extract/enrich validation after a successful pushIoc.
+ */
+const MAX_IOC_DEFANGED_LENGTH = MAX_IOC_VALUE_LENGTH * 3;
 const MAX_IOC_TIER_BASIS_LENGTH = 512;
 
 export const extractedIocSchema = schema.object({
   type: oneOfLiterals(IOC_TYPES),
   value: schema.string({ minLength: 1, maxLength: MAX_IOC_VALUE_LENGTH }),
-  defanged: schema.maybe(schema.string({ minLength: 1, maxLength: MAX_IOC_VALUE_LENGTH })),
+  defanged: schema.maybe(schema.string({ minLength: 1, maxLength: MAX_IOC_DEFANGED_LENGTH })),
   tier: oneOfLiterals(IOC_TIERS),
   tier_heuristic: oneOfLiterals(IOC_TIERS),
   tier_basis: schema.string({ minLength: 1, maxLength: MAX_IOC_TIER_BASIS_LENGTH }),
