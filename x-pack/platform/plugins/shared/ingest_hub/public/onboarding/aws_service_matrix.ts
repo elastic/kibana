@@ -1023,7 +1023,7 @@ export function buildAwsServiceMatrix(
     // Use static fallback signal types when the manifest couldn't be derived (manifest unavailable
     // or no PT matched). Manifest-derived types take precedence when present.
     const signalTypes: SignalType[] =
-      signalTypesSet.size > 0 ? [...signalTypesSet] : (entry.signalTypes ?? []);
+      signalTypesSet.size > 0 ? [...signalTypesSet] : entry.signalTypes ?? [];
     const deploymentMethods = buildDeploymentMethods(
       staticMethods,
       managedIntegrations,
