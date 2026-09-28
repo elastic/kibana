@@ -41,7 +41,7 @@ jest.mock('../../rule_context', () => ({
   useRule: () => ({
     id: 'rule-1',
     grouping: { fields: [] },
-    query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
+    query: { base: 'FROM logs-*' },
   }),
 }));
 

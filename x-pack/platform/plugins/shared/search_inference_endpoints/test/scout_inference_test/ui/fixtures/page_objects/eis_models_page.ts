@@ -29,6 +29,12 @@ export class EisModelsPage {
   readonly flyoutAddEndpointButton: Locator;
   readonly flyoutCloseButton: Locator;
   readonly flyoutRegionUnavailableCallout: Locator;
+  readonly flyoutEditRegionPreferencesButton: Locator;
+  readonly flyoutViewDetailsButton: Locator;
+  readonly flyoutEolCallout: Locator;
+  readonly flyoutEolViewDetailsButton: Locator;
+  readonly flyoutEolDescription: Locator;
+  readonly flyoutPreviewCallout: Locator;
   readonly allEndpointRows: Locator;
 
   // Add/View Endpoint Modal
@@ -76,6 +82,7 @@ export class EisModelsPage {
   readonly displayOptionsApplyButton: Locator;
   readonly endOfLifeModelsShowButton: Locator;
   readonly outsideRegionPreferencesShowButton: Locator;
+  readonly previewModelsShowButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     // Header
@@ -106,6 +113,16 @@ export class EisModelsPage {
     this.flyoutRegionUnavailableCallout = this.page.testSubj.locator(
       'modelDetailFlyoutRegionUnavailableCallout'
     );
+    this.flyoutEditRegionPreferencesButton = this.page.testSubj.locator(
+      'modelDetailFlyoutEditRegionPreferencesButton'
+    );
+    this.flyoutViewDetailsButton = this.page.testSubj.locator('modelDetailFlyoutViewDetailsButton');
+    this.flyoutEolCallout = this.page.testSubj.locator('modelDetailFlyoutEolCallout');
+    this.flyoutEolViewDetailsButton = this.page.testSubj.locator(
+      'modelDetailFlyoutEolViewDetailsButton'
+    );
+    this.flyoutEolDescription = this.page.testSubj.locator('modelDetailFlyoutEolDescription');
+    this.flyoutPreviewCallout = this.page.testSubj.locator('modelDetailFlyoutPreviewCallout');
     this.allEndpointRows = this.page.testSubj
       .locator('modelDetailFlyout')
       .locator('[data-test-subj^="endpoint-row-"]');
@@ -182,6 +199,7 @@ export class EisModelsPage {
     this.outsideRegionPreferencesShowButton = this.page.testSubj.locator(
       'eisDisplayOptionsOutsideRegionPreferencesShow'
     );
+    this.previewModelsShowButton = this.page.testSubj.locator('eisDisplayOptionsPreviewModelsShow');
   }
 
   // --- Navigation ---
@@ -216,6 +234,12 @@ export class EisModelsPage {
   public async showModelsOutsideRegionPreferences() {
     await this.displayOptionsButton.click();
     await this.outsideRegionPreferencesShowButton.click();
+    await this.displayOptionsApplyButton.click();
+  }
+
+  public async showPreviewModels() {
+    await this.displayOptionsButton.click();
+    await this.previewModelsShowButton.click();
     await this.displayOptionsApplyButton.click();
   }
 
@@ -275,5 +299,9 @@ export class EisModelsPage {
         break;
     }
     return this.page.testSubj.locator(`${prefix}-${id}`);
+  }
+
+  public modelBlockedBadge(modelName: string): Locator {
+    return this.page.testSubj.locator(`modelBlockedBadge-${modelName}`);
   }
 }

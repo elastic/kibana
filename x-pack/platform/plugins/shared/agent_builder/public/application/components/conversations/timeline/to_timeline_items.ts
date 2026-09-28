@@ -6,10 +6,20 @@
  */
 
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
+import type { ConversationEvent } from '@kbn/agent-builder-common';
 import { TimelineEventType } from '@kbn/agent-builder-common';
 import type { TimelineDisplayEvent } from '../../../../services/events';
-import { EXECUTION_STREAMING_EVENT_TYPE } from '../../../../services/events';
-import type { ExecutionAccumulator, TimelineItem, UserEntry } from './types';
+import {
+  EXECUTION_STREAMING_EVENT_TYPE,
+  isTimelineDisplayEvent,
+} from '../../../../services/events';
+import type {
+  ExecutionAccumulator,
+  GroupedItem,
+  UnresolvedAttachmentItem,
+  UnresolvedCustomEventItem,
+  UserEntry,
+} from './types';
 import { accumulatorToItem, foldAttachmentRefs } from './timeline_item_utils';
 import { findAwaitingPromptEventId } from './awaiting_prompt';
 import { answersByPromptId, withQuestionAnswers } from './prompt_answers';
@@ -17,17 +27,21 @@ import { resolvedToolCallIds, isSupersededToolCallStep } from './tool_call_steps
 import { resumeToOriginalExecutionId } from './execution_chains';
 
 export const groupTimelineEvents = (
-  events: TimelineDisplayEvent[],
+  events: ConversationEvent[],
   eventsById: Map<string, TimelineDisplayEvent>,
   /** Id of the locally-built user message that has no saved twin yet. */
   pendingUserMessageId?: string
-): TimelineItem[] => {
-  const awaitingPromptEventId = findAwaitingPromptEventId(events);
-  const answers = answersByPromptId(events);
-  const resolvedToolCalls = resolvedToolCallIds(events);
-  const resumeLinks = resumeToOriginalExecutionId(events, eventsById);
+): GroupedItem[] => {
+  // The run-shaped helpers only understand built-in events; narrow once, up front.
+  const displayEvents = events.filter(isTimelineDisplayEvent);
+  const awaitingPromptEventId = findAwaitingPromptEventId(displayEvents);
+  const answers = answersByPromptId(displayEvents);
+  const resolvedToolCalls = resolvedToolCallIds(displayEvents);
+  const resumeLinks = resumeToOriginalExecutionId(displayEvents, eventsById);
 
-  const ordered: Array<UserEntry | ExecutionAccumulator> = [];
+  const ordered: Array<
+    UserEntry | UnresolvedAttachmentItem | UnresolvedCustomEventItem | ExecutionAccumulator
+  > = [];
   const accMap = new Map<string, ExecutionAccumulator>();
   const seenAttachmentRefs = new Map<string, AttachmentVersionRef>();
 
@@ -53,6 +67,11 @@ export const groupTimelineEvents = (
   };
 
   for (const event of events) {
+    if (!isTimelineDisplayEvent(event)) {
+      // Whether the type has a UI here is the resolve step's call.
+      ordered.push({ kind: 'customEvent', key: event.id, event });
+      continue;
+    }
     switch (event.type) {
       case TimelineEventType.userMessage:
         foldAttachmentRefs(seenAttachmentRefs, event.data.attachment_refs);
@@ -66,6 +85,15 @@ export const groupTimelineEvents = (
 
       case TimelineEventType.promptResponse:
         foldAttachmentRefs(seenAttachmentRefs, event.data.input?.attachment_refs);
+        break;
+
+      case TimelineEventType.attachmentAdded:
+      case TimelineEventType.attachmentUpdated:
+        // Only the server's explicit ask to show the attachment becomes an item. Whether the
+        // attachment still exists and can draw is the resolve step's call.
+        if (event.data.render_inline) {
+          ordered.push({ kind: 'attachment', key: event.id, event });
+        }
         break;
 
       case TimelineEventType.executionStarted: {
@@ -102,15 +130,9 @@ export const groupTimelineEvents = (
       case TimelineEventType.executionAborted: {
         if (!event.execution_id) break;
         const acc = getOrCreateAcc(event.execution_id, event.created_at, event.trigger_event_id);
-        const openPause = awaitingPromptEventId ? eventsById.get(awaitingPromptEventId) : undefined;
-        const openPauseExecutionId = openPause?.execution_id
-          ? resumeLinks.get(openPause.execution_id) ?? openPause.execution_id
-          : undefined;
-        acc.terminal =
-          openPause?.type === TimelineEventType.executionTerminated &&
-          openPauseExecutionId === acc.executionId
-            ? openPause
-            : event;
+        // An interrupted resume ends the turn: the answer already closed the prompt, so the
+        // interruption is the terminal the user sees, not the pause.
+        acc.terminal = event;
         break;
       }
 
@@ -120,18 +142,18 @@ export const groupTimelineEvents = (
   }
 
   return ordered.map(
-    (entry): TimelineItem =>
+    (entry): GroupedItem =>
       'executionId' in entry ? accumulatorToItem(entry, eventsById, awaitingPromptEventId) : entry
   );
 };
 
 /** Groups a timeline - saved events, live events, or both merged - into renderable items. */
 export const buildItems = (
-  events: TimelineDisplayEvent[],
+  events: ConversationEvent[],
   pendingUserMessageId?: string
-): TimelineItem[] =>
+): GroupedItem[] =>
   groupTimelineEvents(
     events,
-    new Map(events.map((event) => [event.id, event])),
+    new Map(events.filter(isTimelineDisplayEvent).map((event) => [event.id, event])),
     pendingUserMessageId
   );

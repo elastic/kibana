@@ -10,6 +10,8 @@ import type {
   ConversationRound,
   ConversationRoundAuthor,
   ConversationRoundStep,
+  ExecutionAbortedEvent,
+  ExecutionFailedEvent,
   ExecutionStepEvent,
   ExecutionTerminatedEvent,
   PromptResponseEvent,
@@ -20,6 +22,11 @@ import {
   ConversationRoundStatus,
   EventActorType,
   TimelineEventType,
+  ZERO_MODEL_USAGE,
+  answeredPromptRequestIds,
+  interruptionOfTerminal,
+  isExecutionTerminalEvent,
+  isToolCallStep,
   parseExecutionId,
 } from '@kbn/agent-builder-common';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
@@ -34,15 +41,25 @@ interface ExecutionPartial {
   round: ConversationRound;
   /** ask_user_question answers carried by the prompt_response that triggered this execution. */
   answers: Map<string, AskUserQuestionAnswer[]>;
-  /** This execution's persisted resume state, carried onto the folded round when terminal. */
-  state?: RoundState;
+  /**
+   * The resume state this execution's `execution_terminated` persisted, kept even once the pause
+   * is answered (the round then carries none): the fold reads its `agent.nodes` to find the tool
+   * calls an interrupted resume never reached.
+   */
+  pauseState?: RoundState;
+  /** True when the execution ended with `execution_failed` / `execution_aborted`. */
+  interrupted: boolean;
 }
 
 /**
- * Reconstructs rounds from a timeline.
+ * Reconstructs rounds from a timeline. Every terminated execution — with an outcome, failed or
+ * aborted — forms a partial; a round is its executions folded in order. A pause is consumed as
+ * soon as a `prompt_response` answers it, however the resume ended.
  */
 export const eventsToRounds = (events: ConversationEvent[]): ConversationRound[] => {
   const byId = new Map(events.map((event) => [event.id, event]));
+  // `prompt_response` events carry no execution_id, so the join is computed once over everything.
+  const answered = answeredPromptRequestIds(events);
 
   // Lifecycle events grouped by execution, in first-seen order.
   const executions = new Map<string, ConversationEvent[]>();
@@ -73,17 +90,20 @@ export const eventsToRounds = (events: ConversationEvent[]): ConversationRound[]
       continue;
     }
 
-    const terminated = group.find(
-      (event) => event.type === TimelineEventType.executionTerminated
-    ) as ExecutionTerminatedEvent | undefined;
-    if (!terminated) {
+    // An execution with no terminal (in progress) forms no partial.
+    const terminal = group.find(isExecutionTerminalEvent);
+    if (!terminal) {
       continue;
     }
+    const terminated =
+      terminal.type === TimelineEventType.executionTerminated ? terminal : undefined;
 
     const stepEvents = group.filter(
       (event): event is ExecutionStepEvent => event.type === TimelineEventType.executionStep
     );
-    const steps = stepEvents.length > 0 ? stepsFromEvents(stepEvents) : terminated.data.steps ?? [];
+    // Interrupted terminals carry no steps: an interrupted execution's steps are its step events only.
+    const steps =
+      stepEvents.length > 0 ? stepsFromEvents(stepEvents) : terminated?.data.steps ?? [];
 
     const userMessage = isInitial ? (trigger as UserMessageEvent) : undefined;
     const resumeInput = isResume ? (trigger as PromptResponseEvent).data.input : undefined;
@@ -93,27 +113,31 @@ export const eventsToRounds = (events: ConversationEvent[]): ConversationRound[]
       input: userMessage ? toRoundInput(userMessage) : resumeInput ?? { message: '' },
       started_at: userMessage
         ? userMessage.created_at
-        : startedEvent?.created_at ?? terminated.created_at,
+        : startedEvent?.created_at ?? terminal.created_at,
       ...(userMessage ? authorAndOrigin(userMessage) : {}),
-      ...terminatedRoundFields(terminated.data, steps),
+      ...(terminal.type === TimelineEventType.executionTerminated
+        ? terminatedRoundFields(terminal, steps, answered.has(terminal.id))
+        : interruptedRoundFields(terminal, steps)),
     };
 
     const answers = isResume
       ? answersFromPromptResponse(trigger as PromptResponseEvent)
       : new Map<string, AskUserQuestionAnswer[]>();
 
-    const roundId = execution.roundId;
-    const bucket = buckets.get(roundId);
     const partial: ExecutionPartial = {
       order: execution.index,
       round,
       answers,
-      state: terminated.data.state,
+      // the terminal's own state, whether or not the pause was answered (`round.state` is
+      // already cleared for an answered pause)
+      pauseState: terminated?.data.state,
+      interrupted: terminated === undefined,
     };
+    const bucket = buckets.get(execution.roundId);
     if (bucket) {
       bucket.push(partial);
     } else {
-      buckets.set(roundId, [partial]);
+      buckets.set(execution.roundId, [partial]);
     }
   }
 
@@ -126,19 +150,51 @@ export const eventsToRounds = (events: ConversationEvent[]): ConversationRound[]
     }
     let round = bucket[0].round;
     for (let i = 1; i < bucket.length; i++) {
-      round = applyResumeResolution(round, bucket[i].round, bucket[i].answers);
+      const next = bucket[i];
+      round = applyResumeResolution(round, next.round, next.answers);
+      if (next.interrupted) {
+        round = markUnreachedPausedCalls(round, bucket[i - 1].pauseState, next.round.steps);
+      }
     }
-    // `mergeRounds` nulls `state`; carry it from the terminal execution.
+    // `mergeRounds` nulls `state`; the folded round's resume state is the last execution's round
+    // state — present only for an unanswered pause. An interrupted or answered last execution
+    // leaves the round with no state: nothing to resume from.
     if (bucket.length > 1) {
-      const terminalState = bucket[bucket.length - 1].state;
-      if (terminalState) {
-        round = { ...round, state: terminalState };
+      const lastRoundState = bucket[bucket.length - 1].round.state;
+      if (lastRoundState) {
+        round = { ...round, state: lastRoundState };
       }
     }
     rounds.push(round);
   }
 
   return rounds;
+};
+
+/**
+ * The paused execution's tool calls (one `state.agent.nodes` entry each) that an interrupted
+ * resume never reached — no copy among its steps — are marked `interrupted` on the merged round.
+ * Calls the resume did copy carry their own mark (set by the run tracker) through
+ * `applyResumeResolution`; an unmarked copy with an empty `results` is a real empty return.
+ */
+const markUnreachedPausedCalls = (
+  round: ConversationRound,
+  pauseState: RoundState | undefined,
+  resumeSteps: ConversationRoundStep[]
+): ConversationRound => {
+  const pausedIds = new Set((pauseState?.agent.nodes ?? []).map((node) => node.tool_call_id));
+  if (pausedIds.size === 0) {
+    return round;
+  }
+  const copied = new Set(resumeSteps.filter(isToolCallStep).map((step) => step.tool_call_id));
+  return {
+    ...round,
+    steps: round.steps.map((step) =>
+      isToolCallStep(step) && pausedIds.has(step.tool_call_id) && !copied.has(step.tool_call_id)
+        ? { ...step, interrupted: true as const }
+        : step
+    ),
+  };
 };
 
 /** ask_user_question answers carried by a prompt_response, keyed by prompt_id. */
@@ -183,10 +239,7 @@ export const authorAndOrigin = (
   return { author, ...(actor.origin ? { origin: actor.origin } : {}) };
 };
 
-const terminatedRoundFields = (
-  data: ExecutionTerminatedEvent['data'],
-  steps: ConversationRoundStep[]
-): Pick<
+type RoundRunFields = Pick<
   ConversationRound,
   | 'status'
   | 'response'
@@ -198,7 +251,15 @@ const terminatedRoundFields = (
   | 'trace_id'
   | 'state'
   | 'configuration_overrides'
-> => {
+  | 'interruption'
+>;
+
+const terminatedRoundFields = (
+  terminated: ExecutionTerminatedEvent,
+  steps: ConversationRoundStep[],
+  answered: boolean
+): RoundRunFields => {
+  const { data } = terminated;
   const { outcome } = data;
   const summary = {
     steps,
@@ -206,21 +267,53 @@ const terminatedRoundFields = (
     time_to_first_token: data.time_to_first_token,
     time_to_last_token: data.time_to_last_token,
     ...(data.trace_id ? { trace_id: data.trace_id } : {}),
-    ...(data.state ? { state: data.state } : {}),
     ...(data.configuration_overrides
       ? { configuration_overrides: data.configuration_overrides }
       : {}),
   };
 
   if (outcome.type === 'responded') {
-    return { ...summary, status: ConversationRoundStatus.completed, response: outcome.response };
+    return {
+      ...summary,
+      ...(data.state ? { state: data.state } : {}),
+      status: ConversationRoundStatus.completed,
+      response: outcome.response,
+    };
+  }
+
+  // A consumed pause (some `prompt_response` answers it) is no longer awaiting anything: no
+  // prompts, no resume state.
+  if (answered) {
+    return { ...summary, status: ConversationRoundStatus.completed, response: { message: '' } };
   }
 
   // A paused (HITL) run has no response; the rounds model represents it as awaiting_prompt.
   return {
     ...summary,
+    ...(data.state ? { state: data.state } : {}),
     status: ConversationRoundStatus.awaitingPrompt,
     pending_prompts: outcome.prompts,
     response: { message: '' },
+  };
+};
+
+/** The round fields of an interrupted execution; explicit defaults for what the partial summary lacks. */
+const interruptedRoundFields = (
+  terminal: ExecutionFailedEvent | ExecutionAbortedEvent,
+  steps: ConversationRoundStep[]
+): RoundRunFields => {
+  const { data } = terminal;
+  return {
+    steps,
+    model_usage: data.model_usage ?? ZERO_MODEL_USAGE,
+    time_to_first_token: data.time_to_first_token ?? 0,
+    time_to_last_token: data.time_to_last_token,
+    ...(data.trace_id ? { trace_id: data.trace_id } : {}),
+    ...(data.configuration_overrides
+      ? { configuration_overrides: data.configuration_overrides }
+      : {}),
+    status: ConversationRoundStatus.completed,
+    response: { message: '' },
+    interruption: interruptionOfTerminal(terminal),
   };
 };

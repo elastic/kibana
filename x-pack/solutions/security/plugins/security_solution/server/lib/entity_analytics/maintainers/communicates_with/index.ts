@@ -24,6 +24,7 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
     status,
     crudClient,
     entityMetadataClient,
+    relationshipsClient,
     signal,
     telemetry,
   }) => {
@@ -42,6 +43,7 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
       namespace,
       crudClient,
       entityMetadataClient,
+      relationshipsClient,
       integrations: COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS,
       maintainerName: 'communicates_with',
       signal,

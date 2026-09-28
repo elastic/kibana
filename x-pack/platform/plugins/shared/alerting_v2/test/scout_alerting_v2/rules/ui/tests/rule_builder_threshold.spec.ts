@@ -149,12 +149,10 @@ test.describe(
           buildCreateRuleData({
             metadata: { name: EDIT_RULE_NAME, builder_type: 'threshold' },
             query: {
-              format: 'composed',
               base: `FROM ${TEST_INDEX} | STATS count = COUNT(*)`,
               breach: { segment: '| WHERE count > 5' },
             },
             time_field: '@timestamp',
-            recovery_strategy: undefined,
           })
         );
         ruleId = rule.id;
@@ -230,7 +228,6 @@ test.describe(
           buildCreateRuleData({
             metadata: { name: 'was-builder-rule', builder_type: 'threshold' },
             query: {
-              format: 'composed',
               base: `FROM ${TEST_INDEX} | STATS count = COUNT(*)`,
               breach: { segment: '| WHERE count > 5' },
             },
@@ -244,7 +241,6 @@ test.describe(
           buildCreateRuleData({
             metadata: { name: 'was-builder-rule' },
             query: {
-              format: 'composed',
               base: `FROM ${TEST_INDEX} | STATS count = COUNT(*)`,
               breach: { segment: '| WHERE count > 5' },
             },
@@ -277,7 +273,6 @@ test.describe(
           buildCreateRuleData({
             metadata: { name: 'unparseable-builder-rule', builder_type: 'threshold' },
             query: {
-              format: 'composed',
               base: `FROM ${TEST_INDEX} | STATS COUNT(*) BY host.name`,
               breach: { segment: '| WHERE `COUNT(*)` > 3.0' },
             },
@@ -319,7 +314,6 @@ test.describe(
           buildCreateRuleData({
             metadata: { name: 'switch-modal-rule', builder_type: 'threshold' },
             query: {
-              format: 'composed',
               base: `FROM ${TEST_INDEX} | STATS count = COUNT(*)`,
               breach: { segment: '| WHERE count > 5' },
             },

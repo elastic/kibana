@@ -187,11 +187,7 @@ export function createNavigationTree({
             }),
           },
           {
-            children: [
-              { link: 'searchSynonyms:synonyms' },
-              { link: 'searchQueryRules' },
-              { link: 'searchPlayground' },
-            ],
+            children: [{ link: 'searchSynonyms:synonyms' }, { link: 'searchQueryRules' }],
             id: 'search_relevance',
             title: i18n.translate('xpack.serverlessSearch.nav.ingest.relevance.title', {
               defaultMessage: 'Relevance',
