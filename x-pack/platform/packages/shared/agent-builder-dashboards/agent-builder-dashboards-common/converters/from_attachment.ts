@@ -84,6 +84,7 @@ const normalizeWidgets = (widgets: AgentWidget[]): DashboardWidget[] =>
 /**
  * Converts a DashboardAttachment to a DashboardState.
  * Uses provided values from the attachment, falling back to defaults for missing fields.
+ * Lens panels stay in API format; the attachment never carries saved-object state.
  */
 export const attachmentDataToDashboardState = ({
   panels = [],
