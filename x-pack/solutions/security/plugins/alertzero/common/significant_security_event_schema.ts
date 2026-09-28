@@ -6,6 +6,9 @@
  */
 
 import { z } from '@kbn/zod/v4';
+// The canonical reason list, reused rather than re-declared: a reason this schema does not
+// accept is an attachment `ai.attachment.add` rejects for telling the truth.
+import { HuntIncompleteReason } from '@kbn/alertzero-common';
 import { ATTACHMENT_ENTITY_FIELDS } from './attachment_entity';
 import { alertZeroAttachmentDataSchema } from './attachment_data_schema';
 import { SEVERITY_LEVELS } from './attachment_enums';
@@ -159,6 +162,15 @@ const huntResultBehaviorExecutionSchema = z.object({
   row_count: z.number().int().min(0),
   /** True when at least one required-index row was returned. */
   hit: z.boolean(),
+  /**
+   * Why this execution could not answer the question, when it could not. Carried from
+   * Tier 2 because `hit: false` alone is ambiguous: an execution that returned rows the
+   * required-index bar could not evaluate (`rows_unclassifiable`, e.g. a STATS pipeline
+   * that dropped `_index`) is "could not tell", while a plain `hit: false` is "nothing
+   * there". Only the second is evidence of a clean environment, so a reader that cannot
+   * tell them apart will record a hunt as clean that never reached a verdict.
+   */
+  inconclusive_reason: HuntIncompleteReason.optional(),
 });
 
 const huntResultTier2BehaviorSchema = z.object({
@@ -180,6 +192,13 @@ const huntResultTier2Schema = z
   .object({
     status: z.enum(['no_behaviors_found', 'no_behaviors_validated', 'behaviors_proposed']),
     behaviors: z.array(huntResultTier2BehaviorSchema).max(20),
+    /**
+     * Set when Tier 2 validated more proposals than this array can hold. Tier 2's
+     * generation budget caps how many proposals get a query, not how many validate, so a
+     * report-scoped entry listing every proposal can overflow — and a silent cut would
+     * read as the complete set of behaviors the run considered.
+     */
+    behaviors_truncated: z.boolean().optional(),
   })
   // Tier 2 sets `behaviors_proposed` exactly when at least one behavior validated, so a
   // status that disagrees with the list is a producer bug: the card would show

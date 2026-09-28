@@ -247,6 +247,17 @@ describe('buildSseAttachmentId', () => {
       buildSseAttachmentId({ spaceId: 'default', reportId: 'tr-1', techniqueId: 'T1078.004' })
     ).toEqual(withTechnique);
   });
+
+  it('keeps a report id containing the subject separator distinct from a technique scope', () => {
+    // Nothing constrains a report id's characters, and this id is the idempotency key for a
+    // re-hunt: colliding subjects mean one report's finding overwrites another's.
+    expect(buildSseAttachmentId({ spaceId: 'default', reportId: 'r|T1078.004' })).not.toEqual(
+      buildSseAttachmentId({ spaceId: 'default', reportId: 'r', techniqueId: 'T1078.004' })
+    );
+    expect(buildSseAttachmentId({ spaceId: 'default|r', reportId: 'x' })).not.toEqual(
+      buildSseAttachmentId({ spaceId: 'default', reportId: 'r|x' })
+    );
+  });
 });
 
 describe('buildSseData', () => {
@@ -711,11 +722,59 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     expect(entries).toHaveLength(1);
     expect(entries[0].attachment_id).toEqual(idFor('T1552.001'));
     expect(huntResultOf(entries[0]).hit_sources).toEqual(['tier1']);
-    // `counts.total_hits` is the report's total. On a technique-scoped entry it has
-    // to say so, beside the share of it this entry actually carries.
+    // `counts.total_hits` is the report's total and spans optional indices, so the
+    // sentence says whose count it is, that it is a match count rather than a
+    // confirmed one, and how much of it this entry carries.
     expect(entries[0].data.evidence_for).toContain(
-      'Tier 1 confirmed 1 hit(s) for this report in the hunt window, 1 of which are referenced here (see hunt_result.tier1.per_index).'
+      'Tier 1 matched 1 event(s) for this report in the hunt window, at least one in a required index; 1 are referenced here (see hunt_result.tier1.per_index for the required/optional split).'
     );
+  });
+
+  it('does not let an optional-index hit attributed to a technique promote it', async () => {
+    // Tier 1 samples required and optional indices together but sets `has_confirmed_hit` from
+    // a count over the required patterns alone, so the hit that cleared the bar and the hit
+    // attributed to this technique need not be the same one.
+    const result = await run(
+      {
+        ...HIT_TIER1_RESULT,
+        counts: { total_hits: 2, returned_hits: 2, affected_hosts: 1, affected_users: 1 },
+        hits: [
+          {
+            // Cleared the bar, but belongs to no technique.
+            index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+            id: 'evt-required-unattributed',
+            timestamp: '2026-07-30T13:05:00.000Z',
+          },
+          {
+            // Attributed to the technique, but from an optional index.
+            index: '.alerts-security.alerts-default',
+            id: 'alert-optional-attributed',
+            timestamp: '2026-07-30T13:06:00.000Z',
+            matched: { field: 'file.hash.md5', technique_id: 'T1552.001' },
+          },
+        ],
+        per_index: [
+          {
+            index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+            hit_count: 1,
+            required: true,
+          },
+          { index: '.alerts-security.alerts-default', hit_count: 1, required: false },
+        ],
+      },
+      [
+        proposedBehavior({
+          techniqueId: 'T1552.001',
+          ruleName: 'Credential file read on CI runner',
+          hit: false,
+        }),
+      ]
+    );
+
+    const entries = entriesFor(result);
+
+    expect(entries).toHaveLength(1);
+    expect(entries[0].attachment_id).toEqual(idFor());
   });
 
   it('publishes one entry for a technique proposed twice', async () => {
@@ -904,6 +963,83 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     ).toBe(true);
   });
 
+  it('bounds the report-scoped fallback to the behaviors the schema accepts', () => {
+    // Tier 2's generation budget caps how many proposals get a query, not how many validate,
+    // so `behaviors` can arrive longer than 20. The fallback entry is the one that lists them
+    // all, and it is the only SSE the run produces — an overflow loses the finding entirely.
+    const behaviors = Array.from({ length: 21 }, (_, i) =>
+      behaviorFixture({
+        technique_id: `T90${String(i).padStart(2, '0')}`,
+        rule_name: `Proposed rule ${i}`,
+        execution: { executed: true, row_count: 0, hit: false },
+      })
+    );
+    const result = withBehaviors(tier1Result({}), behaviors);
+
+    expect(schemaIssues(result)).toEqual([]);
+    const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
+
+    // Report-scoped: no technique corroborated, so nothing narrowed the list.
+    expect(entry.attachment_id).toEqual(
+      buildSseAttachmentId({ spaceId: 'default', reportId: 'tr-1' })
+    );
+    expect(huntResultOf(entry).tier2?.behaviors).toHaveLength(20);
+    expect(huntResultOf(entry).tier2?.behaviors_truncated).toBe(true);
+  });
+
+  it('trims an affected host the schema would reject rather than losing the attachment', () => {
+    // Tier 2 bounds how many host/user values it keeps, not how long each is, and an ES|QL
+    // rule the model wrote can evaluate a column into something longer than the schema allows.
+    const result = withBehaviors(tier1Result({}), [
+      behaviorFixture({
+        affected_hosts: ['h'.repeat(513)],
+        affected_users: ['u'.repeat(600)],
+      }),
+    ]);
+
+    expect(schemaIssues(result)).toEqual([]);
+    const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
+    const [behavior] = huntResultOf(entry).tier2?.behaviors ?? [];
+
+    expect(behavior.affected_hosts?.[0]).toHaveLength(512);
+    expect(behavior.affected_users?.[0]).toHaveLength(512);
+  });
+
+  it('does not count an execution that reached no verdict as evidence of a clean environment', () => {
+    // Tier 2 reports `hit: false` both for "nothing there" and for rows it could not evaluate
+    // against the required indices. Only the first is evidence the environment is clean.
+    const result = withBehaviors(tier1Result({}), [
+      behaviorFixture({
+        technique_id: 'T1078.004',
+        execution: { executed: true, row_count: 0, hit: false },
+      }),
+      behaviorFixture({
+        technique_id: 'T1552.001',
+        execution: {
+          executed: true,
+          row_count: 0,
+          hit: false,
+          inconclusive_reason: 'rows_unclassifiable',
+        },
+      }),
+    ]);
+
+    expect(schemaIssues(result)).toEqual([]);
+    const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
+
+    expect(entry.data.evidence_against).toEqual([
+      'Tier 2 executed 1 proposed technique(s) with no required-index rows: T1078.004.',
+    ]);
+    // The reason survives in the structured payload, so the distinction is recoverable
+    // rather than asserted in prose the schema cannot check.
+    expect(huntResultOf(entry).tier2?.behaviors[1].execution).toEqual({
+      executed: true,
+      row_count: 0,
+      hit: false,
+      inconclusive_reason: 'rows_unclassifiable',
+    });
+  });
+
   it('shares the event cap between the tiers instead of letting Tier 1 fill it', () => {
     // Tier 1 returns up to the coordinator's `size: 100`, and `events` caps at 50, so
     // appending Tier 2 after Tier 1 drops every ref to the behavior that confirmed
@@ -947,7 +1083,7 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     // The Tier 1 count quoted to the reader is the refs the entry carries, not the
     // ones it was offered.
     expect(entry.data.evidence_for).toContain(
-      'Tier 1 confirmed 50 hit(s) for this report in the hunt window, 49 of which are referenced here (see hunt_result.tier1.per_index).'
+      'Tier 1 matched 50 event(s) for this report in the hunt window, at least one in a required index; 49 are referenced here (see hunt_result.tier1.per_index for the required/optional split).'
     );
   });
 
