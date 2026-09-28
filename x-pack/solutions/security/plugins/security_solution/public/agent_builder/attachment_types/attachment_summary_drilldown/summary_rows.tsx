@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { css } from '@emotion/react';
 import { EuiSkeletonText, useEuiTheme } from '@elastic/eui';
 import { lastValueFrom } from 'rxjs';
-import type { IEsSearchRequest } from '@kbn/search-types';
+import type { ISearchGeneric } from '@kbn/search-types';
 import { i18n } from '@kbn/i18n';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import {
@@ -35,6 +35,21 @@ const ALERTS_TITLE = i18n.translate(
   { defaultMessage: 'Alerts' }
 );
 
+const SEVERITY_LABELS: Record<string, string> = {
+  critical: i18n.translate('xpack.securitySolution.agentBuilder.attachments.severity.critical', {
+    defaultMessage: 'Critical',
+  }),
+  high: i18n.translate('xpack.securitySolution.agentBuilder.attachments.severity.high', {
+    defaultMessage: 'High',
+  }),
+  medium: i18n.translate('xpack.securitySolution.agentBuilder.attachments.severity.medium', {
+    defaultMessage: 'Medium',
+  }),
+  low: i18n.translate('xpack.securitySolution.agentBuilder.attachments.severity.low', {
+    defaultMessage: 'Low',
+  }),
+};
+
 const LazyFlyoutOpener = React.lazy(() =>
   import(
     /* webpackChunkName: "security_attachment_summary_flyout_opener" */
@@ -45,9 +60,12 @@ const LazyFlyoutOpener = React.lazy(() =>
 const severityToColor = (severity?: string): string =>
   SEVERITY_COLOR[severity as keyof typeof SEVERITY_COLOR] ?? SEVERITY_COLOR.high;
 
-// e.g. "critical" → "Critical"
-const severityLabel = (severity?: string): string | undefined =>
-  severity ? severity.charAt(0).toUpperCase() + severity.slice(1) : undefined;
+const severityLabel = (severity?: string): string | undefined => {
+  if (!severity) return undefined;
+  return (
+    SEVERITY_LABELS[severity.toLowerCase()] ?? severity.charAt(0).toUpperCase() + severity.slice(1)
+  );
+};
 
 const parseSingleAlertSeverity = (attachment: UnknownAttachment): string | undefined => {
   const alert = (attachment.data as { alert?: unknown })?.alert;
@@ -116,38 +134,29 @@ const AlertSummaryRow = ({
 
 interface AsyncAlertSummaryRowProps {
   alertId: string;
+  /** Concrete backing index from the ES hit's _index field. */
+  indexName: string;
   label: string;
   iconColor: string;
   severity?: string;
-  getSpaceId: () => Promise<string>;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }
 
-// Space id resolved on first click so row count is synchronous (drives Show more limit).
 const AsyncAlertSummaryRow = ({
   alertId,
+  indexName,
   label,
   iconColor,
   severity,
-  getSpaceId,
   resolveSecurityCanvasContext,
 }: AsyncAlertSummaryRowProps) => {
   const [openCount, setOpenCount] = useState(0);
-  const [descriptor, setDescriptor] = useState<FlyoutDescriptor | null>(null);
 
-  const handleClick = useCallback(async () => {
-    let desc = descriptor;
-    if (!desc) {
-      const spaceId = await getSpaceId();
-      desc = {
-        kind: FLYOUT_DESCRIPTOR_KIND.document,
-        documentId: alertId,
-        indexName: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
-      };
-      setDescriptor(desc);
-    }
-    setOpenCount((c) => c + 1);
-  }, [alertId, descriptor, getSpaceId]);
+  const descriptor: FlyoutDescriptor = {
+    kind: FLYOUT_DESCRIPTOR_KIND.document,
+    documentId: alertId,
+    indexName,
+  };
 
   return (
     <AttachmentSummaryRow
@@ -156,9 +165,9 @@ const AsyncAlertSummaryRow = ({
       iconType="dot"
       iconColor={iconColor}
       iconLabel={severityLabel(severity)}
-      onClick={handleClick}
+      onClick={() => setOpenCount((c) => c + 1)}
     >
-      {openCount > 0 && descriptor ? (
+      {openCount > 0 ? (
         <div css={css({ display: 'none' })} key={openCount}>
           <Suspense fallback={null}>
             <LazyFlyoutOpener
@@ -174,6 +183,8 @@ const AsyncAlertSummaryRow = ({
 
 interface FetchedAlert {
   id: string;
+  /** Concrete backing index from _index, used to open the flyout. */
+  indexName: string;
   label: string;
   severity: string;
 }
@@ -212,39 +223,36 @@ interface AlertsSectionFetcherProps {
   alertIds: string[];
   getSpaceId: () => Promise<string>;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
+  search: ISearchGeneric;
 }
 
 const AlertsSectionFetcher = ({
   alertIds,
   getSpaceId,
   resolveSecurityCanvasContext,
+  search,
 }: AlertsSectionFetcherProps) => {
-  const [resolvedAlerts, setResolvedAlerts] = useState<FetchedAlert[] | null>(null);
+  const [resolvedAlerts, setResolvedAlerts] = useState<FetchedAlert[] | null | 'error'>(null);
 
   const alertIdsKey = alertIds.join(',');
 
   useEffect(() => {
     let cancelled = false;
+    setResolvedAlerts(null);
 
     const ids = alertIdsKey.split(',').filter(Boolean);
 
     const doFetch = async () => {
-      const [spaceId, { kibanaServices }] = await Promise.all([
-        getSpaceId(),
-        resolveSecurityCanvasContext(),
-      ]);
-
+      const spaceId = await getSpaceId();
       const alertIndex = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
       const response = await lastValueFrom(
-        kibanaServices.data.search.search<IEsSearchRequest>({
+        search({
           params: {
             index: alertIndex,
-            body: {
-              query: { terms: { _id: ids } },
-              _source: ['kibana.alert.rule.name', 'kibana.alert.severity'],
-              size: ids.length,
-            },
+            query: { terms: { _id: ids } },
+            _source: ['kibana.alert.rule.name', 'kibana.alert.severity'],
+            size: ids.length,
           },
         })
       );
@@ -253,11 +261,13 @@ const AlertsSectionFetcher = ({
 
       const hits = (response.rawResponse.hits.hits ?? []) as Array<{
         _id: string;
+        _index: string;
         _source?: Record<string, unknown>;
       }>;
 
-      const fetched: FetchedAlert[] = hits.map(({ _id, _source = {} }) => ({
+      const fetched: FetchedAlert[] = hits.map(({ _id, _index, _source = {} }) => ({
         id: _id,
+        indexName: _index,
         label: sourceField(_source, 'kibana.alert.rule.name') ?? _id,
         severity: sourceField(_source, 'kibana.alert.severity') ?? '',
       }));
@@ -271,27 +281,34 @@ const AlertsSectionFetcher = ({
 
     doFetch().catch(() => {
       if (!cancelled) {
-        setResolvedAlerts([]);
+        setResolvedAlerts('error');
       }
     });
 
     return () => {
       cancelled = true;
     };
-  }, [alertIdsKey, getSpaceId, resolveSecurityCanvasContext]);
+  }, [alertIdsKey, getSpaceId, search]);
 
   if (resolvedAlerts === null) {
     return <AlertsSectionSkeleton rowCount={alertIds.length} />;
   }
 
-  const rows = resolvedAlerts.map(({ id, label, severity }) => (
+  if (resolvedAlerts === 'error') {
+    const rows = alertIds.map((id) => (
+      <AttachmentSummaryRow key={id} label={id} typeName={ALERT_TYPE_NAME} iconType="dot" />
+    ));
+    return <AttachmentSummaryGroup title={ALERTS_TITLE} rows={rows} />;
+  }
+
+  const rows = resolvedAlerts.map(({ id, indexName, label, severity }) => (
     <AsyncAlertSummaryRow
       key={id}
       alertId={id}
+      indexName={indexName}
       label={label}
       iconColor={severityToColor(severity)}
       severity={severity}
-      getSpaceId={getSpaceId}
       resolveSecurityCanvasContext={resolveSecurityCanvasContext}
     />
   ));
@@ -335,16 +352,18 @@ export interface RenderAlertsSectionParams {
   attachment: UnknownAttachment;
   getSpaceId: () => Promise<string>;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
+  search: ISearchGeneric;
 }
 
 /**
  * Returns a section that fetches alert names and severities from ES at render time.
- * Only alerts that resolve are shown; unresolvable IDs are silently dropped.
+ * Shows a skeleton while loading; on error shows the raw alert IDs as read-only rows.
  */
 export const renderAlertsSection = ({
   attachment,
   getSpaceId,
   resolveSecurityCanvasContext,
+  search,
 }: RenderAlertsSectionParams): ReactNode => {
   const data = attachment.data as { alertIds?: unknown };
   const alertIds = data?.alertIds;
@@ -358,6 +377,7 @@ export const renderAlertsSection = ({
       alertIds={ids}
       getSpaceId={getSpaceId}
       resolveSecurityCanvasContext={resolveSecurityCanvasContext}
+      search={search}
     />
   );
 };

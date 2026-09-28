@@ -32,7 +32,17 @@ export const AttachmentSummarySection = memo<AttachmentSummarySectionProps>(
       [attachments]
     );
 
-    if (summaryAttachments.length === 0) {
+    const renderableAttachments = useMemo(
+      () =>
+        summaryAttachments.filter((a) =>
+          Boolean(
+            attachmentsService.getAttachmentUiDefinition(a.type)?.renderConversationDetailsContent
+          )
+        ),
+      [summaryAttachments, attachmentsService]
+    );
+
+    if (renderableAttachments.length === 0) {
       return null;
     }
 

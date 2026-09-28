@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { renderAlertSection, renderAlertsSection } from './summary_rows';
@@ -49,21 +49,18 @@ jest.mock('@kbn/agentic-investigations-common', () => ({
   DEFAULT_COLLAPSED_COUNT: 4,
 }));
 
-const makeMockBundle = (alertHits: Array<{ _id: string; _source: Record<string, unknown> }>) => ({
-  kibanaServices: {
-    data: {
-      search: {
-        search: jest.fn(() =>
-          of({
-            rawResponse: {
-              hits: { hits: alertHits },
-            },
-          })
-        ),
+const makeSearch = (
+  alertHits: Array<{ _id: string; _index?: string; _source: Record<string, unknown> }>
+) =>
+  jest.fn(() =>
+    of({
+      rawResponse: {
+        hits: {
+          hits: alertHits.map((h) => ({ _index: '.alerts-default', ...h })),
+        },
       },
-    },
-  },
-});
+    })
+  );
 
 const resolveSecurityCanvasContext = jest.fn();
 const getSpaceId = jest.fn().mockResolvedValue('default');
@@ -168,27 +165,31 @@ describe('renderAlertSection', () => {
 });
 
 describe('renderAlertsSection', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    getSpaceId.mockResolvedValue('default');
+  });
 
   it('returns null when alertIds is absent', () => {
     const result = renderAlertsSection({
       attachment: makeAlertsAttachment([]),
       getSpaceId,
       resolveSecurityCanvasContext,
+      search: makeSearch([]),
     });
 
     expect(result).toBeNull();
   });
 
   it('renders a skeleton while the fetch is in flight', () => {
-    // resolveSecurityCanvasContext never resolves, simulating in-flight fetch.
-    resolveSecurityCanvasContext.mockReturnValue(new Promise(() => {}));
+    getSpaceId.mockReturnValue(new Promise(() => {}));
 
     renderSection(
       renderAlertsSection({
         attachment: makeAlertsAttachment(['id-1', 'id-2', 'id-3']),
         getSpaceId,
         resolveSecurityCanvasContext,
+        search: jest.fn(() => new Observable(() => {})),
       })
     );
 
@@ -196,15 +197,14 @@ describe('renderAlertsSection', () => {
   });
 
   it('shows the resolved rule name as the row label', async () => {
-    resolveSecurityCanvasContext.mockResolvedValue(
-      makeMockBundle([{ _id: 'id-1', _source: { 'kibana.alert.rule.name': 'Impossible travel' } }])
-    );
-
     renderSection(
       renderAlertsSection({
         attachment: makeAlertsAttachment(['id-1']),
         getSpaceId,
         resolveSecurityCanvasContext,
+        search: makeSearch([
+          { _id: 'id-1', _source: { 'kibana.alert.rule.name': 'Impossible travel' } },
+        ]),
       })
     );
 
@@ -212,18 +212,15 @@ describe('renderAlertsSection', () => {
   });
 
   it('drops alert IDs that ES did not return', async () => {
-    resolveSecurityCanvasContext.mockResolvedValue(
-      makeMockBundle([
-        { _id: 'id-1', _source: { 'kibana.alert.rule.name': 'Found' } },
-        // id-2 is missing from the response
-      ])
-    );
-
     renderSection(
       renderAlertsSection({
         attachment: makeAlertsAttachment(['id-1', 'id-2']),
         getSpaceId,
         resolveSecurityCanvasContext,
+        search: makeSearch([
+          { _id: 'id-1', _source: { 'kibana.alert.rule.name': 'Found' } },
+          // id-2 is missing from the response
+        ]),
       })
     );
 
@@ -232,13 +229,12 @@ describe('renderAlertsSection', () => {
   });
 
   it('renders nothing when no alerts resolve', async () => {
-    resolveSecurityCanvasContext.mockResolvedValue(makeMockBundle([]));
-
     const { container } = renderSection(
       renderAlertsSection({
         attachment: makeAlertsAttachment(['id-1']),
         getSpaceId,
         resolveSecurityCanvasContext,
+        search: makeSearch([]),
       })
     );
 
@@ -249,31 +245,31 @@ describe('renderAlertsSection', () => {
   });
 
   it('sorts rows critical-first', async () => {
-    resolveSecurityCanvasContext.mockResolvedValue(
-      makeMockBundle([
-        {
-          _id: 'low-id',
-          _source: { 'kibana.alert.rule.name': 'Low alert', 'kibana.alert.severity': 'low' },
-        },
-        {
-          _id: 'crit-id',
-          _source: {
-            'kibana.alert.rule.name': 'Critical alert',
-            'kibana.alert.severity': 'critical',
-          },
-        },
-        {
-          _id: 'med-id',
-          _source: { 'kibana.alert.rule.name': 'Medium alert', 'kibana.alert.severity': 'medium' },
-        },
-      ])
-    );
-
     renderSection(
       renderAlertsSection({
         attachment: makeAlertsAttachment(['low-id', 'crit-id', 'med-id']),
         getSpaceId,
         resolveSecurityCanvasContext,
+        search: makeSearch([
+          {
+            _id: 'low-id',
+            _source: { 'kibana.alert.rule.name': 'Low alert', 'kibana.alert.severity': 'low' },
+          },
+          {
+            _id: 'crit-id',
+            _source: {
+              'kibana.alert.rule.name': 'Critical alert',
+              'kibana.alert.severity': 'critical',
+            },
+          },
+          {
+            _id: 'med-id',
+            _source: {
+              'kibana.alert.rule.name': 'Medium alert',
+              'kibana.alert.severity': 'medium',
+            },
+          },
+        ]),
       })
     );
 
@@ -287,18 +283,15 @@ describe('renderAlertsSection', () => {
   });
 
   it('each row opens a descriptor scoped to its own alert id on click', async () => {
-    resolveSecurityCanvasContext.mockResolvedValue(
-      makeMockBundle([
-        { _id: 'id-1', _source: { 'kibana.alert.rule.name': 'Rule A' } },
-        { _id: 'id-2', _source: { 'kibana.alert.rule.name': 'Rule B' } },
-      ])
-    );
-
     renderSection(
       renderAlertsSection({
         attachment: makeAlertsAttachment(['id-1', 'id-2']),
         getSpaceId,
         resolveSecurityCanvasContext,
+        search: makeSearch([
+          { _id: 'id-1', _source: { 'kibana.alert.rule.name': 'Rule A' } },
+          { _id: 'id-2', _source: { 'kibana.alert.rule.name': 'Rule B' } },
+        ]),
       })
     );
 
@@ -314,29 +307,37 @@ describe('renderAlertsSection', () => {
   });
 
   it('does not start the fetch before the component mounts', () => {
-    resolveSecurityCanvasContext.mockResolvedValue(makeMockBundle([]));
+    const mockSearch = makeSearch([]);
 
     renderAlertsSection({
       attachment: makeAlertsAttachment(['id-1']),
       getSpaceId,
       resolveSecurityCanvasContext,
+      search: mockSearch,
     });
 
-    // factory called, but no component mounted yet — context not resolved
-    expect(resolveSecurityCanvasContext).not.toHaveBeenCalled();
+    // factory called, but no component mounted yet — search not triggered
+    expect(mockSearch).not.toHaveBeenCalled();
   });
 
-  it('renders nothing when the fetch throws', async () => {
-    resolveSecurityCanvasContext.mockRejectedValue(new Error('network error'));
+  it('renders fallback rows when the fetch throws', async () => {
+    const failingSearch = jest.fn(
+      () =>
+        new Observable((s) => {
+          s.error(new Error('network error'));
+        })
+    );
 
-    const { container } = renderSection(
+    renderSection(
       renderAlertsSection({
         attachment: makeAlertsAttachment(['id-1']),
         getSpaceId,
         resolveSecurityCanvasContext,
+        search: failingSearch,
       })
     );
 
-    await waitFor(() => expect(container).toBeEmptyDOMElement());
+    await waitFor(() => expect(screen.getByTestId('row')).toBeInTheDocument());
+    expect(screen.getByText('id-1')).toBeInTheDocument();
   });
 });

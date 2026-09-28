@@ -55,7 +55,7 @@ export const AttachmentSummaryList = memo<AttachmentSummaryListProps>(
         css={css({
           borderRadius: euiTheme.size.s,
           overflow: 'hidden',
-          '& > * + *': { borderTop: euiTheme.border.thin },
+          '& > *:not(:first-child)': { borderTop: euiTheme.border.thin },
         })}
         data-test-subj="attachmentSummaryPanel"
       >

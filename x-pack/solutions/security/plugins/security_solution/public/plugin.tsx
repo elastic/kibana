@@ -370,6 +370,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         resolveSecurityCanvasContext: () =>
           this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         getSpaceId: () => plugins.spaces.getActiveSpace().then((s) => s.id),
+        data: plugins.data,
       });
       registerAttackDiscoveryAttachment({
         attachments: plugins.agentBuilder.attachments,

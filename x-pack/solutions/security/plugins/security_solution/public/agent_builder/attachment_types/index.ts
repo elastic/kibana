@@ -79,10 +79,12 @@ export const registerAttachmentUiDefinitions = ({
   attachments,
   resolveSecurityCanvasContext,
   getSpaceId,
+  data,
 }: {
   attachments: AttachmentServiceStartContract;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
   getSpaceId: () => Promise<string>;
+  data: DataPublicPluginStart;
 }) => {
   attachments.addAttachmentType<UnknownAttachmentWithLabel>(ALERT_ATTACHMENT_CONFIG.type, {
     ...createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon),
@@ -107,6 +109,7 @@ export const registerAttachmentUiDefinitions = ({
       renderConversationDetailsContent: createAlertsSummaryRows({
         resolveSecurityCanvasContext,
         getSpaceId,
+        search: data.search.search,
       }),
     }
   );

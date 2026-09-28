@@ -66,21 +66,33 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
     const hasDrilldown = Boolean(onClick);
     const padding = `12px ${euiTheme.size.base}`;
 
+    // For clickable rows the button's aria-label already identifies the row; a nested
+    // focusable EuiIconTip would create a second tab stop inside the button.
+    const iconElement = hasDrilldown ? (
+      <EuiIcon
+        type={iconType}
+        color={iconColor}
+        size="s"
+        data-test-subj="attachmentSummaryRowIcon"
+        aria-hidden={true}
+      />
+    ) : (
+      <EuiIconTip
+        type={iconType}
+        color={iconColor}
+        size="s"
+        content={iconLabel ?? typeName}
+        position="top"
+        iconProps={{
+          'data-test-subj': 'attachmentSummaryRowIcon',
+          'aria-label': iconLabel ?? typeName,
+        }}
+      />
+    );
+
     const content = (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip
-            type={iconType}
-            color={iconColor}
-            size="s"
-            content={iconLabel ?? typeName}
-            position="top"
-            iconProps={{
-              'data-test-subj': 'attachmentSummaryRowIcon',
-              'aria-label': iconLabel ?? typeName,
-            }}
-          />
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{iconElement}</EuiFlexItem>
 
         <EuiFlexItem css={css({ minInlineSize: 0 })}>
           {isLabelTruncated ? (
@@ -129,7 +141,7 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
             data-test-subj="attachmentSummaryRowButton"
             css={css({
               padding,
-              '&:hover': {
+              '&:hover:not(:focus-visible)': {
                 boxShadow: 'none',
                 backgroundColor: euiTheme.colors.backgroundBaseSubdued,
               },
