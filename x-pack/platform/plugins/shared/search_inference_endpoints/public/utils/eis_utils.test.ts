@@ -453,6 +453,22 @@ describe('getRegionOptions', () => {
       'region-aws-us-east-1',
     ]);
   });
+
+  it('keeps the region display name when a later copy differs only in casing', () => {
+    const unnamed = makeEndpoint('model', [{ csp: 'aws', region: 'us-east-1', geo: 'us' }]);
+    const named = makeEndpoint('model', [
+      {
+        csp: 'AWS',
+        region: 'us-east-1',
+        geo: 'US',
+        region_display_name: 'US East (Virginia)',
+      },
+    ]);
+    expect(getRegionOptions([unnamed, named])).toEqual([
+      { key: 'geo-us', label: 'North America' },
+      { key: 'region-aws-us-east-1', label: 'US East (Virginia) - AWS' },
+    ]);
+  });
 });
 
 describe('getAvailableGeos', () => {

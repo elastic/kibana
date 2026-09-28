@@ -396,7 +396,7 @@ export const getAvailableRegions = (endpoints: EisInferenceEndpoint[]): CspRegio
 
     for (const region of regions) {
       if (!isCspRegion(region)) continue;
-      const key = regionKey(region);
+      const key = regionKey(region).toLowerCase();
       seen.set(key, keepPreferredRegion(seen.get(key), region));
     }
   }
