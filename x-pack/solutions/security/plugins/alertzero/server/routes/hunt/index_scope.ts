@@ -12,14 +12,14 @@ import {
   INTERNAL_API_ACCESS,
 } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
+import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INDEX_SCOPE_URL } from '../../../common/constants';
 import {
   HUNT_TECHNOLOGIES,
   resolveIndexScope,
 } from '../../services/watches/hunt/common/resolve_index_scope';
 import type { RouteDependencies } from '../register_routes';
 
-export const HUNT_INDEX_SCOPE_URL = `${HUNT_INTERNAL_ROUTE_BASE}/index_scope` as const;
+export { HUNT_INDEX_SCOPE_URL };
 
 /**
  * Index-scope projection over `resolveIndexScope`, one entry per technology

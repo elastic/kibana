@@ -48,6 +48,21 @@ export const ALERTZERO_ACTIONS_URL = `${ALERTZERO_INTERNAL_URL}/actions` as cons
 export const ALERTZERO_INVESTIGATIONS_COUNT_URL =
   `${ALERTZERO_INTERNAL_URL}/investigations/count` as const;
 
+// --- Hunt services ---
+// Exported here, not just from the alertzero plugin's own common/constants.ts, so the
+// platform-level kbn-workflows managed-definitions tests can assert Hunt Watch's managed
+// YAML never references a route path string that isn't one of these, without reaching into
+// a private solution plugin's server modules.
+
+/** Internal route namespace for the hunt services. */
+export const HUNT_INTERNAL_ROUTE_BASE = '/internal/alertzero/hunt' as const;
+
+/** Tier 1 index-scope projection: which telemetry indices exist per technology. */
+export const HUNT_INDEX_SCOPE_URL = `${HUNT_INTERNAL_ROUTE_BASE}/index_scope` as const;
+
+/** Candidate report selection for the tagged Worker's scheduled sweep and manual trigger. */
+export const CANDIDATES_URL = `${HUNT_INTERNAL_ROUTE_BASE}/candidates` as const;
+
 /** Agent Builder builtin tool wrapping the action catalog API. */
 export const ALERTZERO_ACTIONS_LIST_TOOL_ID = 'security.alertzero.actions.list' as const;
 
@@ -177,6 +192,15 @@ export const SYSTEM_SECURITY_WORKER_IDS = [
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
 ] as const;
+
+/**
+ * Hunt Watch's two feature children (tagged `security` + `continuous-threat-hunt`),
+ * dispatched by the tagged Worker above. `find_or_create_investigation` and the hunt
+ * child itself stay untagged Worker-branch plumbing and have no id here.
+ */
+export const SYSTEM_SECURITY_HUNT_PACKAGE_REPORT_ID =
+  'system-security-hunt-package-report' as const;
+export const SYSTEM_SECURITY_HUNT_PROPOSAL_GATE_ID = 'system-security-hunt-proposal-gate' as const;
 
 /**
  * Static Worker catalog: Watch membership and display names for not-yet-installed Workers.

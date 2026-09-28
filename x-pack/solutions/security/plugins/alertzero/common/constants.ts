@@ -18,6 +18,9 @@ export {
   ALERTZERO_WATCH_URL_TEMPLATE,
   buildWatchUrl,
   SYSTEM_SECURITY_WATCH_IDS,
+  HUNT_INTERNAL_ROUTE_BASE,
+  HUNT_INDEX_SCOPE_URL,
+  CANDIDATES_URL,
 } from '@kbn/alertzero-common';
 
 /** API privilege for read-only AlertZero internal routes. */
@@ -42,9 +45,8 @@ export const ALERTZERO_ATTACHMENT_TYPES = {
 } as const;
 
 // --- Hunt services ---
-
-/** Internal route namespace for the hunt services. */
-export const HUNT_INTERNAL_ROUTE_BASE = '/internal/alertzero/hunt' as const;
+// HUNT_INTERNAL_ROUTE_BASE, HUNT_INDEX_SCOPE_URL, and CANDIDATES_URL are re-exported from
+// @kbn/alertzero-common above, not redefined here — see that package's constants.ts.
 
 /** Reports index the hunt services read candidates from and write feedback to. */
 export const HUNT_REPORTS_INDEX = '.kibana-threat-reports' as const;
