@@ -145,6 +145,8 @@ describe('WorkflowExecutionFlyout step URL and field paths', () => {
 
     renderFlyout();
 
+    // Mounting must keep a deep-linked step, not reset it.
+    expect(mockSetSelectedStepExecution).not.toHaveBeenCalled();
     expect(screen.getByTestId('tree-selected-id')).toHaveTextContent('step-123');
     expect(screen.getAllByTestId('workflowExecutionStepDataTable').length).toBeGreaterThan(0);
 
