@@ -290,7 +290,8 @@ export const WatchDetailPage: React.FC = () => {
           <EuiFlexItem grow={false}>
             <EuiCallOut
               announceOnMount
-              iconType="alert"
+              color="warning"
+              iconType="lock"
               title={settingsI18n.READ_ONLY_CALLOUT_TITLE}
               data-test-subj="alertZeroReadOnlyCallout"
             >
