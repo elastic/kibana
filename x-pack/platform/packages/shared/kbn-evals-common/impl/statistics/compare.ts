@@ -5,31 +5,26 @@
  * 2.0.
  */
 
-import { pairedT } from '@elastic/statistics';
-import type { EvaluationScoreDocument } from '../schemas/common_attributes.gen';
-import type { PairedTTestResult } from '../schemas/experiments/compare_experiments_route.gen';
-import { mean, pairScores, resolveDirection } from './pairing';
+import { pairedTable } from '@elastic/statistics';
+import type {
+  ComparisonResult,
+  HypothesisTest,
+} from '../schemas/experiments/compare_experiments_route.gen';
+import { mean, resolveDirection } from './pairing';
 import type { PairedScore } from './pairing';
+import { runPairedTest } from './run_test';
+import { selectTest } from './select_test';
 
-/**
- * Compute paired t-test results grouped by dataset and evaluator.
- * Accepts either raw score documents (which are paired internally)
- * or pre-computed pairs to avoid duplicate pairing work.
- */
-export function computePairedTTestResults(pairs: PairedScore[]): PairedTTestResult[];
-export function computePairedTTestResults(
-  targetScores: EvaluationScoreDocument[],
-  baselineScores: EvaluationScoreDocument[]
-): PairedTTestResult[];
-export function computePairedTTestResults(
-  targetScoresOrPairs: EvaluationScoreDocument[] | PairedScore[],
-  baselineScores?: EvaluationScoreDocument[]
-): PairedTTestResult[] {
-  const pairs: PairedScore[] =
-    baselineScores !== undefined
-      ? pairScores(targetScoresOrPairs as EvaluationScoreDocument[], baselineScores).pairs
-      : (targetScoresOrPairs as PairedScore[]);
+/** Discordant pairs of a binary slice: `[[both 1, target only], [baseline only, both 0]]`. */
+function countDiscordantPairs(
+  target: number[],
+  baseline: number[]
+): NonNullable<HypothesisTest['discordantPairs']> {
+  const [[, targetOnly], [baselineOnly]] = pairedTable(target, baseline);
+  return { targetOnly, baselineOnly };
+}
 
+function groupByDatasetAndEvaluator(pairs: PairedScore[]): PairedScore[][] {
   const groups = new Map<string, PairedScore[]>();
   for (const pair of pairs) {
     const key = `${pair.datasetId}|${pair.evaluatorName}`;
@@ -40,30 +35,49 @@ export function computePairedTTestResults(
       groups.set(key, [pair]);
     }
   }
+  return [...groups.values()];
+}
 
-  const results: PairedTTestResult[] = [];
-  for (const group of groups.values()) {
-    const groupTargetScores = group.map((pair) => pair.scoreTarget);
-    const groupBaselineScores = group.map((pair) => pair.scoreBaseline);
+function compareSlice(group: PairedScore[]): ComparisonResult {
+  const target = group.map((pair) => pair.scoreTarget);
+  const baseline = group.map((pair) => pair.scoreBaseline);
 
-    // Two-tailed paired t-test; `pValue` is null when fewer than two pairs are available.
-    const { pValue } = pairedT(groupTargetScores, groupBaselineScores);
+  const sampleSize = group.length;
 
-    const direction =
-      group.find((pair) => pair.direction !== undefined)?.direction ??
-      resolveDirection(undefined, undefined, group[0].evaluatorName);
+  const { metricType, testId } = selectTest(target, baseline);
+  const outcome = runPairedTest(testId, target, baseline);
 
-    results.push({
-      datasetId: group[0].datasetId,
-      datasetName: group[0].datasetName,
-      evaluatorName: group[0].evaluatorName,
-      sampleSize: group.length,
-      meanTarget: mean(groupTargetScores),
-      meanBaseline: mean(groupBaselineScores),
-      pValue,
-      direction,
-    });
-  }
+  const hypothesisTest: HypothesisTest = {
+    id: outcome.id,
+    ...(outcome.method !== undefined && { method: outcome.method }),
+    statistic: outcome.statistic,
+    ...(metricType === 'binary' && {
+      discordantPairs: countDiscordantPairs(target, baseline),
+    }),
+  };
 
-  return results;
+  const direction =
+    group.find((pair) => pair.direction !== undefined)?.direction ??
+    resolveDirection(undefined, undefined, group[0].evaluatorName);
+
+  return {
+    datasetId: group[0].datasetId,
+    datasetName: group[0].datasetName,
+    evaluatorName: group[0].evaluatorName,
+    sampleSize,
+    meanTarget: mean(target),
+    meanBaseline: mean(baseline),
+    pValue: outcome.pValue,
+    direction,
+    metricType,
+    hypothesisTest,
+  };
+}
+
+/**
+ * Run a paired statistical test per (dataset, evaluator) slice of the given pairs. The test is
+ * chosen per slice by `selectTest` from the inferred metric type and the observed scores.
+ */
+export function compareScores(pairs: PairedScore[]): ComparisonResult[] {
+  return groupByDatasetAndEvaluator(pairs).map(compareSlice);
 }

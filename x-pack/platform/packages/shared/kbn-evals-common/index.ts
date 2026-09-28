@@ -32,10 +32,5 @@ export type {
 export { getDatasetId } from './impl/dataset_ids';
 export { getEvaluatorDefinitionId } from './impl/evaluator_ids';
 export { ALL_SPACES_ID, DEFAULT_SPACE_ID, resolveDatasetHomeSpace } from './impl/spaces';
-export {
-  pairScores,
-  computePairedTTestResults,
-  resolveDirection,
-  isImproved,
-} from './impl/statistics';
+export { pairScores, compareScores, resolveDirection, isImproved } from './impl/statistics';
 export type { PairedScore } from './impl/statistics';

@@ -33,7 +33,7 @@ import { css } from '@emotion/css';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useHistory, useLocation } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
-import type { Direction, PairedTTestResult } from '@kbn/evals-common';
+import type { Direction, ComparisonResult } from '@kbn/evals-common';
 import {
   useCompareExperiments,
   useEvalsTraceFetcher,
@@ -602,10 +602,10 @@ export const CompareExperimentsPage: React.FC = () => {
     direction: Direction;
   } | null>(null);
 
-  const [sortField, setSortField] = useState<keyof PairedTTestResult>('datasetName');
+  const [sortField, setSortField] = useState<keyof ComparisonResult>('datasetName');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  const handleRowClick = useCallback((result: PairedTTestResult) => {
+  const handleRowClick = useCallback((result: ComparisonResult) => {
     setFlyoutState({
       datasetId: result.datasetId,
       datasetName: result.datasetName,
@@ -704,7 +704,7 @@ export const CompareExperimentsPage: React.FC = () => {
 
   const firstRowByDataset = useMemo(() => {
     const seen = new Set<string>();
-    const firstRows = new Set<PairedTTestResult>();
+    const firstRows = new Set<ComparisonResult>();
     for (const item of sortedResults) {
       if (!seen.has(item.datasetId)) {
         firstRows.add(item);
@@ -716,13 +716,13 @@ export const CompareExperimentsPage: React.FC = () => {
 
   const isGroupedByDataset = sortField === 'datasetName';
 
-  const columns: Array<EuiBasicTableColumn<PairedTTestResult>> = useMemo(
+  const columns: Array<EuiBasicTableColumn<ComparisonResult>> = useMemo(
     () => [
       {
         field: 'datasetName',
         name: i18n.COLUMN_DATASET,
         sortable: true,
-        render: (_val: string, item: PairedTTestResult) => {
+        render: (_val: string, item: ComparisonResult) => {
           if (isGroupedByDataset && !firstRowByDataset.has(item)) return null;
           return <strong>{item.datasetName}</strong>;
         },
@@ -755,7 +755,7 @@ export const CompareExperimentsPage: React.FC = () => {
       },
       {
         name: i18n.COLUMN_DIFF,
-        render: (item: PairedTTestResult) => (
+        render: (item: ComparisonResult) => (
           <DiffValue
             diff={computeCompareDiff(item.meanTarget, item.meanBaseline)}
             direction={item.direction}
@@ -772,7 +772,7 @@ export const CompareExperimentsPage: React.FC = () => {
       },
       {
         name: i18n.COLUMN_SIGNIFICANCE,
-        render: (item: PairedTTestResult) => (
+        render: (item: ComparisonResult) => (
           <SignificanceBadge
             pValue={item.pValue}
             diff={computeCompareDiff(item.meanTarget, item.meanBaseline)}
@@ -957,7 +957,7 @@ export const CompareExperimentsPage: React.FC = () => {
               ]}
             />
           ) : (
-            <EuiBasicTable<PairedTTestResult>
+            <EuiBasicTable<ComparisonResult>
               tableCaption={i18n.TABLE_CAPTION}
               items={sortedResults}
               columns={columns}
@@ -966,7 +966,7 @@ export const CompareExperimentsPage: React.FC = () => {
               }}
               onChange={({ sort }) => {
                 if (sort) {
-                  setSortField(sort.field as keyof PairedTTestResult);
+                  setSortField(sort.field as keyof ComparisonResult);
                   setSortDirection(sort.direction);
                 }
               }}

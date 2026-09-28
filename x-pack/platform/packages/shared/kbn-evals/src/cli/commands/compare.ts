@@ -9,7 +9,7 @@ import Fs from 'fs';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import { KbnClient } from '@kbn/kbn-client';
-import { computePairedTTestResults, pairScores } from '@kbn/evals-common';
+import { compareScores, pairScores } from '@kbn/evals-common';
 import type { BaselineExperiment } from '../../utils/evals_client';
 import { EvalsClient } from '../../utils/evals_client';
 import { getEvaluationsKbnClient } from '../../utils/evaluations_kbn_client';
@@ -23,7 +23,7 @@ const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
 export const compareCmd: Command<void> = {
   name: 'compare',
   description: `
-  Compare two evaluation experiments using paired t-tests.
+  Compare two evaluation experiments with a paired statistical test per dataset and evaluator.
 
   Usage modes:
     1. Direct comparison of two experiment IDs (target first, baseline second):
@@ -58,8 +58,8 @@ export const compareCmd: Command<void> = {
     ],
     help: `
       --baseline-branch  Branch to find the latest baseline experiment on
-      --suite            Suite ID filter for baseline lookup and score filtering
-      --format           Output format: "terminal" (default) or "markdown"
+    --suite            Suite ID filter for baseline lookup and score filtering
+    --format           Output format: "terminal" (default) or "markdown"
       --kibana-url       Kibana URL for generating compare page links in markdown
       --output           Append markdown output to a file instead of stdout
       --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
@@ -81,7 +81,6 @@ export const compareCmd: Command<void> = {
     if (format !== 'terminal' && format !== 'markdown') {
       throw createFlagError('--format must be "terminal" or "markdown".');
     }
-
     const evaluationsKbnUrl = process.env.EVAL_KBN_URL;
     if (!evaluationsKbnUrl) {
       log.warning(`EVAL_KBN_URL not set; defaulting to ${DEFAULT_EVAL_KBN_URL}.`);
@@ -278,9 +277,9 @@ export const compareCmd: Command<void> = {
       `Paired ${pairs.length} scores (skipped ${skippedMissingPairs} missing pairs, ${skippedNullScores} null scores).`
     );
 
-    const results = computePairedTTestResults(pairs);
+    const results = compareScores(pairs);
     if (results.length === 0) {
-      log.warning('No t-test results returned.');
+      log.warning('No comparison results returned.');
       return;
     }
 

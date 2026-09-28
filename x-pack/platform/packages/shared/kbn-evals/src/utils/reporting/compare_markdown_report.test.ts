@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { PairedTTestResult } from '@kbn/evals-common';
+import type { ComparisonResult } from '@kbn/evals-common';
 import { formatMarkdownCompareReport } from './compare_markdown_report';
 
-const makeResult = (overrides: Partial<PairedTTestResult> = {}): PairedTTestResult => ({
+const makeResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult => ({
   datasetId: 'ds-1',
   datasetName: 'Dataset One',
   evaluatorName: 'Criteria',
@@ -17,6 +17,8 @@ const makeResult = (overrides: Partial<PairedTTestResult> = {}): PairedTTestResu
   meanBaseline: 0.7,
   pValue: 0.03,
   direction: 'maximize',
+  metricType: 'continuous_bounded',
+  hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'exact', statistic: 5 },
   ...overrides,
 });
 

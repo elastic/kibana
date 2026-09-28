@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-export type MetricType =
-  | 'binary'
-  | 'continuous_bounded'
-  | 'continuous_unbounded'
-  | 'count'
-  | 'ordinal_k';
+import type { MetricType } from '../schemas/experiments/compare_experiments_route.gen';
+
+export type { MetricType };
 
 /**
  * Maximum share of distinct values among the observed scores for an integer metric to be
@@ -43,7 +40,7 @@ export function inferMetricType(target: number[], baseline: number[]): MetricTyp
   const min = Math.min(...values);
   const max = Math.max(...values);
 
-  if (values.every((value) => Number.isInteger(value))) {
+  if (min >= 0 && values.every((value) => Number.isInteger(value))) {
     // TODO: observed values alone cannot separate a scale from a small count. `Chat Calls`
     // observed as [1, 2, 3, 1, 2] is contiguous from 1 with a low unique ratio and is
     // classified as ordinal_k although it is a count.

@@ -8,7 +8,7 @@
 import chalk from 'chalk';
 import { table } from 'table';
 import { isImproved } from '@kbn/evals-common';
-import type { Direction, PairedTTestResult } from '@kbn/evals-common';
+import type { Direction, ComparisonResult } from '@kbn/evals-common';
 
 const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
 
@@ -60,7 +60,7 @@ export function formatPairedTTestReport({
 }: {
   targetExperimentId: string;
   baselineExperimentId: string;
-  results: PairedTTestResult[];
+  results: ComparisonResult[];
   significanceThreshold?: number;
 }): {
   header: string[];

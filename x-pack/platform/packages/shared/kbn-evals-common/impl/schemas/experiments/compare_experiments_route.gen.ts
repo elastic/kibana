@@ -16,12 +16,80 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-export const PairedTTestResult = lazySchema(() =>
+/**
+ * Paired hypothesis test applied to one (dataset, evaluator) slice. `paired_t` compares mean differences, `wilcoxon_signed_rank` is its rank-based alternative, `mcnemar` compares paired binary outcomes.
+ */
+export const StatisticalTestId = lazySchema(() =>
+  z.enum(['paired_t', 'wilcoxon_signed_rank', 'mcnemar'])
+);
+export type StatisticalTestId = z.infer<typeof StatisticalTestId>;
+export type StatisticalTestIdEnum = typeof StatisticalTestId.enum;
+export const StatisticalTestIdEnum = StatisticalTestId.enum;
+
+/**
+ * Shape of the observed scores: every score is 0 or 1 (`binary`), a fraction within [0, 1] (`continuous_bounded`), any real number (`continuous_unbounded`), a non-negative integer (`count`) or a level on a dense 1..k scale (`ordinal_k`).
+ */
+export const MetricType = lazySchema(() =>
+  z.enum(['binary', 'continuous_bounded', 'continuous_unbounded', 'count', 'ordinal_k'])
+);
+export type MetricType = z.infer<typeof MetricType>;
+export type MetricTypeEnum = typeof MetricType.enum;
+export const MetricTypeEnum = MetricType.enum;
+
+/**
+ * The paired hypothesis test run on one (dataset, evaluator) slice.
+ */
+export const HypothesisTest = lazySchema(() =>
+  z.object({
+    id: StatisticalTestId,
+    /**
+     * Variant of the test that produced the p-value, when the test has more than one (for example `mid-p`, `exact`, `asymptotic`).
+     */
+    method: z
+      .string()
+      .max(64)
+      .optional()
+      .describe(
+        'Variant of the test that produced the p-value, when the test has more than one (for example `mid-p`, `exact`, `asymptotic`).'
+      ),
+    /**
+     * Test statistic, null when the test could not run
+     */
+    statistic: z.number().nullable().describe('Test statistic, null when the test could not run'),
+    /**
+     * Only for binary metrics: the pairs on which the two arms disagree, the counts behind the McNemar statistic. Combine with `direction` to read them as improvements or regressions.
+     */
+    discordantPairs: z
+      .object({
+        /**
+         * Pairs where the target scored 1 and the baseline 0
+         */
+        targetOnly: z.number().int().describe('Pairs where the target scored 1 and the baseline 0'),
+        /**
+         * Pairs where the baseline scored 1 and the target 0
+         */
+        baselineOnly: z
+          .number()
+          .int()
+          .describe('Pairs where the baseline scored 1 and the target 0'),
+      })
+      .optional()
+      .describe(
+        'Only for binary metrics: the pairs on which the two arms disagree, the counts behind the McNemar statistic. Combine with `direction` to read them as improvements or regressions.'
+      ),
+  })
+);
+export type HypothesisTest = z.infer<typeof HypothesisTest>;
+
+export const ComparisonResult = lazySchema(() =>
   z.object({
     datasetId: z.string().max(1024),
     datasetName: z.string().max(256),
     evaluatorName: z.string().max(256),
-    sampleSize: z.number().int(),
+    /**
+     * Number of paired scores in this slice
+     */
+    sampleSize: z.number().int().describe('Number of paired scores in this slice'),
     /**
      * Mean score of the baseline experiment
      */
@@ -30,7 +98,13 @@ export const PairedTTestResult = lazySchema(() =>
      * Mean score of the target experiment
      */
     meanTarget: z.number().describe('Mean score of the target experiment'),
-    pValue: z.number().nullable(),
+    /**
+     * Two-sided p-value of `hypothesisTest`, null when the test could not run
+     */
+    pValue: z
+      .number()
+      .nullable()
+      .describe('Two-sided p-value of `hypothesisTest`, null when the test could not run'),
     /**
      * Whether a higher score is an improvement (`maximize`), a lower score is an improvement (`minimize`), or the score cannot be compared across arms at all (`neutral`) for this evaluator.
      */
@@ -39,9 +113,11 @@ export const PairedTTestResult = lazySchema(() =>
       .describe(
         'Whether a higher score is an improvement (`maximize`), a lower score is an improvement (`minimize`), or the score cannot be compared across arms at all (`neutral`) for this evaluator.'
       ),
+    metricType: MetricType,
+    hypothesisTest: HypothesisTest,
   })
 );
-export type PairedTTestResult = z.infer<typeof PairedTTestResult>;
+export type ComparisonResult = z.infer<typeof ComparisonResult>;
 
 export const CompareExperimentsRequestQuery = lazySchema(() =>
   z.object({
@@ -71,7 +147,7 @@ export type CompareExperimentsRequestQueryInput = z.input<typeof CompareExperime
 
 export const CompareExperimentsResponse = lazySchema(() =>
   z.object({
-    results: z.array(PairedTTestResult),
+    results: z.array(ComparisonResult),
     pairing: z.object({
       totalPairs: z.number().int(),
       skippedMissingPairs: z.number().int(),

@@ -6,7 +6,7 @@
  */
 
 import { isImproved } from '@kbn/evals-common';
-import type { Direction, PairedTTestResult } from '@kbn/evals-common';
+import type { Direction, ComparisonResult } from '@kbn/evals-common';
 
 const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
 const STALENESS_WARNING_DAYS = 3;
@@ -80,7 +80,7 @@ export function formatMarkdownCompareReport({
 }: {
   targetExperimentId: string;
   baselineExperimentId: string;
-  results: PairedTTestResult[];
+  results: ComparisonResult[];
   significanceThreshold?: number;
   comparePageUrl?: string;
   baselineTimestamp?: string;
@@ -174,7 +174,7 @@ export function formatMarkdownCompareReport({
     (r) => r.pValue === null || !Number.isFinite(r.pValue) || r.pValue >= significanceThreshold
   );
 
-  const renderTable = (rows: PairedTTestResult[]) => {
+  const renderTable = (rows: ComparisonResult[]) => {
     const tableLines: string[] = [];
     tableLines.push(
       `| Dataset | Evaluator | N | Mean (PR) | Mean (${baselineBranch}) | Diff | p-value | Sig | Outcome |`
