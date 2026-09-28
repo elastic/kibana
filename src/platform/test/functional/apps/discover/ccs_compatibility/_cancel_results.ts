@@ -178,6 +178,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
         });
 
+        // The task-poll above only confirms the *backend* compute is still running — it says
+        // nothing about whether the *client* has received its first async-search response yet
+        // (which is what sets the interceptor's local search id). That first response is bounded
+        // by the server-enforced wait_for_completion_timeout (200ms), but under CI load the round
+        // trip can occasionally exceed the 500ms the secondary button's delay budgets for, leaving
+        // the client's id unset when cancel fires — the search then errors out with no partial-
+        // results retrieval at all (id is required to attempt it). This buffer is bounded by that
+        // known 200ms server contract, unlike DELAY()'s row-count-dependent duration, so a fixed
+        // margin here is a deliberate choice, not an unaccounted-for guess.
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
         await testSubjects.click('queryCancelButton');
         await header.waitUntilLoadingHasFinished();
 
