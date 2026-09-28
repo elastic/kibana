@@ -17,7 +17,6 @@ import type { RuleDomain, RuleParams } from '../../../application/rule/types';
 import {
   injectReferencesIntoActions,
   injectReferencesIntoArtifacts,
-  addMissingUiamKeyTagIfNeeded,
   API_KEY_ATTRIBUTES_TO_STRIP,
 } from '..';
 import { createNewAPIKeySet, extractReferences, updateMeta } from '../../lib';
@@ -267,14 +266,6 @@ async function updateAttributes({
     attributes.throttle ?? null
   );
 
-  const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
-    attributes.tags,
-    apiKeyAttributes?.uiamApiKey,
-    context.isServerless,
-    context.shouldGrantUiam,
-    context.apiKeyType
-  );
-
   // TODO (http-versioning) Remove casts when updateMeta has been converted
   const updatedAttributes = updateMeta(context, {
     ...(apiKeyAttributes
@@ -283,7 +274,6 @@ async function updateAttributes({
           ...apiKeyAttributes,
         }
       : attributes),
-    tags: tagsWithUiamCheck,
     params: updatedParams,
     actions: rawAlertActions,
     notifyWhen,

@@ -31,6 +31,10 @@ jest.mock('./alert_condition_step', () => ({
   AlertConditionStep: () => <div data-test-subj="mockAlertConditionStep" />,
 }));
 
+jest.mock('@kbn/core-di-browser', () => ({
+  useService: () => ({ mgetWorkflows: jest.fn().mockResolvedValue([]) }),
+}));
+
 const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDiscoverState => ({
   ...createInitialState({ mode: 'create' }),
   ...overrides,
@@ -273,12 +277,12 @@ describe('step validation', () => {
   describe('notifications step validation', () => {
     const notificationsStep = getSteps(true).steps.find((s) => s.id === 'notifications')!;
 
-    it('declares notifications fields and no custom validate', () => {
-      expect(notificationsStep.fields).toEqual(['notifications']);
+    it('has no declared fields and no custom validate', () => {
+      expect(notificationsStep.fields).toBeUndefined();
       expect(notificationsStep.validate).toBeUndefined();
     });
 
-    it('delegates to methods.trigger with notifications', async () => {
+    it('returns true without calling trigger when no fields are declared', async () => {
       const state = createState();
       const methods = {
         trigger: jest.fn().mockResolvedValue(true),
@@ -286,17 +290,8 @@ describe('step validation', () => {
 
       const result = await validateStep(notificationsStep, methods, state);
 
-      expect(methods.trigger).toHaveBeenCalledWith(['notifications']);
+      expect(methods.trigger).not.toHaveBeenCalled();
       expect(result).toBe(true);
-    });
-
-    it('returns false when trigger rejects notifications validation', async () => {
-      const state = createState();
-      const methods = {
-        trigger: jest.fn().mockResolvedValue(false),
-      } as unknown as UseFormReturn<FormValues>;
-
-      expect(await validateStep(notificationsStep, methods, state)).toBe(false);
     });
   });
 
@@ -314,17 +309,17 @@ describe('step validation', () => {
         { wrapper: createComposeFormWrapper() }
       );
 
-    it('renders the simple action policy section in create mode', async () => {
+    it('renders the action policies section in create mode', async () => {
       renderNotificationsStep();
       await waitFor(() => {
-        expect(screen.getByText('Simple action policy')).toBeInTheDocument();
+        expect(screen.getByText('Action policies')).toBeInTheDocument();
       });
     });
 
-    it('renders the simple action policy section in edit mode', async () => {
+    it('renders the action policies section in edit mode', async () => {
       renderNotificationsStep('rule-1');
       await waitFor(() => {
-        expect(screen.getByText('Simple action policy')).toBeInTheDocument();
+        expect(screen.getByText('Action policies')).toBeInTheDocument();
       });
     });
   });

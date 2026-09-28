@@ -7,6 +7,7 @@
 
 import React, { memo, useCallback, useState } from 'react';
 import {
+  EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
   EuiPopover,
@@ -17,7 +18,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { SystemFlyoutType } from '@kbn/core-overlays-browser';
 import { useFlyoutPushVsOverlay } from '../hooks/use_flyout_push_vs_overlay';
+import { useFlyoutSize } from '../hooks/use_flyout_width';
 import {
+  FLYOUT_HEADER_FLYOUT_SIZE_RESET_BUTTON_TEST_ID,
+  FLYOUT_HEADER_FLYOUT_SIZE_TITLE_TEST_ID,
   FLYOUT_HEADER_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID,
   FLYOUT_HEADER_FLYOUT_TYPE_OVERLAY_OPTION_TEST_ID,
   FLYOUT_HEADER_FLYOUT_TYPE_PUSH_OPTION_TEST_ID,
@@ -57,6 +61,14 @@ const FLYOUT_TYPE_PUSH_TOOLTIP = i18n.translate(
   'xpack.securitySolution.flyoutV2.settingsMenu.pushTooltip',
   { defaultMessage: 'Displays the flyout next to the page' }
 );
+const FLYOUT_SIZE_TITLE = i18n.translate(
+  'xpack.securitySolution.flyoutV2.settingsMenu.flyoutSizeTitle',
+  { defaultMessage: 'Flyout size' }
+);
+const FLYOUT_SIZE_RESET_BUTTON = i18n.translate(
+  'xpack.securitySolution.flyoutV2.settingsMenu.resetSizeButton',
+  { defaultMessage: 'Reset size' }
+);
 
 const OPTIONS = [
   {
@@ -81,6 +93,7 @@ const OPTIONS = [
  */
 export const SettingsMenu = memo(() => {
   const { type, setType } = useFlyoutPushVsOverlay();
+  const { hasCustomWidth, resetSize } = useFlyoutSize();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const togglePopover = useCallback(() => setIsPopoverOpen((open) => !open), []);
@@ -92,6 +105,11 @@ export const SettingsMenu = memo(() => {
     },
     [setType]
   );
+
+  const onResetSizeClick = useCallback(() => {
+    resetSize();
+    closePopover();
+  }, [resetSize, closePopover]);
 
   const button = (
     <EuiToolTip content={SETTINGS_MENU_BUTTON_TOOLTIP}>
@@ -126,6 +144,20 @@ export const SettingsMenu = memo(() => {
         onChange={onFlyoutTypeChange}
         data-test-subj={FLYOUT_HEADER_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID}
       />
+      <EuiSpacer size="m" />
+      <EuiTitle size="xxs" data-test-subj={FLYOUT_HEADER_FLYOUT_SIZE_TITLE_TEST_ID}>
+        <h3>{FLYOUT_SIZE_TITLE}</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiButtonEmpty
+        onClick={onResetSizeClick}
+        disabled={!hasCustomWidth}
+        flush="left"
+        size="s"
+        data-test-subj={FLYOUT_HEADER_FLYOUT_SIZE_RESET_BUTTON_TEST_ID}
+      >
+        {FLYOUT_SIZE_RESET_BUTTON}
+      </EuiButtonEmpty>
     </EuiPopover>
   );
 });

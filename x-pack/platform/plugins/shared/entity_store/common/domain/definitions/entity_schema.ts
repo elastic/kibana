@@ -17,6 +17,8 @@ export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 /** Which extraction process a task is running as. */
 export type ExtractionMode = z.infer<typeof ExtractionMode>;
 export const ExtractionMode = z.enum(['single', 'priority', 'nonPriority']);
+/** Named access to the modes. Use this rather than the string literals, which live only above. */
+export const EXTRACTION_MODE = ExtractionMode.enum;
 
 const mappingSchema = z.any();
 

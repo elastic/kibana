@@ -147,4 +147,26 @@ describe('datatableFn', () => {
       'unknown',
     ]);
   });
+
+  it('should ask inspector Data to show the table dash for missing values', async () => {
+    const tables = {
+      reset: jest.fn(function (this: { missingValueDisplay: 'text' | 'table' }) {
+        this.missingValueDisplay = 'text';
+      }),
+      allowCsvExport: false,
+      missingValueDisplay: 'text' as const,
+      logDatatable: jest.fn(),
+    };
+    const ctx = {
+      ...context,
+      inspectorAdapters: { tables },
+    } as unknown as ExecutionContext<DefaultInspectorAdapters>;
+
+    await datatableFn(() => mockFormatFactory)(buildTable(), buildArgs(), ctx);
+
+    expect(tables.reset).toHaveBeenCalled();
+    expect(tables.allowCsvExport).toBe(true);
+    expect(tables.missingValueDisplay).toBe('table');
+    expect(tables.logDatatable).toHaveBeenCalled();
+  });
 });

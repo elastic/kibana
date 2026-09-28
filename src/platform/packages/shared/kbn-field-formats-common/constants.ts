@@ -16,14 +16,20 @@ export const EMPTY_LABEL = i18n.translate('fieldFormats.blankLabel', {
 
 export const NULL_LABEL = i18n.translate('fieldFormats.nullLabel', {
   defaultMessage: '(null)',
-  description: 'Represents the label used to replace an null value in tables and charts',
+  description:
+    'Represents the label used to replace a null value in charts, and the tooltip describing the dash shown in tables and Discover',
 });
+
+/**
+ * Displayed in place of a null value in tables and Discover, where a tooltip can carry the
+ * meaning. Not translated: a dash is locale-independent.
+ *
+ * Named `NULL_PLACEHOLDER` (rather than `NULL_TOKEN`) to make the distinction from
+ * `MISSING_TOKEN` explicit: `MISSING_TOKEN` is an internal sentinel used to mark absent
+ * values in aggregation flows, whereas this constant is user-facing UI text.
+ */
+export const NULL_PLACEHOLDER = '-';
 
 export const NAN_LABEL = 'NaN';
 
 export const MISSING_TOKEN = '__missing__';
-
-export function getEmptyOrMissingLabel(val: unknown): string | undefined {
-  if (val === '') return EMPTY_LABEL;
-  if (val == null || val === MISSING_TOKEN) return NULL_LABEL;
-}

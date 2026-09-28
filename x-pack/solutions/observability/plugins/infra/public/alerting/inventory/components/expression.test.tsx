@@ -16,7 +16,7 @@ import { unifiedSearchPluginMock as mockUnifiedSearchPluginMock } from '@kbn/uni
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import type { AlertContextMeta } from './expression';
-import { defaultExpression, ExpressionRow, Expressions } from './expression';
+import { defaultExpression, ExpressionRow, Expressions, type ExpressionsProps } from './expression';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { ResolvedDataView } from '../../../utils/data_view';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
@@ -161,6 +161,57 @@ describe('Expression', () => {
     const chart = wrapper.find('[data-test-subj="preview-chart"]');
 
     expect(chart.prop('kuery')).toBe(ruleParams.filterQueryText);
+  });
+
+  function previewSchema(ruleParams: Pick<ExpressionsProps['ruleParams'], 'nodeType' | 'schema'>) {
+    const params: ExpressionsProps['ruleParams'] = {
+      criteria: [
+        {
+          metric: 'cpuV2',
+          timeSize: 1,
+          timeUnit: 'm',
+          threshold: [10],
+          comparator: COMPARATORS.GREATER_THAN,
+        },
+      ],
+      filterQueryText: '',
+      sourceId: 'default',
+      ...ruleParams,
+    };
+
+    const wrapper = shallowWithIntl(
+      <Expressions
+        ruleInterval="1m"
+        ruleThrottle="1m"
+        alertNotifyWhen="onThrottleInterval"
+        ruleParams={params}
+        errors={{}}
+        setRuleParams={(key, value) => Reflect.set(params, key, value)}
+        setRuleProperty={() => {}}
+        metadata={{}}
+        dataViews={dataViewMock}
+      />
+    );
+
+    return {
+      schema: wrapper.find('[data-test-subj="preview-chart"]').prop('schema'),
+      storedSchema: params.schema,
+    };
+  }
+
+  it('previews a pod rule as ecs without rewriting a stored semconv schema', () => {
+    const preview = previewSchema({ nodeType: 'pod', schema: 'semconv' });
+
+    expect(preview.schema).toBe('ecs');
+    expect(preview.storedSchema).toBe('semconv');
+  });
+
+  it('keeps a host preview on the saved schema', () => {
+    expect(previewSchema({ nodeType: 'host', schema: 'semconv' }).schema).toBe('semconv');
+  });
+
+  it('does not invent a schema for a host rule that has none', () => {
+    expect(previewSchema({ nodeType: 'host' }).schema).toBeUndefined();
   });
 
   describe('using custom metrics', () => {
