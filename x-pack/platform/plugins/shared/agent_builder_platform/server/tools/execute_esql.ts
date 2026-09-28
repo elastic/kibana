@@ -64,7 +64,12 @@ If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.
 
 The \`limit\` parameter can be used to limit the number of results to return. It defaults to 100.
 You should avoid using a higher limit value unless explicitly asked by the user or if you know for sure the length of the data will not be a problem.
-Note that this option can't be used to increase the number of results if the query already defines a \`LIMIT\` clause - the lowest limit will always prevail.`,
+Note that this option can't be used to increase the number of results if the query already defines a \`LIMIT\` clause - the lowest limit will always prevail.
+
+### Data tiers
+
+Indices on the frozen tier are always excluded, because querying them requires recovering searchable snapshots from object storage and can take several minutes.
+If results look incomplete for a time range that reaches far into the past, tell the user that frozen tier data was not searched.`,
     schema: executeEsqlToolSchema,
     handler: async (
       { query: esqlQuery, params: esqlParams = {}, time_range: explicitTimeRange, limit = 100 },
