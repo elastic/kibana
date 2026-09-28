@@ -9,6 +9,7 @@ import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-serve
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ENGINE_DESCRIPTOR_TYPE_NAME } from '../../../../common/privileges';
+import { MIN_SAMPLING_RATE } from '../global_state/constants';
 
 export const EngineDescriptorTypeName = ENGINE_DESCRIPTOR_TYPE_NAME;
 
@@ -381,6 +382,79 @@ const version8: SavedObjectsFullModelVersion = {
   },
 };
 
+const engineDescriptorSchemaV9 = engineDescriptorSchemaV8.extends({
+  nonPriorityLogExtractionState: schema.nullable(logExtractionRuntimeStateSchemaV7),
+});
+
+// Adds the non-priority process cursor. schema.nullable defaults absent keys to null, so no
+// backfill is needed for version 8 descriptors. Not queried, so no mappings addition.
+const version9: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    create: engineDescriptorSchemaV9,
+    forwardCompatibility: engineDescriptorSchemaV9.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
+const engineDescriptorSchemaV10 = engineDescriptorSchemaV9.extends({
+  nonPriorityStatus: schema.nullable(
+    schema.oneOf([
+      schema.literal('installing'),
+      schema.literal('started'),
+      schema.literal('stopped'),
+      schema.literal('updating'),
+      schema.literal('error'),
+    ])
+  ),
+  nonPriorityError: schema.nullable(
+    schema.object({
+      message: schema.string(),
+      action: schema.string(),
+    })
+  ),
+});
+
+// Adds the non-priority process status and error, so its lifecycle and failures are tracked
+// separately from the priority process rather than sharing one field. schema.nullable defaults
+// absent keys to null, so no backfill is needed for version 9 descriptors. Not queried, so no
+// mappings addition.
+const version10: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    create: engineDescriptorSchemaV10,
+    forwardCompatibility: engineDescriptorSchemaV10.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
+const nonPriorityLogExtractionConfigSchemaV11 = schema.object({
+  lookbackPeriod: schema.maybe(schema.nullable(schema.string())),
+  delay: schema.maybe(schema.nullable(schema.string())),
+  docsLimit: schema.maybe(schema.nullable(schema.number())),
+  maxLogsPerPage: schema.maybe(schema.nullable(schema.number())),
+  frequency: schema.maybe(schema.nullable(schema.string())),
+  maxTimeWindowSize: schema.maybe(schema.nullable(schema.string())),
+  maxLogsPerWindow: schema.maybe(schema.nullable(schema.number())),
+  maxLogsPerWindowCapBehavior: schema.maybe(
+    schema.nullable(schema.oneOf([schema.literal('defer'), schema.literal('drop')] as const))
+  ),
+  samplingRate: schema.maybe(schema.nullable(schema.number({ min: MIN_SAMPLING_RATE, max: 1 }))),
+});
+
+const engineDescriptorSchemaV11 = engineDescriptorSchemaV10.extends({
+  nonPriorityLogExtractionConfig: schema.maybe(nonPriorityLogExtractionConfigSchemaV11),
+});
+
+// Adds nonPriorityLogExtractionConfig for future non-priority-specific overrides (e.g. samplingRate).
+// Not exposed via any API - populated only by internal server logic. Optional, so older descriptors
+// stay valid with no backfill. Not queried, so no mappings addition.
+const version11: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    create: engineDescriptorSchemaV11,
+    forwardCompatibility: engineDescriptorSchemaV11.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EngineDescriptorType: SavedObjectsType = {
   name: EngineDescriptorTypeName,
   hidden: false,
@@ -395,6 +469,9 @@ export const EngineDescriptorType: SavedObjectsType = {
     6: version6,
     7: version7,
     8: version8,
+    9: version9,
+    10: version10,
+    11: version11,
   },
   hiddenFromHttpApis: true,
 };

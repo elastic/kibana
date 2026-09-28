@@ -11,9 +11,10 @@ import type { FC, ReactNode } from 'react';
 import React from 'react';
 import classNames from 'classnames';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   items: ReactNode[];
@@ -29,25 +30,43 @@ interface Props {
 
 export const FilterButtonGroup: FC<Props> = ({ items, attached, size = 's', ...rest }: Props) => {
   const styles = useMemoCss(filterButtonStyles);
+
+  if (attached) {
+    return (
+      <EuiFlexGroup
+        className={classNames('kbnFilterButtonGroup', {
+          'kbnFilterButtonGroup--attached': attached,
+          [`kbnFilterButtonGroup--${size}`]: size,
+        })}
+        gutterSize="none"
+        responsive={false}
+        css={styles.wrapper}
+        {...rest}
+      >
+        {items.map((item, i) =>
+          !item ? null : (
+            <EuiFlexItem key={i} grow={false}>
+              {item}
+            </EuiFlexItem>
+          )
+        )}
+      </EuiFlexGroup>
+    );
+  }
+
   return (
-    <EuiFlexGroup
-      className={classNames('kbnFilterButtonGroup', {
-        'kbnFilterButtonGroup--attached': attached,
-        [`kbnFilterButtonGroup--${size}`]: size,
+    <EuiButtonGroup
+      className="kbnFilterButtonGroup"
+      variant="segmented"
+      legend={i18n.translate('kql.query.queryBar.filterButtonGroupTitle', {
+        defaultMessage: 'Filter options',
       })}
-      gutterSize="none"
-      responsive={false}
-      css={styles.wrapper}
+      buttonSize={size}
+      wrap={false}
       {...rest}
     >
-      {items.map((item, i) =>
-        item == null ? undefined : (
-          <EuiFlexItem key={i} grow={false}>
-            {item}
-          </EuiFlexItem>
-        )
-      )}
-    </EuiFlexGroup>
+      {items}
+    </EuiButtonGroup>
   );
 };
 

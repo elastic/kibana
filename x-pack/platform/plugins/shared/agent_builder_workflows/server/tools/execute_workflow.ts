@@ -55,6 +55,8 @@ Use this tool when:
 — The user asks to run, trigger or execute a workflow.
 — You need to run a workflow you just generated (e.g. via \`generate_workflow\`).
 
+**This tool can perform destructive and irreversible operations** — workflows may include steps that delete Elasticsearch indices or documents, post messages to Slack, make arbitrary HTTP requests, or perform other actions with external side effects. Always review the workflow steps before executing.
+
 ## Source — exactly one must be provided
 
 - \`workflowId\`: a persisted workflow id (the workflow must be saved and enabled).

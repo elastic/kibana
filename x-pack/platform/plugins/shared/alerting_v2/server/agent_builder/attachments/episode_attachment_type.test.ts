@@ -24,6 +24,7 @@ import type { EpisodesClient } from '../../lib/episodes_client';
 import type { RulesClient } from '../../lib/rules_client';
 import type { PrivilegeChecker } from '../../lib/services/privilege_checker/privilege_checker';
 import { getRuleToolId } from '../tools/get_rule';
+import { getRuleEventsToolId } from '../tools/get_rule_events';
 import { refreshEpisodeToolId } from '../tools/refresh_episode';
 import { createEpisodeAttachmentType } from './episode_attachment_type';
 
@@ -39,7 +40,7 @@ const baseEpisodeData: EpisodeAttachmentData = {
   'episode.id': 'ep-1',
   'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
   'rule.id': 'rule-1',
-  group_hash: 'gh-1',
+  group_hash: '98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56',
   first_timestamp: '2026-04-10T11:00:00.000Z',
   last_timestamp: '2026-04-10T12:00:00.000Z',
   duration: 3600000,
@@ -204,7 +205,7 @@ describe('createEpisodeAttachmentType', () => {
         last_ack_action: null,
         last_assignee_uid: null,
         last_snooze_action: null,
-        snooze_expiry: null,
+        snoozed_until: null,
         last_tags: null,
         episode_data: null,
         severity: null,
@@ -219,7 +220,7 @@ describe('createEpisodeAttachmentType', () => {
           last_ack_action: undefined,
           last_assignee_uid: undefined,
           last_snooze_action: undefined,
-          snooze_expiry: undefined,
+          snoozed_until: undefined,
           last_tags: undefined,
           episode_data: undefined,
           severity: undefined,
@@ -435,21 +436,25 @@ describe('createEpisodeAttachmentType', () => {
       expect(value).toContain('Episode label: Host CPU high alert');
     });
 
-    it('mentions the attachment-scoped refresh and get_rule tools', async () => {
+    it('mentions the attachment-scoped refresh, get_rule, and get_rule_events tools', async () => {
       const value = await formatValue(baseEpisodeData);
       expect(value).toContain(refreshEpisodeToolId('attach-1'));
       expect(value).toContain(getRuleToolId('attach-1'));
+      expect(value).toContain(getRuleEventsToolId('attach-1'));
+      expect(value).toContain('Call it with no arguments');
+      expect(value).toContain('at most 100 rows');
+      expect(value).toContain('Do not retry the same window');
       expect(value).toContain('rule-management');
     });
 
-    it('exposes refresh_episode and get_rule bounded tools unique to the attachment', async () => {
+    it('exposes refresh_episode, get_rule, and get_rule_events bounded tools unique to the attachment', async () => {
       const formatted = await definition.format(buildAttachment(baseEpisodeData), {
         request: {} as KibanaRequest,
         spaceId: 'default',
       });
       expect(formatted.getBoundedTools).toBeDefined();
       const tools = await formatted.getBoundedTools!();
-      expect(tools).toHaveLength(2);
+      expect(tools).toHaveLength(3);
       expect(tools[0]).toEqual(
         expect.objectContaining({
           id: refreshEpisodeToolId('attach-1'),
@@ -463,6 +468,12 @@ describe('createEpisodeAttachmentType', () => {
         })
       );
       expect(tools[1].description).toContain('rule-management');
+      expect(tools[2]).toEqual(
+        expect.objectContaining({
+          id: getRuleEventsToolId('attach-1'),
+          description: expect.stringContaining('ep-1'),
+        })
+      );
     });
   });
 
@@ -475,6 +486,7 @@ describe('createEpisodeAttachmentType', () => {
       expect(description).toContain('read-only');
       expect(description).toContain('refresh_episode');
       expect(description).toContain('get_rule');
+      expect(description).toContain('get_rule_events');
       expect(description).toContain('rule-management');
     });
   });

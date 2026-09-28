@@ -26,7 +26,6 @@ describe('attachmentDataToActionPolicyPayload', () => {
       destinations: [{ type: 'workflow', id: 'wf-1' }],
       matcher: { tags: ['prod'] },
       group_by: ['host.name'],
-      tags: ['tag1'],
       grouping_mode: 'per_field',
       throttle: { strategy: 'time_interval', interval: '5m' },
     };
@@ -39,7 +38,6 @@ describe('attachmentDataToActionPolicyPayload', () => {
       destinations: [{ type: 'workflow', id: 'wf-1' }],
       matcher: { tags: ['prod'] },
       group_by: ['host.name'],
-      tags: ['tag1'],
       grouping_mode: 'per_field',
       throttle: { strategy: 'time_interval', interval: '5m' },
     });

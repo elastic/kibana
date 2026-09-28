@@ -14,19 +14,19 @@ import {
   ALERTING_V2_RULE_LIBRARY_LOCATOR,
   ALERTING_V2_RULES_LOCATOR,
 } from '@kbn/alerting-v2-constants';
+import type { LocatorHost } from '@kbn/rule-data-utils';
 import type {
   AlertingV2ActionPoliciesLocatorParams,
   AlertingV2EpisodesLocatorParams,
   AlertingV2ExecutionHistoryLocatorParams,
   AlertingV2HostApp,
-  AlertingV2LocatorHost,
   AlertingV2RuleLibraryLocatorParams,
   AlertingV2RulesLocatorParams,
 } from '../locators';
 import type { AlertingV2Locators } from './locator_context';
 
 interface HostParams extends SerializableRecord {
-  host?: AlertingV2LocatorHost;
+  host?: LocatorHost;
 }
 
 export const getAlertingV2Locators = (share: SharePluginStart): AlertingV2Locators => ({
@@ -47,7 +47,7 @@ export const getAlertingV2Locators = (share: SharePluginStart): AlertingV2Locato
 
 export const bindLocatorToHost = <P extends HostParams>(
   locator: LocatorPublic<P>,
-  host: AlertingV2LocatorHost
+  host: LocatorHost
 ): LocatorPublic<P> => {
   const withHost = (params: P): P => ({
     ...params,

@@ -137,6 +137,7 @@ export const createAiNavigationTree = (
           title: i18nStrings.ingestAndManageData.indicesAndDataStreams.title,
           children: [
             { link: 'management:index_management' },
+            { link: 'management:esql_views' },
             { link: 'management:transform' },
             { link: 'management:data_quality' },
           ],
@@ -154,6 +155,7 @@ export const createAiNavigationTree = (
           children: [
             { link: 'management:api_keys' },
             { link: 'management:application_connections' },
+            { link: 'management:service_accounts' },
             { link: 'management:roles' },
           ],
         },

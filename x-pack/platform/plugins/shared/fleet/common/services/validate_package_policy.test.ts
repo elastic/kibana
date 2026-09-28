@@ -746,6 +746,28 @@ describe('Fleet - validatePackagePolicy()', () => {
         expect(result.inputs?.foo?.streams?.foo?.condition!.length).toBeGreaterThan(0);
         expect(validationHasErrors(result)).toBe(true);
       });
+
+      it('does not throw and returns no condition errors for a boolean condition', () => {
+        // Handlebars can coerce 'true'/'false' text to boolean; validateCondition must not
+        // call .trim() on the raw boolean value.
+        const result = validatePackagePolicy(
+          { ...validPackagePolicy, condition: true as any },
+          mockPackage,
+          deps
+        );
+        expect(result.condition).toBeNull();
+        expect(validationHasErrors(result)).toBe(false);
+      });
+
+      it('does not throw and returns no condition errors for boolean false condition', () => {
+        const result = validatePackagePolicy(
+          { ...validPackagePolicy, condition: false as any },
+          mockPackage,
+          deps
+        );
+        expect(result.condition).toBeNull();
+        expect(validationHasErrors(result)).toBe(false);
+      });
     });
   });
 

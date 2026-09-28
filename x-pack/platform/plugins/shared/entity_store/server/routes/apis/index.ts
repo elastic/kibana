@@ -10,6 +10,8 @@ export { registerStop } from './stop';
 export { registerStatus } from './status';
 export { registerForceLogExtraction } from './force_log_extraction';
 export { registerForceHistorySnapshot } from './force_history_snapshot';
+export { registerEnableHistorySnapshot } from './enable_history_snapshot';
+export { registerDisableHistorySnapshot } from './disable_history_snapshot';
 export { registerUninstall } from './uninstall';
 export { registerCRUDCreate } from './crud/create';
 export { registerCRUDUpdate } from './crud/update';

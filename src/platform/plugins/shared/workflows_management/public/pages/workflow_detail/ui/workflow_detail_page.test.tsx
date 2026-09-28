@@ -85,7 +85,17 @@ jest.mock('./workflow_not_found_page', () => ({
 }));
 
 jest.mock('./workflow_detail_header', () => ({
-  WorkflowDetailHeader: () => <div data-test-subj="workflow-detail-header">{'Header'}</div>,
+  WorkflowDetailHeader: ({ onOpenExecutionList }: { onOpenExecutionList?: () => void }) => (
+    <div data-test-subj="workflow-detail-header">
+      <button
+        type="button"
+        data-test-subj="workflowDetailExecutionsButton"
+        onClick={onOpenExecutionList}
+      >
+        {'Executions'}
+      </button>
+    </div>
+  ),
 }));
 jest.mock('./workflow_detail_editor', () => ({
   WorkflowDetailEditor: () => <div data-test-subj="workflow-detail-editor">{'Editor'}</div>,
@@ -415,6 +425,50 @@ describe('WorkflowDetailPage', () => {
       expect(screen.queryByTestId('workflow-execution-list')).not.toBeInTheDocument();
       expect(screen.queryByTestId('workflow-execution-detail')).not.toBeInTheDocument();
     });
+
+    it('opens the list flyout on Executions click and closes it on the next click', () => {
+      const setSelectedExecution = jest.fn();
+      mockUseWorkflowUrlState.mockReturnValue({
+        activeTab: 'workflow' as const,
+        selectedExecutionId: undefined,
+        setSelectedExecution,
+        setActiveTab: jest.fn(),
+      });
+
+      renderWithProviders({ id: 'test-workflow-123' }, (s) => {
+        s.dispatch(setWorkflow(mockWorkflow));
+      });
+
+      fireEvent.click(screen.getByTestId('workflowDetailExecutionsButton'));
+      expect(screen.getByTestId('workflow-execution-list-flyout')).toBeInTheDocument();
+      expect(screen.queryByTestId('workflow-execution-flyout')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('workflowDetailExecutionsButton'));
+      expect(screen.queryByTestId('workflow-execution-list-flyout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflow-execution-flyout')).not.toBeInTheDocument();
+      expect(setSelectedExecution).toHaveBeenCalledWith(null, { replace: true });
+    });
+
+    it('closes the detail and list flyouts when Executions is clicked while a run is selected', () => {
+      const setSelectedExecution = jest.fn();
+      mockUseWorkflowUrlState.mockReturnValue({
+        activeTab: 'workflow' as const,
+        selectedExecutionId: 'execution-123',
+        setSelectedExecution,
+        setActiveTab: jest.fn(),
+      });
+
+      renderWithProviders({ id: 'test-workflow-123' }, (s) => {
+        s.dispatch(setWorkflow(mockWorkflow));
+      });
+
+      expect(screen.getByTestId('workflow-execution-flyout')).toBeInTheDocument();
+      expect(screen.getByTestId('workflow-execution-list-flyout')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('workflowDetailExecutionsButton'));
+      expect(screen.queryByTestId('workflow-execution-list-flyout')).not.toBeInTheDocument();
+      expect(setSelectedExecution).toHaveBeenCalledWith(null, { replace: true });
+    });
   });
 
   describe('breadcrumbs', () => {
@@ -431,6 +485,31 @@ describe('WorkflowDetailPage', () => {
     it('should call loadConnectors on mount', () => {
       renderWithProviders({ id: 'test-workflow-123' });
       expect(mockLoadConnectors).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not reload the workflow when a URL update writes new history state', () => {
+      const { historyRef } = renderWithProviders({ id: 'test-workflow-123' }, undefined, [
+        '/test-workflow-123',
+      ]);
+      expect(mockLoadWorkflow).toHaveBeenCalledTimes(1);
+
+      // `useWorkflowUrlState` writes its own keys to the entry state when it updates the URL.
+      act(() => {
+        historyRef.current?.push({
+          pathname: '/test-workflow-123',
+          search: '?executionId=exec-1',
+          state: { workflowsRunEntry: { depth: 1, openedInApp: true } },
+        });
+      });
+      act(() => {
+        historyRef.current?.push({
+          pathname: '/test-workflow-123',
+          search: '?executionId=exec-1&stepExecutionId=step-a',
+          state: { workflowsRunEntry: { depth: 2, openedInApp: true } },
+        });
+      });
+
+      expect(mockLoadWorkflow).toHaveBeenCalledTimes(1);
     });
 
     it('should call loadWorkflow when id changes', () => {
@@ -498,7 +577,7 @@ describe('WorkflowDetailPage', () => {
         s.dispatch(setWorkflow(mockWorkflow));
       });
 
-      expect(setActiveTab).toHaveBeenCalledWith('workflow');
+      expect(setActiveTab).toHaveBeenCalledWith('workflow', { replace: true });
     });
 
     it('clears selected execution on workflow tab when execution read is not allowed', () => {
@@ -518,7 +597,7 @@ describe('WorkflowDetailPage', () => {
         s.dispatch(setWorkflow(mockWorkflow));
       });
 
-      expect(setSelectedExecution).toHaveBeenCalledWith(null);
+      expect(setSelectedExecution).toHaveBeenCalledWith(null, { replace: true });
     });
 
     it('does not mount execution list when execution read is not allowed', () => {

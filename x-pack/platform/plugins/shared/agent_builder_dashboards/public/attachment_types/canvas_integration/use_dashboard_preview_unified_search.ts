@@ -15,7 +15,7 @@ import { isOfQueryType, type Filter, type Query, type TimeRange } from '@kbn/es-
 import { i18n } from '@kbn/i18n';
 import { useHasEsqlPanel } from '@kbn/presentation-publishing';
 import { isEqual } from 'lodash';
-import type { DashboardState } from '@kbn/dashboard-plugin/server';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { DEFAULT_TIME_RANGE } from '@kbn/agent-builder-dashboards-common';
 
 interface UseDashboardPreviewUnifiedSearchParams {

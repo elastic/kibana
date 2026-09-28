@@ -7,7 +7,7 @@
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { RulesApi } from './rules_api';
-import { ALERTING_V2_RULE_API_PATH } from '../constants';
+import { ALERTING_V2_INTERNAL_RULE_API_PATH, ALERTING_V2_RULE_API_PATH } from '../constants';
 
 describe('RulesApi', () => {
   const http = httpServiceMock.createStartContract();
@@ -116,7 +116,7 @@ describe('RulesApi', () => {
 
       const result = await api.listTags();
 
-      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/tags`, {
+      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_INTERNAL_RULE_API_PATH}/tags`, {
         query: { search: undefined, kind: undefined },
       });
       expect(result).toEqual({ tags: ['cpu', 'memory'] });
@@ -127,7 +127,7 @@ describe('RulesApi', () => {
 
       await api.listTags({ search: 'pro' });
 
-      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/tags`, {
+      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_INTERNAL_RULE_API_PATH}/tags`, {
         query: { search: 'pro', kind: undefined },
       });
     });
@@ -137,7 +137,7 @@ describe('RulesApi', () => {
 
       await api.listTags({ kind: 'alert' });
 
-      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/tags`, {
+      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_INTERNAL_RULE_API_PATH}/tags`, {
         query: { search: undefined, kind: 'alert' },
       });
     });

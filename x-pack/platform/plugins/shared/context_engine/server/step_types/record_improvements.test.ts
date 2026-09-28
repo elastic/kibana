@@ -84,7 +84,7 @@ describe('getRecordImprovementsStepDefinition', () => {
 
     await handler(context);
 
-    expect(get).toHaveBeenCalledWith('orders');
+    expect(get).toHaveBeenCalledWith('orders', 'default');
     expect(recordImprovementsMock).toHaveBeenCalledWith(
       expect.objectContaining({ allowedActions: ['add_ki'] })
     );
@@ -130,6 +130,7 @@ describe('getRecordImprovementsStepDefinition', () => {
         signalSpaces: ['default'],
         proposals: INPUT.improvements,
         improvementsService,
+        spaceId: 'default',
       })
     );
   });
@@ -207,5 +208,33 @@ describe('getRecordImprovementsStepDefinition', () => {
       expect.objectContaining({ type: 'FeatureDisabledError' })
     );
     expect(recordImprovementsMock).not.toHaveBeenCalled();
+  });
+
+  it('uses the workflow space for the feature flag, privilege check, AI index lookup, and improvements service', async () => {
+    const esClient = { bulk: jest.fn() };
+    const context = createMockStepContext({ input: INPUT, esClient, spaceId: 'marketing' });
+    const isContextEngineEnabled = jest.fn().mockResolvedValue(true);
+    const checkWritePrivilege = jest.fn().mockResolvedValue(true);
+    const getImprovementsService = jest.fn().mockReturnValue(improvementsService);
+    const get = jest.fn().mockResolvedValue({ id: 'orders' });
+
+    const { handler } = getRecordImprovementsStepDefinition({
+      getAiIndexService: () => ({ get } as never),
+      getImprovementsService,
+      getAuditLogger: async () => undefined,
+      isContextEngineEnabled,
+      isFeedbackLoopEnabled: async () => true,
+      checkWritePrivilege,
+      ...mockKiStepTelemetry(),
+    });
+    await handler(context);
+
+    expect(isContextEngineEnabled).toHaveBeenCalledWith('marketing');
+    expect(checkWritePrivilege).toHaveBeenCalledWith(expect.anything(), 'marketing');
+    expect(get).toHaveBeenCalledWith('orders', 'marketing');
+    expect(getImprovementsService).toHaveBeenCalledWith(esClient, 'marketing');
+    expect(recordImprovementsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ spaceId: 'marketing' })
+    );
   });
 });
