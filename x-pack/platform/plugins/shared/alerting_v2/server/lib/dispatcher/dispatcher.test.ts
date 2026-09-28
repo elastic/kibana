@@ -115,8 +115,14 @@ function mockNpFindAllDecrypted(
 
 const createMockWorkflowsManagement = (): jest.Mocked<WorkflowsServerPluginSetup['management']> =>
   ({
-    getWorkflowsByIds: jest.fn().mockResolvedValue([]),
-    bulkScheduleWorkflow: jest.fn().mockResolvedValue([]),
+    getWorkflowsByIdsForRequests: jest.fn(
+      async (
+        lookups: Parameters<
+          WorkflowsServerPluginSetup['management']['getWorkflowsByIdsForRequests']
+        >[0]
+      ) => lookups.map(() => ({ status: 'fulfilled' as const, value: [] }))
+    ),
+    getClient: jest.fn(() => ({ bulkScheduleWorkflow: jest.fn().mockResolvedValue([]) })),
   } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>);
 
 function buildDispatcherService(deps: {
@@ -471,8 +477,8 @@ describe('DispatcherService', () => {
       const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
       const result = await dispatcherService.run({ eventWatermark, taskId: 'task-1' });
 
-      expect(mockWfm.getWorkflowsByIds).not.toHaveBeenCalled();
-      expect(mockWfm.bulkScheduleWorkflow).not.toHaveBeenCalled();
+      expect(mockWfm.getWorkflowsByIdsForRequests).not.toHaveBeenCalled();
+      expect(mockWfm.getClient).not.toHaveBeenCalled();
 
       const [{ operations }] = storageEsClient.bulk.mock.calls[0];
       const docs = (operations ?? []).filter((_, index) => index % 2 === 1);

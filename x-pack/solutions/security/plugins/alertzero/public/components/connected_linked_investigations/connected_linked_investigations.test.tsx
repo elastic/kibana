@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { useLinkedInvestigations } from '@kbn/agentic-investigations-plugin/public';
+import { statusSignal } from '../connected_status/status_signal';
 import { ConnectedLinkedInvestigations } from './connected_linked_investigations';
 
 jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
@@ -52,6 +53,7 @@ describe('ConnectedLinkedInvestigations', () => {
       data: undefined,
       isLoading: true,
       isError: false,
+      refetch: jest.fn(),
     });
 
     render(<ConnectedLinkedInvestigations {...defaultProps} />, { wrapper });
@@ -64,6 +66,7 @@ describe('ConnectedLinkedInvestigations', () => {
       data: undefined,
       isLoading: false,
       isError: true,
+      refetch: jest.fn(),
     });
 
     render(<ConnectedLinkedInvestigations {...defaultProps} />, { wrapper });
@@ -79,6 +82,7 @@ describe('ConnectedLinkedInvestigations', () => {
       ],
       isLoading: false,
       isError: false,
+      refetch: jest.fn(),
     });
 
     render(<ConnectedLinkedInvestigations {...defaultProps} />, { wrapper });
@@ -93,6 +97,7 @@ describe('ConnectedLinkedInvestigations', () => {
       data: [{ id: 'inv-1', title: 'Mass file encryption', status: 'open', agent_id: 'agent-1' }],
       isLoading: false,
       isError: false,
+      refetch: jest.fn(),
     });
 
     render(
@@ -109,7 +114,12 @@ describe('ConnectedLinkedInvestigations', () => {
   });
 
   it('passes linkedInvestigationIds to the hook', () => {
-    mockUseLinkedInvestigations.mockReturnValue({ data: [], isLoading: false, isError: false });
+    mockUseLinkedInvestigations.mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
     const ids = ['inv-x', 'inv-y'];
 
     render(<ConnectedLinkedInvestigations {...defaultProps} linkedInvestigationIds={ids} />, {
@@ -119,5 +129,25 @@ describe('ConnectedLinkedInvestigations', () => {
     expect(mockUseLinkedInvestigations).toHaveBeenCalledWith(
       expect.objectContaining({ linkedInvestigationIds: ids })
     );
+  });
+
+  it('calls refetch when the status signal fires', () => {
+    const refetch = jest.fn();
+    mockUseLinkedInvestigations.mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: false,
+      refetch,
+    });
+
+    render(<ConnectedLinkedInvestigations {...defaultProps} />, { wrapper });
+
+    expect(refetch).not.toHaveBeenCalled();
+
+    act(() => {
+      statusSignal.bump();
+    });
+
+    expect(refetch).toHaveBeenCalledTimes(1);
   });
 });

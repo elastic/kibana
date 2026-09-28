@@ -10,13 +10,11 @@ import {
   MAX_ASSESSMENT_NOTE_LENGTH,
   MAX_SUMMARY_LENGTH,
   MAX_SYMPTOM_HYPOTHESIS_LENGTH,
-  type TriggerFeedback,
   type SignificantEventInvestigation,
 } from '@kbn/significant-events-schema';
 import { attachInvestigationToEvent } from './attach_investigation';
 import { EventClient } from './event_client';
 import type { SignificantEvent } from './data_stream';
-import { EVENT_STATUS_CHANGED_TRIGGER_ID } from '../../../../common/workflows/triggers';
 
 const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
@@ -38,26 +36,6 @@ const createInvestigation = (
   started_at: '2026-01-01T01:00:00.000Z',
   ...overrides,
 });
-
-const feedback = <T extends TriggerFeedback>(update: T): T => update;
-
-const severityFeedback = (from: SignificantEvent['severity'], to: SignificantEvent['severity']) =>
-  feedback({
-    field: 'severity',
-    from,
-    to,
-    reason: 'The investigation established a different severity.',
-    evidence: [{ description: 'Investigation evidence.' }],
-  });
-
-const statusFeedback = (from: SignificantEvent['status'], to: SignificantEvent['status']) =>
-  feedback({
-    field: 'status',
-    from,
-    to,
-    reason: 'The investigation established a different status.',
-    evidence: [{ description: 'Investigation evidence.' }],
-  });
 
 const createEventClient = (hits: SignificantEvent[]) => {
   const okResponse = { errors: false, items: [] } as unknown as BulkResponse;
@@ -293,77 +271,6 @@ describe('attachInvestigationToEvent', () => {
     expect(dataStreamClient.create).not.toHaveBeenCalled();
   });
 
-  it('applies trigger feedback fields in the same version as the completed investigation', async () => {
-    const existing = createEvent({ event_uuid: 'event-1', severity: '40-medium', status: 'open' });
-    const { client, dataStreamClient } = createEventClient([existing]);
-    const investigation = createInvestigation({ completed_at: '2026-01-01T02:00:00.000Z' });
-
-    const result = await attachInvestigationToEvent({
-      eventClient: client,
-      eventId: 'agent-event-1',
-      investigation,
-      triggerFeedback: [severityFeedback('40-medium', '80-critical')],
-    });
-
-    expect(result.updated).toBe(1);
-
-    const [[callArg]] = dataStreamClient.create.mock.calls;
-    const written: SignificantEvent = callArg.documents[0];
-
-    // Single version carries both the investigation entry and the trigger feedback field.
-    expect(written.investigations).toEqual([investigation]);
-    expect(written.severity).toBe('80-critical');
-    expect(written.status).toBe('open');
-    expect(written.workflow_execution_id).toBe(investigation.workflow_execution_id);
-  });
-
-  it('writes a field-only change even when the investigation entry is unchanged', async () => {
-    const investigation = createInvestigation({ completed_at: '2026-01-01T02:00:00.000Z' });
-    const existing = createEvent({
-      event_uuid: 'event-1',
-      severity: '40-medium',
-      investigations: [investigation],
-    });
-    const { client, dataStreamClient } = createEventClient([existing]);
-
-    // Same investigation entry (idempotent attach) but a genuinely new severity.
-    const result = await attachInvestigationToEvent({
-      eventClient: client,
-      eventId: 'agent-event-1',
-      investigation,
-      triggerFeedback: [severityFeedback('40-medium', '80-critical')],
-    });
-
-    expect(result.updated).toBe(1);
-
-    const [[callArg]] = dataStreamClient.create.mock.calls;
-    const written: SignificantEvent = callArg.documents[0];
-
-    expect(written.investigations).toHaveLength(1);
-    expect(written.severity).toBe('80-critical');
-  });
-
-  it('ignores when neither the investigation entry nor the trigger feedback fields changed', async () => {
-    const investigation = createInvestigation({ completed_at: '2026-01-01T02:00:00.000Z' });
-    const existing = createEvent({
-      event_uuid: 'event-1',
-      severity: '40-medium',
-      investigations: [investigation],
-    });
-    const { client, dataStreamClient } = createEventClient([existing]);
-
-    const result = await attachInvestigationToEvent({
-      eventClient: client,
-      eventId: 'agent-event-1',
-      investigation,
-      triggerFeedback: [severityFeedback('40-medium', '40-medium')],
-    });
-
-    expect(result.updated).toBe(0);
-    expect(result.ignored).toBe(1);
-    expect(dataStreamClient.create).not.toHaveBeenCalled();
-  });
-
   it('resolves lineage: attach targets the latest event version for the given event_id', async () => {
     const pending = createInvestigation({ workflow_execution_id: 'exec-1' });
     const e0 = createEvent({ event_uuid: 'event-0', event_id: 'slug-1' });
@@ -398,41 +305,5 @@ describe('attachInvestigationToEvent', () => {
     expect(written.investigations).toHaveLength(1);
     expect(written.investigations![0].started_at).toBe(pending.started_at);
     expect(written.investigations![0].completed_at).toBe('2026-01-01T02:00:00.000Z');
-  });
-
-  it('emits eventStatusChanged when a reassessment changes the status', async () => {
-    const existing = createEvent({ event_uuid: 'event-1', status: 'open' });
-    const { client, triggerEmitter } = createEventClient([existing]);
-    const investigation = createInvestigation({ completed_at: '2026-01-01T02:00:00.000Z' });
-
-    await attachInvestigationToEvent({
-      eventClient: client,
-      eventId: 'agent-event-1',
-      investigation,
-      triggerFeedback: [statusFeedback('open', 'closed')],
-    });
-
-    expect(triggerEmitter).toHaveBeenCalledWith(
-      EVENT_STATUS_CHANGED_TRIGGER_ID,
-      expect.objectContaining({ status: 'closed', previous_status: 'open' })
-    );
-  });
-
-  it('does not emit eventStatusChanged when the status is unchanged', async () => {
-    const existing = createEvent({ event_uuid: 'event-1', status: 'open' });
-    const { client, triggerEmitter } = createEventClient([existing]);
-    const investigation = createInvestigation({ completed_at: '2026-01-01T02:00:00.000Z' });
-
-    await attachInvestigationToEvent({
-      eventClient: client,
-      eventId: 'agent-event-1',
-      investigation,
-      triggerFeedback: [severityFeedback('40-medium', '80-critical')],
-    });
-
-    expect(triggerEmitter).not.toHaveBeenCalledWith(
-      EVENT_STATUS_CHANGED_TRIGGER_ID,
-      expect.anything()
-    );
   });
 });
