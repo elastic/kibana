@@ -33,29 +33,27 @@ export function registerWorkflowSteps(
 
   workflowsExtensions.registerStepDefinition(() =>
     ifExperimental(() =>
-      import('./conversation_metadata').then((m) => m.getConversationMetadataStepDefinition)
+      import('./conversations').then((m) => m.getConversationMetadataStepDefinition)
     )
   );
   workflowsExtensions.registerStepDefinition(() =>
     ifExperimental(() =>
-      import('./conversation_metadata').then((m) => m.updateConversationMetadataStepDefinition)
+      import('./conversations').then((m) => m.updateConversationMetadataStepDefinition)
     )
   );
 
   workflowsExtensions.registerStepDefinition(() =>
     ifExperimental(() =>
-      import('./conversation_metadata').then((m) => m.addConversationEventStepDefinition)
+      import('./conversations').then((m) => m.addConversationEventStepDefinition)
     )
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    ifExperimental(() =>
-      import('./conversation_metadata').then((m) => m.addUserMessageStepDefinition)
-    )
+    ifExperimental(() => import('./conversations').then((m) => m.addUserMessageStepDefinition))
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./conversation_metadata').then((m) => m.createConversationStepDefinition)
+    import('./conversations').then((m) => m.createConversationStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
