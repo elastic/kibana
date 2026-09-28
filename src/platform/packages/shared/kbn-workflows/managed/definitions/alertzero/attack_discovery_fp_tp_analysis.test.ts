@@ -200,7 +200,7 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     // `## Rationale` section.
     it('keeps an absent rationale absent rather than empty', () => {
       expect(stepIn('emit_result')?.with?.rationale_markdown).toBe(
-        '${{ steps.analyze.output.structured_output.rationale_markdown }}'
+        "${{ steps.keep_model_writeup.output.rows | where: 'keep', true | map: 'rationale_markdown' | first }}"
       );
     });
 
@@ -572,9 +572,9 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       );
     });
 
-    it('tells the agent a truncated event list cannot clear the attack', () => {
+    it('tells the agent a truncated entity or event list cannot clear the attack', () => {
       expect(String(analyze?.with?.message)).toContain(
-        'A truncated raw-event list is missing evidence and cannot clear an attack.'
+        'A truncated entity or raw-event list is missing evidence and cannot clear an attack.'
       );
     });
 
@@ -625,33 +625,106 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
   });
 
   describe('the truncation clear', () => {
-    const render = (field: string, total: number, verdict: string, summary: string): string =>
-      createWorkflowLiquidEngine().parseAndRenderSync(
-        String(stepIn('block_truncated_clear')?.with?.[field]),
-        {
-          steps: {
-            load_events: { output: { hits: { total: { value: total } } } },
-            analyze: { output: { structured_output: { verdict, summary_markdown: summary } } },
-          },
-        }
-      );
-
-    it('returns inconclusive when a truncated event page would clear the attack', () => {
-      expect(render('verdict', 51, 'false_positive', 'Cleared.')).toBe('inconclusive');
+    const contextFor = (
+      events: number | undefined,
+      entities: number | undefined,
+      verdict: string,
+      summary: string
+    ) => ({
+      steps: {
+        ...(events === undefined
+          ? {}
+          : { load_events: { output: { hits: { total: { value: events } } } } }),
+        ...(entities === undefined
+          ? {}
+          : { load_entities: { output: { hits: { total: { value: entities } } } } }),
+        analyze: { output: { structured_output: { verdict, summary_markdown: summary } } },
+      },
     });
 
-    it('keeps false_positive when every matched event is shown', () => {
-      expect(render('verdict', 50, 'false_positive', 'Cleared.')).toBe('false_positive');
+    const render = (
+      field: string,
+      events: number | undefined,
+      entities: number | undefined,
+      verdict: string,
+      summary: string
+    ): string =>
+      createWorkflowLiquidEngine().parseAndRenderSync(
+        String(stepIn('block_truncated_clear')?.with?.[field]),
+        contextFor(events, entities, verdict, summary)
+      );
+
+    const evaluate = (
+      events: number | undefined,
+      entities: number | undefined,
+      verdict: string
+    ): unknown => {
+      const expression = String(stepIn('block_truncated_clear')?.with?.downgraded)
+        .replace(/^\$\{\{/, '')
+        .replace(/\}\}$/, '')
+        .trim();
+
+      return createWorkflowLiquidEngine().evalValueSync(
+        expression,
+        contextFor(events, entities, verdict, 'Cleared.')
+      );
+    };
+
+    it('returns inconclusive when a truncated event page would clear the attack', () => {
+      expect(render('verdict', 51, 10, 'false_positive', 'Cleared.')).toBe('inconclusive');
+    });
+
+    it('returns inconclusive when a truncated entity page would clear the attack', () => {
+      expect(render('verdict', 10, 51, 'false_positive', 'Cleared.')).toBe('inconclusive');
+    });
+
+    it('keeps false_positive when every matched event and entity is shown', () => {
+      expect(render('verdict', 50, 50, 'false_positive', 'Cleared.')).toBe('false_positive');
     });
 
     it('keeps true_positive when the event page is truncated', () => {
-      expect(render('verdict', 51, 'true_positive', 'Escalate.')).toBe('true_positive');
+      expect(render('verdict', 51, 10, 'true_positive', 'Escalate.')).toBe('true_positive');
+    });
+
+    it('keeps true_positive when the entity page is truncated', () => {
+      expect(render('verdict', 10, 51, 'true_positive', 'Escalate.')).toBe('true_positive');
+    });
+
+    it('keeps false_positive when the entity query failed', () => {
+      expect(
+        createWorkflowLiquidEngine().parseAndRenderSync(
+          String(stepIn('block_truncated_clear')?.with?.verdict),
+          {
+            steps: {
+              load_events: { output: { hits: { total: { value: 10 } } } },
+              load_entities: { error: { message: 'failed' } },
+              analyze: {
+                output: {
+                  structured_output: { verdict: 'false_positive', summary_markdown: 'Cleared.' },
+                },
+              },
+            },
+          }
+        )
+      ).toBe('false_positive');
+    });
+
+    it('marks a truncated clear as downgraded', () => {
+      expect(evaluate(10, 51, 'false_positive')).toBe(true);
+    });
+
+    it('does not mark a complete clear as downgraded', () => {
+      expect(evaluate(50, 50, 'false_positive')).toBe(false);
     });
 
     it('replaces the summary when truncation blocks a clear', () => {
-      expect(render('summary_markdown', 51, 'false_positive', 'Cleared.')).toBe(
-        'Raw events were truncated, so this cannot be cleared as a false positive.'
+      expect(render('summary_markdown', 51, 10, 'false_positive', 'Cleared.')).toBe(
+        'Evidence was truncated, so this cannot be cleared as a false positive.'
       );
+    });
+
+    it('keeps the model summary when the clear stands', () => {
+      expect(render('summary_markdown', 50, 50, 'false_positive', 'Cleared.')).toBe('Cleared.');
     });
 
     it('runs after the payload guard and before emit', () => {
@@ -660,7 +733,62 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
           stepNames.indexOf('require_supported_verdict'),
           stepNames.indexOf('emit_result') + 1
         )
-      ).toEqual(['require_supported_verdict', 'block_truncated_clear', 'emit_result']);
+      ).toEqual([
+        'require_supported_verdict',
+        'block_truncated_clear',
+        'keep_model_writeup',
+        'emit_result',
+      ]);
+    });
+
+    const writeup = (keep: boolean, rationale: string | undefined) => ({
+      steps: {
+        keep_model_writeup: {
+          output: {
+            rows: [
+              {
+                keep,
+                ...(rationale === undefined ? {} : { rationale_markdown: rationale }),
+                checks: [{ name: 'process_parent', result: 'contradicts' }],
+                claims: { world: [{ id: 'event-1' }] },
+              },
+            ],
+          },
+        },
+      },
+    });
+
+    const emitted = (field: string, keep: boolean, rationale?: string): unknown => {
+      const expression = String(stepIn('emit_result')?.with?.[field])
+        .replace(/^\$\{\{/, '')
+        .replace(/\}\}$/, '')
+        .trim();
+
+      return createWorkflowLiquidEngine().evalValueSync(expression, writeup(keep, rationale));
+    };
+
+    it('emits the model rationale when the clear stands', () => {
+      expect(emitted('rationale_markdown', true, 'Parent is a scheduler.')).toBe(
+        'Parent is a scheduler.'
+      );
+    });
+
+    it('omits the rationale when the clear was downgraded', () => {
+      expect(emitted('rationale_markdown', false, 'Parent is a scheduler.')).toBeUndefined();
+    });
+
+    it('omits checks when the clear was downgraded', () => {
+      expect(emitted('checks', false, 'Parent is a scheduler.')).toBeUndefined();
+    });
+
+    it('omits claims when the clear was downgraded', () => {
+      expect(emitted('claims', false, 'Parent is a scheduler.')).toBeUndefined();
+    });
+
+    it('omits the payload rationale on the same path as the attachment', () => {
+      const payload = stepIn('emit_result')?.with?.payload as { rationale_markdown?: string };
+
+      expect(payload.rationale_markdown).toBe(stepIn('emit_result')?.with?.rationale_markdown);
     });
   });
 });

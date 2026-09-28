@@ -199,7 +199,8 @@ steps:
         Required source unavailable; no classification was produced.
 
   # Optional. An empty or failed query does not fail the run. The verdict rules
-  # treat a missing source as unable to clear an alert.
+  # treat a missing source as unable to clear an alert. A truncated page does not
+  # fail the run; `block_truncated_clear` stops it from clearing the attack.
   - name: load_entities
     type: elasticsearch.search
     on-failure:
@@ -319,8 +320,8 @@ steps:
         4. inconclusive — anything else: every world check is skipped or neutral, or
            only entity_role or alert_linkage supports.
 
-        A truncated raw-event list is missing evidence and cannot clear an attack. If more
-        events matched than are shown below, do not return false_positive.
+        A truncated entity or raw-event list is missing evidence and cannot clear an attack.
+        If more entities or events matched than are shown below, do not return false_positive.
 
         Claims:
         - claims.world: one entry for each world-check result the verdict relies on, with
@@ -347,7 +348,7 @@ steps:
         Cited alerts ({{ steps.count_alerts.output.found }} of {{ steps.count_alerts.output.cited }}):
         {{ steps.load_alerts.output.hits.hits | json }}
 
-        Entity store (query failed: {{ steps.source_status.output.entities_failed }}):
+        Entity store, showing at most 50 of {{ steps.load_entities.output.hits.total.value | default: 0 }} that matched (query failed: {{ steps.source_status.output.entities_failed }}):
         {{ steps.load_entities.output.hits.hits | default: consts.no_rows | json }}
 
         Raw events within 2 hours of the discovery, showing at most 50 of {{ steps.load_events.output.hits.total.value | default: 0 }} that matched (query failed: {{ steps.source_status.output.events_failed }}):
@@ -486,14 +487,32 @@ steps:
         {{ consts.supported_verdicts | join: ", " }}, or the summary was empty.
         No classification was produced.
 
-  # A truncated event page is missing evidence. The review closes the attack on
-  # `false_positive`, so that verdict becomes `inconclusive` before it is emitted.
-  # `true_positive` is left alone: truncation blocks a clear, not an escalation.
+  # A truncated entity or event page is missing evidence. The review closes the
+  # attack on `false_positive`, so that verdict becomes `inconclusive` before it is
+  # emitted. `true_positive` is left alone: truncation blocks a clear, not an
+  # escalation.
+  #
+  # Parentheses are required. `and` binds tighter than `or`, so an ungrouped
+  # condition also rewrites a truncated `true_positive`.
   - name: block_truncated_clear
     type: data.set
     with:
-      verdict: "{% if steps.load_events.output.hits.total.value > 50 and steps.analyze.output.structured_output.verdict == 'false_positive' %}inconclusive{% else %}{{ steps.analyze.output.structured_output.verdict }}{% endif %}"
-      summary_markdown: "{% if steps.load_events.output.hits.total.value > 50 and steps.analyze.output.structured_output.verdict == 'false_positive' %}Raw events were truncated, so this cannot be cleared as a false positive.{% else %}{{ steps.analyze.output.structured_output.summary_markdown }}{% endif %}"
+      downgraded: "${{ (steps.load_events.output.hits.total.value > 50 or steps.load_entities.output.hits.total.value > 50) and steps.analyze.output.structured_output.verdict == 'false_positive' }}"
+      verdict: "{% if (steps.load_events.output.hits.total.value > 50 or steps.load_entities.output.hits.total.value > 50) and steps.analyze.output.structured_output.verdict == 'false_positive' %}inconclusive{% else %}{{ steps.analyze.output.structured_output.verdict }}{% endif %}"
+      summary_markdown: "{% if (steps.load_events.output.hits.total.value > 50 or steps.load_entities.output.hits.total.value > 50) and steps.analyze.output.structured_output.verdict == 'false_positive' %}Evidence was truncated, so this cannot be cleared as a false positive.{% else %}{{ steps.analyze.output.structured_output.summary_markdown }}{% endif %}"
+
+  # The model's rationale, checks, and claims still argue `false_positive` after the
+  # verdict is rewritten. The review attaches the rationale, so a downgrade omits
+  # them. `where` plus `first` yields nothing when `keep` is false, and `${{ }}`
+  # leaves that absence absent instead of `""`.
+  - name: keep_model_writeup
+    type: data.set
+    with:
+      rows:
+        - keep: "${{ steps.block_truncated_clear.output.downgraded == false }}"
+          rationale_markdown: "${{ steps.analyze.output.structured_output.rationale_markdown }}"
+          checks: "${{ steps.analyze.output.structured_output.checks }}"
+          claims: "${{ steps.analyze.output.structured_output.claims }}"
 
   # `workflow.execute` resolves to the child's `context.output`, so a child with no
   # `workflow.output` step hands its parent nothing.
@@ -511,8 +530,8 @@ steps:
       summary_markdown: "{{ steps.block_truncated_clear.output.summary_markdown }}"
       # `${{ }}`, not `{{ }}`: `{{ }}` stringifies undefined to `""`, and the
       # attachment null-checks the field, so an empty string would render an empty
-      # `## Rationale` section.
-      rationale_markdown: "${{ steps.analyze.output.structured_output.rationale_markdown }}"
+      # `## Rationale` section. A downgrade matches no `keep` row, so this is absent.
+      rationale_markdown: "${{ steps.keep_model_writeup.output.rows | where: 'keep', true | map: 'rationale_markdown' | first }}"
       analysis_execution_id: "{{ execution.id }}"
       # From the document, not `inputs`.
       attack_discovery_id: "{{ steps.load_attack_discovery.output.hits.hits | map: '_id' | first }}"
@@ -527,6 +546,8 @@ steps:
           total: "${{ steps.count_alerts.output.cited }}"
         entities:
           seen: "${{ steps.load_entities.output.hits.hits | default: consts.no_rows | size }}"
+          cap: 50
+          truncated: "${{ steps.load_entities.output.hits.total.value > 50 }}"
         events:
           seen: "${{ steps.load_events.output.hits.hits | default: consts.no_rows | size }}"
           cap: 50
@@ -534,6 +555,6 @@ steps:
       payload:
         verdict: "${{ steps.block_truncated_clear.output.verdict }}"
         summary_markdown: "${{ steps.block_truncated_clear.output.summary_markdown }}"
-        rationale_markdown: "${{ steps.analyze.output.structured_output.rationale_markdown }}"
-      checks: "${{ steps.analyze.output.structured_output.checks }}"
-      claims: "${{ steps.analyze.output.structured_output.claims }}"
+        rationale_markdown: "${{ steps.keep_model_writeup.output.rows | where: 'keep', true | map: 'rationale_markdown' | first }}"
+      checks: "${{ steps.keep_model_writeup.output.rows | where: 'keep', true | map: 'checks' | first }}"
+      claims: "${{ steps.keep_model_writeup.output.rows | where: 'keep', true | map: 'claims' | first }}"
