@@ -10,8 +10,8 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { getExecutionsByIds } from '../../lib/get_executions_by_ids';
 import { sharedBulk } from '../../lib/bulk/shared_bulk';
+import { getExecutionsByIds } from '../../lib/get_executions_by_ids';
 import type {
   BulkRequestOptions,
   BulkResponse,
