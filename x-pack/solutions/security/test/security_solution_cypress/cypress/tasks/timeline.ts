@@ -351,26 +351,16 @@ export const openCreateTimelineOptionsPopover = () => {
 };
 
 export const createTimelineFromBottomBar = () => {
-  recurse(
-    () => {
-      cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
-      return cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE);
-    },
-    (sub) => sub.is(':visible')
-  );
-
+  // The plus icon toggles the popover, so click it once and let `should` wait for the
+  // opening transition; re-clicking in a retry loop would close the popover again.
+  cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
+  cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE).should('be.visible');
   cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE).click();
 };
 
 export const createTimelineTemplateFromBottomBar = () => {
-  recurse(
-    () => {
-      cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
-      return cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0);
-    },
-    (sub) => sub.is(':visible')
-  );
-
+  cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
+  cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0).should('be.visible');
   cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0).click();
 };
 
