@@ -38,7 +38,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('empty state', () => {
       it('displays an empty list with an add button correctly', async () => {
-        await testSubjects.existOrFail('cases-table-add-case');
+        await testSubjects.existOrFail('cases-list-add-case');
       });
     });
 
@@ -214,6 +214,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.isEnabled('pagination-button-1');
         await testSubjects.click('pagination-button-1');
         await testSubjects.isEnabled('pagination-button-0');
+        await testSubjects.click('pagination-button-0');
       });
     });
 
