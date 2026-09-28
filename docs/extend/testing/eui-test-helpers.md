@@ -93,7 +93,7 @@ The on-demand label publishes an npm snapshot using EUI's trusted credentials an
 
 `@elastic/eui` and `@elastic/eui-test-helpers` are two packages in one monorepo with **independent versions**. Kibana pins each separately in `package.json`, so a helper release can ship without an EUI release and the other way round. Three checks keep the three moving parts compatible:
 
-1. **On every EUI PR**, the helper validation specs run against Storybook. A PR that touches an EUI component also runs the specs of the matching helper (correlated by directory path), so a DOM change that would break a helper fails the EUI PR, not a Kibana test later. See [Flake detection](https://github.com/elastic/eui/blob/main/packages/test-helpers/CONTRIBUTING.md#ci-integration).
+1. **On every EUI PR**, the helper validation specs run against Storybook. A PR that touches an EUI component also runs the specs of the matching helper (correlated by directory path), so a DOM change that would break a helper fails the EUI PR, not a Kibana test later. See [CI integration](https://github.com/elastic/eui/blob/main/packages/test-helpers/CONTRIBUTING.md#ci-integration).
 2. **Every weeknight**, EUI publishes snapshots of both packages, opens a draft Kibana PR titled `[DO NOT MERGE][EUI] Nightly Build` that bumps Kibana to them, and runs full Kibana CI. This answers "will today's EUI `main` break Kibana?" before anything is released. Source: [`update_kibana_dependencies.yml`](https://github.com/elastic/eui/blob/main/.github/workflows/update_kibana_dependencies.yml).
 3. **On release**, an EUI maintainer opens the Kibana upgrade PR with the official versions. Because the nightly already ran against the same code, that PR is expected to be a clean version bump.
 
