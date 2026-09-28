@@ -241,6 +241,34 @@ describe('ESQLEditor', () => {
     expect(mockESQLDataGrid).toHaveBeenCalled();
   });
 
+  it('does not show the refreshing bar while refreshing a query that returned no rows', async () => {
+    const preview = { rows: [], columns: [], dataView: {} } as unknown as ESQLDataGridAttrs;
+
+    getSuggestionsMock.mockImplementationOnce(async (...args: unknown[]) => {
+      const setDataGridAttrs = args[9] as ((attrs: ESQLDataGridAttrs) => void) | undefined;
+      setDataGridAttrs?.(preview);
+      return undefined;
+    });
+
+    renderEditor({ isESQLResultsAccordionOpen: true, onESQLResultsAccordionToggle: jest.fn() });
+    await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+    await act(() =>
+      capturedOnSubmit!({ esql: 'FROM index1 | STATS maxB = MAX(bytes)' }, new AbortController())
+    );
+    const results = screen.getByTestId('ESQLQueryResults');
+
+    getSuggestionsMock.mockReturnValue(new Promise(() => {}));
+    act(() => {
+      void capturedOnSubmit!(
+        { esql: 'FROM index1 | STATS minB = MIN(bytes)' },
+        new AbortController()
+      );
+    });
+
+    await waitFor(() => expect(within(results).getByRole('progressbar')).toBeInTheDocument());
+    expect(within(results).queryByTestId('ESQLQueryResultsRefreshing')).not.toBeInTheDocument();
+  });
+
   it('stops showing the loading spinner when a refresh fails with cached rows', async () => {
     const preview = {
       rows: [{ a: 1 }, { a: 2 }, { a: 3 }],
@@ -291,11 +319,14 @@ describe('ESQLEditor', () => {
     );
 
     expect(within(results).queryByRole('progressbar')).not.toBeInTheDocument();
-    expect(within(results).getByTestId('ESQLQueryResultsEmpty')).toBeInTheDocument();
-    expect(within(results).getByTestId('ESQLQueryResultsErrorIcon')).toHaveAttribute(
-      'data-euiicon-type',
-      'error'
+    expect(within(results).getByTestId('ESQLQueryResultsEmpty')).toHaveTextContent(
+      'The query returned an error. See the errors in the query editor above.'
     );
+    const errorIcon = within(results).getByTestId('ESQLQueryResultsErrorIcon');
+    expect(errorIcon).toHaveAttribute('data-euiicon-type', 'error');
+
+    await userEvent.hover(errorIcon);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Query error');
   });
 
   it('does not show the error icon when the first preview returns nothing without an error', async () => {
@@ -309,6 +340,9 @@ describe('ESQLEditor', () => {
     const results = screen.getByTestId('ESQLQueryResults');
     expect(within(results).queryByRole('progressbar')).not.toBeInTheDocument();
     expect(within(results).queryByTestId('ESQLQueryResultsErrorIcon')).not.toBeInTheDocument();
+
+    await userEvent.click(within(results).getByRole('button', { name: /ES\|QL Query Results/i }));
+    expect(within(results).queryByTestId('ESQLQueryResultsEmpty')).not.toBeInTheDocument();
   });
 
   it('reports toggles to the parent without changing its own state when controlled', async () => {

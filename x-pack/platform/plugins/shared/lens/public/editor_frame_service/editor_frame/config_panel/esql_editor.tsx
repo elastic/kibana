@@ -204,7 +204,10 @@ export function ESQLEditor({
         prevQuery.current = q;
         setSubmittedQuery(q);
       } finally {
-        setIsPreviewLoading(false);
+        // A newer run already owns the loading state when this one was aborted
+        if (!abortController?.signal.aborted) {
+          setIsPreviewLoading(false);
+        }
         setIsVisualizationLoading(false);
       }
     },

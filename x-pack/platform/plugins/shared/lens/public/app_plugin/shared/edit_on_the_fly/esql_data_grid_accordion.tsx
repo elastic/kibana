@@ -13,7 +13,7 @@ import {
   EuiAccordion,
   EuiSpacer,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
   EuiNotificationBadge,
   EuiPanel,
   EuiProgress,
@@ -47,8 +47,11 @@ export const ESQLDataGridAccordion = ({
   onToggle,
 }: ESQLDataGridAccordionProps) => {
   const styles = useMemoCss(componentStyles);
-  const isEmpty = !isLoading && !dataGridAttrs;
+  const showQueryError = isAccordionOpen && !isLoading && !dataGridAttrs && hasQueryError;
   const fillsAvailableSpace = isAccordionOpen && Boolean(dataGridAttrs);
+  const queryErrorLabel = i18n.translate('xpack.lens.config.ESQLQueryResultsErrorLabel', {
+    defaultMessage: 'Query error',
+  });
 
   return (
     <EuiFlexItem
@@ -80,13 +83,14 @@ export const ESQLDataGridAccordion = ({
               {dataGridAttrs.rows.length}
             </EuiNotificationBadge>
           ) : hasQueryError ? (
-            <EuiIcon
+            <EuiIconTip
               type="error"
               color="danger"
-              aria-label={i18n.translate('xpack.lens.config.ESQLQueryResultsErrorLabel', {
-                defaultMessage: 'Query error',
-              })}
-              data-test-subj="ESQLQueryResultsErrorIcon"
+              position="left"
+              aria-label={queryErrorLabel}
+              content={queryErrorLabel}
+              disableScreenReaderOutput
+              iconProps={{ 'data-test-subj': 'ESQLQueryResultsErrorIcon' }}
             />
           ) : undefined
         }
@@ -95,7 +99,7 @@ export const ESQLDataGridAccordion = ({
         // content area when there is nothing to show yet.
         isLoadingMessage={!dataGridAttrs}
       >
-        {isAccordionOpen && isEmpty && (
+        {showQueryError && (
           <EuiPanel
             color="subdued"
             paddingSize="m"
@@ -104,8 +108,9 @@ export const ESQLDataGridAccordion = ({
           >
             <EuiText size="s" color="subdued" textAlign="center">
               <p>
-                {i18n.translate('xpack.lens.config.ESQLQueryResultsUnavailable', {
-                  defaultMessage: 'No results to display',
+                {i18n.translate('xpack.lens.config.ESQLQueryResultsErrorMessage', {
+                  defaultMessage:
+                    'The query returned an error. See the errors in the query editor above.',
                 })}
               </p>
             </EuiText>
@@ -113,7 +118,7 @@ export const ESQLDataGridAccordion = ({
         )}
         {isAccordionOpen && dataGridAttrs && (
           <div css={styles.gridContainer}>
-            {isLoading && (
+              {isLoading && dataGridAttrs.rows.length > 0 && (
               <EuiProgress
                 size="xs"
                 color="accent"
