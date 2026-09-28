@@ -97,11 +97,3 @@ export const MAX_DATASET_DESCRIPTION_LENGTH = 2048 as const;
 export const MAX_EVALUATOR_NAME_LENGTH = 128 as const;
 
 export const MAX_DATASET_TAG_FACETS = 100 as const;
-
-/**
- * Prefix for LLM-as-a-judge root span names (`judge · <evaluator>`). Shared so
- * both the online task-provider path and the offline evals executor name judge
- * roots identically, and the Tracing routes keep them visible while excluding
- * other evaluator root spans (see `EXCLUDE_NON_JUDGE_EVALUATOR_ROOTS`).
- */
-export const JUDGE_SPAN_NAME_PREFIX = 'judge · ' as const;
