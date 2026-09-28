@@ -159,22 +159,32 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   const cardFilter = useMemo((): QueryDslQueryContainer | null => {
     if (!activeFilter || activeFilter.type !== 'card') return null;
+    // Always return a terms filter when a card is active — an empty array matches nothing,
+    // keeping the table consistent with the tile (0 shown) rather than falling back to all entities.
+    let ids: string[];
     switch (activeFilter.cardId) {
       case 'entitiesWithAlerts':
-        return toTermsFilter(alertsEntityIds);
+        ids = alertsEntityIds;
+        break;
       case 'entitiesWithAnomalies':
-        return toTermsFilter(anomaliesEntityIds);
+        ids = anomaliesEntityIds;
+        break;
       case 'riskMovers':
-        return toTermsFilter(riskMoversEntityIds);
+        ids = riskMoversEntityIds;
+        break;
       case 'newlyHighCritical':
-        return toTermsFilter(newlyHCEntityIds);
+        ids = newlyHCEntityIds;
+        break;
       case 'watchlisted':
-        return toTermsFilter(watchlistedEntityIds);
+        ids = watchlistedEntityIds;
+        break;
       case 'newEntity':
-        return toTermsFilter(newEntityEntityIds);
+        ids = newEntityEntityIds;
+        break;
       default:
         return null;
     }
+    return { terms: { 'entity.id': ids } };
   }, [
     activeFilter,
     alertsEntityIds,

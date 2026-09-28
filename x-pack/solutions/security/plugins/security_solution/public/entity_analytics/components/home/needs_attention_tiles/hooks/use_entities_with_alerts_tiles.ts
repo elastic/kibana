@@ -14,7 +14,6 @@ import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useRiskEngineStatus } from '../../../../api/hooks/use_risk_engine_status';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { buildAlertBasedTilesQuery } from '../queries/entities_with_alerts_query';
 import type { TimeRange } from '../../use_time_range_param';
@@ -76,16 +75,13 @@ export const useAlertBasedTiles = ({
   entityFilters?: EntityFilters;
 }) => {
   const { data } = useKibana().services;
-  const { data: riskEngineStatus, isLoading: isStatusLoading } = useRiskEngineStatus();
   const euidApi = useEntityStoreEuidApi();
   const { data: resolvedIndex, isLoading: isIndexLoading } =
     useResolvedLatestEntitiesIndexName(spaceId);
 
   const isEnabled =
     !skip &&
-    !isStatusLoading &&
     !isIndexLoading &&
-    riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED' &&
     Boolean(euidApi) &&
     Boolean(resolvedIndex?.indexName);
 
@@ -144,7 +140,7 @@ export const useAlertBasedTiles = ({
     alertsEntityIds: queryResult?.alertsEntityIds ?? [],
     watchlistedCount: queryResult?.watchlistedCount ?? 0,
     watchlistedEntityIds: queryResult?.watchlistedEntityIds ?? [],
-    isLoading: isStatusLoading || isIndexLoading || isLoading,
+    isLoading: isIndexLoading || isLoading,
     error: filteredError,
   };
 };

@@ -57,6 +57,7 @@ export const useNewEntityCount = ({
   const {
     data: result,
     isLoading,
+    isFetching,
     error,
   } = useQuery(
     queryKey,
@@ -76,9 +77,14 @@ export const useNewEntityCount = ({
       const row = rawResponse.values?.[0];
       const valueIndex = rawResponse.columns?.findIndex((c) => c.name === 'value') ?? 0;
       const entityIdsIndex = rawResponse.columns?.findIndex((c) => c.name === 'entity_ids') ?? 1;
+      const rawIds = row?.[entityIdsIndex];
       return {
         count: typeof row?.[valueIndex] === 'number' ? (row[valueIndex] as number) : 0,
-        entityIds: Array.isArray(row?.[entityIdsIndex]) ? (row[entityIdsIndex] as string[]) : [],
+        entityIds: Array.isArray(rawIds)
+          ? (rawIds as string[]).filter(Boolean)
+          : typeof rawIds === 'string' && rawIds
+          ? [rawIds]
+          : [],
       };
     },
     {
@@ -93,7 +99,7 @@ export const useNewEntityCount = ({
   return {
     count: result?.count ?? 0,
     entityIds: result?.entityIds ?? [],
-    isLoading: isLoading || isStatusLoading,
+    isLoading: isLoading || isFetching || isStatusLoading,
     error,
   };
 };
