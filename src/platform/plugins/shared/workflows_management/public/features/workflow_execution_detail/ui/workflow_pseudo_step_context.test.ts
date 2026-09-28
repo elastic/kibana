@@ -306,6 +306,11 @@ describe('buildOverviewStepExecutionFromContext', () => {
     context: { inputs: {}, workflowRunId: 'run-1' },
   };
 
+  it('preserves the finish time without a context timestamp', () => {
+    const overview = buildOverviewStepExecutionFromContext(baseOverviewExecution);
+    expect(overview.finishedAt).toBe(baseOverviewExecution.finishedAt);
+  });
+
   it('adds executionError when execution.error is set and steps ran (no duplicate of trigger-only path)', () => {
     const overview = buildOverviewStepExecutionFromContext(baseOverviewExecution);
     const input = overview.input as Record<string, unknown>;

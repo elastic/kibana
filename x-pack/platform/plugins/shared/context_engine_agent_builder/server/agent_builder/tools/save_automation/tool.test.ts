@@ -11,7 +11,8 @@ import { AI_INDEX_ATTACHMENT_TYPE } from '../../../../common/agent_builder_attac
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../../../common/agent_builder_tools';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import { createSaveAutomationTool } from './tool';
+import { createSaveAutomationTool, normalizeSaveAutomationParams } from './tool';
+import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
 
 jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
   hasWorkflowReadPrivilege: jest.fn().mockResolvedValue(true),
@@ -103,6 +104,10 @@ describe('save_automation tool', () => {
     expect(createTool().id).toBe(CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID);
   });
 
+  it('is gated by the shared availability config', () => {
+    expect(createTool().availability).toBe(aiIndexToolsAvailability);
+  });
+
   it('uses always confirmation policy with workflow and ai index names', async () => {
     const tool = createTool();
     const attachments = createAttachments();
@@ -142,7 +147,7 @@ describe('save_automation tool', () => {
     );
 
     expect(savedConfirmation?.message).toContain('workflow "workflow-1"');
-    expect(getWorkflowMock).toHaveBeenCalledWith('workflow-1', 'default');
+    expect(getWorkflowMock).toHaveBeenCalledWith('workflow-1', 'default', expect.anything());
   });
 
   it('uses the saved workflow name when workflowId is provided', async () => {
@@ -284,7 +289,7 @@ describe('save_automation tool', () => {
       );
 
       expect(confirmation?.title).toBe('Replace workflow automation');
-      expect(getWorkflowMock).toHaveBeenCalledWith('workflow-7', 'default');
+      expect(getWorkflowMock).toHaveBeenCalledWith('workflow-7', 'default', expect.anything());
     });
 
     it('still offers a plain save when the attachment has never been saved', async () => {
@@ -347,6 +352,32 @@ describe('save_automation tool', () => {
 
     it('does not include a run field — running is done via run_automation after saving', () => {
       expect((createTool().schema.shape as Record<string, unknown>).run).toBeUndefined();
+    });
+
+    // Some models fill every optional parameter with whitespace instead of omitting it, and then
+    // retry the identical call when it is rejected. A blank carries nothing, so it reads as omitted.
+    it('reads whitespace-only optional ids as omitted rather than as a second definition', () => {
+      expect(
+        parse({ workflowYaml: 'name: x', workflowAttachmentId: ' ', workflowId: ' ' }).success
+      ).toBe(true);
+      expect(parse({ workflowAttachmentId: 'attachment-1', workflowYaml: '' }).success).toBe(true);
+    });
+
+    it('still rejects a call where every definition is blank', () => {
+      expect(parse({ workflowYaml: ' ', workflowAttachmentId: '', workflowId: ' ' }).success).toBe(
+        false
+      );
+    });
+
+    it('drops blank ids before they reach the handler', () => {
+      expect(
+        normalizeSaveAutomationParams({
+          workflowYaml: 'name: x',
+          workflowAttachmentId: ' ',
+          workflowId: '',
+          aiIndexId: 'my-ai-index',
+        })
+      ).toEqual({ workflowYaml: 'name: x', aiIndexId: 'my-ai-index', run: false });
     });
   });
 });

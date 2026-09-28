@@ -187,13 +187,15 @@ export const tryResolveSavedWorkflowById = async ({
   workflowsManagement,
   workflowId,
   spaceId,
+  request,
 }: {
   workflowsManagement: WorkflowsManagementApi;
   workflowId: string;
   spaceId: string;
+  request: KibanaRequest;
 }): Promise<SavedWorkflowSummary | undefined> => {
   try {
-    const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId);
+    const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId, request);
     return workflow ? { name: workflow.name, enabled: workflow.enabled } : undefined;
   } catch {
     return undefined;
@@ -289,7 +291,7 @@ const assertWorkflowReadAccess = async ({
     );
   }
 
-  const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId);
+  const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId, request);
   if (!workflow) {
     throw new Error(`Workflow '${workflowId}' was not found in this space.`);
   }
@@ -492,7 +494,7 @@ const persistWorkflow = async ({
     // exists. If it does not, `updateWorkflow` would fail with a message about the id rather than
     // about the choice, and the caller has a create available that it may not think to fall back
     // to. A workflow can also have been deleted since the attachment recorded it.
-    const target = await workflowsManagement.getWorkflow(existingWorkflowId, spaceId);
+    const target = await workflowsManagement.getWorkflow(existingWorkflowId, spaceId, request);
     if (!target) {
       throw new Error(
         `Workflow '${existingWorkflowId}' was not found in this space, so there is nothing to ` +
@@ -541,7 +543,7 @@ export const runSavedAutomation = async ({
 
     // A disabled definition cannot be run by id. Asking to save and run is consent to enable it,
     // and `enabled` on its own is the one update a managed workflow accepts.
-    const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId);
+    const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId, request);
     const enabledForRun = workflow?.enabled !== true;
     if (enabledForRun) {
       // Enabling is a write to the saved workflow, and holding execute says nothing about holding

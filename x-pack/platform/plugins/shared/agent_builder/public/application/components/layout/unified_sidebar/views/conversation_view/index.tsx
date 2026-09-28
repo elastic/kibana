@@ -45,7 +45,6 @@ import { useAgentBuilderAgents } from '../../../../../hooks/agents/use_agents';
 import { useLastAgentId } from '../../../../../hooks/use_last_agent_id';
 import { useConversationList } from '../../../../../hooks/use_conversation_list';
 import { useConversationListMutations } from '../../../../../hooks/use_conversation_list_mutations';
-import { useStreamingContext } from '../../../../../context/streaming/streaming_context';
 import { SidebarNavList } from '../../shared/sidebar_nav_list';
 
 import { ConversationFooter } from './conversation_footer';
@@ -126,8 +125,6 @@ export const ConversationSidebarView: React.FC = () => {
   const { total: unpinnedTotal } = useConversationList({ agentId, pinned: false });
   // Enable the Search button when any conversations exist across either list.
   const hasConversations = unpinnedTotal > 0 || pinnedTotal > 0;
-
-  const { removeAllErrors, removeError } = useStreamingContext();
 
   const { markAsPinned, markAsUnpinned } = useConversationListMutations({
     routeConversationId: conversationId,
@@ -235,12 +232,7 @@ export const ConversationSidebarView: React.FC = () => {
   ]);
 
   const handlePressNewConversation = () => {
-    removeAllErrors();
     navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }));
-  };
-
-  const handleConversationItemClick = (clickedConversationId: string) => {
-    removeError(clickedConversationId);
   };
 
   return (
@@ -319,7 +311,6 @@ export const ConversationSidebarView: React.FC = () => {
                           isFetchingNextPage={isFetchingNextPinnedPage}
                           isDropDisabled={draggingFromId === DROPPABLE_IDS.PINNED}
                           backgroundColor={dropBackgrounds[DROPPABLE_IDS.PINNED]}
-                          onItemClick={handleConversationItemClick}
                           isDragging={draggingFromId !== null}
                         />
                       </EuiFlexItem>
@@ -391,7 +382,6 @@ export const ConversationSidebarView: React.FC = () => {
                           agentId={agentId}
                           currentConversationId={conversationId}
                           isNewConversationRoute={isNewConversationRoute}
-                          onItemClick={handleConversationItemClick}
                           isDropDisabled={draggingFromId === DROPPABLE_IDS.CHATS}
                           backgroundColor={dropBackgrounds[DROPPABLE_IDS.CHATS]}
                         />
@@ -415,7 +405,6 @@ export const ConversationSidebarView: React.FC = () => {
           currentConversationId={conversationId}
           onClose={() => setIsSearchModalOpen(false)}
           onSelectConversation={(id) => {
-            removeError(id);
             navigateToAgentBuilderUrl(
               appPaths.agent.conversations.byId({ agentId, conversationId: id })
             );

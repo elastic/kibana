@@ -7,6 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * This contract is declarative on purpose: apps describe what to show (text, options, callbacks),
+ * and the header decides how it looks. Do not add `ReactNode`, `ReactElement`, JSX, or render-prop
+ * fields here. They let every app paint its own UI, and the header stops looking like one
+ * component. The renderer also coerces text to plain strings and drops undeclared keys, see
+ * "Strict props" in the `@kbn/app-header` README.
+ *
+ * When the existing props cannot express something, add a new declarative field for it (for
+ * example a text badge variant) rather than a slot for arbitrary content. `renderCustomBadge` is a
+ * deprecated exception, not a pattern to copy.
+ */
+
 import type { ReactElement, MouseEventHandler } from 'react';
 import type { IconType } from '@elastic/eui';
 import type { AppMenuConfig } from '@kbn/ui-app-menu';

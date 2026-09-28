@@ -258,6 +258,16 @@ describe('Detection Coverage review', () => {
       }
     );
 
+    // All spaces share one indicator index.
+    it('reads the indicator only from the current space', () => {
+      const query = stepByName('read_ki')?.with?.query as { bool?: { filter?: unknown[] } };
+
+      expect(query?.bool?.filter).toEqual([
+        { ids: { values: ['{{ inputs.ki_id }}'] } },
+        { term: { 'attributes.space_id': '{{ workflow.spaceId }}' } },
+      ]);
+    });
+
     // The review runs in the space of the sweep that started it. A link without the
     // space prefix opens the default space.
     it('links every approval message to the conversation in the current space', () => {
@@ -346,7 +356,7 @@ describe('Detection Coverage review', () => {
     // or the index is wrong. "No verdict" means the check itself failed.
     it('tells a missing indicator apart from a check that returned no verdict', () => {
       expect(emit?.check_error).toContain('steps.read_ki.output.hits.total.value == 0');
-      expect(emit?.check_error).toContain('knowledge indicator not found');
+      expect(emit?.check_error).toContain('knowledge indicator not found in this space');
       expect(emit?.check_error).toContain('produced no verdict');
     });
 
