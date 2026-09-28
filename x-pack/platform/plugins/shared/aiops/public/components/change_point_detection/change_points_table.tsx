@@ -36,7 +36,7 @@ export interface ChangePointsTableProps {
   isLoading: boolean;
   onSelectionChange?: (update: SelectedChangePoint[]) => void;
   onRenderComplete?: () => void;
-  parentApi: unknown;
+  parentApi?: unknown;
 }
 
 function getFilterConfig(
