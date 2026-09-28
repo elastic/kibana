@@ -163,11 +163,21 @@ export class ExecutionContextService
       onActivityEnd();
       throw error;
     }
-    if (isPromiseLike(result)) {
-      result.then(onActivityEnd, onActivityEnd);
-    } else {
-      onActivityEnd();
+    if (result instanceof Promise) {
+      // Return a derived promise that re-throws, so that a rejection the caller drops is still
+      // reported as unhandled instead of being swallowed by the activity bookkeeping.
+      return result.then(
+        (value) => {
+          onActivityEnd();
+          return value;
+        },
+        (error) => {
+          onActivityEnd();
+          throw error;
+        }
+      ) as typeof result;
     }
+    onActivityEnd();
     return result;
   }
 
@@ -230,6 +240,3 @@ export class ExecutionContextService
     );
   }
 }
-
-const isPromiseLike = (value: unknown): value is PromiseLike<unknown> =>
-  typeof (value as PromiseLike<unknown> | undefined)?.then === 'function';

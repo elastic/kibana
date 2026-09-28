@@ -612,6 +612,24 @@ describe('ExecutionContextService', () => {
       expect(onEnd).toHaveBeenCalledTimes(2);
     });
 
+    it("returns a derived promise so that rejections stay the caller's to handle", async () => {
+      const { setupContract, onEnd } = setup(true);
+      const error = new Error('nope');
+      const original = Promise.reject(error);
+      const returned = setupContract.withContext(context, () => original);
+
+      // the observer must not mark the caller-visible promise as handled
+      expect(returned).not.toBe(original);
+      await expect(returned).rejects.toBe(error);
+      expect(onEnd).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns the original promise for untracked contexts', () => {
+      const { setupContract } = setup(true);
+      const original = Promise.resolve(1);
+      expect(setupContract.withContext({ type: 'application' }, () => original)).toBe(original);
+    });
+
     it('observes even when execution context propagation is disabled', () => {
       const { setupContract, onEnd } = setup(false);
       setupContract.withContext(context, () => undefined);
