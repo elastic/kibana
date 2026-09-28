@@ -258,7 +258,7 @@ export class AlertingPlugin {
   private readonly disabledRuleTypes: Set<string>;
   private readonly enabledRuleTypes: Set<string> | null = null;
   private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi>;
-  private changeTrackingService?: ChangeTrackingService;
+  private changeTrackingService: ChangeTrackingService;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -585,12 +585,10 @@ export class AlertingPlugin {
           // Rule Change Tracking
           // There are many alerting rule types but they all belong to a specific solution
           // (security, stack, observability).
-          if (this.changeTrackingService) {
-            const { scope } = this.config.ruleChangeTracking;
-            if (scope.includes('all') || scope.includes(ruleType.solution)) {
-              ruleType.trackChanges = true;
-              this.changeTrackingService.register(ruleType.solution);
-            }
+          const { scope } = this.config.ruleChangeTracking;
+          if (scope.includes('all') || scope.includes(ruleType.solution)) {
+            ruleType.trackChanges = true;
+            this.changeTrackingService.register(ruleType.solution);
           }
 
           ruleTypeRegistry.register(ruleType);
@@ -676,7 +674,7 @@ export class AlertingPlugin {
       features: plugins.features,
     });
 
-    changeTrackingService?.initialize({
+    changeTrackingService.initialize({
       elasticsearchClient: core.elasticsearch.client.asInternalUser,
       authService: core.security.authc,
     });

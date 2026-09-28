@@ -11,6 +11,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { RawRule } from '../../../../types';
 import type { RulesClientContext } from '../../../../rules_client/types';
+import { changeTrackingServiceMock } from '../../../../rules_client/lib/change_tracking/service.mock';
 import type { IScopedChangeTrackingService } from '../../../../rules_client/lib/change_tracking';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { logRuleChanges } from './log_rule_changes';
@@ -231,21 +232,6 @@ describe('logBulkRuleChanges', () => {
     await logRuleChanges({
       rulesClientContext: context,
       ruleSOs: [],
-      changesContext: {
-        action: RuleChangeTrackingAction.ruleEnable,
-        timestamp: REFERENCE_TIMESTAMP_MS,
-      },
-    });
-
-    expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
-  });
-
-  it('does nothing when the change tracking service is not configured', async () => {
-    const context = buildContext({ changeTrackingService: undefined });
-
-    await logRuleChanges({
-      rulesClientContext: context,
-      ruleSOs: [buildRuleSO('rule-1')],
       changesContext: {
         action: RuleChangeTrackingAction.ruleEnable,
         timestamp: REFERENCE_TIMESTAMP_MS,
@@ -527,11 +513,7 @@ const buildErroredRuleSO = (id: string): SavedObjectErrorResult => ({
   error: { error: 'Conflict', message: 'version_conflict_engine_exception', statusCode: 409 },
 });
 
-const createMockChangeTrackingService = (): jest.Mocked<IScopedChangeTrackingService> => ({
-  log: jest.fn().mockResolvedValue(undefined),
-  logBulk: jest.fn().mockResolvedValue(undefined),
-  getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
-});
+const createMockChangeTrackingService = () => changeTrackingServiceMock.createScoped();
 
 interface RuleTypeStub {
   solution: string;

@@ -15,6 +15,7 @@ import { ChangeHistoryClient } from '@kbn/change-history';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RuleChange, RuleChangeHistorySnapshot } from './types';
 import { ChangeTrackingService } from './service';
+import { RuleChangeTrackingDisabledError } from './errors';
 
 jest.mock('@kbn/change-history', () => ({
   ChangeHistoryClient: jest.fn(),
@@ -451,18 +452,19 @@ describe('ChangeTrackingService', () => {
         );
       });
 
-      it('throws when the module has no client and adds a warning to the logs', async () => {
+      it('throws RuleChangeTrackingDisabledError when the module has no client and adds a warning to the logs', async () => {
         initializeService({ username: 'alice' });
-        await expect(
-          service
-            .asScoped(httpServerMock.createKibanaRequest())
-            .getHistory('stack', 'default', 'rule-1', {})
-        ).rejects.toThrow(
-          'Unable to get history. Change history client not initialized for [stack, alerting-rules]'
+        const promise = service
+          .asScoped(httpServerMock.createKibanaRequest())
+          .getHistory('stack', 'default', 'rule-1', {});
+
+        await expect(promise).rejects.toBeInstanceOf(RuleChangeTrackingDisabledError);
+        await expect(promise).rejects.toThrow(
+          'Rule change tracking is not enabled for [stack, alerting-rules]'
         );
         expect(logger.error).not.toHaveBeenCalled();
         expect(logger.warn).toHaveBeenCalledWith(
-          'Unable to get history. Change history client not initialized for [stack, alerting-rules]'
+          'Rule change tracking is not enabled for [stack, alerting-rules]'
         );
       });
     });

@@ -45,7 +45,7 @@ describe('config deprecations', () => {
     expect(migrated.ruleChangeTracking?.scope).toEqual(['security']);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "You no longer need to configure \\"ruleChangeTracking.enabled\\".",
+        "Use the \\"securitySolution:enableRuleChangesHistory\\" advanced setting to turn the feature off per space.",
       ]
     `);
   });

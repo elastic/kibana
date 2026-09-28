@@ -28,6 +28,7 @@ import type {
   RuleChange,
 } from './types';
 import { ALERTING_RULE_DATASET } from './constants';
+import { RuleChangeTrackingDisabledError } from './errors';
 
 const RULE_SO_FIELDS_TO_HASH = Object.fromEntries(
   RuleAttributesToEncrypt.map((field) => [field, true] as [string, true])
@@ -180,13 +181,16 @@ export class ChangeTrackingService implements IChangeTrackingService {
     opts: GetChangeHistoryOptions
   ): Promise<GetHistoryResult> {
     const client = this.clients[module];
+
     if (!client) {
-      const error = new Error(
-        `Unable to get history. Change history client not initialized for [${module}, ${this.dataset}]`
+      const error = new RuleChangeTrackingDisabledError(
+        `Rule change tracking is not enabled for [${module}, ${this.dataset}]`
       );
       this.logger.warn(error.message);
+
       throw error;
     }
+
     return client.getHistory(spaceId, RULE_SAVED_OBJECT_TYPE, ruleId, {
       ...opts,
       spanLabels: { solution: module, action: 'read' },

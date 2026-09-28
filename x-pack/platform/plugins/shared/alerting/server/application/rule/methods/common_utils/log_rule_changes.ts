@@ -83,10 +83,6 @@ export async function logRuleChanges({
   },
   changesContext: { action, timestamp, metadata, refresh },
 }: LogRuleChanges): Promise<void> {
-  if (!changeTrackingService) {
-    return;
-  }
-
   const effectiveRuleSOs = encryptedFieldsMap?.size
     ? overlayEncryptedFields(ruleSOs, encryptedFieldsMap)
     : ruleSOs;
