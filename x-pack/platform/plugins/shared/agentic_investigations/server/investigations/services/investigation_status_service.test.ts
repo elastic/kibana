@@ -94,9 +94,14 @@ describe('InvestigationStatusService.getPreview', () => {
   };
 
   it('maps action name from action.name', async () => {
-    const { service } = makeDeps([{ id: 'p-1', action: { name: 'Block IP' } }]);
+    const { service, proposalsService } = makeDeps([{ id: 'p-1', action: { name: 'Block IP' } }]);
     const result = await service.getPreview(request, 'conv-1');
     expect(result.pending_proposals).toEqual([{ id: 'p-1', action_name: 'Block IP' }]);
+    expect(proposalsService.list).toHaveBeenCalledWith(
+      expect.objectContaining({ conversationId: 'conv-1' }),
+      SPACE_ID,
+      request
+    );
   });
 
   it('falls back to actionWorkflowId when action is absent', async () => {
@@ -243,7 +248,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
       getSpaceId: jest.fn().mockReturnValue(SPACE_ID),
       logger,
     });
-    return { service, releaseGate, patchMetadata: client.patchMetadata };
+    return { service, releaseGate, get, patchMetadata: client.patchMetadata };
   };
 
   it('skips a proposal that was already decided (conflict, re-read shows decided)', async () => {
@@ -269,7 +274,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
 
   it('retries and succeeds when the proposal is still pending after a conflict', async () => {
     const conflictErr = Object.assign(new Error('occ lost'), { name: 'ProposalConflictError' });
-    const { service, releaseGate, patchMetadata } = makeDismissService({
+    const { service, releaseGate, get, patchMetadata } = makeDismissService({
       releaseGateSideEffect: conflictErr,
       // Re-read: still pending.
       getProposalResult: { decision: undefined, status: 'pending', expired: false },
@@ -281,6 +286,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
     });
 
     // First call failed → re-read says still pending → retry → success.
+    expect(get).toHaveBeenCalledWith('p-1', SPACE_ID, request);
     expect(releaseGate).toHaveBeenCalledTimes(2);
     expect(patchMetadata).toHaveBeenCalled();
     expect(result.dismissed_proposal_ids).toEqual(['p-1']);

@@ -49,7 +49,7 @@ export const createNavigationTree = (
         link: 'inbox' as AppDeepLinkId,
         icon: 'mail',
       },
-      // AlertZero body (nodes omitted when xpack.alertzero.enabled is false)
+      // AlertZero body (nodes omitted when securitySolution:enableAlertZero is off)
       ...defaultNavigationTree.alertZero(),
       {
         link: 'discover',
@@ -274,6 +274,7 @@ export const createNavigationTree = (
               { link: 'management:roles' },
               { link: 'management:api_keys' },
               { link: 'management:role_mappings' },
+              { link: 'management:service_accounts' },
             ],
           },
           {

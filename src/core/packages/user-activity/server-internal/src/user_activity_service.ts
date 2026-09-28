@@ -25,6 +25,7 @@ import type {
   InternalUserActivityServiceStart,
 } from './types';
 import { shouldLog } from './user_activity_filters';
+import { shapeServerlessOtelAppenders } from './user_activity_otel_transform';
 
 /** @internal */
 interface UserActivitySetupDeps {
@@ -66,11 +67,15 @@ export class UserActivityService
       this.filters = config.filters;
     });
 
+    const isServerless = this.coreContext.env.packageInfo.buildFlavor === 'serverless';
+
     logging.configure(
       ['user_activity'],
       config$.pipe(
         map((config) => ({
-          appenders: config.appenders,
+          appenders: isServerless
+            ? shapeServerlessOtelAppenders(config.appenders)
+            : config.appenders,
           loggers: [
             {
               name: 'event',
