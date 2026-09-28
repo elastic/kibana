@@ -91,8 +91,8 @@ describe('createSignificantEventsAlertingContextResolver', () => {
       schedule: { interval: '5m' },
     });
 
-    expect(
-      createRule.mock.calls[0][0].data.query.breach.query.includes('SET project_routing')
-    ).toBe(isServerless);
+    expect(createRule.mock.calls[0][0].data.query.base.includes('SET project_routing')).toBe(
+      isServerless
+    );
   });
 });
