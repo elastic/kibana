@@ -974,7 +974,10 @@ describe('getEarsUrl()', () => {
 
 describe('isEarsEnabled()', () => {
   test('returns true when neither config key is set', () => {
-    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: { ...defaultActionsConfig.auth, ears: undefined },
+    });
     expect(acu.isEarsEnabled()).toBe(true);
   });
 
