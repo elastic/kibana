@@ -196,7 +196,7 @@ describe('ki_queries_validate tool', () => {
 
     const result = await invokeHandler(
       createTool(),
-      { target_id: 'logs.test', queries: [candidate] },
+      { slug: 'logs.test', queries: [candidate] },
       createMockToolContext()
     );
     if (!('results' in result)) {
@@ -207,7 +207,9 @@ describe('ki_queries_validate tool', () => {
       {
         type: 'other',
         data: {
-          target_id: 'logs.test',
+          slug: 'logs.test',
+          title: 'logs.test',
+          view_name: '$.nightshift.sources.default.logs.test',
           queries: [{ query: candidate, valid: false, status: 'Failed to add' }],
           finalized: false,
         },
@@ -218,7 +220,7 @@ describe('ki_queries_validate tool', () => {
   it('finalizes an explicit empty batch without loading target state', async () => {
     const result = await invokeHandler(
       createTool(),
-      { target_id: 'logs.test', queries: [] },
+      { slug: 'logs.test', queries: [] },
       createMockToolContext()
     );
     if (!('results' in result)) {
@@ -230,7 +232,7 @@ describe('ki_queries_validate tool', () => {
       {
         type: 'other',
         data: {
-          target_id: 'logs.test',
+          slug: 'logs.test',
           queries: [],
           finalized: true,
           finalized_queries: [],

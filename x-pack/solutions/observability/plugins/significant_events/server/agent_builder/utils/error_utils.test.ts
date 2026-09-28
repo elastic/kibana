@@ -20,7 +20,9 @@ describe('classifyError', () => {
   });
 
   it('returns the disabled-source message', () => {
-    expect(classifyError(new SourceDisabledError('payments'))).toBe('Source "payments" is disabled.');
+    expect(classifyError(new SourceDisabledError('payments'))).toBe(
+      'Source "payments" is disabled.'
+    );
   });
 
   it('leaves a generic 404 as an unexpected error', () => {

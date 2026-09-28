@@ -57,5 +57,3 @@ describe('validateEsqlQueryForSourceOrThrow', () => {
     ).toThrow(EsqlQueryValidationError);
   });
 });
-
-
