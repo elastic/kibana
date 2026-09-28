@@ -71,6 +71,54 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
     expect(definition.getLabel(withHits)).toBe('3 hits confirm: Suspicious lateral movement');
   });
 
+  it('credits the behavior, not the hit count, when only Tier 2 confirmed the finding', () => {
+    const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
+    // The entry carries its report's Tier 1 counts, and a clean Tier 1 leaves them at zero.
+    const tier2Only = {
+      data: {
+        ...baseData,
+        hunt_result: {
+          has_confirmed_hit: true,
+          hit_sources: ['tier2'],
+          time_range: { from: '2024-01-01T00:00:00Z', to: '2024-01-02T00:00:00Z' },
+          tier1: {
+            status: 'no_environment_hits',
+            counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
+            per_index: [],
+            resolved_iocs: [],
+          },
+          tier2: {
+            status: 'behaviors_proposed',
+            behaviors: [
+              {
+                technique_id: 'T1021',
+                tactic_ids: ['TA0008'],
+                confidence: 0.7,
+                rule_name: 'Lateral movement via RDP',
+                execution: { executed: true, row_count: 4, hit: true },
+              },
+            ],
+          },
+        },
+      },
+    } as unknown as SignificantSecurityEventAttachment;
+
+    expect(definition.getLabel(tier2Only)).toBe(
+      'Behavior match confirms: Suspicious lateral movement'
+    );
+  });
+
+  it('ignores captured label fields that are not strings', () => {
+    const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
+    // A persisted payload can carry a shape this build no longer accepts, and the platform
+    // chrome renders this value directly.
+    const objectLabel = {
+      data: { ...baseData, attachmentLabel: { text: 'nope' }, title: { text: 'also nope' } },
+    } as unknown as SignificantSecurityEventAttachment;
+
+    expect(definition.getLabel(objectLabel)).toBe('Significant Security Event');
+  });
+
   it('falls back to a malformed-payload shape: default label, capability-only subtitle', () => {
     const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
     expect(definition.getLabel({ data: {} } as unknown as SignificantSecurityEventAttachment)).toBe(

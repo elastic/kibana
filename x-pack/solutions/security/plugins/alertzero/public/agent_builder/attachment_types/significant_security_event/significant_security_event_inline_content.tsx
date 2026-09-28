@@ -12,6 +12,7 @@ import {
   EuiAccordion,
   EuiBadge,
   EuiBasicTable,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
@@ -63,6 +64,7 @@ import {
 } from './view_model';
 import type {
   HuntResult,
+  HuntResultBehaviorExecution,
   MapsToProposal,
   SignificantSecurityAlertRef,
   SignificantSecurityEventAttachment,
@@ -100,6 +102,15 @@ const TIER1_STATUS_LABELS: Record<HuntResult['tier1']['status'], string> = {
     'xpack.alertzero.agentBuilder.attachments.sse.tier1EnvironmentHitsFound',
     { defaultMessage: 'Environment hits found' }
   ),
+};
+
+const TIER_LABELS: Record<HuntResult['hit_sources'][number], string> = {
+  tier1: i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.tier1Prefix', {
+    defaultMessage: 'Tier 1',
+  }),
+  tier2: i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.tier2Prefix', {
+    defaultMessage: 'Tier 2',
+  }),
 };
 
 const TIER2_STATUS_LABELS: Record<NonNullable<HuntResult['tier2']>['status'], string> = {
@@ -143,6 +154,27 @@ const visColorPalette = euiPaletteColorBlind();
 
 /** Cycles through the EUI color-blind-safe palette for distribution bar segments. */
 const visColorAt = (index: number) => visColorPalette[index % visColorPalette.length];
+
+/**
+ * Producer-set marker that a list is a subset of what the run found. Rendered wherever the
+ * schema carries a `*_truncated` flag, because the length of the list below is otherwise the
+ * only thing a reader has to go on, and a silent cut reads as the complete set.
+ */
+const PartialListNote: React.FC<{ label: string; testSubj: string }> = ({ label, testSubj }) => (
+  <EuiText size="xs" color="subdued" component="span" data-test-subj={testSubj}>
+    <EuiIcon type="scissors" size="s" color="subdued" aria-hidden /> {label}
+  </EuiText>
+);
+
+const PARTIAL_BREAKDOWN_LABEL = i18n.translate(
+  'xpack.alertzero.agentBuilder.attachments.sse.partialBreakdown',
+  { defaultMessage: 'Partial breakdown' }
+);
+
+const PARTIAL_LIST_LABEL = i18n.translate(
+  'xpack.alertzero.agentBuilder.attachments.sse.partialList',
+  { defaultMessage: 'Partial list' }
+);
 
 /** `value` in the badge, confidence as a quieter suffix so the value itself stays scannable. */
 const ConfidenceSuffix: React.FC<{ confidence?: number }> = ({ confidence }) => {
@@ -426,12 +458,15 @@ const EvidenceColumn: React.FC<{
   items: string[];
 }> = ({ label, iconType, iconColor, items }) => {
   const { euiTheme } = useEuiTheme();
+  // The schema accepts 50 items per side, so the overflow has to be reachable: the hidden
+  // items are the hunt's own reasoning, and evidence against is what argues the finding down.
+  const [isExpanded, setIsExpanded] = React.useState(false);
   if (items.length === 0) {
     return null;
   }
 
-  const visibleItems = items.slice(0, EVIDENCE_BULLET_LIMIT);
-  const hiddenCount = items.length - visibleItems.length;
+  const visibleItems = isExpanded ? items : items.slice(0, EVIDENCE_BULLET_LIMIT);
+  const hiddenCount = Math.max(items.length - EVIDENCE_BULLET_LIMIT, 0);
 
   return (
     <EuiFlexItem grow={false}>
@@ -467,17 +502,25 @@ const EvidenceColumn: React.FC<{
         </ul>
       </EuiText>
       {hiddenCount > 0 && (
-        <EuiText
-          size="xs"
-          color="subdued"
-          data-test-subj="alertzeroSignificantSecurityEventEvidenceOverflow"
-        >
-          <FormattedMessage
-            id="xpack.alertzero.agentBuilder.attachments.sse.evidenceOverflow"
-            defaultMessage="+{hiddenCount} more"
-            values={{ hiddenCount }}
-          />
-        </EuiText>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="xs"
+            flush="left"
+            iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
+            onClick={() => setIsExpanded((expanded) => !expanded)}
+            data-test-subj="alertzeroSignificantSecurityEventEvidenceOverflow"
+          >
+            {isExpanded
+              ? i18n.translate(
+                  'xpack.alertzero.agentBuilder.attachments.sse.evidenceOverflowCollapse',
+                  { defaultMessage: 'Show fewer' }
+                )
+              : i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.evidenceOverflow', {
+                  defaultMessage: '+{hiddenCount} more',
+                  values: { hiddenCount },
+                })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       )}
     </EuiFlexItem>
   );
@@ -590,17 +633,88 @@ interface Tier2TableRow {
   tactic_ids: string[];
   confidence: number;
   rule_name: string;
+  execution?: HuntResultBehaviorExecution;
 }
+
+/**
+ * What the behavior's query actually found, which the rest of the row does not say: technique,
+ * rule and confidence describe the proposal, not its result. Four outcomes read identically
+ * without it — an executed hit, an executed clean run, a proposal that never ran, and a run
+ * whose rows could not be classified — and only the second is evidence of a clean environment.
+ *
+ * An absent `execution` is left blank rather than labeled: the producer reported no result,
+ * which is not the same as reporting that nothing ran.
+ */
+const BehaviorExecutionCell: React.FC<{ execution?: HuntResultBehaviorExecution }> = ({
+  execution,
+}) => {
+  if (!execution) {
+    return null;
+  }
+
+  if (!execution.executed) {
+    return (
+      <EuiBadge color="hollow">
+        {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.behaviorNotExecuted', {
+          defaultMessage: 'Not executed',
+        })}
+      </EuiBadge>
+    );
+  }
+
+  if (execution.hit) {
+    return (
+      <EuiBadge color="danger">
+        {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.behaviorHit', {
+          defaultMessage: 'Hit: {count, plural, one {# row} other {# rows}}',
+          values: { count: execution.row_count },
+        })}
+      </EuiBadge>
+    );
+  }
+
+  if (execution.inconclusive_reason) {
+    return (
+      <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="warning">
+            {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.behaviorInconclusive', {
+              defaultMessage: 'Inconclusive',
+            })}
+          </EuiBadge>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued" css={cellStyles}>
+            {execution.inconclusive_reason}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  return (
+    <EuiBadge color="success">
+      {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.behaviorClean', {
+        defaultMessage: 'No rows',
+      })}
+    </EuiBadge>
+  );
+};
 
 const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult }) => {
   const { euiTheme } = useEuiTheme();
   const { tier1, tier2 } = huntResult;
   const isSampled = tier1.counts.returned_hits < tier1.counts.total_hits;
+  const confirmingTiers = huntResult.hit_sources.map((source) => TIER_LABELS[source]);
   const distributionStats = tier1.per_index.map((row, index) => ({
     key: row.index,
     count: row.hit_count,
     label: row.index,
     color: visColorAt(index),
+    // Only required indices can corroborate: Tier 1's hit bar is computed from them, and an
+    // optional index contributes hits that did not clear it. Unlabeled, its segment reads as
+    // part of the corroborating total.
+    required: row.required,
   }));
   const totalDistributedHits = tier1.per_index.reduce((sum, row) => sum + row.hit_count, 0);
 
@@ -667,6 +781,19 @@ const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult })
       render: (tacticIds: string[]) => <HollowBadgeList items={tacticIds} />,
     },
     {
+      field: 'execution',
+      name: i18n.translate(
+        'xpack.alertzero.agentBuilder.attachments.sse.huntResultBehaviorResult',
+        {
+          defaultMessage: 'Result',
+        }
+      ),
+      width: '10em',
+      render: (execution: Tier2TableRow['execution']) => (
+        <BehaviorExecutionCell execution={execution} />
+      ),
+    },
+    {
       field: 'confidence',
       name: i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.huntResultConfidence', {
         defaultMessage: 'Confidence',
@@ -700,6 +827,7 @@ const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult })
       tactic_ids: behavior.tactic_ids,
       confidence: behavior.confidence,
       rule_name: behavior.rule_name,
+      ...(behavior.execution ? { execution: behavior.execution } : {}),
     })) ?? [];
 
   return (
@@ -736,12 +864,28 @@ const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult })
                   )}
             </EuiBadge>
           </EuiFlexItem>
+          {/* Which tier cleared the bar for this finding, which the tier statuses beside it do
+              not say: a report-scoped entry carries its report's Tier 1 status, so
+              "Tier 1 Environment hits found" can sit beside a finding only Tier 2 corroborated
+              and read as its confirmation. */}
+          {confirmingTiers.length > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge
+                color="hollow"
+                iconType="check"
+                data-test-subj="alertzeroSignificantSecurityEventHuntResultHitSources"
+              >
+                {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.huntConfirmedBy', {
+                  defaultMessage: 'Confirmed by {tiers}',
+                  values: { tiers: confirmingTiers.join(', ') },
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow">
               <EuiText size="xs" color="subdued" component="span">
-                {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.tier1Prefix', {
-                  defaultMessage: 'Tier 1',
-                })}
+                {TIER_LABELS.tier1}
               </EuiText>{' '}
               {TIER1_STATUS_LABELS[tier1.status]}
             </EuiBadge>
@@ -750,9 +894,7 @@ const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult })
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow">
                 <EuiText size="xs" color="subdued" component="span">
-                  {i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.tier2Prefix', {
-                    defaultMessage: 'Tier 2',
-                  })}
+                  {TIER_LABELS.tier2}
                 </EuiText>{' '}
                 {TIER2_STATUS_LABELS[tier2.status]}
               </EuiBadge>
@@ -841,6 +983,17 @@ const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult })
                       <EuiFlexItem grow={false} key={stat.key}>
                         <EuiHealth color={stat.color} textSize="xs">
                           {stat.label} ({stat.count})
+                          {stat.required ? null : (
+                            <>
+                              {' '}
+                              <EuiText size="xs" color="subdued" component="span">
+                                {i18n.translate(
+                                  'xpack.alertzero.agentBuilder.attachments.sse.huntResultOptionalIndex',
+                                  { defaultMessage: 'optional' }
+                                )}
+                              </EuiText>
+                            </>
+                          )}
                         </EuiHealth>
                       </EuiFlexItem>
                     ))}
@@ -853,6 +1006,15 @@ const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult })
                       defaultMessage="{hits, plural, one {# event} other {# events}} across {indices, plural, one {# index} other {# indices}}"
                       values={{ hits: totalDistributedHits, indices: tier1.per_index.length }}
                     />
+                    {tier1.per_index_truncated ? (
+                      <>
+                        {' · '}
+                        <PartialListNote
+                          label={PARTIAL_BREAKDOWN_LABEL}
+                          testSubj="alertzeroSignificantSecurityEventHuntResultPerIndexTruncated"
+                        />
+                      </>
+                    ) : null}
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -868,6 +1030,14 @@ const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult })
                 'xpack.alertzero.agentBuilder.attachments.sse.huntResultResolvedIocs',
                 { defaultMessage: 'Resolved IOCs' }
               )}
+              aside={
+                tier1.resolved_iocs_truncated ? (
+                  <PartialListNote
+                    label={PARTIAL_LIST_LABEL}
+                    testSubj="alertzeroSignificantSecurityEventHuntResultResolvedIocsTruncated"
+                  />
+                ) : undefined
+              }
             >
               <LabeledBadgeTable
                 rows={resolvedIocRows}
@@ -889,6 +1059,14 @@ const HuntResultSection: React.FC<{ huntResult: HuntResult }> = ({ huntResult })
                 'xpack.alertzero.agentBuilder.attachments.sse.huntResultBehaviorsTitle',
                 { defaultMessage: 'Validated behaviors' }
               )}
+              aside={
+                tier2?.behaviors_truncated ? (
+                  <PartialListNote
+                    label={PARTIAL_LIST_LABEL}
+                    testSubj="alertzeroSignificantSecurityEventHuntResultBehaviorsTruncated"
+                  />
+                ) : undefined
+              }
             >
               <TableFrame>
                 <EuiBasicTable<Tier2TableRow>
