@@ -284,8 +284,16 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
       await expect(eisModels.flyout).toBeVisible();
     });
 
-    await test.step('unavailable callout is visible', async () => {
+    await test.step('unavailable callout is visible and every region option remains', async () => {
       await expect(eisModels.flyoutRegionUnavailableCallout).toBeVisible();
+      await expect(eisModels.flyoutRegionOption('geo-apac')).toHaveText('Asia Pacific');
+      await expect(eisModels.flyoutRegionOption('geo-us')).toHaveText('North America');
+      await expect(eisModels.flyoutRegionOption('region-aws-ap-southeast-1')).toHaveText(
+        'ap-southeast-1 - AWS'
+      );
+      await expect(eisModels.flyoutRegionOption('region-aws-us-east-1')).toHaveText(
+        'us-east-1 - AWS'
+      );
     });
   });
 

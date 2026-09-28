@@ -204,18 +204,28 @@ describe('ModelDetailFlyout', () => {
       expect(screen.getAllByTestId('flyoutRegionOption-geo-us')).toHaveLength(1);
     });
 
-    it('still renders region options when the model is denied by region policy', () => {
+    it('still renders every region option when the model is denied by region policy', () => {
       renderFlyout(MODEL_ID, [
         createEndpoint({
           metadata: {
             denied_by_region_policy: true,
-            regions: [{ csp: 'aws', region: 'us-east-1', geo: 'us' }],
+            regions: [
+              { csp: 'aws', region: 'us-east-1', geo: 'us' },
+              { csp: 'aws', region: 'eu-west-1', geo: 'eu' },
+            ],
           },
         }),
       ]);
 
       expect(screen.getByTestId('modelDetailFlyoutRegionUnavailableCallout')).toBeInTheDocument();
-      expect(screen.getByTestId('flyoutRegionOptions')).toBeInTheDocument();
+      expect(screen.getByTestId('flyoutRegionOption-geo-eu')).toHaveTextContent('Europe');
+      expect(screen.getByTestId('flyoutRegionOption-geo-us')).toHaveTextContent('North America');
+      expect(screen.getByTestId('flyoutRegionOption-region-aws-eu-west-1')).toHaveTextContent(
+        'eu-west-1 - AWS'
+      );
+      expect(screen.getByTestId('flyoutRegionOption-region-aws-us-east-1')).toHaveTextContent(
+        'us-east-1 - AWS'
+      );
     });
 
     it('says region options are not available when the endpoint has no region metadata', () => {
