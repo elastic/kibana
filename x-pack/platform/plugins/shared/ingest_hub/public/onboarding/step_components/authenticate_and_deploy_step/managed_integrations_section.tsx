@@ -332,9 +332,12 @@ export function ManagedIntegrationsSection({
                       setIsDeployReady(false);
                       if (id === 'access_keys') {
                         setConnectorId(undefined);
-                        // In static-key edit mode, restore authMethod so drift clears and Next
-                        // re-enables if the user reverts without deploying.
-                        if (isStaticKeysEditMode) setAuthMethod('static_keys');
+                        // In edit mode, restore authMethod so drift clears and Next re-enables
+                        // if the user reverts to access_keys without deploying. Use isEditMode
+                        // rather than isStaticKeysEditMode: after switching to identity_federation,
+                        // authMethod is 'identity_federation' so isStaticKeysEditMode becomes false,
+                        // which would prevent the revert from clearing isDirty (4121333261).
+                        if (isEditMode) setAuthMethod('static_keys');
                       } else if (isStaticKeysEditMode) {
                         // Switching to identity federation while currently deployed with static keys:
                         // update authMethod so the drift check detects the pending auth change and

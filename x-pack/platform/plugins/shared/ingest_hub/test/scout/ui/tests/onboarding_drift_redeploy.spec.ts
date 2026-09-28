@@ -508,6 +508,24 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
       { key: SERVICE_SETTINGS_SESSION_KEY }
     );
 
+    // Seed detectAndReview so the MI section renders in deployed state (serviceStatuses keeps
+    // the instance visible and isAlreadyDeployed=true so isDirty blocks Next - 4123190774).
+    await page.evaluate(
+      ({ key, depId }) => {
+        sessionStorage.setItem(
+          key,
+          JSON.stringify({
+            policyIdsByInstance: { elb: 'mock-mi-policy-id' },
+            serviceStatuses: { elb: 'receiving' },
+            onboardingDeploymentId: depId,
+            failedInstances: [],
+            deployErrors: {},
+          })
+        );
+      },
+      { key: DETECT_AND_REVIEW_SESSION_KEY, depId: DEP_ID }
+    );
+
     await page.reload();
     await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
     await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
@@ -557,6 +575,54 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
     // isMiDone is false — Next stays blocked until a successful redeploy.
     await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeDisabled();
+
+    // Exercise successful Retry: override the PUT mock to return 200, then add SO PUT mock
+    // and click Retry — the drift callout must disappear and Next must enable (4123049397).
+    await page.route(
+      (url) => /\/api\/fleet\/managed_integrations\/mock-mi-policy-id$/.test(url.pathname),
+      async (route) => {
+        if (route.request().method() === 'GET') {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ item: MI_POLICY_ITEM }),
+          });
+        } else if (route.request().method() === 'PUT') {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ item: MI_POLICY_ITEM }),
+          });
+        } else {
+          await route.continue();
+        }
+      }
+    );
+    await page.route(
+      (url) =>
+        new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname) && true,
+      async (route) => {
+        if (route.request().method() === 'PUT') {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ item: makeSoItem(DEP_ID, { connectorId: null, authMethod: 'static_keys' }) }),
+          });
+        } else {
+          await route.continue();
+        }
+      }
+    );
+    const retryMiPutPromise = page.waitForRequest(
+      (req) =>
+        req.method() === 'PUT' &&
+        /\/api\/fleet\/managed_integrations\/mock-mi-policy-id$/.test(new URL(req.url()).pathname)
+    );
+    await page.testSubj.locator('managedIntegrationsSection-retryButton').click();
+    await retryMiPutPromise;
+    // Successful retry: drift flag cleared, callout disappears, Next enables.
+    await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
+    await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
   });
 
   test('auth drift: connector change detected and callout shown', async ({ browserAuth, page }) => {
@@ -637,14 +703,20 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
         })
     );
 
-    // Agent policies combobox — return empty list so the fetch doesn't hang.
+    // Agent policies combobox — return the seeded policy so the combobox is not empty and
+    // selectedAgentPolicyIds is preserved (an empty list causes reconcile to clear it - 4123330443).
     await page.route(
       (url) => /\/api\/fleet\/agent_policies/.test(url.pathname),
       (route) =>
         route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({ items: [], total: 0, page: 1, perPage: 20 }),
+          body: JSON.stringify({
+            items: [{ id: 'mock-agent-policy-id', name: 'Mock Agent Policy' }],
+            total: 1,
+            page: 1,
+            perPage: 20,
+          }),
         })
     );
 
@@ -812,7 +884,18 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
       'agent-drift-bucket'
     );
 
-    // isDirty cleared → drift callout disappears.
-    await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
+    // isDirty cleared → session reflects the new state. The step may navigate away after
+    // a successful deploy (unmounting the callout), so assert on session state rather than
+    // UI element visibility to avoid a vacuously-true assertion (4123330463).
+    const isDirtyAfter = await page.evaluate(({ key }) => {
+      const raw = sessionStorage.getItem(key);
+      if (!raw) return null;
+      try {
+        return (JSON.parse(raw) as Record<string, unknown>).isDirty ?? null;
+      } catch {
+        return null;
+      }
+    }, { key: DETECT_AND_REVIEW_SESSION_KEY });
+    expect(isDirtyAfter).toBeFalsy();
   });
 });

@@ -482,6 +482,11 @@ export function useMiDeploy({
         setIsDeploying(true);
         updateDetectAndReviewStep({ isDeploying: true });
 
+        // Hoist cleanup result so it can be merged into a single updateDetectAndReviewStep call.
+        // React may batch synchronous state updates, meaning two sequential calls in the same
+        // tick both capture the same prev state — the second call would clobber the
+        // pendingCleanupPolicyIds written by the first (4121333268).
+        let retryRemainingPending: Record<string, string> | undefined;
         if (Object.keys(plan.retryPending).length > 0) {
           cleanupOps = await cleanupManagedIntegrationsPolicies({
             pendingCleanupPolicyIds: plan.retryPending,
@@ -500,12 +505,15 @@ export function useMiDeploy({
             removeDeployInstances
           );
           cleanedInstanceIds = retryReconciliation.cleanedInstanceIds;
-          updateDetectAndReviewStep({
-            pendingCleanupPolicyIds: retryReconciliation.remainingPending,
-          });
+          retryRemainingPending = retryReconciliation.remainingPending;
         }
 
+        // Combine cleanup result with service-status update into one write so React batching
+        // cannot lose pendingCleanupPolicyIds (4121333268).
         updateDetectAndReviewStep({
+          ...(retryRemainingPending !== undefined
+            ? { pendingCleanupPolicyIds: retryRemainingPending }
+            : {}),
           serviceStatuses: buildInstanceStatuses(plan.deployedTargets, []),
           failedInstances: plan.remainingFailed,
           deployErrors: {},
@@ -524,6 +532,11 @@ export function useMiDeploy({
             updateDetectAndReviewStep({
               isDeploying: false,
               failedInstances: allFailedIds,
+              // Re-include cleanup result in case this write races with the combined write above;
+              // also prevents a batched call from losing the pendingCleanupPolicyIds update.
+              ...(retryRemainingPending !== undefined
+                ? { pendingCleanupPolicyIds: retryRemainingPending }
+                : {}),
             });
             return { cleanupFailed: true };
           }

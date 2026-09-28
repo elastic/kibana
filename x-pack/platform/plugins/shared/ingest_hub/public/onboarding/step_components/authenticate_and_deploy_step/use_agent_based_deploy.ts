@@ -130,7 +130,9 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       // For fresh deploys, skip groups where every instance already has a package policy —
       // this handles incremental service additions (deploy A, add B, Next should only deploy B).
       const targetsToDeploy = isRetry
-        ? targets.filter((g) => g.instanceIds.some((id) => instanceIds.includes(id)))
+        ? targets.filter((g) =>
+            g.instanceIds.some((id) => instanceIds.includes(id) && !alreadyDeployedIds.has(id))
+          )
         : targets.filter((g) => g.instanceIds.some((id) => !alreadyDeployedIds.has(id)));
 
       // Services deselected from Step 1 never call removeDeployInstance, so pendingCleanupPolicyIds
@@ -291,11 +293,27 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             }
           }
 
-          // Pure dirty-redeploy case: no new targets and no cleanup remaining.
-          if (targetsToDeploy.length === 0 && !hasPendingCleanup) {
-            const { onboardingDeploymentId } = detectAndReviewStep;
+          // Policy updates succeeded — mark applied so later paths can include updated
+          // serviceVars/authMethod in SO writes and the cleanup-only path clears isDirty.
+          dirtyUpdateApplied = true;
+
+          // Pure dirty-redeploy case: no new targets AND cleanup fully succeeded.
+          // When cleanup partially failed (remainingPending non-empty), fall through to
+          // the cleanup-only path so isDirty is cleared without writing an incomplete
+          // post-cleanup state to the SO (4123049389).
+          if (
+            targetsToDeploy.length === 0 &&
+            Object.keys(remainingPending).length === 0
+          ) {
             if (onboardingDeploymentId) {
-              const soUpdated = await updateDeployment(onboardingDeploymentId, {
+              const postCleanupIds = Object.fromEntries(
+                Object.entries(detectAndReviewStep.policyIdsByInstance ?? {}).filter(
+                  ([id]) => !cleanedLiveStale.includes(id)
+                )
+              );
+              // Check SO write result — if it fails, keep isDirty so the user can retry
+              // rather than silently losing the updated settings (4123049384).
+              const soOk = await updateDeployment(onboardingDeploymentId, {
                 services: selectedServiceIds,
                 serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
                   string,
@@ -304,24 +322,31 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
                 authMethod: authenticateAndDeployStep.authMethod ?? null,
                 connectorId: authenticateAndDeployStep.connectorId ?? null,
               });
-              if (!soUpdated) {
-                // Toast already shown by updateDeployment. Keep isDirty so the user can retry.
+              if (!soOk) {
                 setIsDeploying(false);
                 updateDetectAndReviewStep({ isDeploying: false });
                 return { failed: true };
               }
             }
             setIsDeploying(false);
-            updateDetectAndReviewStep({ isDeploying: false, isDirty: false });
+            // Clear stale failure state from prior deploy attempts so agentHasFailed does not
+            // linger after a successful dirty redeploy (4123190760).
+            setFailedInstances([]);
+            updateDetectAndReviewStep({ isDeploying: false, isDirty: false, failedInstances: [] });
             return { failed: false };
           }
-          dirtyUpdateApplied = true;
-          // Falls through to the new-target deploy path below; isDirty cleared after that succeeds.
+          // If cleanup partially failed OR there are new targets, fall through.
         }
 
         if (targetsToDeploy.length === 0) {
           setIsDeploying(false);
-          updateDetectAndReviewStep({ isDeploying: false });
+          updateDetectAndReviewStep({
+            isDeploying: false,
+            // Dirty update policy changes succeeded (dirtyUpdateApplied=true) even though cleanup
+            // partially failed — clear isDirty so the user can navigate without re-deploying
+            // policies that are already up to date (4123049389).
+            ...(dirtyUpdateApplied ? { isDirty: false } : {}),
+          });
           // Only refresh the SO services list when ALL cleanup succeeded — both explicit
           // pendingCleanupPolicyIds (Step 4 deselections) AND live-stale entries (Step 1
           // deselections). A failed live-stale cleanup is not tracked in remainingPending, so
@@ -449,6 +474,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         // The SO tracks current desired state, not a frozen deploy snapshot. Refreshing
         // services/serviceVars here means a resume after a Back→add-service→Next sequence
         // restores the complete service set, not just what was deployed first.
+        let soOk = true;
         if (onboardingDeploymentId) {
           // Build the persisted policy-ID list from the post-cleanup snapshot: filter out
           // instance IDs removed by cleanup (cleanedLiveStale) before merging with current
@@ -466,7 +492,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           );
           const cleanupFullySucceeded =
             Object.keys(remainingPending).length === 0 && allLiveStaleSucceededInDeploy;
-          await updateDeployment(onboardingDeploymentId, {
+          soOk = await updateDeployment(onboardingDeploymentId, {
             ...(resolvedAgentPolicyIds.length ? { agentPolicyIds: resolvedAgentPolicyIds } : {}),
             packagePolicyIds: [...new Set(Object.values({ ...priorIds, ...policyIdsByInstance }))],
             // Always update mechanisms so that a record originally created for managed_integration
@@ -515,13 +541,12 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           isDeploying: false,
           serviceStatuses: statuses,
           policyIdsByInstance,
-          // On retry, merge with latest to preserve statuses for non-retried instances.
-          failedInstances: isRetry
-            ? [...getLatestFailedInstances().filter((id) => !allTargetIds.includes(id)), ...failed]
-            : failed,
-          deployErrors: errorsByInstance,
-          // Clear drift flag when new targets were deployed alongside a successful dirty update.
-          ...(dirtyUpdateApplied && failed.length === 0 ? { isDirty: false } : {}),
+          failedInstances: mergedFailed,
+          deployErrors: mergedErrors,
+          // Clear drift flag only when the SO write confirmed the new state — if the SO PUT
+          // failed, the updated settings were not persisted, so isDirty must stay true to force
+          // a retry rather than silently losing the change (4123190769).
+          ...(dirtyUpdateApplied && mergedFailed.length === 0 && soOk ? { isDirty: false } : {}),
         });
         return { failed: mergedFailed.length > 0 };
       } catch (err) {

@@ -773,7 +773,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         </>
       )}
 
-      {showMiSection && isDirty && (
+      {(showMiSection || showAgentSection) && isDirty && (
         <>
           <EuiCallOut
             announceOnMount
