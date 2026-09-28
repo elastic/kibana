@@ -66,7 +66,7 @@ test.describe(
         await pageObjects.maps.enableAutoFitToBounds();
       });
 
-      test('should automatically fit to bounds when query is applied', async ({ pageObjects }) => {
+      test('should automatically fit to bounds when query is applied', async ({ page, pageObjects }) => {
         // Set view to other side of world so no matching results
         await pageObjects.maps.setView(0, 0, 6);
 

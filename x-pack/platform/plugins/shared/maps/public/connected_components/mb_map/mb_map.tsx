@@ -138,6 +138,14 @@ export class MbMap extends Component<Props> {
     };
   }
 
+  _updateViewDataAttributes() {
+    if (!this._containerRef || !this.props.mapApi) return;
+    const { zoom, center } = this._getMapExtentState();
+    this._containerRef.dataset.mapLat = String(center.lat);
+    this._containerRef.dataset.mapLon = String(center.lon);
+    this._containerRef.dataset.mapZoom = String(zoom);
+  }
+
   async _createMbMapInstance(initialView: MapCenterAndZoom | null): Promise<MapApi> {
     this._reportUsage();
     return new Promise((resolve) => {
@@ -237,6 +245,7 @@ export class MbMap extends Component<Props> {
     }
 
     this.props.setMapApi(mbMap);
+    this._updateViewDataAttributes();
     this.props.onMapReady(this._getMapExtentState());
     this._loadMakiSprites(mbMap);
     this._registerMapEventListeners(mbMap);
@@ -250,6 +259,7 @@ export class MbMap extends Component<Props> {
       'moveend',
       _.debounce(() => {
         if (this._isMounted) {
+          this._updateViewDataAttributes();
           this.props.extentChanged(this._getMapExtentState());
         }
       }, 100)

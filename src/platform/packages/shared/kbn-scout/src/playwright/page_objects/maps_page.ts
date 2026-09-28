@@ -11,6 +11,7 @@ import type { ScoutPage } from '..';
 import { expect } from '..';
 import { AppMenu } from './app_menu';
 import { InspectorPage } from './inspector';
+import { QueryBar } from './query_bar';
 import { SavedObjectSaveModal } from './saved_object_save_modal';
 
 // Maps first paint regularly exceeds Scout's 10s actionTimeout under parallel load.
@@ -30,6 +31,7 @@ export class MapsPage {
   public readonly exitFullScreenButton;
   private readonly layerTocTooltip;
   private readonly appMenu: AppMenu;
+  private readonly queryBar: QueryBar;
   private readonly mapContainer;
   private readonly setViewForm;
   /** Save modal locators/actions, shared with other apps (e.g. Visualize) via `SavedObjectSaveModal`. */
@@ -51,6 +53,7 @@ export class MapsPage {
     this.fullScreenModeButton = this.page.testSubj.locator('mapsFullScreenMode');
     this.exitFullScreenButton = this.page.testSubj.locator('exitFullScreenModeButton');
     this.appMenu = new AppMenu(this.page);
+    this.queryBar = new QueryBar(this.page);
     this.layerTocTooltip = this.page.testSubj.locator('layerTocTooltip');
     this.mapContainer = this.page.testSubj.locator('mapContainer');
     this.setViewForm = this.page.testSubj.locator('mapSetViewForm');
@@ -205,10 +208,7 @@ export class MapsPage {
     // timeout: 0 prevents waiting for the element to appear — the form only exists in
     // the DOM when the popover is open, so without it Playwright retries for 10s and throws.
     if (await this.setViewForm.isVisible({ timeout: 1_000 })) {
-      // page.keyboard.press is more robust than setViewForm.press in embedded contexts:
-      // during map panning the dashboard re-renders the panel, detaching the form element,
-      // which causes locator.press to retry until it times out.
-      await this.page.keyboard.press('Escape');
+      await this.page.testSubj.click('toggleSetViewVisibilityButton');
       await this.setViewForm.waitFor({ state: 'hidden', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
     }
   }
@@ -253,12 +253,15 @@ export class MapsPage {
   }
 
   async getView(): Promise<{ lat: number; lon: number; zoom: number }> {
-    await this.openSetViewPopover();
-    const lat = await this.page.testSubj.locator('latitudeInput').inputValue();
-    const lon = await this.page.testSubj.locator('longitudeInput').inputValue();
-    const zoom = await this.page.testSubj.locator('zoomInput').inputValue();
-    await this.closeSetViewPopover();
-    return { lat: parseFloat(lat), lon: parseFloat(lon), zoom: parseFloat(zoom) };
+    const attrs = await this.mapContainer.evaluate((el) => ({
+      lat: (el as HTMLElement).dataset.mapLat,
+      lon: (el as HTMLElement).dataset.mapLon,
+      zoom: (el as HTMLElement).dataset.mapZoom,
+    }));
+    if (attrs.lat === undefined || attrs.lon === undefined || attrs.zoom === undefined) {
+      throw new Error('Map view data attributes not found on mapContainer');
+    }
+    return { lat: parseFloat(attrs.lat), lon: parseFloat(attrs.lon), zoom: parseFloat(attrs.zoom) };
   }
 
   async openMapWithId(id: string) {
@@ -318,10 +321,8 @@ export class MapsPage {
 
   /** Sets the KQL query in the search bar, submits it, and waits for layers to load. */
   async setAndSubmitQuery(query: string) {
-    const input = this.page.testSubj.locator('queryInput');
-    await input.clear();
-    await input.pressSequentially(query);
-    await this.page.testSubj.click('querySubmitButton');
+    await this.queryBar.setQuery(query);
+    await this.queryBar.submitQuery();
     await this.waitForLayersToLoad();
   }
 
