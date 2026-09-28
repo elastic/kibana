@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { AlertStatusChangedV1Payload } from '../../common/workflows/triggers';
+import type { AlertStatusChangedV1Payload } from '../../../common/workflows/triggers';
 
 export const ALERT_STATUS_CHANGED_EVENT_TYPE = 'alert.status.changed' as const;
 
