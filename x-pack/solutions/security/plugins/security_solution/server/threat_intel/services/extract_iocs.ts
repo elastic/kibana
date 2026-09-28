@@ -614,7 +614,12 @@ const defangValue = (type: IocType, value: string, shouldDefang: boolean): strin
  *   hxxp:// / hxxps:// (any case)→ http:// / https://   obfuscated scheme prefix
  *   [@] / (at)                   → @    email defang markers
  */
-const refang = (text: string): string =>
+/**
+ * Recover defanged IOC spellings (`hxxps`, `evil[.]com`, …) to their canonical
+ * form. Exported so adjudication can locate canonical candidate values in the
+ * same refanged view that extraction uses.
+ */
+export const refang = (text: string): string =>
   text
     // Bracket/paren/brace-wrapped dot
     .replace(/\[\.\]|\(\.\)|\{\.\}/g, '.')

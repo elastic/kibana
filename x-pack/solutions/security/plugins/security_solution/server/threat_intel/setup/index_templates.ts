@@ -1537,10 +1537,16 @@ interface RequiredMapping {
 const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
   { path: 'content.article_url', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
   { path: 'content.rss_body_text' },
+  { path: 'content.rss_body_chars' },
   { path: 'content.rendered_body_text' },
   { path: 'content.materialization.status' },
+  // Leaves, not just the parent: a failed materialization putMapping can leave
+  // `status` mapped while `rendered_chars` stays absent, and dynamic:strict then
+  // rejects successful Jina writes that set the leaf.
+  { path: 'content.materialization.rendered_chars' },
   { path: 'extracted.artifacts' },
   { path: 'extracted.core.context_mode' },
+  { path: 'extracted.core.context_chars' },
   { path: 'extracted.diamond' },
   { path: 'extracted.diamond.context_mode' },
   { path: 'extracted.diamond.context_chars' },

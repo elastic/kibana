@@ -131,4 +131,37 @@ describe('enrichReportCore', () => {
     expect(result.context.coverage).toBeLessThan(1);
     expect(invoke.mock.calls[1][0]).toContain('MIDDLE_EVIDENCE');
   });
+
+  it('bounds the IOC candidate payload on overflow retry', async () => {
+    const overflow = new InferenceTaskError(
+      ChatCompletionErrorCode.ContextLengthExceededError,
+      'context window exceeded',
+      {}
+    );
+    const invoke = jest
+      .fn()
+      .mockRejectedValueOnce(overflow)
+      .mockResolvedValueOnce({
+        raw: { response_metadata: {} },
+        parsed: { ...OUTPUT, approved_ioc_candidate_ids: [0] },
+      });
+    const manyIocs = Array.from({ length: 60 }, (_, index) => ({
+      type: 'url' as const,
+      value: `https://evil.example/payload-${index}`,
+      defanged: `https://evil.example/payload-${index}`,
+      tier: 'uncertain' as const,
+      tier_heuristic: 'uncertain' as const,
+      tier_basis: 'uncertain_default',
+    }));
+    const text = manyIocs.map((ioc) => `Fetched ${ioc.value}.`).join(' ');
+
+    await enrichReportCore(buildModel(invoke), logger, { text, iocs: manyIocs });
+
+    const retryPrompt = String(invoke.mock.calls[1][0]);
+    const candidatesMatch = /IOC candidates:\n(\[[\s\S]*?\])\n\nSource:/.exec(retryPrompt);
+    expect(candidatesMatch).not.toBeNull();
+    const retryCandidates = JSON.parse(candidatesMatch![1]) as Array<{ context: string }>;
+    expect(retryCandidates).toHaveLength(50);
+    expect(retryCandidates.every((entry) => entry.context.length <= 120)).toBe(true);
+  });
 });

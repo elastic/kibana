@@ -7,9 +7,13 @@
 
 import { createHash } from 'node:crypto';
 import type { ExtractedIoc, ExtractIocsResult, IocTier } from './extract_iocs';
+import { refang } from './extract_iocs';
 
 const MAX_SEMANTIC_CANDIDATES = 300;
+/** Cap for the overflow-retry prompt so candidate values alone cannot re-overflow. */
+export const OVERFLOW_MAX_SEMANTIC_CANDIDATES = 50;
 const CONTEXT_CHARS = 240;
+const OVERFLOW_CONTEXT_CHARS = 120;
 const PROMOTABLE_TIERS: ReadonlySet<IocTier> = new Set([
   'discriminating',
   'contextual',
@@ -63,16 +67,33 @@ const iocSetHash = (iocs: ExtractedIoc[]): string | null =>
         )
         .digest('hex');
 
-const contextFor = (text: string, lowerText: string, value: string): string => {
-  const index = lowerText.indexOf(value.toLowerCase());
-  if (index < 0) return '';
-  return text
+const sliceContext = (source: string, index: number, valueLength: number): string =>
+  source
     .slice(
       Math.max(0, index - CONTEXT_CHARS),
-      Math.min(text.length, index + value.length + CONTEXT_CHARS)
+      Math.min(source.length, index + valueLength + CONTEXT_CHARS)
     )
     .replace(/\s+/g, ' ')
     .trim();
+
+/**
+ * Prefer the original article span. When the IOC was published defanged
+ * (`hxxps://evil[.]example/...`), the canonical value only appears in the
+ * refanged copy that extraction already uses — take context from there.
+ */
+const contextFor = (
+  originalText: string,
+  lowerOriginal: string,
+  refangedText: string,
+  lowerRefanged: string,
+  value: string
+): string => {
+  const lowerValue = value.toLowerCase();
+  const originalIndex = lowerOriginal.indexOf(lowerValue);
+  if (originalIndex >= 0) return sliceContext(originalText, originalIndex, value.length);
+  const refangedIndex = lowerRefanged.indexOf(lowerValue);
+  if (refangedIndex >= 0) return sliceContext(refangedText, refangedIndex, value.length);
+  return '';
 };
 
 const hostnameFor = (value: string): string | undefined => {
@@ -110,7 +131,9 @@ export const prepareIocAdjudication = (
   params: Pick<AdjudicateIocsParams, 'text' | 'iocs' | 'article_url'>
 ): PreparedIocAdjudication => {
   const output = [...params.iocs];
-  const lowerText = params.text.toLowerCase();
+  const lowerOriginal = params.text.toLowerCase();
+  const refangedText = refang(params.text);
+  const lowerRefanged = refangedText.toLowerCase();
   let deterministicReferences = 0;
 
   const candidates = params.iocs
@@ -136,7 +159,13 @@ export const prepareIocAdjudication = (
   const reviewable = candidates.slice(0, MAX_SEMANTIC_CANDIDATES).map((candidate) => ({
     ...candidate,
     id: candidate.originalIndex,
-    context: contextFor(params.text, lowerText, candidate.ioc.value),
+    context: contextFor(
+      params.text,
+      lowerOriginal,
+      refangedText,
+      lowerRefanged,
+      candidate.ioc.value
+    ),
   }));
   const overflow = candidates.slice(MAX_SEMANTIC_CANDIDATES);
   for (const candidate of overflow) {
@@ -151,6 +180,39 @@ export const prepareIocAdjudication = (
     reviewable,
     deterministicReferences,
     overflowReferences: overflow.length,
+  };
+};
+
+/**
+ * Shrink the candidate set and per-candidate context for a confirmed context
+ * overflow retry. Candidates not sent are marked as unreviewed overflow so
+ * reconcile cannot treat them as model rejections.
+ */
+export const boundIocAdjudicationForOverflow = (
+  prepared: PreparedIocAdjudication
+): PreparedIocAdjudication => {
+  const kept = prepared.reviewable
+    .slice(0, OVERFLOW_MAX_SEMANTIC_CANDIDATES)
+    .map((candidate) => ({
+      ...candidate,
+      context: candidate.context.slice(0, OVERFLOW_CONTEXT_CHARS),
+    }));
+  const skipped = prepared.reviewable.slice(OVERFLOW_MAX_SEMANTIC_CANDIDATES);
+  if (skipped.length === 0) {
+    return { ...prepared, reviewable: kept };
+  }
+  const output = [...prepared.output];
+  for (const candidate of skipped) {
+    output[candidate.originalIndex] = downgrade(
+      candidate.ioc,
+      'semantic_reference_unreviewed_overflow'
+    );
+  }
+  return {
+    output,
+    reviewable: kept,
+    deterministicReferences: prepared.deterministicReferences,
+    overflowReferences: prepared.overflowReferences + skipped.length,
   };
 };
 

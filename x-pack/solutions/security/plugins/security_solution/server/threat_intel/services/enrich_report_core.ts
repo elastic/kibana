@@ -17,10 +17,12 @@ import {
 } from '../../../common/threat_intel';
 import type { ExtractedIoc } from './extract_iocs';
 import {
+  boundIocAdjudicationForOverflow,
   prepareIocAdjudication,
   reconcileIocAdjudication,
   type AdjudicateIocsResult,
   type IocAdjudicationCandidate,
+  type PreparedIocAdjudication,
 } from './adjudicate_iocs';
 import { severityScore } from './severity';
 import { logStageUsage } from '../lib/cost_tracker';
@@ -198,7 +200,7 @@ export const enrichReportCore = async (
   logger: Logger,
   params: EnrichReportCoreParams
 ): Promise<EnrichReportCoreResult> => {
-  const prepared = prepareIocAdjudication(params);
+  let prepared: PreparedIocAdjudication = prepareIocAdjudication(params);
   const structured = model.chatModel.withStructuredOutput(reportCoreModelOutputSchema, {
     includeRaw: true,
   });
@@ -216,7 +218,10 @@ export const enrichReportCore = async (
     };
   } catch (error) {
     if (!isContextLengthExceededError(error as Error)) throw error;
+    // Article shrink alone is not enough: long candidate value/context JSON can
+    // re-overflow the window. Bound the payload before the retry.
     context = selectOverflowRetryArticleContext(params.text);
+    prepared = boundIocAdjudicationForOverflow(prepared);
     result = (await structured.invoke(buildPrompt(params, context.text, prepared.reviewable))) as {
       raw: { response_metadata: Record<string, unknown> };
       parsed: ReportCoreModelOutput;

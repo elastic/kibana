@@ -38,13 +38,17 @@ export const EXTRACT_IOCS_MAX_RESPONSE_SIZE = 5_000;
 
 const IOC_TIERS = ['discriminating', 'contextual', 'reference', 'denied', 'uncertain'] as const;
 
+/** Matches the keyword ignore_above used for IOC values on the reports index. */
+const MAX_IOC_VALUE_LENGTH = MAX_URL_LENGTH;
+const MAX_IOC_TIER_BASIS_LENGTH = 512;
+
 export const extractedIocSchema = schema.object({
   type: oneOfLiterals(IOC_TYPES),
-  value: schema.string(),
-  defanged: schema.maybe(schema.string()),
+  value: schema.string({ minLength: 1, maxLength: MAX_IOC_VALUE_LENGTH }),
+  defanged: schema.maybe(schema.string({ minLength: 1, maxLength: MAX_IOC_VALUE_LENGTH })),
   tier: oneOfLiterals(IOC_TIERS),
   tier_heuristic: oneOfLiterals(IOC_TIERS),
-  tier_basis: schema.string(),
+  tier_basis: schema.string({ minLength: 1, maxLength: MAX_IOC_TIER_BASIS_LENGTH }),
   port: schema.maybe(schema.number()),
 });
 

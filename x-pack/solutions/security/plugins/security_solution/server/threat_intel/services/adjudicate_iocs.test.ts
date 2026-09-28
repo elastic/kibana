@@ -6,7 +6,12 @@
  */
 
 import type { ExtractedIoc } from './extract_iocs';
-import { prepareIocAdjudication, reconcileIocAdjudication } from './adjudicate_iocs';
+import {
+  boundIocAdjudicationForOverflow,
+  OVERFLOW_MAX_SEMANTIC_CANDIDATES,
+  prepareIocAdjudication,
+  reconcileIocAdjudication,
+} from './adjudicate_iocs';
 
 const candidate = (value: string, overrides: Partial<ExtractedIoc> = {}): ExtractedIoc => ({
   type: 'url',
@@ -103,5 +108,35 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(result.iocs[0].tier).toBe('discriminating');
     expect(result.promotable_count).toBe(1);
     expect(prepared.reviewable).toHaveLength(0);
+  });
+
+  it('locates defanged IOC values in a refanged copy for review context', () => {
+    const canonical = 'https://evil.example/payload.exe';
+    const defanged = 'hxxps://evil[.]example/payload.exe';
+    const prepared = prepareIocAdjudication({
+      text: `The dropper fetched ${defanged} over HTTPS.`,
+      iocs: [candidate(canonical, { defanged })],
+    });
+
+    expect(prepared.reviewable).toHaveLength(1);
+    expect(prepared.reviewable[0].context).toContain('dropper fetched');
+    expect(prepared.reviewable[0].context).toContain(canonical);
+  });
+
+  it('bounds candidate count and context for overflow retry', () => {
+    const iocs = Array.from({ length: OVERFLOW_MAX_SEMANTIC_CANDIDATES + 10 }, (_, index) =>
+      candidate(`https://evil.example/payload-${index}`)
+    );
+    const text = iocs.map((ioc) => `Fetched ${ioc.value} from C2.`).join(' ');
+    const prepared = prepareIocAdjudication({ text, iocs });
+    const bounded = boundIocAdjudicationForOverflow(prepared);
+    const result = reconcileIocAdjudication(bounded, new Set([0]));
+
+    expect(bounded.reviewable).toHaveLength(OVERFLOW_MAX_SEMANTIC_CANDIDATES);
+    expect(bounded.overflowReferences).toBe(10);
+    expect(bounded.reviewable.every((entry) => entry.context.length <= 120)).toBe(true);
+    expect(result.iocs[OVERFLOW_MAX_SEMANTIC_CANDIDATES].tier_basis).toBe(
+      'semantic_reference_unreviewed_overflow'
+    );
   });
 });
