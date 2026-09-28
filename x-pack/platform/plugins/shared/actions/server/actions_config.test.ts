@@ -973,15 +973,15 @@ describe('getEarsUrl()', () => {
 });
 
 describe('isEarsEnabled()', () => {
-  test('returns true when neither config key is set', () => {
+  test('returns false when ears is not configured at all', () => {
     const acu = getActionsConfigurationUtilities({
       ...defaultActionsConfig,
       auth: { ...defaultActionsConfig.auth, ears: undefined },
     });
-    expect(acu.isEarsEnabled()).toBe(true);
+    expect(acu.isEarsEnabled()).toBe(false);
   });
 
-  test('returns true when auth.ears.enabled is true', () => {
+  test('returns false when ears.url is not set even if enabled is true', () => {
     const acu = getActionsConfigurationUtilities({
       ...defaultActionsConfig,
       auth: {
@@ -989,7 +989,29 @@ describe('isEarsEnabled()', () => {
         ears: { enabled: true, enableExperimental: false },
       },
     });
+    expect(acu.isEarsEnabled()).toBe(false);
+  });
+
+  test('returns true when ears.url is set and enabled is not specified', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: true, enableExperimental: false, url: 'https://ears.example.com' },
+      },
+    });
     expect(acu.isEarsEnabled()).toBe(true);
+  });
+
+  test('returns false when ears.url is set but enabled is false', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: false, enableExperimental: false, url: 'https://ears.example.com' },
+      },
+    });
+    expect(acu.isEarsEnabled()).toBe(false);
   });
 });
 
