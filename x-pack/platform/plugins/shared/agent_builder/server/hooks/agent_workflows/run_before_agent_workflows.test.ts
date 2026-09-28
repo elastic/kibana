@@ -382,6 +382,35 @@ describe('runBeforeAgentWorkflows', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
+  it('retains a JSON namespace named __proto__ through normalization', async () => {
+    const context = createContext();
+    const { workflowApi, getInternalServices } = createDeps();
+    const workflowContext = JSON.parse('{"__proto__":{"version":1,"data":{"value":1}}}');
+    executeWorkflowMock.mockResolvedValue({
+      success: true,
+      execution: {
+        execution_id: 'exec-prototype-namespace',
+        status: ExecutionStatus.COMPLETED,
+        workflow_id: 'wf-1',
+        started_at: '2026-01-01T00:00:00.000Z',
+        output: { workflow_context: workflowContext },
+      },
+    });
+
+    const result = await runBeforeAgentWorkflows({
+      context,
+      workflowApi,
+      getInternalServices,
+      logger,
+    });
+    expect(Object.hasOwn(result?.preExecutionWorkflow?.workflow_context ?? {}, '__proto__')).toBe(
+      true
+    );
+    expect(JSON.stringify(result?.preExecutionWorkflow?.workflow_context)).toBe(
+      JSON.stringify(workflowContext)
+    );
+  });
+
   it('shallow-merges independent namespaces and replaces repeated namespaces', async () => {
     const context = createContext();
     const { workflowApi, getInternalServices, resolveAgentConfiguration } = createDeps();

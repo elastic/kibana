@@ -123,7 +123,7 @@ const normalizeWorkflowContext = (value: unknown): WorkflowContext | undefined =
     return undefined;
   }
 
-  const context: WorkflowContext = {};
+  const context: WorkflowContext = Object.create(null);
   const budget = { remaining: WORKFLOW_CONTEXT_MAX_BYTES };
   let namespaceCount = 0;
   for (const namespace in value) {
