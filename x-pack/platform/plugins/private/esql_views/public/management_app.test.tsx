@@ -304,6 +304,10 @@ describe('ManagementApp', () => {
     expect(screen.getByTestId('esqlViewNameInput')).toBeDisabled();
     expect(screen.getByTestId('esqlViewDescriptionInput')).toBeDisabled();
     expect(screen.getByTestId('esqlViewQueryEditor')).toBeDisabled();
+    expect(screen.getByTestId('esqlViewCancelButton')).toBeDisabled();
+    // The EUI Jest mock does not forward closeButtonProps, so exercise the guarded close callback.
+    fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+    expect(screen.getByTestId('esqlViewFormFlyout')).toBeInTheDocument();
 
     await act(async () => {
       if (!resolveCreate) {

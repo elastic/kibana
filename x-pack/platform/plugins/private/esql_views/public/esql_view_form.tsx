@@ -89,6 +89,12 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
   const [saveError, setSaveError] = useState<string>();
   const [isSaving, setIsSaving] = useState(false);
 
+  const handleClose = () => {
+    if (!isSaving) {
+      onClose();
+    }
+  };
+
   const nameValidationError =
     !isEditing && isNameTouched ? getNameValidationMessage(validateEsqlViewName(name)) : undefined;
   const descriptionError =
@@ -178,8 +184,9 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
   return (
     <EuiFlyout
       aria-labelledby={titleId}
+      closeButtonProps={{ disabled: isSaving }}
       data-test-subj="esqlViewFormFlyout"
-      onClose={onClose}
+      onClose={handleClose}
       ownFocus
       size="l"
     >
@@ -328,7 +335,11 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty data-test-subj="esqlViewCancelButton" onClick={onClose}>
+            <EuiButtonEmpty
+              data-test-subj="esqlViewCancelButton"
+              isDisabled={isSaving}
+              onClick={handleClose}
+            >
               {translations.cancelButtonLabel}
             </EuiButtonEmpty>
           </EuiFlexItem>
