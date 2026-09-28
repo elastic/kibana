@@ -60,6 +60,7 @@ import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
 import type { ServerlessProjectType } from '../common/constants/types';
+import { SERVERLESS_PROJECT_TYPES } from '../common/constants/owners';
 
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { TemplatesMigrationTaskManager } from './tasks/templates_migration/templates_migration_task_manager';
@@ -237,15 +238,24 @@ export class CasePlugin
             management: plugins.workflowsManagement.management,
             logger: this.logger,
             audit: plugins.security.audit,
-            getWorkflowRunAuthorizer: async (request) => {
-              const [{ savedObjects }] = await core.getStartServices();
-              return this.clientFactory.createWorkflowRunAuthorizer({
-                request,
-                savedObjectsService: savedObjects,
-              });
-            },
+            attachmentTypeRegistry: this.unifiedAttachmentTypeRegistry,
           })
         : undefined;
+
+    // Resolves a request-scoped workflow run context. Defined here and threaded directly into
+    // the route so that `getCasesWorkflowRunContext` does not need to live on `CaseRequestContext`
+    // (which would expose it to all ~20 plugins that depend on the `cases` context).
+    const getWorkflowRunContext = workflowRunService
+      ? async (request: KibanaRequest) => {
+          const [coreStart] = await core.getStartServices();
+          return this.clientFactory.createWorkflowRunContext({
+            request,
+            scopedClusterClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+            savedObjectsService: coreStart.savedObjects,
+            clientSource: 'rest_api',
+          });
+        }
+      : undefined;
 
     registerRoutes({
       router,
@@ -258,7 +268,9 @@ export class CasePlugin
         ...getInternalRoutes(
           this.userProfileService,
           this.caseConfig,
-          workflowRunService ? { service: workflowRunService, getSpaceId } : undefined
+          workflowRunService && getWorkflowRunContext
+            ? { service: workflowRunService, getSpaceId, getWorkflowRunContext }
+            : undefined
         ),
       ],
       logger: this.logger,
@@ -310,7 +322,11 @@ export class CasePlugin
     );
     registerCaseWorkflowTriggers(plugins.workflowsExtensions);
 
-    if (plugins.agentBuilder) {
+    const isCasesAgentBuilderAllowed =
+      !this.isServerless ||
+      (!!serverlessProjectType && SERVERLESS_PROJECT_TYPES.includes(serverlessProjectType));
+
+    if (plugins.agentBuilder && isCasesAgentBuilderAllowed) {
       registerCasesAgentBuilderTools(
         plugins.agentBuilder,
         getCasesClient('agent_builder'),

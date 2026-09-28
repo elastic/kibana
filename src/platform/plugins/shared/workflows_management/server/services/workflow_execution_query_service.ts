@@ -36,6 +36,10 @@ import {
 } from '../api/lib/build_workflow_executions_search_query';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
 import { getChildWorkflowExecutions } from '../api/lib/get_child_workflow_executions';
+import {
+  getExecutionStepExecutions,
+  type GetExecutionStepExecutionsResult,
+} from '../api/lib/get_execution_step_executions';
 import { getWorkflowExecution } from '../api/lib/get_workflow_execution';
 import {
   searchStepExecutions,
@@ -43,6 +47,7 @@ import {
 } from '../api/lib/search_step_executions';
 import { searchWorkflowExecutions } from '../api/lib/search_workflow_executions';
 import type {
+  GetExecutionStepExecutionsParams,
   GetStepExecutionParams,
   SearchStepExecutionsParams,
 } from '../api/workflows_management_api';
@@ -83,6 +88,7 @@ export interface ProcessedWaitForInputFilters {
 }
 
 interface WaitForInputListOptions {
+  accessControlFilter?: estypes.QueryDslQueryContainer;
   page?: number;
   perPage?: number;
   includeReasoning?: boolean;
@@ -124,7 +130,7 @@ export class WorkflowExecutionQueryService {
   async getWorkflowExecution(
     executionId: string,
     spaceId: string,
-    options?: { includeInput?: boolean; includeOutput?: boolean }
+    options?: { includeInput?: boolean; includeOutput?: boolean; omitStepExecutions?: boolean }
   ): Promise<WorkflowExecutionDto | null> {
     return getWorkflowExecution({
       workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
@@ -134,6 +140,7 @@ export class WorkflowExecutionQueryService {
       spaceId,
       includeInput: options?.includeInput,
       includeOutput: options?.includeOutput,
+      omitStepExecutions: options?.omitStepExecutions,
     });
   }
 
@@ -149,6 +156,21 @@ export class WorkflowExecutionQueryService {
     });
   }
 
+  async getExecutionStepExecutions(
+    params: GetExecutionStepExecutionsParams,
+    spaceId: string
+  ): Promise<GetExecutionStepExecutionsResult> {
+    return getExecutionStepExecutions({
+      workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
+      stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
+      logger: this.deps.logger,
+      workflowExecutionId: params.executionId,
+      spaceId,
+      page: params.page,
+      size: params.size,
+    });
+  }
+
   async getWorkflowExecutions(
     params: SearchWorkflowExecutionsParams,
     spaceId: string
@@ -156,6 +178,7 @@ export class WorkflowExecutionQueryService {
     const must: estypes.QueryDslQueryContainer[] = [
       ...(params.workflowId ? [{ term: { workflowId: params.workflowId } }] : []),
       buildWorkflowExecutionsSpaceFilter(spaceId),
+      ...(params.accessControlFilter ? [params.accessControlFilter] : []),
     ];
 
     if (params.statuses) {
@@ -235,7 +258,10 @@ export class WorkflowExecutionQueryService {
     params: SearchExecutionsViewParams,
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
-    const must: estypes.QueryDslQueryContainer[] = [buildWorkflowExecutionsSpaceFilter(spaceId)];
+    const must: estypes.QueryDslQueryContainer[] = [
+      buildWorkflowExecutionsSpaceFilter(spaceId),
+      ...(params.accessControlFilter ? [params.accessControlFilter] : []),
+    ];
 
     if (params.query) {
       must.push(params.query);
@@ -408,7 +434,12 @@ export class WorkflowExecutionQueryService {
    */
   async listWaitingForInputSteps(
     spaceId: string,
-    { page = 1, perPage = 100, includeReasoning = false }: WaitForInputListOptions = {}
+    {
+      page = 1,
+      perPage = 100,
+      includeReasoning = false,
+      accessControlFilter,
+    }: WaitForInputListOptions = {}
   ): Promise<WaitForInputListResult> {
     const from = Math.max(0, (page - 1) * perPage);
     let response: estypes.SearchResponse<EsWorkflowStepExecution>;
@@ -416,7 +447,11 @@ export class WorkflowExecutionQueryService {
       response = await this.deps.stepExecutionsDataClient.search({
         query: {
           bool: {
-            must: [{ term: { spaceId } }, { term: { status: 'waiting_for_input' } }],
+            must: [
+              { term: { spaceId } },
+              { term: { status: 'waiting_for_input' } },
+              ...(accessControlFilter ? [accessControlFilter] : []),
+            ],
             // `hitl.respondedAt` marks a claimed response that Task Manager
             // may not have resumed yet; it belongs to the processed listing.
             must_not: [
@@ -522,10 +557,12 @@ export class WorkflowExecutionQueryService {
       workflowId,
       respondedBy,
       sortOrder = 'desc',
+      accessControlFilter,
     }: WaitForInputListOptions & ProcessedWaitForInputFilters = {}
   ): Promise<WaitForInputListResult> {
     const from = Math.max(0, (page - 1) * perPage);
     const filterMust = buildHistoryFilterClauses({ channel, workflowId, respondedBy, q });
+    if (accessControlFilter) filterMust.push(accessControlFilter);
     let response: estypes.SearchResponse<EsWorkflowStepExecution>;
     try {
       response = await this.deps.stepExecutionsDataClient.search({
@@ -621,7 +658,10 @@ export class WorkflowExecutionQueryService {
    */
   async listProcessedWaitForInputFacets(
     spaceId: string,
-    { maxBuckets = 50 }: { maxBuckets?: number } = {}
+    {
+      maxBuckets = 50,
+      accessControlFilter,
+    }: { maxBuckets?: number; accessControlFilter?: estypes.QueryDslQueryContainer } = {}
   ): Promise<ProcessedWaitForInputFacets> {
     let response: estypes.SearchResponse<EsWorkflowStepExecution, ProcessedWaitForInputFacetAggs>;
     try {
@@ -630,7 +670,11 @@ export class WorkflowExecutionQueryService {
         size: 0,
         query: {
           bool: {
-            must: [{ term: { spaceId } }, { term: { stepType: 'waitForInput' } }],
+            must: [
+              { term: { spaceId } },
+              { term: { stepType: 'waitForInput' } },
+              ...(accessControlFilter ? [accessControlFilter] : []),
+            ],
             should: PROCESSED_WAIT_FOR_INPUT_SHOULD,
             minimum_should_match: 1,
           },
@@ -803,6 +847,27 @@ export class WorkflowExecutionQueryService {
    */
   async getWaitingStepExecutionId(executionId: string, spaceId: string): Promise<string | null> {
     try {
+      const { items } = await this.deps.workflowExecutionsDataClient.getByIds([executionId], {
+        sourceIncludes: ['spaceId', 'stepExecutionIds'],
+      });
+      const execution = items[0]?.document;
+      if (!execution || execution.spaceId !== spaceId) return null;
+      if (execution.stepExecutionIds?.length) {
+        const { items: steps } = await this.deps.stepExecutionsDataClient.getByIds(
+          execution.stepExecutionIds,
+          { sourceIncludes: ['id', 'spaceId', 'workflowRunId', 'stepType', 'status', 'finishedAt'] }
+        );
+        return (
+          steps.findLast(
+            ({ document: step }) =>
+              step.spaceId === spaceId &&
+              step.workflowRunId === executionId &&
+              (step.stepType === 'waitForInput' || step.stepType === 'waitForApproval') &&
+              step.status === 'waiting_for_input' &&
+              !step.finishedAt
+          )?.document.id ?? null
+        );
+      }
       const response = (await this.deps.stepExecutionsDataClient.search({
         query: {
           bool: {

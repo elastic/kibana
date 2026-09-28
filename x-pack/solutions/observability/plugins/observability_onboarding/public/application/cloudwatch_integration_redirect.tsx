@@ -30,7 +30,7 @@ export const CloudwatchIntegrationRedirect: React.FC = () => {
   const [hasError, setHasError] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
-  const isAddDataPageV2Enabled = featureFlags.getBooleanValue(IS_ADD_DATA_PAGE_V2_ENABLED, false);
+  const isAddDataPageV2Enabled = featureFlags.useBooleanValue(IS_ADD_DATA_PAGE_V2_ENABLED, false);
   // The V2 page has no category tabs, so the Cloud tab param only applies to V1.
   const backLinkPath = isAddDataPageV2Enabled ? '' : '?category=cloud';
 

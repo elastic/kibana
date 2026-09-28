@@ -42,6 +42,7 @@ dependsOn:
   - '@kbn/nightshift-investigations-plugin'
   - '@kbn/nightshift-shared'
   - '@kbn/observability-shared-plugin'
+  - '@kbn/react-hooks'
   - '@kbn/react-query'
   - '@kbn/scout-oblt'
   - '@kbn/serverless'
@@ -49,9 +50,11 @@ dependsOn:
   - '@kbn/shared-ux-ai-components'
   - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/shared-ux-router'
+  - '@kbn/shared-ux-utility'
   - '@kbn/significant-events-plugin'
   - '@kbn/significant-events-schema'
   - '@kbn/spaces-plugin'
+  - '@kbn/ui-callout'
   - '@kbn/unified-search-plugin'
 tags:
   - plugin

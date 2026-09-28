@@ -30,7 +30,7 @@ export function parseDurationToMs(value: string): number {
  */
 export function validateDuration(value: string): string | void {
   if (!DURATION_RE.test(value)) {
-    return `Invalid duration "${value}". Expected format like "5m", "1h", "30s", "250ms"`;
+    return 'Invalid duration. Expected format like "5m", "1h", "30s", "250ms"';
   }
 }
 
@@ -60,15 +60,38 @@ export function validateMinDuration(value: string, min: string): string | void {
   }
 }
 
+const errorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
 /**
- * Validate an ES|QL query string
+ * Validate an ES|QL query string. A parser crash is reported as an invalid
+ * query rather than thrown, so route validation answers 400 instead of 500.
  * @returns Error message if invalid, undefined if valid
  */
 export function validateEsqlQuery(query: string): string | void {
-  const errors = Parser.parseErrors(query);
+  let errors: ReturnType<typeof Parser.parseErrors>;
+  try {
+    errors = Parser.parseErrors(query);
+  } catch (error) {
+    return `Invalid ES|QL query: ${errorMessage(error)}`;
+  }
   if (errors.length > 0) {
     return `Invalid ES|QL query: ${errors[0].message}`;
   }
+}
+
+/**
+ * Validate the query obtained by composing `base` with `segment`.
+ * @returns Error message if the composition or the result is invalid, undefined if valid
+ */
+export function validateComposedEsqlQuery(base: string, segment: string): string | void {
+  let composed: string;
+  try {
+    composed = composeEsqlQuery(base, segment);
+  } catch (error) {
+    return `Invalid ES|QL query: ${errorMessage(error)}`;
+  }
+  return validateEsqlQuery(composed);
 }
 
 /**

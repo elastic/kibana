@@ -8,15 +8,13 @@
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   getChartTypeConfigPromptContent,
-  getChartTypeReviewPromptContent,
   getChartTypeSelectionPromptContent,
 } from './chart_type_guidance';
 
 describe('chart type guidance', () => {
-  it('compiles selection, config, and review prompt content', () => {
+  it('compiles selection and config prompt content', () => {
     expect({
       selection: getChartTypeSelectionPromptContent(),
-      review: getChartTypeReviewPromptContent(),
       config: Object.fromEntries(
         Object.values(SupportedChartType).map((chartType) => [
           chartType,
@@ -26,60 +24,68 @@ describe('chart type guidance', () => {
     }).toMatchInlineSnapshot(`
       Object {
         "config": Object {
-          "data_table": "",
-          "gauge": "CHART-SPECIFIC RULES FOR GAUGE:
-      - Always omit the optional 'min' and 'max' fields from the final configuration.
-      - Do not infer, synthesize, or backfill gauge bounds from the ES|QL results or the user request.
-      - Only include goal/target-related fields when the user explicitly asks for a goal or threshold.",
-          "heatmap": "",
-          "metric": "CHART-SPECIFIC RULES FOR METRIC:
-      - Do not set a panel chart title on a dashboard; the primary metric painted title is the title.
-      - A single primary metric is valid, but when meaningful, enrich it from the same ES|QL with a trend background or secondary metric. Never invent another index or field.
-      - Use \`type: \\"bar\\"\` only for meaningful progress-to-max.
-      - For trend/delta secondary metrics, hide the label with \`styling.secondary.label.visible: false\` and omit \`label\`. Show labels only for distinct named measures.",
-          "mosaic": "",
-          "pie": "",
-          "region_map": "",
-          "tag_cloud": "",
-          "treemap": "",
-          "waffle": "",
-          "xy": "CHART-SPECIFIC RULES FOR XY:
+          "data_table": "CHART RULES FOR DATA_TABLE:
+      - Units: set \`format\` on the bound column whenever the data has a well-known unit, inferring it from column names and the request (e.g. \\"cpu\\", \\"bytes_in\\", \\"latency_ms\\") even when nobody asked. Utilization percentages on 0 to 1 ratios use { type: \\"percent\\", decimals: 1, compact: true } (see Percent scale for already-scaled columns). Bytes use { type: \\"bytes\\", decimals: 1 }. Bits use { type: \\"bits\\", decimals: 1 }. Durations use { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" }, where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Leave plain counts and ambiguous units unformatted.
+      - Percent scale: \`{ type: \\"percent\\" }\` multiplies the value by 100, so use it only when the query yields a 0 to 1 ratio. When the query already scales to 0 to 100 (e.g. \`100 * errors / total\`, \`ROUND(... * 100, 1)\`, columns named \`_pct\` or \`percentage\`), use \`{ type: \\"number\\", decimals: 1, suffix: \\"%\\" }\` instead. Thresholds and color \`steps\` must use the same scale as the column values.
+      - Set the top-level \`title\` to a concise panel title naming the measure and breakdown. Category labels do not replace it.
+      - Color only where it adds meaning (status, severity, magnitude), and only as badges. Numeric columns use \`apply_color_to: \\"badge\\"\` with \`color: { type: \\"auto\\" }\` so Lens computes stops from table data. Categorical columns use \`color: { mode: \\"categorical\\", palette: \\"<palette id>\\", mapping: [] }\` so Lens assigns colors to actual values. Do not color cell backgrounds or text unless the user asks.",
+          "gauge": "CHART RULES FOR GAUGE:
+      - Units: set \`format\` on the bound column whenever the data has a well-known unit, inferring it from column names and the request (e.g. \\"cpu\\", \\"bytes_in\\", \\"latency_ms\\") even when nobody asked. Utilization percentages on 0 to 1 ratios use { type: \\"percent\\", decimals: 1, compact: true } (see Percent scale for already-scaled columns). Bytes use { type: \\"bytes\\", decimals: 1 }. Bits use { type: \\"bits\\", decimals: 1 }. Durations use { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" }, where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Leave plain counts and ambiguous units unformatted.
+      - Percent scale: \`{ type: \\"percent\\" }\` multiplies the value by 100, so use it only when the query yields a 0 to 1 ratio. When the query already scales to 0 to 100 (e.g. \`100 * errors / total\`, \`ROUND(... * 100, 1)\`, columns named \`_pct\` or \`percentage\`), use \`{ type: \\"number\\", decimals: 1, suffix: \\"%\\" }\` instead. Thresholds and color \`steps\` must use the same scale as the column values.
+      - Omit the top-level \`title\`, because the gauge label names the measure.
+      - Bind \`min\`, \`max\`, or \`goal\` only to a column the query returns for that purpose. Never add or infer them otherwise.
+      - The default bands are \`range: \\"percentage\\"\` with 4 steps: \`0 <= value < 25\`, \`25 <= value < 50\`, \`50 <= value < 75\`, \`75 <= value <= 100\`. During enhancement, restore these unless existing thresholds are meaningful for the measure. A focused palette-only edit changes step colors while preserving the step count, boundaries, and \`range\`.",
+          "heatmap": "CHART RULES FOR HEATMAP:
+      - Units: set \`format\` on the bound column whenever the data has a well-known unit, inferring it from column names and the request (e.g. \\"cpu\\", \\"bytes_in\\", \\"latency_ms\\") even when nobody asked. Utilization percentages on 0 to 1 ratios use { type: \\"percent\\", decimals: 1, compact: true } (see Percent scale for already-scaled columns). Bytes use { type: \\"bytes\\", decimals: 1 }. Bits use { type: \\"bits\\", decimals: 1 }. Durations use { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" }, where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Leave plain counts and ambiguous units unformatted.
+      - Percent scale: \`{ type: \\"percent\\" }\` multiplies the value by 100, so use it only when the query yields a 0 to 1 ratio. When the query already scales to 0 to 100 (e.g. \`100 * errors / total\`, \`ROUND(... * 100, 1)\`, columns named \`_pct\` or \`percentage\`), use \`{ type: \\"number\\", decimals: 1, suffix: \\"%\\" }\` instead. Thresholds and color \`steps\` must use the same scale as the column values.
+      - Set the top-level \`title\` to a concise panel title naming the measure and breakdown. Category labels do not replace it.
+      - Keep the default \\"Temperature\\" palette by omitting \`color\` or using \`color: { type: \\"auto\\" }\`. Generate explicit \`steps\` only when the user requests a custom palette or gives thresholds.",
+          "metric": "CHART RULES FOR METRIC:
+      - Units: set \`format\` on the bound column whenever the data has a well-known unit, inferring it from column names and the request (e.g. \\"cpu\\", \\"bytes_in\\", \\"latency_ms\\") even when nobody asked. Utilization percentages on 0 to 1 ratios use { type: \\"percent\\", decimals: 1, compact: true } (see Percent scale for already-scaled columns). Bytes use { type: \\"bytes\\", decimals: 1 }. Bits use { type: \\"bits\\", decimals: 1 }. Durations use { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" }, where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Leave plain counts and ambiguous units unformatted.
+      - Percent scale: \`{ type: \\"percent\\" }\` multiplies the value by 100, so use it only when the query yields a 0 to 1 ratio. When the query already scales to 0 to 100 (e.g. \`100 * errors / total\`, \`ROUND(... * 100, 1)\`, columns named \`_pct\` or \`percentage\`), use \`{ type: \\"number\\", decimals: 1, suffix: \\"%\\" }\` instead. Thresholds and color \`steps\` must use the same scale as the column values.
+      - Omit the top-level \`title\`, because the primary metric label already names the panel.
+      - A single number is fine. When the value benefits from context, add a trend background (\`background_chart: { type: \\"trend\\" }\`) or a secondary metric (a second \`metrics[]\` entry with \`type: \\"secondary\\"\`) bound to columns the same ES|QL query returns. Never invent another index or field.
+      - For a secondary trend or delta, hide the label with \`styling.secondary.label.visible: false\` and omit \`label\`. Label a secondary metric only when it is a distinct named measure.
+      - Omit \`color\` by default. Bounded metrics (percent, ratio, utilization, error/success rate, SLO compliance) are the usual exception. When such a measure reads as good or bad, apply explicit 3-band \`steps\` using \\"Status\\", \\"Negative\\", \\"Positive\\", or \\"Temperature\\", with a status or adverse palette when higher is worse. Take thresholds from the query or context when available, otherwise use conventional bands for the measure, in the same unit and scale as the metric output. Unbounded values (counts, bytes, durations, rates with unknown scale) stay uncolored unless the user asks.
+      - Color the value, never the background. Set \`apply_color_to: \\"value\\"\` in the same edit that sets the \`color\` config. Never set \`apply_color_to\` on its own, because without a \`color\` config Lens tints the value with a default green that carries no meaning. When a metric is not colored, omit both \`color\` and \`apply_color_to\`.
+      - Never combine \`background_chart\` with coloring. Lens forces \`apply_color_to\` to \\"background\\" whenever a background chart is present, so a \`color\` config would paint the whole panel instead of the value. When using a \`background_chart\`, omit both \`color\` and \`apply_color_to\`.",
+          "mosaic": "CHART RULES FOR MOSAIC:
+      - Units: set \`format\` on the bound column whenever the data has a well-known unit, inferring it from column names and the request (e.g. \\"cpu\\", \\"bytes_in\\", \\"latency_ms\\") even when nobody asked. Utilization percentages on 0 to 1 ratios use { type: \\"percent\\", decimals: 1, compact: true } (see Percent scale for already-scaled columns). Bytes use { type: \\"bytes\\", decimals: 1 }. Bits use { type: \\"bits\\", decimals: 1 }. Durations use { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" }, where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Leave plain counts and ambiguous units unformatted.
+      - Percent scale: \`{ type: \\"percent\\" }\` multiplies the value by 100, so use it only when the query yields a 0 to 1 ratio. When the query already scales to 0 to 100 (e.g. \`100 * errors / total\`, \`ROUND(... * 100, 1)\`, columns named \`_pct\` or \`percentage\`), use \`{ type: \\"number\\", decimals: 1, suffix: \\"%\\" }\` instead. Thresholds and color \`steps\` must use the same scale as the column values.
+      - Set the top-level \`title\` to a concise panel title naming the measure and breakdown. Category labels do not replace it.",
+          "pie": "CHART RULES FOR PIE:
+      - Units: set \`format\` on the bound column whenever the data has a well-known unit, inferring it from column names and the request (e.g. \\"cpu\\", \\"bytes_in\\", \\"latency_ms\\") even when nobody asked. Utilization percentages on 0 to 1 ratios use { type: \\"percent\\", decimals: 1, compact: true } (see Percent scale for already-scaled columns). Bytes use { type: \\"bytes\\", decimals: 1 }. Bits use { type: \\"bits\\", decimals: 1 }. Durations use { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" }, where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Leave plain counts and ambiguous units unformatted.
+      - Percent scale: \`{ type: \\"percent\\" }\` multiplies the value by 100, so use it only when the query yields a 0 to 1 ratio. When the query already scales to 0 to 100 (e.g. \`100 * errors / total\`, \`ROUND(... * 100, 1)\`, columns named \`_pct\` or \`percentage\`), use \`{ type: \\"number\\", decimals: 1, suffix: \\"%\\" }\` instead. Thresholds and color \`steps\` must use the same scale as the column values.
+      - Set the top-level \`title\` to a concise panel title naming the measure and breakdown. Category labels do not replace it.
+      - Omit explicit \`color\` properties so Lens applies its default palette. Add colors only when the user explicitly asks.
+      - Omit \`legend\` entirely so Lens applies its defaults, including during enhancement. Drop any existing \`legend\` block rather than carrying it over. Set \`legend\` only when the user explicitly asks for a legend change, and then set only the requested property.",
+          "region_map": "CHART RULES FOR REGION_MAP:
+      - Units: set \`format\` on the bound column whenever the data has a well-known unit, inferring it from column names and the request (e.g. \\"cpu\\", \\"bytes_in\\", \\"latency_ms\\") even when nobody asked. Utilization percentages on 0 to 1 ratios use { type: \\"percent\\", decimals: 1, compact: true } (see Percent scale for already-scaled columns). Bytes use { type: \\"bytes\\", decimals: 1 }. Bits use { type: \\"bits\\", decimals: 1 }. Durations use { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" }, where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Leave plain counts and ambiguous units unformatted.
+      - Percent scale: \`{ type: \\"percent\\" }\` multiplies the value by 100, so use it only when the query yields a 0 to 1 ratio. When the query already scales to 0 to 100 (e.g. \`100 * errors / total\`, \`ROUND(... * 100, 1)\`, columns named \`_pct\` or \`percentage\`), use \`{ type: \\"number\\", decimals: 1, suffix: \\"%\\" }\` instead. Thresholds and color \`steps\` must use the same scale as the column values.
+      - Set the top-level \`title\` to a concise panel title naming the measure and breakdown. Category labels do not replace it.",
+          "tag_cloud": "CHART RULES FOR TAG_CLOUD:
+      - Units: set \`format\` on the bound column whenever the data has a well-known unit, inferring it from column names and the request (e.g. \\"cpu\\", \\"bytes_in\\", \\"latency_ms\\") even when nobody asked. Utilization percentages on 0 to 1 ratios use { type: \\"percent\\", decimals: 1, compact: true } (see Percent scale for already-scaled columns). Bytes use { type: \\"bytes\\", decimals: 1 }. Bits use { type: \\"bits\\", decimals: 1 }. Durations use { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" }, where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Leave plain counts and ambiguous units unformatted.
+      - Percent scale: \`{ type: \\"percent\\" }\` multiplies the value by 100, so use it only when the query yields a 0 to 1 ratio. When the query already scales to 0 to 100 (e.g. \`100 * errors / total\`, \`ROUND(... * 100, 1)\`, columns named \`_pct\` or \`percentage\`), use \`{ type: \\"number\\", decimals: 1, suffix: \\"%\\" }\` instead. Thresholds and color \`steps\` must use the same scale as the column values.
+      - Set the top-level \`title\` to a concise panel title naming the measure and breakdown. Category labels do not replace it.",
+          "treemap": "CHART RULES FOR TREEMAP:
+      - Units: set \`format\` on the bound column whenever the data has a well-known unit, inferring it from column names and the request (e.g. \\"cpu\\", \\"bytes_in\\", \\"latency_ms\\") even when nobody asked. Utilization percentages on 0 to 1 ratios use { type: \\"percent\\", decimals: 1, compact: true } (see Percent scale for already-scaled columns). Bytes use { type: \\"bytes\\", decimals: 1 }. Bits use { type: \\"bits\\", decimals: 1 }. Durations use { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" }, where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Leave plain counts and ambiguous units unformatted.
+      - Percent scale: \`{ type: \\"percent\\" }\` multiplies the value by 100, so use it only when the query yields a 0 to 1 ratio. When the query already scales to 0 to 100 (e.g. \`100 * errors / total\`, \`ROUND(... * 100, 1)\`, columns named \`_pct\` or \`percentage\`), use \`{ type: \\"number\\", decimals: 1, suffix: \\"%\\" }\` instead. Thresholds and color \`steps\` must use the same scale as the column values.
+      - Set the top-level \`title\` to a concise panel title naming the measure and breakdown. Category labels do not replace it.",
+          "waffle": "CHART RULES FOR WAFFLE:
+      - Units: set \`format\` on the bound column whenever the data has a well-known unit, inferring it from column names and the request (e.g. \\"cpu\\", \\"bytes_in\\", \\"latency_ms\\") even when nobody asked. Utilization percentages on 0 to 1 ratios use { type: \\"percent\\", decimals: 1, compact: true } (see Percent scale for already-scaled columns). Bytes use { type: \\"bytes\\", decimals: 1 }. Bits use { type: \\"bits\\", decimals: 1 }. Durations use { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" }, where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Leave plain counts and ambiguous units unformatted.
+      - Percent scale: \`{ type: \\"percent\\" }\` multiplies the value by 100, so use it only when the query yields a 0 to 1 ratio. When the query already scales to 0 to 100 (e.g. \`100 * errors / total\`, \`ROUND(... * 100, 1)\`, columns named \`_pct\` or \`percentage\`), use \`{ type: \\"number\\", decimals: 1, suffix: \\"%\\" }\` instead. Thresholds and color \`steps\` must use the same scale as the column values.
+      - Set the top-level \`title\` to a concise panel title naming the measure and breakdown. Category labels do not replace it.",
+          "xy": "CHART RULES FOR XY:
+      - Units: set \`format\` on the bound column whenever the data has a well-known unit, inferring it from column names and the request (e.g. \\"cpu\\", \\"bytes_in\\", \\"latency_ms\\") even when nobody asked. Utilization percentages on 0 to 1 ratios use { type: \\"percent\\", decimals: 1, compact: true } (see Percent scale for already-scaled columns). Bytes use { type: \\"bytes\\", decimals: 1 }. Bits use { type: \\"bits\\", decimals: 1 }. Durations use { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" }, where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Leave plain counts and ambiguous units unformatted.
+      - Percent scale: \`{ type: \\"percent\\" }\` multiplies the value by 100, so use it only when the query yields a 0 to 1 ratio. When the query already scales to 0 to 100 (e.g. \`100 * errors / total\`, \`ROUND(... * 100, 1)\`, columns named \`_pct\` or \`percentage\`), use \`{ type: \\"number\\", decimals: 1, suffix: \\"%\\" }\` instead. Thresholds and color \`steps\` must use the same scale as the column values.
+      - Set the top-level \`title\` to a concise panel title naming the measure and breakdown. Category labels do not replace it.
+      - Hide axis titles by setting \`title: { visible: false }\` on both the x and y axes, and do not set axis title text.
+      - Area series use \`styling.areas.fill: \\"gradient\\"\`, never solid.
+      - Set \`legend.position: \\"bottom\\"\` and keep the default outside placement. Use \`legend.layout: { type: \\"list\\" }\` without legend statistics and \`legend.layout: { type: \\"grid\\" }\` when statistics are set, so the values line up in columns. Always set \`legend.visibility\`, because an unset value hides the legend entirely. Use \`\\"auto\\"\` so Lens shows the legend for multiple series and hides it for a single series. Use \`\\"visible\\"\` instead when legend statistics are set.
+      - Use the default Lens palette by omitting explicit \`color\` properties. During enhancement, remove all custom palettes and series color overrides. Add colors only when requested, and never use legacy palette IDs (\`eui_amsterdam\`, \`kibana_v7_legacy\`, or \`elastic_brand_2023\`).
       - For horizontal bars, use type: \\"bar_horizontal\\" with x = category field and y = metric field. Example: \\"top OS by count as horizontal bar\\" → type: \\"bar_horizontal\\", x: { column: \\"OS\\" }, y: [{ column: \\"Count\\" }]. Do NOT put the metric on x.
-      - Do NOT set axis titles. Rely on the visualization title and column labels to convey meaning. Set axis title visibility to false (e.g. { visible: false }) for both X and Y axes.
-      - For area series, set \`styling.areas.fill: \\"gradient\\"\` rather than solid.
-      - Default legend rules: Place outside at the bottom. Omit legend.layout.type. Do not set legend.visibility unless legend statistics are set - then set it to \\"visible\\".
       - If the request asks for series statistics *in the legend* (avg, min, max, median, last_value, last_non_null_value, first_value, count, total, standard_deviation, … — any legend.statistics option) without naming a field to aggregate, set legend.statistics to those options and legend.visibility: \\"visible\\". If the request is \\"average <field> over time\\", bind the AVG column from the query — do not treat that as legend statistics. Never invent statistic columns the query does not emit.",
         },
-        "review": "CHART REVIEW RULES:
-      ### metric
-      - Do not set a panel chart title on a dashboard; the primary metric painted title is the title.
-      - A single primary metric is valid, but when meaningful, enrich it from the same ES|QL with a trend background or secondary metric. Never invent another index or field.
-      - Use \`type: \\"bar\\"\` only for meaningful progress-to-max.
-      - For trend/delta secondary metrics, hide the label with \`styling.secondary.label.visible: false\` and omit \`label\`. Show labels only for distinct named measures.
-      Critical:
-      - A painted dashboard chrome title on a metric is a critical issue — the primary metric name is already the title.
-      - Invented static colors or BACKGROUND fills on the primary metric are a critical issue.
-      Suggestions:
-      - When a trend or status could be shown (time series available, or a clear threshold/comparison) and the panel is a lone number on white, suggest adding a sparkline or secondary. A single number with nothing to compare or trend is fine.
-      ### gauge
-      - Always omit the optional 'min' and 'max' fields from the final configuration.
-      - Do not infer, synthesize, or backfill gauge bounds from the ES|QL results or the user request.
-      - Only include goal/target-related fields when the user explicitly asks for a goal or threshold.
-      ### xy
-      - For horizontal bars, use type: \\"bar_horizontal\\" with x = category field and y = metric field. Example: \\"top OS by count as horizontal bar\\" → type: \\"bar_horizontal\\", x: { column: \\"OS\\" }, y: [{ column: \\"Count\\" }]. Do NOT put the metric on x.
-      - Do NOT set axis titles. Rely on the visualization title and column labels to convey meaning. Set axis title visibility to false (e.g. { visible: false }) for both X and Y axes.
-      - For area series, set \`styling.areas.fill: \\"gradient\\"\` rather than solid.
-      - Default legend rules: Place outside at the bottom. Omit legend.layout.type. Do not set legend.visibility unless legend statistics are set - then set it to \\"visible\\".
-      - If the request asks for series statistics *in the legend* (avg, min, max, median, last_value, last_non_null_value, first_value, count, total, standard_deviation, … — any legend.statistics option) without naming a field to aggregate, set legend.statistics to those options and legend.visibility: \\"visible\\". If the request is \\"average <field> over time\\", bind the AVG column from the query — do not treat that as legend statistics. Never invent statistic columns the query does not emit.
-      Critical:
-      - A solid area fill on the painted chart is a critical issue.
-      - A visible legend on a one-series categorical chart is a critical issue.
-      ### data_table
-      Critical:
-      - Invented custom cell or text colors are a critical issue.
-      ### pie
-      Critical:
-      - Invented per-slice or custom colors are a critical issue.",
         "selection": "Available chart types — choose the one that best fits the user's intent and the nature of the data being visualized:
       - metric: Displays a single numeric value, KPI, or aggregate statistic (count, sum, average) with an optional trend line. Choose for single numbers without ranges or targets.
       - gauge: Displays a single metric within a range with optional min/max/goal bounds. Choose when showing progress toward a goal or performance against thresholds (e.g. \\"CPU usage as a gauge\\", \\"sales target progress\\").

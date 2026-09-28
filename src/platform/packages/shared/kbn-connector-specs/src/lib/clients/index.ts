@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MongoClient } from 'mongodb';
 import type { Pool as Mysql2Pool } from 'mysql2/promise';
 import type { ClientTypeSpec } from './client_type_spec';
+import { mongodbClientType } from './mongodb_client_type';
 import { mysqlClientType } from './mysql';
 
 export type {
@@ -17,9 +19,12 @@ export type {
   ConnectorNetworkSettings,
   ConnectorResponseSettings,
   CredentialAccessor,
+  HostTarget,
+  PlatformServices,
 } from './client_type_spec';
 
 export interface ClientRegistry {
+  mongodb: MongoClient;
   mysql: Mysql2Pool;
 }
 
@@ -30,5 +35,6 @@ export type ClientTypeSpecs = Readonly<{
 }>;
 
 export const clientTypes: ClientTypeSpecs = {
+  mongodb: mongodbClientType,
   mysql: mysqlClientType,
 };

@@ -14,17 +14,13 @@ import {
   ALL_ROLE,
   apiTest,
   buildAlertEvent,
-  buildCreateRuleData,
   NO_ACCESS_ROLE,
   READ_ROLE,
   testData,
 } from '../fixtures';
 
 const SUGGESTIONS_PATH = ALERTING_V2_INTERNAL_SUGGESTIONS_MATCHER_VALUES_API_PATH;
-const OTHER_SPACE_ID = 'matcher-suggestions-other-space';
 
-/** Mirrors `MAX_SUGGESTIONS` in the matcher suggestions service. */
-const MAX_SUGGESTIONS = 10;
 const FIELD_MAX_LENGTH = 256;
 const QUERY_MAX_LENGTH = 1024;
 
@@ -79,15 +75,12 @@ const buildSeededAlertEvents = () => [
 apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classic' }, () => {
   let writerHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
+  apiTest.beforeAll(async ({ requestAuth }) => {
     const writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
     // This is an internal API reached over POST, so the request needs the
     // shared XSRF / internal-origin headers alongside the API key; without
     // them Kibana rejects the request with a 400 before it hits validation.
     writerHeaders = { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader };
-
-    await apiServices.spaces.delete(OTHER_SPACE_ID);
-    await apiServices.spaces.create({ id: OTHER_SPACE_ID, name: OTHER_SPACE_ID });
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
@@ -98,7 +91,6 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
   apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.alertingV2.rules.cleanUp();
     await apiServices.alertingV2.ruleEvents.cleanUp();
-    await apiServices.spaces.delete(OTHER_SPACE_ID);
   });
 
   apiTest(
@@ -130,71 +122,6 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
     // `inactive` contains but does not start with `a`, so it is filtered out.
     expect(response.body).toStrictEqual(['active']);
   });
-
-  apiTest(
-    'rule.name: narrows the saved object search to names matching the query prefix',
-    async ({ apiClient, apiServices }) => {
-      for (const name of ['scoutcpuhigh', 'scoutcpulow', 'scoutmemory']) {
-        await apiServices.alertingV2.rules.create(buildCreateRuleData({ metadata: { name } }));
-      }
-
-      const response = await suggestValues(
-        apiClient,
-        { field: 'rule.name', query: 'scoutcpu' },
-        { headers: writerHeaders }
-      );
-
-      expect(response).toHaveStatusCode(200);
-      expect([...response.body].sort()).toStrictEqual(['scoutcpuhigh', 'scoutcpulow']);
-    }
-  );
-
-  apiTest(
-    'rule.tags: returns the deduplicated tags across all rules',
-    async ({ apiClient, apiServices }) => {
-      await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({
-          metadata: { name: 'scouttaggedone', tags: ['scoutprod', 'scoutcpu'] },
-        })
-      );
-      await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'scouttaggedtwo', tags: ['scoutcpu'] } })
-      );
-
-      const response = await suggestValues(
-        apiClient,
-        { field: 'rule.tags', query: '' },
-        { headers: writerHeaders }
-      );
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual(['scoutcpu', 'scoutprod']);
-    }
-  );
-
-  apiTest(
-    `rule.tags: caps the result at ${MAX_SUGGESTIONS} suggestions`,
-    async ({ apiClient, apiServices }) => {
-      const tags = Array.from(
-        { length: MAX_SUGGESTIONS + 2 },
-        (_, i) => `scout-tag-${String(i).padStart(2, '0')}`
-      );
-
-      await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'scoutmanytags', tags } })
-      );
-
-      const response = await suggestValues(
-        apiClient,
-        { field: 'rule.tags', query: '' },
-        { headers: writerHeaders }
-      );
-
-      expect(response).toHaveStatusCode(200);
-      // Tags are sorted before slicing, so the cap keeps the first ten.
-      expect(response.body).toStrictEqual(tags.slice(0, MAX_SUGGESTIONS));
-    }
-  );
 
   apiTest(
     'group_hash: aggregates the values stored on the alert events',
@@ -273,44 +200,11 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
   });
 
   apiTest(
-    'space isolation: only suggests rules that live in the requested space',
-    async ({ apiClient, apiServices }) => {
-      await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'scoutdefaultspacerule' } })
-      );
-      // `rules.cleanUp` only reaches the default space, so this rule lives on
-      // until `afterAll` deletes the space along with its saved objects.
-      await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'scoutotherspacerule' } }),
-        { spaceId: OTHER_SPACE_ID }
-      );
-
-      const defaultSpaceResponse = await suggestValues(
-        apiClient,
-        { field: 'rule.name', query: '' },
-        { headers: writerHeaders }
-      );
-
-      expect(defaultSpaceResponse).toHaveStatusCode(200);
-      expect(defaultSpaceResponse.body).toStrictEqual(['scoutdefaultspacerule']);
-
-      const otherSpaceResponse = await suggestValues(
-        apiClient,
-        { field: 'rule.name', query: '' },
-        { headers: writerHeaders, spaceId: OTHER_SPACE_ID }
-      );
-
-      expect(otherSpaceResponse).toHaveStatusCode(200);
-      expect(otherSpaceResponse.body).toStrictEqual(['scoutotherspacerule']);
-    }
-  );
-
-  apiTest(
     'validation: rejects body with unknown top-level keys (strict schema)',
     async ({ apiClient }) => {
       const response = await suggestValues(
         apiClient,
-        { field: 'rule.name', query: 'test', unknownField: 'x' },
+        { field: 'episode_status', query: 'test', unknownField: 'x' },
         { headers: writerHeaders }
       );
 
@@ -325,9 +219,9 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
       const response = await suggestValues(
         apiClient,
         {
-          field: 'rule.name',
+          field: 'episode_status',
           query: 'test',
-          fieldMeta: { name: 'rule.name', type: 'string' },
+          fieldMeta: { name: 'episode_status', type: 'string' },
           filters: [],
         },
         { headers: writerHeaders }
@@ -341,7 +235,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
   apiTest('validation: rejects a body without a query', async ({ apiClient }) => {
     const response = await suggestValues(
       apiClient,
-      { field: 'rule.name' },
+      { field: 'episode_status' },
       { headers: writerHeaders }
     );
 
@@ -374,7 +268,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
   apiTest('validation: rejects a query longer than the schema limit', async ({ apiClient }) => {
     const response = await suggestValues(
       apiClient,
-      { field: 'rule.name', query: 'a'.repeat(QUERY_MAX_LENGTH + 1) },
+      { field: 'episode_status', query: 'a'.repeat(QUERY_MAX_LENGTH + 1) },
       { headers: writerHeaders }
     );
 

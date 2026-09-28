@@ -22,7 +22,6 @@ const baseRuleAttrs: RuleSavedObjectAttributes = {
     name: 'High CPU',
     description: 'CPU breach detection',
     tags: ['ops', 'cpu'],
-    owner: 'observability',
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '15m' },
@@ -32,9 +31,9 @@ const baseRuleAttrs: RuleSavedObjectAttributes = {
   },
   state_transition: null,
   enabled: true,
-  createdBy: 'elastic',
+  createdBy: { profile_uid: 'elastic' },
   createdAt: '2026-04-01T00:00:00.000Z',
-  updatedBy: 'elastic',
+  updatedBy: { profile_uid: 'elastic' },
   updatedAt: '2026-04-10T00:00:00.000Z',
 } as RuleSavedObjectAttributes;
 
@@ -265,12 +264,21 @@ describe('createRuleSmlType', () => {
         title: 'High CPU',
         content: '',
         permissions: { kibana: { privileges: [] } },
-        attributes: {
-          id: 'sml-1',
-          origin: { uri: `${RULE_KI_TYPE}://${originId}` },
-          created_at: '2026-04-10T00:00:00.000Z',
-          updated_at: '2026-04-10T00:00:00.000Z',
-          ingestion_method: 'crawled' as const,
+        id: 'sml-1',
+        '@timestamp': '2026-04-10T00:00:00.000Z',
+        updated_at: '2026-04-10T00:00:00.000Z',
+        references: [{ uri: `${RULE_KI_TYPE}://${originId}`, relation: 'derived_from' as const }],
+        governance: {
+          provenance: {
+            created_by: {
+              uri: 'crawler://sml',
+              metadata: { ingestion_method: 'crawled' as const },
+            },
+            updated_by: {
+              uri: 'crawler://sml',
+              metadata: { ingestion_method: 'crawled' as const },
+            },
+          },
         },
       };
     };

@@ -132,7 +132,7 @@ export class WorkflowsApiService {
   async hardDelete(workflowId: string): Promise<void> {
     await this.kbnClient.request({
       method: 'DELETE',
-      path: `/s/${this.spaceId}/api/workflows/workflow/${workflowId}?force=true`,
+      path: `/s/${this.spaceId}/api/workflows/workflow/${workflowId}?force=true&acknowledgeAclLoss=true`,
     });
   }
 
@@ -275,21 +275,33 @@ export class WorkflowsApiService {
     });
   }
 
+  /**
+   * Polls an execution until it reports one of `status` and, when provided, `until` also holds.
+   *
+   * Step executions are written with `refresh: false` into a different index than the execution
+   * document, so `stepExecutions` can lag the reported status by a refresh cycle. Pass `until` to
+   * wait for the step data an assertion needs instead of treating the status as a proxy for it.
+   */
   async waitForStatus({
     workflowExecutionId,
     status,
     timeout = 20_000,
     includeOutput = false,
+    until,
   }: {
     workflowExecutionId: string;
     status: ExecutionStatus | readonly ExecutionStatus[];
     timeout?: number;
     includeOutput?: boolean;
+    until?: (execution: WorkflowExecutionDto) => boolean;
   }): Promise<WorkflowExecutionDto> {
     const expected = Array.isArray(status) ? status : [status];
     const execution = await waitForConditionOrThrow({
       action: () => this.getExecution(workflowExecutionId, { includeOutput }),
-      condition: (next) => next != null && expected.includes(next.status as ExecutionStatus),
+      condition: (next) =>
+        next != null &&
+        expected.includes(next.status as ExecutionStatus) &&
+        (until == null || until(next)),
       interval: 1000,
       timeout,
       errorMessage: (last) =>

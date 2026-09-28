@@ -63,7 +63,8 @@ const postJson = (
   body: Record<string, unknown> = {}
 ) => apiClient.post(path, { headers, body, responseType: 'json' });
 
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/291346
+apiTest.describe.skip(
   'Synthetics manage rules privilege',
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {

@@ -72,6 +72,19 @@ configured Relay client to server plugins so all Relay consumers use the same ou
 proxy, and TLS policy. The Relay host must also be added to `xpack.actions.allowedHosts`, since
 Relay requests go through the same `ensureUriAllowed` check as any other connector call.
 
+On Serverless, `xpack.actions.relay.uiam.enabled: true` makes every Relay request also carry an
+`Authorization: Bearer` header holding a fresh, short-lived token for Kibana's own UIAM identity,
+obtained from the security plugin's `authc.systemIdentity`. The Relay forwards that token together
+with the certificate identity injected by the ingress proxy to UIAM, which is what lets Relay
+authenticate Kibana across regions. At the Relay, the token only validates alongside Kibana's mTLS
+certificate identity, so the certificate configured under `xpack.actions.relay.ssl` must be the same
+one configured under `xpack.security.uiam.ssl`. That certificate is also what UIAM derives Kibana's own
+identity from. `authc.systemIdentity` is therefore only available when
+`xpack.security.uiam.ssl.certificate` and `.key` are set. If the token cannot be minted, or the flag is
+on without that configuration, the Relay request fails rather than being sent unauthenticated.
+The setting is rejected outside Serverless; with it off (the default) the header is omitted and the
+Relay identifies Kibana from the mTLS leg alone.
+
 ### Configuration Utilities
 
 This module provides utilities for interacting with the configuration.

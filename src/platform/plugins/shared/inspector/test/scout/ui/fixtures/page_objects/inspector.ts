@@ -110,6 +110,26 @@ export class Inspector {
     return sessionId;
   }
 
+  /**
+   * The names of the requests listed by the open inspector's request chooser,
+   * in the order they are offered. Leaves the chooser closed, since its open
+   * list covers the request detail tabs.
+   */
+  async getRequestNames(): Promise<string[]> {
+    const names = await this.page.components
+      .comboBox('inspectorRequestChooser')
+      .getAllVisibleOptions();
+    await this.page.keyboard.press('Escape');
+    return names;
+  }
+
+  /** The selected request's total time, in milliseconds, as the Requests view reports it. */
+  async getRequestTotalTime(): Promise<number> {
+    const badge = this.page.testSubj.locator('inspectorRequestTotalTime');
+    await badge.waitFor({ state: 'visible' });
+    return parseFloat((await badge.innerText()).replace('ms', ''));
+  }
+
   async openRequestsStatisticsTab() {
     await this.requests.statisticsTab.click();
   }

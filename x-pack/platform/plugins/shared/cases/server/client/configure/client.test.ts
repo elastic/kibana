@@ -349,6 +349,7 @@ describe('client', () => {
             closure_type: 'close-by-user',
             owner: 'cases',
             templates: [],
+            extractObservables: true,
           },
           version: 'test-version',
         });
@@ -450,6 +451,7 @@ describe('client', () => {
               },
             ],
             observableTypes: [],
+            extractObservables: true,
           },
           version: 'test-version',
         });
@@ -701,6 +703,7 @@ describe('client', () => {
               templates: [],
               closure_type: 'close-by-user',
               owner: 'cases',
+              extractObservables: true,
             },
             id: 'test-id',
             version: 'test-version',
@@ -744,6 +747,7 @@ describe('client', () => {
                   type: '.none',
                 },
                 customFields: [],
+                extractObservables: true,
                 owner: 'cases',
                 templates: [],
               },
@@ -820,6 +824,7 @@ describe('client', () => {
               ],
               closure_type: 'close-by-user',
               owner: 'cases',
+              extractObservables: true,
             },
             id: 'test-id',
             version: 'test-version',
@@ -870,6 +875,7 @@ describe('client', () => {
                   name: 'none',
                   type: '.none',
                 },
+                extractObservables: true,
                 owner: 'cases',
                 customFields: [
                   {
@@ -947,6 +953,7 @@ describe('client', () => {
               templates: [],
               closure_type: 'close-by-user',
               owner: 'cases',
+              extractObservables: true,
             },
             id: 'test-id',
             version: 'test-version',
@@ -990,6 +997,7 @@ describe('client', () => {
                   type: '.none',
                 },
                 customFields: [],
+                extractObservables: true,
                 owner: 'cases',
                 templates: [],
               },
@@ -1052,6 +1060,7 @@ describe('client', () => {
               closure_type: 'close-by-user',
               owner: 'cases',
               observableTypes: [],
+              extractObservables: true,
             },
             id: 'test-id',
             version: 'test-version',
@@ -1102,6 +1111,7 @@ describe('client', () => {
                     type: 'text',
                   },
                 ],
+                extractObservables: true,
                 owner: 'cases',
                 templates: [
                   {
@@ -1238,6 +1248,7 @@ describe('client', () => {
             closure_type: 'close-by-user',
             owner: 'securitySolutionFixture',
             templates: [],
+            extractObservables: true,
           },
           version: 'test-version',
         };
@@ -1618,6 +1629,7 @@ describe('client', () => {
                   updated_at: null,
                   updated_by: null,
                   observableTypes: [],
+                  extractObservables: true,
                 },
                 score: 0,
               },
@@ -1644,6 +1656,7 @@ describe('client', () => {
               updated_at: null,
               updated_by: null,
               observableTypes: [],
+              extractObservables: true,
             },
           });
 
@@ -1883,6 +1896,7 @@ describe('client', () => {
           ],
           templates: [],
           observableTypes: [],
+          extractObservables: true,
           created_at: '2019-11-25T21:54:48.952Z',
           created_by: { full_name: 'elastic', email: 'test@test.com', username: 'elastic' },
           updated_at: null,

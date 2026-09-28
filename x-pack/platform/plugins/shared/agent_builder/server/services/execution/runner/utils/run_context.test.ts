@@ -6,6 +6,7 @@
  */
 
 import type { RunContext } from '@kbn/agent-builder-server';
+import { ConversationOriginType } from '@kbn/agent-builder-common';
 import {
   createEmptyRunContext,
   forkContextForToolRun,
@@ -109,6 +110,27 @@ describe('RunContext utilities', () => {
           },
         ],
       });
+    });
+
+    it('should carry the conversation origin onto the agent stack entry', () => {
+      const parentContext: RunContext = {
+        runId: 'parent-run-id',
+        stack: [],
+      };
+
+      const forkedContext = forkContextForAgentRun({
+        agentId: 'test-agent',
+        origin: ConversationOriginType.Slack,
+        parentContext,
+      });
+
+      expect(forkedContext.stack).toEqual([
+        {
+          type: 'agent',
+          agentId: 'test-agent',
+          origin: ConversationOriginType.Slack,
+        },
+      ]);
     });
 
     it('should preserve existing stack entries when forking', () => {

@@ -19,8 +19,17 @@ interface CreateIndexOptions {
 }
 
 /** Scale to 0 replicas on single-node clusters so health can go green. */
-const INDEX_SETTINGS = {
+const REPLICA_SETTINGS = {
   auto_expand_replicas: '0-1',
+} as const;
+
+const HIDDEN_SETTINGS = {
+  index: { hidden: true },
+} as const;
+
+const INDEX_SETTINGS = {
+  ...REPLICA_SETTINGS,
+  ...HIDDEN_SETTINGS,
 } as const;
 
 export const createIndexWithMappings = async ({
@@ -40,7 +49,6 @@ export const createIndexWithMappings = async ({
 
     logger?.debug(`Creating index ${indexName} with mappings`);
 
-    // Create the index with proper mappings
     await retryTransientEsErrors(
       () =>
         esClient.indices.create({
@@ -89,16 +97,28 @@ export const createOrUpdateIndex = async ({
           () =>
             esClient.indices.putSettings({
               index: indexName,
-              settings: INDEX_SETTINGS,
+              settings: REPLICA_SETTINGS,
             }),
           { logger }
         );
-        logger?.debug(`Updated settings for existing index ${indexName}`);
+        logger?.debug(`Updated replica settings for existing index ${indexName}`);
       } catch (settingsError) {
-        logger?.warn(`Failed to update settings for index ${indexName}: ${settingsError.message}`);
+        logger?.warn(
+          `Failed to update replica settings for index ${indexName}: ${settingsError.message}`
+        );
       }
 
       try {
+        await retryTransientEsErrors(
+          () =>
+            esClient.indices.putSettings({
+              index: indexName,
+              settings: HIDDEN_SETTINGS,
+            }),
+          { logger }
+        );
+        logger?.debug(`Applied hidden setting for existing index ${indexName}`);
+
         await esClient.indices.putMapping({
           index: indexName,
           ...mappings,

@@ -25,7 +25,7 @@ export const errorResponseSchema = z
     code: z
       .string()
       .describe(
-        'A stable, machine-readable error code (e.g., "RULE_NOT_FOUND", "INVALID_SCHEDULE"). Safe for clients to branch on.'
+        'Stable error code you can branch on, for example `INVALID_SCHEDULE` or `RULE_ALREADY_EXISTS`.'
       ),
     error: z
       .string()
@@ -35,13 +35,13 @@ export const errorResponseSchema = z
     message: z
       .string()
       .describe(
-        'A human-friendly explanation of the error. Subject to change without notice. Do not parse or rely on its content.'
+        'A readable explanation of the error. The wording can change without notice. Do not parse this field.'
       ),
     details: z
       .record(z.string(), z.unknown())
       .optional()
       .describe(
-        'Optional structured context (e.g., validation field errors, conflict resource IDs).'
+        'Optional extra information about the error, for example field validation issues or the `rule_id` when that ID already exists.'
       ),
   })
   .meta({ id: 'alerting_error_response' });

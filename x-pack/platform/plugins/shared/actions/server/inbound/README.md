@@ -13,7 +13,9 @@ Restart Kibana. With the flag off, `.inboundWebhook` is not registered (create /
 
 ## Create, then mint the token
 
-Public create/update never return a plaintext token (and never mint one). Public GET/create/update omit `config.ingestTokenHash`; the hub still verifies against the stored hash. After create, call rotate once to mint the first live token.
+Public create/update never return a plaintext token (and never mint one). The HMAC of the token is stored on a hidden `connector_ingress_credential` saved object. Public GET/create/update/list never return the hash. After create, call rotate once to mint the first live token.
+
+The token shape is `{credentialId}.{secret}`. One live credential saved object per connector (random id). Rotate deletes the previous SO and creates a new one; the hub `get`s the id from the token and verifies the HMAC. Renaming the connector does not remint the ingest token.
 
 ```bash
 curl -u elastic:changeme -X POST "$KIBANA_URL/api/actions/connector" \
@@ -76,7 +78,7 @@ The ingest token only authenticates the POST. After it is accepted, Actions decr
 
 ## Rotate (first mint and later rotations)
 
-Mints a new token, invalidates the previous one immediately (if any), and returns `{ "ingest_token": "<token>" }` once. This is an internal UI route (`access: internal`); include `x-elastic-internal-origin` when calling it from curl. The Stack Management flyout rotates once after create to show the first token.
+Mints a new `connector_ingress_credential`, deletes the previous credential saved object (if any), and returns `{ "ingest_token": "<token>" }` once. Rotate is audited as a credential event, not a connector update. This is an internal UI route (`access: internal`); include `x-elastic-internal-origin` when calling it from curl. The Stack Management flyout rotates once after create to show the first token.
 
 ```bash
 curl -u elastic:changeme -X POST \
