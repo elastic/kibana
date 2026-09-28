@@ -170,6 +170,7 @@ export const LiquidSettingsSchema = z.object({
 export type LiquidSettings = z.infer<typeof LiquidSettingsSchema>;
 
 export const WorkflowSettingsSchema = z.object({
+  run_as: z.string().min(1).max(1024).optional(),
   'on-failure': WorkflowOnFailureSchema.optional(),
   timezone: z.string().optional(), // Should follow IANA TZ format
   timeout: DurationSchema.optional(), // e.g., '5s', '1m', '2h'
@@ -1207,6 +1208,9 @@ export const WorkflowExecutionContextSchema = z.object({
   startedAt: z.date(),
   url: z.string(),
   executedBy: z.string().optional(),
+  effectiveIdentity: z
+    .object({ type: z.literal('service_account'), id: z.string().max(1024) })
+    .optional(),
   triggeredBy: z.string().optional(),
   usage: WorkflowTokenUsageSchema.optional(),
 });
