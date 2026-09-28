@@ -186,6 +186,7 @@ export interface TanStackDataGridProps {
   toolbarLeftSide?: React.ReactNode;
   toolbarTrailingControl?: React.ReactNode;
   showKeyboardShortcuts?: UnifiedDataTableProps['showKeyboardShortcuts'];
+  showMultiFields?: UnifiedDataTableProps['showMultiFields'];
   showSummaryColumnToggle?: UnifiedDataTableProps['showSummaryColumnToggle'];
   enableComparisonMode?: UnifiedDataTableProps['enableComparisonMode'];
   ariaLabelledBy?: UnifiedDataTableProps['ariaLabelledBy'];
@@ -1553,6 +1554,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     toolbarLeftSide,
     toolbarTrailingControl,
     showKeyboardShortcuts = true,
+    showMultiFields = true,
     showSummaryColumnToggle = false,
     enableComparisonMode = false,
     ariaLabelledBy = 'documentsAriaLabel',
@@ -1813,8 +1815,8 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
 
     const shouldShowFieldHandler = useMemo(() => {
       const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
-      return getShouldShowFieldHandler(dataViewFields, dataView, true);
-    }, [dataView]);
+      return getShouldShowFieldHandler(dataViewFields, dataView, showMultiFields);
+    }, [dataView, showMultiFields]);
 
     // ── Full-screen mode ──
     const [isFullScreen, setIsFullScreen] = useState(false);

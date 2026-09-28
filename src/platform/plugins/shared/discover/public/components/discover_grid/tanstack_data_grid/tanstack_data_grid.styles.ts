@@ -174,6 +174,8 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     height: '100%',
     width: '100%',
     minWidth: 0,
+    // Isolates each row's layout and paint, so scrolling doesn't repaint the rows around it.
+    contain: 'layout paint',
     backgroundColor: euiTheme.components.dataGridRowBackground,
     borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.components.dataGridBorderColor}`,
     boxSizing: 'border-box',
