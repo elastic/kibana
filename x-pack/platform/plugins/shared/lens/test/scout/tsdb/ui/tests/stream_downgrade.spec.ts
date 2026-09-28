@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout/ui';
 import {
   TSDB_SCENARIO_DOCUMENT_COUNT,
   createTsdbScenarioTimeRange,
+  createTsdbStreamScenario,
   enableElasticChartDebug,
   getDowngradeBoundaryData,
   sumFirstNValues,
@@ -24,81 +25,140 @@ const REGULAR_INDEX = `kibana_sample_data_lens_tsdb_regular_${RESOURCE_SUFFIX}`;
 const ADDITIONAL_TSDB_STREAM = `kibana_sample_data_lens_tsdb_additional_${RESOURCE_SUFFIX}`;
 const TIME_RANGE = createTsdbScenarioTimeRange();
 
-interface ScenarioResult {
-  /** Count of `lns-indexPatternDimension-average incompatible` elements. */
-  incompatibleAverageCount: number;
-  /** Bar chart data from the full time range with empty rows enabled. */
-  bars: Array<{ y: number }>;
-  /** Whether the before-downgrade time window contains any data. */
-  hasDataBeforeDowngrade: boolean;
-  /** Whether the after-downgrade time window contains any data. */
-  hasDataAfterDowngrade: boolean;
-  expectedDocumentCountBeforeRollover: number;
-}
-
 // The downgraded base stream has mixed backing-index mappings (old TSDB + new regular).
 // Elasticsearch field caps reports metric_conflicts_indices and omits time_series_metric,
 // so Lens sees bytes_counter as a plain numeric field and keeps Average enabled — even when
 // another pure TSDB stream is added to the data view.
 
-const runScenario = async (
-  { page, pageObjects, tsdbScenario }: TsdbScenarioContext,
-  indexes: TsdbScenarioIndex[]
-): Promise<ScenarioResult> => {
-  const scenario = await tsdbScenario.setup(BASE_STREAM, indexes, TIME_RANGE);
+const SCENARIOS: Array<{ title: string; indexes: TsdbScenarioIndex[] }> = [
+  {
+    title: 'supports a downgraded TSDB data stream without additional indices',
+    indexes: [{ index: BASE_STREAM }],
+  },
+  {
+    title: 'supports a downgraded TSDB data stream with a regular index',
+    indexes: [
+      { index: BASE_STREAM },
+      { index: REGULAR_INDEX, create: true, removeTSDBFields: true },
+    ],
+  },
+  {
+    title: 'supports a downgraded TSDB data stream with a downsampled TSDB stream',
+    indexes: [
+      { index: BASE_STREAM },
+      { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb', downsample: true },
+    ],
+  },
+  {
+    title: 'supports a downgraded TSDB data stream with regular and downsampled resources',
+    indexes: [
+      { index: BASE_STREAM },
+      { index: REGULAR_INDEX, create: true, removeTSDBFields: true },
+      { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb', downsample: true },
+    ],
+  },
+  {
+    title: 'supports a downgraded TSDB data stream with another TSDB stream',
+    indexes: [
+      { index: BASE_STREAM },
+      { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb' },
+    ],
+  },
+];
 
-  const incompatibleAverageCount =
-    await test.step('check counter field compatibility', async () => {
-      await pageObjects.lens.workspace.openFullEditor();
-      await pageObjects.lens.configureDimension({
-        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-        operation: 'date_histogram',
-        field: '@timestamp',
-      });
-      await pageObjects.lens.configureDimension({
-        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'min',
-        field: 'bytes_counter',
-        keepOpen: true,
-      });
-
-      const count = await page.testSubj
-        .locator('lns-indexPatternDimension-average incompatible')
-        .count();
-      await pageObjects.lens.closeDimensionEditor();
-      return count;
-    });
-
-  const bars = await test.step('visualize count data before and after the downgrade', async () => {
-    // Each step needs an empty editor, so reload Lens to clear prior dimensions.
-    await pageObjects.lens.workspace.openFullEditor();
-    await pageObjects.lens.configureDimension({
-      dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-      operation: 'date_histogram',
-      field: '@timestamp',
-      keepOpen: true,
-    });
-
-    // Bar charts disable empty rows by default. Keep empty buckets so the first and last bars cover
-    // the complete range before and after the stream rollover.
-    await pageObjects.lens.dimensions.enableIncludeEmptyRows();
-    await pageObjects.lens.closeDimensionEditor();
-
-    await pageObjects.lens.configureDimension({
-      dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-      operation: 'count',
-    });
-
-    await pageObjects.lens.waitForVisualization('xyVisChart');
-    const chartData = await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart');
-    const chartBars = chartData.bars?.[0]?.bars ?? [];
-    expect(chartBars.length).toBeGreaterThan(0);
-    return chartBars;
+const getIncompatibleAverageCount = async ({
+  page,
+  pageObjects,
+}: TsdbScenarioContext): Promise<number> => {
+  await pageObjects.lens.workspace.openFullEditor();
+  await pageObjects.lens.configureDimension({
+    dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+    operation: 'date_histogram',
+    field: '@timestamp',
+  });
+  await pageObjects.lens.configureDimension({
+    dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+    operation: 'min',
+    field: 'bytes_counter',
+    keepOpen: true,
   });
 
-  const { hasDataBeforeDowngrade, hasDataAfterDowngrade } =
-    await test.step('visualize data on both sides of the downgrade boundary', async () => {
-      return getDowngradeBoundaryData({
+  const count = await page.testSubj
+    .locator('lns-indexPatternDimension-average incompatible')
+    .count();
+  await pageObjects.lens.closeDimensionEditor();
+  return count;
+};
+
+const getCountBars = async ({
+  pageObjects,
+}: Pick<TsdbScenarioContext, 'pageObjects'>): Promise<Array<{ y: number }>> => {
+  await pageObjects.lens.workspace.openFullEditor();
+  await pageObjects.lens.configureDimension({
+    dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+    operation: 'date_histogram',
+    field: '@timestamp',
+    keepOpen: true,
+  });
+
+  // Bar charts disable empty rows by default. Keep empty buckets so the first and last bars cover
+  // the complete range before and after the stream rollover.
+  await pageObjects.lens.dimensions.enableIncludeEmptyRows();
+  await pageObjects.lens.closeDimensionEditor();
+
+  await pageObjects.lens.configureDimension({
+    dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+    operation: 'count',
+  });
+
+  await pageObjects.lens.waitForVisualization('xyVisChart');
+  const chartData = await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart');
+  return chartData.bars?.[0]?.bars ?? [];
+};
+
+// Each scenario gets its own describe so that its Elasticsearch and data-view lifecycle runs in
+// `beforeAll`/`afterAll`, which carry their own timeouts, leaving the 60s test timeout for UI work.
+for (const { title, indexes } of SCENARIOS) {
+  test.describe(`Lens TSDB stream downgrade: ${title}`, { tag: tags.deploymentAgnostic }, () => {
+    const scenario = createTsdbStreamScenario({
+      baseStream: BASE_STREAM,
+      baseStreamKind: 'downgraded',
+      indexes,
+      timeRange: TIME_RANGE,
+    });
+
+    test.beforeAll(async ({ apiServices, tsdbHelper, uiSettings }) => {
+      await scenario.setup({ apiServices, tsdbHelper, uiSettings });
+    });
+
+    test.beforeEach(async ({ browserAuth, context }) => {
+      await enableElasticChartDebug(context);
+      await browserAuth.loginAsPrivilegedUser();
+    });
+
+    test.afterAll(async () => scenario.cleanup());
+
+    test('keeps the counter field compatible with Average', async ({ page, pageObjects }) => {
+      expect(await getIncompatibleAverageCount({ page, pageObjects })).toBe(0);
+    });
+
+    test('counts documents before and after the downgrade', async ({ pageObjects }) => {
+      const bars = await getCountBars({ pageObjects });
+      expect(bars.length).toBeGreaterThan(0);
+
+      // Bucket boundaries can vary with chart interval selection. Lens does not count a
+      // downsample target as an additional contribution beside its source stream.
+      const columnsToCheck = Math.floor(bars.length / 2);
+      expect
+        .soft(sumFirstNValues(columnsToCheck, bars))
+        .toBeGreaterThan(scenario.expectedDocumentCountBeforeRollover - 1);
+      expect
+        .soft(sumFirstNValues(columnsToCheck, [...bars].reverse()))
+        .toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
+    });
+
+    test('visualizes data on both sides of the downgrade boundary', async ({ pageObjects }) => {
+      const { hasDataBeforeDowngrade, hasDataAfterDowngrade } = await getDowngradeBoundaryData({
         pageObjects,
         timeRange: TIME_RANGE,
         configureMetricDimension: async () => {
@@ -108,110 +168,9 @@ const runScenario = async (
           });
         },
       });
+
+      expect.soft(hasDataBeforeDowngrade).toBe(true);
+      expect.soft(hasDataAfterDowngrade).toBe(true);
     });
-
-  return {
-    incompatibleAverageCount,
-    bars,
-    hasDataBeforeDowngrade,
-    hasDataAfterDowngrade,
-    expectedDocumentCountBeforeRollover: scenario.expectedDocumentCountBeforeRollover,
-  };
-};
-
-const getScenarioData = ({ bars }: ScenarioResult) => {
-  // Bucket boundaries can vary with chart interval selection. Lens does not count a downsample
-  // target as an additional contribution beside its source stream.
-  const columnsToCheck = Math.floor(bars.length / 2);
-  return {
-    beforeDowngrade: sumFirstNValues(columnsToCheck, bars),
-    afterDowngrade: sumFirstNValues(columnsToCheck, [...bars].reverse()),
-  };
-};
-
-const assertDowngradeResult = (result: ScenarioResult) => {
-  expect.soft(result.incompatibleAverageCount).toBe(0);
-  expect.soft(result.hasDataBeforeDowngrade).toBe(true);
-  expect.soft(result.hasDataAfterDowngrade).toBe(true);
-  const counts = getScenarioData(result);
-  expect
-    .soft(counts.beforeDowngrade)
-    .toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
-  expect.soft(counts.afterDowngrade).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
-};
-
-test.describe('Lens TSDB stream downgrade scenarios', { tag: tags.deploymentAgnostic }, () => {
-  let cleanupBaseStream: (() => Promise<void>) | undefined;
-
-  test.beforeAll(async ({ tsdbHelper }) => {
-    const baseStream = await tsdbHelper.createDowngradedStream(BASE_STREAM, TIME_RANGE);
-    cleanupBaseStream = baseStream.cleanup;
   });
-
-  test.beforeEach(async ({ browserAuth, context }) => {
-    await enableElasticChartDebug(context);
-    await browserAuth.loginAsPrivilegedUser();
-  });
-
-  test.afterAll(async () => {
-    await cleanupBaseStream?.();
-  });
-
-  test('supports a downgraded TSDB data stream without additional indices', async ({
-    page,
-    pageObjects,
-    tsdbScenario,
-  }) => {
-    const result = await runScenario({ page, pageObjects, tsdbScenario }, [{ index: BASE_STREAM }]);
-    assertDowngradeResult(result);
-  });
-
-  test('supports a downgraded TSDB data stream with a regular index', async ({
-    page,
-    pageObjects,
-    tsdbScenario,
-  }) => {
-    const result = await runScenario({ page, pageObjects, tsdbScenario }, [
-      { index: BASE_STREAM },
-      { index: REGULAR_INDEX, create: true, removeTSDBFields: true },
-    ]);
-    assertDowngradeResult(result);
-  });
-
-  test('supports a downgraded TSDB data stream with a downsampled TSDB stream', async ({
-    page,
-    pageObjects,
-    tsdbScenario,
-  }) => {
-    const result = await runScenario({ page, pageObjects, tsdbScenario }, [
-      { index: BASE_STREAM },
-      { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb', downsample: true },
-    ]);
-    assertDowngradeResult(result);
-  });
-
-  test('supports a downgraded TSDB data stream with regular and downsampled resources', async ({
-    page,
-    pageObjects,
-    tsdbScenario,
-  }) => {
-    const result = await runScenario({ page, pageObjects, tsdbScenario }, [
-      { index: BASE_STREAM },
-      { index: REGULAR_INDEX, create: true, removeTSDBFields: true },
-      { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb', downsample: true },
-    ]);
-    assertDowngradeResult(result);
-  });
-
-  test('supports a downgraded TSDB data stream with another TSDB stream', async ({
-    page,
-    pageObjects,
-    tsdbScenario,
-  }) => {
-    const result = await runScenario({ page, pageObjects, tsdbScenario }, [
-      { index: BASE_STREAM },
-      { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb' },
-    ]);
-    assertDowngradeResult(result);
-  });
-});
+}
