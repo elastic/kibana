@@ -119,6 +119,22 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     // Wait for the page to finish hydrating (the step root must be visible).
     await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
 
+    await page.evaluate(
+      ({ key, depId }) => {
+        sessionStorage.setItem(
+          key,
+          JSON.stringify({
+            policyIdsByInstance: { elb: 'mock-mi-policy-id' },
+            serviceStatuses: { elb: 'receiving' },
+            onboardingDeploymentId: depId,
+            failedInstances: [],
+            deployErrors: {},
+          })
+        );
+      },
+      { key: DETECT_AND_REVIEW_SESSION_KEY, depId: DEP_ID }
+    );
+
     // Step 2: Simulate user changing bucket_arn in Step 2 (overwrite session serviceVars).
     // Hydration wrote serviceVars: {} — now we put a non-empty value so the session differs
     // from what the SO recorded.
@@ -128,6 +144,7 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
           key,
           JSON.stringify({
             globalRegion: 'us-east-1',
+            instances: [{ instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false }],
             serviceVars: {
               elb: {
                 enabledDataStreams: ['elb_logs'],
@@ -153,6 +170,9 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     // Drift callout must appear. The drift effect: session elb has bucket_arn, SO has no
     // serviceVars key for elb → deployedInstanceIds includes elb → dirty detected.
     await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
+
+    // isAlreadyDeployed would be true based on statuses but isDirty blocks Next.
+    await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeDisabled();
 
     // The MI section must auto-open (isDone: true → false when isDirty fires).
     // The deployment used static keys (no connectorId), so StaticKeysReplaceView is shown.
@@ -212,7 +232,8 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     const miPutRequest = await miPutPromise;
     expect(miPutRequest.postData()).toContain('new-drift-bucket');
     // After dirty redeploy, SO must be written with the new serviceVars.
-    await soPutPromise;
+    const soRequest = await soPutPromise;
+    expect(JSON.stringify(JSON.parse(soRequest.postData() ?? '{}'))).toContain('new-drift-bucket');
 
     // isDirty clears → isMiDone becomes true → section collapses, Next button enabled.
     await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
@@ -359,6 +380,18 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
     await soResponsePromise;
 
+    // Override the package mock to include credential vars at the package level
+    // so the policy PUT body carries the new key values.
+    await mockAwsPackage(page, {
+      item: {
+        ...MOCK_AWS_PACKAGE.item,
+        vars: [
+          { name: 'access_key_id', type: 'text' },
+          { name: 'secret_access_key', type: 'password' },
+        ],
+      },
+    });
+
     // Reveal and fill both credential fields; once both are non-empty the replace view calls
     // onReadyChange(true) which synchronously sets isDirty=true — no SO fetch needed.
     await page.testSubj.locator('staticKeysReplace-accessKeyId-toggle').click();
@@ -367,6 +400,57 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     await page.testSubj.locator('staticKeysReplace-secretAccessKey').fill('wJalrXUtnFEMI/K7MDENG');
 
     await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
+
+    await page.route(
+      (url) => /\/api\/fleet\/managed_integrations\/mock-mi-policy-id$/.test(url.pathname),
+      async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ item: MI_POLICY_ITEM }),
+        });
+      }
+    );
+    const miPutPromise = page.waitForRequest(
+      (req) =>
+        req.method() === 'PUT' &&
+        /\/api\/fleet\/managed_integrations\/mock-mi-policy-id$/.test(new URL(req.url()).pathname)
+    );
+    const soPutPromise = page.waitForRequest(
+      (req) =>
+        req.method() === 'PUT' &&
+        new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(
+          new URL(req.url()).pathname
+        )
+    );
+    await page.route(
+      (url) =>
+        new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname) && true,
+      async (route) => {
+        if (route.request().method() === 'PUT') {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ item: makeSoItem(DEP_ID, { authMethod: 'static_keys', connectorId: null }) }),
+          });
+        } else {
+          await route.continue();
+        }
+      }
+    );
+
+    const deployButton = page.testSubj.locator('managedIntegrationsSection-deployButton');
+    await expect(deployButton).toBeEnabled();
+    await deployButton.click();
+
+    const miPutRequest = await miPutPromise;
+    const miPutBody = JSON.parse(miPutRequest.postData() ?? '{}');
+    // Credential vars must be included in the PUT body.
+    expect(JSON.stringify(miPutBody)).toContain('AKIAIOSFODNN7EXAMPLE');
+    await soPutPromise;
+
+    // isDirty clears → drift callout disappears.
+    await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
   });
 
   test('failed dirty redeploy keeps Retry visible and blocks Next', async ({
@@ -381,7 +465,7 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
         route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({ item: makeSoItem(DEP_ID) }),
+          body: JSON.stringify({ item: makeSoItem(DEP_ID, { connectorId: null, authMethod: 'static_keys' }) }),
         })
     );
 
@@ -398,6 +482,7 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
           key,
           JSON.stringify({
             globalRegion: 'us-east-1',
+            instances: [{ instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false }],
             serviceVars: {
               elb: {
                 enabledDataStreams: ['elb_logs'],
@@ -418,6 +503,11 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     await page.reload();
     await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
     await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
+
+    await page.testSubj.click('staticKeysReplace-accessKeyId-toggle');
+    await page.testSubj.fill('staticKeysReplace-accessKeyId', 'AKIAIOSFODNN7EXAMPLE');
+    await page.testSubj.click('staticKeysReplace-secretAccessKey-toggle');
+    await page.testSubj.fill('staticKeysReplace-secretAccessKey', 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY');
 
     // Policy GET succeeds, PUT returns 500 — simulates a transient Fleet error.
     await page.route(
@@ -441,7 +531,14 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
       }
     );
 
+    const miPutPromise = page.waitForRequest(
+      (req) =>
+        req.method() === 'PUT' &&
+        /\/api\/fleet\/managed_integrations\/mock-mi-policy-id$/.test(new URL(req.url()).pathname)
+    );
+
     await page.testSubj.locator('managedIntegrationsSection-deployButton').click();
+    await miPutPromise;
 
     // Failed PUT: hook surfaces hasFailed=true, isDeploying becomes false.
     await expect(page.testSubj.locator('managedIntegrationsSection-retryButton')).toBeVisible();

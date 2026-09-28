@@ -69,6 +69,7 @@ function setupMocks({
   cloud = undefined,
   setConnectorId = jest.fn(),
   setStaticKeys = jest.fn(),
+  clearStagedStaticKeys = jest.fn(),
   setPendingIacTemplate = jest.fn(),
   connectorId = undefined,
   authMethod = undefined,
@@ -78,6 +79,7 @@ function setupMocks({
   cloud?: object;
   setConnectorId?: jest.Mock;
   setStaticKeys?: jest.Mock;
+  clearStagedStaticKeys?: jest.Mock;
   setPendingIacTemplate?: jest.Mock;
   connectorId?: string;
   authMethod?: 'identity_federation' | 'static_keys';
@@ -91,6 +93,7 @@ function setupMocks({
   mockUseOnboardingFlow.mockReturnValue({
     setConnectorId,
     setStaticKeys,
+    clearStagedStaticKeys,
     setPendingIacTemplate,
     authenticateAndDeployStep: { connectorId, authMethod, staticKeys },
     awsServicesMap: new Map([

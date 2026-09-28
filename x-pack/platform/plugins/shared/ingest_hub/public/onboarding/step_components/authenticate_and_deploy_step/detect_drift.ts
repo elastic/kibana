@@ -17,6 +17,13 @@ import { toSOServiceVars } from './package_inputs';
  * path) — those are compared against the service's effective deployed default so that saving
  * default settings in Step 2 does not appear as drift.
  */
+// Duplicate instances have instanceId = `${serviceId}__dup-${n}`; the servicesMap is keyed
+// by serviceId. Strip the suffix so lookups work for both originals and duplicates.
+function getServiceId(instanceId: string): string {
+  const dupIdx = instanceId.indexOf('__dup-');
+  return dupIdx >= 0 ? instanceId.slice(0, dupIdx) : instanceId;
+}
+
 export function detectServiceVarsDrift(
   sessionServiceVars: Record<string, ServiceVars>,
   soServiceVars: Record<string, Record<string, unknown>>,
@@ -30,14 +37,21 @@ export function detectServiceVarsDrift(
   const dirty: string[] = [];
   for (const instanceId of Object.keys(soServiceVars)) {
     if (!typedSession[instanceId]) {
-      // No session entry for this instance. If it is still deployed (in deployedInstanceIds),
-      // the user may have deselected and reselected the service — session vars were pruned but
-      // the policy retains old custom settings. Treat as drift if the SO had non-empty vars.
-      if (
-        deployedInstanceIds?.has(instanceId) &&
-        Object.keys(soServiceVars[instanceId]).length > 0
-      ) {
-        dirty.push(instanceId);
+      // No session entry for this instance. If it is still deployed (in deployedInstanceIds)
+      // the user deselected and reselected the service — session vars were pruned. Compare the
+      // SO against the service's effective default so that a reselected instance whose settings
+      // were not re-edited does not appear as drift.
+      if (deployedInstanceIds?.has(instanceId)) {
+        const service = servicesMap.get(getServiceId(instanceId));
+        const deployedDefault = service
+          ? toSOServiceVars(
+              { [instanceId]: { enabledDataStreams: service.dataStreams, varsByDataStream: {} } },
+              servicesMap
+            )[instanceId] ?? {}
+          : {};
+        if (JSON.stringify(deployedDefault) !== JSON.stringify(soServiceVars[instanceId])) {
+          dirty.push(instanceId);
+        }
       }
       // Otherwise it is a truly removed instance — handled as a cleanup target; skip.
       continue;
@@ -54,8 +68,9 @@ export function detectServiceVarsDrift(
       if (!typedSession[instanceId]) continue; // removed — handled by cleanup
       // Compare against the service's effective deployed default, not a bare {}, so that a
       // session entry that merely reflects the service's defaults does not appear as drift when
-      // the SO omitted those vars on an all-defaults deploy.
-      const service = servicesMap.get(instanceId);
+      // the SO omitted those vars on an all-defaults deploy. Use getServiceId so duplicates
+      // (e.g. elb__dup-1) resolve to the correct servicesMap entry.
+      const service = servicesMap.get(getServiceId(instanceId));
       const deployedDefault = service
         ? toSOServiceVars(
             {

@@ -253,7 +253,12 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // isDirty) also resets the ref. Without this, the stale true from the pre-deploy comparison merges
   // with the StaticKeysReplaceView's initial onReadyChange(false) on remount and restores isDirty.
   useEffect(() => {
-    if (!isDirty) driftDirtyRef.current = false;
+    if (!isDirty) {
+      driftDirtyRef.current = false;
+      // Also reset the replace-form dirty ref so a pending drift fetch that resolves after a
+      // successful static-key redeploy does not re-set isDirty via the stale ref value.
+      replaceFormDirtyRef.current = false;
+    }
   }, [isDirty]);
   const [deployAttempted, setDeployAttempted] = useState(false);
   // Not done when isDirty: force the Deploy button visible so the user can apply updated settings.
@@ -737,6 +742,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
             }
             color="warning"
             iconType="warning"
+            announceOnMount
             data-test-subj="authenticateAndDeployStep-driftCheckErrorCallout"
           >
             <FormattedMessage
