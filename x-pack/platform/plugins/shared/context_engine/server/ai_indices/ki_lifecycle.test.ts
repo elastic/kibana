@@ -53,7 +53,7 @@ describe('applyKiLifecycle', () => {
     expect(flat(applyKiLifecycle('FROM ai-index-idx-x', [index('ai-index-idx-*')]))).toContain(
       LIFECYCLE
     );
-    expect(flat(applyKiLifecycle('FROM idx-b', [index('idx-a, idx-b')]))).toContain(LIFECYCLE);
+    expect(flat(applyKiLifecycle('FROM idx-b', [index('idx-a,idx-b')]))).toContain(LIFECYCLE);
   });
 
   it('collapses to the latest revision per id for a data stream', () => {

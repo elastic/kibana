@@ -28,7 +28,7 @@ const LATEST_REVISION = [
 ];
 
 /** The commands after `FROM` that select the current, active, unexpired KIs. */
-export const kiLifecyclePipeline = (type: AiIndexDest['type']): string[] =>
+const kiLifecyclePipeline = (type: AiIndexDest['type']): string[] =>
   type === 'data_stream' ? [...LATEST_REVISION, ...LIFECYCLE_FILTERS] : LIFECYCLE_FILTERS;
 
 /** Unset or `active` status, and not yet expired: the DSL form of the lifecycle filters. */
@@ -70,9 +70,6 @@ const overlaps = (source: string, dest: string): boolean =>
  * returned unchanged; Elasticsearch reports the error.
  */
 export const applyKiLifecycle = (query: string, dests: AiIndexDest[]): string => {
-  if (dests.length === 0) {
-    return query;
-  }
   const { root, errors } = Parser.parse(query);
   if (errors.length > 0) {
     return query;
@@ -81,10 +78,7 @@ export const applyKiLifecycle = (query: string, dests: AiIndexDest[]): string =>
     (source) => source.index?.valueUnquoted ?? source.name
   );
   const matched = dests.filter(({ value }) =>
-    value
-      .split(',')
-      .map((dest) => dest.trim())
-      .some((dest) => sources.some((source) => overlaps(source, dest)))
+    value.split(',').some((dest) => sources.some((source) => overlaps(source, dest)))
   );
   if (matched.length === 0) {
     return query;
