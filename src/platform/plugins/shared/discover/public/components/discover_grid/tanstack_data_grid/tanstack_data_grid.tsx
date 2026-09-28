@@ -1114,7 +1114,6 @@ const VirtualCell = React.memo(
           className={isPinned ? 'tsg-pinnedCell' : undefined}
           css={[
             isSelect ? styles.selectCell : styles.controlCell,
-            isPinned && styles.pinnedCell,
             isLastLeftPinned && styles.pinnedCellShadow,
             isFocused && styles.focusedCell,
           ]}

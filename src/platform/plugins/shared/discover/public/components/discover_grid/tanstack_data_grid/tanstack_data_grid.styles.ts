@@ -214,15 +214,15 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
   }),
 
   pinnedCell: css({
-    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    backgroundColor: euiTheme.colors.backgroundBasePrimary,
   }),
 
   pinnedHeaderCell: css({
-    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    backgroundColor: euiTheme.colors.backgroundBasePrimary,
   }),
 
   pinnedCellShadow: css({
-    boxShadow: `2px 0 4px -2px ${euiTheme.colors.borderBasePlain}`,
+    boxShadow: `1px 0 0 ${euiTheme.colors.borderStrong}, 2px 0 6px -1px ${euiTheme.colors.borderStrong}`,
   }),
 
   cell: css({
