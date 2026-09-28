@@ -273,7 +273,7 @@ export class MapsPage {
    * Opens the inspector, selects a request by name, reads its raw JSON response,
    * closes the inspector, and returns the parsed response body.
    */
-  async getResponse(requestName: string): Promise<{ rawResponse: any }> {
+  async getResponse(requestName: string): ReturnType<typeof this.inspector.getResponse> {
     await this.inspector.open();
     await this.inspector.openInspectorRequestsView();
 
@@ -282,7 +282,7 @@ export class MapsPage {
 
     const responseBody = await this.inspector.getResponse();
     await this.inspector.close();
-    return { rawResponse: responseBody };
+    return responseBody;
   }
 
   /**

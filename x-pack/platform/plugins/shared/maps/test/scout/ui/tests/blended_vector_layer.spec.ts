@@ -35,11 +35,6 @@ test.describe(
       await uiSettings.set({ defaultIndex: DEFAULT_INDEX_ID });
     });
 
-    test.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.maps.openMapWithId(BLENDED_DOCUMENT_EXAMPLE_ID);
-    });
-
     test.afterAll(async ({ kbnClient, uiSettings }) => {
       await kbnClient.savedObjects.cleanStandardList();
       if (prevDefaultIndex !== undefined) {
@@ -49,33 +44,34 @@ test.describe(
       }
     });
 
-    test('should request documents when zoomed to smaller regions showing less data', async ({
-      pageObjects,
-    }) => {
-      const { rawResponse: response } = await pageObjects.maps.getResponse(
-        LOAD_DOCUMENTS_REQUEST_NAME
-      );
-      // Allow a range of hits to account for variances in browser window size.
-      expect(response.hits.hits.length).toBeGreaterThanOrEqual(5);
-      expect(response.hits.hits.length).toBeLessThanOrEqual(12);
-    });
+    test('blended vector layer', async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsPrivilegedUser();
+      await pageObjects.maps.openMapWithId(BLENDED_DOCUMENT_EXAMPLE_ID);
 
-    test('should request clusters when zoomed to larger regions showing lots of data', async ({
-      pageObjects,
-    }) => {
-      await pageObjects.maps.setView(20, -90, 2);
-      const { rawResponse: response } = await pageObjects.maps.getResponse(
-        LOAD_CLUSTERS_REQUEST_NAME
-      );
-      expect(response.aggregations.gridSplit.buckets).toHaveLength(15);
-    });
+      await test.step('should request documents when zoomed to smaller regions showing less data', async () => {
+        const { rawResponse: response } = await pageObjects.maps.getResponse(
+          LOAD_DOCUMENTS_REQUEST_NAME
+        );
+        // Allow a range of hits to account for variances in browser window size.
+        expect(response.hits.hits.length).toBeGreaterThanOrEqual(5);
+        expect(response.hits.hits.length).toBeLessThanOrEqual(12);
+      });
 
-    test('should request documents when query narrows data', async ({ pageObjects }) => {
-      await pageObjects.maps.setAndSubmitQuery('bytes > 19000');
-      const { rawResponse: response } = await pageObjects.maps.getResponse(
-        LOAD_DOCUMENTS_REQUEST_NAME
-      );
-      expect(response.hits.hits).toHaveLength(75);
+      await test.step('should request clusters when zoomed to larger regions showing lots of data', async () => {
+        await pageObjects.maps.setView(20, -90, 2);
+        const { rawResponse: response } = await pageObjects.maps.getResponse(
+          LOAD_CLUSTERS_REQUEST_NAME
+        );
+        expect(response.aggregations.gridSplit.buckets).toHaveLength(15);
+      });
+
+      await test.step('should request documents when query narrows data', async () => {
+        await pageObjects.maps.setAndSubmitQuery('bytes > 19000');
+        const { rawResponse: response } = await pageObjects.maps.getResponse(
+          LOAD_DOCUMENTS_REQUEST_NAME
+        );
+        expect(response.hits.hits).toHaveLength(75);
+      });
     });
   }
 );
