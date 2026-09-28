@@ -8,13 +8,18 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import type { GetScopedClients } from '../../../routes/types';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
+import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { eventsWriteHandler } from '../event_write/handler';
 import { createEventTool, SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID } from './tool';
 
 jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
+}));
+
+jest.mock('../../../routes/utils/assert_can_manage_significant_events', () => ({
+  assertCanManageSignificantEvents: jest.fn(),
 }));
 
 jest.mock('../event_write/handler', () => ({
@@ -27,7 +32,7 @@ describe('event_create tool', () => {
   it('uses expected tool id', () => {
     const tool = createEventTool({
       getScopedClients: jest.fn() as unknown as GetScopedClients,
-      server: {} as StreamsServer,
+      server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: telemetry as never,
     });
@@ -37,6 +42,7 @@ describe('event_create tool', () => {
 
   it('returns success result', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    (assertCanManageSignificantEvents as jest.Mock).mockResolvedValue(undefined);
     (eventsWriteHandler as jest.Mock).mockResolvedValue({
       event_uuid: 'e1',
       event_id: 'agent-event-abcd1234',
@@ -46,13 +52,14 @@ describe('event_create tool', () => {
 
     const getScopedClients = jest.fn().mockResolvedValue({
       getEventClient: jest.fn().mockReturnValue({}),
+      getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
       licensing: {},
       uiSettingsClient: {},
     });
 
     const tool = createEventTool({
       getScopedClients: getScopedClients as unknown as GetScopedClients,
-      server: {} as StreamsServer,
+      server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: telemetry as never,
     });
@@ -73,5 +80,8 @@ describe('event_create tool', () => {
     if ('results' in result) {
       expect(result.results[0].type).toBe('other');
     }
+    expect(assertCanManageSignificantEvents).toHaveBeenCalledWith(
+      expect.objectContaining({ request: expect.anything() })
+    );
   });
 });

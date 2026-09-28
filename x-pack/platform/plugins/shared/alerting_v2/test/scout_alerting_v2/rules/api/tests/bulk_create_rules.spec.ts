@@ -48,7 +48,7 @@ apiTest.describe('Bulk create rules API', { tag: '@local-stateful-classic' }, ()
     });
     expect(response).toHaveStatusCode(200);
     expect(response.body.errors).toStrictEqual([]);
-    expect(response.body.rules).toHaveLength(2);
+    expect(response.body.items).toHaveLength(2);
 
     const stored = await apiServices.alertingV2.rules.find({ per_page: 100 });
     expect(stored.items).toHaveLength(2);
@@ -76,8 +76,8 @@ apiTest.describe('Bulk create rules API', { tag: '@local-stateful-classic' }, ()
         },
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body.rules).toHaveLength(1);
-      expect(response.body.rules[0].metadata.name).toBe('fresh-rule');
+      expect(response.body.items).toHaveLength(1);
+      expect(response.body.items[0].metadata.name).toBe('fresh-rule');
       expect(response.body.errors).toHaveLength(1);
       expect(response.body.errors[0]).toMatchObject({
         id: 'existing-bulk-id',
@@ -126,7 +126,7 @@ apiTest.describe('Bulk create rules API', { tag: '@local-stateful-classic' }, ()
         },
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body.rules).toHaveLength(1);
+      expect(response.body.items).toHaveLength(1);
     }
   );
 

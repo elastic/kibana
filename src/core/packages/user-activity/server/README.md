@@ -15,7 +15,7 @@ Use `trackUserAction` to record user actions:
 core.userActivity.trackUserAction({
   event: {
     action: 'create_alerting_rule',
-    type: 'creation',
+    type: ['creation'],
     start: new Date().toISOString(),
     end: new Date().toISOString(),
     duration: 250000000, // 250ms in ns
@@ -29,7 +29,7 @@ You can optionally provide a custom message, ECS `event.outcome`, top-level ECS 
 ```ts
 core.userActivity.trackUserAction({
   message: 'User snoozed an alerting rule',
-  event: { action: 'snooze_alerting_rule', type: 'change', outcome: 'success' },
+  event: { action: 'snooze_alerting_rule', type: ['change'], outcome: 'success' },
   object: { id: 'rule-456', name: 'CPU usage threshold', type: 'rule', tags: ['production'] },
   metadata: {
     ui_surface: 'rules_table',
@@ -38,7 +38,7 @@ core.userActivity.trackUserAction({
 });
 ```
 
-For failed actions, set `event.outcome` to `failure` and populate `error` with ECS fields (`type`, `message`, `stack_trace`, `code`) instead of stuffing failure detail only into `metadata`.
+For failed actions, set `event.outcome` to `failure` and populate `error` with ECS fields (`type`, `message`, `stack_trace`, `code`) instead of stuffing failure detail only into `metadata`. When `event.outcome` is omitted, the emitted event defaults to `unknown`.
 
 ## Registering new actions
 
@@ -110,7 +110,9 @@ The following context is automatically added to every log entry by Kibana's HTTP
 | `user.roles` | Array of roles |
 | `client.ip` | IP address |
 | `client.address` | IP address (OTel compliance) |
-| `session.id` | Session ID |
+| `source.ip` | Copy of `client.ip` (ECS `source`) |
+| `source.address` | Copy of `client.ip` (ECS `source`) |
+| `kibana.session.id` | Session ID |
 | `kibana.space.id` | Current space ID |
 | `http.request.referrer` | Referrer |
 
@@ -120,8 +122,9 @@ Here's the current schema reference: [`docs/reference/user-activity.md`](../../.
 
 Some of the fields in the schema come from:
 
-- `trackUserAction()` params (for example `message`, `event.*`, `object.*`, `metadata.*`)
-- Injected context (for example `user.*`, `session.*`, `client.*`, `kibana.space.id`, and `http.request.referrer`)
+- `trackUserAction()` params (for example `message`, `event.*`, `metadata.*`; the `object` param is emitted as `kibana.object.*`)
+- Injected context (for example `user.*`, `client.*`, `source.*`, `kibana.session.id`, `kibana.space.id`, and `http.request.referrer`)
+- Fields derived by the service (`kibana.saved_object.type` and `kibana.saved_object.id`, emitted when `object.type` is a registered saved object type)
 - Fields automatically added by the logging system / JSON layout (for example `@timestamp`)
 
 > **Important**

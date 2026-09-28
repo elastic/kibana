@@ -88,6 +88,8 @@ export const createNlToEsqlGraph = ({
   documentation,
   esqlCallbacks,
   includeDatasets = false,
+  includeViews = false,
+  includeFrozen = false,
   sessionId,
   cacheControl,
 }: {
@@ -97,6 +99,8 @@ export const createNlToEsqlGraph = ({
   documentation: EsqlLoadedDocumentation;
   esqlCallbacks?: ValidateEsqlQueryCallbacks;
   includeDatasets?: boolean;
+  includeViews?: boolean;
+  includeFrozen?: boolean;
   sessionId?: string;
   cacheControl?: ChatCompleteCacheControl;
 }) => {
@@ -105,6 +109,8 @@ export const createNlToEsqlGraph = ({
       resourceName: state.target,
       samplingSize: 100,
       includeDatasets,
+      includeViews,
+      includeFrozen,
       esClient,
     });
 
@@ -307,6 +313,7 @@ export const createNlToEsqlGraph = ({
         query,
         params: buildTimeRangeParams(state.timeRange),
         ...(schemaOnly ? { limit: 1, dropNullColumns: false } : {}),
+        includeFrozen,
         esClient,
       });
       action = {
