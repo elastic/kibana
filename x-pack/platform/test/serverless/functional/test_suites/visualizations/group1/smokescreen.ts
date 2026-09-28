@@ -21,7 +21,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   // Flaky on MKI (#kibana-serverless-test-alerts); keep local serverless coverage.
   // Tracking: https://github.com/elastic/kibana/issues/282284
-  describe('lens smokescreen tests', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/286139
+  describe.skip('lens smokescreen tests', function () {
     this.tags(['skipMKI']);
 
     before(async () => {
