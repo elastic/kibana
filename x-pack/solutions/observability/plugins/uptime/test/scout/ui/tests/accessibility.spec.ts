@@ -8,12 +8,11 @@
 import moment from 'moment';
 import type { ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { test, testData } from '../fixtures';
+import { test } from '../fixtures';
 import { makeChecks } from '../fixtures/helpers/make_checks';
 import { makeTls } from '../fixtures/helpers/make_tls';
 
 const MONITOR_ID = 'a11yTestMonitor';
-const GENERATED_INDEX = 'heartbeat-8-generated-test';
 
 // Matches the FTR app snapshot: scan the whole page, skip chart canvases.
 const CHART_EXCLUSION = '[role="graphics-document"][aria-roledescription="visualization"]';
@@ -26,9 +25,8 @@ const scanPage = (page: ScoutPage) =>
   });
 
 test.describe('Uptime accessibility', { tag: ['@local-stateful-classic'] }, () => {
-  test.beforeAll(async ({ esArchiver, esClient, kbnClient }) => {
+  test.beforeAll(async ({ esClient, kbnClient }) => {
     await kbnClient.uiSettings.update({ 'observability:enableLegacyUptimeApp': true });
-    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.BLANK);
     // Partial x509 fails monitor-list runtime validation (issuer.distinguished_name) and stalls overview.
     await makeChecks(esClient, MONITOR_ID, 150, 1, 1000, {
       tls: makeTls({
@@ -52,7 +50,6 @@ test.describe('Uptime accessibility', { tag: ['@local-stateful-classic'] }, () =
       refresh: true,
       conflicts: 'proceed',
     });
-    await esClient.indices.delete({ index: GENERATED_INDEX, ignore_unavailable: true });
   });
 
   test('overview page', async ({ page }) => {
@@ -84,11 +81,16 @@ test.describe('Uptime accessibility', { tag: ['@local-stateful-classic'] }, () =
 
   test('settings page', async ({ page, pageObjects }) => {
     await pageObjects.uptimeApp.navigateToSettings();
+    // The route wrapper renders before the settings fetch replaces the loading inputs.
+    await pageObjects.uptimeApp.loadSettingsFields();
     expect((await scanPage(page)).violations).toStrictEqual([]);
   });
 
   test('certificates page', async ({ page, pageObjects }) => {
     await pageObjects.uptimeApp.navigateToCertificates();
+    const table = page.testSubj.locator('uptimeCertificatesTable');
+    await expect(table).toBeVisible();
+    await expect(table).not.toContainText('Loading certificates');
     expect((await scanPage(page)).violations).toStrictEqual([]);
   });
 });
