@@ -16,7 +16,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { OnboardingPage } from './onboarding_page';
 
 jest.mock('../../components/scan_failure_callout/scan_failure_callout', () => ({
-  ScanFailureCallout: () => null,
+  ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
 }));
 
 const renderPage = ({ canWrite = false }: { canWrite?: boolean } = {}) => {
@@ -42,6 +42,11 @@ const renderPage = ({ canWrite = false }: { canWrite?: boolean } = {}) => {
 };
 
 describe('OnboardingPage', () => {
+  it('mounts the scan-failure callout', () => {
+    renderPage();
+    expect(screen.getByTestId('alertZeroScanFailureCallout')).toBeInTheDocument();
+  });
+
   it('renders the title', () => {
     renderPage();
     expect(screen.getByText('Get started with AlertZero')).toBeInTheDocument();

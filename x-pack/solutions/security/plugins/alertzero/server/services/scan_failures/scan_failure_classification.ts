@@ -128,6 +128,13 @@ const DEFINITION_CLASSIFICATION = {
   [ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID]: exclude,
 } as const satisfies Record<AlertZeroDefinitionId, ScanFailureClassification>;
 
+/** Action workflows. They are not Worker scans, so the failure query leaves them out. */
+export const SCAN_FAILURE_EXCLUDED_DEFINITION_IDS = (
+  Object.entries(DEFINITION_CLASSIFICATION) as Array<
+    [AlertZeroDefinitionId, ScanFailureClassification]
+  >
+).flatMap(([id, classification]) => (classification.kind === 'exclude' ? [id] : []));
+
 export const classifyScanFailureDefinition = (
   definitionId: string | null | undefined
 ): ScanFailureClassification => {

@@ -31,6 +31,7 @@ import {
   ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
+  SCAN_FAILURE_MAX_PAGES,
   SCAN_FAILURE_PAGE_SIZE,
   ScanFailuresService,
   type FailedExecutionPage,
@@ -380,6 +381,22 @@ describe('ScanFailuresService', () => {
     await service.list(request, 'default');
 
     expect(executions.getWorkflowExecution).toHaveBeenCalledTimes(1);
+  });
+
+  it('marks the window incomplete when failures remain past the page cap', async () => {
+    const total = SCAN_FAILURE_PAGE_SIZE * SCAN_FAILURE_MAX_PAGES + 1;
+    const search = jest.fn(async () =>
+      page(
+        Array.from({ length: SCAN_FAILURE_PAGE_SIZE }, () => ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID),
+        total
+      )
+    );
+    const { service } = createService(search);
+
+    await expect(service.list(request, 'default')).resolves.toEqual({
+      workers: [],
+      unknown: true,
+    });
   });
 
   it('reads the next page while a full page of failures remains', async () => {

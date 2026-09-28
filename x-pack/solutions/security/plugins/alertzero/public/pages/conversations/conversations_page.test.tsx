@@ -40,7 +40,7 @@ import type { ProposalItem } from '../../../common/proposals/list';
 import { ConversationsPage } from './conversations_page';
 
 jest.mock('../../components/scan_failure_callout/scan_failure_callout', () => ({
-  ScanFailureCallout: () => null,
+  ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
 }));
 
 // Only the mutations are stubbed: the module also exports DISMISS_REASON_OPTIONS, which
@@ -298,6 +298,15 @@ beforeEach(() => {
     refetch: jest.fn(),
   });
   mockOpenCount(0);
+});
+
+describe('ConversationsPage scan failures', () => {
+  it('mounts the scan-failure callout', () => {
+    mockProposals({});
+    renderPage('/');
+
+    expect(screen.getByTestId('alertZeroScanFailureCallout')).toBeInTheDocument();
+  });
 });
 
 describe('ConversationsPage details flyout', () => {

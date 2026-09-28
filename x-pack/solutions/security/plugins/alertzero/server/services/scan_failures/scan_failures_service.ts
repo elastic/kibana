@@ -145,6 +145,7 @@ export const collectScanFailures = async (
   loadExecution: LoadExecution
 ): Promise<ScanFailuresResponse> => {
   const executions: FailedExecutionPage['results'] = [];
+  let incomplete = false;
 
   for (let page = 1; page <= SCAN_FAILURE_MAX_PAGES; page++) {
     const { results, total } = await searchPage(page);
@@ -152,17 +153,21 @@ export const collectScanFailures = async (
 
     // The same definition can be started by different Workers, so a definition
     // id on an earlier page does not mean later pages can be skipped.
-    const noFurtherPage =
+    const coveredTheWindow =
       results.length === 0 ||
       results.length < SCAN_FAILURE_PAGE_SIZE ||
       page * SCAN_FAILURE_PAGE_SIZE >= total;
 
-    if (noFurtherPage) {
+    if (coveredTheWindow) {
       break;
+    }
+    if (page === SCAN_FAILURE_MAX_PAGES) {
+      incomplete = true;
     }
   }
 
-  return foldFailedExecutions(executions, loadExecution);
+  const folded = await foldFailedExecutions(executions, loadExecution);
+  return incomplete ? { ...folded, unknown: true } : folded;
 };
 
 export class ScanFailuresService {

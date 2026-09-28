@@ -15,6 +15,7 @@ import type {
   WorkflowExecutionListDto,
   WorkflowListDto,
 } from '@kbn/workflows';
+import { SCAN_FAILURE_EXCLUDED_DEFINITION_IDS } from '../scan_failures/scan_failure_classification';
 
 /** `managedBy` stamped on AlertZero managed workflow executions. */
 const ALERTZERO_MANAGED_BY = 'alertzero';
@@ -140,7 +141,14 @@ export class WatchWorkflowsManagementClientImpl implements WatchWorkflowsManagem
         statuses: [ExecutionStatus.FAILED],
         finishedAfter: 'now-24h',
         includeManagedExecutions: true,
-        query: { term: { managedBy: ALERTZERO_MANAGED_BY } },
+        query: {
+          bool: {
+            filter: [{ term: { managedBy: ALERTZERO_MANAGED_BY } }],
+            must_not: [
+              { terms: { originManagedWorkflowId: SCAN_FAILURE_EXCLUDED_DEFINITION_IDS } },
+            ],
+          },
+        },
         sortField: 'finishedAt',
         sortOrder: 'desc',
         page: params.page,
