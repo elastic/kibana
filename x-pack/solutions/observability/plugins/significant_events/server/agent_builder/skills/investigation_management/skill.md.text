@@ -37,7 +37,7 @@ waitForCompletion: true
 - `message` (string, required) — a clear description of the issue to investigate. Include symptoms, time range, and any relevant context. Be specific.
 - `title` (string, required) — a short human-readable headline (under ~80 characters) naming the affected entity and the problem, e.g. the significant event title or the alert rule name. It is the investigation's title, so never use an id or UUID.
 - `stream_names` (string array, optional) — data stream names to scope observability queries. Leave empty to let the investigation agent discover relevant streams.
-- `context` (object, required) — includes `source` and the corresponding subject id (`manual_id`, `alert_id`, or `significant_event_id`), plus any structured context for the investigation agent.
+- `context` (object, required) — includes `source` and the corresponding subject id (`manual_id`, `alert_id`, or `event_id`), plus any structured context for the investigation agent.
 - `concurrency_key` (string, optional) — a stable key (e.g. a significant event's event id or an alert id). Investigations sharing a key are de-duplicated: starting a new one cancels any in-progress investigation with the same key.
 
 **Example call (free-form issue):**

@@ -192,6 +192,31 @@ describe('SignificantEventFlyout actions menu', () => {
     expect(screen.getByTestId('sigEventDismissModal')).toBeInTheDocument();
   });
 
+  it('disables Dismiss and Close when lifecycle has no events (hasCanonicalLifecycle=false)', () => {
+    // Default afterEach mock: data: undefined — hasCanonicalLifecycle is false.
+    // Actions button is still rendered but action items must be disabled.
+    lifecycleMock.mockReturnValue({
+      data: { events: [], detections: [] },
+      isLoading: false,
+      isSuccess: true,
+      isError: false,
+      refetch: jest.fn(),
+    });
+    render(<SignificantEventFlyout event={event} onClose={jest.fn()} />);
+
+    fireEvent.click(screen.getByTestId('sigEventFlyoutActionsButton'));
+
+    const dismissItem = screen.getByText('Dismiss significant event').closest('button');
+    const closeItem = screen.getByTestId('sigEventCloseButton');
+
+    expect(dismissItem).toBeDisabled();
+    expect(closeItem).toBeDisabled();
+
+    // Clicking the disabled dismiss item must not open the modal.
+    fireEvent.click(screen.getByText('Dismiss significant event'));
+    expect(screen.queryByTestId('sigEventDismissModal')).not.toBeInTheDocument();
+  });
+
   it('does not expose actions for an already dismissed event', () => {
     render(
       <SignificantEventFlyout event={{ ...event, status: 'dismissed' }} onClose={jest.fn()} />

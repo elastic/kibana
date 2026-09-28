@@ -174,6 +174,7 @@ export const createEventInvestigationAttachTool = ({
         telemetry.trackAgentToolEventInvestigationAttach({
           success: false,
           event_id: toolParams.event_id,
+          event_uuid: toolParams.event_uuid,
           workflow_execution_id: toolParams.workflow_execution_id,
           error_message: message,
         });
