@@ -506,6 +506,27 @@ describe('useWorkflowUrlState', () => {
       expect(result.current.urlState.selectedExecutionId).toBeUndefined();
     });
 
+    it('keeps the same history state object when a URL update does not change the run entry', () => {
+      const entryState = { fromList: true };
+      const { result } = renderWithHistory([{ pathname: '/', search: '', state: entryState }]);
+
+      act(() => {
+        result.current.urlState.setGraphDirection('LR');
+      });
+
+      expect(result.current.history.location.state).toBe(entryState);
+    });
+
+    it('does not add history state to entries outside a run', () => {
+      const { result } = renderWithHistory(['/']);
+
+      act(() => {
+        result.current.urlState.setActiveTab('executions');
+      });
+
+      expect(result.current.history.location.state).toBeUndefined();
+    });
+
     it('keeps other history state on entries it pushes', () => {
       const { result } = renderWithHistory([
         { pathname: '/', search: '?tab=executions', state: { fromList: true } },

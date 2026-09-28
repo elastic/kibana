@@ -487,6 +487,31 @@ describe('WorkflowDetailPage', () => {
       expect(mockLoadConnectors).toHaveBeenCalledTimes(1);
     });
 
+    it('does not reload the workflow when a URL update writes new history state', () => {
+      const { historyRef } = renderWithProviders({ id: 'test-workflow-123' }, undefined, [
+        '/test-workflow-123',
+      ]);
+      expect(mockLoadWorkflow).toHaveBeenCalledTimes(1);
+
+      // `useWorkflowUrlState` writes its own keys to the entry state when it updates the URL.
+      act(() => {
+        historyRef.current?.push({
+          pathname: '/test-workflow-123',
+          search: '?executionId=exec-1',
+          state: { workflowsRunEntry: { depth: 1, openedInApp: true } },
+        });
+      });
+      act(() => {
+        historyRef.current?.push({
+          pathname: '/test-workflow-123',
+          search: '?executionId=exec-1&stepExecutionId=step-a',
+          state: { workflowsRunEntry: { depth: 2, openedInApp: true } },
+        });
+      });
+
+      expect(mockLoadWorkflow).toHaveBeenCalledTimes(1);
+    });
+
     it('should call loadWorkflow when id changes', () => {
       const store = createMockStore();
       const services = createStartServicesMock();

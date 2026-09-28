@@ -66,15 +66,19 @@ const getRunEntryState = (state: unknown): RunEntryState | undefined => {
     : undefined;
 };
 
-/** Returns the entry state with the run entry set, keeping any other state it carries. */
-const withRunEntryState = (
-  state: unknown,
-  runEntry: RunEntryState | undefined
-): Record<string, unknown> => {
+/** Returns the entry state with the run entry set; the same object when the run entry is unchanged. */
+const withRunEntryState = (state: unknown, runEntry: RunEntryState | undefined): unknown => {
+  const current = getRunEntryState(state);
+  if (current?.depth === runEntry?.depth && current?.openedInApp === runEntry?.openedInApp) {
+    return state;
+  }
   const rest =
     state != null && typeof state === 'object' ? { ...(state as Record<string, unknown>) } : {};
   delete rest[RUN_ENTRY_STATE_KEY];
-  return runEntry ? { ...rest, [RUN_ENTRY_STATE_KEY]: runEntry } : rest;
+  if (runEntry) {
+    return { ...rest, [RUN_ENTRY_STATE_KEY]: runEntry };
+  }
+  return Object.keys(rest).length > 0 ? rest : undefined;
 };
 
 /**
