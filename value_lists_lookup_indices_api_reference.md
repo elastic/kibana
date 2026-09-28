@@ -352,7 +352,9 @@ sequenceDiagram
         S-->>K: level, rules with canRead
     end
     alt already restricted
-        K->>ES: alias still exists? remove it if so (system user)
+        opt not dryRun
+            K->>ES: alias still exists? remove it if so (system user)
+        end
         K-->>C: 200 { access: restricted, changed }
     end
     opt dryRun

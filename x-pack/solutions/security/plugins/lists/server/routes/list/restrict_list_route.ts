@@ -53,7 +53,7 @@ const uniqueRules = (rules: ValueListReferencingRule[]): ValueListReferencingRul
 };
 
 const remedy = (index: string): string =>
-  `Grant read on "${index}" to the roles that must keep reading this list, then save each referencing rule (or use the update API key action) so its API key is refreshed. Disabling and enabling a rule keeps its key`;
+  `Grant read on "${index}" to the roles that must keep reading this list, then save each referencing rule (or call POST /api/alerting/rule/{id}/_update_api_key) so its API key is refreshed. Disabling and enabling a rule keeps its key`;
 
 /**
  * Restrict a lookup list to explicit grants on its concrete index.

@@ -116,9 +116,15 @@ export const findRulesReferencingValueList = async ({
       }
     }
 
-    // The list id as a whole token in a threat query: `list_id: "foo"` or `list_id: foo`
-    // name `foo`, while `foo-bar` and `foo.1` do not.
-    const listIdToken = new RegExp(`(^|[^\\w.-])${escapeRegExp(listId)}(?![\\w.-])`);
+    // The list id as the value of a `list_id` clause in a threat query, in the shapes a
+    // rule can carry: `list_id: foo`, `list_id: "foo"`, or `list_id: (bar or foo)`. The id
+    // must be a whole token, so `foo-bar` and `foo.1` do not name `foo`, and the id
+    // anywhere else in the query (`event.action: foo`) does not name the list either: a
+    // rule that reads the stream without selecting this list is a `maybe`, never a block.
+    const idPattern = escapeRegExp(listId);
+    const listIdClause = new RegExp(
+      `list_id\\s*:\\s*(?:"${idPattern}"|${idPattern}(?![\\w.-])|\\([^)]*(?<![\\w.-])${idPattern}(?![\\w.-])[^)]*\\))`
+    );
 
     // indicator match rules are few, so fetch them by type and filter their params in
     // memory. Only indicator match rules have a threat index, so this is exhaustive.
@@ -146,7 +152,7 @@ export const findRulesReferencingValueList = async ({
       if (accessNames.some(names)) {
         referenced.set(rule.id, entry);
       } else if (names(itemsIndex)) {
-        if (listIdToken.test(String(params.threatQuery ?? ''))) {
+        if (listIdClause.test(String(params.threatQuery ?? ''))) {
           referenced.set(rule.id, entry);
         } else {
           maybe.set(rule.id, { ...entry, reason: 'threat_index_maybe' });

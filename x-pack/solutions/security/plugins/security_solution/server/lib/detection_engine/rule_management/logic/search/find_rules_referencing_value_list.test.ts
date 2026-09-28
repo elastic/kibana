@@ -92,4 +92,36 @@ describe('findRulesReferencingValueList', () => {
     const result = await scan([indicatorRule('r5', [ITEMS], `list_id: "${LIST_ID}"`)]);
     expect(result.level).toBe('referenced');
   });
+
+  // Only a `list_id` clause selects the list. The id as a token anywhere else in the
+  // query does not, so such a rule stays a warning and never blocks a migration.
+  it('does not treat the list id elsewhere in the threat query as a reference', async () => {
+    const result = await scan([indicatorRule('r6', [ITEMS], `event.action: ${LIST_ID}`)]);
+    expect(result.level).toBe('maybe');
+    expect(result.rules).toEqual([
+      expect.objectContaining({ id: 'r6', reason: 'threat_index_maybe' }),
+    ]);
+  });
+
+  it.each([
+    [`list_id: ${LIST_ID}`],
+    [`list_id:"${LIST_ID}"`],
+    [`list_id : ${LIST_ID}`],
+    [`list_id: ("other" or "${LIST_ID}")`],
+    [`not list_id: (${LIST_ID} or other)`],
+    [`list_id: "${LIST_ID}" and event.kind: indicator`],
+  ])('reports a rule whose list_id clause names the list as referenced: %s', async (query) => {
+    const result = await scan([indicatorRule('r7', [ITEMS], query)]);
+    expect(result.level).toBe('referenced');
+  });
+
+  it.each([
+    [`list_id: ${LIST_ID}-2`],
+    [`list_id: "${LIST_ID}-2"`],
+    [`list_id: (${LIST_ID}.old or other)`],
+    [`list_id: other and value: ${LIST_ID}`],
+  ])('does not treat a longer id or another field as naming the list: %s', async (query) => {
+    const result = await scan([indicatorRule('r8', [ITEMS], query)]);
+    expect(result.level).toBe('maybe');
+  });
 });

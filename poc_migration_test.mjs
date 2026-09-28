@@ -25,6 +25,9 @@ const IM_RULE = 'poc-mig-im';
 // a list read by an indicator match rule through the wildcard `.items-*` rather than the exact stream name
 const WILD_LIST = 'poc-mig-wild';
 const WILD_RULE = 'poc-mig-wild-im';
+// a list whose id appears in a threat query as an ordinary token, not as a `list_id` clause
+const TOKEN_LIST = 'poc-mig-token';
+const TOKEN_RULE = 'poc-mig-token-im';
 const EXC_RULE = 'poc-mig-exc-rule';
 const EXC_CONTAINER = 'poc-mig-exc-container';
 const MIG_INDEX = `.value-list-v2-${SPACE}-${MIG_LIST}`;
@@ -80,7 +83,7 @@ const createLegacyList = async (id, value) => {
   await kbn('POST', '/api/lists/items', { list_id: id, value });
 };
 
-const createImRule = (ruleId, listId, threatIndex = [ITEMS_INDEX]) =>
+const createImRule = (ruleId, listId, threatIndex = [ITEMS_INDEX], threatQuery = `list_id: "${listId}"`) =>
   kbn('POST', '/api/detection_engine/rules', {
     rule_id: ruleId,
     name: ruleId,
@@ -95,7 +98,7 @@ const createImRule = (ruleId, listId, threatIndex = [ITEMS_INDEX]) =>
     query: '*',
     language: 'kuery',
     threat_index: threatIndex,
-    threat_query: `list_id: "${listId}"`,
+    threat_query: threatQuery,
     threat_language: 'kuery',
     threat_mapping: [{ entries: [{ field: 'destination.ip', type: 'mapping', value: 'ip' }] }],
   });
@@ -153,8 +156,9 @@ const cleanup = async () => {
   await kbn('DELETE', `/api/detection_engine/rules?rule_id=${IM_RULE}`);
   await kbn('DELETE', `/api/detection_engine/rules?rule_id=${WILD_RULE}`);
   await kbn('DELETE', `/api/detection_engine/rules?rule_id=${EXC_RULE}`);
+  await kbn('DELETE', `/api/detection_engine/rules?rule_id=${TOKEN_RULE}`);
   await kbn('DELETE', `/api/exception_lists?list_id=${EXC_CONTAINER}&namespace_type=single`);
-  for (const id of [MIG_LIST, MAYBE_LIST, EXC_LIST, REJ_LIST, WILD_LIST])
+  for (const id of [MIG_LIST, MAYBE_LIST, EXC_LIST, REJ_LIST, WILD_LIST, TOKEN_LIST])
     await kbn('DELETE', `/api/lists?id=${id}&deleteReferences=true`);
   await es('DELETE', `/${MIG_INDEX}`);
   await es('DELETE', `/.value-list-v2-${SPACE}-${REJ_LIST}`);
@@ -277,6 +281,19 @@ const main = async () => {
   const wildReported = (wildDry.json?.referencingRules?.rules ?? []).find((r) => r.id === wildRule.json.id);
   check('a wildcard threat index that names the list is reported as referenced and blocks', wildDry.json?.warningLevel === 'referenced' && wildReported?.reason === 'threat_index' && wildDry.json?.blocked === true, `${wildDry.json?.warningLevel} ${JSON.stringify(wildReported)}`);
   await kbn('DELETE', `/api/detection_engine/rules?rule_id=${WILD_RULE}`);
+
+  log('\n=== a rule whose threat query mentions the list id outside a list_id clause ===');
+  // Only a `list_id` clause selects the list. The id as a token elsewhere in the query
+  // (`event.action: <id>`) does not, so the rule is a `maybe` and the migration is not
+  // blocked; blocking here would make every such migration require force.
+  await createLegacyList(TOKEN_LIST, '7.7.7.7');
+  const tokenRule = await createImRule(TOKEN_RULE, TOKEN_LIST, [ITEMS_INDEX], `event.action: ${TOKEN_LIST}`);
+  if (tokenRule.status >= 400) throw new Error(`create token IM rule failed: ${tokenRule.status} ${JSON.stringify(tokenRule.json)}`);
+  await sleep(1500);
+  const tokenDry = await kbn('POST', '/internal/lists/_migrate', { id: TOKEN_LIST, dryRun: true }, ih);
+  const tokenReported = (tokenDry.json?.referencingRules?.rules ?? []).find((r) => r.id === tokenRule.json.id);
+  check('the list id as a plain token in a threat query is a maybe and does not block', tokenDry.json?.warningLevel === 'maybe' && tokenReported?.reason === 'threat_index_maybe' && tokenDry.json?.blocked === false, `${tokenDry.json?.warningLevel} blocked=${tokenDry.json?.blocked} ${JSON.stringify(tokenReported)}`);
+  await kbn('DELETE', `/api/detection_engine/rules?rule_id=${TOKEN_RULE}`);
 
   log('\n=== migrate a list holding values the lookup grammar refuses ===');
   // Elasticsearch stores `1.9` on a long field as 1, so the legacy list accepts it; the

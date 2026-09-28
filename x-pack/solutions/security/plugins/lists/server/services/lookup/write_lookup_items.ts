@@ -772,15 +772,19 @@ export const deleteLookupItemByValue = async ({
     const query: estypes.QueryDslQueryContainer = {
       bool: { filter: [{ term: { kind: 'source' } }, { term: { src_range: value } }] },
     };
-    const found = await esClient.search<Record<string, unknown>>({
-      _source: DELETED_ITEM_SOURCE,
-      index,
-      query,
-      size: 10000,
-    });
-    const hits = found.hits.hits.filter((hit) => hit._source != null);
+    // Every containing range is collected, paged with `search_after`, before the delete:
+    // the delete by query below removes them all, so the response must list them all,
+    // not the first page of a single search.
+    const hits = (
+      await collectHits<Record<string, unknown>>({
+        _source: DELETED_ITEM_SOURCE,
+        esClient,
+        index,
+        query,
+      })
+    ).filter((hit) => hit._source != null);
     if (hits.length === 0) return [];
-    // the same two steps as the shared stream: find, then delete by the same query
+    // the same two steps as the current implementation: find, then delete by the same query
     await esClient.deleteByQuery({
       conflicts: 'proceed',
       index,

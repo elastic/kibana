@@ -105,6 +105,40 @@ describe('deleteLookupItemByValue (range types)', () => {
     expect(deleted).toHaveLength(1);
   });
 
+  it('collects every containing range beyond one search page before deleting, and returns them all', async () => {
+    // 10,001 ranges all contain 5: one full page of 10,000, then a page of one. The
+    // delete by query removes them all, so the response must list them all.
+    const ranges = Array.from({ length: 10001 }, (_, i) => ({
+      range_end: String(6 + i),
+      range_start: '5',
+    }));
+    const page = (from: number, to: number): ReturnType<typeof searchResponse> =>
+      searchResponse(
+        ranges.slice(from, to).map((range, i) => ({ ...sourceBoundDoc(range), sort: [from + i] }))
+      );
+    esClient.search.mockResponseOnce(page(0, 10000)).mockResponseOnce(page(10000, 10001));
+
+    const deleted = await deleteLookupItemByValue({
+      esClient,
+      index: TEST_INDEX,
+      listId: TEST_LIST_ID,
+      type: 'integer_range',
+      value: '5',
+    });
+
+    expect(esClient.search).toHaveBeenCalledTimes(2);
+    // the second page starts after the last hit of the first
+    expect(esClient.search).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: containing('5'), search_after: [9999] })
+    );
+    expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+    expect(deleted).toHaveLength(10001);
+    // the removed ranges overlap, so their regions merge into one marker
+    expect(bulkCall(0).operations).toEqual(
+      expectedDirtyMarkerOps([{ range_end: '10006', range_start: '5' }])
+    );
+  });
+
   it('returns nothing and changes nothing when no range contains the value', async () => {
     esClient.search.mockResponseOnce(searchResponse([]));
 
