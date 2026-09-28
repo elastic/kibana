@@ -40,9 +40,9 @@ import type { ExtraAction } from './extra_actions_bar';
 import { ExtraActionsBar } from './extra_actions_bar';
 import { useAgentBuilderIntegration } from './hooks/use_agent_builder_integration';
 import { useFixWithAi } from './hooks/use_fix_with_ai';
-import { useServiceAccountEditor } from './hooks/use_service_account_editor';
 import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
 import { KeyboardShortcutsPopover } from './keyboard_shortcuts_popover';
+import { ServiceAccountEditorWidgets } from './service_accounts/service_account_editor_widgets';
 import { StepActions } from './step_actions';
 import { WorkflowStepMinimap } from './workflow_step_minimap';
 import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
@@ -109,7 +109,6 @@ import {
   registerUnifiedHoverProvider,
 } from '../lib/monaco_providers';
 import { registerWorkflowDefinitionProvider } from '../lib/monaco_providers/workflow_definition_provider';
-import { LOAD_MORE_SERVICE_ACCOUNTS } from '../lib/service_accounts/service_account_editor';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { useRegisterHoverCommands } from '../lib/use_register_hover_commands';
@@ -438,10 +437,7 @@ export const WorkflowYAMLEditor = ({
     []
   );
 
-  const serviceAccountEditor = useServiceAccountEditor();
-  const completionProvider = useWorkflowYamlCompletionProvider(
-    serviceAccountEditor.completionProvider
-  );
+  const completionProvider = useWorkflowYamlCompletionProvider();
 
   const handleEditorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
@@ -451,18 +447,6 @@ export const WorkflowYAMLEditor = ({
 
       registerKeyboardCommands({ editor, openActionsPopover, ...keyboardHandlers });
       registerHoverCommands();
-      disposablesRef.current.push(
-        editor.addAction({
-          id: LOAD_MORE_SERVICE_ACCOUNTS,
-          label: i18n.translate('workflows.editor.loadMoreServiceAccountsButtonLabel', {
-            defaultMessage: 'Load more service accounts',
-          }),
-          run: () => {
-            serviceAccountEditor.loadMore();
-            editor.trigger('serviceAccounts', 'editor.action.triggerSuggest', {});
-          },
-        })
-      );
 
       if (completionProvider) {
         const disposable = monaco.languages.registerCompletionItemProvider(
@@ -517,7 +501,6 @@ export const WorkflowYAMLEditor = ({
 
         // Create unified providers with template expression support
         const providerConfig = {
-          provideServiceAccountHover: serviceAccountEditor.provideHover,
           getYamlDocument: () => yamlDocumentRef.current || null,
           getExecutionContext: () => executionContextRef.current,
           fetchStepExecutionData: (stepId: string) => fetchStepExecutionDataRef.current(stepId),
@@ -911,6 +894,7 @@ export const WorkflowYAMLEditor = ({
       ref={containerRef}
     >
       <GlobalWorkflowEditorStyles />
+      {isActive && <ServiceAccountEditorWidgets editor={mountedEditor} />}
       <ActionsMenuPopover
         closePopover={dismissActionsPopover}
         onActionSelected={onActionSelected}

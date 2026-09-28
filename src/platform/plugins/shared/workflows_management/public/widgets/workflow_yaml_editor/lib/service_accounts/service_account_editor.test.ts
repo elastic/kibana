@@ -8,12 +8,10 @@
  */
 
 import { parseDocument } from 'yaml';
-import { monaco } from '@kbn/code-editor';
 import {
   createServiceAccountEditor,
   getRunAsValue,
   LOAD_MORE_SERVICE_ACCOUNTS,
-  type ServiceAccountEditorContext,
 } from './service_account_editor';
 import { createFakeMonacoModel } from '../../../../../common/mocks/monaco_model';
 import type { ServiceAccountDirectory } from '../../../../entities/service_accounts';
@@ -29,8 +27,7 @@ const cancellation = {
   isCancellationRequested: false,
   onCancellationRequested: () => ({ dispose() {} }),
 };
-const completionContext = { triggerKind: monaco.languages.CompletionTriggerKind.Invoke };
-const setup = (markedYaml: string, context?: ServiceAccountEditorContext) => {
+const setup = (markedYaml: string) => {
   const offset = markedYaml.indexOf('|<-');
   const yaml = markedYaml.replace('|<-', '');
   const model = createFakeMonacoModel(yaml, offset);
@@ -41,14 +38,9 @@ const setup = (markedYaml: string, context?: ServiceAccountEditorContext) => {
     get: jest.fn().mockResolvedValue(account),
     list: jest.fn().mockResolvedValue({ serviceAccounts: [account] }),
   };
-  const editor = createServiceAccountEditor(directory, context);
+  const editor = createServiceAccountEditor(directory);
   const complete = () =>
-    editor.completionProvider.provideCompletionItems(
-      model,
-      position,
-      completionContext,
-      cancellation
-    );
+    editor.completionProvider.provideCompletionItems(model, position, cancellation);
   return { yaml, model, position, document, directory, editor, complete };
 };
 
@@ -62,7 +54,8 @@ describe('service account editor', () => {
       const result = await complete();
       expect(result?.suggestions).toHaveLength(1);
       const suggestion = result?.suggestions[0];
-      expect(suggestion?.label).toEqual({ label: account.name, description: account.id });
+      expect(suggestion?.label).toEqual(account.name);
+      expect(suggestion?.account?.roles).toEqual(['viewer']);
       expect(suggestion?.insertText).toBe(JSON.stringify(account.id));
       if (!suggestion || !('startLineNumber' in suggestion.range))
         throw new Error('Missing replacement range');
@@ -156,80 +149,26 @@ describe('service account editor', () => {
     expect((await complete())?.suggestions).toEqual([]);
   });
 
-  it('resolves a saved ID for hover and treats the text as untrusted', async () => {
+  it('resolves details using the stable ID and preserves role metadata', async () => {
     const { editor, directory, model, position } = setup(
       'settings:\n  run_as: "opaque/account-id"|<-'
     );
-    const hover = await editor.provideHover(model, position);
+    expect(await editor.getAccountAtPosition(model, position)).toMatchObject({ account });
     expect(directory.get).toHaveBeenCalledWith(account.id);
-    expect(hover?.contents[0]).toMatchObject({ isTrusted: false, supportHtml: false });
-    expect(hover?.contents[0].value).toContain(account.name);
-    expect(hover?.contents[0].value).toContain('**Roles:** viewer');
-    expect(hover?.contents[0].value).toContain('**Role scope:** This deployment');
-    expect(hover?.contents[0].value).toContain('**Status:** Enabled');
-    expect(hover?.contents[0].value).toContain('**Kibana can assume this account:** Yes');
-    expect(hover?.contents[0].value).not.toContain('**Project');
   });
 
-  it('shows current project context for Serverless without inventing other project assignments', async () => {
-    const { editor, directory, model, position } = setup('settings:\n  run_as: opaque|<-', {
-      isServerless: true,
-      projectName: 'Investigation project',
-      projectId: 'project123',
-    });
-    directory.get.mockResolvedValue({ ...account, roles: ['viewer', 'custom_reader'] });
-    const hover = await editor.provideHover(model, position);
-    expect(hover?.contents[0].value).toContain('**Role scope:** Current project');
-    expect(hover?.contents[0].value).toContain('**Project:** Investigation project');
-    expect(hover?.contents[0].value).toContain('**Project ID:** project123');
-    expect(hover?.contents[0].value).toContain('**Roles:** viewer, custom\\_reader');
-    expect(hover?.contents[0].value).not.toContain('**Projects:**');
-  });
-
-  it('does not invent a project name or ID when cloud metadata is unavailable', async () => {
-    const { editor, model, position } = setup('settings:\n  run_as: opaque|<-', {
-      isServerless: true,
-    });
-    const hover = await editor.provideHover(model, position);
-    expect(hover?.contents[0].value).toContain('**Role scope:** Current project');
-    expect(hover?.contents[0].value).not.toContain('**Project:**');
-    expect(hover?.contents[0].value).not.toContain('**Project ID:**');
-  });
-
-  it('shows missing roles and unavailable account state explicitly', async () => {
+  it('includes unavailable accounts in details, even though they cannot be suggested', async () => {
     const { editor, directory, model, position } = setup('settings:\n  run_as: opaque|<-');
     directory.get.mockResolvedValue({ ...account, roles: [], enabled: false, assumable: false });
-    const hover = await editor.provideHover(model, position);
-    expect(hover?.contents[0].value).toContain('**Roles:** No roles assigned');
-    expect(hover?.contents[0].value).toContain('**Status:** Disabled');
-    expect(hover?.contents[0].value).toContain('**Kibana can assume this account:** No');
-  });
-
-  it('escapes directory and project metadata as plain text', async () => {
-    const { editor, directory, model, position } = setup('settings:\n  run_as: opaque|<-', {
-      isServerless: true,
-      projectName: '<project>',
-      projectId: 'project`123',
+    expect(await editor.getAccountAtPosition(model, position)).toMatchObject({
+      account: { roles: [], enabled: false, assumable: false },
     });
-    directory.get.mockResolvedValue({
-      ...account,
-      id: 'id`123',
-      name: '[Account](command:run)',
-      roles: ['reader\n**admin**'],
-    });
-    const hover = await editor.provideHover(model, position);
-    expect(hover?.contents[0]).toMatchObject({ isTrusted: false, supportHtml: false });
-    expect(hover?.contents[0].value).toContain('\\[Account\\]\\(command:run\\)');
-    expect(hover?.contents[0].value).toContain('**ID:** id\\`123');
-    expect(hover?.contents[0].value).toContain('**Roles:** reader \\*\\*admin\\*\\*');
-    expect(hover?.contents[0].value).toContain('**Project:** \\<project\\>');
-    expect(hover?.contents[0].value).toContain('**Project ID:** project\\`123');
   });
 
   it('does not look up account details on hover when the feature is disabled', async () => {
     const { editor, directory, model, position } = setup('settings:\n  run_as: opaque|<-');
     directory.isEnabled.mockReturnValue(false);
-    expect(await editor.provideHover(model, position)).toBeNull();
+    expect(await editor.getAccountAtPosition(model, position)).toBeNull();
     expect(directory.get).not.toHaveBeenCalled();
   });
 
@@ -237,6 +176,6 @@ describe('service account editor', () => {
     const { editor, directory, model, position } = setup('settings:\n  run_as: opaque|<-');
     directory.get.mockResolvedValue(null);
     expect(getRunAsValue(model, position)?.id).toBe('opaque');
-    expect(await editor.provideHover(model, position)).toBeNull();
+    expect(await editor.getAccountAtPosition(model, position)).toBeNull();
   });
 });

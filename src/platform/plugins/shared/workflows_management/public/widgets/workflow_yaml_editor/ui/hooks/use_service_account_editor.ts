@@ -9,17 +9,9 @@
 
 import { useMemo } from 'react';
 import { useServiceAccountDirectory } from '../../../../entities/service_accounts';
-import { useKibana } from '../../../../hooks/use_kibana';
 import { createServiceAccountEditor } from '../../lib/service_accounts/service_account_editor';
 
 export const useServiceAccountEditor = () => {
   const directory = useServiceAccountDirectory();
-  const { cloud, serverless } = useKibana().services;
-  const isServerless = cloud?.isServerlessEnabled ?? Boolean(serverless);
-  const projectName = cloud?.serverless.projectName;
-  const projectId = cloud?.serverless.projectId;
-  return useMemo(
-    () => createServiceAccountEditor(directory, { isServerless, projectName, projectId }),
-    [directory, isServerless, projectName, projectId]
-  );
+  return useMemo(() => createServiceAccountEditor(directory), [directory]);
 };

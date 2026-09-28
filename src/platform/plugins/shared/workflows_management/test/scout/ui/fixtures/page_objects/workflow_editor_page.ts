@@ -27,6 +27,7 @@ export class WorkflowEditorPage {
   public readOnlyBadge: Locator;
   public readonly accessMode: Locator;
   public readonly serviceAccountBadges: Locator;
+  public readonly serviceAccountPopup: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.yamlEditor = this.page.testSubj.locator('workflowYamlEditor');
@@ -50,6 +51,7 @@ export class WorkflowEditorPage {
     this.serviceAccountBadges = this.yamlEditor.locator(
       '.service-account-name-badge, .service-account-name-badge-unavailable'
     );
+    this.serviceAccountPopup = this.page.testSubj.locator('serviceAccountEditorPopup');
     this.accessMode = this.page.testSubj.locator('entityAccessControlMode');
   }
 

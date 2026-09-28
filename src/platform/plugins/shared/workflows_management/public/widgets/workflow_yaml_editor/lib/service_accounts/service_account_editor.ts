@@ -10,16 +10,14 @@
 import { isMap, isScalar, parseDocument } from 'yaml';
 import { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import type { ServiceAccountDirectory } from '../../../../entities/service_accounts';
+import type {
+  ServiceAccountDirectory,
+  WorkflowServiceAccount,
+} from '../../../../entities/service_accounts';
 
-export interface ServiceAccountEditorContext {
-  isServerless: boolean;
-  projectName?: string;
-  projectId?: string;
+export interface ServiceAccountSuggestion extends monaco.languages.CompletionItem {
+  account?: WorkflowServiceAccount;
 }
-
-const escapeMarkdown = (value: string): string =>
-  value.replace(/[\r\n]+/g, ' ').replace(/[\\`*_{}[\]()<>#+.!|~-]/g, '\\$&');
 
 export const LOAD_MORE_SERVICE_ACCOUNTS = 'workflows.editor.loadMoreServiceAccounts';
 
@@ -63,19 +61,20 @@ export const getRunAsValue = (
   };
 };
 
-export const createServiceAccountEditor = (
-  directory: ServiceAccountDirectory,
-  context: ServiceAccountEditorContext = { isServerless: false }
-) => {
+export const createServiceAccountEditor = (directory: ServiceAccountDirectory) => {
   const cursors: Array<string | undefined> = [undefined];
   let nextPage: string | undefined;
 
-  const completionProvider: monaco.languages.CompletionItemProvider = {
+  const completionProvider = {
     triggerCharacters: [' ', ':', '"', "'"],
-    provideCompletionItems: async (model, position, _context, token) => {
+    provideCompletionItems: async (
+      model: monaco.editor.ITextModel,
+      position: monaco.Position,
+      token: monaco.CancellationToken
+    ): Promise<{ suggestions: ServiceAccountSuggestion[] } | null> => {
       const value = getRunAsValue(model, position);
       if (!value || !directory.isEnabled()) return null;
-      const suggestions: monaco.languages.CompletionItem[] = [];
+      const suggestions: ServiceAccountSuggestion[] = [];
       const seen = new Set<string>();
       for (const cursor of cursors) {
         const page = await directory.list(cursor);
@@ -90,7 +89,8 @@ export const createServiceAccountEditor = (
           if (account.enabled && account.assumable && !seen.has(account.id)) {
             seen.add(account.id);
             suggestions.push({
-              label: { label: account.name, description: account.id },
+              label: account.name,
+              account,
               kind: monaco.languages.CompletionItemKind.Value,
               insertText:
                 (model.getLineContent(position.lineNumber)[value.range.startColumn - 2] === ':'
@@ -132,81 +132,19 @@ export const createServiceAccountEditor = (
     },
   };
 
-  const provideHover = async (
+  const getAccountAtPosition = async (
     model: monaco.editor.ITextModel,
     position: monaco.Position
-  ): Promise<monaco.languages.Hover | null> => {
+  ) => {
     const value = getRunAsValue(model, position);
     if (!value?.id || !directory.isEnabled()) return null;
     const account = await directory.get(value.id);
-    if (!account) return null;
-    return {
-      range: value.range,
-      contents: [
-        {
-          value: [
-            i18n.translate('workflows.editor.serviceAccountHoverDescription', {
-              defaultMessage: '**Service account:** {name}\n\n**ID:** {id}',
-              values: { name: escapeMarkdown(account.name), id: escapeMarkdown(account.id) },
-            }),
-            i18n.translate('workflows.editor.serviceAccountHoverRolesDescription', {
-              defaultMessage: '**Roles:** {roles}',
-              values: {
-                roles: account.roles.length
-                  ? i18n.formatList('unit', account.roles.map(escapeMarkdown))
-                  : i18n.translate('workflows.editor.serviceAccountNoRolesLabel', {
-                      defaultMessage: 'No roles assigned',
-                    }),
-              },
-            }),
-            i18n.translate('workflows.editor.serviceAccountHoverScopeDescription', {
-              defaultMessage: '**Role scope:** {scope}',
-              values: {
-                scope: context.isServerless
-                  ? i18n.translate('workflows.editor.serviceAccountProjectScopeLabel', {
-                      defaultMessage: 'Current project',
-                    })
-                  : i18n.translate('workflows.editor.serviceAccountDeploymentScopeLabel', {
-                      defaultMessage: 'This deployment',
-                    }),
-              },
-            }),
-            ...(context.isServerless && context.projectName
-              ? [
-                  i18n.translate('workflows.editor.serviceAccountHoverProjectDescription', {
-                    defaultMessage: '**Project:** {name}',
-                    values: { name: escapeMarkdown(context.projectName) },
-                  }),
-                ]
-              : []),
-            ...(context.isServerless && context.projectId
-              ? [
-                  i18n.translate('workflows.editor.serviceAccountHoverProjectIdDescription', {
-                    defaultMessage: '**Project ID:** {id}',
-                    values: { id: escapeMarkdown(context.projectId) },
-                  }),
-                ]
-              : []),
-            i18n.translate('workflows.editor.serviceAccountHoverStatusDescription', {
-              defaultMessage: '**Status:** {enabled, select, true {Enabled} other {Disabled}}',
-              values: { enabled: String(account.enabled) },
-            }),
-            i18n.translate('workflows.editor.serviceAccountHoverAssumableDescription', {
-              defaultMessage:
-                '**Kibana can assume this account:** {assumable, select, true {Yes} other {No}}',
-              values: { assumable: String(account.assumable) },
-            }),
-          ].join('\n\n'),
-          isTrusted: false,
-          supportHtml: false,
-        },
-      ],
-    };
+    return account ? { range: value.range, account } : null;
   };
 
   const loadMore = (): void => {
     if (nextPage && !cursors.includes(nextPage)) cursors.push(nextPage);
   };
 
-  return { completionProvider, provideHover, loadMore };
+  return { completionProvider, getAccountAtPosition, loadMore, isEnabled: directory.isEnabled };
 };

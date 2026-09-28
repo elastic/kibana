@@ -158,10 +158,6 @@ export interface MonacoConnectorHandler {
  * Configuration for Monaco providers
  */
 export interface ProviderConfig {
-  provideServiceAccountHover?: (
-    model: monaco.editor.ITextModel,
-    position: monaco.Position
-  ) => Promise<monaco.languages.Hover | null>;
   /** Function to get the current YAML document */
   getYamlDocument: () => YAML.Document | null;
   /** Function to get the current execution context (for template expression hover) */

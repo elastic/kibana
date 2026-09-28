@@ -119,6 +119,7 @@ test.describe(
       await editor.dismissYamlSuggestions();
       await editor.hoverServiceAccountId(ACCOUNT_ID);
       await expect(editor.serviceAccountBadges).toHaveCount(0);
+      await expect(editor.serviceAccountPopup).toBeHidden();
       expect(await editor.getYamlEditorValue()).toContain(`run_as: ${ACCOUNT_ID}`);
       expect(directoryRequests).toStrictEqual([]);
     });

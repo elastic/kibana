@@ -20,9 +20,7 @@ import type { WorkflowEsqlCompletionServices } from '../../lib/autocomplete/sugg
 import type { WorkflowKqlCompletionServices } from '../../lib/autocomplete/suggestions/workflow_kql_completion_services';
 import { useWorkflowEsqlCallbacks } from '../../lib/esql_validation/use_workflow_esql_callbacks';
 
-export const useWorkflowYamlCompletionProvider = (
-  serviceAccountProvider?: monaco.languages.CompletionItemProvider
-): monaco.languages.CompletionItemProvider => {
+export const useWorkflowYamlCompletionProvider = (): monaco.languages.CompletionItemProvider => {
   const { services } = useKibana();
   const getPropertyHandler = useGetPropertyHandler();
   const editorState = useSelector(selectDetail);
@@ -60,10 +58,9 @@ export const useWorkflowYamlCompletionProvider = (
       () => editorStateRef.current,
       getKqlServices,
       getPropertyHandler,
-      getEsqlServices,
-      serviceAccountProvider
+      getEsqlServices
     );
-  }, [getPropertyHandler, registry, services.fieldFormats, services.kql, serviceAccountProvider]);
+  }, [getPropertyHandler, registry, services.fieldFormats, services.kql]);
 
   return completionProvider;
 };
