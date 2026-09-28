@@ -123,6 +123,7 @@ import { buildMlAuthz } from './lib/machine_learning/authz';
 import { createPrebuiltRuleAssetsClient } from './lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
 import { createAlertAnalysisWorkflowRuleAttachmentService } from './workflows/alert_analysis_workflow/rule_attachments';
+import type { AlertAnalysisWorkflowRuleAttachmentService } from '../common/workflows/alert_analysis_workflow';
 
 import { RequestContextFactory } from './request_context_factory';
 
@@ -1270,46 +1271,48 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not started.');
     }
 
-    const getAlertAnalysisWorkflowRuleAttachmentService: SecuritySolutionPluginStart['getAlertAnalysisWorkflowRuleAttachmentService'] =
-      async (request, workflowId) => {
-        const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
-        const [rulesClient, actionsClient, rulesAuthz, license] = await Promise.all([
-          plugins.alerting.getRulesClientWithRequest(request),
-          plugins.actions.getActionsClientWithRequest(request),
-          calculateRulesAuthz({ coreStart: core, request }),
-          plugins.licensing.getLicense(),
-        ]);
-        const mlAuthz = buildMlAuthz({
-          license,
-          ml,
-          request,
-          savedObjectsClient: scopedSavedObjectsClient,
-        });
-        const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(scopedSavedObjectsClient);
-        const detectionRulesClient = createDetectionRulesClient({
-          rulesClient,
+    const getAlertAnalysisWorkflowRuleAttachmentService = async (
+      request: KibanaRequest,
+      workflowId: string
+    ): Promise<AlertAnalysisWorkflowRuleAttachmentService> => {
+      const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
+      const [rulesClient, actionsClient, rulesAuthz, license] = await Promise.all([
+        plugins.alerting.getRulesClientWithRequest(request),
+        plugins.actions.getActionsClientWithRequest(request),
+        calculateRulesAuthz({ coreStart: core, request }),
+        plugins.licensing.getLicense(),
+      ]);
+      const mlAuthz = buildMlAuthz({
+        license,
+        ml,
+        request,
+        savedObjectsClient: scopedSavedObjectsClient,
+      });
+      const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(scopedSavedObjectsClient);
+      const detectionRulesClient = createDetectionRulesClient({
+        rulesClient,
+        actionsClient,
+        savedObjectsClient: scopedSavedObjectsClient,
+        mlAuthz,
+        rulesAuthz,
+        productFeaturesService,
+        license,
+        analytics: this.analyticsSetup,
+        userProfile: core.userProfile,
+        logger: this.logger,
+      });
+      return createAlertAnalysisWorkflowRuleAttachmentService({
+        rulesClient,
+        workflowId,
+        bulkEditDependencies: {
           actionsClient,
-          savedObjectsClient: scopedSavedObjectsClient,
+          prebuiltRuleAssetClient,
           mlAuthz,
           rulesAuthz,
-          productFeaturesService,
-          license,
-          analytics: this.analyticsSetup,
-          userProfile: core.userProfile,
-          logger: this.logger,
-        });
-        return createAlertAnalysisWorkflowRuleAttachmentService({
-          rulesClient,
-          workflowId,
-          bulkEditDependencies: {
-            actionsClient,
-            prebuiltRuleAssetClient,
-            mlAuthz,
-            rulesAuthz,
-            ruleCustomizationStatus: detectionRulesClient.getRuleCustomizationStatus(),
-          },
-        });
-      };
+          ruleCustomizationStatus: detectionRulesClient.getRuleCustomizationStatus(),
+        },
+      });
+    };
 
     // Push, not pull: alertzero cannot declare a dependency on this plugin's start contract to
     // pull this function itself, since this plugin already depends on alertzero (the `alertzero`
@@ -1319,9 +1322,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       getAlertAnalysisWorkflowRuleAttachmentService
     );
 
-    return {
-      getAlertAnalysisWorkflowRuleAttachmentService,
-    };
+    return {};
   }
 
   public stop() {
