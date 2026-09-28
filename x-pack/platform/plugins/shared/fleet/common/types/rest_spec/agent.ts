@@ -197,7 +197,9 @@ export interface PostBulkAgentRestartRequest {
   };
 }
 
-export type PostBulkAgentRestartResponse = { actionId: string };
+export interface PostBulkAgentRestartResponse {
+  actionId: string;
+}
 
 export interface PostAgentReassignRequest {
   params: {
