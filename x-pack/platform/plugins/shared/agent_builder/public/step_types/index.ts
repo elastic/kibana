@@ -49,6 +49,12 @@ export function registerWorkflowSteps(
   );
 
   workflowsExtensions.registerStepDefinition(() =>
+    ifExperimental(() =>
+      import('./conversation_metadata').then((m) => m.addUserMessageStepDefinition)
+    )
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
     import('./conversation_metadata').then((m) => m.createConversationStepDefinition)
   );
 
