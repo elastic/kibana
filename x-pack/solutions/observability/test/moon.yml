@@ -29,7 +29,6 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/io-ts-utils'
   - '@kbn/synthetics-plugin'
-  - '@kbn/uptime-plugin'
   - '@kbn/apm-plugin'
   - '@kbn/apm-sources-access-plugin'
   - '@kbn/server-route-repository'
