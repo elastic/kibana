@@ -8,6 +8,7 @@
 import fs from 'fs';
 import path from 'path';
 import { get } from 'lodash';
+import { getESQLAdHocDataviewId } from '@kbn/esql-utils';
 import type { ParsedPanel } from '../../../../../../../../../../common/siem_migrations/parsers/types';
 import type { EsqlColumn } from '../../types';
 import { processPanel, toKibanaFieldType } from './process_panel';
@@ -296,6 +297,87 @@ describe('processPanel', () => {
       expect(toKibanaFieldType('garbage')).toBe('unknown');
       expect(toKibanaFieldType('num')).toBe('unknown');
       expect(toKibanaFieldType('int')).toBe('unknown');
+    });
+  });
+
+  describe('ad-hoc data view id', () => {
+    const readDataViewIds = (result: object) => {
+      const references = get(result, 'embeddableConfig.attributes.references') as
+        | Array<{ type: string; id: string }>
+        | undefined;
+      const layers = get(
+        result,
+        'embeddableConfig.attributes.state.datasourceStates.textBased.layers'
+      ) as Record<string, { index?: string }> | undefined;
+      const indexPatternRefs = get(
+        result,
+        'embeddableConfig.attributes.state.datasourceStates.textBased.indexPatternRefs'
+      ) as Array<{ id: string; title: string }> | undefined;
+      const adHocDataViews = get(result, 'embeddableConfig.attributes.state.adHocDataViews') as
+        | Record<string, { id?: string; title?: string; timeFieldName?: string }>
+        | undefined;
+
+      return {
+        referenceIds: (references ?? [])
+          .filter((reference) => reference.type === 'index-pattern')
+          .map((reference) => reference.id),
+        layerIndexes: Object.values(layers ?? {}).map((layer) => layer.index),
+        indexPatternRefIds: (indexPatternRefs ?? []).map((ref) => ref.id),
+        adHocIds: Object.keys(adHocDataViews ?? {}),
+        adHocSpecs: Object.values(adHocDataViews ?? {}),
+      };
+    };
+
+    it('stores the click-time id, including @timestamp, on every data view reference', async () => {
+      const dataViewId = await getESQLAdHocDataviewId({
+        indexPattern: 'filebeat-*',
+        timeFieldName: '@timestamp',
+        projectRouting: undefined,
+      });
+      const result = processPanel(
+        readTemplate('bar_vertical'),
+        'FROM filebeat-* | STATS count=COUNT(*) BY host',
+        createColumns(['count', 'host']),
+        createParsedPanel({ viz_type: 'bar_vertical' }),
+        { id: dataViewId, timeFieldName: '@timestamp' }
+      );
+
+      const ids = readDataViewIds(result);
+      expect(ids.referenceIds).toEqual([dataViewId]);
+      expect(ids.layerIndexes).toEqual([dataViewId]);
+      expect(ids.indexPatternRefIds).toEqual([dataViewId]);
+      expect(ids.adHocIds).toEqual([dataViewId]);
+      expect(ids.adHocSpecs).toEqual([
+        expect.objectContaining({
+          id: dataViewId,
+          title: 'filebeat-*',
+          name: 'filebeat-*',
+          timeFieldName: '@timestamp',
+        }),
+      ]);
+    });
+
+    it('stores the click-time id without a time field when @timestamp is absent', async () => {
+      const dataViewId = await getESQLAdHocDataviewId({
+        indexPattern: 'kibana_sample_data_ecommerce',
+        timeFieldName: undefined,
+        projectRouting: undefined,
+      });
+      const result = processPanel(
+        readTemplate('bar_vertical'),
+        'FROM kibana_sample_data_ecommerce | STATS count=COUNT(*) BY host',
+        createColumns(['count', 'host']),
+        createParsedPanel({ viz_type: 'bar_vertical' }),
+        { id: dataViewId }
+      );
+
+      const ids = readDataViewIds(result);
+      expect(ids.referenceIds).toEqual([dataViewId]);
+      expect(ids.layerIndexes).toEqual([dataViewId]);
+      expect(ids.indexPatternRefIds).toEqual([dataViewId]);
+      expect(ids.adHocIds).toEqual([dataViewId]);
+      expect(ids.adHocSpecs[0].timeFieldName).toBeUndefined();
+      expect(ids.adHocSpecs[0].title).toBe('kibana_sample_data_ecommerce');
     });
   });
 });

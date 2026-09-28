@@ -39,6 +39,20 @@ interface ColumnInfo {
   inMetricDimension?: boolean;
 }
 
+/** Ad-hoc data view identity that matches a filter click on the translated ES|QL query. */
+export interface PanelDataViewIdentity {
+  id: string;
+  timeFieldName?: string;
+}
+
+interface AdHocDataViewSpec {
+  id?: string;
+  title: string;
+  name: string;
+  timeFieldName?: string;
+  [key: string]: unknown;
+}
+
 interface PanelJSON {
   title?: string;
   gridData?: {
@@ -52,12 +66,14 @@ interface PanelJSON {
   panelIndex?: string;
   embeddableConfig?: {
     attributes?: {
+      references?: Array<{ type: string; id: string; name?: string }>;
       state?: {
         visualization?: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
         datasourceStates?: {
           textBased?: {
             layers?: {
               [key: string]: {
+                index?: string;
                 query?: { esql: string };
                 columns?: ColumnInfo[];
               };
@@ -66,7 +82,7 @@ interface PanelJSON {
           };
         };
         query?: { esql: string };
-        adHocDataViews?: Record<string, { title: string; name: string; [key: string]: unknown }>;
+        adHocDataViews?: Record<string, AdHocDataViewSpec>;
       };
     };
   };
@@ -78,7 +94,8 @@ export const processPanel = (
   panel: object,
   query: string,
   esqlColumns: EsqlColumn[],
-  parsedPanel: ParsedPanel
+  parsedPanel: ParsedPanel,
+  dataView?: PanelDataViewIdentity
 ): object => {
   const panelJSON = structuredClone(panel) as PanelJSON;
 
@@ -104,7 +121,7 @@ export const processPanel = (
   // Configure visualization-specific properties
   configureVixTypeProperties(panelJSON, vizType, query, columns);
   configureStackedProperties(panelJSON, vizType, columns);
-  configureDatasourceProperties(panelJSON, query, columnList);
+  configureDatasourceProperties(panelJSON, query, columnList, dataView);
 
   return panelJSON;
 };
@@ -278,11 +295,14 @@ function configureStackedProperties(
 function configureDatasourceProperties(
   panelJSON: PanelJSON,
   query: string,
-  columnList: ColumnInfo[]
+  columnList: ColumnInfo[],
+  dataView?: PanelDataViewIdentity
 ): void {
   const indexPattern = getIndexPatternFromESQLQuery(query);
+  const state = panelJSON.embeddableConfig?.attributes?.state;
+  const previousDataViewIds = collectAdHocDataViewIds(state?.adHocDataViews);
 
-  const textBased = panelJSON.embeddableConfig?.attributes?.state?.datasourceStates?.textBased;
+  const textBased = state?.datasourceStates?.textBased;
   if (textBased?.layers) {
     const layerId = '3a5310ab-2832-41db-bdbe-1b6939dd5651';
     if (textBased.layers[layerId]) {
@@ -290,20 +310,71 @@ function configureDatasourceProperties(
       textBased.layers[layerId].columns = columnList;
     }
 
+    if (dataView) {
+      for (const layer of Object.values(textBased.layers)) {
+        if (layer.index && previousDataViewIds.has(layer.index)) {
+          layer.index = dataView.id;
+        }
+      }
+    }
+
     if (textBased.indexPatternRefs?.[0]) {
       textBased.indexPatternRefs[0].title = indexPattern;
     }
+    if (dataView) {
+      for (const ref of textBased.indexPatternRefs ?? []) {
+        if (previousDataViewIds.has(ref.id)) {
+          ref.id = dataView.id;
+        }
+      }
+    }
   }
 
-  const state = panelJSON.embeddableConfig?.attributes?.state;
   if (state?.query) {
     state.query.esql = query;
   }
 
-  if (state?.adHocDataViews) {
-    for (const spec of Object.values(state.adHocDataViews)) {
-      spec.title = indexPattern;
-      spec.name = indexPattern;
+  const references = panelJSON.embeddableConfig?.attributes?.references;
+  if (dataView && references) {
+    for (const reference of references) {
+      if (reference.type === 'index-pattern' && previousDataViewIds.has(reference.id)) {
+        reference.id = dataView.id;
+      }
     }
   }
+
+  if (state?.adHocDataViews) {
+    const nextDataViews: NonNullable<typeof state.adHocDataViews> = {};
+    for (const [key, spec] of Object.entries(state.adHocDataViews)) {
+      spec.title = indexPattern;
+      spec.name = indexPattern;
+      const nextKey = dataView && previousDataViewIds.has(key) ? dataView.id : key;
+      if (dataView && previousDataViewIds.has(key)) {
+        spec.id = dataView.id;
+        if (dataView.timeFieldName) {
+          spec.timeFieldName = dataView.timeFieldName;
+        } else {
+          delete spec.timeFieldName;
+        }
+      }
+      nextDataViews[nextKey] = spec;
+    }
+    state.adHocDataViews = nextDataViews;
+  }
+}
+
+function collectAdHocDataViewIds(
+  adHocDataViews: Record<string, AdHocDataViewSpec> | undefined
+): Set<string> {
+  const ids = new Set<string>();
+  if (!adHocDataViews) {
+    return ids;
+  }
+  for (const [key, spec] of Object.entries(adHocDataViews)) {
+    ids.add(key);
+    if (typeof spec.id === 'string') {
+      ids.add(spec.id);
+    }
+  }
+  return ids;
 }

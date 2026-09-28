@@ -11,7 +11,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { HttpStart } from '@kbn/core/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { DATASETS_ROUTE, SOURCES_AUTOCOMPLETE_ROUTE, TIMEFIELD_ROUTE } from '@kbn/esql-types';
-import { getIndexForESQLQuery } from './get_esql_adhoc_dataview';
+import { getESQLAdHocDataviewId, getIndexForESQLQuery } from './get_esql_adhoc_dataview';
 
 function createMockDataViewsService() {
   return {
@@ -449,5 +449,33 @@ describe('getIndexForESQLQuery', () => {
     expect(http.get).toHaveBeenCalledWith(LOCAL_ROUTE);
     expect(http.get).toHaveBeenCalledWith(REMOTE_ROUTE);
     expect(http.get).toHaveBeenCalledWith(DATASETS_ROUTE);
+  });
+});
+
+describe('getESQLAdHocDataviewId', () => {
+  it('hashes esql-logs-* to the historical template id', async () => {
+    await expect(
+      getESQLAdHocDataviewId({
+        indexPattern: 'logs-*',
+        timeFieldName: undefined,
+        projectRouting: undefined,
+      })
+    ).resolves.toBe('d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da');
+  });
+
+  it('changes the hash when @timestamp is included', async () => {
+    const withoutTimeField = await getESQLAdHocDataviewId({
+      indexPattern: 'filebeat-*',
+      timeFieldName: undefined,
+      projectRouting: undefined,
+    });
+    const withTimeField = await getESQLAdHocDataviewId({
+      indexPattern: 'filebeat-*',
+      timeFieldName: '@timestamp',
+      projectRouting: undefined,
+    });
+
+    expect(withTimeField).not.toBe(withoutTimeField);
+    expect(withTimeField).toHaveLength(64);
   });
 });

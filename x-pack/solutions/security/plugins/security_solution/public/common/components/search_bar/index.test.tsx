@@ -89,6 +89,26 @@ describe('SearchBarComponent', () => {
     (useKibana as jest.Mock).mockReturnValue(useKibanaMock);
   });
 
+  it('passes dashboard data views to the filter bar with the page data view', () => {
+    const panelDataView = createStubDataView({
+      spec: { id: 'panel-data-view', title: 'kibana_sample_data_ecommerce' },
+    });
+    const store = createMockStore();
+
+    render(
+      <TestProviders store={store}>
+        <SearchBarComponent {...props} additionalDataViews={[panelDataView]} />
+      </TestProviders>
+    );
+
+    expect(useKibanaMock.services.unifiedSearch.ui.SearchBar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexPatterns: [dataView, panelDataView],
+      }),
+      expect.anything()
+    );
+  });
+
   it('calls useUpdateUrlParam for filter and query', () => {
     const query = { query: 'testQuery', language: 'kuery' };
     const filters = [
