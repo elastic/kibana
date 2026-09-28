@@ -34,8 +34,6 @@ export const openConversationDetailsFlyout = async ({
   const titleId = generateTitleId();
   const queryClient = new QueryClient();
 
-  // Must be a managed flyout, not `openFlyout` (which forces `session="never"`), so flyouts opened
-  // from its content can join its history and get a Back button to it.
   const flyoutRef = core.overlays.openSystemFlyout(
     <QueryClientProvider client={queryClient}>
       <ConversationDetailsFlyoutSnapshot
@@ -48,7 +46,6 @@ export const openConversationDetailsFlyout = async ({
     {
       session: 'start',
       historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
-      // Must stay static: EUI re-registers a main flyout whose title changes, closing its stack.
       title: FLYOUT_TITLE,
       size: 's',
       flyoutMenuDisplayMode: 'always',

@@ -273,7 +273,6 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
       session="start"
       historyKey={CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY}
       flyoutMenuDisplayMode="always"
-      // Must stay static: EUI re-registers a main flyout whose title changes, closing its stack.
       flyoutMenuProps={{ title: FLYOUT_TITLE }}
       size="s"
       type="push"
