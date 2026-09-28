@@ -148,6 +148,13 @@ actual documented behavior — flag them even without live access to the API, ba
   `/items?page=2`) a `Link` header commonly carries, so it stops pagination at page one for those
   vendors. The helper should resolve the link against the request URL and use the resolved URL for the
   next request, which handles both forms and still compares the right origin.
+
+  Then check *which* base it resolves against. `new URL(url, baseURL)` is not the URL Axios requested:
+  Axios concatenates `baseURL` and `url` rather than resolving them, so a `baseURL` with a path
+  (`https://api.example/v1`) plus `url: '/items'` is requested as `/v1/items` but resolves as `/items`.
+  A relative continuation link measured against that base paginates at an endpoint the connector never
+  called, and returns nothing or the wrong collection without erroring. `ctx.client.getUri({ url,
+  params })` returns the effective URL and is the correct base.
 - **"At least one of" update inputs**: If every field on an update-action's input schema is optional, check
   for a `.refine()` (or equivalent) requiring at least one to be set. Without it, a call with no fields set
   silently no-ops instead of erroring.

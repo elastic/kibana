@@ -291,21 +291,28 @@ anything.
 
 Three details that are easy to get wrong:
 
-- **Check the origin of a continuation URL before requesting it.** A vendor-supplied absolute link is
+- **Check the origin of a continuation URL before requesting it.** A vendor-supplied link is
   caller-untrusted data, and `ctx.client` carries the connector's credentials. Axios strips a standard
   authorization header on a cross-host *redirect*, but an explicit new request gets no such protection,
   so an attacker-influenced `nextLink` sends the credentials to the host it names and can reach an
-  internal address. Confirm the link's origin matches the request you sent (or an explicitly allowed
-  host) and stop paginating if it does not:
+  internal address. Stop paginating unless the link's origin matches the request you sent (or an
+  explicitly allowed host).
 
-  Resolve the link against the URL of the request that produced it, and request the *resolved* URL.
+  Resolve the link against the URL the client actually requested, and request the *resolved* URL.
   `new URL(nextLink)` alone throws on a relative link (`?page=2`, `/items?page=2`), which a `Link`
   header commonly carries, so a bare parse both breaks those vendors and reads as if every link were
-  absolute:
+  absolute.
+
+  Take the base from `ctx.client.getUri()`, not from `new URL(url, baseURL)`. Axios does not resolve a
+  path the way the `URL` constructor does: it *concatenates* `baseURL` and `url` (`combineURLs`
+  strips the leading slash), so `baseURL: 'https://api.example/v1'` with `url: '/items'` is requested as
+  `https://api.example/v1/items`, while `new URL('/items', 'https://api.example/v1')` gives
+  `https://api.example/items`. Resolving a `?page=2` link against that wrong base silently continues
+  paginating at an endpoint the connector never called:
 
   ```typescript
-  const requested = new URL(url, baseUrl);
-  const next = new URL(nextLink, requested); // resolves '?page=2' against the request
+  const requested = new URL(ctx.client.getUri({ url, params }));
+  const next = new URL(nextLink, requested); // resolves '?page=2' against the real request
   if (next.origin !== requested.origin) {
     break;
   }
