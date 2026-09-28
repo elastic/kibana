@@ -11,9 +11,17 @@ import {
   ALERTZERO_HUNT_WORKFLOW_ID,
   ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID,
   ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID,
+  ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import { API_VERSIONS } from '@kbn/alertzero-common';
+import {
+  API_VERSIONS,
+  CANDIDATES_URL,
+  HUNT_COORDINATOR_URL,
+  HUNT_INDEX_SCOPE_URL,
+  SYSTEM_SECURITY_HUNT_PACKAGE_REPORT_ID,
+  SYSTEM_SECURITY_HUNT_PROPOSAL_GATE_ID,
+} from '@kbn/alertzero-common';
 
 interface NestedStep {
   name: string;
@@ -187,5 +195,78 @@ describe(ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID, () => {
     expect(inputs.message).toEqual(expect.stringContaining('steps.package_report.output.reason'));
     expect(inputs.message).toEqual(expect.stringContaining('steps.hunt.output.reason'));
     expect(inputs.message).toEqual(expect.stringContaining('execution.url'));
+  });
+});
+
+// Phase 7 task 2's whole point: @kbn/alertzero-common's exported ids are checked against
+// the real registered workflow ids here, not against a second copy of the same literal --
+// this file already safely depends on both @kbn/workflows/managed and
+// @kbn/alertzero-common, which is why this cross-check lives here rather than in
+// kbn-workflows' own hunt_worker_workflows.test.ts (a platform package with no dependency
+// on this solution-specific one).
+describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
+  it('exports the two feature-child ids matching their real registered ids', () => {
+    expect(SYSTEM_SECURITY_HUNT_PACKAGE_REPORT_ID).toBe(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID);
+    expect(SYSTEM_SECURITY_HUNT_PROPOSAL_GATE_ID).toBe(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID);
+  });
+
+  // 1f: no `kibana.request` step in any of the five hunt YAMLs calls a route path that
+  // isn't one of the exported constants above -- a stale or hand-typed path string
+  // would otherwise only 404 at runtime, on the first sweep that reaches that step.
+  describe('every kibana.request step across the five hunt YAMLs', () => {
+    const KNOWN_ROUTE_PATHS = new Set<string>([
+      HUNT_INDEX_SCOPE_URL,
+      CANDIDATES_URL,
+      HUNT_COORDINATOR_URL,
+      // main's own public package, not alertzero's -- Hunt Watch calls it but does not
+      // own it, so it is not one of this package's exports.
+      '/internal/proposals',
+    ]);
+    const SPACE_PREFIX = '/s/{{ workflow.spaceId }}';
+    const stripSpacePrefix = (path: string): string | undefined =>
+      path.startsWith(SPACE_PREFIX) ? path.slice(SPACE_PREFIX.length) : undefined;
+
+    const renderWorker = (): ParsedWorkflow => {
+      const definition = getManagedWorkflowDefinition(
+        ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID
+      );
+      if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
+        throw new Error('Missing Worker yamlTemplate');
+      }
+      const yamlTemplate = definition.yamlTemplate as (values: Record<string, unknown>) => string;
+      return parse(
+        yamlTemplate({
+          settingsVersion: 1,
+          autonomyLevel: 'manual',
+          scheduleInterval: '4h',
+          extras: { tier2When: 'on_hits', candidateLimit: 10, fanOutMax: 10 },
+        })
+      ) as ParsedWorkflow;
+    };
+
+    const rawPaths = [
+      renderWorker(),
+      parseChild(ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID),
+      parseChild(ALERTZERO_HUNT_WORKFLOW_ID),
+      parseChild(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID),
+      parseChild(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID),
+    ]
+      .flatMap((workflow) => requestSteps(workflow))
+      .map((step) => step.with?.path)
+      .filter((path): path is string => typeof path === 'string');
+
+    it('calls at least one route', () => {
+      expect(rawPaths.length).toBeGreaterThan(0);
+    });
+
+    it('is space-addressed rather than an unconditional /s/default', () => {
+      expect(rawPaths.filter((path) => stripSpacePrefix(path) === undefined)).toEqual([]);
+    });
+
+    it('calls a known route path', () => {
+      const strippedPaths = rawPaths.map(stripSpacePrefix).filter((path): path is string => !!path);
+
+      expect(strippedPaths.filter((path) => !KNOWN_ROUTE_PATHS.has(path))).toEqual([]);
+    });
   });
 });

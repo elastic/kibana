@@ -63,6 +63,9 @@ export const HUNT_INDEX_SCOPE_URL = `${HUNT_INTERNAL_ROUTE_BASE}/index_scope` as
 /** Candidate report selection for the tagged Worker's scheduled sweep and manual trigger. */
 export const CANDIDATES_URL = `${HUNT_INTERNAL_ROUTE_BASE}/candidates` as const;
 
+/** Two-tier hunt pipeline for a single report, called by the hunt child (`hunt.yaml`). */
+export const HUNT_COORDINATOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_coordinator` as const;
+
 /** Agent Builder builtin tool wrapping the action catalog API. */
 export const ALERTZERO_ACTIONS_LIST_TOOL_ID = 'security.alertzero.actions.list' as const;
 

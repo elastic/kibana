@@ -21,6 +21,7 @@ export {
   HUNT_INTERNAL_ROUTE_BASE,
   HUNT_INDEX_SCOPE_URL,
   CANDIDATES_URL,
+  HUNT_COORDINATOR_URL,
 } from '@kbn/alertzero-common';
 
 /** API privilege for read-only AlertZero internal routes. */

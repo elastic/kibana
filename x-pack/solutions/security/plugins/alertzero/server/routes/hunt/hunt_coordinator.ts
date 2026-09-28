@@ -14,7 +14,7 @@ import {
 } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { randomUUID } from 'crypto';
-import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
+import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_COORDINATOR_URL } from '../../../common/constants';
 import { InvalidHuntWindowError } from '../../services/watches/hunt/common/assert_hunt_window';
 import { huntCoordinator } from '../../services/watches/hunt/hunt_coordinator';
 import { parseTechnologyInput } from '../../services/watches/hunt/common/resolve_index_scope';
@@ -22,7 +22,7 @@ import { buildSseData } from '../../services/watches/hunt/common/sse_mapper';
 import { resolveScopedModel } from './lib/scoped_model';
 import type { RouteDependencies } from '../register_routes';
 
-export const HUNT_COORDINATOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_coordinator` as const;
+export { HUNT_COORDINATOR_URL };
 
 /**
  * Runs the two-tier hunt pipeline (Tier 1 + optional Tier 2) for a single report.
