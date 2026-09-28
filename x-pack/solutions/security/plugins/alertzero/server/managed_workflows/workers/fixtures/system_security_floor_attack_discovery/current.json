@@ -1,0 +1,5 @@
+{
+  "settingsVersion": 1,
+  "autonomyLevel": "supervised",
+  "scheduleInterval": "5d"
+}

@@ -31,7 +31,8 @@ interface StoredFixture {
 }
 
 const loadFixtures = (workerId: RegisteredWorkerId): StoredFixture[] => {
-  const dir = resolve(__dirname, 'fixtures', workerId);
+  // Worker ids stay hyphenated. Fixture paths are snake_case so the file-casing check passes.
+  const dir = resolve(__dirname, 'fixtures', workerId.replaceAll('-', '_'));
   return readdirSync(dir)
     .filter((name) => name.endsWith('.json'))
     .sort()
@@ -50,7 +51,7 @@ const ALL_FIXTURES = SYSTEM_SECURITY_WORKER_IDS.flatMap((workerId) => loadFixtur
  */
 const LITERAL_RENDERED_VALUES: Record<string, readonly string[]> = {
   'system-security-floor-alert-triage/current.json': ['settingsVersion: 1', 'autonomy: "assisted"'],
-  'system-security-floor-attack-discovery/autonomy-only.json': [
+  'system-security-floor-attack-discovery/autonomy_only.json': [
     'every: "24h"',
     'scheduleInterval: "24h"',
     'autonomy: "manual"',
@@ -64,14 +65,14 @@ const LITERAL_RENDERED_VALUES: Record<string, readonly string[]> = {
     'settingsVersion: 1',
     'autonomy: "assisted"',
   ],
-  'system-security-detection-rule-tuning/qa-schedule-only.json': [
+  'system-security-detection-rule-tuning/qa_schedule_only.json': [
     'every: "2h"',
     'scheduleInterval: "2h"',
     '"analysisWindowDays":7',
     '"fpCountThreshold":10',
     '"fpRateThresholdPct":50',
   ],
-  'system-security-detection-rule-tuning/analysis-window-only.json': [
+  'system-security-detection-rule-tuning/analysis_window_only.json': [
     'every: "2h"',
     '"analysisWindowDays":14',
     '"fpCountThreshold":10',
