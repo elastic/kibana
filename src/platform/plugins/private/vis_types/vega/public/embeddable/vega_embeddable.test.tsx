@@ -15,7 +15,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { BehaviorSubject, of } from 'rxjs';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
@@ -27,7 +26,7 @@ import {
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { VegaParser } from '../data_model/vega_parser';
-import type { VegaVisualizationDependencies } from '../plugin';
+import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
 import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../../common/constants';
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent, VegaEventHandler } from '../types';
@@ -149,7 +148,7 @@ describe('vegaEmbeddableFactory', () => {
     );
     const factory = vegaEmbeddableFactory(coreStart, {
       uiActions: { executeTriggerActions },
-      SearchBar: (() => null) as UnifiedSearchPublicPluginStart['ui']['SearchBar'],
+      SearchBar: (() => null) as VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'],
       visualizationDependencies,
     });
     const uuid = 'vega-panel';
@@ -337,7 +336,7 @@ describe('vegaEmbeddableFactory', () => {
     query$.next({ language: 'kuery', query: 'response: 200' });
     await waitFor(() => {
       expect(mockVegaRequestHandler).toHaveBeenLastCalledWith(
-        expect.objectContaining({ query: { language: 'kuery', query: 'response: 200' } })
+        expect.objectContaining({ query: [{ language: 'kuery', query: 'response: 200' }] })
       );
     });
     expect(abortSignalFor(0).aborted).toBe(true);

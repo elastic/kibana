@@ -12,7 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { VegaPluginStartDependencies } from '../plugin';
 import type { VegaEmbeddableApi } from './vega_embeddable';
 import { VegaEditorFlyout } from './vega_editor_flyout';
 
@@ -21,13 +21,16 @@ jest.mock('../components/vega_vis_editor', () => ({
     editorValue,
     onChange,
     onFormatChange,
+    actionsPlacement,
   }: {
     editorValue: string;
     onChange: (value: string) => void;
     onFormatChange: (format: 'hjson' | 'json') => void;
+    actionsPlacement?: 'overlay' | 'toolbar';
   }) => (
     <div>
       <div data-test-subj="vegaSpecEditorValue">{editorValue}</div>
+      <div data-test-subj="vegaSpecEditorActionsPlacement">{actionsPlacement}</div>
       <button onClick={() => onFormatChange('hjson')}>setFormat</button>
       <button onClick={() => onChange('{ mark: bar }')}>changeSpec</button>
     </div>
@@ -91,7 +94,7 @@ const renderFlyout = ({
         </button>
       </div>
     );
-  }) as UnifiedSearchPublicPluginStart['ui']['SearchBar'];
+  }) as VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'];
 
   const closeFlyout = jest.fn();
   const onPreview = jest.fn();
@@ -126,6 +129,14 @@ describe('VegaEditorFlyout', () => {
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Run preview' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Apply and close' })).toBeDisabled();
+  });
+
+  it('renders the spec editor actions in a toolbar so they do not cover the code', async () => {
+    renderFlyout();
+
+    expect(await screen.findByTestId('vegaSpecEditorActionsPlacement')).toHaveTextContent(
+      'toolbar'
+    );
   });
 
   it('runs preview for an updated spec', async () => {
@@ -180,6 +191,19 @@ describe('VegaEditorFlyout', () => {
     });
 
     expect(screen.getByRole('button', { name: 'Apply and close' })).toBeEnabled();
+  });
+
+  it('does not enable saving when filters only differ in display metadata', async () => {
+    const { api } = renderFlyout({
+      initialFilters: [
+        { meta: { alias: 'panel filter', key: 'status' }, query: { match: { status: 200 } } },
+      ],
+    });
+
+    fireEvent.click(await screen.findByText('updateFilters'));
+
+    await waitFor(() => expect(api.setFilters).toHaveBeenCalled());
+    expect(screen.getByRole('button', { name: 'Apply and close' })).toBeDisabled();
   });
 
   it('passes an empty filters array to the search bar when the panel has no filters', async () => {

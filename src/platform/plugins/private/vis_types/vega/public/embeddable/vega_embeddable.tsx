@@ -21,7 +21,6 @@ import type {
   EmbeddablePublicDefinition,
   HasDrilldowns,
 } from '@kbn/embeddable-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import {
   BehaviorSubject,
   combineLatest,
@@ -33,13 +32,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
-import {
-  FilterStateStore,
-  isOfQueryType,
-  type AggregateQuery,
-  type Filter,
-  type Query,
-} from '@kbn/es-query';
+import { isOfQueryType, type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
 import { parse } from 'hjson';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
@@ -105,47 +98,6 @@ interface VegaRenderInput {
   visData: VegaParser;
 }
 
-const isAppliedQuery = (query: Query | AggregateQuery | undefined): query is Query => {
-  if (!isOfQueryType(query)) return false;
-  if (typeof query.query === 'string') return query.query.trim().length > 0;
-  return Object.keys(query.query).length > 0;
-};
-
-/** Parent dashboard search plus a non-empty panel query and panel filters. */
-const mergePanelSearch = (
-  parentQuery: Query | AggregateQuery | undefined,
-  parentFilters: Filter[] | undefined,
-  panelQuery: Query | AggregateQuery | undefined,
-  panelFilters: Filter[] | undefined
-): { query: Query | Query[] | undefined; filters: Filter[] } => {
-  const filters = [...(parentFilters ?? []), ...(panelFilters ?? [])];
-  if (!isAppliedQuery(panelQuery)) {
-    return { query: parentQuery as Query | undefined, filters };
-  }
-  if (isOfQueryType(parentQuery)) {
-    return { query: [parentQuery, panelQuery], filters };
-  }
-  return { query: panelQuery, filters };
-};
-
-const toUnifiedSearchFilters = (filters: VegaByValueState['filters']): Filter[] | undefined => {
-  return toStoredFilters(filters)?.map((filter): Filter => {
-    if (filter.$state) {
-      return {
-        ...filter,
-        $state: {
-          store: filter.$state.store ?? FilterStateStore.APP_STATE,
-        },
-      };
-    }
-
-    return {
-      ...filter,
-      $state: undefined,
-    };
-  });
-};
-
 /**
  * By-value state for the dedicated Dashboard Vega panel.
  *
@@ -178,7 +130,7 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
 
 interface VegaEmbeddableDependencies {
   uiActions: Pick<VegaPluginStartDependencies['uiActions'], 'executeTriggerActions'>;
-  SearchBar: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
+  SearchBar: VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'];
   visualizationDependencies: VegaVisualizationDependencies;
 }
 
@@ -204,7 +156,7 @@ export const vegaEmbeddableFactory = (
     }>(
       {
         query: toStoredQuery(initialState.query),
-        filters: toUnifiedSearchFilters(initialState.filters),
+        filters: toStoredFilters(initialState.filters) as Filter[] | undefined,
       },
       {
         query: undefined,
@@ -286,7 +238,7 @@ export const vegaEmbeddableFactory = (
         drilldownsManager.reinitializeState(nextState);
         panelSearchStateManager.reinitializeState({
           query: toStoredQuery(nextState.query),
-          filters: toUnifiedSearchFilters(nextState.filters),
+          filters: toStoredFilters(nextState.filters) as Filter[] | undefined,
         });
         spec$.next(nextState.spec);
       },
@@ -435,16 +387,11 @@ export const vegaEmbeddableFactory = (
               abortSignal: signal,
               inspectorAdapters,
             });
-            const panelSearch = mergePanelSearch(
-              data.query,
-              data.filters,
-              panelQuery,
-              panelFilters
-            );
             const visData = await requestHandler({
               timeRange,
-              query: panelSearch.query,
-              filters: panelSearch.filters,
+              // buildEsQuery ANDs these and ignores empty and ES|QL queries.
+              query: [data.query, panelQuery].filter(isOfQueryType),
+              filters: [...(data.filters ?? []), ...(panelFilters ?? [])],
               visParams: {
                 spec: spec.format === 'json' ? JSON.stringify(spec.value) : spec.value,
               },

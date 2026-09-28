@@ -19,43 +19,37 @@ import {
   EuiFlyoutHeader,
   EuiSkeletonText,
   EuiTitle,
+  euiFullHeight,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { QueryState } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { isOfQueryType, type Query } from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, compareFilters, isOfQueryType, type Query } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { isEqual } from 'lodash';
 import type { VegaByValueState } from '../../server';
+import type { VegaPluginStartDependencies } from '../plugin';
 import { vegaTitleInWizard } from '../vega_icon';
 import type { VegaEmbeddableApi } from './vega_embeddable';
 
-type PanelSearch = Omit<QueryState, 'time' | 'refreshInterval'>;
+type PanelSearch = Pick<QueryState, 'query' | 'filters'>;
 
-const emptyQuery: Query = { language: 'kuery', query: '' };
+const flyoutBodyCss = css`
+  ${euiFullHeight()}
+  .euiFlyoutBody__overflow {
+    ${euiFullHeight()}
+    min-height: 0;
+  }
 
-const searchBarCss = css({
-  flexShrink: 0,
-});
-
-const bodyCss = css({
-  display: 'flex',
-  flex: 1,
-  flexDirection: 'column',
-  gap: 16,
-  minHeight: 0,
-});
-
-const editorContainerCss = css({
-  blockSize: 'clamp(320px, 60vh, 720px)',
-  display: 'flex',
-  minHeight: 0,
-  overflow: 'hidden',
-});
+  .euiFlyoutBody__overflowContent {
+    ${euiFullHeight()}
+    min-height: 0;
+  }
+`;
 
 const sameSearch = (left: PanelSearch, right: PanelSearch): boolean =>
-  isEqual(left.query, right.query) && isEqual(left.filters ?? [], right.filters ?? []);
+  isEqual(left.query, right.query) &&
+  compareFilters(left.filters ?? [], right.filters ?? [], COMPARE_ALL_OPTIONS);
 
 const VegaSpecEditor = lazy(() =>
   import('../components/vega_vis_editor').then((module) => ({ default: module.VegaSpecEditor }))
@@ -88,7 +82,7 @@ export const VegaEditorFlyout = ({
   onSave,
 }: {
   api: VegaEmbeddableApi;
-  SearchBar: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
+  SearchBar: VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'];
   ariaLabelledBy: string;
   closeFlyout: () => void;
   defaultDataView?: DataView;
@@ -169,12 +163,12 @@ export const VegaEditorFlyout = ({
           <h2 id={ariaLabelledBy}>{vegaTitleInWizard}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody data-test-subj="editorFlyoutBody">
-        <div css={bodyCss}>
-          <div css={searchBarCss}>
+      <EuiFlyoutBody data-test-subj="editorFlyoutBody" css={flyoutBodyCss}>
+        <EuiFlexGroup css={{ height: '100%' }} direction="column" gutterSize="m">
+          <EuiFlexItem grow={false}>
             <SearchBar
               appName="vegaEditorFlyout"
-              query={search.query && isOfQueryType(search.query) ? search.query : emptyQuery}
+              query={isOfQueryType(search.query) ? search.query : undefined}
               filters={search.filters ?? []}
               indexPatterns={dataViews}
               showQueryInput
@@ -194,8 +188,8 @@ export const VegaEditorFlyout = ({
               displayStyle="inPage"
               dataTestSubj="editorFlyoutSearchBar"
             />
-          </div>
-          <div css={editorContainerCss}>
+          </EuiFlexItem>
+          <EuiFlexItem css={{ minHeight: 0 }}>
             <Suspense
               fallback={
                 <EuiSkeletonText
@@ -212,10 +206,11 @@ export const VegaEditorFlyout = ({
                 initialFormat={initialSpec.format}
                 onChange={setSpec}
                 onFormatChange={setFormat}
+                actionsPlacement="toolbar"
               />
             </Suspense>
-          </div>
-        </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
