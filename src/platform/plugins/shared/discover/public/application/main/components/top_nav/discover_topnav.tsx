@@ -104,7 +104,13 @@ export const DiscoverTopNav = ({
     if (dataView.type === DataViewType.ROLLUP) {
       return false;
     }
-    return { disabled: !dataView.isTimeBased() };
+    const disabled =
+      (dataView.type !== 'esql' && !dataView.isTimeBased()) ||
+      (dataView.type === 'esql' && !dataView.timeFieldName);
+
+    return {
+      disabled,
+    };
   }, [dataView]);
 
   const closeFieldEditor = useRef<() => void | undefined>();

@@ -215,6 +215,7 @@ export const generateEsqlCompletion = async ({
             resourceName,
             esClient,
             samplingSize: 50,
+            includeViews: true,
           }).catch((e) => {
             logger?.debug(
               `[generateEsqlCompletion] failed to resolve resource '${resourceName}': ${e?.message}`

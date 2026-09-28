@@ -17,6 +17,7 @@ import {
   EventService,
   eventsDataStream,
   type eventsMappings,
+  type EventClient,
   type StoredEvent,
 } from '../../lib/significant_events/events';
 import type { GetScopedClients } from '../../routes/types';
@@ -59,7 +60,15 @@ export const createSignificantEventSmlType = ({
       eventsDataStream.name
     );
 
-    return eventService.getClient({ dataStreamClient, esClient, space: DEFAULT_SPACE_ID });
+    // `EventService.getClient()` returns `EventClient | RuleEventsClient` now that
+    // `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ` exists, but this SML type doesn't pass
+    // `useRuleEventsRead` (always false here), so the result is always an `EventClient` at
+    // runtime. See the equivalent note in `significant_events_clients.ts`.
+    return eventService.getClient({
+      dataStreamClient,
+      esClient,
+      space: DEFAULT_SPACE_ID,
+    }) as EventClient;
   };
 
   return {
