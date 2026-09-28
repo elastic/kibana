@@ -228,7 +228,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
       return { items: [], errors: false };
     }
     const { backingIndexes } = this.deps.metadataManager.getMeta();
-    const fallbackIndexes = backingIndexes.slice(-2);
+    const fallbackIndexes = backingIndexes.slice(-2).concat(this.additionalIndexesToQuery);
 
     const result = new Array<BulkItemResponse>(request.items.length);
     let hasErrors = false;
@@ -272,12 +272,12 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     ];
 
     if (mergedItems.length > 0) {
-      const bulkResponse = await sharedBulk(
-        this.deps.esClient,
-        { ...request, items: mergedItems },
-        this.deps.logger,
-        fallbackIndexes
-      );
+      const bulkResponse = await sharedBulk({
+        esClient: this.deps.esClient,
+        request: { ...request, items: mergedItems },
+        logger: this.deps.logger,
+        fallbackIndexes,
+      });
 
       bulkResponse.items.forEach((responseItem, idx) => {
         result[mergedRequestIndexes[idx]] = responseItem;
@@ -301,7 +301,6 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     const sendable: Array<{ item: SharedBulkItem<TExecution>; originalIndex: number }> = [];
     const preFailed: Array<{ id: string; originalIndex: number; error: estypes.ErrorCause }> = [];
     const pendingIds = new Map<string, number>();
-    const dataStreamMetadata = this.deps.metadataManager.getMeta();
 
     // DataStream requires @timestamp to be set on create and update.
     // We inject the @timestamp into the document from the date field.
@@ -344,7 +343,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
         Array.from(pendingIds.keys())
       );
 
-      for (const [id, i] of pendingIds) {
+      for (const [id, i] of Array.from(pendingIds.entries())) {
         const version = versions[id];
         const item = items[i];
 
