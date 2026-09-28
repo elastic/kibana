@@ -20,8 +20,9 @@ dependsOn:
   - '@kbn/evals'
   - '@kbn/scout'
   - '@kbn/tooling-log'
-  - '@kbn/core'
+  - '@kbn/agent-builder-common'
   - '@kbn/workflows'
+  - '@kbn/core'
   - '@kbn/gen-ai-functional-testing'
 tags:
   - functional-tests
