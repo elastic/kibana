@@ -9,6 +9,7 @@ import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   PUBLIC_HEADERS,
+  INTERNAL_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
 } from '../../../common/fixtures/constants';
@@ -26,6 +27,7 @@ apiTest.describe(
   { tag: ENTITY_STORE_TAGS },
   () => {
     let defaultHeaders: Record<string, string>;
+    let internalHeaders: Record<string, string>;
 
     /** `frequency` and `delay` for one engine, as reported by the status route. */
     const engineConfig = async (apiClient: ApiClientFixture, type: string) => {
@@ -48,6 +50,10 @@ apiTest.describe(
       defaultHeaders = {
         ...credentials.cookieHeader,
         ...PUBLIC_HEADERS,
+      };
+      internalHeaders = {
+        ...credentials.cookieHeader,
+        ...INTERNAL_HEADERS,
       };
     });
 
@@ -106,5 +112,33 @@ apiTest.describe(
         expect((await engineConfig(apiClient, 'user')).frequency).toBe('1m');
       }
     );
+
+    // The dual-process flag is off in this suite. Per-type config is not a dual-process
+    // feature, so the route has to work here.
+    apiTest('sets a per-type override without the dual-process flag', async ({ apiClient }) => {
+      await installAllEntityTypes(apiClient, defaultHeaders);
+
+      const response = await apiClient.put(ENTITY_STORE_ROUTES.internal.ENGINE_CONFIG('service'), {
+        headers: internalHeaders,
+        responseType: 'json',
+        body: { logExtraction: { frequency: '10m' } },
+      });
+      expect(response.statusCode).toBe(200);
+
+      expect((await engineConfig(apiClient, 'service')).frequency).toBe('10m');
+      expect((await engineConfig(apiClient, 'user')).frequency).toBe('1m');
+    });
+
+    apiTest('rejects nonPriorityOverride without the dual-process flag', async ({ apiClient }) => {
+      await installAllEntityTypes(apiClient, defaultHeaders);
+
+      const response = await apiClient.put(ENTITY_STORE_ROUTES.internal.ENGINE_CONFIG('user'), {
+        headers: internalHeaders,
+        responseType: 'json',
+        body: { nonPriorityOverride: { samplingRate: 0.5 } },
+      });
+
+      expect(response.statusCode).toBe(400);
+    });
   }
 );

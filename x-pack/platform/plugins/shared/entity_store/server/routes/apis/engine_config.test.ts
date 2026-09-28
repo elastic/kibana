@@ -37,15 +37,18 @@ const createCtx = ({
     nonPriorityLogExtractionConfig: {},
   }),
   getPrivileges = jest.fn().mockResolvedValue(authorized),
+  dualProcess = true,
 }: {
   updateTypeConfig?: jest.Mock;
   getPrivileges?: jest.Mock;
+  dualProcess?: boolean;
 } = {}) => ({
   ctx: {
     entityStore: Promise.resolve({
       logger: loggerMock.create(),
       assetManagerClient: { getPrivileges } as unknown as AssetManagerClient,
       logsExtractionClient: { updateTypeConfig } as unknown as LogsExtractionClient,
+      isDualProcessEnabled: jest.fn().mockResolvedValue(dualProcess),
     }),
   } as unknown as EntityStoreRequestHandlerContext,
   updateTypeConfig,
@@ -57,6 +60,7 @@ const createRes = () =>
     ok: jest.fn(({ body }) => ({ status: 200, payload: body })),
     notFound: jest.fn(({ body }) => ({ status: 404, payload: body })),
     forbidden: jest.fn(({ body }) => ({ status: 403, payload: body })),
+    badRequest: jest.fn(({ body }) => ({ status: 400, payload: body })),
   } as unknown as KibanaResponseFactory);
 
 type EngineConfigRequest = Parameters<typeof handleEngineConfig>[1];
@@ -97,6 +101,40 @@ describe('handleEngineConfig', () => {
       logExtraction: undefined,
       nonPriorityOverride: { frequency: null },
     });
+  });
+
+  it('writes logExtraction with the dual-process flag off', async () => {
+    const { ctx, updateTypeConfig } = createCtx({ dualProcess: false });
+
+    const result = await handleEngineConfig(
+      ctx,
+      createReq({ logExtraction: { frequency: '30m' } }),
+      createRes()
+    );
+
+    expect(result).toMatchObject({ status: 200 });
+    expect(updateTypeConfig).toHaveBeenCalledWith('user', {
+      logExtraction: { frequency: '30m' },
+      nonPriorityOverride: undefined,
+    });
+  });
+
+  it('rejects nonPriorityOverride with the dual-process flag off', async () => {
+    const { ctx, updateTypeConfig } = createCtx({ dualProcess: false });
+
+    const result = await handleEngineConfig(
+      ctx,
+      createReq({ nonPriorityOverride: { samplingRate: 0.5 } }),
+      createRes()
+    );
+
+    expect(result).toEqual({
+      status: 400,
+      payload: {
+        message: 'nonPriorityOverride requires dual-process log extraction to be enabled',
+      },
+    });
+    expect(updateTypeConfig).not.toHaveBeenCalled();
   });
 
   it('checks privileges against additionalIndexPatterns from the shared block', async () => {

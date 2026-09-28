@@ -13,7 +13,6 @@ import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter, EntityStoreRequestHandlerContext } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import { dualProcessEnabledMiddleware } from '../middleware/dual_process_enabled';
 import { validateLogExtractionParams } from './utils/log_extraction_validator';
 import { enforceEntityStorePrivileges } from './utils/check_entity_store_privileges';
 import { EntityType } from '../../../common/domain/definitions/entity_schema';
@@ -47,12 +46,25 @@ export async function handleEngineConfig(
     logger: baseLogger,
     assetManagerClient: assetManager,
     logsExtractionClient,
+    isDualProcessEnabled,
   } = await ctx.entityStore;
   const { entityType } = req.params;
   const { logExtraction, nonPriorityOverride } = req.body;
 
   const logger = baseLogger.get('engineConfig').get(entityType);
   logger.debug('Engine config API called');
+
+  // `logExtraction` (layer 5) is read in every extraction mode, so the route is served
+  // regardless of the flag. `nonPriorityOverride` (layer 6) is only read by the non-priority
+  // process, which never runs with the flag off - accepting it would store a value that
+  // silently does nothing.
+  if (nonPriorityOverride && !(await isDualProcessEnabled())) {
+    return res.badRequest({
+      body: {
+        message: 'nonPriorityOverride requires dual-process log extraction to be enabled',
+      },
+    });
+  }
 
   // Only `logExtraction` carries index patterns - NonPriorityLogExtractionTypeOverride has none.
   const forbidden = await enforceEntityStorePrivileges(
@@ -89,7 +101,8 @@ export function registerEngineConfig(router: EntityStorePluginRouter) {
       summary: 'Update the log extraction configuration of one entity type',
       description:
         'Set per entity-type log extraction overrides. `logExtraction` applies to both extraction ' +
-        'processes, `nonPriorityOverride` only to the non-priority one. ' +
+        'processes. `nonPriorityOverride` applies only to the non-priority one and requires ' +
+        'dual-process log extraction to be enabled. ' +
         'Omitting a field leaves it unchanged. Sending `null` clears it and falls back to the layer below.',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
@@ -106,6 +119,6 @@ export function registerEngineConfig(router: EntityStorePluginRouter) {
           },
         },
       },
-      wrapMiddlewares(handleEngineConfig, [dualProcessEnabledMiddleware])
+      wrapMiddlewares(handleEngineConfig)
     );
 }
