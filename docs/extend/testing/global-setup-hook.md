@@ -123,13 +123,15 @@ globalTeardownHook(
     await kbnClient.uiSettings.unset('discover:searchOnPageLoad');
     await kbnClient.uiSettings.updateGlobal({ hideAnnouncements: false });
 
-    // Revert feature-flag overrides flipped via apiServices.core.settings(...).
+    // Remove the dynamic feature-flag override introduced by this suite.
     await apiServices.core.settings({
-      'feature_flags.overrides': { 'discover.isEsqlDefault': false },
+      'feature_flags.overrides': { 'discover.isEsqlDefault': null },
     });
   }
 );
 ```
+
+The feature-flag example assumes no dynamic override existed before setup. If one did, restore its previous value instead of removing it. Preserve unrelated overrides; see [Feature flags](./feature-flags.md#scout-feature-flags-runtime).
 
 ### Available fixtures
 

@@ -29,6 +29,8 @@ Feature flag overrides are **server-wide**: they apply to the entire Kibana inst
 The `@kbn/eslint/scout_no_core_settings_in_space_test` ESLint rule warns when `apiServices.core.settings(...)` is called inside `spaceTest` scope (directly, in `spaceTest.describe`/`beforeAll`/`afterAll`/`step`, etc.), since that scope runs in parallel across spaces sharing the same server.
 ::::::
 
+The examples below assume the suite introduces a dynamic override that was previously absent. Set that key to `null` in teardown to remove the dynamic override and restore the underlying configuration or feature-flag provider evaluation. Setting it to `false` forces a value instead. If a dynamic override already existed, restore its previous value; preserve unrelated overrides.
+
 ### In a global setup hook (recommended for parallel suites) [scout-feature-flags-global-setup]
 
 Enable the flag once in `global.setup.ts` before any worker starts:
@@ -40,7 +42,7 @@ globalSetupHook('Enable feature flags', async ({ apiServices, log }) => {
   log.info('[setup] Enabling my-feature-flag...');
   await apiServices.core.settings({
     'feature_flags.overrides': {
-      'my-plugin.my-feature-flag': 'true',
+      'my-plugin.my-feature-flag': true,
     },
   });
 });
@@ -55,7 +57,7 @@ globalTeardownHook('Revert feature flags', async ({ apiServices, log }) => {
   log.info('[teardown] Reverting my-feature-flag...');
   await apiServices.core.settings({
     'feature_flags.overrides': {
-      'my-plugin.my-feature-flag': false,
+      'my-plugin.my-feature-flag': null,
     },
   });
 });
@@ -78,7 +80,7 @@ test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
 
   test.afterAll(async ({ apiServices }) => {
     await apiServices.core.settings({
-      'xpack.fleet.experimentalFeatures': { newBrowseIntegrationUx: false },
+      'xpack.fleet.experimentalFeatures': { newBrowseIntegrationUx: null },
     });
   });
 

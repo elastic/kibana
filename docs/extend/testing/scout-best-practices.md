@@ -344,14 +344,14 @@ globalSetupHook('Load shared test data (if needed)', async ({ esArchiver, log })
 });
 ```
 
-✔️ **Do:** revert suite-wide state in `global.teardown.ts` so it doesn't leak into other configs:
+✔️ **Do:** revert suite-wide state in `global.teardown.ts` so it doesn't leak into other configs. The feature-flag example removes a dynamic override introduced by this suite; if an override already existed, restore its previous value instead. See [Feature flags](./feature-flags.md#scout-feature-flags-runtime):
 
 ```ts
 globalTeardownHook('Reset shared Kibana state', async ({ kbnClient, apiServices, log }) => {
   log.debug('[teardown] resetting shared state...');
   await kbnClient.uiSettings.unset('discover:searchOnPageLoad');
   await apiServices.core.settings({
-    'feature_flags.overrides': { 'discover.isEsqlDefault': false },
+    'feature_flags.overrides': { 'discover.isEsqlDefault': null },
   });
 });
 ```
