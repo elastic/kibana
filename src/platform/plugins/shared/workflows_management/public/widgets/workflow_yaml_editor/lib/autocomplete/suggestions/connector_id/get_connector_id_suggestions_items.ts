@@ -28,11 +28,16 @@ import {
 export function getConnectorIdSuggestionsItems(
   stepType: string,
   range: monaco.IRange | monaco.languages.CompletionItemRanges,
-  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
+  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>,
+  inferenceConnectorInstances?: ReadonlyMap<string, ConnectorInstance[]>
 ): monaco.languages.CompletionItem[] {
   const suggestions: monaco.languages.CompletionItem[] = [];
 
-  const instances = getConnectorInstancesForType(stepType, dynamicConnectorTypes);
+  const instances = getConnectorInstancesForType(
+    stepType,
+    dynamicConnectorTypes,
+    inferenceConnectorInstances
+  );
 
   instances.forEach((instance) =>
     suggestions.push(createConnectorSuggestion(instance, stepType, range))
@@ -50,13 +55,20 @@ export function getConnectorIdSuggestionsItems(
  */
 export function getConnectorInstancesForType(
   stepType: string,
-  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
-): Array<ConnectorInstance & { connectorType: string }> {
+  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>,
+  inferenceConnectorInstances?: ReadonlyMap<string, ConnectorInstance[]>
+): ConnectorInstance[] {
+  const customStepSelectionHandler = getCustomStepConnectorIdSelectionHandler(stepType);
+  const connectorTypes = customStepSelectionHandler?.connectorTypes ?? [stepType];
+  if (
+    connectorTypes.some((connectorType) => connectorType.startsWith('inference.')) &&
+    customStepSelectionHandler?.inferenceFeatureId
+  ) {
+    return inferenceConnectorInstances?.get(customStepSelectionHandler.inferenceFeatureId) ?? [];
+  }
   if (!dynamicConnectorTypes) {
     return [];
   }
-  const customStepSelectionHandler = getCustomStepConnectorIdSelectionHandler(stepType);
-  const connectorTypes = customStepSelectionHandler?.connectorTypes ?? [stepType];
 
   return connectorTypes.flatMap((connectorType) => {
     // Remove the leading dot just in case. e.g. .inference.completion -> inference.completion

@@ -23,7 +23,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...searchFunctionalConfig.get('kbnTestServer.serverArgs'),
         '--xpack.spaces.defaultSolution=es', // Default to Search Solution
-        `--uiSettings.overrides.searchPlayground:searchModeEnabled=true`,
       ],
     },
     // load tests in the index file
