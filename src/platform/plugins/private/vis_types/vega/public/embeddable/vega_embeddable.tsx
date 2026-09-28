@@ -13,6 +13,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { fromStoredFilters, toStoredFilters } from '@kbn/as-code-filters-transforms';
 import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
@@ -51,6 +52,7 @@ import {
   initializeStateApi,
   initializeTimeRangeManager,
   initializeTitleManager,
+  type CanCancelRequests,
   type HasEditCapabilities,
   type ProjectRoutingOverrides,
   type PublishesBlockingError,
@@ -151,6 +153,7 @@ const toUnifiedSearchFilters = (filters: VegaByValueState['filters']): Filter[] 
  * participates in public dashboards-as-code validation and OpenAPI generation.
  */
 export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
+  CanCancelRequests &
   HasDrilldowns &
   HasEditCapabilities &
   HasInspectorAdapters &
@@ -341,6 +344,7 @@ export const vegaEmbeddableFactory = (
       approximationApplied$,
       projectRoutingOverrides$,
       dataViews$,
+      cancelRequests: (reason) => abortController.abort(reason),
       supportedTriggers: () => VEGA_SUPPORTED_TRIGGERS,
       getTypeDisplayName: () => 'Vega',
       isEditingEnabled: () => true,
@@ -402,6 +406,11 @@ export const vegaEmbeddableFactory = (
           abortController.abort();
           abortController = new AbortController();
           const { signal } = abortController;
+          // A cancelled request can still resolve with partial results, but once a newer fetch
+          // starts, that fetch owns the loading state.
+          const isCurrentFetch = () =>
+            abortController.signal === signal &&
+            (!signal.aborted || signal.reason === AbortReason.CANCELED);
 
           rendered$.next(false);
           dataLoading$.next(true);
@@ -418,6 +427,10 @@ export const vegaEmbeddableFactory = (
 
           try {
             const { createVegaRequestHandler } = await import('../async_services');
+            if (signal.aborted) {
+              if (isCurrentFetch()) rendered$.next(true);
+              return;
+            }
             const requestHandler = createVegaRequestHandler(deps.visualizationDependencies, {
               abortSignal: signal,
               inspectorAdapters,
@@ -445,7 +458,7 @@ export const vegaEmbeddableFactory = (
               esqlVariables: data.esqlVariables,
             });
 
-            if (signal.aborted) {
+            if (!isCurrentFetch()) {
               return;
             }
             approximationApplied$.next(visData.approximationApplied);
@@ -456,6 +469,8 @@ export const vegaEmbeddableFactory = (
             });
           } catch (error) {
             if (signal.aborted) {
+              // A cancel is not an error; keep whatever the panel already shows.
+              if (isCurrentFetch()) rendered$.next(true);
               return;
             }
             renderInput$.next(undefined);
@@ -464,7 +479,7 @@ export const vegaEmbeddableFactory = (
             // render that never happens.
             rendered$.next(true);
           } finally {
-            if (!signal.aborted) {
+            if (isCurrentFetch()) {
               dataLoading$.next(false);
             }
           }

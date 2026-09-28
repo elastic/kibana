@@ -14,6 +14,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { BehaviorSubject, of } from 'rxjs';
 import { ESQLVariableType } from '@kbn/esql-types';
@@ -374,6 +375,70 @@ describe('vegaEmbeddableFactory', () => {
     // Reporting waits on the shared item, so a panel that cannot render must still complete.
     expect(api.rendered$.getValue()).toBe(true);
     expect(mockVegaVisComponentProps).toBeUndefined();
+  });
+
+  it('cancels the in-flight request without surfacing an error', async () => {
+    let rejectRequest: (error: Error) => void = () => {};
+    mockVegaRequestHandler.mockImplementation(
+      () =>
+        new Promise((_resolve, reject) => {
+          rejectRequest = reject;
+        })
+    );
+    const { api, Component: PanelComponent } = await buildEmbeddable();
+    render(<PanelComponent />);
+    await waitFor(() => expect(mockVegaRequestHandler).toHaveBeenCalledTimes(1));
+
+    api.cancelRequests(AbortReason.CANCELED);
+    expect(abortSignalFor(0).reason).toBe(AbortReason.CANCELED);
+    rejectRequest(new Error('Request aborted'));
+
+    await waitFor(() => expect(api.dataLoading$.getValue()).toBe(false));
+    expect(api.blockingError$.getValue()).toBeUndefined();
+    expect(api.rendered$.getValue()).toBe(true);
+  });
+
+  it('renders partial results returned after a cancel', async () => {
+    const partialVisData = { isVegaLite: true, useMap: false } as unknown as VegaParser;
+    let resolveRequest: (data: VegaParser) => void = () => {};
+    mockVegaRequestHandler.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveRequest = resolve;
+        })
+    );
+    const { api, Component: PanelComponent } = await buildEmbeddable();
+    render(<PanelComponent />);
+    await waitFor(() => expect(mockVegaRequestHandler).toHaveBeenCalledTimes(1));
+
+    api.cancelRequests(AbortReason.CANCELED);
+    resolveRequest(partialVisData);
+
+    await waitFor(() => expect(mockVegaVisComponentProps?.visData).toBe(partialVisData));
+    expect(api.dataLoading$.getValue()).toBe(false);
+  });
+
+  it('drops partial results from a cancelled request once a newer fetch starts', async () => {
+    const resolvers: Array<(data: VegaParser) => void> = [];
+    mockVegaRequestHandler.mockImplementation(
+      () => new Promise((resolve) => resolvers.push(resolve))
+    );
+    const { api, Component: PanelComponent } = await buildEmbeddable();
+    render(<PanelComponent />);
+    await waitFor(() => expect(mockVegaRequestHandler).toHaveBeenCalledTimes(1));
+
+    api.cancelRequests(AbortReason.CANCELED);
+    reload$.next();
+    await waitFor(() => expect(mockVegaRequestHandler).toHaveBeenCalledTimes(2));
+    resolvers[0]({ isVegaLite: false, useMap: false } as unknown as VegaParser);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(mockVegaVisComponentProps).toBeUndefined();
+    expect(api.dataLoading$.getValue()).toBe(true);
+
+    resolvers[1](visData);
+    await waitFor(() => expect(mockVegaVisComponentProps?.visData).toBe(visData));
+    expect(api.dataLoading$.getValue()).toBe(false);
   });
 
   it('routes filter events through ON_APPLY_FILTER', async () => {
