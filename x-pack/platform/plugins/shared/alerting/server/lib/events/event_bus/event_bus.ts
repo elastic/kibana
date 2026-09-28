@@ -81,7 +81,9 @@ export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TCont
           await handler(...args);
         } catch (err) {
           this.logger.error(
-            `[event_bus] Handler for "${type}" threw: ${err instanceof Error ? err.message : String(err)}`
+            `[event_bus] Handler for "${type}" threw: ${
+              err instanceof Error ? err.message : String(err)
+            }`
           );
         }
       });

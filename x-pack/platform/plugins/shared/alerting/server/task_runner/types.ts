@@ -28,7 +28,10 @@ import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-ty
 import type { IAsyncSearchOptions } from '@kbn/data-plugin/common';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import type { AsyncDomainEventBus } from '../lib/events/event_bus';
-import type { AlertingDomainEvent, AlertingPublisherContext } from '../lib/workflow_extensions/events';
+import type {
+  AlertingDomainEvent,
+  AlertingPublisherContext,
+} from '../lib/workflow_extensions/events';
 import type { AlertStatusChangedV1Payload } from '../common/workflows/triggers';
 import type { IAlertsClient } from '../alerts_client/types';
 import type { Alert } from '../alert';
