@@ -282,7 +282,10 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                         result: _result,
                         evaluatorTraceId: _traceId,
                       };
-                    }
+                    },
+                    // LLM judges get a `judge · <name>` root span so their traces
+                    // clear the Tracing UI's non-judge evaluator-root filter.
+                    { kind: evaluator.kind }
                   );
                   this.options.log.info(
                     `✅ Evaluator "${evaluator.name}" on run (exampleIndex=${exampleIndex}, repetition=${rep}) completed`
