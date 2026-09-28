@@ -45,6 +45,7 @@ export default meta;
 interface DefaultArgs {
   numberOfItems: number;
   maxColumns: InfoBlocksMaxColumns | 'auto';
+  minColumnWidth: number;
 }
 
 // A middle-truncating link with a trailing copy action. The render prop lets
@@ -215,59 +216,92 @@ const TALL_SVG = (
   </svg>
 );
 
+const numberOfItemsArgType = {
+  description: 'Number of items in each panel',
+  control: { type: 'range', min: 1, max: SAMPLE_ITEMS.length, step: 1 },
+} as const;
+
+const minColumnWidthArgType = {
+  description:
+    'Narrowest a column may be before the column count steps down; resize the flyout to see it',
+  control: { type: 'range', min: 100, max: 400, step: 10 },
+} as const;
+
+const renderGallery = ({ numberOfItems, maxColumns, minColumnWidth }: DefaultArgs) => (
+  <FlyoutWrapper title="Info blocks gallery">
+    <EuiTitle size="s">
+      <h3>Sample set</h3>
+    </EuiTitle>
+    <EuiSpacer size="m" />
+    <InfoBlocks
+      items={SAMPLE_ITEMS.slice(0, numberOfItems)}
+      maxColumns={maxColumns}
+      minColumnWidth={minColumnWidth}
+    />
+
+    <EuiSpacer size="xl" />
+    <EuiTitle size="s">
+      <h3>Big number</h3>
+    </EuiTitle>
+    <EuiSpacer size="m" />
+    <InfoBlocks
+      items={[
+        {
+          title: 'Risk score',
+          value: '90',
+          size: 'xl' as const,
+          color: 'danger',
+        },
+        ...SAMPLE_ITEMS,
+      ].slice(0, numberOfItems)}
+      maxColumns={maxColumns}
+      minColumnWidth={minColumnWidth}
+    />
+
+    <EuiSpacer size="xl" />
+    <EuiTitle size="s">
+      <h3>Inline SVG</h3>
+    </EuiTitle>
+    <EuiSpacer size="m" />
+    <InfoBlocks
+      items={[{ title: 'Trend', value: TALL_SVG }, ...SAMPLE_ITEMS].slice(0, numberOfItems)}
+      maxColumns={maxColumns}
+      minColumnWidth={minColumnWidth}
+    />
+  </FlyoutWrapper>
+);
+
 export const Default: StoryObj<DefaultArgs> = {
-  name: 'InfoBlocks',
+  name: 'Default',
   argTypes: {
-    numberOfItems: {
-      description: 'Number of items in each panel',
-      control: { type: 'range', min: 1, max: SAMPLE_ITEMS.length, step: 1 },
-    },
+    numberOfItems: numberOfItemsArgType,
     maxColumns: {
       description:
         'Widest column count, or `auto` to derive it from the item count; resize the flyout to see it step down',
       control: { type: 'inline-radio' },
       options: [2, 3, 4, 'auto'],
     },
+    minColumnWidth: minColumnWidthArgType,
   },
   args: {
     numberOfItems: SAMPLE_ITEMS.length,
     maxColumns: 'auto',
+    minColumnWidth: 140,
   },
-  render: ({ numberOfItems, maxColumns }) => (
-    <FlyoutWrapper title="Info blocks gallery">
-      <EuiTitle size="s">
-        <h3>Sample set</h3>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <InfoBlocks items={SAMPLE_ITEMS.slice(0, numberOfItems)} maxColumns={maxColumns} />
+  render: renderGallery,
+};
 
-      <EuiSpacer size="xl" />
-      <EuiTitle size="s">
-        <h3>Big number</h3>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <InfoBlocks
-        items={[
-          {
-            title: 'Risk score',
-            value: '90',
-            size: 'xl' as const,
-            color: 'danger',
-          },
-          ...SAMPLE_ITEMS,
-        ].slice(0, numberOfItems)}
-        maxColumns={maxColumns}
-      />
-
-      <EuiSpacer size="xl" />
-      <EuiTitle size="s">
-        <h3>Inline SVG</h3>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <InfoBlocks
-        items={[{ title: 'Trend', value: TALL_SVG }, ...SAMPLE_ITEMS].slice(0, numberOfItems)}
-        maxColumns={maxColumns}
-      />
-    </FlyoutWrapper>
-  ),
+export const WideColumns: StoryObj<DefaultArgs> = {
+  name: 'Wide columns',
+  argTypes: {
+    numberOfItems: numberOfItemsArgType,
+    maxColumns: { table: { disable: true } },
+    minColumnWidth: minColumnWidthArgType,
+  },
+  args: {
+    numberOfItems: SAMPLE_ITEMS.length,
+    maxColumns: 'auto',
+    minColumnWidth: 260,
+  },
+  render: renderGallery,
 };

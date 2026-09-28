@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FunctionComponent } from 'react';
+import React, { useMemo, type FunctionComponent } from 'react';
 import { css } from '@emotion/react';
 import { EuiPanel, useEuiMemoizedStyles } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import { InfoBlock } from './info_block.component';
 
-const FLYOUT_MIN_CELL_WIDTH = 140;
+const DEFAULT_MIN_COLUMN_WIDTH = 140;
 const FLYOUT_MAX_GRID_COLUMNS = 4;
 import type { InfoBlocksMaxColumns, InfoBlocksProps } from './types';
 
@@ -44,13 +44,17 @@ const columnState = (columns: number) => `
   }
 `;
 
-/** Widest state first; container queries tie on specificity, so the narrowest must come last. */
-const responsiveGrid = (maxColumns: number) => {
+/**
+ * Widest state first; container queries tie on specificity, so the narrowest must come last.
+ * `minColumnWidth` must stay out of the column sizes, so that a single column never grows wider
+ * than the container.
+ */
+const responsiveGrid = (maxColumns: number, minColumnWidth: number) => {
   let steps = '';
   for (let columns = maxColumns - 1; columns >= 1; columns--) {
-    // Each state needs `columns * FLYOUT_MIN_CELL_WIDTH` to fit.
+    // Each state needs `columns * minColumnWidth` to fit.
     steps += `
-      @container ${CONTAINER_NAME} (width < ${(columns + 1) * FLYOUT_MIN_CELL_WIDTH}px) {
+      @container ${CONTAINER_NAME} (width < ${(columns + 1) * minColumnWidth}px) {
         ${columnState(columns)}
       }
     `;
@@ -128,24 +132,22 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
         display: none;
       }
     `,
-
-    /** One variant per supported cap, since each has its own breakpoint ladder. */
-    grids: {
-      2: responsiveGrid(2),
-      3: responsiveGrid(3),
-      4: responsiveGrid(FLYOUT_MAX_GRID_COLUMNS),
-    },
   };
 };
 
 /** Responsive card for a small set of labeled values. */
 export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({
   items,
+  minColumnWidth = DEFAULT_MIN_COLUMN_WIDTH,
   maxColumns = 'auto',
   ...rest
 }) => {
   const memoizedStyles = useEuiMemoizedStyles(styles);
   const columns = maxColumns === 'auto' ? resolveMaxColumns(items.length) : maxColumns;
+  const gridStyles = useMemo(
+    () => responsiveGrid(columns, minColumnWidth),
+    [columns, minColumnWidth]
+  );
 
   return (
     <div css={memoizedStyles.wrapper}>
@@ -157,7 +159,7 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({
       >
         {/* The grid lives on the `dl` because each block is a `dt`/`dd` pair, which `dl` only
             accepts wrapped in a single element — so that wrapper has to be the grid cell. */}
-        <dl css={[memoizedStyles.grid, memoizedStyles.grids[columns]]}>
+        <dl css={[memoizedStyles.grid, gridStyles]}>
           {items.map((item, index) => (
             <InfoBlock key={item.id ?? index} {...item} />
           ))}
