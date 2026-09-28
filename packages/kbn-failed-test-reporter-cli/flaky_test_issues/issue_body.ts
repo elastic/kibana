@@ -351,10 +351,10 @@ const suiteErrors = (suite: FlakySuite): SuiteError[] => {
         byKey.set(error.key, {
           key: error.key,
           message: error.message,
-          failures: error.failures,
-          builds: error.builds,
+          failures: error.failuresCount,
+          builds: error.buildsCount,
           byPipeline: new Map(
-            error.byPipeline.map(({ pipeline, failures }) => [pipeline, failures])
+            error.byPipeline.map(({ pipeline, failuresCount }) => [pipeline, failuresCount])
           ),
           branches: new Set(error.branches),
           targets: new Set(error.targets),
@@ -366,10 +366,10 @@ const suiteErrors = (suite: FlakySuite): SuiteError[] => {
         });
         continue;
       }
-      current.failures += error.failures;
+      current.failures += error.failuresCount;
       current.builds = undefined;
-      for (const { pipeline, failures } of error.byPipeline) {
-        current.byPipeline.set(pipeline, (current.byPipeline.get(pipeline) ?? 0) + failures);
+      for (const { pipeline, failuresCount } of error.byPipeline) {
+        current.byPipeline.set(pipeline, (current.byPipeline.get(pipeline) ?? 0) + failuresCount);
       }
       for (const branch of error.branches) current.branches.add(branch);
       for (const target of error.targets) current.targets.add(target);

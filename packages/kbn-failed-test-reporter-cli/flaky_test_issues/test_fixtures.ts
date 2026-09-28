@@ -96,11 +96,11 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
     {
       key: 'Error: Timed out Nms waiting for expect(locator).toBeVisible()',
       message: 'Error: Timed out 30000ms waiting for expect(locator).toBeVisible()',
-      failures: 61,
-      builds: 49,
+      failuresCount: 61,
+      buildsCount: 49,
       byPipeline: [
-        { pipeline: 'kibana-on-merge', failures: 49 },
-        { pipeline: 'kibana-pull-request', failures: 12 },
+        { pipeline: 'kibana-on-merge', failuresCount: 49 },
+        { pipeline: 'kibana-pull-request', failuresCount: 12 },
       ],
       branches: ['main', 'someone:fix-it'],
       targets: ['stateful-classic'],

@@ -41,7 +41,7 @@ export type FlakyTestSampleFailure = z.infer<typeof FlakyTestSampleFailureSchema
 /** Failed attempts with one error on one pipeline. */
 export const FlakyTestErrorPipelineSchema = z.object({
   pipeline: z.string(),
-  failures: z.int(),
+  failuresCount: z.int(),
 });
 
 /**
@@ -55,9 +55,9 @@ export const FlakyTestErrorSchema = z.object({
   /** The newest failure's message, in full. */
   message: z.string(),
   /** Failed attempts with this error. */
-  failures: z.int(),
+  failuresCount: z.int(),
   /** Distinct builds those attempts ran in. */
-  builds: z.int(),
+  buildsCount: z.int(),
   /** Most failures first. */
   byPipeline: z.array(FlakyTestErrorPipelineSchema),
   /** Distinct branches, sorted; pull request builds record the head ref as `owner:branch`. */

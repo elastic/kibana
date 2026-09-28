@@ -113,11 +113,11 @@ const multiTestReport = () => {
         {
           key: 'Error: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe',
           message: 'Error: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe',
-          failures: 20,
-          builds: 20,
+          failuresCount: 20,
+          buildsCount: 20,
           byPipeline: [
-            { pipeline: 'kibana-on-merge', failures: 12 },
-            { pipeline: 'kibana-pull-request', failures: 8 },
+            { pipeline: 'kibana-on-merge', failuresCount: 12 },
+            { pipeline: 'kibana-pull-request', failuresCount: 8 },
           ],
           branches: ['main', 'someone:fix-it', 'other:thing'],
           targets: ['stateful-classic', 'serverless-security_complete'],
@@ -141,9 +141,9 @@ const multiTestReport = () => {
         {
           key: 'Error: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe',
           message: 'Error: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe\n\nfrom b',
-          failures: 3,
-          builds: 3,
-          byPipeline: [{ pipeline: 'kibana-on-merge', failures: 3 }],
+          failuresCount: 3,
+          buildsCount: 3,
+          byPipeline: [{ pipeline: 'kibana-on-merge', failuresCount: 3 }],
           branches: ['9.2'],
           targets: ['stateful-classic'],
           firstFailedAt: new Date('2026-09-01T00:00:00.000Z'),
@@ -154,9 +154,9 @@ const multiTestReport = () => {
         {
           key: 'TimeoutError: page.waitForSelector: Timeout Nms exceeded.',
           message: 'TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.',
-          failures: 1,
-          builds: 1,
-          byPipeline: [{ pipeline: 'kibana-on-merge', failures: 1 }],
+          failuresCount: 1,
+          buildsCount: 1,
+          byPipeline: [{ pipeline: 'kibana-on-merge', failuresCount: 1 }],
           branches: ['main'],
           targets: ['unknown'],
           firstFailedAt: new Date('2026-09-07T06:12:00.000Z'),
@@ -177,9 +177,9 @@ const multiTestReport = () => {
         {
           key: 'TypeError: Cannot read properties of undefined',
           message: 'TypeError: Cannot read properties of undefined',
-          failures: 5,
-          builds: 2,
-          byPipeline: [{ pipeline: 'kibana-pull-request', failures: 5 }],
+          failuresCount: 5,
+          buildsCount: 2,
+          byPipeline: [{ pipeline: 'kibana-pull-request', failuresCount: 5 }],
           branches: ['someone:wip', 'pull/1234/head'],
           targets: ['stateful-classic'],
           firstFailedAt: new Date('2026-09-08T00:00:00.000Z'),
@@ -379,7 +379,7 @@ describe('renderFlakySuiteIssueBody', () => {
       flakyTest({
         errors: [
           { ...flakyTest().errors[0], branches: ['a:x'] },
-          { ...flakyTest().errors[0], key: 'other', failures: 2, branches: ['pull/7/head'] },
+          { ...flakyTest().errors[0], key: 'other', failuresCount: 2, branches: ['pull/7/head'] },
         ],
       }),
     ]);
@@ -411,7 +411,7 @@ describe('renderFlakySuiteIssueBody', () => {
     const errors = Array.from({ length: 6 }, (_, index) => ({
       ...flakyTest().errors[0],
       key: `k${index}`,
-      failures: 10 - index,
+      failuresCount: 10 - index,
     }));
     const report = flakyReport([flakyTest({ errors })]);
     const body = renderFlakySuiteIssueBody(groupIntoSuites(report.flaky)[0], { report });

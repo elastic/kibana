@@ -809,11 +809,11 @@ describe('fetchTestErrors', () => {
       {
         key: 'Error: boom N',
         message: 'Error: boom 9',
-        failures: 8,
-        builds: 7,
+        failuresCount: 8,
+        buildsCount: 7,
         byPipeline: [
-          { pipeline: 'kibana-pull-request', failures: 5 },
-          { pipeline: 'kibana-on-merge', failures: 3 },
+          { pipeline: 'kibana-pull-request', failuresCount: 5 },
+          { pipeline: 'kibana-on-merge', failuresCount: 3 },
         ],
         branches: ['9.5', 'a:x', 'b:y', 'main'],
         targets: ['serverless-search', 'stateful-classic'],
@@ -822,7 +822,7 @@ describe('fetchTestErrors', () => {
         lastFailedBuildUrl: 'https://b/9',
         lastFailedJobId: 'job-9',
       },
-      expect.objectContaining({ key: 'TypeError: nope', failures: 1 }),
+      expect.objectContaining({ key: 'TypeError: nope', failuresCount: 1 }),
     ]);
     expect(errors.get('t2')).toEqual([
       expect.objectContaining({ key: 'Other', lastFailedBuildUrl: undefined }),

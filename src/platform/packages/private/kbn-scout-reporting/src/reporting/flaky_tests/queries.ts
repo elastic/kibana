@@ -634,13 +634,15 @@ interface TestErrorRow extends Record<string, unknown> {
 const foldErrorRows = (key: string, rows: readonly TestErrorRow[]): FlakyTestError => {
   const newest = [...rows].sort((a, b) => b.last_failed_at.localeCompare(a.last_failed_at))[0];
   const byPipeline = rows
-    .flatMap((row) => (row.pipeline ? [{ pipeline: row.pipeline, failures: row.failures }] : []))
-    .sort((a, b) => b.failures - a.failures || a.pipeline.localeCompare(b.pipeline));
+    .flatMap((row) =>
+      row.pipeline ? [{ pipeline: row.pipeline, failuresCount: row.failures }] : []
+    )
+    .sort((a, b) => b.failuresCount - a.failuresCount || a.pipeline.localeCompare(b.pipeline));
   return {
     key,
     message: newest.message ?? '',
-    failures: rows.reduce((sum, row) => sum + row.failures, 0),
-    builds: rows.reduce((sum, row) => sum + row.builds, 0),
+    failuresCount: rows.reduce((sum, row) => sum + row.failures, 0),
+    buildsCount: rows.reduce((sum, row) => sum + row.builds, 0),
     byPipeline,
     branches: [...new Set(rows.flatMap((row) => asArray(row.branches)))].sort(),
     targets: [...new Set(rows.flatMap((row) => asArray(row.targets)))].sort(),
@@ -692,7 +694,7 @@ export const fetchTestErrors = async (
       testId,
       [...byKey.entries()]
         .map(([key, rows]) => foldErrorRows(key, rows))
-        .sort((a, b) => b.failures - a.failures || b.builds - a.builds)
+        .sort((a, b) => b.failuresCount - a.failuresCount || b.buildsCount - a.buildsCount)
     );
   }
   return byTest;

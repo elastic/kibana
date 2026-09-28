@@ -389,9 +389,9 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       {
         key: 'boom',
         message: 'boom',
-        failures: 30,
-        builds: 30,
-        byPipeline: [{ pipeline: 'kibana-on-merge', failures: 30 }],
+        failuresCount: 30,
+        buildsCount: 30,
+        byPipeline: [{ pipeline: 'kibana-on-merge', failuresCount: 30 }],
         branches: ['main'],
         targets: ['unknown'],
         firstFailedAt: new Date('2026-09-01T00:00:00.000Z'),
