@@ -7,6 +7,7 @@
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   isCcsTarget,
   partitionByCcs,
@@ -15,6 +16,12 @@ import {
   getIndexFields,
 } from './ccs';
 import { getIndexMappings } from './mappings';
+
+const fieldCapsRequest = (index: string) => ({
+  index,
+  fields: ['*'],
+  index_filter: { bool: { must_not: [{ term: { _tier: 'data_frozen' } }] } },
+});
 
 describe('isCcsTarget', () => {
   it('returns true for a CCS pattern with cluster prefix', () => {
@@ -112,15 +119,28 @@ describe('getFieldsFromFieldCaps', () => {
       esClient,
     });
 
-    expect(esClient.fieldCaps).toHaveBeenCalledWith({
-      index: 'remote:my-index',
-      fields: ['*'],
-    });
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('remote:my-index'));
 
     expect(fields.sort((a, b) => a.path.localeCompare(b.path))).toEqual([
       { path: 'message', type: 'text', meta: {}, searchable: true },
       { path: 'status', type: 'keyword', meta: {}, searchable: true },
     ]);
+  });
+
+  it('keeps frozen tier indices when they are included', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.fieldCaps.mockResolvedValue({ indices: ['remote:my-index'], fields: {} });
+
+    await getFieldsFromFieldCaps({
+      resource: 'remote:my-index',
+      esClient,
+      includeFrozen: true,
+    });
+
+    expect(esClient.fieldCaps).toHaveBeenCalledWith({
+      index: 'remote:my-index',
+      fields: ['*'],
+    });
   });
 });
 
@@ -266,10 +286,7 @@ describe('getIndexFields', () => {
       esClient,
     });
 
-    expect(esClient.fieldCaps).toHaveBeenCalledWith({
-      index: 'remote:logs',
-      fields: ['*'],
-    });
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('remote:logs'));
     expect(getIndexMappingsMock).not.toHaveBeenCalled();
     expect(result['remote:logs'].type).toBe('indexPattern');
     expect(result['remote:logs'].rawMapping).toBeUndefined();
@@ -365,10 +382,7 @@ describe('getIndexFields', () => {
     const result = await getIndexFields({ indices: ['my-alias'], esClient });
 
     expect(getIndexMappingsMock).not.toHaveBeenCalled();
-    expect(esClient.fieldCaps).toHaveBeenCalledWith({
-      index: 'my-alias',
-      fields: ['*'],
-    });
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('my-alias'));
     expect(result['my-alias'].type).toBe('alias');
     expect(result['my-alias'].rawMapping).toBeUndefined();
     expect(result['my-alias'].fields).toEqual([
@@ -397,10 +411,7 @@ describe('getIndexFields', () => {
     const result = await getIndexFields({ indices: ['logs-*'], esClient });
 
     expect(getIndexMappingsMock).not.toHaveBeenCalled();
-    expect(esClient.fieldCaps).toHaveBeenCalledWith({
-      index: 'logs-*',
-      fields: ['*'],
-    });
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('logs-*'));
     expect(result['logs-*'].type).toBe('indexPattern');
     expect(result['logs-*'].rawMapping).toBeUndefined();
     expect(result['logs-*'].fields).toEqual([

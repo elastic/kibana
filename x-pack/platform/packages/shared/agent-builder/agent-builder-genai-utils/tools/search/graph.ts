@@ -69,12 +69,14 @@ export const createSearchToolGraph = ({
   logger,
   events,
   topSnippetsConfig,
+  includeFrozen = false,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   logger: Logger;
   events: ToolEventEmitter;
   topSnippetsConfig?: TopSnippetsConfig;
+  includeFrozen?: boolean;
 }) => {
   const getTools = (state: StateType) => {
     const relevanceTool = createRelevanceSearchTool({
@@ -83,6 +85,7 @@ export const createSearchToolGraph = ({
       events,
       logger,
       topSnippetsConfig,
+      includeFrozen,
     });
     const nlSearchTool = createNaturalLanguageSearchTool({
       model,
@@ -92,6 +95,7 @@ export const createSearchToolGraph = ({
       rowLimit: state.rowLimit,
       customInstructions: state.customInstructions,
       timeRange: state.timeRange,
+      includeFrozen,
     });
     return [relevanceTool, nlSearchTool];
   };
@@ -129,6 +133,7 @@ export const createSearchToolGraph = ({
     const explorerRes = await indexExplorer({
       nlQuery: state.nlQuery,
       indexPattern: state.targetPattern ?? '*',
+      includeFrozen,
       esClient,
       model,
       logger,
