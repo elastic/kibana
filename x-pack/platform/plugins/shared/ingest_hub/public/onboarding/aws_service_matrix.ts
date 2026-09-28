@@ -983,9 +983,8 @@ export function buildAwsServiceMatrix(
       }
 
       // Fallback: packages with no matching policy template (e.g. awsfirehose) still expose
-      // their data streams — derive signal types and populate dataStreams directly from the
-      // package manifest. varDefsByDataStream is intentionally left empty: these are agent-based
-      // services that are configured via the Elastic Agent policy, not the MI settings flyout.
+      // their data streams — derive signal types and populate the full per-DS metadata so that
+      // buildPackageInputs can configure the agent policy with a valid input stream.
       if (!pt) {
         for (const ds of packageInfo.data_streams ?? []) {
           const dsId = (ds as any)?.path as string | undefined;
@@ -995,8 +994,29 @@ export function buildAwsServiceMatrix(
           }
           if (dsId) {
             dataStreams.push(dsId);
+            const dsInfo = computeDataStreamInfo(entry, ds, dsId);
+            varDefsByDataStream[dsId] = dsInfo;
+            for (const [input, byName] of Object.entries(dsInfo.varDefsByInput)) {
+              const bucket = (varDefsByInput[input] ??= {});
+              for (const [varName, varDef] of Object.entries(byName)) {
+                bucket[varName] ??= varDef;
+              }
+            }
+            if (!entry.inputs) {
+              for (const input of dsInfo.inputs) {
+                if (!inputs) inputs = [];
+                if (!inputs.includes(input)) inputs.push(input);
+              }
+            }
+            for (const input of dsInfo.defaultEnabledInputs) {
+              if (!defaultEnabledInputs.includes(input)) defaultEnabledInputs.push(input);
+            }
           }
         }
+        if (dataStreams.length > 0) {
+          defaultEnabled = defaultEnabledInputs.length > 0;
+        }
+        ({ requiredConfig, optionalConfig } = deriveUnionConfig(varDefsByInput));
       }
     }
 
