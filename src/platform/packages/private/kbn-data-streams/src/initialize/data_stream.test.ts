@@ -126,6 +126,9 @@ describe('initializeDataStream', () => {
       timestamp_field: { name: '@timestamp' },
     });
 
+    const versionedMappings = (version: number | undefined) =>
+      version === undefined ? {} : { _meta: { version } };
+
     const createExistingIndexTemplate = ({
       version,
       mappingsVersion,
@@ -140,35 +143,41 @@ describe('initializeDataStream', () => {
         index_patterns: [`${dataStreamName}*`],
         composed_of: [],
         _meta: { version },
-        template: {
-          mappings: mappingsVersion === undefined ? {} : { _meta: { version: mappingsVersion } },
-          lifecycle,
-        },
+        template: { mappings: versionedMappings(mappingsVersion), lifecycle },
       },
     });
 
     const mockWriteIndexMappingsVersion = (version: number | undefined) => {
       (elasticsearchClient.indices.getMapping as jest.Mock).mockResolvedValue({
-        [writeIndexName]: { mappings: version === undefined ? {} : { _meta: { version } } },
+        [writeIndexName]: { mappings: versionedMappings(version) },
       });
     };
 
-    it('rolls over lazily instead of updating the write index mappings when the version is incremented', async () => {
-      mockWriteIndexMappingsVersion(undefined);
-
-      await initializeDataStream({
+    const initializeWithRollover = (
+      overrides: Partial<Parameters<typeof initializeDataStream>[0]>
+    ) =>
+      initializeDataStream({
         logger,
         elasticsearchClient,
         dataStream: createDataStream(2),
         existingDataStream: createExistingDataStream(),
-        existingIndexTemplate: createExistingIndexTemplate({ version: 1 }),
+        existingIndexTemplate: undefined,
         skipCreation: false,
+        ...overrides,
+      });
+
+    it('rolls over lazily instead of updating the write index mappings when the version is incremented', async () => {
+      mockWriteIndexMappingsVersion(undefined);
+
+      await initializeWithRollover({
+        existingIndexTemplate: createExistingIndexTemplate({ version: 1 }),
       });
 
       expect(elasticsearchClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
       expect(elasticsearchClient.indices.putMapping).not.toHaveBeenCalled();
       expect(elasticsearchClient.indices.getMapping).toHaveBeenCalledWith({
         index: writeIndexName,
+        filter_path: ['*.mappings._meta.version'],
       });
       expect(elasticsearchClient.indices.rollover).toHaveBeenCalledWith({
         alias: dataStreamName,
@@ -180,13 +189,8 @@ describe('initializeDataStream', () => {
       // e.g. a previous start updated the index template but failed to roll over.
       mockWriteIndexMappingsVersion(1);
 
-      await initializeDataStream({
-        logger,
-        elasticsearchClient,
-        dataStream: createDataStream(2),
-        existingDataStream: createExistingDataStream(),
+      await initializeWithRollover({
         existingIndexTemplate: createExistingIndexTemplate({ version: 2, mappingsVersion: 2 }),
-        skipCreation: false,
       });
 
       expect(elasticsearchClient.indices.rollover).toHaveBeenCalledWith({
@@ -198,13 +202,8 @@ describe('initializeDataStream', () => {
     it('does not roll over when the write index mappings are up to date', async () => {
       mockWriteIndexMappingsVersion(2);
 
-      await initializeDataStream({
-        logger,
-        elasticsearchClient,
-        dataStream: createDataStream(2),
-        existingDataStream: createExistingDataStream(),
+      await initializeWithRollover({
         existingIndexTemplate: createExistingIndexTemplate({ version: 2, mappingsVersion: 2 }),
-        skipCreation: false,
       });
 
       expect(elasticsearchClient.indices.rollover).not.toHaveBeenCalled();
@@ -212,13 +211,8 @@ describe('initializeDataStream', () => {
     });
 
     it('does not roll over when the index template mappings are not versioned', async () => {
-      await initializeDataStream({
-        logger,
-        elasticsearchClient,
-        dataStream: createDataStream(2),
-        existingDataStream: createExistingDataStream(),
+      await initializeWithRollover({
         existingIndexTemplate: createExistingIndexTemplate({ version: 2 }),
-        skipCreation: false,
       });
 
       expect(elasticsearchClient.indices.getMapping).not.toHaveBeenCalled();
@@ -226,13 +220,9 @@ describe('initializeDataStream', () => {
     });
 
     it('does not roll over when the data stream is already marked for rollover', async () => {
-      await initializeDataStream({
-        logger,
-        elasticsearchClient,
-        dataStream: createDataStream(2),
+      await initializeWithRollover({
         existingDataStream: createExistingDataStream({ rolloverOnWrite: true }),
         existingIndexTemplate: createExistingIndexTemplate({ version: 1 }),
-        skipCreation: false,
       });
 
       expect(elasticsearchClient.indices.getMapping).not.toHaveBeenCalled();
@@ -240,13 +230,9 @@ describe('initializeDataStream', () => {
     });
 
     it('creates a missing data stream without rolling over', async () => {
-      await initializeDataStream({
-        logger,
-        elasticsearchClient,
+      await initializeWithRollover({
         dataStream: createDataStream(1),
         existingDataStream: undefined,
-        existingIndexTemplate: undefined,
-        skipCreation: false,
       });
 
       expect(elasticsearchClient.indices.createDataStream).toHaveBeenCalledWith({
@@ -258,17 +244,13 @@ describe('initializeDataStream', () => {
     it('updates the lifecycle when the version is incremented', async () => {
       mockWriteIndexMappingsVersion(1);
 
-      await initializeDataStream({
-        logger,
-        elasticsearchClient,
+      await initializeWithRollover({
         dataStream: createDataStream(2, { data_retention: '30d' }),
-        existingDataStream: createExistingDataStream(),
         existingIndexTemplate: createExistingIndexTemplate({
           version: 1,
           mappingsVersion: 1,
           lifecycle: { data_retention: '7d' },
         }),
-        skipCreation: false,
       });
 
       expect(elasticsearchClient.indices.putDataLifecycle).toHaveBeenCalledWith({

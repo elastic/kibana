@@ -7,11 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import invariant from 'node:assert';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import type * as api from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import { retryEs } from '../retry_es';
+
+export const getDeployedVersion = (
+  existingIndexTemplate: api.IndicesGetIndexTemplateIndexTemplateItem,
+  dataStreamName: string
+): number => {
+  const deployedVersion = existingIndexTemplate.index_template?._meta?.version;
+  invariant(
+    typeof deployedVersion === 'number' && deployedVersion > 0,
+    `Datastream ${dataStreamName} metadata is in an unexpected state, expected version to be a number but got ${deployedVersion}`
+  );
+  return deployedVersion;
+};
 
 export const getExistingIndexTemplate = async (
   elasticsearchClient: ElasticsearchClient,

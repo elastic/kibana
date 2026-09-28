@@ -17,6 +17,8 @@ import type { DataStreamDefinition } from '../types';
 import type { GetFieldsOf } from '@kbn/es-mappings';
 import { mappings, type MappingsDefinition } from '@kbn/es-mappings';
 import { initialize } from '../initialize';
+import { getExistingIndexTemplate } from '../initialize/exists_checks';
+import { initializeIndexTemplate } from '../initialize/index_template';
 import { DataStreamClient } from '../client';
 
 describe('Data streams initialize function', () => {
@@ -754,13 +756,16 @@ describe('Data streams initialize function', () => {
       expect((await getIndexMappings(firstBackingIndex))._meta).toEqual({ version: 1 });
 
       // A previous start installed the v2 index template but did not roll over.
-      await esClient.indices.putIndexTemplate({
-        name: testDataStream.name,
-        index_patterns: [`${testDataStream.name}*`],
-        data_stream: { hidden: true },
-        priority: 100,
-        template: { mappings: { ...v2Mappings, _meta: { version: 2 } } },
-        _meta: { version: 2, previousVersions: [1] },
+      await initializeIndexTemplate({
+        logger,
+        elasticsearchClient: esClient,
+        dataStream: v2Definition,
+        existingIndexTemplate: await getExistingIndexTemplate(
+          esClient,
+          testDataStream.name,
+          logger
+        ),
+        skipCreation: false,
       });
 
       await initialize({

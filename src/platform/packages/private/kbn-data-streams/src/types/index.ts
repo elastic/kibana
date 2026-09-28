@@ -8,11 +8,7 @@
  */
 
 export type { BaseSearchRuntimeMappings } from './runtime';
-export type {
-  DataStreamDefinition,
-  AnyDataStreamDefinition,
-  MappingsUpdateStrategy,
-} from './definition';
+export type { DataStreamDefinition, AnyDataStreamDefinition } from './definition';
 export type {
   ClientSearchRequest,
   ClientSearchResponse,

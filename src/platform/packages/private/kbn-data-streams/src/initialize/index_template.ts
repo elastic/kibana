@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import invariant from 'node:assert';
 import type * as api from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { retryEs } from '../retry_es';
 import type { AnyDataStreamDefinition } from '../types';
 import { applyDefaults } from './defaults';
+import { getDeployedVersion } from './exists_checks';
 import { withMappingsVersion } from './rollover';
 
 /**
@@ -51,11 +51,7 @@ export async function initializeIndexTemplate({
   // index template exists so we always update it.
   if (existingIndexTemplate) {
     logger.debug(`Index template already exists: ${dataStream.name}, updating it.`);
-    const deployedVersion = existingIndexTemplate.index_template?._meta?.version;
-    invariant(
-      typeof deployedVersion === 'number' && deployedVersion > 0,
-      `Datastream ${dataStream.name} metadata is in an unexpected state, expected version to be a number but got ${deployedVersion}`
-    );
+    const deployedVersion = getDeployedVersion(existingIndexTemplate, dataStream.name);
 
     if (deployedVersion >= version) {
       // index already applied and updated.

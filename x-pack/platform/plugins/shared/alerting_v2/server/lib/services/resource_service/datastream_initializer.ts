@@ -36,8 +36,7 @@ export class DatastreamInitializer implements IResourceInitializer {
       name: this.resourceDefinition.dataStreamName,
       hidden: true,
       version: this.resourceDefinition.version,
-      // Mapping changes are applied to a new backing index on the next write; existing backing
-      // indices are never updated in place, which allows breaking changes such as field aliases.
+      // Allows breaking mapping changes, such as converting fields to aliases.
       mappingsUpdateStrategy: 'rollover',
       template: {
         aliases: {},

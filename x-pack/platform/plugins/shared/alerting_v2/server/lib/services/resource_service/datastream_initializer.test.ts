@@ -7,7 +7,6 @@
 
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
-import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
@@ -177,56 +176,17 @@ describe('DatastreamInitializer', () => {
     );
   });
 
-  it('rolls the data stream over instead of updating the write index mappings when the version is incremented', async () => {
-    const writeIndexName = '.ds-.alerting-test-000001';
-    const existingDataStream: IndicesDataStream = {
-      name: resourceDefinition.dataStreamName,
-      generation: 1,
-      hidden: true,
-      indices: [{ index_name: writeIndexName, index_uuid: 'write-index-uuid' }],
-      next_generation_managed_by: 'Data stream lifecycle',
-      prefer_ilm: false,
-      rollover_on_write: false,
-      settings: {},
-      status: 'green',
-      template: resourceDefinition.dataStreamName,
-      timestamp_field: { name: '@timestamp' },
-    };
-    esClient.indices.getDataStream.mockResolvedValue({ data_streams: [existingDataStream] });
-    esClient.indices.getIndexTemplate.mockResolvedValue({
-      index_templates: [
-        {
-          name: resourceDefinition.dataStreamName,
-          index_template: {
-            index_patterns: [`${resourceDefinition.dataStreamName}*`],
-            composed_of: [],
-            _meta: { version: 1, previousVersions: [] },
-          },
-        },
-      ],
-    });
-    // Write index created before its mappings were versioned.
-    esClient.indices.getMapping.mockResolvedValue({ [writeIndexName]: { mappings: {} } });
+  it('installs the index template with versioned mappings for the rollover update strategy', async () => {
+    const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
 
-    const initializer = new DatastreamInitializer(mockLogger, esClient, {
-      ...resourceDefinition,
-      version: 2,
-    });
     await initializer.initialize();
 
     expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
       expect.objectContaining({
         template: expect.objectContaining({
-          mappings: expect.objectContaining({ _meta: { version: 2 } }),
+          mappings: expect.objectContaining({ _meta: { version: resourceDefinition.version } }),
         }),
       })
     );
-    expect(esClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
-    expect(esClient.indices.putMapping).not.toHaveBeenCalled();
-    expect(esClient.indices.createDataStream).not.toHaveBeenCalled();
-    expect(esClient.indices.rollover).toHaveBeenCalledWith({
-      alias: resourceDefinition.dataStreamName,
-      lazy: true,
-    });
   });
 });

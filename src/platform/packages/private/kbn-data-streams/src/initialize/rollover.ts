@@ -29,34 +29,36 @@ export const getMappingsVersion = (
 };
 
 /**
- * Lazily rolls the data stream over when its write index was created from older mappings than the
- * index template's, so that the next write creates a backing index with the current mappings.
- *
- * Lazy rollovers are idempotent: data streams already marked for rollover are skipped, and several
- * Kibana nodes marking the same data stream result in a single rollover on the next write.
+ * Lazily rolls the data stream over when its write index has older mappings than the index template.
+ * Idempotent: several Kibana nodes marking the same data stream result in a single rollover.
  */
 export async function rolloverIfWriteIndexOutdated({
   logger,
   elasticsearchClient,
-  dataStream,
+  existingDataStream,
   templateMappingsVersion,
 }: {
   logger: Logger;
   elasticsearchClient: ElasticsearchClient;
-  dataStream: api.IndicesDataStream;
+  existingDataStream: api.IndicesDataStream;
   templateMappingsVersion: number | undefined;
 }): Promise<void> {
-  const { name, indices, rollover_on_write: rolloverOnWrite } = dataStream;
-  const writeIndex = indices[indices.length - 1];
+  const { name, indices, rollover_on_write: rolloverOnWrite } = existingDataStream;
 
   // An index template without a mappings version predates the rollover strategy: there is nothing
   // to compare the write index against until the next version is released.
-  if (!writeIndex || rolloverOnWrite || templateMappingsVersion === undefined) {
+  if (rolloverOnWrite || templateMappingsVersion === undefined) {
     return;
   }
 
-  const { [writeIndex.index_name]: writeIndexMappings } = await retryEs(
-    () => elasticsearchClient.indices.getMapping({ index: writeIndex.index_name }),
+  const { index_name: writeIndexName } = indices[indices.length - 1];
+  const { [writeIndexName]: writeIndexMappings } = await retryEs(
+    () =>
+      elasticsearchClient.indices.getMapping({
+        index: writeIndexName,
+        // A write index without a mappings version is omitted from the filtered response.
+        filter_path: ['*.mappings._meta.version'],
+      }),
     { logger, dataStreamName: name }
   );
   const writeIndexMappingsVersion = getMappingsVersion(writeIndexMappings?.mappings);
@@ -65,16 +67,13 @@ export async function rolloverIfWriteIndexOutdated({
     writeIndexMappingsVersion !== undefined &&
     writeIndexMappingsVersion >= templateMappingsVersion
   ) {
-    logger.debug(`Write index ${writeIndex.index_name} of ${name} has up to date mappings.`);
+    logger.debug(`Write index ${writeIndexName} of ${name} has up to date mappings.`);
     return;
   }
 
+  const writeIndexVersionLabel = writeIndexMappingsVersion ?? '(none)';
   logger.info(
-    `Rolling over data stream ${name} on next write: write index ${
-      writeIndex.index_name
-    } has mappings v${
-      writeIndexMappingsVersion ?? '(none)'
-    }, index template has v${templateMappingsVersion}.`
+    `Rolling over data stream ${name} on next write: write index ${writeIndexName} has mappings v${writeIndexVersionLabel}, index template has v${templateMappingsVersion}.`
   );
   await retryEs(() => elasticsearchClient.indices.rollover({ alias: name, lazy: true }), {
     logger,
