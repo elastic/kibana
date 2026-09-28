@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EsClient } from '@kbn/scout';
+import type { EsClient, KbnClient } from '@kbn/scout';
 import type { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { EntityStoreStatusResponseBody } from '../../../../server/routes/apis/status';
@@ -24,6 +24,7 @@ import {
   UPDATES_INDEX,
   ENTRA_SOURCE_INDEX,
 } from './constants';
+import { EntityResolutionRuleTypeName } from '../../../../server/domain/resolution/rules/saved_object/constants';
 
 type ApiWorkerFixtures = Parameters<Parameters<typeof apiTest>[2]>[0];
 export type ApiClientFixture = ApiWorkerFixtures['apiClient'];
@@ -79,6 +80,15 @@ export const clearEntityStoreIndices = async (esClient: EsClient) => {
 
   await esClient.indices.deleteDataStream({ name: LOGS_TEST_INDEX }).catch(() => {});
   await esClient.indices.deleteDataStream({ name: QUERY_TRANSLATION_TEST_INDEX }).catch(() => {});
+};
+
+/**
+ * Removes rule enablement overrides so `defaultEnabled` is what the matcher sees.
+ * Disable/enable routes write a saved object rather than deleting one, and
+ * uninstall does not clean these up.
+ */
+export const clearResolutionRuleOverrides = async (kbnClient: KbnClient): Promise<void> => {
+  await kbnClient.savedObjects.clean({ types: [EntityResolutionRuleTypeName] });
 };
 
 /**

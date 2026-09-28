@@ -20,6 +20,7 @@ import { FF_ENABLE_ENTITY_STORE_V2, RESOLUTION_RULE_IDS } from '../../../../../c
 import { hashEuid } from '../../../../../common/domain/euid';
 import {
   clearEntityStoreIndices,
+  clearResolutionRuleOverrides,
   seedUserEntity,
   waitForResolution,
   assertNotResolved,
@@ -50,6 +51,7 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
     await kbnClient.uiSettings.update({
       [FF_ENABLE_ENTITY_STORE_V2]: true,
     });
+    await clearResolutionRuleOverrides(kbnClient);
 
     await esClient.indices.delete({
       index: [LATEST_INDEX, UPDATES_INDEX],
@@ -84,13 +86,14 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
     });
   });
 
-  apiTest.afterAll(async ({ apiClient, esClient }) => {
+  apiTest.afterAll(async ({ apiClient, esClient, kbnClient }) => {
     const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
     expect(response.statusCode).toBe(200);
+    await clearResolutionRuleOverrides(kbnClient);
     await clearEntityStoreIndices(esClient);
   });
 
