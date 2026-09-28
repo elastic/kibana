@@ -26,12 +26,18 @@ interface ConversationStream {
 
 export class ConversationStreamService {
   private readonly streams = new Map<string, ConversationStream>();
+  private readonly streamStartedSub: Subscription;
 
   constructor(private readonly source: ChatEventSource) {
-    // An execution can begin before anything subscribes to its stream - ensure we don't remove the stream too early (e.g. when user navigates away).
-    this.source.getStreamStarted$().subscribe((conversationId) => {
+    this.streamStartedSub = this.source.getStreamStarted$().subscribe((conversationId) => {
       this.ensure(conversationId).running = true;
     });
+  }
+
+  dispose(): void {
+    this.streamStartedSub.unsubscribe();
+    this.streams.forEach((stream) => stream.sub.unsubscribe());
+    this.streams.clear();
   }
 
   private ensure(conversationId: string): ConversationStream {

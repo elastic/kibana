@@ -548,4 +548,27 @@ describe('ConversationStreamService', () => {
 
     expect(() => service.clearPromptResponse('A', 'pr-999')).not.toThrow();
   });
+
+  it('dispose stops the service from reacting to further start signals', () => {
+    const { source, getSubject, startRun } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+
+    service.dispose();
+    startRun('A');
+
+    expect(getSubject('A').observed).toBe(false);
+    expect(service.getSnapshot('A')).toEqual([]);
+  });
+
+  it('dispose unsubscribes any streams still held at teardown time', () => {
+    const { source, getSubject, startRun } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+
+    startRun('A');
+    expect(getSubject('A').observed).toBe(true);
+
+    service.dispose();
+
+    expect(getSubject('A').observed).toBe(false);
+  });
 });

@@ -72,6 +72,7 @@ export const mountApp = async ({
   );
 
   return () => {
+    conversationStreamService.dispose();
     ReactDOM.unmountComponentAtNode(element);
   };
 };
