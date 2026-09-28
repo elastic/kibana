@@ -190,13 +190,6 @@ export const ENTITY_STORE_PREBUILT_WATCHLISTS_WARNING_TEXT = i18n.translate(
   }
 );
 
-export const RISK_SCORE_ENGINE_RUN_SUCCESS = i18n.translate(
-  'xpack.securitySolution.riskScore.engineRunSuccess',
-  {
-    defaultMessage: 'Entity risk score maintainer run started successfully',
-  }
-);
-
 export const RISK_ENGINE_SAVED_OBJECT_CONFIGURATION_SUCCESS = i18n.translate(
   'xpack.securitySolution.riskScore.savedObject.configurationSuccess',
   {
@@ -234,22 +227,12 @@ export const RISK_ENGINE_INCLUDE_CLOSED_ALERTS_DESCRIPTION = i18n.translate(
   }
 );
 
-export const RISK_ENGINE_NEXT_RUN_TIME = (timeInMinutes: string) =>
-  i18n.translate('xpack.securitySolution.riskScore.engineNextRunTime', {
-    defaultMessage: `Next maintainer run in {timeInMinutes}`,
-    values: { timeInMinutes },
-  });
-
 export const ENTITY_ANALYTICS_STATUS_SWITCH_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.statusSwitchLabel',
   {
     defaultMessage: 'Entity analytics',
   }
 );
-
-export const RUN_RISK_SCORE_ENGINE = i18n.translate('xpack.securitySolution.riskScore.runEngine', {
-  defaultMessage: 'Run Maintainer',
-});
 
 export const SAVE_CHANGES = i18n.translate(
   'xpack.securitySolution.riskScore.engineSavedObjectsaveChanges',
@@ -262,13 +245,6 @@ export const DISCARD_CHANGES = i18n.translate(
   'xpack.securitySolution.riskScore.engineSavedObject.discardChanges',
   {
     defaultMessage: 'Discard Changes',
-  }
-);
-
-export const RISK_SCORE_ENGINE_RUN_FAILURE = i18n.translate(
-  'xpack.securitySolution.riskScore.engineRunSuccess',
-  {
-    defaultMessage: 'Entity risk score maintainer run failed to start',
   }
 );
 

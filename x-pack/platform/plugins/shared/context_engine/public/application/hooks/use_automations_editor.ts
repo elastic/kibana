@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useReducer } from 'react';
+import { useCallback, useMemo, useReducer, useState } from 'react';
 import type { AiIndexAutomation, GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import { buildStarterWorkflowYaml } from '../utils/starter_workflow_yaml';
 import { useCreateWorkflow } from './use_create_workflow';
@@ -48,7 +48,7 @@ const reducer = (
 
 interface UseAutomationsEditorParams {
   aiIndex: GetAiIndexResponse | undefined;
-  onSaved: () => void;
+  onSaved: () => void | Promise<void>;
 }
 
 export interface UseAutomationsEditorResult {
@@ -74,6 +74,7 @@ export const useAutomationsEditor = ({
   const [state, dispatch] = useReducer(reducer, IDLE);
   const { saveAutomations, isSaving } = useSaveAiIndexAutomations();
   const { createWorkflow, isCreating } = useCreateWorkflow();
+  const [isPersisting, setIsPersisting] = useState(false);
 
   const savedAutomations = aiIndex?.automations;
   const automations = useMemo(
@@ -105,12 +106,18 @@ export const useAutomationsEditor = ({
       if (!aiIndex) {
         return false;
       }
-      const saved = await saveAutomations(aiIndex, next);
-      if (saved) {
-        dispatch({ type: 'editStopped' });
-        onSaved();
+      setIsPersisting(true);
+      try {
+        const saved = await saveAutomations(aiIndex, next);
+        if (saved) {
+          dispatch({ type: 'editStopped' });
+          // Wait for the AI index refetch so navigation to Workflows does not abort it.
+          await onSaved();
+        }
+        return saved;
+      } finally {
+        setIsPersisting(false);
       }
-      return saved;
     },
     [aiIndex, onSaved, saveAutomations]
   );
@@ -142,7 +149,7 @@ export const useAutomationsEditor = ({
     workflowIds,
     isSaving,
     isCreating,
-    isBusy: isSaving || isCreating,
+    isBusy: isSaving || isCreating || isPersisting,
     startEditing,
     stopEditing,
     removeAutomation,

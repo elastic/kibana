@@ -89,45 +89,31 @@ export class GcsFileSystem extends AbstractFileSystem {
   }
 
   protected async hasArchive(archivePath: string): Promise<boolean> {
-    const commands: Array<[cmd: string, args: string[]]> = [
-      ['gcloud', ['storage', 'ls', '--uri', archivePath]],
-      ['gsutil', ['-q', 'ls', archivePath]],
-    ];
-
-    for (const [cmd, args] of commands) {
-      try {
-        await execa(cmd, args, {
-          cwd: REPO_ROOT,
-          stdio: 'ignore',
-        });
-        return true;
-      } catch (error) {
-        continue;
-      }
+    try {
+      await execa('gcloud', ['storage', 'ls', archivePath], {
+        cwd: REPO_ROOT,
+        stdio: 'ignore',
+      });
+      return true;
+    } catch (error) {
+      this.log.debug(`Unable to find TypeScript cache archive at ${archivePath}: ${String(error)}`);
+      return false;
     }
-
-    return false;
   }
 
   protected async readMetadata(metadataPath: string): Promise<ArchiveMetadata | undefined> {
-    const commands: Array<[cmd: string, args: string[]]> = [
-      ['gcloud', ['storage', 'cat', metadataPath]],
-      ['gsutil', ['cat', metadataPath]],
-    ];
-
-    for (const [cmd, args] of commands) {
-      try {
-        const { stdout } = await execa(cmd, args, {
-          cwd: REPO_ROOT,
-          stderr: 'ignore',
-        });
-        return JSON.parse(stdout) as ArchiveMetadata;
-      } catch (error) {
-        continue;
-      }
+    try {
+      const { stdout } = await execa('gcloud', ['storage', 'cat', metadataPath], {
+        cwd: REPO_ROOT,
+        stderr: 'ignore',
+      });
+      return JSON.parse(stdout) as ArchiveMetadata;
+    } catch (error) {
+      this.log.debug(
+        `Unable to read TypeScript cache metadata at ${metadataPath}: ${String(error)}`
+      );
+      return undefined;
     }
-
-    return undefined;
   }
 
   protected async writeMetadata(metadataPath: string, data: ArchiveMetadata): Promise<void> {

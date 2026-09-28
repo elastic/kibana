@@ -167,9 +167,9 @@ export function createScenarios(
     // runs immediately (derivative flyout), Visualize opens the share export flyout.
     await retry.waitFor('export popover or flyout to open', async () => {
       return (
-        (await testSubjects.exists('exportPopoverPanel', { timeout: 500 })) ||
-        (await testSubjects.exists('exportDerivativeFlyout-exportJson', { timeout: 500 })) ||
-        (await testSubjects.exists('exportItemDetailsFlyout', { timeout: 500 }))
+        (await testSubjects.exists('exportPopoverPanel')) ||
+        (await testSubjects.exists('exportDerivativeFlyout-exportJson')) ||
+        (await testSubjects.exists('exportItemDetailsFlyout'))
       );
     });
 
