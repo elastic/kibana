@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UiSettingsCommon } from '@kbn/data-views-plugin/common';
 import { getEsqlFn } from './esql';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import type {
@@ -16,19 +15,19 @@ import type {
   IEsqlSearchOptions,
   IEsqlSearchResult,
 } from '@kbn/search-types';
+import { ESQLVariableType } from '@kbn/esql-types';
 import type { KibanaContext } from '..';
 
 interface MockTypedSearchService {
   esql: jest.Mock<Promise<IEsqlSearchResult>, [IEsqlSearchParams, IEsqlSearchOptions?]>;
 }
 
-const mockUiSettings = (): UiSettingsCommon =>
-  ({
-    get: jest.fn((key: string) => {
-      if (key === 'dateFormat:tz') return 'UTC';
-      return undefined;
-    }),
-  } as unknown as UiSettingsCommon);
+const makeDatatable = (): NonNullable<IEsqlSearchResult['datatable']> => ({
+  type: 'datatable',
+  columns: [{ id: 'col1', name: 'col1', meta: { type: 'string' } }],
+  rows: [{ col1: 'value1' }],
+  meta: { type: 'es_ql', statistics: { totalCount: 1 } },
+});
 
 const createExecutionContext = (): ExecutionContext =>
   ({
@@ -39,39 +38,44 @@ const createExecutionContext = (): ExecutionContext =>
     getExecutionContext: jest.fn(),
   } as unknown as ExecutionContext);
 
-const getMockSearchService = (
-  columns: Array<{ name: string; type: string; _meta?: Record<string, unknown> }>,
-  values: unknown[][] = [['v1']]
-): MockTypedSearchService => {
-  const mockTyped = {
-    esql: jest.fn().mockResolvedValue({
-      rawResponse: {
-        values,
-        columns,
-      },
-    }),
-  } as unknown as MockTypedSearchService;
+const getMockSearchService = (): MockTypedSearchService => ({
+  esql: jest.fn().mockResolvedValue({
+    rawResponse: { columns: [], values: [] },
+    datatable: makeDatatable(),
+  }),
+});
 
-  return mockTyped;
-};
 const createEsqlFn = (mockSearchService: MockTypedSearchService) =>
   getEsqlFn({
     getStartDependencies: async () => ({
       searchService: mockSearchService as unknown as ISearchMethods,
-      uiSettings: mockUiSettings(),
     }),
   });
 
 describe('getEsqlFn', () => {
-  it('should always return a fully serializable table', async () => {
-    const esqlFn = createEsqlFn(
-      getMockSearchService([{ name: 'column1', type: 'string' }], [['value1']])
-    );
+  it('returns the datatable from the search service', async () => {
+    const mockSearchService = getMockSearchService();
+    const esqlFn = createEsqlFn(mockSearchService);
 
     const result = await esqlFn.fn(null, { query: 'FROM index' }, createExecutionContext());
 
     expect(result?.type).toEqual('datatable');
     expect(() => JSON.stringify(result)).not.toThrow();
+  });
+
+  it('requests columnMetadata, dropNullColumns, and includeExecutionMetadata', async () => {
+    const mockSearchService = getMockSearchService();
+
+    await createEsqlFn(mockSearchService).fn(
+      null,
+      { query: 'FROM index' },
+      createExecutionContext()
+    );
+
+    const options = mockSearchService.esql.mock.calls[0][1];
+    expect(options?.columnMetadata).toBe(true);
+    expect(options?.dropNullColumns).toBe(true);
+    expect(options?.includeExecutionMetadata).toBe(true);
   });
 
   describe('ignoreGlobalFilters', () => {
@@ -83,14 +87,11 @@ describe('getEsqlFn', () => {
     const input: KibanaContext = {
       type: 'kibana_context',
       filters: [inputFilter],
-      query: {
-        language: 'kuery',
-        query: 'myField:uniqueFromQueryBar',
-      },
+      query: { language: 'kuery', query: 'myField:uniqueFromQueryBar' },
     };
 
-    it('should include global query and filters in params.filter when ignoreGlobalFilters is false', async () => {
-      const mockSearchService = getMockSearchService([], []);
+    it('passes global query and filters in the search context when ignoreGlobalFilters is false', async () => {
+      const mockSearchService = getMockSearchService();
 
       await createEsqlFn(mockSearchService).fn(
         input,
@@ -98,15 +99,14 @@ describe('getEsqlFn', () => {
         createExecutionContext()
       );
 
-      const params = mockSearchService.esql.mock.calls[0][0];
+      const [params, options] = mockSearchService.esql.mock.calls[0];
       expect(params.query).toBe('FROM index');
-      const filterJson = JSON.stringify(params.filter);
-      expect(filterJson).toContain('uniqueFromFilterPill');
-      expect(filterJson).toContain('uniqueFromQueryBar');
+      expect(options?.searchContext?.filters).toEqual([inputFilter]);
+      expect(options?.searchContext?.query).toEqual(input.query);
     });
 
-    it('should exclude global query and filters from params.filter when ignoreGlobalFilters is true', async () => {
-      const mockSearchService = getMockSearchService([], []);
+    it('excludes global query and filters from the search context when ignoreGlobalFilters is true', async () => {
+      const mockSearchService = getMockSearchService();
 
       await createEsqlFn(mockSearchService).fn(
         input,
@@ -114,163 +114,28 @@ describe('getEsqlFn', () => {
         createExecutionContext()
       );
 
-      const params = mockSearchService.esql.mock.calls[0][0];
+      const [params, options] = mockSearchService.esql.mock.calls[0];
       expect(params.query).toBe('FROM index');
-      const filterJson = JSON.stringify(params.filter);
-      expect(filterJson).not.toContain('uniqueFromFilterPill');
-      expect(filterJson).not.toContain('uniqueFromQueryBar');
+      expect(options?.searchContext?.filters).toEqual([]);
+      expect(options?.searchContext?.query).toBeUndefined();
     });
   });
 
-  it('resolves meta.sourceParams.sourceField through RENAME to the underlying field', async () => {
-    const mockSearchService = getMockSearchService([{ name: 'new_name', type: 'keyword' }]);
-
-    const result = await createEsqlFn(mockSearchService).fn(
-      null,
-      { query: 'FROM index | RENAME old_name AS new_name' },
-      createExecutionContext()
-    );
-
-    expect(result?.columns?.[0]?.meta?.sourceParams?.sourceField).toBe('old_name');
-    expect(result?.columns?.[0]?.meta?.sourceParams?.isSourceFieldFilterable).toBe(true);
-    expect(result?.columns?.[0]?.name).toBe('new_name');
-  });
-
-  it('keeps meta.sourceParams.sourceField as the ES column name without RENAME', async () => {
-    const mockSearchService = getMockSearchService([{ name: 'host', type: 'keyword' }]);
-
-    const result = await createEsqlFn(mockSearchService).fn(
-      null,
-      { query: 'FROM index' },
-      createExecutionContext()
-    );
-
-    // A plain pass-through field is its own real, filterable field, even though it was never
-    // renamed.
-    expect(result?.columns?.[0]?.meta?.sourceParams?.sourceField).toBe('host');
-    expect(result?.columns?.[0]?.meta?.sourceParams?.isSourceFieldFilterable).toBe(true);
-  });
-
-  it('treats an EVAL-computed field with no rename as not filterable', async () => {
-    const mockSearchService = getMockSearchService([{ name: 'doubled', type: 'long' }]);
-
-    const result = await createEsqlFn(mockSearchService).fn(
-      null,
-      { query: 'FROM index | EVAL doubled = bytes * 2' },
-      createExecutionContext()
-    );
-
-    expect(result?.columns?.[0]?.meta?.sourceParams?.sourceField).toBe('doubled');
-    expect(result?.columns?.[0]?.meta?.sourceParams?.isSourceFieldFilterable).toBe(false);
-  });
-
-  it('treats a METADATA column as filterable, even though it was never renamed', async () => {
-    const mockSearchService = getMockSearchService([{ name: '_id', type: 'keyword' }]);
-
-    const result = await createEsqlFn(mockSearchService).fn(
-      null,
-      { query: 'FROM index METADATA _id' },
-      createExecutionContext()
-    );
-
-    expect(result?.columns?.[0]?.isComputedColumn).toBe(true);
-    expect(result?.columns?.[0]?.meta?.sourceParams?.sourceField).toBe('_id');
-    expect(result?.columns?.[0]?.meta?.sourceParams?.isSourceFieldFilterable).toBe(true);
-  });
-
-  it('resolves chained RENAME pipeline for meta.sourceParams.sourceField', async () => {
-    const mockSearchService = getMockSearchService([{ name: 'c', type: 'keyword' }]);
-
-    const result = await createEsqlFn(mockSearchService).fn(
-      null,
-      { query: 'FROM index | RENAME a AS b | RENAME b AS c' },
-      createExecutionContext()
-    );
-
-    expect(result?.columns?.[0]?.meta?.sourceParams?.sourceField).toBe('a');
-    expect(result?.columns?.[0]?.name).toBe('c');
-  });
-
-  it('passes ES column _meta through to meta.esMeta', async () => {
-    const columnMeta = { approximation: { type: 'count_distinct', column: '@timestamp' } };
-    const mockSearchService = getMockSearchService([
-      { name: 'count', type: 'long', _meta: columnMeta },
-    ]);
-
-    const result = await createEsqlFn(mockSearchService).fn(
-      null,
-      { query: 'FROM index | STATS COUNT(DISTINCT @timestamp)' },
-      createExecutionContext()
-    );
-
-    expect(result?.columns?.[0]?.meta?.esMeta).toEqual(columnMeta);
-  });
-
-  it('omits meta.esMeta when ES column has no _meta', async () => {
-    const mockSearchService = getMockSearchService([{ name: 'host', type: 'keyword' }]);
-
-    const result = await createEsqlFn(mockSearchService).fn(
-      null,
-      { query: 'FROM index' },
-      createExecutionContext()
-    );
-
-    expect(result?.columns?.[0]?.meta?.esMeta).toBeUndefined();
-  });
-
-  it('requests column_metadata from Elasticsearch', async () => {
-    const mockSearchService = getMockSearchService([{ name: 'host', type: 'keyword' }]);
+  it('passes the time range, time field, and control variables in the search context', async () => {
+    const mockSearchService = getMockSearchService();
+    const timeRange = { from: '2024-01-01T00:00:00.000Z', to: '2024-01-02T00:00:00.000Z' };
+    const esqlVariables = [{ key: 'field', value: 'host', type: ESQLVariableType.FIELDS }];
 
     await createEsqlFn(mockSearchService).fn(
-      null,
-      { query: 'FROM index' },
+      { type: 'kibana_context', timeRange, esqlVariables },
+      { query: 'FROM index | KEEP ??field', timeField: '@timestamp' },
       createExecutionContext()
     );
 
-    const options = mockSearchService.esql.mock.calls[0][1];
-    expect(options?.columnMetadata).toBe(true);
-  });
-
-  it('resolves meta.sourceParams.sourceField for STATS BY alias = column', async () => {
-    const mockSearchService = getMockSearchService([
-      { name: 'cnt', type: 'long' },
-      { name: 'region', type: 'keyword' },
-    ]);
-
-    const query = 'FROM index | STATS cnt = COUNT(*) BY region = country';
-    const result = await createEsqlFn(mockSearchService).fn(
-      null,
-      { query },
-      createExecutionContext()
+    const [params, options] = mockSearchService.esql.mock.calls[0];
+    expect(params.query).toBe('FROM index | KEEP ??field');
+    expect(options?.searchContext).toEqual(
+      expect.objectContaining({ timeRange, timeField: '@timestamp', esqlVariables })
     );
-
-    const regionColumn = result?.columns?.find((col) => col.name === 'region');
-    expect(regionColumn?.meta?.sourceParams?.sourceField).toBe('country');
-    expect(
-      result?.columns?.find((col) => col.name === 'cnt')?.meta?.sourceParams?.sourceField
-    ).toBe('cnt');
-  });
-
-  describe('resolves meta.sourceParams.appliedTimeRange for date columns when an input time range is provided', () => {
-    it('sets appliedTimeRange for date columns when an input time range is provided', async () => {
-      const mockSearchService = getMockSearchService([{ name: '@timestamp', type: 'date' }]);
-
-      const input: KibanaContext = {
-        type: 'kibana_context',
-        timeRange: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' },
-      };
-
-      const result = await createEsqlFn(mockSearchService).fn(
-        input,
-        { query: 'FROM index' },
-        createExecutionContext()
-      );
-
-      const sourceParams = result?.columns?.[0]?.meta?.sourceParams;
-      expect(sourceParams).toHaveProperty('appliedTimeRange', {
-        from: '2026-01-01T00:00:00.000Z',
-        to: '2026-01-02T00:00:00.000Z',
-      });
-    });
   });
 });

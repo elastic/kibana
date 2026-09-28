@@ -12,14 +12,23 @@ import { SearchMethodsService } from './search_methods';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { EsQueryConfig, Filter } from '@kbn/es-query';
+import { ESQLVariableType } from '@kbn/esql-types';
 
 describe('SearchMethodsService', () => {
   let mockSearch: jest.MockedFunction<ISearchGeneric>;
   let service: SearchMethodsService;
+  let getEsQueryConfig: jest.MockedFunction<() => Promise<EsQueryConfig>>;
 
   beforeEach(() => {
     mockSearch = jest.fn();
-    service = new SearchMethodsService(mockSearch);
+    getEsQueryConfig = jest.fn().mockResolvedValue({
+      allowLeadingWildcards: true,
+      queryStringOptions: {},
+      ignoreFilterIfFieldNotInIndex: false,
+      dateFormatTZ: 'America/New_York',
+    });
+    service = new SearchMethodsService(mockSearch, { getEsQueryConfig });
   });
 
   const createMockResponse = (
@@ -147,13 +156,14 @@ describe('SearchMethodsService', () => {
       expect(params).not.toHaveProperty('settings');
     });
 
-    it('returns rawResponse', async () => {
+    it('returns rawResponse and datatable', async () => {
       const mockResponse = { columns: [], values: [] };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
       const result = await service.esql({ query: 'FROM logs' });
 
-      expect(result).toEqual({ rawResponse: mockResponse });
+      expect(result.rawResponse).toEqual(mockResponse);
+      expect(result.datatable).toMatchObject({ type: 'datatable', columns: [], rows: [] });
     });
 
     describe('inspector', () => {
@@ -262,7 +272,8 @@ describe('SearchMethodsService', () => {
 
         const result = await service.esql({ query: 'FROM logs' });
 
-        expect(result).toEqual({ rawResponse: mockResponse });
+        expect(result.rawResponse).toEqual(mockResponse);
+        expect(result.datatable).toMatchObject({ type: 'datatable' });
       });
 
       it('calls requestResponder.error when search throws with error.attributes', async () => {
@@ -274,7 +285,7 @@ describe('SearchMethodsService', () => {
         const inspector = createMockInspector(requestResponder);
 
         await expect(service.esql({ query: 'FROM logs' }, { inspector })).rejects.toThrow(
-          'Search failed'
+          'Unexpected error from Elasticsearch: validation_exception - Invalid query'
         );
 
         expect(requestResponder.json).toHaveBeenCalled();
@@ -296,6 +307,127 @@ describe('SearchMethodsService', () => {
         expect(requestResponder.error).toHaveBeenCalledWith({
           json: { message: 'Network error' },
         });
+      });
+    });
+
+    describe('searchContext', () => {
+      const phraseFilter: Filter = {
+        meta: { alias: null, disabled: false, negate: false },
+        query: { match_phrase: { host: 'fromFilterPill' } },
+      };
+      const timeRange = { from: '2024-01-01T00:00:00.000Z', to: '2024-01-02T00:00:00.000Z' };
+
+      const getRequestParams = () => mockSearch.mock.calls[0][0].params;
+
+      beforeEach(() => {
+        mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
+      });
+
+      it('leaves the request untouched when no search context is provided', async () => {
+        await service.esql({ query: 'FROM logs' });
+
+        expect(getEsQueryConfig).not.toHaveBeenCalled();
+        expect(getRequestParams()).toEqual(
+          expect.objectContaining({ filter: undefined, params: undefined, time_zone: undefined })
+        );
+      });
+
+      it('combines filters, query, and time range into the request filter', async () => {
+        await service.esql(
+          { query: 'FROM logs' },
+          {
+            searchContext: {
+              timeRange,
+              timeField: '@timestamp',
+              filters: [phraseFilter],
+              query: { language: 'kuery', query: 'service:fromQueryBar' },
+            },
+          }
+        );
+
+        const filterJson = JSON.stringify(getRequestParams().filter);
+        expect(filterJson).toContain('fromFilterPill');
+        expect(filterJson).toContain('fromQueryBar');
+        expect(getRequestParams().filter.bool.filter).toContainEqual({
+          range: {
+            '@timestamp': {
+              format: 'strict_date_optional_time',
+              gte: timeRange.from,
+              lte: timeRange.to,
+            },
+          },
+        });
+      });
+
+      it('only applies the time range through named params without a time field', async () => {
+        await service.esql(
+          { query: 'FROM logs | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend' },
+          { searchContext: { timeRange } }
+        );
+
+        expect(getRequestParams().filter).toBeUndefined();
+        expect(getRequestParams().params).toEqual([
+          { _tstart: timeRange.from },
+          { _tend: timeRange.to },
+        ]);
+      });
+
+      it('adds control variables used in the query as named params', async () => {
+        await service.esql(
+          { query: 'FROM logs | STATS COUNT(*) BY ?field' },
+          {
+            searchContext: {
+              esqlVariables: [
+                { key: 'field', value: 'host', type: ESQLVariableType.FIELDS },
+                { key: 'unused', value: 'other', type: ESQLVariableType.VALUES },
+              ],
+            },
+          }
+        );
+
+        expect(getRequestParams().query).toBe('FROM logs | STATS COUNT(*) BY ??field');
+        expect(getRequestParams().params).toEqual([{ field: 'host' }]);
+      });
+
+      it('merges the context with the filter and named params from the caller', async () => {
+        const callerFilter = { term: { status: 'fromCaller' } };
+
+        await service.esql(
+          {
+            query: 'FROM logs | WHERE status == ?status AND @timestamp >= ?_tstart',
+            params: [{ status: 'fromCaller' }],
+            filter: callerFilter,
+          },
+          { searchContext: { timeRange, filters: [phraseFilter] } }
+        );
+
+        expect(getRequestParams().filter.bool.filter).toContainEqual(callerFilter);
+        expect(JSON.stringify(getRequestParams().filter)).toContain('fromFilterPill');
+        expect(getRequestParams().params).toEqual([
+          { status: 'fromCaller' },
+          { _tstart: timeRange.from },
+        ]);
+      });
+
+      it('ignores ES|QL queries in the context', async () => {
+        await service.esql(
+          { query: 'FROM logs' },
+          { searchContext: { query: { esql: 'FROM other' } } }
+        );
+
+        expect(getRequestParams().filter).toBeUndefined();
+      });
+
+      it('defaults the time zone from advanced settings', async () => {
+        await service.esql({ query: 'FROM logs' }, { searchContext: {} });
+
+        expect(getRequestParams().time_zone).toBe('America/New_York');
+      });
+
+      it('prefers the time zone from the caller', async () => {
+        await service.esql({ query: 'FROM logs', timeZone: 'Europe/Paris' }, { searchContext: {} });
+
+        expect(getRequestParams().time_zone).toBe('Europe/Paris');
       });
     });
   });

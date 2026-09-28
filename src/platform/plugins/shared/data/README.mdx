@@ -161,6 +161,32 @@ const result = await data.search.esql(
 console.log(result.rawResponse.values);
 ```
 
+#### ES|QL Search with Kibana Search Context
+
+Pass a `searchContext` to apply the time range, filters, query bar, and ES|QL controls from the surrounding app, such as a dashboard panel's fetch context:
+
+```.ts
+const result = await data.search.esql(
+  { query: 'FROM logs-* | STATS count = COUNT(*) BY ??field' },
+  {
+    sessionId: fetchContext.searchSessionId,
+    searchContext: {
+      timeRange: fetchContext.timeRange,
+      timeField: '@timestamp',
+      filters: fetchContext.filters,
+      query: fetchContext.query,
+      esqlVariables: fetchContext.esqlVariables,
+    },
+  }
+);
+```
+
+When `searchContext` is provided, the method:
+
+- combines `filters`, `query` (KQL or Lucene; ES|QL queries are ignored), and a range filter on `timeField` for `timeRange` with any `filter` you pass. Without a `timeField`, the time range is only applied through the named params below.
+- adds the `?_tstart` and `?_tend` named params from `timeRange`, and the values of control variables used in the query, to `params`.
+- defaults `timeZone` to the `dateFormat:tz` advanced setting.
+
 #### Basic DSL Search
 
 ```.ts

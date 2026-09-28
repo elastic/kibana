@@ -33,6 +33,7 @@ export type {
   IDslPagination,
   IEsqlSearchParams,
   IEsqlSearchOptions,
+  IEsqlSearchContext,
   IEsqlSearchResult,
   IEqlSearchParams,
   IEqlSearchOptions,

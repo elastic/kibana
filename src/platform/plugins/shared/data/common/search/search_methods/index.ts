@@ -8,3 +8,10 @@
  */
 
 export { SearchMethodsService } from './search_methods';
+export type { SearchMethodsServiceDependencies } from './search_methods';
+export {
+  mapEsqlResponseToDatatable,
+  formatAndRethrowEsqlError,
+  extractEsqlErrorInfo,
+} from './datatable_mapper';
+export type { EsqlDatatableContext } from './datatable_mapper';

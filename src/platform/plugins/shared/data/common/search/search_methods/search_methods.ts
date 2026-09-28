@@ -8,6 +8,14 @@
  */
 
 import { lastValueFrom, takeWhile } from 'rxjs';
+import { castArray } from 'lodash';
+import {
+  buildEsQuery,
+  getTimeZoneFromSettings,
+  isOfQueryType,
+  type EsQueryConfig,
+} from '@kbn/es-query';
+import { fixESQLQueryWithVariables, getNamedParams } from '@kbn/esql-utils';
 import type {
   ISearchMethods,
   IDslSearchParams,
@@ -17,6 +25,7 @@ import type {
   IDslPagination,
   IEsqlSearchParams,
   IEsqlSearchOptions,
+  IEsqlSearchContext,
   IEsqlSearchResult,
   IEqlSearchParams,
   IEqlSearchOptions,
@@ -37,12 +46,21 @@ import type {
   EQL_SEARCH_STRATEGY,
   SQL_SEARCH_STRATEGY,
 } from '..';
+import { getTime } from '../../query';
+import { mapEsqlResponseToDatatable, formatAndRethrowEsqlError } from './datatable_mapper';
 import {
   getDslRequestInspectorStats,
   getDslResponseInspectorStats,
   getEsqlInspectorStats,
   getSqlInspectorStats,
 } from './inspector_stats';
+
+export interface SearchMethodsServiceDependencies {
+  /**
+   * Resolves the query config from advanced settings, used to apply a search context
+   */
+  getEsQueryConfig: () => Promise<EsQueryConfig>;
+}
 
 /**
  * SearchMethodsService provides strategy-specific search methods with type-safe
@@ -53,13 +71,19 @@ import {
  * searches and adds pagination helpers for DSL searches using search_after.
  */
 export class SearchMethodsService implements ISearchMethods {
-  constructor(private readonly search: ISearchGeneric) {}
+  constructor(
+    private readonly search: ISearchGeneric,
+    private readonly deps: SearchMethodsServiceDependencies
+  ) {}
 
   /**
    * Execute an ES|QL search
    */
   async esql(params: IEsqlSearchParams, options?: IEsqlSearchOptions): Promise<IEsqlSearchResult> {
-    const request = this.buildEsqlRequest(params, options);
+    const esqlParams = options?.searchContext
+      ? await this.applyEsqlSearchContext(params, options.searchContext)
+      : params;
+    const request = this.buildEsqlRequest(esqlParams, options);
     const searchOptions = this.mapEsqlOptions(
       options,
       'esql_async' as typeof ESQL_ASYNC_SEARCH_STRATEGY
@@ -84,15 +108,23 @@ export class SearchMethodsService implements ISearchMethods {
         requestParams: response.requestParams,
       });
 
+      const datatable = mapEsqlResponseToDatatable(response.rawResponse as any, {
+        query: params.query,
+        timeRange: options?.searchContext?.timeRange,
+        esqlVariables: options?.searchContext?.esqlVariables,
+        warning: response.warning,
+      });
+
       return {
         rawResponse: response.rawResponse,
         warning: response.warning,
+        datatable,
       };
     } catch (error) {
       requestResponder?.error({
         json: 'attributes' in error ? error.attributes : { message: error.message },
       });
-      throw error;
+      return formatAndRethrowEsqlError(error);
     }
   }
 
@@ -352,6 +384,59 @@ export class SearchMethodsService implements ISearchMethods {
         dropNullColumns: options?.dropNullColumns,
         include_execution_metadata: options?.includeExecutionMetadata,
         ...(options?.columnMetadata ? { settings: { column_metadata: true } } : {}),
+      },
+    };
+  }
+
+  private async applyEsqlSearchContext(
+    params: IEsqlSearchParams,
+    { timeRange, timeField, filters = [], query, esqlVariables = [] }: IEsqlSearchContext
+  ): Promise<IEsqlSearchParams> {
+    const esQueryConfig = await this.deps.getEsQueryConfig();
+
+    // this is for backward compatibility, if the query is of fields or functions type
+    // and the query is not set with ?? in the query, we should set it
+    // https://github.com/elastic/elasticsearch/pull/122459
+    const esqlQuery = fixESQLQueryWithVariables(params.query, esqlVariables);
+
+    const timeFilter = timeRange && getTime(undefined, timeRange, { fieldName: timeField });
+    const contextFilters = [...filters, ...(timeFilter ? [timeFilter] : [])];
+    const contextQueries = castArray(query ?? []).filter(isOfQueryType);
+    const contextFilter =
+      contextFilters.length || contextQueries.length
+        ? buildEsQuery(undefined, contextQueries, contextFilters, esQueryConfig)
+        : undefined;
+
+    // ES|QL does not allow mixing positional and named params, so context params are only
+    // valid alongside named params from the caller
+    const namedParams = [
+      ...(params.params ?? []),
+      ...(getNamedParams(esqlQuery, timeRange, esqlVariables) ?? []),
+    ] as NonNullable<IEsqlSearchParams['params']>;
+
+    return {
+      ...params,
+      query: esqlQuery,
+      params: namedParams.length ? namedParams : undefined,
+      filter: this.mergeEsqlFilters(contextFilter, params.filter),
+      timeZone:
+        params.timeZone ??
+        (esQueryConfig.dateFormatTZ ? getTimeZoneFromSettings(esQueryConfig.dateFormatTZ) : 'UTC'),
+    };
+  }
+
+  private mergeEsqlFilters(
+    contextFilter: ReturnType<typeof buildEsQuery> | undefined,
+    filter: IEsqlSearchParams['filter']
+  ): IEsqlSearchParams['filter'] {
+    if (!contextFilter || !filter) {
+      return contextFilter ?? filter;
+    }
+
+    return {
+      bool: {
+        ...contextFilter.bool,
+        filter: [...contextFilter.bool.filter, ...castArray(filter)],
       },
     };
   }

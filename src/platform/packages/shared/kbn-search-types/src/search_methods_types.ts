@@ -8,9 +8,11 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
-import type { ProjectRouting } from '@kbn/es-query';
+import type { AggregateQuery, Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLSearchParams } from '@kbn/es-types';
 import type { RequestAdapter, RequestStatistics } from '@kbn/inspector-plugin/common';
 
@@ -201,9 +203,50 @@ export interface IEsqlSearchParams {
 }
 
 /**
+ * Kibana search context (time range, filters, query bar, and controls) to apply to an ES|QL search.
+ * The shape matches the corresponding fields of a dashboard panel's fetch context, so it can be
+ * passed through directly.
+ */
+export interface IEsqlSearchContext {
+  /**
+   * Time range to restrict the search to. Fills the `?_tstart` and `?_tend` named params, and
+   * adds a range filter on `timeField` when one is provided.
+   */
+  timeRange?: TimeRange;
+
+  /**
+   * The date field to apply the `timeRange` filter to. ES|QL searches have no data view, so
+   * without this the time range is only applied through the `?_tstart` and `?_tend` named params.
+   */
+  timeField?: string;
+
+  /**
+   * Kibana filters to apply
+   */
+  filters?: Filter[];
+
+  /**
+   * KQL or Lucene query to apply. ES|QL (aggregate) queries are ignored.
+   */
+  query?: Query | Query[] | AggregateQuery;
+
+  /**
+   * ES|QL control variables. Values for variables used in the query are added as named params.
+   */
+  esqlVariables?: ESQLControlVariable[];
+}
+
+/**
  * Options specific to ES|QL search
  */
 export interface IEsqlSearchOptions extends IBaseSearchOptions {
+  /**
+   * Kibana search context to apply. When provided, the time range, filters, and query are combined
+   * with `params.filter`, control variables are added to `params.params`, and `params.timeZone`
+   * defaults to the `dateFormat:tz` advanced setting.
+   */
+  searchContext?: IEsqlSearchContext;
+
   /**
    * Drop columns that only contain null values
    */
@@ -233,6 +276,11 @@ export interface IEsqlSearchResult {
    * Warning message from the ES Warning HTTP response header
    */
   warning?: string;
+  /**
+   * The response mapped to an expressions Datatable, ready for use in visualizations.
+   * Populated when the query includes a `searchContext` or the caller requests datatable mapping.
+   */
+  datatable?: Datatable;
 }
 
 // ============================================================================
