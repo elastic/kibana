@@ -6,7 +6,7 @@
  */
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-import { alertStatusChangedV1TriggerDefinition } from '../../common/workflows/triggers';
+import { alertStatusChangedV1TriggerDefinition } from '../../../common/workflows/triggers';
 
 export function registerTriggerDefinitions(
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup

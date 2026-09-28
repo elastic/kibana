@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import { AlertStatusChangedV1TriggerId } from '../../common/workflows/triggers';
+import { AlertStatusChangedV1TriggerId } from '../../../common/workflows/triggers';
 import type { AsyncDomainEventBus } from '../events/event_bus';
 import type {
   AlertStatusChangedEvent,
