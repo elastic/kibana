@@ -34,8 +34,11 @@ jest.mock('@kbn/ui-callout', () => ({
   KbnDangerCallout: ({ title }: { title: string }) => (
     <div data-test-subj="danger-callout">{title}</div>
   ),
-  KbnWarningCallout: ({ title }: { title: string }) => (
-    <div data-test-subj="warning-callout">{title}</div>
+  KbnWarningCallout: ({ title, children }: { title: string; children?: React.ReactNode }) => (
+    <div data-test-subj="warning-callout">
+      {title}
+      {children}
+    </div>
   ),
 }));
 
@@ -306,6 +309,30 @@ describe('ProposalApprovalCard', () => {
         '[data-test-subj="proposalApprove-proposal-1"]'
       ) as HTMLButtonElement;
       expect(approveBtn).toBeDisabled();
+    });
+  });
+
+  describe('a proposal re-offered after a failed attempt', () => {
+    const FAILURE = 'Rule update rejected: invalid query';
+
+    it('explains why it is being offered again', () => {
+      setupMocks(baseProposal({ status: 'pending', previousExecutionError: FAILURE }));
+      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      const callout = getByTestId('warning-callout');
+      expect(callout).toHaveTextContent('A previous attempt at this action failed');
+      // The reason is the actionable half: the title alone does not tell an
+      // analyst whether re-approving is likely to fail the same way.
+      expect(callout).toHaveTextContent(FAILURE);
+    });
+
+    it('drops the explanation once the proposal is no longer awaiting a decision', () => {
+      setupMocks(
+        baseProposal({ status: 'succeeded', decision: 'approved', previousExecutionError: FAILURE })
+      );
+      const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      expect(container).not.toHaveTextContent(FAILURE);
     });
   });
 

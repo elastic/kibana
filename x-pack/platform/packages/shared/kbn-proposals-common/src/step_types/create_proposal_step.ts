@@ -10,6 +10,7 @@ import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import {
+  MAX_TITLE_LENGTH,
   proposalCategorySchema,
   proposalConfidenceSchema,
   proposalImpactSchema,
@@ -21,7 +22,7 @@ export const CreateProposalStepId = 'proposals.createProposal' as const;
 
 export const createProposalStepInputSchema = z.object({
   conversationId: z.string().describe('Conversation this proposal belongs to.'),
-  title: optionalStepInput(z.string()).describe(
+  title: optionalStepInput(z.string().max(MAX_TITLE_LENGTH)).describe(
     'Short plain-text label naming what is proposed \u2014 `comment` is already the markdown body. Takes precedence over the action workflow\u2019s own name wherever a title is rendered.'
   ),
   comment: z
@@ -108,7 +109,7 @@ export const createProposalStepCommonDefinition: BaseStepDefinition<
     comment: "Tune the noisy rule that produced this alert"
     actionWorkflowId: "{{ inputs.actionWorkflowId }}"
     actionInput: "{{ inputs.actionInput }}"
-    origin: my-solution
+    origin: alertzero
     impact: low
     confidence: medium`,
     ],

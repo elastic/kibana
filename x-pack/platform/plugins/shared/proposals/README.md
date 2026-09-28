@@ -285,7 +285,7 @@ Call the gate workflow; do not write proposals directly.
     workflow-id: system-create-proposal
     inputs:
       conversationId: '{{ steps.investigate.output.conversation_id }}'
-      origin: my-solution
+      origin: alertzero
       title: 'Tune noisy rule'
       comment: 'Tune the noisy rule that produced this alert'
       actionWorkflowId: '{{ steps.suggest_action.output.structured_output.actionWorkflowId }}'
@@ -300,6 +300,8 @@ The input contract:
 | --- | --- | --- |
 | `conversationId` | yes | The conversation the proposal belongs to. |
 | `comment` | yes | Markdown explaining what is being proposed. A proposal a human cannot read is not reviewable. |
+| `origin` | yes | Which feature is producing the proposal. Must be a member of `proposalOriginSchema` — an unrecognised value fails the step rather than being stored. |
+| `title` | no | Short plain-text label. Takes precedence over the action workflow's own name wherever a title is rendered. |
 | `actionWorkflowId` | no | Omit for a proposal the analyst carries out themselves. |
 | `actionInput` | no | Passed to the action workflow as its single `actionInput` object. |
 | `impact`, `confidence` | no | Snapshotted at creation; used for queue ordering. `impact` overrides the action's own. |
