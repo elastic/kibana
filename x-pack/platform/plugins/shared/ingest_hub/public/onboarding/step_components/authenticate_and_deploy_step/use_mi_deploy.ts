@@ -430,9 +430,7 @@ export function useMiDeploy({
           let soWriteSucceeded = true;
           if (
             onboardingDeploymentId &&
-            (cleanupOps.toDelete.length > 0 ||
-              cleanupOps.toUpdate.length > 0 ||
-              dirtyUpdateApplied)
+            (cleanupOps.toDelete.length > 0 || cleanupOps.toUpdate.length > 0 || dirtyUpdateApplied)
           ) {
             const deletedIds = new Set(cleanupOps.toDelete);
             const survivingEntries = Object.entries(policyIdsByInstance).filter(

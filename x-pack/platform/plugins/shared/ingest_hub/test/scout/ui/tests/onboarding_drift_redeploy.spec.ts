@@ -144,7 +144,9 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
           key,
           JSON.stringify({
             globalRegion: 'us-east-1',
-            instances: [{ instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false }],
+            instances: [
+              { instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false },
+            ],
             serviceVars: {
               elb: {
                 enabledDataStreams: ['elb_logs'],
@@ -431,7 +433,9 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
           await route.fulfill({
             status: 200,
             contentType: 'application/json',
-            body: JSON.stringify({ item: makeSoItem(DEP_ID, { authMethod: 'static_keys', connectorId: null }) }),
+            body: JSON.stringify({
+              item: makeSoItem(DEP_ID, { authMethod: 'static_keys', connectorId: null }),
+            }),
           });
         } else {
           await route.continue();
@@ -465,7 +469,9 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
         route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({ item: makeSoItem(DEP_ID, { connectorId: null, authMethod: 'static_keys' }) }),
+          body: JSON.stringify({
+            item: makeSoItem(DEP_ID, { connectorId: null, authMethod: 'static_keys' }),
+          }),
         })
     );
 
@@ -482,7 +488,9 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
           key,
           JSON.stringify({
             globalRegion: 'us-east-1',
-            instances: [{ instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false }],
+            instances: [
+              { instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false },
+            ],
             serviceVars: {
               elb: {
                 enabledDataStreams: ['elb_logs'],
@@ -507,7 +515,10 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
     await page.testSubj.click('staticKeysReplace-accessKeyId-toggle');
     await page.testSubj.fill('staticKeysReplace-accessKeyId', 'AKIAIOSFODNN7EXAMPLE');
     await page.testSubj.click('staticKeysReplace-secretAccessKey-toggle');
-    await page.testSubj.fill('staticKeysReplace-secretAccessKey', 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY');
+    await page.testSubj.fill(
+      'staticKeysReplace-secretAccessKey',
+      'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
+    );
 
     // Policy GET succeeds, PUT returns 500 — simulates a transient Fleet error.
     await page.route(
