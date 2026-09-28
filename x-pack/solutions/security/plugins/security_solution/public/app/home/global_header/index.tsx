@@ -19,7 +19,12 @@ import { PageScope } from '../../../data_view_manager/constants';
 import { SECURITY_FEATURE_ID } from '../../../../common';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
-import { isDashboardViewPath, isDetectionsPath, isRuleChangesHistoryPath } from '../../../helpers';
+import {
+  isDashboardViewPath,
+  isDetectionsPath,
+  isRuleChangesHistoryPath,
+  isRulesManagementPath,
+} from '../../../helpers';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { timelineSelectors } from '../../../timelines/store';
@@ -58,6 +63,8 @@ export const GlobalHeader = React.memo(() => {
   const showDataViewPicker = showDataViewPickerByPath(pathname);
   const dashboardViewPath = isDashboardViewPath(pathname);
   const changesHistoryPath = isRuleChangesHistoryPath(pathname);
+  // The Rules page app header owns ML job settings and Add integrations, and Figma drops the data view picker.
+  const rulesManagementPath = isRulesManagementPath(pathname);
 
   const { href, onClick } = useAddIntegrationsUrl();
 
@@ -66,7 +73,7 @@ export const GlobalHeader = React.memo(() => {
       return;
     }
 
-    if (changesHistoryPath) {
+    if (changesHistoryPath || rulesManagementPath) {
       setHeaderActionMenu(undefined);
       return;
     }
@@ -94,6 +101,7 @@ export const GlobalHeader = React.memo(() => {
     kibanaServiceI18n,
     dashboardViewPath,
     changesHistoryPath,
+    rulesManagementPath,
   ]);
 
   return (
