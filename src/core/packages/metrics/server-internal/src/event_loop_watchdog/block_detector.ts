@@ -11,6 +11,11 @@ import type { WatchdogOptions } from './types';
 
 /** Reports that may be logged in a burst before the report rate limit applies. */
 export const REPORT_BURST = 5;
+/**
+ * Minimum interval at which one report token is refilled, independent of the profile cooldown so
+ * that log volume stays bounded even when profiling is configured to be frequent.
+ */
+export const MIN_REPORT_REFILL_MS = 60_000;
 
 export type DetectorEvent =
   | { type: 'block-start'; startedAt: number; detectedAt: number; profile: boolean }
@@ -131,7 +136,7 @@ export class BlockDetector {
   }
 
   private takeReportToken(now: number): boolean {
-    const refillMs = Math.max(this.options.profileCooldownMs, 1);
+    const refillMs = Math.max(this.options.profileCooldownMs, MIN_REPORT_REFILL_MS);
     if (this.lastRefillAt === undefined) {
       this.lastRefillAt = now;
     } else {

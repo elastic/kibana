@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BlockDetector, REPORT_BURST } from './block_detector';
+import { BlockDetector, MIN_REPORT_REFILL_MS, REPORT_BURST } from './block_detector';
 
 const options = {
   thresholdMs: 500,
@@ -85,5 +85,25 @@ describe('BlockDetector', () => {
 
     now += options.profileCooldownMs;
     expect(blockOnce()).toEqual(expect.objectContaining({ report: true, suppressedBlocks: 2 }));
+  });
+
+  it('bounds reports even when the profile cooldown is disabled', () => {
+    const detector = new BlockDetector({ ...options, profileCooldownMs: 0 });
+    let now = 1_000;
+    const results: boolean[] = [];
+    for (let i = 0; i < REPORT_BURST + 3; i++) {
+      detector.poll(now + 600, now);
+      const [end] = detector.poll(now + 700, now + 650);
+      if (end.type !== 'block-end') throw new Error('expected block-end');
+      results.push(end.report);
+      now += 1_000;
+    }
+    expect(results.filter(Boolean)).toHaveLength(REPORT_BURST);
+
+    now += MIN_REPORT_REFILL_MS;
+    detector.poll(now + 600, now);
+    expect(detector.poll(now + 700, now + 650)).toEqual([
+      expect.objectContaining({ report: true, suppressedBlocks: 3 }),
+    ]);
   });
 });
