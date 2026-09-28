@@ -40,7 +40,6 @@ Tab selection props also live on the root: `selectedTabId` (controlled), `defaul
 - `titleTooltip` — when set, the title icon becomes a focusable `EuiIconTip` using `titleIcon` as its type, defaulting to `info`.
 - `description` — arbitrary `ReactNode` rendered below the title in subdued text. Not wrapped in a `<p>`, so block content is valid.
 - `collapsed` — renders the compact layout permanently, regardless of scroll position.
-- `infoBlocksProps` — props for the `InfoBlocks` grid that renders the `Header.InfoBlock` parts. Takes `minColumnWidth`: the narrowest a column may be, in pixels, before the grid steps down a column.
 - `children` — `Header.MetaBlock`, `Header.Badge`, and `Header.InfoBlock` parts. Free-form content (arbitrary elements, components, bare text) is not rendered, and the assembly library warns in development about unrecognized children.
 
 **`FlyoutTemplate.Body`** renders `Body.Section`, `Body.Accordion`, and `Body.TabPanel` parts alongside arbitrary passthrough content inside `EuiFlyoutBody`, in source order. `Body.Callout` parts render as a stack in the body's banner, above that content. Passthrough children manage their own layout; the template adds no sectioning, titling, or dividers around them. See [`src/body/README.md`](src/body/README.md) for callouts, sections, and unstructured content, and [Tabs](#tabs) below.

@@ -36,15 +36,7 @@ export type InfoBlocksMaxColumns = 2 | 3 | 4;
 export interface InfoBlocksProps {
   /** The blocks to render. Designed for small sets, typically up to 8 blocks. */
   items: readonly InfoBlockItem[];
-  /**
-   * Narrowest a column may be, in pixels, while there are two or more columns. Below that the
-   * blocks stack in one column as wide as the container. Defaults to 140.
-   */
-  minColumnWidth?: number;
-  /**
-   * Widest column count, stepping down as the container narrows. `'auto'` derives it from `items`.
-   * @deprecated Use `minColumnWidth` instead.
-   */
+  /** Widest column count, stepping down as the container narrows. `'auto'` derives it from `items`. */
   maxColumns?: InfoBlocksMaxColumns | 'auto';
   'data-test-subj'?: string;
 }

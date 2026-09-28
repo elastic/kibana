@@ -19,7 +19,6 @@ export type {
   FlyoutHeaderProps,
   FlyoutHeaderBadgeProps,
   FlyoutHeaderInfoBlockProps,
-  FlyoutHeaderInfoBlocksProps,
   FlyoutHeaderMetaBlockProps,
   FlyoutTabProps,
   FlyoutTabBarProps,

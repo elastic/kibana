@@ -231,7 +231,6 @@ export const HeaderZone = ({
   titleTooltip,
   description,
   collapsed = false,
-  infoBlocksProps,
   children,
   flyoutTitleId,
   'data-test-subj': dataTestSubj,
@@ -387,7 +386,6 @@ export const HeaderZone = ({
                   <>
                     <EuiSpacer size="m" />
                     <InfoBlocks
-                      {...infoBlocksProps}
                       items={infoBlockItems}
                       data-test-subj={resolveZoneTestSubj(undefined, headerTestSubj, 'InfoBlocks')}
                     />

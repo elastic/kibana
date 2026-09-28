@@ -21,7 +21,7 @@ import type {
 } from '@elastic/eui';
 // FIXME: change to import from `@elastic/eui` once https://github.com/elastic/eui/pull/10064 is merged.
 import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
-import type { InfoBlockItem, InfoBlocksProps } from '@kbn/flyout-info-blocks';
+import type { InfoBlockItem } from '@kbn/flyout-info-blocks';
 import type { MetaBlock } from '@kbn/flyout-meta-blocks';
 import type {
   FlyoutSectionAction,
@@ -59,9 +59,6 @@ export interface FlyoutBodyTabPanelProps {
   'data-test-subj'?: string;
 }
 
-/** Props forwarded to the header's `InfoBlocks` grid. The template supplies its `items`. */
-export type FlyoutHeaderInfoBlocksProps = Pick<InfoBlocksProps, 'minColumnWidth'>;
-
 /** Props for the declarative `FlyoutTemplate.Header` zone. */
 export interface FlyoutHeaderProps {
   /** Title rendered by the header. Rendered as an `<h3>` (heading level is owned by the template). */
@@ -83,8 +80,6 @@ export interface FlyoutHeaderProps {
    * scroll position. The description, meta blocks, badges, and info blocks are not shown.
    */
   collapsed?: boolean;
-  /** Props forwarded to the `InfoBlocks` grid that renders the `Header.InfoBlock` parts. */
-  infoBlocksProps?: FlyoutHeaderInfoBlocksProps;
 }
 
 /** A block part authors its value as children, and the header zone fills in its `id`. */
