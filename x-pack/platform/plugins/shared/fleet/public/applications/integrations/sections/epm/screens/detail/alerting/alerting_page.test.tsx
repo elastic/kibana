@@ -184,7 +184,7 @@ describe('AlertingPage', () => {
     expect(
       screen.getByTestId('fleetAssetsAccordion.button.alerting_rule_template')
     ).toBeInTheDocument();
-    expect(screen.getByTestId('fleetAlertingEngineTab-v2')).toHaveTextContent('Kibana ES|QL Rules');
+    expect(screen.getByTestId('fleetAlertingEngineTab-v2')).toHaveTextContent('ES|QL Rules');
     expect(screen.getByTestId('fleetAlertingEngineTab-v1')).toHaveTextContent(
       'Standard Rules'
     );
