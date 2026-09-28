@@ -45,7 +45,11 @@ spaceTest.describe(
     spaceTest.beforeAll(async ({ esClient, kbnClient, scoutSpace, config }) => {
       // Endpoint host indexing installs Fleet and waits on metadata transforms.
       spaceTest.setTimeout(600_000);
-      await scoutSpace.setSolutionView('security');
+      // Serverless forces xpack.spaces.allowSolutionVisibility off, so the
+      // solution property cannot be set. A security project is already that view.
+      if (!config.serverless) {
+        await scoutSpace.setSolutionView('security');
+      }
       seeded = await seedAlertFlyoutResponseAction({
         esClient,
         kbnClient,
