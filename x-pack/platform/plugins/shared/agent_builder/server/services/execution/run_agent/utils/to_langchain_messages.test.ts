@@ -279,7 +279,7 @@ describe('prepareMessages', () => {
     expect(content.indexOf('[Sent: ')).toBeLessThan(content.indexOf('<attachments>'));
   });
 
-  it('uses the pending round timestamp when an awaiting-prompt round is promoted to next input', async () => {
+  it('uses the original pending user message despite a resume-time nextInput rewrite', async () => {
     const pendingStartedAt = '2026-06-30T12:34:56.000Z';
     const previousRounds = [
       createRound({
@@ -293,7 +293,7 @@ describe('prepareMessages', () => {
     const result = await prepareMessages({
       conversation: createConversation({
         previousRounds,
-        nextInput: makeRoundInput('prompt answer'),
+        nextInput: makeRoundInput('hook rewrite on resume'),
       }),
     });
 

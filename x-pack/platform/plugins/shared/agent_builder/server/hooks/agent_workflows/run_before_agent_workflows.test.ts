@@ -34,7 +34,9 @@ describe('runBeforeAgentWorkflows', () => {
   const request = httpServerMock.createKibanaRequest();
   const logger = loggingSystemMock.createLogger();
 
-  const createContext = (overrides: { conversationId?: string; agentId?: string } = {}) => ({
+  const createContext = (
+    overrides: { conversationId?: string; agentId?: string; roundExecutionIndex?: number } = {}
+  ) => ({
     request,
     nextInput: { message: 'hello', attachments: [] },
     agentId: 'agent-1',
@@ -158,8 +160,8 @@ describe('runBeforeAgentWorkflows', () => {
     });
   });
 
-  it('returns updated nextInput when workflow returns new_prompt', async () => {
-    const context = createContext();
+  it.each([0, 1, 2])('returns new_prompt on execution index %i', async (roundExecutionIndex) => {
+    const context = createContext({ roundExecutionIndex });
     const { workflowApi, getInternalServices } = createDeps();
     executeWorkflowMock.mockResolvedValue({
       success: true,
@@ -187,6 +189,54 @@ describe('runBeforeAgentWorkflows', () => {
         attachments: [],
       },
     });
+    expect(executeWorkflowMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowParams: expect.objectContaining({ round_execution_index: roundExecutionIndex }),
+      })
+    );
+  });
+
+  it('honors another workflow output when the first workflow skips on resume', async () => {
+    const { workflowApi, getInternalServices, resolveAgentConfiguration } = createDeps();
+    resolveAgentConfiguration.mockResolvedValue({ workflow_ids: ['nightshift', 'policy'] });
+    executeWorkflowMock
+      .mockResolvedValueOnce({
+        success: true,
+        execution: {
+          execution_id: 'nightshift-exec',
+          status: ExecutionStatus.COMPLETED,
+          workflow_id: 'nightshift',
+          started_at: '2026-01-01T00:00:00.000Z',
+          output: {},
+        },
+      })
+      .mockResolvedValueOnce({
+        success: true,
+        execution: {
+          execution_id: 'policy-exec',
+          status: ExecutionStatus.COMPLETED,
+          workflow_id: 'policy',
+          started_at: '2026-01-01T00:00:00.000Z',
+          output: { new_prompt: 'policy rewrite' },
+        },
+      });
+
+    await expect(
+      runBeforeAgentWorkflows({
+        context: createContext({ roundExecutionIndex: 1 }),
+        workflowApi,
+        getInternalServices,
+        logger,
+      })
+    ).resolves.toEqual({ nextInput: { message: 'policy rewrite', attachments: [] } });
+    expect(executeWorkflowMock).toHaveBeenCalledTimes(2);
+    expect(executeWorkflowMock).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        workflowId: 'policy',
+        workflowParams: expect.objectContaining({ round_execution_index: 1 }),
+      })
+    );
   });
 
   it('accumulates model_context without replacing the user message', async () => {
@@ -389,8 +439,8 @@ describe('runBeforeAgentWorkflows', () => {
     });
   });
 
-  it('throws workflowAborted when output requests abort', async () => {
-    const context = createContext();
+  it.each([0, 1, 2])('honors workflow abort on execution index %i', async (roundExecutionIndex) => {
+    const context = createContext({ roundExecutionIndex });
     const { workflowApi, getInternalServices } = createDeps();
     executeWorkflowMock.mockResolvedValue({
       success: true,
@@ -419,6 +469,11 @@ describe('runBeforeAgentWorkflows', () => {
       message: 'Stop this run',
       meta: { workflow: 'Workflow Abort' },
     });
+    expect(executeWorkflowMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowParams: expect.objectContaining({ round_execution_index: roundExecutionIndex }),
+      })
+    );
   });
 
   it('executes each workflow once when global and agent workflows overlap', async () => {

@@ -703,6 +703,7 @@ describe('runDefaultAgentMode', () => {
       const { context, streamEvents } = setup();
       (context.hooks.run as jest.Mock).mockImplementation(async (_lifecycle, hookContext) => ({
         ...hookContext,
+        nextInput: { ...hookContext.nextInput, message: 'hook rewrite' },
         preExecutionWorkflow: { model_context: 'must not be seeded on resume' },
       }));
       const conversation = createEmptyConversation({
@@ -763,6 +764,13 @@ describe('runDefaultAgentMode', () => {
       expect(context.hooks.run).toHaveBeenCalledWith(
         HookLifecycle.beforeAgent,
         expect.objectContaining({ roundExecutionIndex: 1 })
+      );
+      expect(createPromptFactoryMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          processedConversation: expect.objectContaining({
+            nextInput: expect.objectContaining({ message: 'hook rewrite' }),
+          }),
+        })
       );
       expect(context.attachmentStateManager.clearAccessTracking).not.toHaveBeenCalled();
     });
