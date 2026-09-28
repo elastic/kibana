@@ -949,6 +949,41 @@ describe('normalizeAPIConfig', () => {
     });
   });
 
+  it.each(['[]', '["secret"]', '"secret"', '42', 'true', 'null'])(
+    'rejects params that are not a JSON object: %s',
+    (params) => {
+      expect(normalizeAPIConfig({ type: 'browser', params } as any)).toEqual({
+        errorMessage: 'Invalid params: Params must be a JSON object.',
+        formattedConfig: {
+          type: 'browser',
+          params,
+        },
+      });
+    }
+  );
+
+  it('accepts params objects with nested values', () => {
+    const params = '{"retries":3,"options":{"mode":"fast"}}';
+    expect(normalizeAPIConfig({ type: 'browser', params } as any)).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        params,
+      },
+    });
+  });
+
+  it('keeps unchanged stored params that are not a JSON object', () => {
+    const params = '["secret"]';
+    expect(
+      normalizeAPIConfig({ type: 'browser', params } as any, { previousParams: params })
+    ).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        params,
+      },
+    });
+  });
+
   it('playwright_options key mapping validation', function () {
     expect(normalizeAPIConfig({ type: 'browser', playwright_options: '{}' } as any)).toEqual({
       formattedConfig: {

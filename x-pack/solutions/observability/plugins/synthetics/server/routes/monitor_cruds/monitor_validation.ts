@@ -245,7 +245,10 @@ export function validateMonitor(
   };
 }
 
-export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
+export const normalizeAPIConfig = (
+  monitor: CreateMonitorPayLoad,
+  { previousParams }: { previousParams?: string } = {}
+) => {
   const { MonitorTypeCodec } = getZodMonitorCodecs();
   const monitorType = monitor.type as MonitorTypeEnum;
   const decodedType = MonitorTypeCodec.safeParse(monitorType);
@@ -344,7 +347,7 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
   }
 
   if (rawParams) {
-    const { value, error } = validateParams(rawParams);
+    const { value, error } = validateParams(rawParams, previousParams);
     if (error) {
       formattedConfig[ConfigKey.PARAMS] = rawParams as string;
       return {
@@ -398,10 +401,16 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
 };
 const RecordSchema = z.record(z.string(), z.string());
 
-const validateParams = (jsonString: string | any) => {
+const validateParams = (jsonString: string | any, previousParams?: string) => {
   if (typeof jsonString === 'string') {
     try {
-      JSON.parse(jsonString);
+      const parsed = JSON.parse(jsonString);
+      // Params are spread into an object before reaching Heartbeat, so arrays and scalars never
+      // arrive intact. Stored values are exempt so unrelated edits of older monitors still save.
+      const isObject = parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed);
+      if (!isObject && jsonString !== previousParams) {
+        return { error: new Error('Params must be a JSON object.') };
+      }
       return { value: jsonString };
     } catch (e) {
       return { error: e };

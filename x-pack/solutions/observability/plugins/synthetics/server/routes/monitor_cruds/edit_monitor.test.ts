@@ -253,4 +253,39 @@ describe('editSyntheticsMonitorRoute', () => {
     expect(spacesArg).toEqual(expect.arrayContaining(['space-a', 'space-b']));
     expect(spacesArg).toHaveLength(2);
   });
+
+  it('validates params against the stored value so unchanged params are not re-rejected', async () => {
+    const { assertCanPerformMonitorBulkActionInAllSpaces } = jest.requireMock(
+      './monitor_locations_utils'
+    );
+    assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue({ status: 403 });
+    const { normalizeAPIConfig } = jest.requireMock('./monitor_validation');
+
+    const { routeContext } = getRouteContextMock();
+    routeContext.request = {
+      params: { monitorId },
+      query: {},
+      body: { [ConfigKey.ENABLED]: false },
+    } as any;
+    routeContext.spaceId = 'default';
+    routeContext.monitorConfigRepository.getDecrypted = jest.fn().mockResolvedValue({
+      decryptedMonitor: { id: monitorId, type: 'synthetics-monitor', namespaces: ['default'] },
+      normalizedMonitor: {
+        id: monitorId,
+        attributes: {
+          origin: 'ui',
+          [ConfigKey.MONITOR_TYPE]: 'browser',
+          [ConfigKey.PARAMS]: '["secret"]',
+          locations: [],
+        },
+      },
+    });
+
+    await editSyntheticsMonitorRoute().handler(routeContext);
+
+    expect(normalizeAPIConfig).toHaveBeenCalledWith(
+      expect.objectContaining({ [ConfigKey.PARAMS]: '["secret"]' }),
+      { previousParams: '["secret"]' }
+    );
+  });
 });
