@@ -35,6 +35,7 @@ import { SettingsSection } from './settings_section';
 import { ConfigureCasesAppHeader } from './configure_cases_app_header';
 import { OldCustomFieldsAndTemplatesSection } from './old_custom_fields_and_templates_section';
 import * as observableTypesI18n from '../observable_types/translations';
+import * as commonI18n from '../../common/translations';
 
 const contentWrapperCss = css`
   box-sizing: content-box;
@@ -186,7 +187,11 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                     description={configureCasesI18n.EXTRACT_OBSERVABLES_DEFAULT_DESC}
                   >
                     <EuiSwitch
-                      label={configureCasesI18n.EXTRACT_OBSERVABLES_DEFAULT_LABEL}
+                      label={
+                        extractObservables
+                          ? commonI18n.EXTRACT_OBSERVABLES_SWITCH_LABEL_ON
+                          : commonI18n.EXTRACT_OBSERVABLES_SWITCH_LABEL_OFF
+                      }
                       checked={extractObservables}
                       onChange={(e) => onChangeExtractObservables(e.target.checked)}
                       disabled={

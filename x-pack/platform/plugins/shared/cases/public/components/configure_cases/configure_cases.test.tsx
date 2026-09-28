@@ -441,6 +441,23 @@ describe('ConfigureCasesRedesign', () => {
       );
     });
 
+    it('disables the switch when the configuration is being fetched', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        isLoading: false,
+        isFetching: true,
+        data: {
+          ...useCaseConfigureResponse.data,
+          id: '',
+          version: '',
+        },
+      }));
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      expect(await screen.findByTestId('extract-observables-default-switch')).toBeDisabled();
+    });
+
     it('disables the switch when the user lacks settings permissions', async () => {
       renderWithTestingProviders(<ConfigureCasesRedesign />, {
         wrapperProps: { permissions: noCasesSettingsPermission() },
