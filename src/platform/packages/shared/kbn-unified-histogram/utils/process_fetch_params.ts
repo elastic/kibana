@@ -48,7 +48,7 @@ export const buildFetchParams = ({
 
   const columns = params.columns;
   const isTimeBased = dataSource.isTimeBased() && !dataSource.isRollup();
-  const isESQLQuery = dataSource.kind === 'esql';
+  const isESQLQuery = Boolean(query && isOfAggregateQueryType(query));
   const breakdownField = 'breakdownField' in params ? params.breakdownField : initialBreakdownField;
 
   const fetchParams: UnifiedHistogramFetchParams = {

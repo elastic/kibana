@@ -74,26 +74,19 @@ describe('processFetchParams', () => {
     ).toBe(false);
   });
 
-  it('assigns isESQLQuery from the data source', async () => {
+  it('assigns isESQLQuery based on query type', async () => {
     expect(
       (
         await processParams({
           ...commonParams,
-          query: { esql: 'from logs' },
+          query: { query: 'foo', language: 'kuery' },
         })
       ).isESQLQuery
     ).toBe(false);
-
-    EsqlSource.clearCache();
-    const esqlSource = await EsqlSource.create({
-      query: 'from logs',
-      timeFieldName: '@timestamp',
-    });
     expect(
       (
         await processParams({
           ...commonParams,
-          dataSource: esqlSource,
           query: { esql: 'from logs' },
         })
       ).isESQLQuery
