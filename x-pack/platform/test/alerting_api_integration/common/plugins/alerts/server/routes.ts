@@ -883,6 +883,43 @@ export function defineRoutes(
 
   router.post(
     {
+      path: '/api/alerts_fixture/{id}/_test_get_connector_credentials',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        params: schema.object({
+          id: schema.string({ maxLength: 128 }),
+        }),
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      const [_, { actions }] = await core.getStartServices();
+      const actionsClient = await actions.getActionsClientWithRequest(req);
+
+      try {
+        return res.ok({
+          body: await actionsClient.getConnectorCredentials({ id: req.params.id }),
+        });
+      } catch (err) {
+        if (err.isBoom && err.output.statusCode === 403) {
+          return res.forbidden({ body: err });
+        }
+
+        throw err;
+      }
+    }
+  );
+
+  router.post(
+    {
       path: '/api/alerts_fixture/{id}/_execute_connector_as_notification',
       security: {
         authz: {

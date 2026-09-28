@@ -8,7 +8,6 @@
 import type { Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { SandboxCallContext } from './tool_utils';
-import { authorizeConnector } from './connector_authorization';
 
 /** Env var prefix under which connector material is exposed to a single sandbox command. */
 export const CONNECTOR_ENV_PREFIX = 'CONNECTOR_';
@@ -31,7 +30,8 @@ export interface ConnectorCredentialDeps {
 
 export type ResolveConnectorCredentials = (
   connectorId: string,
-  callContext: SandboxCallContext
+  callContext: SandboxCallContext,
+  options?: { minimumValiditySeconds?: number; forceRefresh?: boolean }
 ) => Promise<ConnectorCredentialResolution>;
 
 const toEnvKey = (segment: string): string =>
@@ -47,38 +47,20 @@ const toEnvValue = (value: unknown): string | undefined => {
   return JSON.stringify(value);
 };
 
-/** Reads Authorization from a header record or from the JSON string preconfigured connectors store. */
-const readAuthorizationHeader = (secretHeaders: unknown): string | undefined => {
-  let record = secretHeaders;
-  if (typeof record === 'string') {
-    try {
-      record = JSON.parse(record);
-    } catch {
-      return undefined;
-    }
-  }
-  if (!record || typeof record !== 'object' || Array.isArray(record)) return undefined;
-
-  const authorization = Object.entries(record).find(
-    ([key]) => key.toLowerCase() === 'authorization'
-  )?.[1];
-  return typeof authorization === 'string' ? authorization : undefined;
-};
-
 /**
- * Builds the CONNECTOR_* environment for a connector. Config keys map to CONNECTOR_CONFIG_<KEY>,
- * secret keys to CONNECTOR_SECRET_<KEY>; nested values are JSON-encoded.
+ * Builds the CONNECTOR_* environment from framework-resolved config and auth headers.
+ * Config keys map to CONNECTOR_CONFIG_<KEY>; header names map to CONNECTOR_HEADER_<NAME>.
  */
 export const buildConnectorEnv = ({
   connectorId,
   actionTypeId,
   config,
-  secrets,
+  headers,
 }: {
   connectorId: string;
   actionTypeId: string;
   config: Record<string, unknown>;
-  secrets: Record<string, unknown>;
+  headers: Record<string, string>;
 }): ConnectorCredentialEnv => {
   const env: Record<string, string> = {
     [`${CONNECTOR_ENV_PREFIX}ID`]: connectorId,
@@ -90,21 +72,11 @@ export const buildConnectorEnv = ({
     const envValue = toEnvValue(value);
     if (envValue !== undefined) env[`${CONNECTOR_ENV_PREFIX}CONFIG_${toEnvKey(key)}`] = envValue;
   }
-  for (const [key, value] of Object.entries(secrets)) {
+  for (const [key, value] of Object.entries(headers)) {
     const envValue = toEnvValue(value);
     if (envValue === undefined) continue;
-    env[`${CONNECTOR_ENV_PREFIX}SECRET_${toEnvKey(key)}`] = envValue;
+    env[`${CONNECTOR_ENV_PREFIX}HEADER_${toEnvKey(key)}`] = envValue;
     if (envValue.length >= MIN_REDACTABLE_SECRET_LENGTH) secretValues.push(envValue);
-  }
-
-  // HTTP ES connectors store `Authorization: ApiKey …` in secretHeaders, not `password`.
-  const authorization = readAuthorizationHeader(secrets.secretHeaders);
-  if (authorization?.startsWith('ApiKey ')) {
-    const apiKey = authorization.slice('ApiKey '.length);
-    if (env.CONNECTOR_SECRET_PASSWORD === undefined) {
-      env.CONNECTOR_SECRET_PASSWORD = apiKey;
-    }
-    if (apiKey.length >= MIN_REDACTABLE_SECRET_LENGTH) secretValues.push(apiKey);
   }
 
   return { env, secretValues };
@@ -116,9 +88,8 @@ export const redactSecrets = (text: string, secretValues: readonly string[]): st
 
 /**
  * Creates the resolver that turns a connector id into a one-command credential environment.
- * Deny by default: the connector must be on the agent allow-list and the current user must be
- * allowed to read and execute it in the current space. Only preconfigured (kibana.yml)
- * connectors are supported: their secrets are held in memory by the actions plugin.
+ * Deny by default: the connector must be on the agent allow-list. Actions authorizes execute
+ * access and resolves config plus auth headers without exposing stored secrets.
  */
 export const createConnectorCredentialResolver =
   ({
@@ -128,24 +99,35 @@ export const createConnectorCredentialResolver =
     getDeps: () => ConnectorCredentialDeps;
     logger: Logger;
   }): ResolveConnectorCredentials =>
-  async (connectorId, callContext) => {
+  async (connectorId, callContext, options) => {
     const { actions } = getDeps();
 
-    const authorized = await authorizeConnector(connectorId, callContext, actions);
-    if ('errorMessage' in authorized) return authorized;
-    const { connector, inMemoryConnector } = authorized;
+    if (!actions) {
+      return { errorMessage: 'Connectors are not available in this deployment' };
+    }
 
-    logger.debug(
-      `Injecting credentials for connector ${connectorId} into a single sandbox command`
-    );
+    if (!callContext.allowedConnectorIds.includes(connectorId)) {
+      return {
+        errorMessage:
+          `Connector '${connectorId}' is not assigned to this agent. ` +
+          `Assigned connectors: ${callContext.allowedConnectorIds.join(', ') || 'none'}. ` +
+          `Check /workspace/connectors.md.`,
+      };
+    }
 
-    // Config comes from the in-memory connector, not from `get()`: the actions client omits
-    // config for preconfigured connectors unless they opt in with `exposeConfig`, which would
-    // also publish it over the HTTP API. Authorization above already gated this read.
-    return buildConnectorEnv({
-      connectorId,
-      actionTypeId: connector.actionTypeId,
-      config: inMemoryConnector.config ?? connector.config ?? {},
-      secrets: inMemoryConnector.secrets ?? {},
-    });
+    try {
+      const actionsClient = await actions.getActionsClientWithRequest(callContext.request);
+      const credentials = await actionsClient.getConnectorCredentials({
+        id: connectorId,
+        ...options,
+      });
+
+      logger.debug(
+        `Injecting credentials for connector ${connectorId} into a single sandbox command`
+      );
+
+      return buildConnectorEnv(credentials);
+    } catch (err) {
+      return { errorMessage: `Failed to resolve connector '${connectorId}': ${err}` };
+    }
   };
