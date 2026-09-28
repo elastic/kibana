@@ -41,6 +41,8 @@ export const MetricDetailPage = () => {
     triggerRefresh,
   } = useMetricsTimeContext();
   const { schema, pending: schemaPending } = useDetailSchema();
+  // Gate metadata until schema detection finishes so charts do not paint ECS then swap.
+  const isSchemaReady = !schemaPending;
   const {
     name,
     filteredRequiredMetrics,
@@ -54,7 +56,7 @@ export const MetricDetailPage = () => {
     sourceId,
     timeRange: parsedTimeRange,
     schema,
-    enabled: !schemaPending,
+    enabled: isSchemaReady,
   });
 
   const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions();
