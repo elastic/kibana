@@ -19,7 +19,7 @@ describe('useAlertZeroDocumentationLink', () => {
   it('returns the Security solution guide link', () => {
     mockUseKibana.mockReturnValue({
       services: {
-        docLinks: { links: { securitySolution: { guide: 'https://example.com/guide' } } },
+        docLinks: { links: { siem: { guide: 'https://example.com/guide' } } },
       },
     } as never);
 

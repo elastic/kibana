@@ -19,7 +19,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { AppChromeLayout } from './app_chrome_layout';
 
 const coreStartStub = {
-  docLinks: { links: { securitySolution: { guide: 'https://www.elastic.co/guide' } } },
+  docLinks: { links: { siem: { guide: 'https://www.elastic.co/guide' } } },
 } as unknown as CoreStart;
 
 const makeChromeWithFeedback = (openFeedback?: () => void) => {

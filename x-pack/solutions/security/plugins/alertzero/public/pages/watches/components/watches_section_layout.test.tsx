@@ -77,7 +77,7 @@ describe('WatchesSectionLayout', () => {
     jest.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
-        docLinks: { links: { securitySolution: { guide: 'https://www.elastic.co/guide' } } },
+        docLinks: { links: { siem: { guide: 'https://www.elastic.co/guide' } } },
       },
     } as never);
   });

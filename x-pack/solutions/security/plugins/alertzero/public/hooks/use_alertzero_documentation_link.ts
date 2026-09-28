@@ -16,5 +16,5 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
  */
 export const useAlertZeroDocumentationLink = (): string | undefined => {
   const { services } = useKibana<CoreStart>();
-  return services.docLinks?.links.securitySolution.guide;
+  return services.docLinks?.links.siem.guide;
 };
