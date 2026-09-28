@@ -29,7 +29,9 @@ Feature flag overrides are **server-wide**: they apply to the entire Kibana inst
 The `@kbn/eslint/scout_no_core_settings_in_space_test` ESLint rule warns when `apiServices.core.settings(...)` is called inside `spaceTest` scope (directly, in `spaceTest.describe`/`beforeAll`/`afterAll`/`step`, etc.), since that scope runs in parallel across spaces sharing the same server.
 ::::::
 
-The examples below assume the suite introduces a dynamic override that was previously absent. Set that key to `null` in teardown to remove the dynamic override and restore the underlying configuration or feature-flag provider evaluation. Setting it to `false` forces a value instead. If a dynamic override already existed, restore its previous value; preserve unrelated overrides.
+The examples below assume the setting had no configured value before setup, either in static configuration (such as `kibana.yml`) or in dynamic overrides. Set that key to `null` in teardown to remove it; for `feature_flags.overrides`, this allows the feature-flag provider to evaluate the flag again. Setting it to `false` forces a value instead.
+
+`null` removes the key from the merged configuration; it does not undo the last change or automatically restore a static value. If the setting was already configured, preserve and restore its previous value instead. Preserve unrelated overrides, and coordinate access so other suites do not change the same server-wide setting during the test.
 
 ### In a global setup hook (recommended for parallel suites) [scout-feature-flags-global-setup]
 

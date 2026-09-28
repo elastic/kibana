@@ -131,7 +131,7 @@ globalTeardownHook(
 );
 ```
 
-The feature-flag example assumes no dynamic override existed before setup. If one did, restore its previous value instead of removing it. Preserve unrelated overrides; see [Feature flags](./feature-flags.md#scout-feature-flags-runtime).
+The feature-flag example assumes the flag had no override in either static configuration or dynamic overrides before setup. If it did, restore its previous configured value instead of removing it. Preserve unrelated overrides; see [Feature flags](./feature-flags.md#scout-feature-flags-runtime).
 
 ### Available fixtures
 

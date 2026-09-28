@@ -344,7 +344,7 @@ globalSetupHook('Load shared test data (if needed)', async ({ esArchiver, log })
 });
 ```
 
-✔️ **Do:** revert suite-wide state in `global.teardown.ts` so it doesn't leak into other configs. The feature-flag example removes a dynamic override introduced by this suite; if an override already existed, restore its previous value instead. See [Feature flags](./feature-flags.md#scout-feature-flags-runtime):
+✔️ **Do:** revert suite-wide state in `global.teardown.ts` so it doesn't leak into other configs. The feature-flag example assumes no override existed in static configuration or dynamic overrides before setup. If one did, restore its previous configured value instead of setting it to `null`. See [Feature flags](./feature-flags.md#scout-feature-flags-runtime):
 
 ```ts
 globalTeardownHook('Reset shared Kibana state', async ({ kbnClient, apiServices, log }) => {
