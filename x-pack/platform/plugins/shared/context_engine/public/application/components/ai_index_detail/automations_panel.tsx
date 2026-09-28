@@ -9,7 +9,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -32,6 +31,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { getAiIndexDetailPath } from '../../paths';
+import { AiIndexDetailPanelEmptyPrompt } from './ai_index_detail_panel_empty_prompt';
 import { AutomationRow } from './automation_row';
 
 /**
@@ -92,11 +92,12 @@ export const AutomationsPanel = ({
   };
 
   const canAddMore = automations.length < MAX_AI_INDEX_AUTOMATIONS;
+  const hasAutomations = automations.length > 0;
 
   return (
     <EuiPanel hasBorder paddingSize="l">
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
-        <EuiFlexItem>
+        <EuiFlexItem css={{ minWidth: 0 }}>
           <EuiTitle size="s">
             <h2>
               {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.title', {
@@ -104,6 +105,20 @@ export const AutomationsPanel = ({
               })}
             </h2>
           </EuiTitle>
+          <EuiSpacer size="xs" />
+          <EuiText size="s" color="subdued">
+            <p>
+              {!isLoading && !hasAutomations
+                ? i18n.translate('xpack.contextEngine.aiIndexDetail.automations.descriptionEmpty', {
+                    defaultMessage:
+                      "Create an automation to extract and refresh Knowledge Indicators from this index's sources.",
+                  })
+                : i18n.translate('xpack.contextEngine.aiIndexDetail.automations.description', {
+                    defaultMessage:
+                      "Automations extract and refresh this AI index's Knowledge Indicators from its sources.",
+                  })}
+            </p>
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {isEditing ? (
@@ -210,15 +225,6 @@ export const AutomationsPanel = ({
           ) : null}
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.description', {
-            defaultMessage:
-              "Automations extract and refresh this AI index's Knowledge Indicators from its sources.",
-          })}
-        </p>
-      </EuiText>
       <EuiSpacer size="m" />
       {missingReadPrivilege && (
         <>
@@ -243,28 +249,18 @@ export const AutomationsPanel = ({
       ) : (
         <>
           {automations.length === 0 && !isEditing ? (
-            <EuiEmptyPrompt
+            <AiIndexDetailPanelEmptyPrompt
               iconType="tablePlay"
-              titleSize="xs"
-              data-test-subj="contextAiIndexAutomationsEmpty"
+              dataTestSubj="contextAiIndexAutomationsEmpty"
               title={
-                <h3>
-                  {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.emptyTitle', {
-                    defaultMessage: 'No automations yet',
-                  })}
-                </h3>
-              }
-              body={
-                <p>
-                  {isManaged
-                    ? i18n.translate(
-                        'xpack.contextEngine.aiIndexDetail.automations.emptyBodyManaged',
-                        { defaultMessage: 'No automations are configured for this AI index.' }
-                      )
-                    : i18n.translate('xpack.contextEngine.aiIndexDetail.automations.emptyBody', {
-                        defaultMessage: 'Create an automation to get started.',
-                      })}
-                </p>
+                isManaged
+                  ? i18n.translate(
+                      'xpack.contextEngine.aiIndexDetail.automations.emptyBodyManaged',
+                      { defaultMessage: 'No automations are configured for this AI index.' }
+                    )
+                  : i18n.translate('xpack.contextEngine.aiIndexDetail.automations.emptyTitle', {
+                      defaultMessage: 'No automations yet',
+                    })
               }
             />
           ) : (

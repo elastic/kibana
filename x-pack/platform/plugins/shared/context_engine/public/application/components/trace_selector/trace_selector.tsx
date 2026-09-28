@@ -70,7 +70,7 @@ export const TraceSelector = ({ value, onChange, ebtElement }: TraceSelectorProp
         </EuiButton>
         <EuiButton
           id="index"
-          iconType="listBullet"
+          iconType="chartWaterfall"
           data-test-subj="contextTraceToggle-index"
           {...getEbtProps({
             element: ebtElement,

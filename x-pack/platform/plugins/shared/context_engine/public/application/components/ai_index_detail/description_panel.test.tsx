@@ -69,6 +69,7 @@ describe('DescriptionPanel', () => {
       <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
     );
 
+    expect(screen.getByTestId('contextAiIndexDescriptionEmpty')).toBeInTheDocument();
     expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
     expect(screen.getByText(ADD_ONE_HINT)).toBeInTheDocument();
     expect(screen.getByTestId('contextAddDescriptionButton')).toBeInTheDocument();

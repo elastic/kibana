@@ -53,9 +53,10 @@ const renderWithProviders = (
   );
 };
 
-const EMPTY_FALLBACK = /No agent traces configured/;
-const PICK_HINT =
-  /Point this index at an Elastic agent from Agent Builder, or a data stream carrying OTel GenAI spans/;
+const EMPTY_FALLBACK = /No agent traces yet/;
+const EMPTY_FALLBACK_MANAGED = /No agent traces configured/;
+const EMPTY_HEADER_DESCRIPTION =
+  /Add agent traces so Knowledge Indicators tune against the questions agents actually ask/;
 
 describe('TracesPanel', () => {
   beforeEach(() => {
@@ -79,10 +80,11 @@ describe('TracesPanel', () => {
       <TracesPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
     );
 
+    expect(screen.getByTestId('contextAiIndexTracesEmpty')).toBeInTheDocument();
     expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
-    expect(screen.getByText(PICK_HINT)).toBeInTheDocument();
     expect(screen.getByTestId('contextAddTracesButton')).toBeInTheDocument();
     expect(screen.queryByTestId('contextEditTracesButton')).not.toBeInTheDocument();
+    expect(screen.getByText(EMPTY_HEADER_DESCRIPTION)).toBeInTheDocument();
   });
 
   it('renders read-only empty fallback for managed AI indexes', () => {
@@ -90,8 +92,9 @@ describe('TracesPanel', () => {
       <TracesPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged />
     );
 
-    expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
-    expect(screen.queryByText(PICK_HINT)).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexTracesEmpty')).toBeInTheDocument();
+    expect(screen.getByText(EMPTY_FALLBACK_MANAGED)).toBeInTheDocument();
+    expect(screen.queryByText(EMPTY_FALLBACK)).not.toBeInTheDocument();
   });
 
   it('renders the configured elastic agent trace in read-only mode', () => {
@@ -111,6 +114,7 @@ describe('TracesPanel', () => {
       'Loyalty Support Agent'
     );
     expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('Elastic agent');
+    expect(screen.queryByText(EMPTY_HEADER_DESCRIPTION)).not.toBeInTheDocument();
   });
 
   it('renders the configured data stream trace in read-only mode', () => {
@@ -154,7 +158,7 @@ describe('TracesPanel', () => {
     );
 
     expect(screen.queryByTestId('contextTracesReadOnlyValue')).not.toBeInTheDocument();
-    expect(screen.queryByText(EMPTY_FALLBACK)).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexTracesEmpty')).not.toBeInTheDocument();
   });
 
   it('hides the edit button for managed AI indexes', () => {

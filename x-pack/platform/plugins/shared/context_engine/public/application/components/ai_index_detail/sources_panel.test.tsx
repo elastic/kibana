@@ -119,12 +119,13 @@ describe('SourcesPanel', () => {
     );
 
     expect(screen.getByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
-    expect(
-      screen.getByText('No sources yet. Add a source to start building context for this AI index.')
-    ).toBeInTheDocument();
+    expect(screen.getByText('No sources yet')).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexSourceRow')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextAddSourcesButton')).toBeInTheDocument();
     expect(screen.queryByTestId('contextEditSourcesButton')).not.toBeInTheDocument();
+    expect(
+      screen.getByText('Add a source to start building context for this AI index.')
+    ).toBeInTheDocument();
   });
 
   it('shows read-only empty copy for managed AI indexes with no sources', () => {

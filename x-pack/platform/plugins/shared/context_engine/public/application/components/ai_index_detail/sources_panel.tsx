@@ -24,6 +24,7 @@ import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices'
 import { useDataConnectors } from '../../hooks/use_data_connectors';
 import { useSourcesEditor } from '../../hooks/use_sources_editor';
 import { toSourceType } from '../../utils/sources';
+import { AiIndexDetailPanelEmptyPrompt } from './ai_index_detail_panel_empty_prompt';
 import { SourcePicker } from '../source_picker';
 import { getSourceDisplay } from '../source_display';
 import { SourceRow } from '../source_row';
@@ -66,10 +67,17 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
           <EuiSpacer size="xs" />
           <EuiText size="s" color="subdued">
             <p>
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.sources.description"
-                defaultMessage="Data feeding this AI index. Add a source to refresh context and suggestions."
-              />
+              {!isLoading && !hasSources ? (
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.sources.descriptionEmpty"
+                  defaultMessage="Add a source to start building context for this AI index."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.sources.description"
+                  defaultMessage="Data feeding this AI index. Context and suggestions refresh as sources change."
+                />
+              )}
             </p>
           </EuiText>
         </EuiFlexItem>
@@ -161,9 +169,11 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
           </EuiFlexGroup>
         </div>
       ) : sources.length === 0 ? (
-        <EuiText size="s" color="subdued" data-test-subj="contextAiIndexSourcesEmpty">
-          <p>
-            {isManaged ? (
+        <AiIndexDetailPanelEmptyPrompt
+          iconType="tablePlus"
+          dataTestSubj="contextAiIndexSourcesEmpty"
+          title={
+            isManaged ? (
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.sources.emptyManaged"
                 defaultMessage="This AI index has no sources."
@@ -171,11 +181,11 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
             ) : (
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.sources.empty"
-                defaultMessage="No sources yet. Add a source to start building context for this AI index."
+                defaultMessage="No sources yet"
               />
-            )}
-          </p>
-        </EuiText>
+            )
+          }
+        />
       ) : (
         <EuiFlexGroup direction="column" gutterSize="s">
           {sources.map((source) => {

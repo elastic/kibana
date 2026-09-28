@@ -22,6 +22,7 @@ import React from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { useTracesEditor } from '../../hooks/use_traces_editor';
+import { AiIndexDetailPanelEmptyPrompt } from './ai_index_detail_panel_empty_prompt';
 import { TraceDisplay } from '../trace_display';
 import { TraceSelector } from '../trace_selector';
 
@@ -54,10 +55,17 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
           <EuiSpacer size="xs" />
           <EuiText size="s" color="subdued">
             <p>
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.traces.description"
-                defaultMessage="Traces this AI index learns from. Knowledge Indicators are tuned against the questions agents actually ask."
-              />
+              {!isLoading && !hasTrace ? (
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.traces.descriptionEmpty"
+                  defaultMessage="Add agent traces so Knowledge Indicators tune against the questions agents actually ask."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.traces.description"
+                  defaultMessage="Traces this AI index learns from. Knowledge Indicators are tuned against the questions agents actually ask."
+                />
+              )}
             </p>
           </EuiText>
         </EuiFlexItem>
@@ -152,9 +160,11 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
       ) : currentTrace ? (
         <TraceDisplay trace={currentTrace} />
       ) : (
-        <EuiText size="s" color="subdued">
-          <p data-test-subj="contextTracesReadOnlyValue">
-            {isManaged ? (
+        <AiIndexDetailPanelEmptyPrompt
+          iconType="chartWaterfall"
+          dataTestSubj="contextAiIndexTracesEmpty"
+          title={
+            isManaged ? (
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.traces.emptyManaged"
                 defaultMessage="No agent traces configured."
@@ -162,11 +172,11 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
             ) : (
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.traces.empty"
-                defaultMessage="No agent traces configured. Point this index at an Elastic agent from Agent Builder, or a data stream carrying OTel GenAI spans."
+                defaultMessage="No agent traces yet"
               />
-            )}
-          </p>
-        </EuiText>
+            )
+          }
+        />
       )}
     </EuiPanel>
   );
