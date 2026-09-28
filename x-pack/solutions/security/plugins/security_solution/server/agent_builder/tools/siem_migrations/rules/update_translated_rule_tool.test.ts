@@ -168,10 +168,7 @@ describe('updateTranslatedRuleTool', () => {
     });
     const { esql_query: _, ...inputWithoutMutation } = validInput;
 
-    const result = (await tool.handler(
-      inputWithoutMutation,
-      context
-    )) as ToolHandlerStandardReturn;
+    const result = (await tool.handler(inputWithoutMutation, context)) as ToolHandlerStandardReturn;
 
     expect(result.results[0].type).toBe(ToolResultType.error);
     expect(sendUiEvent).not.toHaveBeenCalled();
@@ -193,7 +190,9 @@ describe('updateTranslatedRuleTool', () => {
       const result = (await tool.handler(validInput, context)) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.error);
-      expect((result.results[0].data as { message: string }).message).toContain('already installed');
+      expect((result.results[0].data as { message: string }).message).toContain(
+        'already installed'
+      );
       // Only the GET call was made — no PATCH
       expect(mockFetch).toHaveBeenCalledTimes(1);
       expect(sendUiEvent).not.toHaveBeenCalled();
@@ -216,7 +215,9 @@ describe('updateTranslatedRuleTool', () => {
       const result = (await tool.handler(prebuiltInput, context)) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.error);
-      expect((result.results[0].data as { message: string }).message).toContain('already installed');
+      expect((result.results[0].data as { message: string }).message).toContain(
+        'already installed'
+      );
       expect(mockFetch).toHaveBeenCalledTimes(1);
       expect(sendUiEvent).not.toHaveBeenCalled();
     });
