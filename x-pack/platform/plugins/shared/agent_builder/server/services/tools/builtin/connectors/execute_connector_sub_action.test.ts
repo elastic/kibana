@@ -117,6 +117,13 @@ describe('createExecuteConnectorSubActionTool', () => {
     expect(tool.tags).toEqual(['connector', 'sub-action']);
   });
 
+  it('is not gated behind an availability check (graduated from experimental)', () => {
+    // Regression guard: this tool used to be unavailable unless
+    // agentBuilder:experimentalFeatures was enabled. It must stay ungated.
+    const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+    expect(tool.availability).toBeUndefined();
+  });
+
   describe('schema (strict, no structural normalization)', () => {
     it('rejects flattened sub-action fields at the root (unknown keys)', () => {
       const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
