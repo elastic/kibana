@@ -8,7 +8,7 @@
 import { type InferenceConnector, InferenceConnectorType } from './connectors';
 import { elasticModelIds } from '../inference_endpoints';
 import { elasticModelDictionary } from '../const';
-import { getContextWindowSize } from './connector_capabilities';
+import { getContextWindowSize, getSupportedReasoningEffortLevels } from './connector_capabilities';
 import { getModelDefinition } from './known_models';
 
 const createConnector = (parts: Partial<InferenceConnector>): InferenceConnector => {
@@ -72,5 +72,58 @@ describe('getContextWindowSize', () => {
     )!.contextWindow;
 
     expect(getContextWindowSize(connector)).toBe(expectedValue);
+  });
+});
+
+describe('getSupportedReasoningEffortLevels', () => {
+  const createEisConnector = (metadata: InferenceConnector['metadata']): InferenceConnector =>
+    createConnector({
+      type: InferenceConnectorType.Inference,
+      isInferenceEndpoint: true,
+      isEis: true,
+      metadata,
+    });
+
+  it.each<{ description: string; connector: InferenceConnector }>([
+    {
+      description: 'a non-EIS connector, even when capabilities are present',
+      connector: createConnector({
+        isEis: false,
+        metadata: { capabilities: { reasoning: { supported_effort_levels: ['high'] } } },
+      }),
+    },
+    { description: 'an EIS connector without metadata', connector: createEisConnector(undefined) },
+    {
+      description: 'an EIS connector without capabilities',
+      connector: createEisConnector({ display: { name: 'Model' } }),
+    },
+    {
+      description: 'capabilities that do not advertise reasoning',
+      connector: createEisConnector({
+        capabilities: { context_window: { max_input_tokens: 1000 } },
+      }),
+    },
+    {
+      description: 'reasoning advertised without levels',
+      connector: createEisConnector({ capabilities: { reasoning: {} } }),
+    },
+    {
+      description: 'reasoning advertised with an empty list of levels',
+      connector: createEisConnector({
+        capabilities: { reasoning: { supported_effort_levels: [] } },
+      }),
+    },
+  ])('returns undefined for $description', ({ connector }) => {
+    expect(getSupportedReasoningEffortLevels(connector)).toBeUndefined();
+  });
+
+  it('returns the advertised levels', () => {
+    const connector = createEisConnector({
+      capabilities: {
+        reasoning: { supported_effort_levels: ['high', 'low'], default_effort_level: 'high' },
+      },
+    });
+
+    expect(getSupportedReasoningEffortLevels(connector)).toEqual(['high', 'low']);
   });
 });

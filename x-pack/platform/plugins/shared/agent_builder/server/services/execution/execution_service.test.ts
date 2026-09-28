@@ -20,6 +20,7 @@ import {
   ConversationRoundStatus,
   ExecutionStatus,
   TimelineEventType,
+  createBadRequestError,
   createRequestAbortedError,
   isBadRequestError,
 } from '@kbn/agent-builder-common';
@@ -77,6 +78,12 @@ jest.mock('./task/heartbeat_reporter', () => ({
     start: jest.fn(),
     stop: jest.fn(),
   })),
+}));
+
+const mockValidateReasoningLevel = jest.fn();
+
+jest.mock('./utils/validate_reasoning_level', () => ({
+  validateReasoningLevel: (...args: unknown[]) => mockValidateReasoningLevel(...args),
 }));
 
 const mockTaskManagerSchedule = jest.fn();
@@ -833,6 +840,64 @@ describe('AgentExecutionService', () => {
       expect(mockExecutionClient.create).toHaveBeenCalledWith(
         expect.objectContaining({ metadata: undefined })
       );
+    });
+  });
+
+  describe('executeAgent with a reasoning level', () => {
+    it('validates the reasoning level against the requested connector', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        params: {
+          agentId: 'agent-1',
+          connectorId: 'connector-1',
+          reasoningLevel: 'high',
+          nextInput: { message: 'hello' },
+        },
+        useTaskManager: true,
+      });
+
+      expect(mockValidateReasoningLevel).toHaveBeenCalledWith(
+        expect.objectContaining({ reasoningLevel: 'high', connectorId: 'connector-1', request })
+      );
+      expect(mockExecutionClient.create).toHaveBeenCalled();
+    });
+
+    it('persists and schedules nothing when the reasoning level is rejected', async () => {
+      mockValidateReasoningLevel.mockRejectedValueOnce(
+        createBadRequestError('Reasoning level "xhigh" is not supported')
+      );
+
+      await expect(
+        service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          params: {
+            agentId: 'agent-1',
+            reasoningLevel: 'xhigh',
+            nextInput: { message: 'hello' },
+          },
+          useTaskManager: true,
+        })
+      ).rejects.toMatchObject({ code: AgentBuilderErrorCode.badRequest });
+
+      expect(conversationService.getScopedClient).not.toHaveBeenCalled();
+      expect(conversationClient.create).not.toHaveBeenCalled();
+      expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
+    });
+
+    it('does not validate when no reasoning level is requested', async () => {
+      await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request: httpServerMock.createKibanaRequest(),
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: true,
+      });
+
+      expect(mockValidateReasoningLevel).not.toHaveBeenCalled();
     });
   });
 

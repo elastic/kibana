@@ -29,6 +29,25 @@ export const getContextWindowSize = (connector: InferenceConnector): number | un
   return undefined;
 };
 
+/**
+ * Retrieve the reasoning effort levels the connector's model supports, as advertised by EIS.
+ *
+ * @returns The advertised levels, or `undefined` when support is unknown: a non-EIS connector, an
+ * endpoint that advertises no reasoning capability, or an empty list of levels.
+ */
+export const getSupportedReasoningEffortLevels = (
+  connector: InferenceConnector
+): string[] | undefined => {
+  if (!connector.isEis) {
+    return undefined;
+  }
+  const supportedLevels = connector.metadata?.capabilities?.reasoning?.supported_effort_levels;
+  if (!supportedLevels?.length) {
+    return undefined;
+  }
+  return supportedLevels;
+};
+
 export const contextWindowFromModelName = (modelName: string): number | undefined => {
   if (elasticModelDictionary[modelName]) {
     modelName = elasticModelDictionary[modelName].model;

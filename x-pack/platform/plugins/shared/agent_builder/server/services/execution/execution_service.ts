@@ -56,7 +56,7 @@ import {
   collectAndWriteEvents,
   type AgentExecutionDeps,
 } from './execution_runner';
-import { serializeExecutionError } from './utils';
+import { serializeExecutionError, validateReasoningLevel } from './utils';
 import { AbortMonitor } from './task/abort_monitor';
 import { HeartbeatReporter } from './task/heartbeat_reporter';
 import { followExecution$ } from './execution_follower';
@@ -118,6 +118,19 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const agentId = params.agentId ?? agentBuilderDefaultAgentId;
     const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
     const interactivity = normalizeInteractive(interactive, mode);
+
+    if (params.reasoningLevel !== undefined) {
+      const { inference, uiSettings, savedObjects, searchInferenceEndpoints } = this.deps;
+      await validateReasoningLevel({
+        reasoningLevel: params.reasoningLevel,
+        connectorId: params.connectorId,
+        request,
+        inference,
+        uiSettings,
+        savedObjects,
+        searchInferenceEndpoints,
+      });
+    }
 
     const executionClient = this.createExecutionClient();
 
