@@ -78,6 +78,7 @@ import { EndpointExceptionsApiClient } from '../../../endpoint_exceptions/servic
 import { POLICY_ARTIFACT_ENDPOINT_EXCEPTIONS_LABELS } from './endpoint_exceptions_translations';
 import { POLICY_ARTIFACT_CUSTOM_YARA_SIGNATURES_LABELS } from './custom_yara_signatures_translations';
 import { CustomYaraSignaturesApiClient } from '../../../custom_yara_signatures/service/api_client';
+import { CustomYaraSignatureCriteria } from '../../../custom_yara_signatures/view/components/custom_yara_signature_criteria';
 import { TrustedAppsCardDecorator } from '../../../trusted_apps/view/trusted_apps_list';
 import { EventFiltersCardDecorator } from '../../../event_filters/view/event_filters_list';
 
@@ -544,6 +545,7 @@ export const PolicyTabs = React.memo(() => {
                     getArtifactPath={getCustomYaraSignaturesListPath}
                     getPolicyArtifactsPath={getPolicyCustomYaraSignaturesPath}
                     canWriteArtifact={canWriteCustomYaraSignatures}
+                    CriteriaComponent={CustomYaraSignatureCriteria}
                   />
                 </>
               ),
