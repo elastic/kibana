@@ -46,7 +46,9 @@ export const LandingPage: React.FC = () => {
     setDecision(showQueue ? 'queue' : 'onboarding');
   }, [decision, showQueue, isUnresolved]);
 
-  if (decision === 'queue' || (decision === null && showQueue)) return <ConversationsPage />;
+  // showQueue is always checked so background data updates (another admin enabling a worker,
+  // or a successful save invalidating the cache) transition the page without needing a reload.
+  if (showQueue) return <ConversationsPage />;
 
   // Guard on decision === null so the spinner only appears before the initial
   // resolution; after the onboarding decision is latched we render directly.

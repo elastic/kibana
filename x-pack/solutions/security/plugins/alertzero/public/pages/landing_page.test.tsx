@@ -194,6 +194,21 @@ describe('LandingPage', () => {
     expect(document.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
   });
 
+  it('transitions to the queue when a worker becomes enabled while onboarding is shown', () => {
+    // Phase 1: no workers enabled — onboarding is shown.
+    mockUseWorkers.mockReturnValue(workersResult([]));
+    const { rerender } = render(wrap(<LandingPage />));
+
+    expect(screen.getByText('Enable your workers')).toBeInTheDocument();
+
+    // Phase 2: another admin enables a worker — page should transition without a reload.
+    mockUseWorkers.mockReturnValue(workersResult([{ enabled: true }]));
+    rerender(wrap(<LandingPage />));
+
+    expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
+    expect(screen.queryByText('Enable your workers')).not.toBeInTheDocument();
+  });
+
   it('transitions from queue to onboarding when stale positive cache is corrected by a fresh empty response', () => {
     // Phase 1: stale cache shows an enabled worker while refetching — queue shown optimistically.
     mockUseWorkers.mockReturnValue(workersResult([{ enabled: true }], { isFetching: true }));

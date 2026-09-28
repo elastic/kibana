@@ -6,6 +6,7 @@
  */
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { WorkflowsPublicPluginStart } from '@kbn/workflows-management-plugin/public';
@@ -19,6 +20,8 @@ export type AlertZeroSetupDependencies = Record<string, never>;
 export interface AlertZeroStartDependencies {
   /** Required plugin, see `requiredPlugins` in kibana.jsonc. */
   agentBuilder: AgentBuilderPluginStart;
+  /** Optional; absent in minimal Kibana deployments without X-Pack security. */
+  security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   share?: SharePluginStart;
   workflowsManagement?: WorkflowsPublicPluginStart;

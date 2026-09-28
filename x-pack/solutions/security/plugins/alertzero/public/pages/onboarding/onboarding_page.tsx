@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   EuiButton,
@@ -34,9 +34,11 @@ import {
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
 } from '@kbn/alertzero-common';
+import { SECURITY_APP_ID } from '@kbn/deeplinks-security';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useCurrentUser } from '../../hooks/use_current_user';
+import { useWorkers } from '../../hooks/use_workers_api';
 import { workerName } from '../watches/workers/translations';
 import { useEnableWorkers } from './use_enable_workers';
 import * as i18n from './translations';
@@ -56,7 +58,8 @@ type WorkerToggleState = Record<OnboardingWorkerId, boolean>;
 const initialToggleState = (): WorkerToggleState =>
   Object.fromEntries(ONBOARDING_WORKER_IDS.map((id) => [id, true])) as WorkerToggleState;
 
-const onboardingWorkers = SYSTEM_SECURITY_WORKER_CATALOG.filter(({ id }) =>
+// Stable catalog slice in display order — used to derive the live available set.
+const ONBOARDING_WORKERS_CATALOG = SYSTEM_SECURITY_WORKER_CATALOG.filter(({ id }) =>
   (ONBOARDING_WORKER_IDS as readonly string[]).includes(id)
 ).sort(
   (a, b) =>
@@ -76,15 +79,31 @@ export const OnboardingPage: React.FC = () => {
 
   const currentUserEmail = useCurrentUser();
 
+  // Intersect the server-returned worker list with the catalog so skill-gated workers
+  // absent from the response are not shown as toggles (or counted toward the minimum).
+  const { data: workersData } = useWorkers();
+  const serverWorkerIds = useMemo(
+    () => new Set((workersData?.workers ?? []).map((w) => w.id)),
+    [workersData]
+  );
+  const onboardingWorkers = useMemo(
+    () => ONBOARDING_WORKERS_CATALOG.filter(({ id }) => serverWorkerIds.has(id)),
+    [serverWorkerIds]
+  );
+  const availableWorkerIds = useMemo(
+    () => onboardingWorkers.map(({ id }) => id as OnboardingWorkerId),
+    [onboardingWorkers]
+  );
+
   const history = useHistory();
   const [workerEnabled, setWorkerEnabled] = useState<WorkerToggleState>(initialToggleState);
   const { handleEnableAndContinue, isSaving } = useEnableWorkers(
-    ONBOARDING_WORKER_IDS,
+    availableWorkerIds,
     workerEnabled,
     () => history.push('/watches')
   );
 
-  const enabledCount = Object.values(workerEnabled).filter(Boolean).length;
+  const enabledCount = availableWorkerIds.filter((id) => workerEnabled[id]).length;
 
   const handleToggle = (workerId: OnboardingWorkerId, checked: boolean) => {
     if (!checked && enabledCount <= 1) return;
@@ -203,6 +222,7 @@ export const OnboardingPage: React.FC = () => {
           <EuiButton
             fill
             isLoading={isSaving}
+            disabled={availableWorkerIds.length === 0}
             onClick={handleEnableAndContinue}
             data-test-subj="alertZeroOnboardingEnableButton"
           >
@@ -211,7 +231,7 @@ export const OnboardingPage: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiLink
-            onClick={() => application.navigateToApp('security')}
+            onClick={() => application.navigateToApp(SECURITY_APP_ID)}
             data-test-subj="alertZeroOnboardingNotNowLink"
           >
             {i18n.NOT_NOW} &rarr;

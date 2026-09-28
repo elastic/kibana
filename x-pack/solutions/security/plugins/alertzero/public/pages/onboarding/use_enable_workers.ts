@@ -35,18 +35,14 @@ export const useEnableWorkers = (
     const idsToUpdate = workerIds.filter((id) => visibleIds.has(id));
 
     setIsSaving(true);
-    try {
-      await Promise.all(
-        idsToUpdate.map((id) =>
-          updateWorker({ workerId: id, patch: { enabled: workerEnabled[id] } })
-        )
-      );
-    } catch {
-      // errors surfaced via toast in useUpdateWorker.onError
-      return;
-    } finally {
-      setIsSaving(false);
-    }
+    // allSettled keeps isSaving true for the full fan-out so a single rejection does
+    // not re-enable the button while the remaining PATCHes are still in-flight.
+    const results = await Promise.allSettled(
+      idsToUpdate.map((id) => updateWorker({ workerId: id, patch: { enabled: workerEnabled[id] } }))
+    );
+    setIsSaving(false);
+    // errors surfaced via toast in useUpdateWorker.onError
+    if (results.some((r) => r.status === 'rejected')) return;
     onSuccess?.();
   };
 

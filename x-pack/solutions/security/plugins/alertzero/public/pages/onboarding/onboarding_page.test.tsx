@@ -32,32 +32,33 @@ const ALL_ONBOARDING_WORKER_IDS = [
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
 ];
 
+const ALL_WORKERS_RESPONSE = {
+  workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({ id, enabled: true })),
+};
+
 const renderPage = ({
   canWrite = false,
-  httpPatch = jest.fn().mockResolvedValue({}),
-  seedWorkers = false,
+  httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } }),
 }: {
   canWrite?: boolean;
   httpPatch?: jest.Mock;
-  seedWorkers?: boolean;
 } = {}) => {
   const coreStart = coreMock.createStart();
   // coreMock.createStart() does not populate feature capabilities; set the
   // alertzero.write capability so the component can branch on it.
   (coreStart.application.capabilities as Record<string, unknown>).alertzero = { write: canWrite };
-  const core = { ...coreStart, http: { ...coreStart.http, patch: httpPatch } };
+  // Mock http.get so useWorkers() always returns the full catalog (including on background
+  // refetches), and http.patch so mutation calls are interceptable per-test.
+  const httpGet = jest.fn().mockResolvedValue(ALL_WORKERS_RESPONSE);
+  const core = { ...coreStart, http: { ...coreStart.http, get: httpGet, patch: httpPatch } };
   const history = createMemoryHistory();
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
 
-  if (seedWorkers) {
-    // Pre-populate the workers list cache so useEnableWorkers can filter IDs
-    // against the server's known workers and avoid spurious 404s.
-    queryClient.setQueryData(queryKeys.workers.list(), {
-      workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({ id })),
-    });
-  }
+  // Pre-populate the workers list cache so the component renders synchronously
+  // with the full catalog and useEnableWorkers can filter IDs on the first click.
+  queryClient.setQueryData(queryKeys.workers.list(), ALL_WORKERS_RESPONSE);
 
   render(
     <I18nProvider>
@@ -101,7 +102,7 @@ describe('OnboardingPage', () => {
 
     it('calls the API for all workers and navigates to /watches when Enable and continue is clicked', async () => {
       const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } });
-      const { history } = renderPage({ canWrite: true, httpPatch, seedWorkers: true });
+      const { history } = renderPage({ canWrite: true, httpPatch });
 
       fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
 
@@ -109,13 +110,53 @@ describe('OnboardingPage', () => {
       expect(httpPatch).toHaveBeenCalledTimes(5);
     });
 
-    it('does not navigate when a worker update fails', async () => {
-      const httpPatch = jest.fn().mockRejectedValue(new Error('server error'));
-      const { history } = renderPage({ canWrite: true, httpPatch, seedWorkers: true });
+    it('keeps controls disabled while save is in-flight and does not allow a second submission', async () => {
+      // Use per-call resolvers so we control when each PATCH settles.
+      const resolvers: Array<() => void> = [];
+      const httpPatch = jest.fn().mockImplementation(
+        () =>
+          new Promise<{ worker: { id: string; enabled: boolean } }>((resolve) => {
+            resolvers.push(() => resolve({ worker: { id: 'mock', enabled: true } }));
+          })
+      );
+      renderPage({ canWrite: true, httpPatch });
 
       fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
 
-      await waitFor(() => expect(httpPatch).toHaveBeenCalled());
+      // While all five PATCHes are pending, the button must be disabled.
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: 'Enable and continue' })).toHaveAttribute(
+          'disabled'
+        )
+      );
+
+      // A second click while in-flight must not trigger additional requests.
+      fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
+      expect(httpPatch).toHaveBeenCalledTimes(5);
+
+      // Resolve all pending PATCHes and verify the button re-enables.
+      resolvers.forEach((r) => r());
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: 'Enable and continue' })).not.toHaveAttribute(
+          'disabled'
+        )
+      );
+    });
+
+    it('does not navigate when a worker update fails', async () => {
+      const httpPatch = jest.fn().mockRejectedValue(new Error('server error'));
+      const { history } = renderPage({ canWrite: true, httpPatch });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
+
+      // Wait for the entire save to settle (button stops loading) before asserting
+      // that navigation did not occur — checking immediately after httpPatch fires
+      // can race against the still-running allSettled fan-out.
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: 'Enable and continue' })).not.toHaveAttribute(
+          'disabled'
+        )
+      );
       expect(history.location.pathname).toBe('/');
     });
 
@@ -139,7 +180,7 @@ describe('OnboardingPage', () => {
 
     it('sends enabled: false for a worker that was toggled off', async () => {
       const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: false } });
-      renderPage({ canWrite: true, httpPatch, seedWorkers: true });
+      renderPage({ canWrite: true, httpPatch });
 
       // Toggle the second worker off.
       const toggles = screen.getAllByRole('switch');
