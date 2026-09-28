@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { FleetUnauthorizedError } from '../../../errors';
-import { appContextService } from '../..';
+import { appContextService, packagePolicyService } from '../..';
 
 import { assertUninstallAuthorizedForAffectedSpaces } from './uninstall_authz';
 
@@ -23,7 +23,19 @@ const mockFns = {
 jest.mock('../..', () => ({
   appContextService: {
     getSecurity: jest.fn(),
+    getInternalUserSOClientWithoutSpaceExtension: jest.fn().mockReturnValue({}),
   },
+  packagePolicyService: {
+    list: jest.fn(),
+  },
+}));
+
+// Mock getInstallation so the dependency walker in collectSpacesForUninstallClosure
+// finds no dependencies (returns undefined for any dep lookup).
+jest.mock('.', () => ({
+  getInstallation: jest.fn().mockResolvedValue(undefined),
+  kibanaSavedObjectTypes: [],
+  getPackageInfo: jest.fn(),
 }));
 
 const mockGetSecurity = appContextService.getSecurity as jest.Mock;
@@ -46,6 +58,7 @@ function makeSecurityStub() {
 }
 
 const mockRequest = {} as KibanaRequest;
+const mockSavedObjectsClient = {} as SavedObjectsClientContract;
 
 /** Minimal Installation fixture covering all space-related fields. */
 function makeInstallation(overrides: object = {}) {
@@ -61,11 +74,17 @@ function makeInstallation(overrides: object = {}) {
   } as any;
 }
 
+const mockPackagePolicyList = packagePolicyService.list as jest.MockedFunction<
+  typeof packagePolicyService.list
+>;
+
 beforeEach(() => {
   jest.clearAllMocks();
   mockFns.useRbacForRequest.mockReturnValue(true);
   mockFns.atSpaces.mockResolvedValue({ hasAllRequested: true });
   mockGetSecurity.mockReturnValue(makeSecurityStub());
+  // Return empty policy list so the dependency walker finds nothing to traverse.
+  mockPackagePolicyList.mockResolvedValue({ items: [], total: 0, page: 1, perPage: 10000 });
 });
 
 describe('assertUninstallAuthorizedForAffectedSpaces', () => {
@@ -79,6 +98,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
           pkgName: 'nginx',
           installation: makeInstallation(),
           packagePolicies: [],
+          savedObjectsClient: mockSavedObjectsClient,
         })
       ).resolves.toBeUndefined();
 
@@ -94,6 +114,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
           pkgName: 'nginx',
           installation: makeInstallation(),
           packagePolicies: [{ id: 'p1', spaceIds: ['some-space'] } as any],
+          savedObjectsClient: mockSavedObjectsClient,
         })
       ).resolves.toBeUndefined();
 
@@ -108,6 +129,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
         pkgName: 'nginx',
         installation: makeInstallation({ installed_kibana_space_id: 'space-a' }),
         packagePolicies: [],
+        savedObjectsClient: mockSavedObjectsClient,
       });
 
       const [calledSpaces] = mockFns.atSpaces.mock.calls[0];
@@ -120,6 +142,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
         pkgName: 'nginx',
         installation: makeInstallation({ installed_kibana_space_id: undefined }),
         packagePolicies: [],
+        savedObjectsClient: mockSavedObjectsClient,
       });
 
       const [calledSpaces] = mockFns.atSpaces.mock.calls[0];
@@ -134,6 +157,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
           additional_spaces_installed_kibana: { 'extra-space': [], 'another-space': [] },
         }),
         packagePolicies: [],
+        savedObjectsClient: mockSavedObjectsClient,
       });
 
       const [calledSpaces] = mockFns.atSpaces.mock.calls[0];
@@ -152,6 +176,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
         pkgName: 'nginx',
         installation: makeInstallation(),
         packagePolicies,
+        savedObjectsClient: mockSavedObjectsClient,
       });
 
       const [calledSpaces] = mockFns.atSpaces.mock.calls[0];
@@ -170,6 +195,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
         pkgName: 'nginx',
         installation: makeInstallation({ installed_kibana_space_id: 'default' }),
         packagePolicies,
+        savedObjectsClient: mockSavedObjectsClient,
       });
 
       const [calledSpaces] = mockFns.atSpaces.mock.calls[0];
@@ -191,6 +217,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
           additional_spaces_installed_kibana: { 'shared-space': [] },
         }),
         packagePolicies,
+        savedObjectsClient: mockSavedObjectsClient,
       });
 
       const [calledSpaces] = mockFns.atSpaces.mock.calls[0];
@@ -211,6 +238,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
           additional_spaces_installed_kibana: { 'extra-space': [] },
         }),
         packagePolicies,
+        savedObjectsClient: mockSavedObjectsClient,
       });
 
       const [calledSpaces] = mockFns.atSpaces.mock.calls[0];
@@ -227,6 +255,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
         pkgName: 'nginx',
         installation: makeInstallation(),
         packagePolicies: [],
+        savedObjectsClient: mockSavedObjectsClient,
       });
 
       const [, { kibana: actions }] = mockFns.atSpaces.mock.calls[0];
@@ -243,6 +272,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
           pkgName: 'nginx',
           installation: makeInstallation(),
           packagePolicies: [{ id: 'pp-1', spaceIds: ['space-b'] } as any],
+          savedObjectsClient: mockSavedObjectsClient,
         })
       ).resolves.toBeUndefined();
     });
@@ -256,6 +286,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
           pkgName: 'nginx',
           installation: makeInstallation(),
           packagePolicies: [{ id: 'pp-1', spaceIds: ['restricted-space'] } as any],
+          savedObjectsClient: mockSavedObjectsClient,
         })
       ).rejects.toThrow(FleetUnauthorizedError);
     });
@@ -268,6 +299,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
         pkgName: 'nginx',
         installation: makeInstallation(),
         packagePolicies: [{ id: 'pp-1', spaceIds: ['secret-space'] } as any],
+        savedObjectsClient: mockSavedObjectsClient,
       }).catch((e) => e);
 
       expect(err).toBeInstanceOf(FleetUnauthorizedError);
@@ -282,6 +314,7 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
         pkgName: 'my-package',
         installation: makeInstallation(),
         packagePolicies: [{ id: 'pp-1', spaceIds: ['space-b'] } as any],
+        savedObjectsClient: mockSavedObjectsClient,
       }).catch((e) => e);
 
       expect(err).toBeInstanceOf(FleetUnauthorizedError);

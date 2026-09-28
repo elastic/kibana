@@ -79,10 +79,8 @@ export async function cleanupDependenciesStep(options: {
   esClient: ElasticsearchClient;
   force?: boolean;
   installSource?: InstallSource;
-  request?: KibanaRequest;
 }): Promise<void> {
-  const { savedObjectsClient, pkgName, installation, esClient, force, installSource, request } =
-    options;
+  const { savedObjectsClient, pkgName, installation, esClient, force, installSource } = options;
   const parentRef = { name: pkgName, version: installation.version };
 
   if (appContextService.getExperimentalFeatures().enableResolveDependencies !== true) {
@@ -128,7 +126,8 @@ export async function cleanupDependenciesStep(options: {
         continue;
       }
       appContextService.getLogger().info(`Removing dependency ${dep.name}@${dep.version}`);
-      // If this was the last dependency, remove the package
+      // If this was the last dependency, remove the package. No request is passed here —
+      // authz over the full dependency closure was already verified at the top-level call.
       await removeInstallation({
         savedObjectsClient,
         pkgName: dep.name,
@@ -136,7 +135,6 @@ export async function cleanupDependenciesStep(options: {
         esClient,
         force,
         installSource,
-        request,
       });
     }
   }
@@ -168,10 +166,14 @@ export async function removeInstallation(options: {
     }
   );
 
-  // Check that the caller has privileges in all spaces affected by this uninstall.
-  // Fail closed if SO_SEARCH_LIMIT was reached — there may be policies in spaces
-  // we haven't enumerated yet.
+  // Check that the caller has privileges in all spaces affected by this uninstall,
+  // including the full dependency closure. collectSpacesForUninstallClosure walks
+  // the dependency tree before any removal starts, so a later authz failure cannot
+  // leave earlier dependencies already deleted.
   if (options.request) {
+    // Fail closed if SO_SEARCH_LIMIT was reached for the root package — there may be
+    // policies in spaces we haven't enumerated yet. Dep truncation is handled inside
+    // collectSpacesForUninstallClosure.
     if (items.length < total) {
       throw new PackageRemovalError(
         `Unable to verify uninstall authorization for package ${pkgName}: too many package policies to enumerate`
@@ -182,6 +184,7 @@ export async function removeInstallation(options: {
       pkgName,
       installation,
       packagePolicies: items,
+      savedObjectsClient,
     });
   }
 
@@ -192,7 +195,6 @@ export async function removeInstallation(options: {
     esClient,
     force: options.force,
     installSource: options.installSource,
-    request: options.request,
   });
 
   if (!options.force) {
