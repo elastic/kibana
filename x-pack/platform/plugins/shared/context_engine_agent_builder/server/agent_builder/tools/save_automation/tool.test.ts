@@ -78,7 +78,6 @@ describe('save_automation tool', () => {
       workflowYaml?: string;
       workflowId?: string;
       aiIndexId?: string;
-      run?: boolean;
     },
     attachments: AttachmentStateManager = createAttachments(),
     spaceId = 'default'
@@ -377,7 +376,7 @@ describe('save_automation tool', () => {
           workflowId: '',
           aiIndexId: 'my-ai-index',
         })
-      ).toEqual({ workflowYaml: 'name: x', aiIndexId: 'my-ai-index', run: false });
+      ).toEqual({ workflowYaml: 'name: x', aiIndexId: 'my-ai-index' });
     });
   });
 });

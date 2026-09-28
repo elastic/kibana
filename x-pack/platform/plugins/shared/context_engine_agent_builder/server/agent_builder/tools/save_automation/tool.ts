@@ -51,7 +51,6 @@ export const normalizeSaveAutomationParams = (
   workflowYaml: blankToUndefined(params.workflowYaml),
   workflowId: blankToUndefined(params.workflowId),
   aiIndexId: blankToUndefined(params.aiIndexId),
-  run: params.run === true,
 });
 
 const saveAutomationSchema = z
@@ -166,7 +165,7 @@ export const createSaveAutomationTool = ({
     askUser: 'always',
     getConfirmation: async ({ toolParams, context }) => {
       const { attachments, request, spaceId } = context;
-      const { workflowAttachmentId, workflowId, workflowYaml, aiIndexId, run } =
+      const { workflowAttachmentId, workflowId, workflowYaml, aiIndexId } =
         normalizeSaveAutomationParams(toolParams);
       const aiIndexLabel = tryResolveAiIndexDisplayLabelFromAttachments(attachments, aiIndexId);
 

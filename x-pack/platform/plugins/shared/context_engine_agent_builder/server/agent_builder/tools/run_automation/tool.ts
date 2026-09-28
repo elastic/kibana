@@ -86,6 +86,7 @@ export const createRunAutomationTool = ({
               workflowsManagement: getWorkflowsManagement(),
               workflowId: id,
               spaceId,
+              request,
             })
           : undefined;
       };
