@@ -763,8 +763,12 @@ steps:
           or steps.diagnose_rule.output.structured_output.change_type == "exception" %}
         {% if steps.can_preview_query_change.output.supported %}
         **Backtest**
-        Simulated {{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} runs of this rule ({{ steps.fetch_rule.output.interval }} interval, {{ steps.fetch_rule.output.from }} lookback) ending {{ inputs.last_fp_at | date: "%Y-%m-%d %H:%M UTC", "UTC" }}.
-        Alerts: {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %} now, {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %} with this change.
+
+        Backtest ({{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} simulated executions of interval {{ steps.fetch_rule.output.interval }},
+        lookback {{ steps.fetch_rule.output.from }}, ending at the newest false positive
+        {{ inputs.last_fp_at }} — usually a much shorter span than the false positives cover):
+        current {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %},
+        proposed {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}.
         {% if steps.record_preview_outcome.output.current_error_text != '' %}
         Current query preview errors: {{ steps.record_preview_outcome.output.current_error_text }}
         {% endif %}
