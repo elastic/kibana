@@ -23,6 +23,7 @@ import {
   INTRA_ROUND_COMPACTION_FRACTION,
   INTRA_ROUND_SUBSTITUTION_FRACTION,
   INTRA_ROUND_SUBSTITUTION_MAX_TOKENS,
+  PRESERVED_RECENT_CYCLES,
   SUBST_INTRA_ROUND_THRESHOLD,
   SUBST_ROUND_START_THRESHOLD_COLD,
   SUBST_ROUND_START_THRESHOLD_HOT,
@@ -103,32 +104,37 @@ export const createContextManagementNodes = (deps: ContextManagementDeps) => {
     };
   };
 
-  /** Tool calls the model currently sees in full: history ones for round start, else the run's. */
+  /**
+   * Tool calls the model currently sees in full: history ones for round start, else the run's.
+   * The run's most recent cycles are never candidates: the next call is the first to read the last
+   * one's results, and the model is likely still working from the one before.
+   */
   const visibleToolCalls = (state: StateType, scope: 'history' | 'current'): RoundToolCall[] => {
     const run = toCurrentRun(state);
     const view = buildContextView({ conversation: deps.conversation, run }, deps);
-    const pending = new Set(state.pendingToolCallIds);
-    const isDurable = ({ tool_call_id: id }: ToolCallStep) =>
-      !pending.has(id) && (state.toolRenderState[id]?.kind ?? 'server') === 'server';
-    return listVisibleUnits({
+    const units = listVisibleUnits({
       entries: view.history.entries,
       steps: run.steps,
       visibility: view.visibility,
-    }).flatMap((unit) => {
-      if (unit.kind === 'message') {
-        return [];
-      }
-      if (unit.kind === 'current_cycle') {
-        return scope === 'current'
-          ? unitToolCalls(unit, run.steps)
-              .filter(isDurable)
-              .map((toolCall) => ({ roundId: run.roundId, toolCall }))
-          : [];
-      }
-      return scope === 'history'
-        ? unitToolCalls(unit, run.steps).map((toolCall) => ({ roundId: unit.round.id, toolCall }))
-        : [];
     });
+    if (scope === 'history') {
+      return units.flatMap((unit) =>
+        unit.kind === 'round_cycle'
+          ? unitToolCalls(unit, run.steps).map((toolCall) => ({ roundId: unit.round.id, toolCall }))
+          : []
+      );
+    }
+    const pending = new Set(state.pendingToolCallIds);
+    const isDurable = ({ tool_call_id: id }: ToolCallStep) =>
+      !pending.has(id) && (state.toolRenderState[id]?.kind ?? 'server') === 'server';
+    return units
+      .filter((unit) => unit.kind === 'current_cycle')
+      .slice(0, -PRESERVED_RECENT_CYCLES)
+      .flatMap((unit) =>
+        unitToolCalls(unit, run.steps)
+          .filter(isDurable)
+          .map((toolCall) => ({ roundId: run.roundId, toolCall }))
+      );
   };
 
   const contextManagement = async (state: StateType): Promise<StateUpdate> => {

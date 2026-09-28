@@ -132,7 +132,7 @@ describe('contextManagement', () => {
         baseState({
           currentCycle: 7,
           lastCallUsage: { inputTokens: 60_000 },
-          steps: [call('x1'), call('x2')],
+          steps: [call('x1'), call('x2'), call('x3'), call('x4')],
           pendingToolCallIds: ['x2'],
         })
       );
@@ -154,6 +154,27 @@ describe('contextManagement', () => {
         },
       ]);
       expect(update.lastContextActionCycle).toBe(7);
+    });
+
+    it('leaves out the two most recent cycles of the run', async () => {
+      const { contextManagement } = createContextManagementNodes(deps());
+      const usage = { inputTokens: 60_000 };
+
+      await contextManagement(
+        baseState({
+          currentCycle: 7,
+          lastCallUsage: usage,
+          steps: [call('x1'), call('x2'), call('x3')],
+        })
+      );
+      await contextManagement(
+        baseState({ currentCycle: 7, lastCallUsage: usage, steps: [call('x1'), call('x2')] })
+      );
+
+      expect(selectCandidatesMock.mock.calls.map(([{ toolCalls }]) => toolCalls)).toEqual([
+        [{ roundId: 'current', toolCall: expect.objectContaining({ tool_call_id: 'x1' }) }],
+        [],
+      ]);
     });
 
     it('does nothing below the substitution threshold or without usage', async () => {
@@ -196,7 +217,11 @@ describe('contextManagement', () => {
       );
 
       const update = await contextManagement(
-        baseState({ currentCycle: 7, lastCallUsage: { inputTokens: 150_000 }, steps: [call('x1')] })
+        baseState({
+          currentCycle: 7,
+          lastCallUsage: { inputTokens: 150_000 },
+          steps: [call('x1'), call('x2'), call('x3')],
+        })
       );
 
       expect(appendedSteps(update)).toEqual([

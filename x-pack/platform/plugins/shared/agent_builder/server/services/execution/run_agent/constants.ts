@@ -19,6 +19,8 @@ export const INTRA_ROUND_SUBSTITUTION_MAX_TOKENS = 100_000;
 export const SUBST_ROUND_START_THRESHOLD_COLD = 1_000;
 export const SUBST_ROUND_START_THRESHOLD_HOT = 10_000;
 export const SUBST_INTRA_ROUND_THRESHOLD = 1_000;
+// Most recent cycles of the run whose results are never substituted in-flight.
+export const PRESERVED_RECENT_CYCLES = 2;
 
 // Compaction preserved tail.
 export const COMPACTION_TAIL_HARD_CAP_TOKENS = 40_000;
