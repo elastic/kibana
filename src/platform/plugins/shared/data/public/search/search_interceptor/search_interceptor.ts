@@ -207,12 +207,6 @@ export class SearchInterceptor {
   }
 
   private sendCancelRequest(searchId: string, strategy: string) {
-    // TEMP DEBUG (issue #246775 investigation) — remove before merging
-    // eslint-disable-next-line no-console
-    console.log(
-      '[DEBUG sendCancelRequest] DELETE',
-      JSON.stringify({ now: Date.now(), searchId, strategy })
-    );
     return this.deps.http.delete(
       buildPath('/internal/search/{strategy}/{id}', { strategy, id: searchId }),
       { version: '1', keepalive: true }
@@ -367,20 +361,6 @@ export class SearchInterceptor {
   ) {
     const { sessionId, strategy } = options;
 
-    // TEMP DEBUG (issue #246775 investigation) — remove before merging
-    const traceId = Math.random().toString(36).slice(2, 8);
-    // eslint-disable-next-line no-console
-    console.log(
-      '[DEBUG runSearch$ start]',
-      JSON.stringify({
-        traceId,
-        sessionId,
-        strategy,
-        requestHash: options.requestHash,
-        paramsPreview: JSON.stringify(request.params ?? {}).slice(0, 300),
-      })
-    );
-
     const search = ({
       abortSignal = searchAbortController.getSignal(),
       pollLength,
@@ -459,19 +439,6 @@ export class SearchInterceptor {
     );
 
     const cancel = async () => {
-      // TEMP DEBUG (issue #246775 investigation) — remove before merging
-      // eslint-disable-next-line no-console
-      console.log(
-        '[DEBUG cancel()]',
-        JSON.stringify({
-          traceId,
-          id,
-          reason: searchAbortController.getSignal().reason,
-          isSavedToBackground,
-          isTimeout: searchAbortController.isTimeout(),
-          isCanceled: searchAbortController.isCanceled(),
-        })
-      );
       // If the request times out/is canceled, we handle cancellation after we make the last call to retrieve the results
       if (
         !id ||
@@ -481,11 +448,6 @@ export class SearchInterceptor {
       )
         return;
       try {
-        // eslint-disable-next-line no-console
-        console.log(
-          '[DEBUG cancel()] sending immediate cancel/DELETE request',
-          JSON.stringify({ traceId, id })
-        );
         await sendCancelRequest();
       } catch (e) {
         // eslint-disable-next-line no-console
@@ -542,20 +504,6 @@ export class SearchInterceptor {
           : response;
       }),
       catchError((e: Error) => {
-        // TEMP DEBUG (issue #246775 investigation) — remove before merging
-        // eslint-disable-next-line no-console
-        console.log(
-          '[DEBUG outer catchError]',
-          JSON.stringify({
-            traceId,
-            now: Date.now(),
-            id,
-            errorMessage: e?.message,
-            isTimeout: searchAbortController.isTimeout(),
-            isCanceled: searchAbortController.isCanceled(),
-            reason: searchAbortController.getSignal().reason,
-          })
-        );
         // If we aborted (search:timeout advanced setting) or the user canceled and there was a partial response, return it instead of just erroring out
         // Only attempt to fetch partial results if we have a valid async search ID
         if (id && (searchAbortController.isTimeout() || searchAbortController.isCanceled())) {
@@ -565,11 +513,6 @@ export class SearchInterceptor {
               [EVENT_PROPERTY_EXECUTION_CONTEXT]: options.executionContext,
             });
           }
-          // eslint-disable-next-line no-console
-          console.log(
-            '[DEBUG outer catchError] retrieving partial results via GET',
-            JSON.stringify({ traceId, now: Date.now(), id })
-          );
           return from(
             this.runSearch(
               { id, ...request },
@@ -580,32 +523,7 @@ export class SearchInterceptor {
               }
             )
           ).pipe(
-            catchError((retrievalError) => {
-              // TEMP DEBUG (issue #246775 investigation) — remove before merging
-              // eslint-disable-next-line no-console
-              console.log(
-                '[DEBUG outer catchError] partial-results GET FAILED, using fallback',
-                JSON.stringify({
-                  traceId,
-                  now: Date.now(),
-                  id,
-                  typeofRetrievalError: typeof retrievalError,
-                  retrievalErrorString: String(retrievalError),
-                  retrievalErrorOwnKeys:
-                    retrievalError && typeof retrievalError === 'object'
-                      ? Object.keys(retrievalError)
-                      : undefined,
-                  retrievalErrorJson: (() => {
-                    try {
-                      return JSON.stringify(retrievalError);
-                    } catch {
-                      return '<circular or unserializable>';
-                    }
-                  })(),
-                })
-              );
-              return of(getFallbackPartialResponse(id));
-            }),
+            catchError(() => of(getFallbackPartialResponse(id))),
             map((response) =>
               options.strategy === ENHANCED_ES_SEARCH_STRATEGY
                 ? toPartialResponseAfterTimeout(response)
@@ -768,20 +686,6 @@ export class SearchInterceptor {
     const sessionOptions = this.deps.session.getSearchOptions(options.sessionId);
     const cached =
       requestHash && !sessionOptions?.isRestore ? this.responseCache.get(requestHash) : undefined; // don't use cache if restoring a session
-
-    // TEMP DEBUG (issue #246775 investigation) — remove before merging
-    // eslint-disable-next-line no-console
-    console.log(
-      '[DEBUG getSearchResponse$]',
-      JSON.stringify({
-        now: Date.now(),
-        requestHash,
-        cacheHit: Boolean(cached),
-        cachedControllerAlreadyAborted: cached?.searchAbortController.getSignal().aborted,
-        cachedControllerReason: cached?.searchAbortController.getSignal().reason,
-        paramsPreview: JSON.stringify(request.params ?? {}).slice(0, 300),
-      })
-    );
 
     const searchAbortController =
       cached?.searchAbortController || new SearchAbortController(this.searchTimeout);

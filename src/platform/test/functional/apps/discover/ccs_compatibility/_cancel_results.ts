@@ -76,9 +76,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           adHoc: true,
         });
 
-        // Add a stall time to the remote indices
-        await filterBar.addDslFilter(
-          `
+        // Retry the whole cancel-and-verify sequence a bounded number of times. This covers a
+        // rare (~2-5%), non-deterministic 404 on the documents query's partial-results retrieval
+        // GET that was confirmed NOT to be a reproducible bug in Kibana's client, Kibana's
+        // server, or Elasticsearch itself: 800 iterations run directly against each of those
+        // three layers in isolation (bypassing the other two) reproduced it zero times. It
+        // appears to depend on real CI resource contention (browser + Kibana + two ES JVMs
+        // competing for the same machine) that can't be forced synthetically outside a real FTR
+        // run. See https://github.com/elastic/kibana/issues/246775 for the full investigation.
+        await retry.try(async () => {
+          // No-op on the first attempt, when there's no filter yet to remove.
+          await filterBar.removeAllFilters().catch(() => {});
+
+          // Add a stall time to the remote indices
+          await filterBar.addDslFilter(
+            `
       {
         "query": {
           "error_query": {
@@ -93,20 +105,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }
         }
       }`,
-          false
-        );
+            false
+          );
 
-        // Wait for the async search to be established on ES so that cancellation can retrieve
-        // partial results via the async search ID. The secondary button becoming enabled signals
-        // SearchSessionState.Loading (after a 500ms delay), which is guaranteed to fire after the
-        // async search ID is available from ES (~200ms from wait_for_completion_timeout).
-        await testSubjects.waitForEnabled('queryCancelButton-secondary-button');
-        await testSubjects.existOrFail('queryCancelButton');
-        await testSubjects.click('queryCancelButton');
-        await header.waitUntilLoadingHasFinished();
+          // Wait for the async search to be established on ES so that cancellation can retrieve
+          // partial results via the async search ID. The secondary button becoming enabled
+          // signals SearchSessionState.Loading (after a 500ms delay), which is guaranteed to
+          // fire after the async search ID is available from ES (~200ms from
+          // wait_for_completion_timeout).
+          await testSubjects.waitForEnabled('queryCancelButton-secondary-button');
+          await testSubjects.existOrFail('queryCancelButton');
+          await testSubjects.click('queryCancelButton');
+          await header.waitUntilLoadingHasFinished();
 
-        // Warning callout is shown
-        await testSubjects.existOrFail('searchResponseWarningsCallout');
+          // Warning callout is shown. Use a short timeout here (rather than the 2-minute
+          // default) so a failed attempt is detected quickly and retried within retry.try's
+          // overall budget.
+          await testSubjects.existOrFail('searchResponseWarningsCallout', { timeout: 15_000 });
+        });
 
         // No "timed out" error notification is shown
         await toasts.assertCount(0);

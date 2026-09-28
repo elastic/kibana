@@ -284,12 +284,6 @@ export function getDataStateContainer({
       .pipe(
         mergeMap(async ({ options }) => {
           numberOfFetches += 1;
-          // TEMP DEBUG (issue #246775 investigation) — remove before merging
-          // eslint-disable-next-line no-console
-          console.log(
-            '[DEBUG discover fetch$]',
-            JSON.stringify({ now: Date.now(), numberOfFetches, options })
-          );
           if (unsubscribeIsRequested) {
             unsubscribeIsRequested = false;
             subscription.unsubscribe();
@@ -670,17 +664,6 @@ export function getDataStateContainer({
   };
 
   const cancel = (reason: AbortReason = AbortReason.CANCELED) => {
-    // TEMP DEBUG (issue #246775 investigation) — remove before merging
-    // eslint-disable-next-line no-console
-    console.log(
-      '[DEBUG discover cancel()]',
-      JSON.stringify({
-        now: Date.now(),
-        reason,
-        hadAbortController: Boolean(abortController),
-        alreadyAborted: abortController?.signal.aborted,
-      })
-    );
     const { cascadedDocumentsFetcher$ } = selectTabRuntimeState(
       runtimeStateManager,
       getCurrentTab().id
