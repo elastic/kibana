@@ -39,17 +39,20 @@ const ALL_WORKERS_RESPONSE = {
 const renderPage = ({
   canWrite = false,
   httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } }),
+  serverWorkers = ALL_WORKERS_RESPONSE,
 }: {
   canWrite?: boolean;
   httpPatch?: jest.Mock;
+  serverWorkers?: { workers: Array<{ id: string; enabled: boolean }> };
 } = {}) => {
   const coreStart = coreMock.createStart();
   // coreMock.createStart() does not populate feature capabilities; set the
   // alertzero.write capability so the component can branch on it.
   (coreStart.application.capabilities as Record<string, unknown>).alertzero = { write: canWrite };
-  // Mock http.get so useWorkers() always returns the full catalog (including on background
-  // refetches), and http.patch so mutation calls are interceptable per-test.
-  const httpGet = jest.fn().mockResolvedValue(ALL_WORKERS_RESPONSE);
+  // Mock http.get so useWorkers() always returns the configured server response
+  // (including on background refetches), and http.patch so mutation calls are
+  // interceptable per-test.
+  const httpGet = jest.fn().mockResolvedValue(serverWorkers);
   const core = { ...coreStart, http: { ...coreStart.http, get: httpGet, patch: httpPatch } };
   const history = createMemoryHistory();
   const queryClient = new QueryClient({
@@ -57,8 +60,8 @@ const renderPage = ({
   });
 
   // Pre-populate the workers list cache so the component renders synchronously
-  // with the full catalog and useEnableWorkers can filter IDs on the first click.
-  queryClient.setQueryData(queryKeys.workers.list(), ALL_WORKERS_RESPONSE);
+  // with the configured server response and useEnableWorkers can filter IDs on the first click.
+  queryClient.setQueryData(queryKeys.workers.list(), serverWorkers);
 
   render(
     <I18nProvider>
@@ -198,6 +201,74 @@ describe('OnboardingPage', () => {
         expect.stringContaining(SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID),
         expect.objectContaining({ body: JSON.stringify({ enabled: true }) })
       );
+    });
+  });
+
+  describe('skill-gated workers (partial server response)', () => {
+    it('omits a worker that is absent from the server response', () => {
+      // Server only knows about 4 of the 5 onboarding workers — the hunt worker is gated.
+      const serverWorkers = {
+        workers: ALL_ONBOARDING_WORKER_IDS.filter(
+          (id) => id !== SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID
+        ).map((id) => ({ id, enabled: true })),
+      };
+      renderPage({ canWrite: true, serverWorkers });
+
+      // The absent worker must not appear.
+      expect(
+        screen.queryByTestId(
+          `alertZeroOnboardingWorkerToggle-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
+        )
+      ).not.toBeInTheDocument();
+      // The four present workers must still render.
+      expect(
+        screen.getByTestId(
+          `alertZeroOnboardingWorkerToggle-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('does not PATCH the absent worker when Enable and continue is clicked', async () => {
+      const serverWorkers = {
+        workers: ALL_ONBOARDING_WORKER_IDS.filter(
+          (id) => id !== SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID
+        ).map((id) => ({ id, enabled: true })),
+      };
+      const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } });
+      const { history } = renderPage({ canWrite: true, httpPatch, serverWorkers });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
+
+      await waitFor(() => expect(history.location.pathname).toBe('/watches'));
+      // Only the 4 present workers should be PATCHed — not the skill-gated absent one.
+      expect(httpPatch).toHaveBeenCalledTimes(4);
+      expect(httpPatch).not.toHaveBeenCalledWith(
+        expect.stringContaining(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID),
+        expect.anything()
+      );
+    });
+
+    it('disables the Enable button when no workers are available from the server', () => {
+      // Server returns no onboarding workers at all — everything is skill-gated.
+      renderPage({ canWrite: true, serverWorkers: { workers: [] } });
+
+      expect(screen.getByRole('button', { name: 'Enable and continue' })).toBeDisabled();
+    });
+
+    it('does not count the absent worker toward the last-enabled guard', () => {
+      // Three workers known to server; toggling two of them off should disable the last, not crash.
+      const presentIds = ALL_ONBOARDING_WORKER_IDS.slice(0, 3);
+      const serverWorkers = { workers: presentIds.map((id) => ({ id, enabled: true })) };
+      renderPage({ canWrite: true, serverWorkers });
+
+      // Toggle two of the three present workers off.
+      const toggles = screen.getAllByRole('switch');
+      fireEvent.click(toggles[1]);
+      fireEvent.click(toggles[2]);
+
+      // Only 3 toggles should exist and the first (last enabled) should be disabled.
+      expect(toggles).toHaveLength(3);
+      expect(toggles[0]).toBeDisabled();
     });
   });
 
