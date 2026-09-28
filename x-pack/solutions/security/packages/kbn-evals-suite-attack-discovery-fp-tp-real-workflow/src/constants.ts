@@ -17,6 +17,21 @@
 /** Public workflows_management API version (`Elastic-Api-Version` header). */
 export const WORKFLOWS_API_VERSION = '2023-10-31';
 
+/** search_inference_endpoints settings route (`APIRoutes.GET/PUT_INFERENCE_SETTINGS`). */
+export const INFERENCE_SETTINGS_ROUTE = '/internal/search_inference_endpoints/settings';
+
+/** Version for the internal search_inference_endpoints settings route. */
+export const INFERENCE_SETTINGS_API_VERSION = '1';
+
+/**
+ * Inference feature the FP/TP analysis workflow's `ai.agent` step resolves its
+ * connector from (`connector-id-by-feature: alertzero_reasoning` in the managed
+ * workflow YAML). The suite routes this feature to the run's evaluation
+ * connector before runs; otherwise the step cannot resolve a connector and
+ * every execution ends `failed`.
+ */
+export const FP_TP_INFERENCE_FEATURE_ID = 'alertzero_reasoning';
+
 /**
  * The AD (attack discovery) workflow that produces attack documents. The
  * suite's task module grades the FP/TP analysis workflow

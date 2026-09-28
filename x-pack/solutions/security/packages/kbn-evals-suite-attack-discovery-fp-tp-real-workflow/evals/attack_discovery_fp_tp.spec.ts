@@ -26,14 +26,16 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import {
   selectEvaluators,
   tags,
+  type DefaultEvaluators,
+  type EvalConnector,
   type EvaluationDataset,
   type Example,
-  type DefaultEvaluators,
 } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
-import { CORPUS_NAMES, type CorpusName } from '../src/constants';
+import { CORPUS_NAMES, FP_TP_INFERENCE_FEATURE_ID, type CorpusName } from '../src/constants';
 import { loadCorpusExamples } from '../src/corpus_loader';
 import { payloadConformance, verdictAccuracy, VERDICT_QUALITY_CRITERIA } from '../src/evaluators';
+import { overrideInferenceFeature } from '../src/inference_override';
 import { runAttackDiscoveryWorkflow } from '../src/workflow_task';
 
 interface AttackDiscoveryExample extends Example {
@@ -70,6 +72,36 @@ evaluate.describe(
   'Attack Discovery — FP/TP verdict accuracy',
   { tag: tags.stateful.classic },
   () => {
+    // The workflow's `ai.agent` step resolves its connector from the
+    // `alertzero_reasoning` inference feature, so route that feature to the run's
+    // evaluation connector for the duration of the suite and restore it after.
+    let restoreInferenceSettings: (() => Promise<void>) | undefined;
+
+    evaluate.beforeAll(
+      async ({
+        fetch,
+        connector,
+        log,
+      }: {
+        fetch: HttpHandler;
+        connector: EvalConnector;
+        log: ToolingLog;
+      }) => {
+        restoreInferenceSettings = await overrideInferenceFeature({
+          fetch,
+          featureId: FP_TP_INFERENCE_FEATURE_ID,
+          endpointId: connector.id,
+        });
+        log.info(`Routed ${FP_TP_INFERENCE_FEATURE_ID} to connector ${connector.id}`);
+      }
+    );
+
+    evaluate.afterAll(async ({ log }: { log: ToolingLog }) => {
+      await restoreInferenceSettings?.().catch((error: Error) =>
+        log.warning(`Could not restore inference settings: ${error.message}`)
+      );
+    });
+
     evaluate(
       'runs the attack-discovery review workflow per corpus case and grades the verdict',
       async ({
