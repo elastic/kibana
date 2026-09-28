@@ -6,18 +6,20 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
+import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { appContextService } from '../app_context';
 
 import { ActionRunner } from './action_runner';
-import { createAgentAction } from './actions';
+import { createAgentAction, createErrorActionResults } from './actions';
 import { BulkActionTaskType } from './bulk_action_types';
+import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 
 export class RestartActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
-    return await restartBatch(this.esClient, agents, this.actionParams!);
+    return await restartBatch(this.esClient, this.soClient, agents, this.actionParams!);
   }
 
   protected getTaskType() {
@@ -31,6 +33,7 @@ export class RestartActionRunner extends ActionRunner {
 
 export async function restartBatch(
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   givenAgents: Agent[],
   options: {
     actionId?: string;
@@ -42,14 +45,30 @@ export async function restartBatch(
   const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
 
-  const agentIds = givenAgents.map((agent) => agent.id);
+  const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
+
+  const errors: Record<Agent['id'], Error> = {};
+  const eligibleAgents: Agent[] = [];
+
+  for (const agent of givenAgents) {
+    if (isHostedAgent(hostedPolicies, agent)) {
+      errors[agent.id] = new HostedAgentPolicyRestrictionRelatedError(
+        `Cannot restart agent in hosted agent policy ${agent.policy_id}`
+      );
+    } else {
+      eligibleAgents.push(agent);
+    }
+  }
+
+  await createErrorActionResults(esClient, actionId, errors, 'hosted agent policy restriction');
+
   const spaceId = options.spaceId;
   const namespaces = spaceId ? [spaceId] : [];
-  const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
+  const internalSoClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
 
-  await createAgentAction(esClient, soClient, {
+  await createAgentAction(esClient, internalSoClient, {
     id: actionId,
-    agents: agentIds,
+    agents: eligibleAgents.map((agent) => agent.id),
     created_at: now,
     type: 'RESTART',
     total,

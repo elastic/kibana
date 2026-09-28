@@ -32,6 +32,7 @@ import type {
   PostBulkAgentRollbackResponse,
   PostAgentRestartResponse,
   PostBulkAgentRestartRequest,
+  PostBulkAgentRestartResponse,
   PostGenerateAgentsReportRequest,
   PostGenerateAgentsReportResponse,
 } from '../../../common/types';
@@ -533,7 +534,7 @@ export function sendPostAgentRestart(agentId: string) {
 }
 
 export function sendPostBulkAgentRestart(body: PostBulkAgentRestartRequest['body']) {
-  return sendRequestForRq<PostAgentRestartResponse>({
+  return sendRequestForRq<PostBulkAgentRestartResponse>({
     path: agentRouteService.postBulkAgentRestart(),
     method: 'post',
     version: API_VERSIONS.public.v1,

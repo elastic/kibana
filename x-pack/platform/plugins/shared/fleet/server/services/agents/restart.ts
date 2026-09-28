@@ -52,7 +52,7 @@ export async function bulkRestartAgents(
 
   if ('agentIds' in options) {
     const givenAgents = await getAgents(esClient, soClient, options);
-    return await restartBatch(esClient, givenAgents, { spaceId: currentSpaceId });
+    return await restartBatch(esClient, soClient, givenAgents, { spaceId: currentSpaceId });
   }
 
   const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
@@ -73,7 +73,7 @@ export async function bulkRestartAgents(
       page: 1,
       perPage: batchSize,
     });
-    return await restartBatch(esClient, agents, { spaceId: currentSpaceId });
+    return await restartBatch(esClient, soClient, agents, { spaceId: currentSpaceId });
   }
 
   const runner = new RestartActionRunner(
