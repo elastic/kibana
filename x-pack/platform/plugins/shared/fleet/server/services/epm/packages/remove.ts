@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+  Logger,
+} from '@kbn/core/server';
 import { differenceBy, chunk } from 'lodash';
 
 import type { SavedObject } from '@kbn/core/server';
@@ -55,6 +60,8 @@ import { populatePackagePolicyAssignedAgentsCount } from '../../package_policies
 import { deleteEsqlViews } from '../elasticsearch/esql_views/remove';
 import type { PackageSpecConditions } from '../../../../common';
 
+import { assertUninstallAuthorizedForAffectedSpaces } from './uninstall_authz';
+
 import { getInstallation, getPackageInfo, kibanaSavedObjectTypes } from '.';
 import { updateUninstallFailedAttempts } from './uninstall_errors_helpers';
 import { deletePackageKnowledgeBase } from './knowledge_base_index';
@@ -72,8 +79,10 @@ export async function cleanupDependenciesStep(options: {
   esClient: ElasticsearchClient;
   force?: boolean;
   installSource?: InstallSource;
+  request?: KibanaRequest;
 }): Promise<void> {
-  const { savedObjectsClient, pkgName, installation, esClient, force, installSource } = options;
+  const { savedObjectsClient, pkgName, installation, esClient, force, installSource, request } =
+    options;
   const parentRef = { name: pkgName, version: installation.version };
 
   if (appContextService.getExperimentalFeatures().enableResolveDependencies !== true) {
@@ -127,6 +136,7 @@ export async function cleanupDependenciesStep(options: {
         esClient,
         force,
         installSource,
+        request,
       });
     }
   }
@@ -139,6 +149,7 @@ export async function removeInstallation(options: {
   esClient: ElasticsearchClient;
   force?: boolean;
   installSource?: InstallSource;
+  request?: KibanaRequest;
 }): Promise<AssetReference[]> {
   const { savedObjectsClient, pkgName, pkgVersion, esClient } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgName });
@@ -146,15 +157,7 @@ export async function removeInstallation(options: {
     throw new PackageRemovalError(`${pkgName} is not installed`);
   }
 
-  await cleanupDependenciesStep({
-    savedObjectsClient,
-    pkgName,
-    installation,
-    esClient,
-    force: options.force,
-    installSource: options.installSource,
-  });
-
+  // Fetch package policies before cleanupDependenciesStep so we can run authz check
   const { total, items } = await packagePolicyService.list(
     appContextService.getInternalUserSOClientWithoutSpaceExtension(),
     {
@@ -164,6 +167,26 @@ export async function removeInstallation(options: {
       spaceId: '*',
     }
   );
+
+  // Check that the caller has privileges in all spaces affected by this uninstall
+  if (options.request) {
+    await assertUninstallAuthorizedForAffectedSpaces({
+      request: options.request,
+      pkgName,
+      installation,
+      packagePolicies: items,
+    });
+  }
+
+  await cleanupDependenciesStep({
+    savedObjectsClient,
+    pkgName,
+    installation,
+    esClient,
+    force: options.force,
+    installSource: options.installSource,
+    request: options.request,
+  });
 
   if (!options.force) {
     await populatePackagePolicyAssignedAgentsCount(esClient, items);

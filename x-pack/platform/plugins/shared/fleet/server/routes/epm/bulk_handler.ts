@@ -34,6 +34,8 @@ import type {
 } from '../../../common/types';
 import { getInstallationsByName } from '../../services/epm/packages/get';
 import { FleetError, FleetUnauthorizedError } from '../../errors';
+import { assertUninstallAuthorizedForAffectedSpaces } from '../../services/epm/packages/uninstall_authz';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 import {
   scheduleBulkUninstall,
   scheduleBulkUpgrade,
@@ -107,6 +109,42 @@ export const postBulkUninstallPackagesHandler: FleetRequestHandler<
 
   const taskManagerStart = getTaskManagerStart();
   await validateInstalledPackages(savedObjectsClient, request.body.packages, 'uninstall');
+
+  // Pre-authorize: check that the caller has privileges in all spaces affected by each package
+  const pkgNames = request.body.packages.map(({ name }) => name);
+  const installations = await getInstallationsByName({ savedObjectsClient, pkgNames });
+  const internalSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+
+  // Single query across all packages, then group by name to avoid N round-trips
+  const allPoliciesKuery = installations
+    .map((i) => `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${i.name}`)
+    .join(' OR ');
+  const { items: allPackagePolicies } = await packagePolicyService.list(internalSoClient, {
+    kuery: allPoliciesKuery,
+    page: 1,
+    perPage: SO_SEARCH_LIMIT,
+    spaceId: '*',
+  });
+
+  // Group policies by package name for per-package authz check
+  const policiesByPkg = new Map<string, typeof allPackagePolicies>();
+  for (const policy of allPackagePolicies) {
+    const name = policy.package?.name;
+    if (name) {
+      const existing = policiesByPkg.get(name) ?? [];
+      existing.push(policy);
+      policiesByPkg.set(name, existing);
+    }
+  }
+
+  for (const installation of installations) {
+    await assertUninstallAuthorizedForAffectedSpaces({
+      request,
+      pkgName: installation.name,
+      installation,
+      packagePolicies: policiesByPkg.get(installation.name) ?? [],
+    });
+  }
 
   const taskId = await scheduleBulkUninstall(
     taskManagerStart,
