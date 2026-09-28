@@ -225,11 +225,15 @@ function makeService(params?: {
       : undefined
   );
 
+  // One space per page, so a sweep that stops after the first page misses `space-a`.
   const spacesRepository = {
-    find: jest.fn(async () => ({
-      saved_objects: (params?.internalSpaceIds ?? params?.spaceIds ?? ['default']).map((id) => ({
-        id,
-      })),
+    createPointInTimeFinder: jest.fn(() => ({
+      async *find() {
+        for (const id of params?.internalSpaceIds ?? params?.spaceIds ?? ['default']) {
+          yield { saved_objects: [{ id }] };
+        }
+      },
+      close: jest.fn(),
     })),
   };
   const internalClient = { asScopedToNamespace: jest.fn() };

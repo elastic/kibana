@@ -52,8 +52,8 @@ type ManagementApi = WorkflowsServerPluginSetup['management'];
 type PauseRun = { mode: 'pause'; access: MaintenanceAccess } | { mode: 'reassert' };
 
 const SPACE_SO_TYPE = 'space';
-/** Default `xpack.spaces.maxSpaces`; deployments are not expected to exceed it. */
-const MAX_SPACES = 1000;
+/** Matches the default `xpack.spaces.maxSpaces`, so a typical deployment is one page. */
+const SPACES_PAGE_SIZE = 1000;
 
 /**
  * Maintenance SO attributes after branding spaceId fields at the SO → domain
@@ -347,10 +347,18 @@ export const createSignificantEventsMaintenanceService = ({
 
   /** Every space id via the internal client, for sweeps without a user request. */
   const findAllSpaceIdsInternally = async (): Promise<SpaceId[]> => {
-    const { saved_objects: spaces } = await server.core.savedObjects
+    const finder = server.core.savedObjects
       .createInternalRepository([SPACE_SO_TYPE])
-      .find({ type: SPACE_SO_TYPE, perPage: MAX_SPACES, fields: [] });
-    return spaces.map((space) => brandSpaceId(space.id));
+      .createPointInTimeFinder({ type: SPACE_SO_TYPE, perPage: SPACES_PAGE_SIZE, fields: [] });
+    try {
+      const ids: SpaceId[] = [];
+      for await (const { saved_objects: spaces } of finder.find()) {
+        ids.push(...spaces.map((space) => brandSpaceId(space.id)));
+      }
+      return ids;
+    } finally {
+      await finder.close();
+    }
   };
 
   const listSpaceIds = async ({
