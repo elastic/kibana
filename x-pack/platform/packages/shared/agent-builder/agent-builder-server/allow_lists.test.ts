@@ -14,6 +14,7 @@ describe('isAllowedBuiltinAttachment', () => {
     expect(isAllowedBuiltinAttachment('esql')).toBe(true);
     expect(isAllowedBuiltinAttachment('platform.dashboard.dashboard_state')).toBe(true);
     expect(isAllowedBuiltinAttachment('security.alert')).toBe(true);
+    expect(isAllowedBuiltinAttachment('security.impact')).toBe(true);
     expect(isAllowedBuiltinAttachment('security.entity_graph')).toBe(true);
     expect(isAllowedBuiltinAttachment('observability.service-map')).toBe(true);
     expect(isAllowedBuiltinAttachment('ml.anomaly_swimlane')).toBe(true);
