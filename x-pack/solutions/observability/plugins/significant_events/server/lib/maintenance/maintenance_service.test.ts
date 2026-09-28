@@ -236,8 +236,22 @@ function makeService(params?: {
       close: jest.fn(),
     })),
   };
-  const internalClient = { asScopedToNamespace: jest.fn() };
-  internalClient.asScopedToNamespace.mockReturnValue(internalClient);
+  // System sweeps scope Settings per space, so each space gets its own client and a
+  // mis-scoped write shows up. User-scoped paths keep the shared `spaceUiSettingsClient`.
+  const internalSpaceUiSettingsClients = new Map<string, typeof spaceUiSettingsClient>();
+  const getInternalSpaceUiSettingsClient = (spaceId: string) => {
+    const existing = internalSpaceUiSettingsClients.get(spaceId);
+    if (existing) {
+      return existing;
+    }
+    const client = makeUiSettingsClient({
+      [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]:
+        params?.scheduledDiscoveryEnabled ?? false,
+    });
+    internalSpaceUiSettingsClients.set(spaceId, client);
+    return client;
+  };
+  const internalClient = { asScopedToNamespace: jest.fn((spaceId: string) => ({ spaceId })) };
 
   const savedObjects = {
     createInternalRepository: jest.fn((types: string[]) =>
@@ -251,7 +265,9 @@ function makeService(params?: {
     core: {
       savedObjects,
       uiSettings: {
-        asScopedToClient: jest.fn(() => spaceUiSettingsClient),
+        asScopedToClient: jest.fn((client?: { spaceId?: string }) =>
+          client?.spaceId ? getInternalSpaceUiSettingsClient(client.spaceId) : spaceUiSettingsClient
+        ),
         globalAsScopedToClient: jest.fn(() => globalUiSettingsClient),
       },
     },
@@ -292,6 +308,7 @@ function makeService(params?: {
     getRuleBackedQueryLinks,
     globalUiSettingsClient,
     spaceUiSettingsClient,
+    getInternalSpaceUiSettingsClient,
   };
 }
 
@@ -669,7 +686,13 @@ describe('SignificantEventsMaintenanceService', () => {
   describe('pauseOnFlagOff', () => {
     it('pauses every space through internal clients, records the restore snapshot, and leaves rules running', async () => {
       const { api, updateWorkflow } = makeManagementApi();
-      const { service, soClient, getScopedClients, v2RulesClient } = makeService({
+      const {
+        service,
+        soClient,
+        getScopedClients,
+        v2RulesClient,
+        getInternalSpaceUiSettingsClient,
+      } = makeService({
         management: api,
         ruleBackedRuleIds: ['rule-1'],
         spaceIds: ['default'],
@@ -688,13 +711,20 @@ describe('SignificantEventsMaintenanceService', () => {
         'space-a',
         SYSTEM_REQUEST
       );
+      expect(getInternalSpaceUiSettingsClient('space-a').set).toHaveBeenCalledWith(
+        OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+        false
+      );
       expect(v2RulesClient?.bulkDisableRules).not.toHaveBeenCalled();
       expect(soClient.create.mock.calls.at(-1)?.[1]).toEqual(
         expect.objectContaining({
           state: 'paused',
           updatedBy: MAINTENANCE_FEATURE_FLAG_ACTOR,
           disabledRuleIds: [],
-          pausedSettings: expect.objectContaining({ continuousOnboardingWasEnabled: true }),
+          pausedSettings: {
+            continuousOnboardingWasEnabled: true,
+            scheduledDiscoveryEnabledSpaceIds: ['default', 'space-a'],
+          },
           lastSummary: expect.objectContaining({ partialFailures: [] }),
         })
       );
@@ -770,17 +800,21 @@ describe('SignificantEventsMaintenanceService', () => {
 
     it('re-asserts across every space with a credential-less request', async () => {
       const { api, updateWorkflow, getWorkflow } = makeManagementApi();
-      const { service, soClient, getScopedClients, globalUiSettingsClient, spaceUiSettingsClient } =
-        makeService({
-          management: api,
-          spaceIds: ['default'],
-          internalSpaceIds: ['default', 'space-a'],
-        });
+      const {
+        service,
+        soClient,
+        getScopedClients,
+        globalUiSettingsClient,
+        getInternalSpaceUiSettingsClient,
+      } = makeService({
+        management: api,
+        spaceIds: ['default'],
+        internalSpaceIds: ['default', 'space-a'],
+      });
 
       await service.pause({ request: REQUEST });
       updateWorkflow.mockClear();
       globalUiSettingsClient.set.mockClear();
-      spaceUiSettingsClient.set.mockClear();
 
       // The system request has no credentials, so anything user-scoped fails.
       getScopedClients.mockRejectedValue(new Error('missing authentication credentials'));
@@ -806,7 +840,7 @@ describe('SignificantEventsMaintenanceService', () => {
         OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
         false
       );
-      expect(spaceUiSettingsClient.set).toHaveBeenCalledWith(
+      expect(getInternalSpaceUiSettingsClient('space-a').set).toHaveBeenCalledWith(
         OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
         false
       );
