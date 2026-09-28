@@ -14,7 +14,7 @@ import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useRiskEngineStatus } from '../../../../api/hooks/use_risk_engine_status';
+import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { buildEntitiesWithAnomaliesCountQuery } from '../queries/entities_with_anomalies_query';
 import type { TimeRange } from '../../use_time_range_param';
@@ -47,16 +47,16 @@ export const useEntitiesWithAnomaliesCount = ({
   entityFilters?: EntityFilters;
 }) => {
   const { data } = useKibana().services;
-  const { data: riskEngineStatus, isLoading: isStatusLoading } = useRiskEngineStatus();
   const euidApi = useEntityStoreEuidApi();
   const { data: resolvedIndex, isLoading: isIndexLoading } =
     useResolvedLatestEntitiesIndexName(spaceId);
+  const { jobIds, loading: isJobsLoading } = useInstalledSecurityJobsIds();
 
   const isEnabled =
     !skip &&
-    !isStatusLoading &&
     !isIndexLoading &&
-    riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED' &&
+    !isJobsLoading &&
+    jobIds.length > 0 &&
     Boolean(euidApi) &&
     Boolean(resolvedIndex?.indexName);
 
@@ -66,9 +66,10 @@ export const useEntitiesWithAnomaliesCount = ({
       euidApi.euid,
       resolvedIndex.indexName,
       timeRange,
-      getEntityFilterESQL(entityFilters)
+      getEntityFilterESQL(entityFilters),
+      jobIds
     );
-  }, [euidApi, resolvedIndex?.indexName, timeRange, entityFilters]);
+  }, [euidApi, resolvedIndex?.indexName, timeRange, entityFilters, jobIds]);
 
   const {
     data: queryResult,
@@ -114,7 +115,7 @@ export const useEntitiesWithAnomaliesCount = ({
   return {
     count: queryResult?.count ?? 0,
     entityIds: queryResult?.entityIds ?? [],
-    isLoading: isStatusLoading || isIndexLoading || isLoading,
+    isLoading: isJobsLoading || isIndexLoading || isLoading,
     error: filteredError,
   };
 };

@@ -20,14 +20,18 @@ export const buildEntitiesWithAnomaliesCountQuery = (
   euid: EntityStoreEuid,
   entitiesIndexName: string,
   timeRange: TimeRange = '24h',
-  entityFilterClauses: string[] = []
+  entityFilterClauses: string[] = [],
+  jobIds: string[] = []
 ): string => {
   const parts: string[] = [];
 
   parts.push(`SET unmapped_fields="nullify";`);
   parts.push(`FROM ${ML_ANOMALIES_INDEX}`);
+
+  const jobFilter =
+    jobIds.length > 0 ? ` AND job_id IN (${jobIds.map((id) => `"${id}"`).join(', ')})` : '';
   parts.push(
-    `| WHERE result_type == "record" AND is_interim == false AND record_score >= 1 AND @timestamp >= NOW() - ${timeRange}`
+    `| WHERE result_type == "record" AND is_interim == false AND record_score >= 1 AND @timestamp >= NOW() - ${timeRange}${jobFilter}`
   );
 
   for (const entityType of ENTITY_TYPES) {
