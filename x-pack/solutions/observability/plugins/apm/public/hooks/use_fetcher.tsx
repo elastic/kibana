@@ -96,7 +96,7 @@ export function useFetcher<TReturn>(
   } = {}
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
   const {
-    services: { notifications, rendering },
+    services: { notifications, rendering, uiSettings },
   } = useKibana();
   const { preservePreviousData = true, showToastOnError = true } = options;
   const [result, setResult] = useState<FetcherResult<InferResponseType<TReturn>>>({
@@ -185,11 +185,13 @@ export function useFetcher<TReturn>(
             };
 
             // `addDanger` always reports to APM RUM via core. For expected transport
-            // failures, use `add` with danger styling so the user still sees the toast
-            // without polluting the error backlog (see kibana#293215).
+            // failures, use `add` so core does not call `apm.captureError`, and copy
+            // the danger toast's icon and warning lifetime (see kibana#293215).
             if (isExpectedTransportFailure(err)) {
               notifications.toasts.add({
                 color: 'danger',
+                iconType: 'error',
+                toastLifeTimeMs: uiSettings.get('notifications:lifetime:warning'),
                 ...toast,
               });
             } else {

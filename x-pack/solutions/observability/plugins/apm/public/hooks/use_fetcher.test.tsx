@@ -24,6 +24,9 @@ const addDangerToast = jest.fn();
 const KibanaReactContext = createKibanaReactContext({
   notifications: { toasts: { add: addToast, addDanger: addDangerToast } },
   rendering: {},
+  uiSettings: {
+    get: (key: string) => (key === 'notifications:lifetime:warning' ? 10000 : undefined),
+  },
 } as unknown as Partial<CoreStart>);
 
 function wrapper({ children }: React.PropsWithChildren) {
@@ -174,6 +177,8 @@ describe('useFetcher', () => {
       expect(addToast).toHaveBeenCalledWith(
         expect.objectContaining({
           color: 'danger',
+          iconType: 'error',
+          toastLifeTimeMs: 10000,
           title: 'Error while fetching resource',
         })
       );
