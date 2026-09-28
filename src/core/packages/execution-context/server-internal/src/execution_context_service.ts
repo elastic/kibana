@@ -55,7 +55,8 @@ export interface IExecutionContext {
 
 /**
  * Notified when `withContext` starts running a function; returns a callback invoked once that
- * function settles, or `undefined` when the context is not of interest.
+ * function settles, or `undefined` when the context is not of interest. For contexts it opts
+ * into, a thenable result is returned to the caller as a derived native promise.
  * @internal
  */
 export type ExecutionContextActivityObserver = (
@@ -164,8 +165,10 @@ export class ExecutionContextService
       }
       // Return a derived native promise that re-throws, so that the activity ends when the result
       // settles and a rejection the caller drops is still reported as unhandled instead of being
-      // swallowed by the bookkeeping. Non-native thenables are adopted, i.e. callers of tracked
-      // contexts receive a native promise.
+      // swallowed by the bookkeeping. Callers of tracked contexts therefore receive a native
+      // promise rather than the original object. This is intentional: only contexts the observer
+      // opts into are affected (today Task Manager task runs, whose only caller awaits the result
+      // from an async function), and any observer must keep that property.
       return Promise.resolve(result).then(
         (value) => {
           onActivityEnd();

@@ -48,6 +48,17 @@ export interface EventLoopWatchdogParams {
 const heartbeatNowUs = (): bigint => process.hrtime.bigint() / 1000n;
 
 /**
+ * Removes lifecycle listeners from a worker that is being discarded. An `error` listener must stay
+ * installed until termination completes: an unhandled `error` event would throw on the main thread.
+ */
+const detachWorker = (worker: Worker): void => {
+  worker.removeAllListeners('message');
+  worker.removeAllListeners('exit');
+  worker.removeAllListeners('error');
+  worker.on('error', () => {});
+};
+
+/**
  * Main-thread side of the watchdog: owns the heartbeat, the worker's lifecycle (with bounded
  * restarts) and forwards activity changes and reports between the registry, worker and logger.
  */
@@ -110,7 +121,7 @@ export class EventLoopWatchdog {
     const { worker } = this;
     this.worker = undefined;
     if (worker) {
-      worker.removeAllListeners();
+      detachWorker(worker);
       await worker.terminate();
     }
     this.logger.info('Event loop watchdog stopped');
@@ -198,7 +209,7 @@ export class EventLoopWatchdog {
     this.worker = undefined;
     this.params.registry.setListener(undefined);
     if (worker) {
-      worker.removeAllListeners();
+      detachWorker(worker);
       worker.terminate().catch(() => {});
     }
   }

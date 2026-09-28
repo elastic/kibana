@@ -89,6 +89,17 @@ describe('EventLoopWatchdog', () => {
     expect(MockWorker.instances).toHaveLength(2);
   });
 
+  it('keeps handling worker errors emitted while terminating', async () => {
+    watchdog.start();
+    const worker = lastWorker();
+    worker.terminate.mockImplementationOnce(async () => {
+      // e.g. an uncaught worker error queued before termination completes
+      worker.emit('error', new Error('late worker error'));
+      return 1;
+    });
+    await expect(watchdog.stop()).resolves.toBeUndefined();
+  });
+
   it('lets concurrent stop callers wait for the same termination', async () => {
     watchdog.start();
     const worker = lastWorker();
