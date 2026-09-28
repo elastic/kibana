@@ -995,12 +995,9 @@ const mergeMemoryGroup = async ({
       const avoid = new Set(currentSources.map((page) => page.id));
       const base = canonicalizeSlug(synthesis.title) || 'merged';
       for (let slugAttempt = 0; slugAttempt < 6; slugAttempt++) {
-        const candidate =
-          slugAttempt === 0
-            ? base
-            : slugAttempt === 1
-            ? `${base}-merged`
-            : `${base}-merged-${slugAttempt}`;
+        const suffix =
+          slugAttempt === 0 ? '' : slugAttempt === 1 ? '-merged' : `-merged-${slugAttempt}`;
+        const candidate = `${base.slice(0, 80 - suffix.length)}${suffix}`;
         const candidateId = toMemoryKiId(candidate);
         if (avoid.has(candidateId) || (await store.get(candidateId))) {
           continue;

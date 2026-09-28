@@ -847,6 +847,76 @@ describe('applyMemoryEdits', () => {
     expect(store.archiveVersioned).not.toHaveBeenCalled();
   });
 
+  it('reserves the merge suffix when the 80-character title slug belongs to a source', async () => {
+    const base = 'a'.repeat(80);
+    const source = page(`memory_${base}`, 'Source memory');
+    const store = createStore({
+      get: jest
+        .fn()
+        .mockImplementation(async (id: string) => (id === source.id ? source : undefined)),
+    });
+
+    const summary = await applyMemoryEdits({
+      store,
+      recalledIds: [source.id],
+      recalledMemories: [source],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        { slug: 'new-fact', title: source.title, content: 'Same fact.', tags: [], categories: [] },
+      ],
+      synthesizeMemoryGroup: async () => ({
+        title: base,
+        content: 'Merged fact.',
+        context: 'source fact',
+      }),
+      logger: loggerMock.create(),
+    });
+
+    const expectedSlug = `${'a'.repeat(73)}-merged`;
+    expect(expectedSlug).toHaveLength(80);
+    expect(store.create).toHaveBeenCalledWith(expect.objectContaining({ slug: expectedSlug }));
+    expect(store.archiveVersioned).toHaveBeenCalledWith(
+      expect.objectContaining({ page: expect.objectContaining({ id: source.id }) }),
+      'merged'
+    );
+    expect(summary).toEqual(
+      expect.objectContaining({ mergeSuccessCount: 1, mergedSourceArchiveCount: 1 })
+    );
+  });
+
+  it('reserves the numbered suffix when earlier long-title candidates are occupied', async () => {
+    const base = 'b'.repeat(80);
+    const source = page('memory_source', 'Source memory');
+    const occupiedBase = page(`memory_${base}`, 'Other fact');
+    const occupiedMerged = page(`memory_${'b'.repeat(73)}-merged`, 'Another fact');
+    const store = createStore({
+      get: jest.fn().mockImplementation(async (id: string) => {
+        return [source, occupiedBase, occupiedMerged].find((entry) => entry.id === id);
+      }),
+    });
+
+    const summary = await applyMemoryEdits({
+      store,
+      recalledIds: [source.id],
+      recalledMemories: [source],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        { slug: 'new-fact', title: source.title, content: 'Same fact.', tags: [], categories: [] },
+      ],
+      synthesizeMemoryGroup: async () => ({
+        title: base,
+        content: 'Merged fact.',
+        context: 'source fact',
+      }),
+      logger: loggerMock.create(),
+    });
+
+    const expectedSlug = `${'b'.repeat(71)}-merged-2`;
+    expect(expectedSlug).toHaveLength(80);
+    expect(store.create).toHaveBeenCalledWith(expect.objectContaining({ slug: expectedSlug }));
+    expect(summary).toEqual(expect.objectContaining({ mergeSuccessCount: 1 }));
+  });
+
   it('merges a catalog overlap and sums decayed telemetry', async () => {
     const hit = page(
       'memory_checkout-redis',
