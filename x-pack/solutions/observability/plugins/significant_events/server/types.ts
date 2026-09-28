@@ -6,14 +6,17 @@
  */
 
 import type { StreamsPluginSetup, StreamsPluginStart } from '@kbn/streams-plugin/server';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type {
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
 } from '@kbn/nightshift-investigations-plugin/server';
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting-v2-plugin/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type {
+  PluginStartContract as ActionsPluginStart,
+  RelayClientContract,
+} from '@kbn/actions-plugin/server';
+import type { CoreStart, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
   AgentBuilderSmlPluginSetup,
@@ -81,6 +84,24 @@ export interface SignificantEventsPluginStartDependencies {
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
 }
 
-export type SignificantEventsServer = StreamsServer & {
+export interface SignificantEventsServer {
+  core: CoreStart;
+  logger: Logger;
+  security: SecurityPluginStart;
+  actions: ActionsPluginStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  inference: InferenceServerStart;
+  licensing: LicensingPluginStart;
+  isServerless: boolean;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
+  workflowsManagement?: WorkflowsServerPluginSetup;
+  agentBuilder?: AgentBuilderPluginStart;
+  spaces?: SpacesPluginStart;
+  cloud?: CloudSetup;
+  /** The running Kibana's version, e.g. `9.2.0`. Used to identify the deployment to the Relay service. */
+  kibanaVersion: string;
+  /** Singleton client for the Relay service, owned by the Actions plugin. */
+  relayClient?: RelayClientContract;
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
-};
+}

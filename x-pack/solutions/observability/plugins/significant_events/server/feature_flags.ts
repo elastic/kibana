@@ -414,7 +414,7 @@ export function registerFeatureFlags(
               'xpack.significantEvents.nightshiftDeveloperModeDescription',
               {
                 defaultMessage:
-                  'When enabled, Nightshift Management shows developer-only tabs and the Significant Events tuning YAML editor in this Kibana space.',
+                  'When enabled, Nightshift shows extra developer-only UI and configuration options in this Kibana space.',
               }
             ),
             type: 'boolean',

@@ -35,7 +35,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
           all: [],
           read: [],
         },
-        ui: [uiPrivileges.show],
+        ui: [uiPrivileges.show, uiPrivileges.write],
       },
       read: {
         app: [CONTEXT_ENGINE_APP_ID],

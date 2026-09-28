@@ -77,7 +77,7 @@ export interface GenerateEsqlOptions {
    */
   nlQuery: string;
   /**
-   * The resource (index/datastream/alias) to target
+   * The resource (index, datastream, alias, or ES|QL view) to target
    */
   index?: string;
   /**
@@ -126,6 +126,14 @@ export interface GenerateEsqlOptions {
    */
   includeDatasets?: boolean;
   /**
+   * If true, ES|QL views are considered when discovering and resolving the target.
+   */
+  includeViews?: boolean;
+  /**
+   * If true, frozen tier indices are queried.
+   */
+  includeFrozen?: boolean;
+  /**
    * EIS session id for best-effort provider stickiness across calls. Non-EIS connectors ignore it.
    */
   sessionId?: string;
@@ -144,6 +152,8 @@ export const generateEsql = async ({
   timeRange: inputTimeRange,
   disableNamedParams,
   includeDatasets = false,
+  includeViews = false,
+  includeFrozen = false,
   model: inputModel,
   modelProvider,
   esClient,
@@ -165,6 +175,8 @@ export const generateEsql = async ({
     documentation,
     esqlCallbacks,
     includeDatasets,
+    includeViews,
+    includeFrozen,
     sessionId,
   });
 
@@ -212,6 +224,8 @@ export const generateEsql = async ({
               esClient,
               limit: 1,
               includeDatasets,
+              includeViews,
+              includeFrozen,
               model,
               logger,
             }),

@@ -1,5 +1,5 @@
 {
-  "sha1": "7fd473ede3f03e65d79de72cdc0d1fcecc20ad81",
+  "sha1": "5ccf0b4b0a0234b6282595e3daeefbb15c0bbf31",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -45,6 +45,20 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/form_rbac.spec.ts",
         "line": 64,
         "column": 15
+      }
+    },
+    {
+      "id": "6226bf77440ddea-c74636a2cd0185d",
+      "title": "Response actions history page filters response actions by trigger type and opens the linked rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/history_log.spec.ts",
+        "line": 47,
+        "column": 7
       }
     }
   ]

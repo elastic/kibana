@@ -29,6 +29,7 @@ export const SNAPSHOT_OPTION: EuiSuperSelectOption<ResultType> = {
       defaultMessage="Snapshot"
     />
   ),
+  'data-test-subj': 'result-type-option-snapshot',
 };
 
 export const DIFFERENTIAL_OPTION: EuiSuperSelectOption<ResultType> = {
@@ -39,6 +40,7 @@ export const DIFFERENTIAL_OPTION: EuiSuperSelectOption<ResultType> = {
       defaultMessage="Differential"
     />
   ),
+  'data-test-subj': 'result-type-option-differential',
 };
 
 export const DIFFERENTIAL_ADDED_ONLY_OPTION: EuiSuperSelectOption<ResultType> = {
@@ -49,6 +51,7 @@ export const DIFFERENTIAL_ADDED_ONLY_OPTION: EuiSuperSelectOption<ResultType> = 
       defaultMessage="Differential (ignore removals)"
     />
   ),
+  'data-test-subj': 'result-type-option-differential-added-only',
 };
 
 export const RESULT_TYPE_SELECT_OPTIONS: Array<EuiSuperSelectOption<ResultType>> = [
