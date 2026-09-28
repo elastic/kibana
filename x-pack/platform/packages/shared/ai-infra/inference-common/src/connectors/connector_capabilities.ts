@@ -32,8 +32,7 @@ export const getContextWindowSize = (connector: InferenceConnector): number | un
 /**
  * Retrieve the reasoning effort levels the connector's model supports, as advertised by EIS.
  *
- * @returns The advertised levels, or `undefined` when support is unknown: a non-EIS connector, an
- * endpoint that advertises no reasoning capability, or an empty list of levels.
+ * @returns The advertised levels, or `undefined` when support is unknown.
  */
 export const getSupportedReasoningEffortLevels = (
   connector: InferenceConnector

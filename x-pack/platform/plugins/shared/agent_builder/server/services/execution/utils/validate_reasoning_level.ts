@@ -18,8 +18,7 @@ import { resolveSelectedConnectorId } from '../../../utils/resolve_selected_conn
 /**
  * Checks that the model an execution will run on supports the requested reasoning level.
  *
- * @param connectorId - Connector requested by the caller. Resolved the same way the runner
- * resolves its default model, so the validated connector is the one the execution uses.
+ * @param connectorId - Connector requested by the caller.
  * @throws {AgentBuilderBadRequestError} when the model does not support `reasoningLevel`.
  */
 export const validateReasoningLevel = async ({
