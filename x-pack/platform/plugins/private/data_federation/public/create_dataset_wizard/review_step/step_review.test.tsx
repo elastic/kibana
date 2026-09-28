@@ -199,7 +199,7 @@ describe('StepReview', () => {
     fireEvent.click(getByTestId('createDatasetWizardReviewRequestTabButton'));
 
     const request = getByTestId('createDatasetWizardReviewRequest');
-    expect(request).toHaveTextContent('PUT /internal/data_federation/dataset/clickbench');
+    expect(request).toHaveTextContent('PUT /_query/dataset/clickbench');
     expect(request).toHaveTextContent('"data_source": "source-1"');
     expect(request).toHaveTextContent('"format": "parquet"');
     expect(request).toHaveTextContent('"dynamic": "false"');

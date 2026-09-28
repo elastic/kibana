@@ -40,7 +40,7 @@ describe('buildDatasetRequest', () => {
       buildDatasetRequest({ name: '  logs  ', data_source: 'source-1', resource: 'bucket/*' })
     ).toEqual({
       method: 'PUT',
-      path: '/internal/data_federation/dataset/logs',
+      path: '/_query/dataset/logs',
       body: { data_source: 'source-1', resource: 'bucket/*' },
     });
   });
