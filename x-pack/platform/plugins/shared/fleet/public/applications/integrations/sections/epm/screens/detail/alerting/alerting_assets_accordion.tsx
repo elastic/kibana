@@ -96,7 +96,7 @@ const AlertingEngineTabs: React.FunctionComponent<{
       >
         <FormattedMessage
           id="xpack.fleet.epm.assets.kibanaStandardRulesTabLabel"
-          defaultMessage="Kibana Standard Rules"
+          defaultMessage="Standard Rules"
         />
       </EuiTab>
     </EuiTabs>
