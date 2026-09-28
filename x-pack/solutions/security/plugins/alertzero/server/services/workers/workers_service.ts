@@ -383,6 +383,10 @@ export class WorkersService {
         return 'alertAnalysisWorkflowDisabled';
       }
     } catch (err) {
+      // Degrades to the runtime-config check below and, ultimately, to the YAML-level
+      // `require_analysis_enabled` guard at execution time: refusing on a transient read
+      // failure here would make the Worker un-enableable whenever `getWorkflow` errors for an
+      // unrelated reason, and a disabled workflow still fails closed at run time regardless.
       this.logger.warn(
         `Alert Triage Worker: could not verify Alert Analysis workflow state: ${
           err instanceof Error ? err.message : String(err)
