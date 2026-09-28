@@ -232,11 +232,12 @@ export const createDatasetWizardStrings = {
   }),
 
   nameHelp: i18n.translate('xpack.dataFederation.createDatasetForm.nameHelp', {
-    defaultMessage: 'Must not match an existing index, data stream, alias, dataset, or view.',
+    defaultMessage:
+      'Unique name for use in queries. All lowercase, dash, underscore, and numbers are supported',
   }),
 
   namePlaceholder: i18n.translate('xpack.dataFederation.createDatasetForm.namePlaceholder', {
-    defaultMessage: 'my-dataset',
+    defaultMessage: 'e.g. my-dataset',
   }),
 
   descriptionLabel: i18n.translate('xpack.dataFederation.createDatasetForm.descriptionLabel', {
@@ -244,7 +245,7 @@ export const createDatasetWizardStrings = {
   }),
 
   descriptionHelp: i18n.translate('xpack.dataFederation.createDatasetForm.descriptionHelp', {
-    defaultMessage: 'Help others understand what this dataset contains.',
+    defaultMessage: 'A brief description to identify this dataset',
   }),
 
   connectNewDataSourceDropDownOptionLabel: i18n.translate(
@@ -261,7 +262,7 @@ export const createDatasetWizardStrings = {
   dataSourcePlaceholder: i18n.translate(
     'xpack.dataFederation.createDatasetForm.dataSourcePlaceholder',
     {
-      defaultMessage: 'Select a data source',
+      defaultMessage: 'Select an existing data source or connect a new one',
     }
   ),
 
@@ -274,11 +275,6 @@ export const createDatasetWizardStrings = {
 
   resourceLabel: i18n.translate('xpack.dataFederation.createDatasetForm.resourceLabel', {
     defaultMessage: 'Resource',
-  }),
-
-  resourceHelp: i18n.translate('xpack.dataFederation.createDatasetForm.resourceHelp', {
-    defaultMessage:
-      'URI or pattern that selects the files to read. For example: s3://logs-bucket/access/**/*.csv.',
   }),
 
   settingsFormatRequired: i18n.translate(
@@ -427,12 +423,6 @@ export const createDatasetWizardStrings = {
     }
   ),
 
-  settingsMaxErrorsHelp: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsMaxErrorsHelp',
-    {
-      defaultMessage: 'Maximum number of row errors before failing.',
-    }
-  ),
   settingsMaxErrorsPlaceholder: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsMaxErrorsPlaceholder',
     {
@@ -446,17 +436,10 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'Maximum error rate',
     }
   ),
-
-  settingsMaxErrorRatioHelp: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsMaxErrorRatioHelp',
-    {
-      defaultMessage: 'Maximum ratio of row errors before failing (0 to 1).',
-    }
-  ),
   settingsMaxErrorRatioPlaceholder: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsMaxErrorRatioPlaceholder',
     {
-      defaultMessage: 'Enter a value from 0 to 1',
+      defaultMessage: 'Enter a ratio between 0 and 1',
     }
   ),
 
@@ -510,13 +493,6 @@ export const createDatasetWizardStrings = {
     }
   ),
 
-  settingsFileExclusionsPlaceholder: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsFileExclusionsPlaceholder',
-    {
-      defaultMessage: '**/*.tmp',
-    }
-  ),
-
   settingsPartitionDetectionLabel: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsPartitionDetectionLabel',
     {
@@ -527,14 +503,14 @@ export const createDatasetWizardStrings = {
   settingsPartitionDetectionHelp: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsPartitionDetectionHelp',
     {
-      defaultMessage: 'Controls how Elastic detects partitions from resource paths.',
+      defaultMessage: 'auto by default',
     }
   ),
 
   settingsPartitionDetectionPlaceholder: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsPartitionDetectionPlaceholder',
     {
-      defaultMessage: 'Default (Auto)',
+      defaultMessage: 'Select partition detection',
     }
   ),
 
@@ -604,7 +580,7 @@ export const createDatasetWizardStrings = {
   settingsSchemaResolutionHelp: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsSchemaResolutionHelp',
     {
-      defaultMessage: 'Controls how schemas are reconciled across files.',
+      defaultMessage: 'How schemas are reconciled across files when reading a glob.',
     }
   ),
 
@@ -668,18 +644,10 @@ export const createDatasetWizardStrings = {
     }
   ),
 
-  settingsPartitionPathHelp: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsPartitionPathHelp',
-    {
-      defaultMessage: 'If left blank, no template is applied.',
-    }
-  ),
-
   settingsPartitionPathPlaceholder: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsPartitionPathPlaceholder',
     {
-      defaultMessage: '{year}/{month}',
-      values: { year: '{year}', month: '{month}' },
+      defaultMessage: 'Select or enter a partition path',
     }
   ),
 
@@ -753,7 +721,7 @@ export const createDatasetWizardStrings = {
   settingsDelimiterHelp: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsDelimiterHelp',
     {
-      defaultMessage: 'If left blank, defaults to comma for CSV and tab for TSV.',
+      defaultMessage: 'CSV: , by default · TSV: \\t by default',
     }
   ),
 
@@ -795,9 +763,13 @@ export const createDatasetWizardStrings = {
   settingsModePlaceholder: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsModePlaceholder',
     {
-      defaultMessage: 'Default (Quoted for CSV, Plain for TSV)',
+      defaultMessage: 'Select quote mode',
     }
   ),
+
+  settingsModeHelp: i18n.translate('xpack.dataFederation.createDatasetForm.settingsModeHelp', {
+    defaultMessage: 'CSV: quoted by default · TSV: plain by default',
+  }),
 
   settingsModeQuoted: i18n.translate('xpack.dataFederation.createDatasetForm.settingsModeQuoted', {
     defaultMessage: 'Quoted',
@@ -824,15 +796,14 @@ export const createDatasetWizardStrings = {
   settingsHeaderRowHelp: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsHeaderRowHelp',
     {
-      defaultMessage:
-        'When set to True, Elastic uses the first row as field names instead of data.',
+      defaultMessage: 'true by default',
     }
   ),
 
   settingsHeaderRowPlaceholder: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsHeaderRowPlaceholder',
     {
-      defaultMessage: 'Default (True)',
+      defaultMessage: 'Select header row',
     }
   ),
 
@@ -853,14 +824,21 @@ export const createDatasetWizardStrings = {
   settingsSkipRowsLabel: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsSkipRowsLabel',
     {
-      defaultMessage: 'Number of rows to skip',
+      defaultMessage: 'Skip rows',
     }
   ),
 
   settingsSkipRowsHelp: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsSkipRowsHelp',
     {
-      defaultMessage: 'If left blank, no rows are skipped.',
+      defaultMessage: '0 by default',
+    }
+  ),
+
+  settingsSkipRowsPlaceholder: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsSkipRowsPlaceholder',
+    {
+      defaultMessage: 'e.g. 0',
     }
   ),
 
@@ -878,11 +856,17 @@ export const createDatasetWizardStrings = {
     }
   ),
 
+  settingsNullValuePlaceholder: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsNullValuePlaceholder',
+    {
+      defaultMessage: 'Select or enter a null value',
+    }
+  ),
+
   settingsNullValueHelp: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsNullValueHelp',
     {
-      defaultMessage:
-        'Empty fields are treated as null by default. Enter another value to treat it as null.',
+      defaultMessage: 'Empty by default',
     }
   ),
 
@@ -896,7 +880,7 @@ export const createDatasetWizardStrings = {
   settingsEncodingHelp: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsEncodingHelp',
     {
-      defaultMessage: 'Character encoding used by the files.',
+      defaultMessage: 'UTF-8 by default',
     }
   ),
 
@@ -967,10 +951,6 @@ export const createDatasetWizardStrings = {
     defaultMessage: 'Quote character',
   }),
 
-  settingsQuoteHelp: i18n.translate('xpack.dataFederation.createDatasetForm.settingsQuoteHelp', {
-    defaultMessage: 'Defaults to " for CSV and no quote character for TSV.',
-  }),
-
   settingsQuotePlaceholder: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsQuotePlaceholder',
     {
@@ -993,7 +973,7 @@ export const createDatasetWizardStrings = {
   ),
 
   settingsEscapeHelp: i18n.translate('xpack.dataFederation.createDatasetForm.settingsEscapeHelp', {
-    defaultMessage: 'Defaults to \\ for CSV and no escape character for TSV.',
+    defaultMessage: 'CSV: \\ by default · TSV: none by default',
   }),
 
   settingsEscapePlaceholder: i18n.translate(
@@ -1034,8 +1014,7 @@ export const createDatasetWizardStrings = {
   settingsColumnPrefixHelp: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsColumnPrefixHelp',
     {
-      defaultMessage:
-        'Used when Header row is False. For example, field_ generates names such as field_0 and field_1.',
+      defaultMessage: 'col by default',
     }
   ),
 
@@ -1056,14 +1035,14 @@ export const createDatasetWizardStrings = {
   settingsTrimSpacesPlaceholder: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsTrimSpacesPlaceholder',
     {
-      defaultMessage: 'Default',
+      defaultMessage: 'Select trim spaces',
     }
   ),
 
   settingsTrimSpacesHelp: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsTrimSpacesHelp',
     {
-      defaultMessage: 'When True, removes ASCII whitespace from the start and end of field values.',
+      defaultMessage: 'false by default',
     }
   ),
 
@@ -1077,14 +1056,21 @@ export const createDatasetWizardStrings = {
   settingsDatetimeFormatHelp: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsDatetimeFormatHelp',
     {
-      defaultMessage: 'Pattern used to parse date and time values.',
+      defaultMessage: 'ISO-8601 by default',
+    }
+  ),
+
+  settingsDatetimeFormatNdjsonHelp: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsDatetimeFormatNdjsonHelp',
+    {
+      defaultMessage: 'strict_date_optional_time by default',
     }
   ),
 
   settingsDatetimeFormatPlaceholder: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsDatetimeFormatPlaceholder',
     {
-      defaultMessage: 'yyyy-MM-dd HH:mm:ss',
+      defaultMessage: 'Select or enter a datetime format',
     }
   ),
 
@@ -1147,67 +1133,81 @@ export const createDatasetWizardStrings = {
   settingsFileExclusionsDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.fileExclusions.description',
     {
-      defaultMessage: 'Excludes files that match these patterns when the resource uses wildcards.',
+      defaultMessage:
+        'Patterns naming objects to drop from wildcard discovery. Default skips files starting with _ or . and _temporary/ and _delta_log/ directories. Setting replaces the default list entirely.',
     }
   ),
   settingsPartitionDetectionDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.partitionDetection.description',
-    { defaultMessage: 'placeholder' }
+    { defaultMessage: 'How partitions are discovered in the resource path' }
   ),
   settingsPartitionPathDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.partitionPath.description',
-    { defaultMessage: 'Names partition columns that cannot be detected from the path.' }
+    {
+      defaultMessage:
+        'Only used when partition detection is Template. If your partition path is not available, create a custom one.',
+    }
   ),
   settingsErrorModeDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.errorMode.description',
-    { defaultMessage: 'Controls how Elastic handles errors while reading data.' }
+    { defaultMessage: 'What happens when a row cannot be parsed.' }
   ),
   settingsMaxErrorsDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.maxErrors.description',
     {
-      defaultMessage: 'Maximum number of rows with errors allowed before the query fails.',
+      defaultMessage: 'Maximum number of row errors before failing.',
     }
   ),
   settingsMaxErrorRatioDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.maxErrorRatio.description',
     {
-      defaultMessage: 'Maximum proportion of rows with errors allowed before the query fails.',
+      defaultMessage: 'Maximum ratio of row errors before failing (0 to 1).',
     }
   ),
   settingsDelimiterDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.delimiter.description',
-    { defaultMessage: 'Character that separates fields.' }
+    {
+      defaultMessage:
+        'The character that separates fields. If your delimiter is not available, create a custom one.',
+    }
   ),
   settingsQuoteModeDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.quoteMode.description',
     {
-      defaultMessage:
-        'Controls whether fields use quote characters, escape characters, or neither.',
+      defaultMessage: 'How quoting and escaping are handled while reading fields.',
     }
   ),
   settingsHeaderRowDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.headerRow.description',
-    { defaultMessage: 'placeholder' }
+    { defaultMessage: 'Whether the first row holds column names rather than data.' }
   ),
   settingsSkipRowsDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.skipRows.description',
     {
-      defaultMessage: 'Blank and comment lines do not count toward this number.',
+      defaultMessage:
+        'Number of leading rows to skip before reading data. Blank and comment lines do not count.',
     }
   ),
   settingsDatetimeFormatDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.datetimeFormat.description',
-    { defaultMessage: 'Controls how Elastic interprets date and time values.' }
+    {
+      defaultMessage:
+        'Pattern used to parse date and time values. If your datetime format is not available, create a custom one.',
+    }
   ),
   settingsNullValueDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.nullValue.description',
     {
-      defaultMessage: 'Enter the value your files use for missing data. For example: NULL or NA.',
+      defaultMessage:
+        'The string treated as null, for example NULL or NA. If your null value is not available, create a custom one.',
     }
   ),
   settingsEncodingDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.encoding.description',
-    { defaultMessage: 'placeholder' }
+    {
+      defaultMessage:
+        'Character encoding of the file. If your encoding is not available, create a custom one.',
+    }
   ),
   settingsSchemaSampleSizeDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.schemaSampleSize.description',
@@ -1217,14 +1217,7 @@ export const createDatasetWizardStrings = {
     'xpack.dataFederation.createDatasetWizard.additionalSettings.quoteCharacter.description',
     {
       defaultMessage:
-        'Character that surrounds field values. A custom value overrides the character set by Quote mode.',
-    }
-  ),
-  settingsEscapeCharacterDescription: i18n.translate(
-    'xpack.dataFederation.createDatasetWizard.additionalSettings.escapeCharacter.description',
-    {
-      defaultMessage:
-        'Character used to escape special characters. A custom value overrides the character set by Quote mode.',
+        'The quote character, or "none" to turn quoting off. An explicit value overrides the mode preset. Must be a single character.',
     }
   ),
   settingsCommentPrefixDescription: i18n.translate(
@@ -1233,11 +1226,11 @@ export const createDatasetWizardStrings = {
   ),
   settingsColumnPrefixDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.columnPrefix.description',
-    { defaultMessage: 'placeholder' }
+    { defaultMessage: 'Prefix for generated column names when no header row is present.' }
   ),
   settingsTrimSpacesDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.trimSpaces.description',
-    { defaultMessage: 'placeholder' }
+    { defaultMessage: 'Remove surrounding ASCII whitespace from string field values.' }
   ),
   settingsMultiValueSyntaxDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.multiValueSyntax.description',
@@ -1249,7 +1242,10 @@ export const createDatasetWizardStrings = {
   ),
   settingsDatetimeFormatNdjsonDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.datetimeFormatNdjson.description',
-    { defaultMessage: 'Controls how Elastic interprets date and time values.' }
+    {
+      defaultMessage:
+        'Pattern used to parse date and time values. If your datetime format is not available, create a custom one.',
+    }
   ),
   settingsOptimizedReaderDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.optimizedReader.description',

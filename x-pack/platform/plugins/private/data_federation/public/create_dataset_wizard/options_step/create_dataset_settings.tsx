@@ -122,20 +122,6 @@ export function CreateDatasetPartitionDetectionField({
   );
 }
 
-export function CreateDatasetSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
-  const format: DatasetFormatFormValue = useWatch({ control, name: 'settings.format' });
-
-  return (
-    <>
-      <EuiSpacer size="m" />
-      <CreateDatasetFormatField control={control} />
-      <CoreFormatSettings control={control} format={format} />
-      <UniversalAdvancedSettings control={control} />
-      <FormatAdvancedSettings control={control} format={format} />
-    </>
-  );
-}
-
 /** Additional settings without format or partition detection — used by the create-dataset wizard. */
 export function CreateDatasetAdditionalSettings({
   control,
@@ -326,7 +312,6 @@ function RemainingUniversalSettings({
       {partitionDetectionValue === 'template' ? (
         <EuiFormRow
           label={createDatasetWizardStrings.settingsPartitionPathLabel}
-          helpText={createDatasetWizardStrings.settingsPartitionPathHelp}
           fullWidth
           isInvalid={Boolean(partitionPathState.error)}
           error={partitionPathState.error?.message}

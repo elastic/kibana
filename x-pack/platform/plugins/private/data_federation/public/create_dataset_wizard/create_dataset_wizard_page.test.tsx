@@ -740,7 +740,7 @@ describe('CreateDatasetWizardPage', () => {
     fireEvent.click(within(advancedAccordion).getByRole('button', { expanded: false }));
     expect(getByTestId('createDatasetWizardAdvancedSettings')).toHaveClass('euiAccordion-isOpen');
 
-    fireEvent.change(getByTestId('createDatasetSettingsEscape'), { target: { value: '\\n' } });
+    fireEvent.change(getByTestId('createDatasetSettingsEscape'), { target: { value: '\\a' } });
 
     await clickNext(getByTestId);
 

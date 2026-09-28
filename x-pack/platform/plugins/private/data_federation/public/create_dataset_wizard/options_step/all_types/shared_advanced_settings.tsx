@@ -22,12 +22,6 @@ import { FileExclusionsSelect } from './fields/file_exclusions_select';
 import { MaxErrorRatioField } from './fields/max_error_ratio_field';
 import { MaxErrorsField } from './fields/max_errors_field';
 import { PartitionDetectionSelect } from '../../components/fields/partition_detection_select';
-const fileExclusionsDefaultHelp = (
-  <FormattedMessage
-    id="xpack.dataFederation.createDatasetForm.settingsFileExclusionsHelpText"
-    defaultMessage="Files matching these patterns are excluded."
-  />
-);
 
 export function SharedAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
   const partitionDetection = useWatch({ control, name: 'settings.partition_detection' });
@@ -47,13 +41,21 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
             infoText={createDatasetWizardStrings.settingsFileExclusionsDescription}
           />
         }
-        helpText={fileExclusionsDefaultHelp}
         fullWidth
       >
         <FileExclusionsSelect control={control} />
       </EuiFormRow>
 
-      <EuiFormRow label={createDatasetWizardStrings.settingsPartitionDetectionLabel} fullWidth>
+      <EuiFormRow
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsPartitionDetectionLabel}
+            infoText={createDatasetWizardStrings.settingsPartitionDetectionDescription}
+          />
+        }
+        helpText={createDatasetWizardStrings.settingsPartitionDetectionHelp}
+        fullWidth
+      >
         <PartitionDetectionSelect control={control} />
       </EuiFormRow>
 
@@ -65,7 +67,6 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
               infoText={createDatasetWizardStrings.settingsPartitionPathDescription}
             />
           }
-          helpText={createDatasetWizardStrings.settingsPartitionPathHelp}
           fullWidth
           isInvalid={Boolean(partitionPathState.error)}
           error={partitionPathState.error?.message}

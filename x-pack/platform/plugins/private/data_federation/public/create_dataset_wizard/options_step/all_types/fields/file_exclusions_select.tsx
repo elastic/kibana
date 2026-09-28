@@ -23,7 +23,6 @@ export function FileExclusionsSelect({ control }: { control: Control<CreateDatas
     <EuiComboBox
       noSuggestions
       delimiter=","
-      placeholder={createDatasetWizardStrings.settingsFileExclusionsPlaceholder}
       selectedOptions={fileExclusionsField.value.map((label) => ({ label }))}
       onCreateOption={(searchValue) => {
         const trimmed = searchValue.trim();

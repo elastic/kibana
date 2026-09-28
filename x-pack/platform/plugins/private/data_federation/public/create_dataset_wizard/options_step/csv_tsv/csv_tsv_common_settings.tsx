@@ -103,16 +103,7 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
         label={
           <FormRowLabelWithInfo
             label={createDatasetWizardStrings.settingsNullValueLabel}
-            infoText={
-              <FormattedMessage
-                id="xpack.dataFederation.createDatasetWizard.additionalSettings.nullValue.descriptionText"
-                defaultMessage="Enter the value your files use for missing data. For example: {nullValue} or {naValue}. When set, empty fields are no longer treated as null."
-                values={{
-                  nullValue: <EuiCode>NULL</EuiCode>,
-                  naValue: <EuiCode>NA</EuiCode>,
-                }}
-              />
-            }
+            infoText={createDatasetWizardStrings.settingsNullValueDescription}
           />
         }
         helpText={createDatasetWizardStrings.settingsNullValueHelp}
@@ -121,6 +112,7 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
         <EuiFieldText
           data-test-subj="createDatasetSettingsNullValue"
           fullWidth
+          placeholder={createDatasetWizardStrings.settingsNullValuePlaceholder}
           value={nullValueField.value}
           onChange={(e) => nullValueField.onChange(e.target.value)}
           name={nullValueField.name}

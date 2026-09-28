@@ -18,8 +18,8 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { DatasetMappingFieldType } from '../../../../common/dataset_types';
+import { FormRowLabelWithInfo } from '../../components/form_row_label_with_info';
 import { DatetimeFormatComboBox } from '../../components/datetime_format_combo_box';
 
 export interface FieldMappingFormValue<TType extends string = string> {
@@ -199,7 +199,7 @@ export function FieldMappingForm({
                 defaultMessage: 'Field name',
               })}
               helpText={i18n.translate('xpack.dataFederation.mappingEditor.logicalNameHelp', {
-                defaultMessage: 'Field name used in queries.',
+                defaultMessage: 'How this field should be named in queries.',
               })}
               isInvalid={Boolean(errors?.name)}
               error={errors?.name}
@@ -217,25 +217,13 @@ export function FieldMappingForm({
 
           <EuiFlexItem style={{ minWidth: 260 }}>
             <EuiFormRow
-              label={i18n.translate('xpack.dataFederation.mappingEditor.physicalPath', {
-                defaultMessage: 'Source field (optional)',
+              label={i18n.translate('xpack.dataFederation.mappingEditor.originalFieldNameLabel', {
+                defaultMessage: 'Original field name',
               })}
-              helpText={
-                <FormattedMessage
-                  id="xpack.dataFederation.mappingEditor.physicalPathHelp"
-                  defaultMessage="Column name or JSON path in the source file. Leave blank if it matches {fieldName}."
-                  values={{
-                    fieldName: (
-                      <strong>
-                        <FormattedMessage
-                          id="xpack.dataFederation.mappingEditor.logicalName"
-                          defaultMessage="Field name"
-                        />
-                      </strong>
-                    ),
-                  }}
-                />
-              }
+              helpText={i18n.translate('xpack.dataFederation.mappingEditor.originalFieldNameHelp', {
+                defaultMessage:
+                  'Name as it appears in your source files, when different from the field name',
+              })}
               fullWidth
             >
               <EuiFieldText
@@ -250,13 +238,17 @@ export function FieldMappingForm({
           {isDateType ? (
             <EuiFlexItem style={{ minWidth: 260, maxWidth: 260 }}>
               <EuiFormRow
-                label={i18n.translate('xpack.dataFederation.mappingEditor.formatLabel', {
-                  defaultMessage: 'Date and time format (optional)',
-                })}
-                helpText={i18n.translate('xpack.dataFederation.mappingEditor.formatHelp', {
-                  defaultMessage:
-                    'Overrides the dataset-level date and time format for this field.',
-                })}
+                label={
+                  <FormRowLabelWithInfo
+                    label={i18n.translate('xpack.dataFederation.mappingEditor.formatLabel', {
+                      defaultMessage: 'Date format',
+                    })}
+                    infoText={i18n.translate('xpack.dataFederation.mappingEditor.formatTooltip', {
+                      defaultMessage:
+                        'Date parsing pattern, for example yyyy-MM-dd HH:mm:ss.',
+                    })}
+                  />
+                }
                 isInvalid={Boolean(errors?.format)}
                 error={errors?.format}
                 fullWidth
@@ -268,7 +260,7 @@ export function FieldMappingForm({
                   placeholder={i18n.translate(
                     'xpack.dataFederation.mappingEditor.formatPlaceholder',
                     {
-                      defaultMessage: 'yyyy-MM-dd HH:mm:ss',
+                      defaultMessage: 'Select or enter a format',
                     }
                   )}
                   data-test-subj="dataFederationMappingEditorFieldFormat"

@@ -119,7 +119,7 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsColumnPrefixLabel}
+            label={createDatasetWizardStrings.settingsColumnPrefixLabel}
         helpText={
           <FormattedMessage
             id="xpack.dataFederation.createDatasetForm.settingsColumnPrefixHelpText"

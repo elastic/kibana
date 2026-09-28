@@ -11,6 +11,7 @@ import {
   buildDatasetSettingsFromFormValues,
   emptyCreateDatasetSettingsFormValues,
   validateEscapeCharacter,
+  validateQuoteCharacter,
   validateMaxErrors,
   validatePartitionPath,
   validateSkipRows,
@@ -104,6 +105,22 @@ describe('create_dataset_form_state', () => {
       expect(validateEscapeCharacter('\\abc')).toBe(
         createDatasetWizardStrings.settingsEscapeInvalid
       );
+    });
+  });
+
+  describe('validateQuoteCharacter', () => {
+    it('accepts empty and a single character', () => {
+      expect(validateQuoteCharacter('')).toBe(true);
+      expect(validateQuoteCharacter('"')).toBe(true);
+      expect(validateQuoteCharacter("'")).toBe(true);
+    });
+
+    it('rejects multi-character values', () => {
+      expect(validateQuoteCharacter('\\t')).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
+      expect(validateQuoteCharacter('\\\\')).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
+      expect(validateQuoteCharacter('ab')).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
+      expect(validateQuoteCharacter('\\a')).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
+      expect(validateQuoteCharacter('\\abc')).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
     });
   });
 

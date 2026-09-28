@@ -48,6 +48,7 @@ export function SkipRowsField({ control }: { control: Control<CreateDatasetFormV
         min={0}
         max={1000}
         step={1}
+        placeholder={createDatasetWizardStrings.settingsSkipRowsPlaceholder}
         isInvalid={isSkipRowsInvalid}
         value={skipRowsField.value}
         onChange={(e) => skipRowsField.onChange(e.target.value)}

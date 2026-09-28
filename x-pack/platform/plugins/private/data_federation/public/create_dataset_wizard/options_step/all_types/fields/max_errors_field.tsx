@@ -56,6 +56,7 @@ export function MaxErrorsField({ control }: { control: Control<CreateDatasetForm
         fullWidth
         min={1}
         step={1}
+        placeholder={createDatasetWizardStrings.settingsMaxErrorsPlaceholder}
         isInvalid={isMaxErrorsInvalid}
         value={maxErrorsField.value}
         onChange={(e) => maxErrorsField.onChange(e.target.value)}

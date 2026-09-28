@@ -38,14 +38,15 @@ type ValidEscapeCharacterSequence = (typeof VALID_ESCAPE_CHARACTER_SEQUENCES)[nu
 const isValidEscapeCharacterSequence = (value: string): value is ValidEscapeCharacterSequence =>
   (VALID_ESCAPE_CHARACTER_SEQUENCES as readonly string[]).includes(value);
 
-const CHARACTER_TO_ESCAPE_SEQUENCE: Partial<Record<string, '\\t' | '\\n' | '\\r'>> = {
-  '\t': '\\t',
-};
+const CHARACTER_TO_ESCAPE_SEQUENCE: Partial<
+  Record<string, Exclude<ValidEscapeCharacterSequence, '\\\\'> | '\\n' | '\\r'>
+> =
+  {
+    '\t': '\\t',
+    '\n': '\\n',
+    '\r': '\\r',
+  };
 
-/**
- * The escape character field in the form allows either a single character, or a
- * two-character escape sequence (`\\t`, `\\\\`) for non-printable values.
- */
 /** Encodes non-printable characters into a two-character escape sequence for the form. */
 export const encodeEscapeCharacterToFormValue = (value: string): string => {
   if (!value) return '';
