@@ -123,18 +123,29 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
     });
   });
 
-  it('defers a negative gate when needs_render says the article was unavailable', () => {
-    expect(findStepByName(workflow.steps, 'defer_unrendered_rejection')).toMatchObject({
+  it('defers RSS Jina fallbacks before gate rejection or core completion', () => {
+    expect(findStepByName(workflow.steps, 'defer_rss_fallback_materialization')).toMatchObject({
       type: 'loop.continue',
-      if: expect.stringContaining('gate_needs_render'),
+      if: "${{ steps.materialize_article.output.materialization.status == 'fallback' }}",
     });
-    const defer = findStepByName(workflow.steps, 'defer_unrendered_rejection');
-    expect(String(defer?.if)).toContain('gate_is_intelligence');
-    // Must run before the permanent rejection write.
     const yaml = THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml;
-    expect(yaml.indexOf('name: defer_unrendered_rejection')).toBeLessThan(
+    expect(yaml.indexOf('name: defer_rss_fallback_materialization')).toBeLessThan(
       yaml.indexOf('name: persist_gate_rejection')
     );
+    expect(yaml.indexOf('name: defer_rss_fallback_materialization')).toBeLessThan(
+      yaml.indexOf('name: extract_iocs')
+    );
+  });
+
+  it('skips a report on gate-rejection persist failure without aborting the foreach', () => {
+    const persist = findStepByName(workflow.steps, 'persist_gate_rejection') as {
+      'on-failure'?: { continue?: boolean };
+    };
+    expect(persist?.['on-failure']?.continue).toBe(true);
+    expect(findStepByName(workflow.steps, 'retry_gate_rejection_persist_failure')).toMatchObject({
+      type: 'loop.continue',
+      if: '${{ steps.persist_gate_rejection.error != null }}',
+    });
   });
 
   it('sends complete article text and contains no blind 30K prefix slice', () => {

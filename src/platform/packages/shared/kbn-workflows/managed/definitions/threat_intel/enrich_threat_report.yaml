@@ -157,12 +157,15 @@ steps:
           gate_has_original_commentary: "${{ steps.assess_relevance.output.has_original_commentary }}"
           gate_reason: "{{ steps.assess_relevance.output.reason }}"
 
-      # A negative verdict on teaser/fallback text is not final: needs_render
-      # means the substantive article was never available (e.g. Jina outage).
-      # Leave the report pending so a later run can re-materialize and re-gate.
-      - name: defer_unrendered_rejection
+      # Jina HTTP / validation fallbacks keep status `fallback` (RSS + URL only;
+      # non-RSS and missing-URL are `skipped`). Leave those pending so a later
+      # run can re-materialize. Do not key this on needs_render alone: a positive
+      # gate on teaser text would otherwise write workflow_v4 and never retry,
+      # while needs_render on manual/KEV / rendered nav pages cannot acquire new
+      # article text and must be allowed to finalize.
+      - name: defer_rss_fallback_materialization
         type: loop.continue
-        if: "${{ variables.gate_is_intelligence == false and variables.gate_needs_render == true }}"
+        if: "${{ steps.materialize_article.output.materialization.status == 'fallback' }}"
 
       - name: persist_gate_rejection
         type: elasticsearch.update
@@ -185,6 +188,12 @@ steps:
             lineage:
               extracted_at: "${{ now }}"
               extraction_method: workflow_v4_rejected
+        on-failure:
+          continue: true
+
+      - name: retry_gate_rejection_persist_failure
+        type: loop.continue
+        if: "${{ steps.persist_gate_rejection.error != null }}"
 
       - name: stop_rejected_report
         type: loop.continue
