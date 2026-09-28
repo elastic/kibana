@@ -1139,6 +1139,9 @@
   {
     "id": "security-investigations",
     "name": "Security Investigations",
+    "areas": [
+      "security"
+    ],
     "github": {
       "team": "elastic/security-investigations",
       "label": "Team:Security Investigations"

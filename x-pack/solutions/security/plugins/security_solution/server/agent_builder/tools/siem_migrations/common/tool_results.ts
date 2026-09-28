@@ -39,14 +39,22 @@ export const createToolErrorResult = (
 
 /**
  * Builds a privilege-denied error result for mutating SIEM migration actions.
+ *
+ * @param action - Short phrase describing the action that failed (e.g. "install migration rules").
+ * @param requiredPrivileges - Human-readable privilege list to include in the error message.
+ *   Defaults to the standard Automatic Migration read-only requirement; override for tools
+ *   that require additional privileges (e.g. install, which also needs Detection Rules: All).
  */
-export const createMissingPrivilegeError = (action: string) => ({
+export const createMissingPrivilegeError = (
+  action: string,
+  requiredPrivileges = 'Security > Automatic Migration: All and Rules: Read'
+) => ({
   results: [
     {
       tool_result_id: getToolResultId(),
       type: ToolResultType.error,
       data: {
-        message: `The current user does not have the required privileges to ${action}. Ask the user to grant Security > Automatic Migration: All and Rules: Read.`,
+        message: `The current user does not have the required privileges to ${action}. Ask the user to grant ${requiredPrivileges}.`,
       },
     },
   ],

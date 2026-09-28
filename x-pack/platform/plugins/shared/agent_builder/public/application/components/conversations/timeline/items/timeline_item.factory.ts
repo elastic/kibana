@@ -7,8 +7,11 @@
 
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
-import type { AgentTurnItem, TimelineItem } from '../types';
+import type { AgentTurnItem, AttachmentItem, CustomEventItem, TimelineItem } from '../types';
 import { createUserMessageEvent } from './user_message_event.factory';
+import { createAttachmentAddedEvent } from './attachment_added_event.factory';
+import { CUSTOM_EVENT_TYPE, createCustomEvent } from './custom_event.factory';
+import { createVersionedAttachment } from './versioned_attachment.factory';
 import { createExecutionTerminatedEvent } from './execution_terminated_event.factory';
 import { createExecutionFailedEvent } from './execution_failed_event.factory';
 import { createExecutionAbortedEvent } from './execution_aborted_event.factory';
@@ -21,6 +24,29 @@ export const createUserMessageItem = (overrides?: Partial<UserMessageItem>): Use
   event: createUserMessageEvent(),
   ...overrides,
 });
+
+export const createAttachmentItem = (overrides?: Partial<AttachmentItem>): AttachmentItem => {
+  const event = overrides?.event ?? createAttachmentAddedEvent();
+  return {
+    kind: 'attachment',
+    key: event.id,
+    event,
+    attachment: createVersionedAttachment({ id: event.data.attachment_id }),
+    version: event.data.current_version,
+    ...overrides,
+  };
+};
+
+export const createCustomEventItem = (overrides?: Partial<CustomEventItem>): CustomEventItem => {
+  const event = overrides?.event ?? createCustomEvent();
+  return {
+    kind: 'customEvent',
+    key: event.id,
+    event,
+    definition: { type: CUSTOM_EVENT_TYPE, render: () => null },
+    ...overrides,
+  };
+};
 
 export const createAgentTurnItem = (overrides?: Partial<AgentTurnItem>): AgentTurnItem => ({
   kind: 'agentTurn',
