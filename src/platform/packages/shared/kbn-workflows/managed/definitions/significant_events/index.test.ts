@@ -65,7 +65,7 @@ const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(21);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(22);
   });
 
   it('bootstraps per-space cleanup before discovery work', () => {
@@ -102,17 +102,13 @@ describe('significant events persistence workflow contracts', () => {
       steps: {
         resolve_open_event: {
           output: {
-            hits: {
-              hits: [
-                {
-                  _source: {
-                    title: 'T'.repeat(512),
-                    summary: 'S'.repeat(10_000),
-                    symptom_hypothesis: 'H'.repeat(10_000),
-                  },
-                },
-              ],
-            },
+            hits: [
+              {
+                title: 'T'.repeat(512),
+                summary: 'S'.repeat(10_000),
+                symptom_hypothesis: 'H'.repeat(10_000),
+              },
+            ],
           },
         },
       },
@@ -150,7 +146,7 @@ describe('significant events persistence workflow contracts', () => {
 
   it('does not launch investigations without resolved event details', () => {
     expect(requireStep(discovery, 'guard_resolved_event').condition).toContain(
-      'steps.resolve_open_event.output.hits.hits[0] != null'
+      'steps.resolve_open_event.output.hits[0] != null'
     );
   });
 
