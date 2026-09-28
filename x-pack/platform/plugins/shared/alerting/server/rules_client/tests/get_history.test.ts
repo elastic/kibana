@@ -8,23 +8,18 @@
 import { generateChangeHistoryDocument } from '@kbn/change-history/test_utils';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { RulesClient } from '../rules_client';
-import { RuleChangeTrackingDisabledError } from '../methods/get_rule_history';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
 import type { RawRule } from '../../types';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import type { IScopedChangeTrackingService } from '../lib/change_tracking';
 import { getRulesClientMockParams } from '../../test_utils';
+import { changeTrackingServiceMock } from '../lib/change_tracking/service.mock';
 
 describe('getHistory()', () => {
   const eventLogClient = eventLogClientMock.create();
 
-  const changeTrackingService: jest.Mocked<IScopedChangeTrackingService> = {
-    log: jest.fn(),
-    logBulk: jest.fn(),
-    getHistory: jest.fn(),
-  };
+  const changeTrackingService = changeTrackingServiceMock.createScoped();
 
   const kibanaVersion = 'v9.5.0';
 
@@ -88,21 +83,6 @@ describe('getHistory()', () => {
 
   beforeEach(() => {
     rulesClient = new RulesClient(rulesClientParams);
-  });
-
-  test('throws RuleChangeTrackingDisabledError when changeTrackingService is not configured', async () => {
-    const clientWithoutTracking = new RulesClient({
-      ...rulesClientParams,
-      changeTrackingService: undefined,
-    });
-
-    await expect(
-      clientWithoutTracking.getHistory({ module: 'security', ruleId: '1' })
-    ).rejects.toBeInstanceOf(RuleChangeTrackingDisabledError);
-
-    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
-    expect(authorization.ensureAuthorized).not.toHaveBeenCalled();
-    expect(changeTrackingService.getHistory).not.toHaveBeenCalled();
   });
 
   test('returns result from the change tracking service', async () => {

@@ -18,6 +18,7 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
+import { changeTrackingServiceMock } from '../../lib/change_tracking/service.mock';
 import { alertingAuthorizationMock } from '../../../authorization/alerting_authorization.mock';
 import { ConnectorAdapterRegistry } from '../../../connector_adapters/connector_adapter_registry';
 import { backfillClientMock } from '../../../backfill_client/backfill_client.mock';
@@ -57,6 +58,7 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 
 const rulesClientContext: RulesClientContext = {
   request: httpServerMock.createKibanaRequest(),
+  changeTrackingService: changeTrackingServiceMock.createScoped(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,

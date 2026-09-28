@@ -80,7 +80,7 @@ export interface RulesClientFactoryOpts {
   internalSavedObjectsRepository: ISavedObjectsRepository;
   actions: ActionsPluginStartContract;
   eventLog: IEventLogClientService;
-  changeTrackingService?: IChangeTrackingService;
+  changeTrackingService: IChangeTrackingService;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   authorization: AlertingAuthorizationClientFactory;
   eventLogger?: IEventLogger;
@@ -111,7 +111,7 @@ export class RulesClientFactory {
   private internalSavedObjectsRepository!: ISavedObjectsRepository;
   private actions!: ActionsPluginStartContract;
   private eventLog!: IEventLogClientService;
-  private changeTrackingService?: IChangeTrackingService;
+  private changeTrackingService!: IChangeTrackingService;
   private kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
   private authorization!: AlertingAuthorizationClientFactory;
   private eventLogger?: IEventLogger;
@@ -440,7 +440,7 @@ export class RulesClientFactory {
       internalSavedObjectsRepository: this.internalSavedObjectsRepository,
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
       auditLogger: securityPluginSetup?.audit.asScoped(request),
-      changeTrackingService: this.changeTrackingService?.asScoped(request),
+      changeTrackingService: this.changeTrackingService.asScoped(request),
       getAlertIndicesAlias: this.getAlertIndicesAlias,
       alertsService: this.alertsService,
       backfillClient: this.backfillClient,
