@@ -79,6 +79,8 @@ apiTest.describe(
       expect(response).toHaveStatusCode(200);
       expect(response.body.template_id).toBe(ESCALATION_TEMPLATE_ID);
       expect(response.body.title).toBe('Scout test investigation');
+      // Verify the assignee was stored — a handler that silently drops the field would still return 200.
+      expect(response.body.metadata?.assignees).toStrictEqual([adminProfileUid]);
       if (response.body.id) createdIds.push(response.body.id);
     });
 

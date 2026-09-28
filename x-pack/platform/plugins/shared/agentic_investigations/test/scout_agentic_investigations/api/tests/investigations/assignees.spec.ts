@@ -28,6 +28,9 @@ apiTest.describe(
 
     let editorProfileUid: string;
     let adminProfileUid: string;
+    // Probe ids kept separate so each is deleted by its owner.
+    let editorProbeId: string;
+    let adminProbeId: string;
     const conversationIds: string[] = [];
 
     apiTest.beforeAll(async ({ samlAuth, apiClient }) => {
@@ -63,10 +66,15 @@ apiTest.describe(
       }
       editorProfileUid = editorProbeRes.body.user?.id as string;
       adminProfileUid = adminProbeRes.body.user?.id as string;
-      conversationIds.push(editorProbeRes.body.id, adminProbeRes.body.id);
+      editorProbeId = editorProbeRes.body.id;
+      adminProbeId = adminProbeRes.body.id;
     });
 
     apiTest.afterAll(async ({ apiClient }) => {
+      // Delete each probe with its owner's cookie — non-owner deletes return 404 on restricted indices.
+      await deleteConversations(apiClient, [editorProbeId], editorCookieHeader);
+      await deleteConversations(apiClient, [adminProbeId], adminCookieHeader);
+      // Per-test conversations are all admin-owned.
       await deleteConversations(apiClient, [...conversationIds], adminCookieHeader);
     });
 
@@ -111,6 +119,7 @@ apiTest.describe(
         });
 
         expect(res).toHaveStatusCode(200);
+        expect(res.body.metadata?.assignees).toStrictEqual([editorProfileUid]);
       }
     );
 
@@ -126,6 +135,7 @@ apiTest.describe(
         });
 
         expect(res).toHaveStatusCode(200);
+        expect(res.body.metadata?.assignees).toStrictEqual([editorProfileUid]);
       }
     );
 

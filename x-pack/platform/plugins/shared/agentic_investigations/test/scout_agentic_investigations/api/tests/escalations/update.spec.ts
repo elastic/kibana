@@ -24,6 +24,7 @@ apiTest.describe(
   () => {
     let cookieHeader: Record<string, string>;
     let viewerCookieHeader: Record<string, string>;
+    let adminProfileUid: string;
     let investigationId: string;
     let secondInvestigationId: string;
     let escalationId: string;
@@ -34,6 +35,8 @@ apiTest.describe(
 
       // Create two investigations through the Agent Builder API so the index is
       // managed by Kibana (direct esClient writes are rejected on restricted indices).
+      // The first response also carries user.id — the admin's profile uid used as
+      // the required assignee in the escalation create call below.
       const [inv1, inv2] = await Promise.all([
         apiClient.post(AB_CONVERSATIONS_PATH, {
           headers: { ...PUBLIC_HEADERS, ...cookieHeader },
@@ -58,11 +61,19 @@ apiTest.describe(
       ]);
       investigationId = expectCreated(inv1, 'first investigation');
       secondInvestigationId = expectCreated(inv2, 'second investigation');
+      adminProfileUid = inv1.body.user?.id as string;
+      if (!adminProfileUid) {
+        throw new Error('admin profile uid not found in investigation creation response');
+      }
 
       // Create the escalation to update
       const createResponse = await apiClient.post(CREATE_ESCALATION_PATH, {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
-        body: { linked_investigation_id: investigationId, visibility: 'public' },
+        body: {
+          linked_investigation_id: investigationId,
+          visibility: 'public',
+          assignees: [adminProfileUid],
+        },
         responseType: 'json',
       });
       escalationId = expectCreated(createResponse, 'escalation');

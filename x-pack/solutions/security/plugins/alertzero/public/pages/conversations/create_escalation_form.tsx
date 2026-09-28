@@ -69,24 +69,19 @@ export const CreateEscalationForm = memo<CreateEscalationFormProps>(
       onSubmit({
         title,
         visibility: isPrivate ? 'private' : 'public',
-        // The owner uid is always prepended; filter it from the selected list first so
-        // a user who picked themselves in the picker is not duplicated.
-        assigneeUids: isPrivate
-          ? [
-              currentUser?.uid || '',
-              ...selectedAssignees.reduce<string[]>((list, assignee) => {
-                if (assignee.uid !== currentUser?.uid) {
-                  list.push(assignee.uid);
-                }
-                return list;
-              }, []),
-            ].filter(Boolean)
-          : [],
+        // Submit exactly what the picker shows.
+        // The owner always has access regardless (implicit ACL); they are shown as a
+        // non-removable label above the picker. The caller (connected modal) adds the
+        // creator uid separately for public escalations.
+        assigneeUids: isPrivate ? selectedAssignees.map((a) => a.uid) : [],
       });
-    }, [onSubmit, title, isPrivate, currentUser, selectedAssignees]);
+    }, [onSubmit, title, isPrivate, selectedAssignees]);
 
     const isSubmitDisabled =
-      isSubmitting || title.trim() === '' || (isPrivate && !currentUser?.uid);
+      isSubmitting ||
+      title.trim() === '' ||
+      // At least one assignee is required for private escalations (API enforces min 1).
+      (isPrivate && selectedAssignees.length === 0);
 
     return (
       <>

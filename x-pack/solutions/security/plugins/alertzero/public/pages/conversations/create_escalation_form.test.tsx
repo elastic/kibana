@@ -97,8 +97,9 @@ describe('CreateEscalationForm', () => {
     });
   });
 
-  it('calls onSubmit with private visibility and currentUser prepended when private', () => {
+  it('calls onSubmit with private visibility and selected assignees when private', () => {
     const onSubmit = jest.fn();
+    // currentUser is pre-selected by default, so submit should include their uid.
     renderForm({ onSubmit, currentUser });
 
     fireEvent.click(screen.getByTestId('escalationModalVisibilitySwitch'));

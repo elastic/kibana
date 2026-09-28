@@ -10,6 +10,7 @@ import {
   EuiCheckableCard,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -18,6 +19,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 import { type EscalationModalRenderProps } from '@kbn/agentic-investigations-common';
 import {
@@ -76,7 +78,12 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
       [application]
     );
 
-    const { data: currentUserProfile } = useCurrentUserProfile();
+    const {
+      data: currentUserProfile,
+      isLoading: isLoadingUserProfile,
+      isError: isUserProfileError,
+      refetch: refetchUserProfile,
+    } = useCurrentUserProfile();
     const { data: suggestedAssignees = [], isFetching: isSearchingAssignees } =
       useSuggestUserProfiles(assigneeSearch);
     const {
@@ -167,48 +174,82 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
           </EuiFlexGroup>
         </div>
 
-        {mode === 'create' && !!currentUserProfile ? (
-          <CreateEscalationForm
-            investigationTitle={investigation.title}
-            suggestedAssignees={suggestedAssignees}
-            isSearchingAssignees={isSearchingAssignees}
-            currentUser={currentUserProfile}
-            currentUserName={currentUserProfile ? getUserDisplayName(currentUserProfile.user) : ''}
-            isSubmitting={createEscalation.isLoading}
-            onSearchAssignees={setAssigneeSearch}
-            onSubmit={({ title, visibility, assigneeUids }) =>
-              createEscalation.mutate(
-                {
-                  linked_investigation_id: conversationId,
-                  title,
-                  visibility,
-                  // For private escalations, assigneeUids already includes the creator uid.
-                  // For public escalations, add the creator alone as the sole assignee.
-                  assignees:
-                    visibility === 'private'
-                      ? assigneeUids
-                      : [currentUserProfile?.uid].filter(
-                          (uid): uid is string => typeof uid === 'string' && uid.length > 0
-                        ),
-                },
-                {
-                  onSuccess: (escalation) => {
-                    notifications?.toasts.addSuccess({
-                      title: ESCALATION_SUCCESS.createTitle,
-                      actionProps: { primary: makeViewEscalationPrimary(escalation.id) },
-                    });
-                    onClose();
-                  },
-                  onError: (err) =>
-                    notifications?.toasts.addDanger({
-                      title: ESCALATION_ERRORS.createFailed,
-                      text: apiErrorText(err),
-                    }),
+        {mode === 'create' ? (
+          <>
+            {isLoadingUserProfile && (
+              <EuiFlexGroup justifyContent="center" css={{ padding: euiTheme.size.l }}>
+                <EuiLoadingSpinner size="l" />
+              </EuiFlexGroup>
+            )}
+
+            {!isLoadingUserProfile && isUserProfileError && (
+              <div css={{ padding: `0 ${euiTheme.size.l} ${euiTheme.size.l}` }}>
+                <KbnDangerCallout
+                  announceOnMount
+                  title={ESCALATION_ERRORS.userProfileLoadFailed}
+                  actionProps={{
+                    primary: {
+                      children: ESCALATION_ERRORS.retryButton,
+                      onClick: () => void refetchUserProfile(),
+                    },
+                  }}
+                />
+              </div>
+            )}
+
+            {!isLoadingUserProfile && !isUserProfileError && currentUserProfile === null && (
+              <div css={{ padding: `0 ${euiTheme.size.l} ${euiTheme.size.l}` }}>
+                <KbnWarningCallout
+                  announceOnMount
+                  title={ESCALATION_ERRORS.userProfileUnavailable}
+                />
+              </div>
+            )}
+
+            {!isLoadingUserProfile && !isUserProfileError && !!currentUserProfile && (
+              <CreateEscalationForm
+                investigationTitle={investigation.title}
+                suggestedAssignees={suggestedAssignees}
+                isSearchingAssignees={isSearchingAssignees}
+                currentUser={currentUserProfile}
+                currentUserName={getUserDisplayName(currentUserProfile.user)}
+                isSubmitting={createEscalation.isLoading}
+                onSearchAssignees={setAssigneeSearch}
+                onSubmit={({ title, visibility, assigneeUids }) =>
+                  createEscalation.mutate(
+                    {
+                      linked_investigation_id: conversationId,
+                      title,
+                      visibility,
+                      // For private escalations, assigneeUids already includes the creator uid.
+                      // For public escalations, add the creator alone as the sole assignee.
+                      assignees:
+                        visibility === 'private'
+                          ? assigneeUids
+                          : [currentUserProfile.uid].filter(
+                              (uid): uid is string => typeof uid === 'string' && uid.length > 0
+                            ),
+                    },
+                    {
+                      onSuccess: (escalation) => {
+                        notifications?.toasts.addSuccess({
+                          title: ESCALATION_SUCCESS.createTitle,
+                          actionProps: { primary: makeViewEscalationPrimary(escalation.id) },
+                        });
+                        onClose();
+                      },
+                      onError: (err) =>
+                        notifications?.toasts.addDanger({
+                          title: ESCALATION_ERRORS.createFailed,
+                          text: apiErrorText(err),
+                        }),
+                    }
+                  )
                 }
-              )
-            }
-            onCancel={onClose}
-          />
+                onCancel={onClose}
+              />
+            )}
+          </>
         ) : null}
 
         {mode === 'addToExisting' ? (

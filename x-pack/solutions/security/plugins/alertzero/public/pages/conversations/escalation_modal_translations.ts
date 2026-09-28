@@ -134,4 +134,13 @@ export const ESCALATION_ERRORS = Object.freeze({
   addToFailed: i18n.translate('xpack.alertzero.escalation.addToFailed', {
     defaultMessage: 'Failed to add to the escalation. Try again.',
   }),
+  userProfileLoadFailed: i18n.translate('xpack.alertzero.escalation.userProfileLoadFailed', {
+    defaultMessage: 'Failed to load your profile. Try again.',
+  }),
+  userProfileUnavailable: i18n.translate('xpack.alertzero.escalation.userProfileUnavailable', {
+    defaultMessage: 'Your user profile is unavailable. Private escalations cannot be created.',
+  }),
+  retryButton: i18n.translate('xpack.alertzero.escalation.retryButton', {
+    defaultMessage: 'Retry',
+  }),
 });
