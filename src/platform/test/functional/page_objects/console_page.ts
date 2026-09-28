@@ -38,7 +38,9 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async clearEditorText() {
-    await this.monacoEditor.clearCodeEditorValue('consoleMonacoEditor');
+    const textArea = await this.getTextArea();
+    await textArea.clickMouseButton();
+    await textArea.clearValueWithKeyboard();
   }
 
   public async focusInputEditor() {
@@ -80,17 +82,8 @@ export class ConsolePageObject extends FtrService {
 
   public async enterText(text: string) {
     if (!text) return;
-    await this.monacoEditor.appendToCodeEditor('consoleMonacoEditor', text);
-    const trimmed = text.trimStart();
-    const isComment =
-      trimmed.startsWith('#') || trimmed.startsWith('//') || trimmed.startsWith('/*');
-    if (!text.includes('\n') && !isComment) {
-      // Single-line non-comment text: the user is typing within a line and may expect
-      // autocomplete to evaluate. Multi-line text and comments are always setup/context —
-      // no completion needed. For comments, triggerSuggest would bypass Monaco's
-      // language-aware suppression and incorrectly show the widget inside comment lines.
-      await this.monacoEditor.triggerSuggest('consoleMonacoEditor');
-    }
+    const textArea = await this.getTextArea();
+    await textArea.type(text);
   }
 
   /**
