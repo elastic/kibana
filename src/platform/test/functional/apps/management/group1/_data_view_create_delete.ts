@@ -103,10 +103,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       /**
-       * Migration recommendation: MIGRATE TO JEST. Timestamp validity after changing the title
-       * is form state derived from mocked field-capability results; extend
-       * src/platform/plugins/shared/data_view_editor/public/components/form_fields/
-       * timestamp_field.test.ts with the replacement-source case rather than using a browser.
+       * Migration recommendation: MIGRATE TO JEST. This must exercise the editor's debounced
+       * title → dataViewEditorService.setIndexPattern() → timestamp-options path, not the
+       * timestamp validator with fixed options. Add data_view_editor_flyout_content.test.tsx beside
+       * the editor component and mock source responses for `log*` then `kibana*`.
        */
       it('correctly validates timestamp after index pattern changes', async function () {
         await PageObjects.settings.clickKibanaIndexPatterns();
