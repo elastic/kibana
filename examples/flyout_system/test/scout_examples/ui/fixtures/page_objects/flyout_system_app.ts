@@ -171,6 +171,20 @@ export class FlyoutSystemApp {
     return this.flyout(form, session).locator(subj('infoBlocks'));
   }
 
+  /** The stack of `Body.Callout` parts, rendered in the body's banner. */
+  bodyBanner(form: FlyoutForm, session: string): Locator {
+    return this.flyout(form, session).locator(subj('flyoutBodyBanner'));
+  }
+
+  /** Both widgets render the same callouts: `Disabled` (warning) and `Failures` (danger, with a Retry action). */
+  bodyCallout(form: FlyoutForm, session: string, name: 'Disabled' | 'Failures'): Locator {
+    return this.bodyBanner(form, session).locator(subj(`flyoutBodyCallout${name}`));
+  }
+
+  bodyCalloutRetry(form: FlyoutForm, session: string): Locator {
+    return this.bodyBanner(form, session).locator(subj('flyoutBodyCalloutRetry'));
+  }
+
   scrollContainer(form: FlyoutForm, session: string): Locator {
     return this.flyout(form, session).locator(subj('euiFlyoutBodyOverflow'));
   }

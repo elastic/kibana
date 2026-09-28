@@ -187,6 +187,48 @@
       }
     },
     {
+      "id": "cde78af71dd2e30-cb2029c9c4eebac",
+      "title": "[NON-MKI] Workflow service accounts: permission boundaries retains read-only permissions after approval by an administrator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_permissions.spec.ts",
+        "line": 49,
+        "column": 7
+      }
+    },
+    {
+      "id": "cde78af71dd2e30-fb141954b208133",
+      "title": "[NON-MKI] Workflow service accounts: permission boundaries scheduled execution cannot use the scheduler privileges to write",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_permissions.spec.ts",
+        "line": 67,
+        "column": 22
+      }
+    },
+    {
+      "id": "cde78af71dd2e30-f341ac55f74a83f",
+      "title": "[NON-MKI] Workflow service accounts: permission boundaries a read-only child cannot inherit its parent write permissions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_permissions.spec.ts",
+        "line": 102,
+        "column": 23
+      }
+    },
+    {
       "id": "de4adc7eaf2d461-8a2ee97083faa6a",
       "title": "[NON-MKI] Workflow service accounts: resume resumes with the original service account",
       "expectedStatus": "passed",

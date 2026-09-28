@@ -1443,6 +1443,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/conte
 x-pack/solutions/security/packages/kbn-evals-suite-threat-intel-enrichment @elastic/security-investigations
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
 x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot @elastic/security-generative-ai
+x-pack/solutions/security/packages/kbn-security-evals-matrix @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-security-evals-workflow-traces @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engineering
@@ -2635,6 +2636,7 @@ src/platform/packages/shared/kbn-connector-specs/src/auth_types/kubernetes_* @el
 
 
 # Connector Specs
+src/platform/packages/shared/kbn-connector-specs/src/specs_allowed_events.ts @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts
 src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts
 src/platform/packages/shared/kbn-connector-specs/src/lib/clients/** @elastic/workchat-eng
@@ -3403,6 +3405,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/rule_management @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/docs/rfcs/detection_response @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_engineering @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/rule_management @elastic/security-detection-engineering
 /x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management @elastic/security-detection-engineering
