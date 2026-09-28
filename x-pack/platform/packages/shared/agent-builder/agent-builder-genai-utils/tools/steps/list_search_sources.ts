@@ -66,7 +66,7 @@ export interface ListSourcesResponse {
  * (e.g. `*`, `emp*`, `a,b-*`, `logs-*,-logs-old`), mirroring how `_resolve/index`
  * honors exclusions for indices, aliases and data streams.
  */
-const matchesPattern = (name: string, pattern: string): boolean => {
+const matchesSearchSourcePattern = (name: string, pattern: string): boolean => {
   const toRegExp = (glob: string) =>
     new RegExp(`^${glob.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*')}$`);
 
@@ -118,7 +118,7 @@ export const listSearchSources = async ({
   const datasetSources = includeDatasets
     ? (await listDatasets({ esClient }))
         .filter((dataset) => isVisibleSearchSource(dataset.name))
-        .filter((dataset) => matchesPattern(dataset.name, pattern))
+        .filter((dataset) => matchesSearchSourcePattern(dataset.name, pattern))
         .map<DatasetSearchSource>((dataset) => {
           return {
             type: EsResourceType.dataset,
@@ -132,7 +132,7 @@ export const listSearchSources = async ({
   const viewSources = includeViews
     ? (await listViews({ esClient }))
         .filter((view) => isVisibleSearchSource(view.name))
-        .filter((view) => matchesPattern(view.name, pattern))
+        .filter((view) => matchesSearchSourcePattern(view.name, pattern))
         .map<ViewSearchSource>((view) => {
           return {
             type: EsResourceType.view,

@@ -512,6 +512,102 @@ describe('getIndexFields', () => {
     expect(esClient.fieldCaps).not.toHaveBeenCalled();
   });
 
+  it('treats a wildcard that matches one view as an index pattern', async () => {
+    const resolveIndex = jest.fn().mockResolvedValue({
+      indices: [],
+      aliases: [],
+      data_streams: [],
+    });
+    const query = jest.fn();
+    const esClient = {
+      ...createEsClient({ resolveIndex }),
+      esql: {
+        getView: jest.fn().mockResolvedValue({
+          views: [{ name: 'logs-parsed', query: 'FROM logs-* | KEEP status' }],
+        }),
+        query,
+      },
+    } as unknown as ElasticsearchClient;
+
+    const result = await getIndexFields({
+      indices: ['logs-*'],
+      includeViews: true,
+      esClient,
+    });
+
+    expect(result['logs-*'].type).toBe('indexPattern');
+    expect(query).not.toHaveBeenCalled();
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('logs-*'));
+  });
+
+  it('does not list views when every local name resolves to an index', async () => {
+    const resolveIndex = jest.fn().mockImplementation(({ name }: { name: string[] }) =>
+      Promise.resolve({
+        indices: [{ name: name[0] }],
+        aliases: [],
+        data_streams: [],
+      })
+    );
+    const getView = jest.fn();
+    const esClient = {
+      ...createEsClient({ resolveIndex }),
+      esql: { getView },
+    } as unknown as ElasticsearchClient;
+    getIndexMappingsMock.mockResolvedValue({
+      'logs-a': { mappings: { properties: { message: { type: 'text' } } } },
+      'logs-b': { mappings: { properties: { message: { type: 'text' } } } },
+    });
+
+    const result = await getIndexFields({
+      indices: ['logs-a', 'logs-b'],
+      includeViews: true,
+      esClient,
+    });
+
+    expect(getView).not.toHaveBeenCalled();
+    expect(result['logs-a'].type).toBe('index');
+    expect(result['logs-b'].type).toBe('index');
+  });
+
+  it('lists views once for names that do not resolve to an index', async () => {
+    const resolveIndex = jest.fn().mockRejectedValue(
+      new esErrors.ResponseError({
+        statusCode: 404,
+        body: { error: { type: 'index_not_found_exception' } },
+        headers: {},
+        meta: {} as any,
+        warnings: [],
+      } as any)
+    );
+    const getView = jest.fn().mockResolvedValue({
+      views: [
+        { name: 'logs-proxy-parsed', query: 'FROM logs-*' },
+        { name: 'errors-only', query: 'FROM logs-* | WHERE status >= 400' },
+      ],
+    });
+    const esClient = {
+      ...createEsClient({ resolveIndex }),
+      esql: {
+        getView,
+        query: jest.fn().mockResolvedValue({
+          columns: [{ name: 'status', type: 'integer' }],
+          values: [],
+        }),
+      },
+    } as unknown as ElasticsearchClient;
+
+    const result = await getIndexFields({
+      indices: ['logs-proxy-parsed', 'errors-only', 'still-missing'],
+      includeViews: true,
+      esClient,
+    });
+
+    expect(getView).toHaveBeenCalledTimes(1);
+    expect(result['logs-proxy-parsed'].type).toBe('view');
+    expect(result['errors-only'].type).toBe('view');
+    expect(result['still-missing'].type).toBe('indexPattern');
+  });
+
   it('treats a 404 from resolveIndex as indexPattern (empty fields)', async () => {
     const notFound = new esErrors.ResponseError({
       statusCode: 404,

@@ -8,6 +8,7 @@
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import pLimit from 'p-limit';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { isVisibleSearchSource } from '@kbn/agent-builder-common';
 import type { MappingField } from './mappings';
 import { flattenMapping, getIndexMappings } from './mappings';
 import type { GetIndexMappingsResult } from './mappings/get_index_mappings';
@@ -18,7 +19,7 @@ import {
 } from './field_caps';
 import { batchByUrlLength } from './batch_by_url_length';
 import { listSearchSources } from '../steps/list_search_sources';
-import { getViewFields } from './views';
+import { getViewFields, listViews } from './views';
 
 /**
  * Returns true if the resource name targets a remote cluster (contains ':'),
@@ -131,25 +132,24 @@ type LocalResolution =
   | { input: string; kind: 'dataStream'; concreteName: string }
   | { input: string; kind: 'alias'; concreteName: string }
   | { input: string; kind: 'view'; concreteName: string }
-  | { input: string; kind: 'indexPattern' };
+  | { input: string; kind: 'indexPattern' }
+  | { input: string; kind: 'unresolved' };
 
 /**
  * Classify a single local input by resolving it via `listSearchSources`
  * (which wraps `_resolve/index` + 404 handling). Only inputs that resolve
  * to exactly one concrete resource (index or data stream) are routed to a
- * mapping API; aliases get `_field_caps` for the unified field list. When
- * `includeViews` is set and the name matches a single ES|QL view and no
- * index, the view's output columns are used. Everything else (wildcards,
- * missing names) goes through `_field_caps` as a pattern.
+ * mapping API; aliases get `_field_caps` for the unified field list. A name
+ * that matches nothing is `unresolved` so the caller can check ES|QL views
+ * once for the whole batch. Everything else (wildcards, multiple targets)
+ * goes through `_field_caps` as a pattern.
  */
 const resolveLocalTarget = async ({
   input,
   esClient,
-  includeViews = false,
 }: {
   input: string;
   esClient: ElasticsearchClient;
-  includeViews?: boolean;
 }): Promise<LocalResolution> => {
   const res = await listSearchSources({
     pattern: input,
@@ -157,7 +157,6 @@ const resolveLocalTarget = async ({
     includeHidden: true,
     excludeIndicesRepresentedAsAlias: true,
     excludeIndicesRepresentedAsDatastream: true,
-    includeViews,
   });
 
   const total = res.indices.length + res.data_streams.length + res.aliases.length;
@@ -173,8 +172,8 @@ const resolveLocalTarget = async ({
     }
   }
 
-  if (includeViews && total === 0 && res.views.length === 1) {
-    return { input, kind: 'view', concreteName: res.views[0].name };
+  if (total === 0) {
+    return { input, kind: 'unresolved' };
   }
 
   return { input, kind: 'indexPattern' };
@@ -208,10 +207,17 @@ export const getIndexFields = async ({
   if (local.length > 0) {
     const resolveLimit = pLimit(5);
     const resolutions = await Promise.all(
-      local.map((input) =>
-        resolveLimit(() => resolveLocalTarget({ input, esClient, includeViews }))
-      )
+      local.map((input) => resolveLimit(() => resolveLocalTarget({ input, esClient })))
     );
+
+    // Views are invisible to `_resolve/index`. Fetch the cluster view list once, and only
+    // when at least one name matched nothing, instead of once per resolved index.
+    const viewNames =
+      includeViews && resolutions.some((resolution) => resolution.kind === 'unresolved')
+        ? (await listViews({ esClient }))
+            .map((view) => view.name)
+            .filter((name) => isVisibleSearchSource(name))
+        : [];
 
     // All buckets share the same `{input, concrete}` shape. For `indexPattern`
     // entries we don't have a resolved concrete name, so we use `input` (the
@@ -224,6 +230,17 @@ export const getIndexFields = async ({
       view: [],
     };
     for (const r of resolutions) {
+      if (r.kind === 'unresolved') {
+        // Only an exact view name is a view. A pattern such as `logs-*` that happens to
+        // match one view must stay an index pattern.
+        const matchedView = viewNames.find((name) => name === r.input);
+        if (matchedView) {
+          buckets.view.push({ input: r.input, concrete: matchedView });
+        } else {
+          buckets.indexPattern.push({ input: r.input, concrete: r.input });
+        }
+        continue;
+      }
       const concrete = r.kind === 'indexPattern' ? r.input : r.concreteName;
       buckets[r.kind].push({ input: r.input, concrete });
     }

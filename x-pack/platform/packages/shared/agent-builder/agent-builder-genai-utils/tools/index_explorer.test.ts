@@ -460,4 +460,48 @@ describe('gatherResourceDescriptors', () => {
       },
     ]);
   });
+
+  it('keeps a broken view with empty fields and still returns a valid index', async () => {
+    listSearchSourcesMock.mockResolvedValue({
+      datasets: [],
+      indices: [{ type: EsResourceType.index, name: 'logs-hot' }],
+      aliases: [],
+      data_streams: [],
+      views: [
+        {
+          type: EsResourceType.view,
+          name: 'logs-proxy-parsed',
+          query: 'FROM missing-index | KEEP status',
+        },
+      ],
+    });
+    getIndexFieldsMock.mockResolvedValue({
+      'logs-hot': {
+        fields: [{ path: 'message', type: 'text', meta: {} }],
+      },
+    });
+    esClient.esql.query.mockRejectedValue(new Error('Unknown index [missing-index]'));
+
+    const result = await gatherResourceDescriptors({
+      indexPattern: '*',
+      includeViews: true,
+      esClient,
+    });
+
+    expect(result).toEqual([
+      {
+        type: EsResourceType.index,
+        name: 'logs-hot',
+        description: undefined,
+        fields: [{ path: 'message', type: 'text' }],
+      },
+      {
+        type: EsResourceType.view,
+        name: 'logs-proxy-parsed',
+        description:
+          'ES|QL view. Query with "FROM logs-proxy-parsed". Defined as: FROM missing-index | KEEP status',
+        fields: [],
+      },
+    ]);
+  });
 });

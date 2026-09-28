@@ -186,10 +186,12 @@ const createViewSummaries = async ({
 }): Promise<ResourceDescriptor[]> => {
   return Promise.all(
     views.map(async ({ name, query, description }) => {
-      const fields = await getViewFields({ name, esClient });
       const definition = `ES|QL view. Query with "FROM ${name}". Defined as: ${summarizeViewQuery(
         query
       )}`;
+      // A view whose stored query no longer runs (for example its backing index was removed)
+      // must not fail selection of the other sources.
+      const fields = await getViewFields({ name, esClient }).catch(() => []);
       return {
         type: EsResourceType.view,
         name,
