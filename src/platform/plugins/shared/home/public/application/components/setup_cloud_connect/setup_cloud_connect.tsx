@@ -46,8 +46,8 @@ export const SetupCloudConnect: FC<Props> = ({ application }) => {
   );
 
   return (
-    <EuiPanel paddingSize="l">
-      <EuiFlexGroup alignItems="center" gutterSize="xl" responsive={false}>
+    <EuiPanel paddingSize="l" css={cardPanel}>
+      <EuiFlexGroup alignItems="center" gutterSize="xl" responsive={false} css={cardRow}>
         <EuiFlexItem grow={false} css={illustrationFrame}>
           <EuiIllustration
             type={api}
@@ -84,6 +84,21 @@ export const SetupCloudConnect: FC<Props> = ({ application }) => {
     </EuiPanel>
   );
 };
+
+const cardPanel = css({
+  containerType: 'inline-size',
+});
+
+// Stack only when the card cannot fit the 128px illustration beside the text.
+const cardRow = css({
+  '@container (max-width: 20rem)': {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    '& > .euiFlexItem:last-child': {
+      alignSelf: 'stretch',
+    },
+  },
+});
 
 const illustrationFrame = css({
   inlineSize: 128,
