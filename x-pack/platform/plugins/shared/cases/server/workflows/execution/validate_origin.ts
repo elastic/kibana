@@ -95,19 +95,23 @@ export const parseSelectedAlertPairs = (inputs: Record<string, unknown>): Docume
 };
 
 /**
- * Reads the (id, index) pairs from `inputs.event.documents`.
+ * Reads the (id, index) pairs from `inputs.event.documents` and `inputs.event.documentIds`.
  *
- * Unlike alerts, documents are not re-fetched by `preprocessAlertInputs` (which early-returns for
- * non-alert triggers) — they are forwarded verbatim to the workflow engine. This check therefore
- * prevents a caller from referencing documents outside the case. Content of the forwarded
- * documents remains client-supplied; activity enrichment is derived server-side from the case.
+ * Pre-expanded `documents` are forwarded verbatim to the workflow engine, while `documentIds` are
+ * expanded by the workflows server, which keeps only hits that exactly match a requested pair.
+ * Either way, these pairs are the full set of documents the workflow receives, so checking them
+ * against the case prevents a caller from referencing documents outside it. Content of forwarded
+ * `documents` remains client-supplied; activity enrichment is derived server-side from the case.
  *
  * Malformed entries are rejected, never skipped. A nullish or missing value is treated as
  * "no document inputs".
  */
 export const parseSelectedDocumentPairs = (inputs: Record<string, unknown>): DocumentPair[] => {
-  const { documents } = getRecord(inputs.event) ?? {};
-  return parseIndexedPairs(documents, 'inputs.event.documents', MAX_DOCUMENTS_PER_WORKFLOW_RUN);
+  const { documents, documentIds } = getRecord(inputs.event) ?? {};
+  return [
+    ...parseIndexedPairs(documents, 'inputs.event.documents', MAX_DOCUMENTS_PER_WORKFLOW_RUN),
+    ...parseIndexedPairs(documentIds, 'inputs.event.documentIds', MAX_DOCUMENTS_PER_WORKFLOW_RUN),
+  ];
 };
 
 const getDefaultTargets = ({
@@ -247,7 +251,7 @@ const resolveAttachmentOrigin = ({
  * selected documents, and at least one selection is required.
  *
  * Types that supply `validateTargets` take full responsibility for alignment and skip this check.
- * Note: a type whose workflow inputs use neither `alertIds` nor `documents` cannot pass the
+ * Note: a type whose workflow inputs use none of `alertIds`, `documents`, or `documentIds` cannot pass the
  * generic check and must provide its own `validateTargets` hook.
  */
 const validateDefaultTargetAlignment = ({
@@ -362,8 +366,8 @@ export const validateOrigin = ({
 
   // Step 3 — document-membership check: applied whenever documents appear in inputs,
   // regardless of origin type, using (id, index) pairs for precise matching.
-  // Unlike alerts, documents are forwarded verbatim (no server-side re-fetch), so this check
-  // is the only guard against a caller referencing documents outside the case.
+  // `selectedDocuments` covers both pre-expanded `documents` and `documentIds`, so this check is
+  // the only guard against a caller referencing documents outside the case.
   if (selectedDocuments.length > 0) {
     const attachedEventPairs = new Set([
       ...attachedEvents.map(({ id, index }) => `${id}|${index}`),
