@@ -36,7 +36,7 @@ This guide tells you where to start, where to go next, how to read each document
 
 ## 4. The performance document
 
-`value_lists_lookup_indices_performance.md` compares response times of the list and item endpoints on both storages. Read its method section first: it says what was measured, with which refresh policy, and the two operations that are compared differently on purpose (import, and delete by value). Then the tables. Then the section on what the comparison does not cover, which includes rule execution. The script behind it is `poc_performance_test.mjs`; run it alone, other scripts on the same Kibana distort it.
+`value_lists_lookup_indices_performance.md` compares response times of the list and item endpoints on both storages. It is a preliminary comparison on a single node development stack, made to catch an order of magnitude change; it does not replace a performance test on a real cluster. Read its method section first: it says what was measured, with which refresh policy, and the two operations that are compared differently on purpose (import, and delete by value). Then the tables. Then the section on what the comparison does not cover, which includes rule execution. The script behind it is `poc_performance_test.mjs`; run it alone, other scripts on the same Kibana distort it.
 
 ## 5. Reviewing the code
 
@@ -151,8 +151,8 @@ Rules created below use `review-events` as their index pattern and a query of `*
    10.10.0.5
    010.10.0.6
    ```
-   The list appears in the table. Click its name to open **List items**: the duplicate is one item, and `010.10.0.6` is absent, because import drops the lines the grammar rejects, as it does today.
-3. In **List items**, use **Add list item** to add `10.10.0.6`, then add `10.10.0.6` again: the total does not change. Add `::ffff:10.10.0.6`: the total does not change either, since it is another spelling of the same address. Edit an item inline to a new value: the item keeps its position in the table but its id changes, which you can see by reading it through the API with the old id and getting a 404. Delete an item. The table is sorted by **Updated at**, newest first, so the edited item is first; the columns are sortable, and the filter box takes KQL, for example `ip:10.10.0.6`. The same view also uploads a file, which appends its lines to the list.
+   The upload succeeds with no warning, on either storage. The list appears in the table. Click its name to open **List items**: the duplicate is one item, and `010.10.0.6` is absent. The import drops the lines the grammar rejects and reports nothing about them, exactly as today's import drops the lines the Elasticsearch mapper rejects; the two places that do report a rejected value are the single item create (400 with the reason) and the migration (409 with a count and a sample).
+3. In **List items**, use **Add list item** to add `10.10.0.6`, then add `10.10.0.6` again: the total does not change. Add `::ffff:10.10.0.6`: the total does not change either, since it is another spelling of the same address, but the value shown for that item becomes `::ffff:10.10.0.6`, because the stored spelling is the last one written. Edit an item inline to a new value: the item keeps its position in the table but its id changes, which you can see by reading it through the API with the old id and getting a 404. Delete an item. The table is sorted by **Updated at**, newest first, so the edited item is first, and the columns are sortable. The filter box has a known limitation on lookup lists, listed under Known limits: a filter on the type column, `ip:10.10.0.6`, which is what the box suggests, matches nothing; `value:10.10.0.6` does. The same view also uploads a file, which appends its lines to the list.
 4. Read the list through Elasticsearch to see what the UI wrote:
    ```bash
    curl -s -u elastic:changeme 'localhost:9200/.value-list-v2-default-<list id>/_search?pretty&size=10'
@@ -224,6 +224,7 @@ These are known and out of scope for the POC.
 - A `boolean` lookup list cannot page past its first `_find` page with a cursor: it holds at most two values, so no second page exists.
 - An indicator match rule whose threat index is a wildcard such as `.items-*` and whose threat query filters on `@timestamp` reports a partial failure once any shared lookup list exists in the space, because the pattern resolves to the lists' aliases and the timestamp warning counts every resolved lookup index. The proposal's "Indicator match threat index" section describes the replacement check; it is not implemented yet.
 - The same check does not catch a `list_id` clause kept on a rule whose threat index was moved to a lookup index; such a rule runs with no alerts and no warning.
+- The KQL filter of `_find`, and therefore the filter box of the **List items** view, is applied as written against the lookup document. On the current stream the value column is named after the list type, so the view suggests `ip:*` and users write `ip:10.0.0.6`; on a lookup list the field is `value` (`src_range` on a range list), so that filter matches nothing. The filter is not rewritten on purpose: the query a user types is the query that runs. The view will have to suggest and validate the right field for a lookup list.
 
 ## 9. What a review comment should contain
 

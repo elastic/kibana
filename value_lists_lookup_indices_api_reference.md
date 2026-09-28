@@ -171,7 +171,7 @@ The public list and item endpoints keep their paths, bodies, and response shapes
 | `GET /api/lists/items?id=` | Located the same way. 404 when no lookup index holds the id. |
 | `DELETE /api/lists/items?id=` | Removes the document the id names. On a range list that is the authored range. |
 | `DELETE /api/lists/items?list_id=&value=` | On an equality list, one document. On a range list, every authored range that contains the value, which is what the current implementation attempts. Today that request answers 400 whenever a range matches, because the current code rebuilds its delete query from the range strings it found. A range string such as `10.0.0.0/24` is rejected by Elasticsearch on both storages and the error is returned as is. 404 when nothing matches. |
-| `GET /api/lists/items/_find` | Pages with the same cursor as today. `sort_field` accepts `value` and the four stamps. |
+| `GET /api/lists/items/_find` | Pages with the same cursor as today. `sort_field` accepts `value` and the four stamps. A KQL `filter` is applied as written against the lookup document's fields: `value` (or `src_range` on a range list) and the four stamps. The type column name of the current stream (`ip: 10.0.0.1`, which the items table suggests) matches nothing on a lookup list. |
 | `POST /api/lists/items/_import` | Lines the grammar rejects are dropped and the rest are written, as today. Without `list_id`, a lookup list named after the file is created. 400 when a legacy list of that name exists. |
 
 ## Storage reference
@@ -965,23 +965,102 @@ The task id did not change: it is derived from the concrete index, which the res
 
 ## Error catalogue
 
-Errors reach the client as `{ "message", "statusCode" }`, with `attributes` where noted above. Messages are quoted as the code produces them; `<…>` marks a value filled in at run time.
+Errors reach the client as `{ "message", "statusCode" }`, with `attributes` where noted. Messages are quoted as the code produces them; `<…>` marks a value filled in at run time. The catalogue is grouped by endpoint; the last two groups list the errors any lookup operation can raise and the messages the task writes to the log.
 
-### 400
+### `POST /internal/lists/_migrate`
 
-| Message | Raised by | Meaning |
+| Status | Message | Meaning |
 |---|---|---|
-| `list item invalid: <reason>` | Item create, update, patch | The value is outside the accepted grammar of the list type. The reasons are listed below. |
-| `list item invalid: "<value>" is not a valid <type> value` | Item create, update, patch, import target check | A range value that does not parse: not `start-end`, not a CIDR block, a start after its end, a date outside the supported range, or a mixed IPv4 and IPv6 range. |
-| `list item invalid: <n> value(s) are not accepted for type <type>: …` | `_migrate` | A legacy value the grammar rejects appeared in the copy after the value scan passed. Rerun the migration. |
-| `list id "<id>" has no characters usable in an index name` | List create, `_migrate` | The id normalizes to nothing. |
-| `Lookup indices are not enabled (xpack.lists.enableLookupIndices)` | `_migrate` | The feature flag is off. |
-| `list "<id>" is a legacy data stream list. Migrate it before restricting it` | `_restrict` | |
-| `list "<id>" is not a lookup list` | `_unrestrict` | |
-| `list "<file name>" exists as a legacy list. Pass list_id to import into it` | Import without `list_id` | The file name matches a legacy list. |
-| The Elasticsearch message, for example `'10.0.0.0/24' is not an IP string literal.` | Delete by value on a range list | The value is a range string, which a range field cannot be queried by. Delete the item by its id instead. |
+| 400 | `Lookup indices are not enabled (xpack.lists.enableLookupIndices)` | The feature flag is off. |
+| 400 | `list id "<id>" has no characters usable in an index name` | The id normalizes to nothing. |
+| 400 | `list item invalid: <n> value(s) are not accepted for type <type>: …` | A legacy value the grammar rejects appeared in the copy after the value scan passed. Rerun the migration. |
+| 404 | `list "<id>" not found` | |
+| 409 | `Migration is blocked: <blockers> Pass force to migrate anyway, or dryRun to see the full report.` | A plain call blocked by the rule scan. `attributes.rejectedValues` is `null`, the value scan did not run. |
+| 409 | `Migration is blocked: <blockers> Pass force to migrate anyway.` | Blocked by rejected values, or by both checks on a dry run turned real. `attributes.rejectedValues` is `{ count, sample }`. |
+| 409 | `Migrated, but not restricted. <restrict message>` | With `restrict: true`. The list is a lookup list now and still shared. `attributes.migration` holds the migration result. |
+| 409 | `"<name>" already exists. The list id normalizes to a name another list or index uses; choose a different id` | The concrete index or alias name is taken by another list. |
+| 409 | `the storage descriptor of list "<id>" was not updated; retry the operation` | The container document changed under the write, or the list vanished. The new index was removed again; the list is still legacy. |
 
-Grammar reasons in `list item invalid: <reason>`:
+### `POST /internal/lists/_restrict`
+
+| Status | Message | Meaning |
+|---|---|---|
+| 400 | `list "<id>" is a legacy data stream list. Migrate it before restricting it` | |
+| 404 | `list "<id>" not found` | |
+| 409 | `Restricting is blocked: <blockers>. <remedy> Pass force to restrict anyway.` | The caller or a referencing rule's key cannot read the concrete index. The remedy names the roles to grant and asks for the rules to be saved, or `POST /api/alerting/rule/{id}/_update_api_key` to be called, so their keys refresh. The report is under `attributes`. |
+| 409 | `the storage descriptor of list "<id>" was not updated; retry the operation` | The container document changed under the write. The alias is still in place. |
+| 500 | `could not check alias "<alias>": <Elasticsearch message>` | A rerun on an already restricted list could not check for a leftover alias; carries the status Elasticsearch returned. |
+
+### `POST /internal/lists/_unrestrict`
+
+| Status | Message | Meaning |
+|---|---|---|
+| 400 | `list "<id>" is not a lookup list` | |
+| 403 | `list "<id>" is restricted to roles that can read "<index>", which this user cannot` | The caller cannot read the concrete index. Undoing a restriction is not open to every list writer. |
+| 404 | `list "<id>" not found` | |
+| 409 | `"<alias>" already exists and is not this list's alias` | Another index owns the alias name. |
+| 409 | `the storage descriptor of list "<id>" was not updated; retry the operation` | The container document changed under the write. The alias was added; the rerun records it. |
+
+### `POST /api/lists` (create)
+
+| Status | Message | Meaning |
+|---|---|---|
+| 400 | `list id "<id>" has no characters usable in an index name` | The id normalizes to nothing. |
+| 409 | `"<name>" already exists. The list id normalizes to a name another list or index uses; choose a different id` | The concrete index or alias name is taken: two ids that normalize alike, or the loser of two concurrent creates. |
+
+### `DELETE /api/lists?id=`
+
+| Status | Message | Meaning |
+|---|---|---|
+| 403 | `list "<id>" is restricted to roles that can read "<name>", which this user cannot` | The caller cannot read the list through its alias, or through its concrete index once restricted. Raised before exception references are stripped. |
+
+### `POST`, `PUT`, `PATCH /api/lists/items` (item writes)
+
+| Status | Message | Meaning |
+|---|---|---|
+| 400 | `list item invalid: <reason>` | On an equality list, the value is outside the accepted grammar of the list type. The reasons are listed under "Grammar reasons" below. |
+| 400 | `list item invalid: "<value>" is not a valid <type> value` | On a range list, the value does not parse: not `start-end`, not a CIDR block, a start after its end, a date outside the supported range, or a mixed IPv4 and IPv6 range. |
+| 404 | `list item id: "<id>" not found` | `PUT` and `PATCH`: no lookup index of the space holds the id, and the current implementation does not either. |
+
+### `GET /api/lists/items`
+
+| Status | Message | Meaning |
+|---|---|---|
+| 404 | `list item id: "<id>" does not exist` | By id: no lookup index of the space holds the id, and the current implementation does not either. |
+| 404 | `list_id: "<id>" item of <value> does not exist` | By value: no document for the value. |
+
+### `DELETE /api/lists/items?id=`
+
+| Status | Message | Meaning |
+|---|---|---|
+| 404 | `list item with id: "<id>" not found` | No lookup index of the space holds the id, and the current implementation does not either. |
+
+### `DELETE /api/lists/items?list_id=&value=`
+
+| Status | Message | Meaning |
+|---|---|---|
+| 400 | The Elasticsearch message, for example `'10.0.0.0/24' is not an IP string literal.` | On a range list, the value is a range string, which a range field cannot be queried by. Delete the item by its id instead. |
+| 404 | `list_id: "<id>" with <value> was not found` | No document, or on a range list no containing range, matches. |
+
+### `POST /api/lists/items/_import`
+
+| Status | Message | Meaning |
+|---|---|---|
+| 400 | `list "<file name>" exists as a legacy list. Pass list_id to import into it` | Without `list_id`, the file name matches a legacy list. |
+
+Lines the grammar rejects are dropped and are not reported; only a failure that is not about a line, such as a missing privilege, fails the import.
+
+### Errors any lookup operation can raise
+
+| Status | Message | Meaning |
+|---|---|---|
+| 403, 429, 503 | The Elasticsearch message | A bulk item failure is raised with the item's own status: no write privilege on the alias or concrete index, a rejected execution, an unavailable shard. |
+| 500 | `list "<id>" has a storage descriptor naming "<name>", which is not this list's index; the descriptor was not written by the lists plugin` | Every read of a list whose descriptor does not match the names recomputed from the space and the list id. A hand edited descriptor, never user input; the system user is not handed the name. |
+| 500 | `"<name>" is not a value list lookup index name`, `"<name>" is not a value list alias name` | Index create and delete, alias add and remove, mapping upgrade, task scheduling and task run refused a name this plugin did not build. Indicates a bug. |
+
+### Grammar reasons
+
+The `<reason>` in `list item invalid: <reason>`, by list type:
 
 | Reason | Types |
 |---|---|
@@ -995,46 +1074,6 @@ Grammar reasons in `list item invalid: <reason>`:
 | `"<value>" has an offset beyond 18:00` | `date`, `date_nanos` |
 | `"<value>" is not true or false` | `boolean` |
 | `the value is empty`, `the value contains a line break` | every type |
-
-### 403
-
-| Message | Raised by | Meaning |
-|---|---|---|
-| `list "<id>" is restricted to roles that can read "<name>", which this user cannot` | `_unrestrict`, `DELETE /api/lists` | The caller cannot read the list through its alias, or through its concrete index once restricted. The operations that undo a restriction are not open to every list writer. |
-| The Elasticsearch message | Item writes | The caller has no write privilege on the alias or concrete index. A bulk item failure is raised with the item's own status, so a 429 or 503 from Elasticsearch is passed through the same way. |
-
-### 404
-
-| Message | Raised by |
-|---|---|
-| `list "<id>" not found` | `_migrate`, `_restrict`, `_unrestrict` |
-| `list item id: "<id>" not found` | `PUT`, `PATCH /api/lists/items`, when no lookup index of the space holds the id and the current implementation does not either |
-| `list item with id: "<id>" not found` | `DELETE /api/lists/items?id=`, same condition |
-| `list item id: "<id>" does not exist` | `GET /api/lists/items?id=`, same condition |
-| `list_id: "<id>" item of <value> does not exist` | `GET /api/lists/items?list_id=&value=` |
-| `list_id: "<id>" with <value> was not found` | `DELETE /api/lists/items?list_id=&value=`, when no document, or no containing range, matches |
-
-### 409
-
-| Message | Raised by | Meaning |
-|---|---|---|
-| `"<name>" already exists. The list id normalizes to a name another list or index uses; choose a different id` | List create, `_migrate` | The concrete index or alias name is taken. Two ids that normalize alike, or the loser of two concurrent creates. |
-| `"<alias>" already exists and is not this list's alias` | `_unrestrict` | Another index owns the alias name. |
-| `the storage descriptor of list "<id>" was not updated; retry the operation` | `_migrate`, `_restrict`, `_unrestrict` | The container document changed under the write, or the list vanished. Nothing else was changed. |
-| `Migration is blocked: <blockers> Pass force to migrate anyway, or dryRun to see the full report.` | `_migrate`, plain call blocked by the rule scan | `attributes.rejectedValues` is `null`, the value scan did not run. |
-| `Migration is blocked: <blockers> Pass force to migrate anyway.` | `_migrate`, blocked by rejected values, or by both checks on a dry run turned real | `attributes.rejectedValues` is `{ count, sample }`. |
-| `Migrated, but not restricted. <restrict message>` | `_migrate` with `restrict: true` | The list is a lookup list now and still shared. `attributes.migration` holds the migration result. |
-| `Restricting is blocked: <blockers>. <remedy> Pass force to restrict anyway.` | `_restrict` | The caller or a referencing rule's key cannot read the concrete index. The remedy names the roles to grant and asks for the rules to be saved so their keys refresh. |
-
-### 500
-
-These indicate a bug or a hand edited descriptor, never user input. The system user is not handed the name.
-
-| Message | Raised by |
-|---|---|
-| `list "<id>" has a storage descriptor naming "<name>", which is not this list's index; the descriptor was not written by the lists plugin` | Every read of a list whose descriptor does not match the names recomputed from the space and the list id |
-| `"<name>" is not a value list lookup index name`, `"<name>" is not a value list alias name` | Index create and delete, alias add and remove, mapping upgrade, task scheduling and task run |
-| `could not check alias "<alias>": <Elasticsearch message>` | `_restrict` rerun on an already restricted list, with the status Elasticsearch returned |
 
 ### Task failures
 

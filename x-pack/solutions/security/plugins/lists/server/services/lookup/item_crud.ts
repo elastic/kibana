@@ -203,7 +203,7 @@ const restoreSearchAfter = (searchAfter: string[] | undefined): estypes.SortResu
  * the cursor records the sort values at the end of the last page served, and a request
  * for a later page walks forward from that position in hops. Sorts on `value` where
  * the type allows it, always with `_seq_no` as tie breaker, which is complete on the
- * single shard. The KQL `filter` is applied as on the shared stream.
+ * single shard. The KQL `filter` is applied as written, against the lookup document's own fields (`value`, or `src_range` on a range list, and the stamps); the type column name of the current `.items-<space>` stream matches nothing here.
  */
 export const findLookupItems = async ({
   currentIndexPosition,

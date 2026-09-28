@@ -1,6 +1,9 @@
 # Value lists in lookup indices: response time comparison
 
-This document reports the response times of the value list endpoints on the two storages, legacy (the shared `.items-<space>` data stream) and lookup (one lookup index per list), measured by `poc_performance_test.mjs` against a single node development stack on one machine. Absolute numbers depend on that machine and are not a capacity statement. The ratios between the two storages, measured on the same operations with the same parameters in the same run, are the result.
+This is a preliminary comparison, run locally, and it answers one question: does moving a list from the current `.items-<space>` stream to its own lookup index change the response time of any operation by an order of magnitude, in either direction? It does not size the feature for production. A proper performance test on a real cluster, with several data nodes, production sized lists, concurrent rule execution, and the cluster's own indexing load, is still needed before the feature ships, and the numbers below are not a substitute for it.
+
+The measurements come from `poc_performance_test.mjs` against a single node development stack on one machine: one Elasticsearch node, one Kibana, no other load. Absolute numbers depend on that machine and are not a capacity statement. The ratios between the two storages, measured on the same operations with the same parameters in the same run, are the result, and they are only meaningful at the level of "same", "a few times", or "an order of magnitude".
+
 
 ## Method
 
@@ -58,6 +61,16 @@ Run of 2026-09-23, Elasticsearch and Kibana 9.6.0 snapshots, ratio is lookup ove
 - **Range lists cost more under concurrent writes, and their coalesced set lags a burst by seconds.** A customer feeding a range list from many concurrent writers should batch them into imports, which do not contend and become visible sooner than on the legacy storage (960 ms against 1.34 s for 10,000 ranges).
 - **Imports become visible at the same time or sooner.** The lookup import writes synchronously and returns when the items are searchable; the legacy import returns early and finishes in the background, so a client that polls for visibility waits the same or longer on the legacy storage.
 - **Nothing here measures rule execution.** The proposal's execution table describes the inline and post-filter paths; their cost was not part of this comparison.
+
+## What a test on a real cluster still has to cover
+
+The comparison above cannot answer these, and the feature should not ship on its numbers alone:
+
+- Several data nodes, so that replicas exist, `auto_expand_replicas` takes effect, and the shard budget of a cluster with hundreds of lists is measured rather than computed.
+- Lists at production size. Telemetry shows lists of millions of items and one of about 154 million; the largest list here holds 10,000.
+- Rule execution. Nothing here measures a rule reading a list, on either path, or the indicator match executor reading a lookup index as its threat index, or many rules reading many lists in the same minute.
+- The coalescing task under sustained writes to large range lists, and its effect on the request path of other lists on the same node.
+- The cluster's own load: ingest, other searches, and other Kibana background tasks competing with the task and the request path.
 
 ## Reproducing
 
