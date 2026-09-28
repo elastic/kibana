@@ -12,6 +12,7 @@ import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import { ReadOperations, WriteOperations } from '@kbn/alerting-plugin/server/authorization';
 import { RulesNotFoundError } from '@kbn/alerting-plugin/server/rules_client/lib/rules_not_found_error';
 import { RulesNotVisibleError } from '@kbn/alerting-plugin/server/rules_client/lib/rules_not_visible_error';
+import { RuleChangeTrackingDisabledError } from '@kbn/alerting-plugin/server/rules_client/lib/change_tracking/errors';
 
 module.exports = {
   parseDuration,
@@ -19,4 +20,5 @@ module.exports = {
   WriteOperations,
   RulesNotFoundError,
   RulesNotVisibleError,
+  RuleChangeTrackingDisabledError,
 };
