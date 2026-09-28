@@ -92,6 +92,7 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/security-engineering-productivity',
     'elastic/security-entity-analytics',
     'elastic/security-generative-ai',
+    'elastic/security-investigations',
     'elastic/security-pds-deployment',
     'elastic/security-service-integrations',
     'elastic/security-solution',
