@@ -153,6 +153,39 @@ describe('Slack inbound events', () => {
     });
   });
 
+  it('uses the deleted message id when a message is deleted', async () => {
+    const result = expectEmit(
+      await events.handleEvents(
+        createContext(
+          callback({
+            type: 'message',
+            subtype: 'message_deleted',
+            channel: 'C123',
+            ts: '1358878755.000001',
+            deleted_ts: '1358878749.000002',
+            previous_message: {
+              user: 'U123',
+              text: 'hello',
+              ts: '1358878749.000002',
+            },
+          })
+        )
+      )
+    );
+
+    expect(result.events[0]).toMatchObject({
+      eventId: SLACK_MESSAGE_EVENT_ID,
+      payload: {
+        workspace: 'T123',
+        channel: 'C123',
+        messageId: '1358878749.000002',
+        sender: 'U123',
+        text: 'hello',
+        subtype: 'message_deleted',
+      },
+    });
+  });
+
   it('emits an app mention', async () => {
     const result = expectEmit(
       await events.handleEvents(
@@ -199,10 +232,56 @@ describe('Slack inbound events', () => {
     expect(result.events[0]?.payload).toEqual({
       channel: 'C123',
       messageId: '1360782400.498405',
+      itemType: 'message',
       user: 'U123',
       reaction: 'thumbsup',
     });
     expect(result.events[0]?.eventId).toBe(SLACK_REACTION_ADDED_EVENT_ID);
+  });
+
+  it('emits a reaction against a file and a file comment', async () => {
+    const fileResult = expectEmit(
+      await events.handleEvents(
+        createContext(
+          callback({
+            type: 'reaction_added',
+            user: 'U123',
+            reaction: 'thumbsup',
+            item: { type: 'file', file: 'F123' },
+          })
+        )
+      )
+    );
+    const commentResult = expectEmit(
+      await events.handleEvents(
+        createContext(
+          callback({
+            type: 'reaction_added',
+            user: 'U123',
+            reaction: 'thumbsup',
+            item: { type: 'file_comment', file: 'F123', file_comment: 'Fc123' },
+          })
+        )
+      )
+    );
+
+    expect(fileResult.events[0]?.payload).toEqual({
+      fileId: 'F123',
+      itemType: 'file',
+      user: 'U123',
+      reaction: 'thumbsup',
+    });
+    expect(commentResult.events[0]?.payload).toEqual({
+      fileId: 'F123',
+      fileCommentId: 'Fc123',
+      itemType: 'file_comment',
+      user: 'U123',
+      reaction: 'thumbsup',
+    });
+    expect(fileResult.events[0]?.eventId).toBe(SLACK_REACTION_ADDED_EVENT_ID);
+    expect(commentResult.events[0]?.eventId).toBe(SLACK_REACTION_ADDED_EVENT_ID);
+    expect(validateEmittedEvents(events.definitions, fileResult.events)).toEqual({ ok: true });
+    expect(validateEmittedEvents(events.definitions, commentResult.events)).toEqual({ ok: true });
   });
 
   it('emits a shared file and omits channel when Slack does not send one', async () => {

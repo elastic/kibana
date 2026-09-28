@@ -72,6 +72,14 @@ const SlackAppMentionEventSchema = z.object({
 const SlackReactionAddedEventSchema = z.object({
   channel: optionalSlackId('Channel of the message that received the reaction.'),
   messageId: optionalSlackId('Timestamp of the message that received the reaction.'),
+  fileId: optionalSlackId('Id of the file that received the reaction.'),
+  fileCommentId: optionalSlackId('Id of the file comment that received the reaction.'),
+  itemType: z
+    .string()
+    .min(1)
+    .max(SLACK_EVENT_NAME_MAX)
+    .optional()
+    .describe('Slack item type, such as message, file, or file_comment.'),
   user: slackId('User id of the person who added the reaction.'),
   reaction: z.string().min(1).max(SLACK_EVENT_NAME_MAX).describe('Reaction name, without colons.'),
 });
@@ -177,17 +185,25 @@ const parseMessage = (
   workspace: string | undefined
 ): ParsedSlackEvent | undefined => {
   const nested = nestedRecord(event, 'message');
+  const previous = nestedRecord(event, 'previous_message');
   const subtype = readId(event.subtype);
-  const preferNestedMessageId = subtype === 'message_changed' || subtype === 'message_deleted';
   const nestedMessageId = nested ? readId(nested.ts) : undefined;
-  const messageId = preferNestedMessageId
-    ? nestedMessageId ?? readId(event.ts)
-    : readId(event.ts) ?? nestedMessageId;
+  const deletedMessageId = readId(event.deleted_ts) ?? (previous ? readId(previous.ts) : undefined);
+  const messageId = (() => {
+    if (subtype === 'message_deleted') {
+      return deletedMessageId ?? readId(event.ts);
+    }
+    if (subtype === 'message_changed') {
+      return nestedMessageId ?? readId(event.ts);
+    }
+    return readId(event.ts) ?? nestedMessageId;
+  })();
   const channel = readId(event.channel);
   if (messageId === undefined || channel === undefined) {
     return undefined;
   }
 
+  const deleted = subtype === 'message_deleted' ? previous : undefined;
   return {
     eventId: SLACK_MESSAGE_EVENT_ID,
     payload: omitUndefined({
@@ -195,8 +211,14 @@ const parseMessage = (
       channel,
       messageId,
       threadId: readId(event.thread_ts) ?? (nested ? readId(nested.thread_ts) : undefined),
-      sender: readId(event.user) ?? (nested ? readId(nested.user) : undefined),
-      text: readText(event.text) ?? (nested ? readText(nested.text) : undefined),
+      sender:
+        readId(event.user) ??
+        (nested ? readId(nested.user) : undefined) ??
+        (deleted ? readId(deleted.user) : undefined),
+      text:
+        readText(event.text) ??
+        (nested ? readText(nested.text) : undefined) ??
+        (deleted ? readText(deleted.text) : undefined),
       subtype,
       botId: readId(event.bot_id) ?? (nested ? readId(nested.bot_id) : undefined),
     }),
@@ -238,6 +260,9 @@ const parseReactionAdded = (event: Record<string, unknown>): ParsedSlackEvent | 
     payload: omitUndefined({
       channel: item ? readId(item.channel) : undefined,
       messageId: item ? readId(item.ts) : undefined,
+      fileId: item ? readId(item.file) : undefined,
+      fileCommentId: item ? readId(item.file_comment) : undefined,
+      itemType: item ? readName(item.type) : undefined,
       user,
       reaction,
     }),

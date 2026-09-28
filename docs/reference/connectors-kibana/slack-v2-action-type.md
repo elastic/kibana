@@ -40,14 +40,14 @@ The connector can start a workflow from a Slack Events API `event_callback`. A s
 | --- | --- | --- |
 | `slack2.message` | `message` | `workspace`, `channel`, `messageId`, `threadId`, `sender`, `text`, `subtype`, `botId` |
 | `slack2.app_mention` | `app_mention` | `workspace`, `channel`, `messageId`, `sender`, `text` |
-| `slack2.reaction_added` | `reaction_added` | `channel`, `messageId`, `user`, `reaction` |
+| `slack2.reaction_added` | `reaction_added` | `channel`, `messageId`, `fileId`, `fileCommentId`, `itemType`, `user`, `reaction` |
 | `slack2.file_shared` | `file_shared` | `fileId`, `user`, `channel` |
 | `slack2.file_public` | `file_public` | `fileId`, `userId` |
 | `slack2.channel_created` | `channel_created` | `channelId`, `name`, `creator` |
 | `slack2.team_join` | `team_join` | `userId`, `name`, `realName`, `displayName`, `email` |
 | `slack2.member_joined_channel` | `member_joined_channel` | `userId`, `channelId`, `inviter` |
 
-`threadId`, `sender`, `text`, `subtype`, and `botId` are present only when Slack sends them. The same applies to `channel` on a shared file, `userId` on a file made public, and `inviter` on a channel join. An event type that is not in this table does not start a workflow.
+`threadId`, `sender`, `text`, `subtype`, and `botId` are present only when Slack sends them. The same applies to `channel` on a shared file, `userId` on a file made public, and `inviter` on a channel join. A reaction includes `channel` and `messageId` when it is on a message, and `fileId` or `fileCommentId` when it is on a file or file comment. An event type that is not in this table does not start a workflow.
 
 Slack's Request URL check sends `url_verification`. The connector responds with HTTP 200 and `{ "challenge": "<value>" }` and does not start a workflow.
 
