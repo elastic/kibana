@@ -6,7 +6,8 @@
  */
 
 import React, { Fragment, useState } from 'react';
-import { EuiCallOut, EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -120,23 +121,20 @@ export const DeleteDataStreamConfirmationModal: React.FunctionComponent<Props> =
       isLoading={isLoading}
     >
       <Fragment>
-        <EuiCallOut
+        <KbnDangerCallout
           title={
             <FormattedMessage
               id="xpack.idxMgmt.deleteDataStreamsConfirmationModal.warningTitle"
               defaultMessage="Deleting data streams also deletes indices"
             />
           }
-          color="danger"
-          iconType="warning"
-        >
-          <p>
+          text={
             <FormattedMessage
               id="xpack.idxMgmt.deleteDataStreamsConfirmationModal.warningMessage"
               defaultMessage="Data streams are collections of time series indices. Deleting a data stream will also delete its indices."
             />
-          </p>
-        </EuiCallOut>
+          }
+        />
 
         <EuiSpacer />
 

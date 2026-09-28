@@ -13,8 +13,10 @@ import {
 } from './recent_anomalies_esql_source_query_hooks';
 
 jest.mock('@kbn/entity-store/public', () => ({ useEntityStoreEuidApi: jest.fn() }));
-jest.mock('@kbn/entity-store/common', () => ({
-  getLatestEntitiesIndexName: jest.fn(() => '.entities.v2.latest.security_default'),
+jest.mock('../../../../common/hooks/use_resolved_latest_entities_index_name', () => ({
+  useResolvedLatestEntitiesIndexName: jest.fn(() => ({
+    data: { indexName: '.entities.v2.latest.default' },
+  })),
 }));
 jest.mock('../anomaly_heatmap_interval', () => ({ useIntervalForHeatmap: jest.fn(() => 3) }));
 

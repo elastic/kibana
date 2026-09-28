@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 
 import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import type { SpaceId } from '@kbn/core-spaces-common';
 
 import type {
   ASSETS_SAVED_OBJECT_TYPE,
@@ -830,7 +831,7 @@ export interface Installation {
   install_version: string;
   install_started_at: string;
   install_source: InstallSource;
-  installed_kibana_space_id?: string;
+  installed_kibana_space_id?: SpaceId;
   /** Kibana version running at the time Kibana assets for this package were last installed/updated */
   installed_kibana_version?: string;
   keep_policies_up_to_date?: boolean;

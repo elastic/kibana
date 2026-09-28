@@ -13,7 +13,9 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import {
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   DEFAULT_DOWNLOAD_SOURCE_URI,
+  DEFAULT_DOWNLOAD_SOURCE_NAME,
   DEFAULT_DOWNLOAD_SOURCE_ID,
+  DEFAULT_DOWNLOAD_SOURCE_REFERENCE,
 } from '../constants';
 
 import type {
@@ -46,7 +48,7 @@ import {
 } from './secrets';
 import { isSSLSecretStorageEnabled } from './secrets';
 
-function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>) {
+export function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>) {
   const { ssl, auth, source_id: sourceId, secrets, ...attributes } = so.attributes;
 
   // Clean up null values from secrets (they may be set during updates to force removal)
@@ -67,12 +69,13 @@ function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>
     }
   }
 
+  // canonical id placed last so attributes.id cannot shadow it
   return {
-    id: sourceId ?? so.id,
     ...attributes,
     ...(cleanedSecrets ? { secrets: cleanedSecrets } : {}),
     ...(ssl ? { ssl: JSON.parse(ssl as string) } : {}),
     ...(auth ? { auth: JSON.parse(auth as string) } : {}),
+    id: sourceId ?? so.id,
   };
 }
 
@@ -139,6 +142,11 @@ class DownloadSourceService {
     logger.debug(`Creating new download source`);
 
     validateFleetSavedObjectId(options?.id);
+    if (options?.id === DEFAULT_DOWNLOAD_SOURCE_REFERENCE) {
+      throw new DownloadSourceError(
+        `'${DEFAULT_DOWNLOAD_SOURCE_REFERENCE}' is a reserved download source ID and cannot be used.`
+      );
+    }
 
     const data: DownloadSourceSOAttributes = {
       ...omit(downloadSource, ['ssl', 'auth', 'secrets']),
@@ -256,7 +264,7 @@ class DownloadSourceService {
 
     const originalItem = await this.get(id);
     const updateData: Partial<DownloadSourceSOAttributes> = {
-      ...omit(newData, ['ssl', 'auth', 'secrets']),
+      ...omit(newData, ['ssl', 'auth', 'secrets', 'id']),
     };
 
     if (updateData.proxy_id) {
@@ -429,15 +437,22 @@ class DownloadSourceService {
     logger.debug(`Updated download source ${id}`);
   }
 
-  public async delete(id: string) {
+  public async delete(id: string, options?: { fromPreconfiguration?: boolean }) {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting download source ${id}`);
 
     const targetDS = await this.get(id);
 
     if (targetDS.is_default) {
-      throw new DownloadSourceError(`Default Download source ${id} cannot be deleted.`);
+      throw new DownloadSourceError(`Default download source ${id} cannot be deleted.`);
     }
+
+    if (targetDS.is_preconfigured && !options?.fromPreconfiguration) {
+      throw new DownloadSourceError(
+        `Preconfigured download source ${id} cannot be deleted outside of kibana config file.`
+      );
+    }
+
     await agentPolicyService.removeDefaultSourceFromAll(
       appContextService.getInternalUserESClient(),
       id
@@ -468,7 +483,7 @@ class DownloadSourceService {
 
     if (!defaultDS) {
       const newDefaultDS: DownloadSourceBase = {
-        name: 'Elastic Artifacts',
+        name: DEFAULT_DOWNLOAD_SOURCE_NAME,
         is_default: true,
         host: DEFAULT_DOWNLOAD_SOURCE_URI,
       };

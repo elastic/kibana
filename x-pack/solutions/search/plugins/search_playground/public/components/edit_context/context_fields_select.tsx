@@ -8,7 +8,8 @@
 import React, { useMemo, useCallback, useState, useRef } from 'react';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiCallOut, EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 
 import type { QuerySourceFields } from '../../types';
@@ -80,13 +81,11 @@ export const ContextFieldsSelect = ({
 
   if (selectOptions.length === 0) {
     return (
-      <EuiCallOut
+      <KbnWarningCallout
         announceOnMount
         title={i18n.translate('xpack.searchPlayground.editContext.noSourceFieldWarning', {
           defaultMessage: 'No source fields found',
         })}
-        color="warning"
-        iconType="warning"
         size="s"
       />
     );

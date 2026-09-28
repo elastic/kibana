@@ -112,7 +112,7 @@ describe('DeleteTimelineModal', () => {
 
     wrapper.find('[data-test-subj="confirmModalCancelButton"]').first().simulate('click');
 
-    expect(closeModal).toBeCalled();
+    expect(closeModal).toHaveBeenCalled();
   });
 
   test('it invokes onDelete when the Delete button is clicked', () => {
@@ -128,7 +128,7 @@ describe('DeleteTimelineModal', () => {
 
     wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
 
-    expect(onDelete).toBeCalled();
+    expect(onDelete).toHaveBeenCalled();
   });
 });
 

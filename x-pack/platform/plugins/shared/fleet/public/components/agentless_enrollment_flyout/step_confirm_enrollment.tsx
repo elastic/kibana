@@ -8,7 +8,8 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiPanel, EuiText, EuiLink, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiButton, EuiPanel, EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
+import { KbnSuccessCallout, KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { Agent, AgentPolicy } from '../../types';
 import { useStartServices } from '../../hooks';
@@ -40,16 +41,14 @@ export const AgentlessStepConfirmEnrollment = ({
   if (overallState === 'success') {
     return (
       <>
-        <EuiCallOut
+        <KbnSuccessCallout
           announceOnMount
-          color="success"
           title={i18n.translate(
             'xpack.fleet.agentlessEnrollmentFlyout.confirmEnrollment.successText',
             {
               defaultMessage: 'Managed integration deployment was successful',
             }
           )}
-          iconType="check"
         />
         <EuiSpacer size="m" />
         <EuiText>
@@ -68,19 +67,16 @@ export const AgentlessStepConfirmEnrollment = ({
   } else if (overallState === 'failure') {
     return (
       <>
-        <EuiCallOut
+        <KbnDangerCallout
           announceOnMount
-          color="danger"
           title={i18n.translate(
             'xpack.fleet.agentlessEnrollmentFlyout.confirmEnrollment.failureText',
             {
               defaultMessage: 'Managed integration deployment failed',
             }
           )}
-          iconType="warning"
-        >
-          {agent?.last_checkin_message && <p>{agent.last_checkin_message}</p>}
-        </EuiCallOut>
+          text={agent?.last_checkin_message}
+        />
         <EuiSpacer size="m" />
         <EuiText>
           <p>

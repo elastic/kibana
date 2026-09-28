@@ -16,7 +16,7 @@ export const ruleQueryToApiQuery = (query: RuleQuery): Query => {
     return {
       format: 'composed',
       base: query.base,
-      breach: { segment: query.breach.segment },
+      ...(query.breach.segment.trim() ? { breach: { segment: query.breach.segment } } : {}),
       ...(query.recovery ? { recovery: { segment: query.recovery.segment } } : {}),
     };
   }
@@ -40,7 +40,7 @@ export const apiQueryToFormQuery = (
     return {
       format: 'composed',
       base: q.base,
-      breach: { segment: q.breach.segment },
+      breach: { segment: q.breach?.segment ?? '' },
       ...(recoveryStrategy === 'query' && q.recovery
         ? { recovery: { segment: q.recovery.segment } }
         : {}),

@@ -12,12 +12,15 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { resolveCcmApiKey } from '@kbn/es';
 import { scoutEvalsArgs } from './prompts';
 import {
+  isAlive,
   isServiceRunning,
   isScoutStale,
+  isEdotStale,
   startService,
   stopService,
   connectorsHash,
   scoutEnvHash,
+  edotEnvHash,
   tailLog,
   isEdotDockerRunning,
 } from './services';
@@ -27,13 +30,25 @@ const SCOUT_LOCAL_CONFIG = '.scout/servers/local.json';
 const SCOUT_READY_POLL_INTERVAL_MS = 3000;
 const SCOUT_READY_TIMEOUT_MS = 180_000;
 
-const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<void> => {
+const waitForScoutReady = async (
+  repoRoot: string,
+  log: ToolingLog,
+  scoutPid: number
+): Promise<void> => {
   const configPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
   const startTime = Date.now();
   let esUrl: string | undefined;
   let kbnUrl: string | undefined;
 
   while (Date.now() - startTime < SCOUT_READY_TIMEOUT_MS) {
+    // A config set that throws exits Scout immediately; its error
+    // is already streamed above by tailLog, so fail now rather than after the full timeout.
+    if (!isAlive(scoutPid)) {
+      throw new Error(
+        `Scout exited before becoming ready. See the log above or: node scripts/evals logs --service scout`
+      );
+    }
+
     if (!esUrl && Fs.existsSync(configPath)) {
       try {
         const raw = Fs.readFileSync(configPath, 'utf-8');
@@ -108,14 +123,19 @@ export interface EnsureEdotOptions {
 
 /**
  * Ensures the EDOT collector is running (exports traces to the configured ES),
- * reusing an existing instance when one is already up.
+ * reusing an existing instance unless it points at a different Elasticsearch.
  */
 export const ensureEdot = async ({
   repoRoot,
   log,
   elasticsearchHost,
 }: EnsureEdotOptions): Promise<void> => {
-  if (isServiceRunning(repoRoot, 'edot') || isEdotDockerRunning()) {
+  const staleCheck = isEdotStale(repoRoot, elasticsearchHost);
+
+  if (staleCheck.stale) {
+    log.warning(`[edot] EDOT collector is stale (${staleCheck.reason}). Restarting...`);
+    await stopService(repoRoot, 'edot', log);
+  } else if (isServiceRunning(repoRoot, 'edot') || isEdotDockerRunning()) {
     log.info('[edot] EDOT collector already running -- reusing');
     return;
   }
@@ -126,6 +146,7 @@ export const ensureEdot = async ({
     log.info(`[edot] EDOT collector will export to: ${elasticsearchHost}`);
   }
   startService(repoRoot, 'edot', 'node', ['scripts/edot_collector.js'], log, {
+    envHash: edotEnvHash(elasticsearchHost),
     env: elasticsearchHost ? { ELASTICSEARCH_HOST: elasticsearchHost } : undefined,
   });
 
@@ -147,6 +168,8 @@ export interface EnsureScoutOptions {
   log: ToolingLog;
   gcsCredentials: string | undefined;
   tracingExporters: string | undefined;
+  /** Env from the suite's `scoutHook`, forwarded to Scout (see `runScoutHook`). */
+  suiteScoutEnv?: Record<string, string>;
   serverConfigSet?: string;
 }
 
@@ -159,9 +182,10 @@ export const ensureScout = async ({
   log,
   gcsCredentials,
   tracingExporters,
+  suiteScoutEnv,
   serverConfigSet = 'evals_tracing',
 }: EnsureScoutOptions): Promise<void> => {
-  const scoutEnv: Record<string, string> = {};
+  const scoutEnv: Record<string, string> = { ...suiteScoutEnv };
   if (gcsCredentials) {
     scoutEnv.GCS_CREDENTIALS = gcsCredentials;
   }
@@ -202,7 +226,7 @@ export const ensureScout = async ({
 
   log.info(`[scout] Starting Scout server (backgrounded, stateful/classic, ${serverConfigSet})...`);
 
-  startService(
+  const scoutPid = startService(
     repoRoot,
     'scout',
     'node',
@@ -218,8 +242,11 @@ export const ensureScout = async ({
 
   const stopTail = tailLog(repoRoot, 'scout', log, { fromStart: true });
   log.info('[scout] Waiting for ES + Kibana to be ready...');
-  await waitForScoutReady(repoRoot, log);
-  stopTail();
+  try {
+    await waitForScoutReady(repoRoot, log, scoutPid);
+  } finally {
+    stopTail();
+  }
   log.info('[scout] Scout server ready');
 };
 
@@ -263,6 +290,7 @@ export interface EnsureEvalStackOptions {
   repoRoot: string;
   log: ToolingLog;
   profileEnvOverrides: Record<string, string>;
+  suiteScoutEnv?: Record<string, string>;
   serverConfigSet?: string;
   requiresEisCcm: boolean;
 }
@@ -275,6 +303,7 @@ export const ensureEvalStack = async ({
   repoRoot,
   log,
   profileEnvOverrides,
+  suiteScoutEnv,
   serverConfigSet = 'evals_tracing',
   requiresEisCcm,
 }: EnsureEvalStackOptions): Promise<void> => {
@@ -285,6 +314,7 @@ export const ensureEvalStack = async ({
     log,
     gcsCredentials: profileEnvOverrides.GCS_CREDENTIALS,
     tracingExporters: profileEnvOverrides.TRACING_EXPORTERS,
+    suiteScoutEnv,
     serverConfigSet,
   });
 

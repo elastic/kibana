@@ -21,7 +21,7 @@ const makeEntry = (
   actor: 'user-1',
   episode_id: 'episode-1',
   group_hash: 'group-1',
-  tags: null,
+  tags: [],
   assignee_uid: null,
   expiry: null,
   reason: null,

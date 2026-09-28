@@ -39,5 +39,6 @@ export * from './use_dismissable_tour';
 export * from './use_agentless_resources';
 export * from './use_is_agentless_query_param';
 export * from './use_var_group_cloud_connector';
+export * from './use_disabled_identity_federation_providers';
 export * from './use_upgrade_review_actions';
 export * from './use_iac_provisioner';

@@ -22,6 +22,7 @@ const {
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_TEST_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_TEST_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
@@ -153,9 +154,13 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
 
   async showEntityDetails(nodeId: string): Promise<void> {
     await this.clickOnNodeExpandButton(nodeId);
-    await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
+    const itemId = (await this.testSubjects.exists(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID))
+      ? GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID
+      : GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID;
+    await this.testSubjects.click(itemId);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
+
   async showEntityRelationships(nodeId: string): Promise<void> {
     await this.clickOnNodeExpandButton(nodeId);
     await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID);

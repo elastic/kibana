@@ -135,8 +135,6 @@ describe('createSmlSearchTool', () => {
         description: 'A CPU chart',
         tags: ['perf'],
         references: [{ uri: 'dashboard://abc' }],
-        spaces: ['default'],
-        permissions: { kibana: { privileges: [] } },
       },
     ];
     mockSearch.mockResolvedValue({ results: hits });
@@ -217,7 +215,7 @@ describe('createSmlSearchTool', () => {
     );
   });
 
-  it('does not pass constraints when agentConfiguration has no connector_ids', async () => {
+  it('passes empty connector ids constraints when agentConfiguration has no connector_ids', async () => {
     mockSearch.mockResolvedValue({ results: [] });
     const contextWithoutConnectors = {
       ...mockContext,
@@ -232,7 +230,7 @@ describe('createSmlSearchTool', () => {
 
     expect(mockSearch).toHaveBeenCalledWith(
       expect.objectContaining({
-        constraints: undefined,
+        constraints: { connector: { ids: [] } },
       })
     );
   });

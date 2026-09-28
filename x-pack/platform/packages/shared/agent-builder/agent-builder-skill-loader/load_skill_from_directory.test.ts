@@ -127,18 +127,37 @@ describe('loadSkillFromDirectory', () => {
     ]);
   });
 
+  it('accepts uppercase file names and directory segments', () => {
+    const dir = skillDir('mixed-case');
+    writeFile(dir, 'SKILL.md', skillMarkdown(['name: my-skill', 'description: desc.']));
+    writeFile(dir, 'README.md', 'Readme content.');
+    writeFile(dir, 'References/Guide.md', 'Guide content.');
+
+    const skill = loadSkillFromDirectory(dir, BASE_PATH, { logger });
+
+    expect(skill.referencedContent).toEqual([
+      { name: 'README', relativePath: '.', content: 'Readme content.' },
+      { name: 'Guide', relativePath: './References', content: 'Guide content.' },
+    ]);
+  });
+
+  it('treats a nested SKILL.md as an ordinary reference', () => {
+    const dir = skillDir('nested-skill-file');
+    writeFile(dir, 'SKILL.md', skillMarkdown(['name: my-skill', 'description: desc.']));
+    writeFile(dir, 'bundled/SKILL.md', 'Bundled content.');
+
+    const skill = loadSkillFromDirectory(dir, BASE_PATH, { logger });
+
+    expect(skill.referencedContent).toEqual([
+      { name: 'SKILL', relativePath: './bundled', content: 'Bundled content.' },
+    ]);
+  });
+
   const rejectedReferenceCases: Array<{
     label: string;
     filePath: string;
     invalidSegment: string;
   }> = [
-    { label: 'a file name that is not lowercase', filePath: 'README.md', invalidSegment: 'README' },
-    {
-      label: 'a directory segment that is not lowercase',
-      filePath: 'References/guide.md',
-      invalidSegment: 'References',
-    },
-    { label: 'a nested SKILL.md', filePath: 'bundled/SKILL.md', invalidSegment: 'SKILL' },
     {
       label: 'a space in the file name',
       filePath: 'bad name.md',

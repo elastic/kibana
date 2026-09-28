@@ -64,6 +64,13 @@ export const listWorkflowExecutionsTool = ({
     Note: date range, trigger type filtering, and cursor-based pagination are not yet supported.
     `),
     schema: listWorkflowExecutionsSchema,
+    annotations: {
+      title: 'List Workflow Executions',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     handler: async ({ workflowId, statuses, limit, page }, { spaceId, request }) => {
       try {
         const authorized = await hasWorkflowExecutionReadPrivilege({
@@ -86,6 +93,7 @@ export const listWorkflowExecutionsTool = ({
             page: page ?? 1,
             size: limit ?? 10,
             omitStepRuns: true,
+            request,
           },
           spaceId
         );

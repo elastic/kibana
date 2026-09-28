@@ -18,8 +18,8 @@ import {
   EuiHorizontalRule,
   EuiComboBox,
   EuiFormRow,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
@@ -70,9 +70,13 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
 
   const toggleStopOnWarn = useCallback(() => setStopOnWarn(!stopOnWarn), [stopOnWarn]);
 
+  const projectRouting = useMemo(() => {
+    return cps?.cpsManager?.getProjectRouting();
+  }, [cps]);
+
   useMemo(() => {
     const newJobCapsService = new NewJobCapsService(mlApi);
-    newJobCapsService.initializeFromDataVIew(dataView).then(() => {
+    newJobCapsService.initializeFromDataVIew(dataView, true, true, projectRouting).then(() => {
       const options: EuiComboBoxOptionOption[] = [
         ...createFieldOptions(newJobCapsService.categoryFields, []),
       ].map((o) => ({
@@ -80,7 +84,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
       }));
       setCategoryFieldsOptions(options);
     });
-  }, [dataView, mlApi]);
+  }, [dataView, mlApi, projectRouting]);
 
   const quickJobCreator = useMemo(
     () =>
@@ -257,7 +261,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
           <>
             <EuiSpacer size="m" />
 
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount
               size="s"
               title={

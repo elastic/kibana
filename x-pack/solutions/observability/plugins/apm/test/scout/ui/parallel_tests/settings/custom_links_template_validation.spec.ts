@@ -123,9 +123,8 @@ test.describe(
       await customLinksPage.clickSave();
 
       await transactionDetailsPage.openActionMenu();
-      await expect(page.getByRole('link', { name: defaultLabel })).toBeVisible({
-        timeout: EXTENDED_TIMEOUT,
-      });
+      const defaultLink = await transactionDetailsPage.revealCustomLink(defaultLabel);
+      await expect(defaultLink).toBeVisible({ timeout: EXTENDED_TIMEOUT });
       expect(await transactionDetailsPage.getCustomLinkHref(defaultLabel)).toBe(expectedUrl);
     });
   }

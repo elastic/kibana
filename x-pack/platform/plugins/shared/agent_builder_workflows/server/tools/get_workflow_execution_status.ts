@@ -41,6 +41,13 @@ export const getWorkflowExecutionStatusTool = ({
     Instead, if the workflow didn't complete, tell the user they can ask you to check the execution.
     `),
     schema: getWorkflowExecutionStatusSchema,
+    annotations: {
+      title: 'Get Workflow Execution Status',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     handler: async ({ executionId }, { spaceId, request }) => {
       try {
         const authorized = await hasWorkflowExecutionReadPrivilege({
@@ -58,6 +65,7 @@ export const getWorkflowExecutionStatusTool = ({
           executionId,
           spaceId,
           workflowApi,
+          request,
         });
 
         if (execution) {

@@ -7,6 +7,7 @@
 import { KibanaSavedObjectType } from '../../../../../../../../common/types/models';
 
 export { AlertingPage } from './alerting_page';
+export type { AlertingAsset, AlertingEngine, AlertingSOAssetType } from './types';
 
 export const ALERTING_ASSET_TYPES: KibanaSavedObjectType[] = [
   KibanaSavedObjectType.alertingRuleTemplate,

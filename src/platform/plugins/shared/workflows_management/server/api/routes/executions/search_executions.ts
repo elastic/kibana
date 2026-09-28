@@ -32,7 +32,6 @@ import {
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
   canReadManagedWorkflowExecutions,
-  hasWorkflowExecutionReadPrivilege,
   WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
 } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
@@ -159,9 +158,6 @@ export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDepe
       },
       withAvailabilityCheck(async (_context, request, response) => {
         try {
-          if (!hasWorkflowExecutionReadPrivilege(request)) {
-            return response.forbidden();
-          }
           const spaceId = spaces.getSpaceId(request);
           const {
             kql,
@@ -213,7 +209,7 @@ export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDepe
           };
 
           return response.ok({
-            body: await api.searchExecutionsView(params, spaceId),
+            body: await api.searchExecutionsView({ ...params, request }, spaceId),
           });
         } catch (error) {
           if (error instanceof Error && 'statusCode' in error && error.statusCode === 400) {

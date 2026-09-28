@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/kibana-utils-plugin'
   - '@kbn/usage-collection-plugin'
   - '@kbn/alerting-plugin'
+  - '@kbn/app-header'
   - '@kbn/actions-plugin'
   - '@kbn/cloud-plugin'
   - '@kbn/encrypted-saved-objects-plugin'

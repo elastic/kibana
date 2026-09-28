@@ -14,7 +14,8 @@ import type {
 } from './v3';
 
 import type { rawRuleMonitoringSchema } from './v11';
-import type { rawRuleSchema, rawRuleSnoozedInstanceSchema } from './v14';
+import type { rawRuleSnoozedInstanceSchema } from './v14';
+import type { rawRuleSchema } from './v15';
 
 type Mutable<T> = { -readonly [P in keyof T]: T[P] extends object ? Mutable<T[P]> : T[P] };
 

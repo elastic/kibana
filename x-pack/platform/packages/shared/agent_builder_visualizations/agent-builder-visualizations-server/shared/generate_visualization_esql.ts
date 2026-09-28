@@ -15,20 +15,20 @@ import { buildEsqlAdditionalInstructions } from './esql_instructions';
 import { validateQueryTarget } from './validate_query_target';
 
 /** Normalized result of resolving an ES|QL query for a visualization. */
-export interface GeneratedVisualizationEsql {
+interface GeneratedVisualizationEsql {
   /** The generated query. Absent when generation failed. */
   query?: string;
   /**
-   * Result columns from the validation run, when `generateEsql` executed the
-   * query and returned rows. Callers that author around the result schema (Vega)
-   * can reuse these instead of executing the query again.
+   * Result columns from the `schema` validation run. Present when generation
+   * succeeded, including when the probe matched no rows. Callers that author
+   * around the result schema (Vega) can reuse these instead of executing again.
    */
   columns?: EsqlEsqlColumnInfo[];
   /** Populated when no usable query could be resolved. */
   error?: string;
 }
 
-export interface GenerateVisualizationEsqlParams {
+interface GenerateVisualizationEsqlParams {
   nlQuery: string;
   index: string | undefined;
   /**
@@ -131,6 +131,7 @@ export const generateVisualizationEsql = async ({
     additionalInstructions: extraInstructions
       ? `${instructions}\n${extraInstructions}`
       : instructions,
+    execute: 'schema' as const,
     ...(timeRange ? { timeRange } : {}),
   };
 

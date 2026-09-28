@@ -8,7 +8,6 @@
 import {
   EuiAccordion,
   EuiButton,
-  EuiCallOut,
   EuiCodeBlock,
   EuiFilterButton,
   EuiFilterGroup,
@@ -28,6 +27,7 @@ import type { FunctionComponent } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ILicense } from '@kbn/licensing-types';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
   getStateWithCopyToFields,
   hasSemanticTextField,
@@ -104,7 +104,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   const { enableSemanticText: isSemanticTextEnabled } = config;
   const hasMLPermissions = capabilities?.ml?.canGetTrainedModels ? true : false;
   const semanticTextInfo = {
-    isSemanticTextEnabled: isSemanticTextEnabled && hasMLPermissions && isPlatinumLicense,
+    isSemanticTextEnabled: isSemanticTextEnabled && isPlatinumLicense,
     indexName: index.name,
     ml,
     setErrorsInTrainedModelDeployment,
@@ -205,18 +205,21 @@ export const DetailsPageMappingsContent: FunctionComponent<{
         }
         const fields = hasSemanticText ? getStateWithCopyToFields(state).fields : state.fields;
         const denormalizedFields = deNormalize(fields);
-        const inferenceIdsInPendingList = forceSaveMappings
-          ? []
-          : Object.values(denormalizedFields)
+        // Deployment validation relies on ML trained model stats, which are only fetched when the
+        // user has ML permissions. Without them the map is empty, so skip the validation.
+        const shouldValidateDeployments = hasMLPermissions && !forceSaveMappings;
+        const inferenceIdsInPendingList = shouldValidateDeployments
+          ? Object.values(denormalizedFields)
               .filter(isSemanticTextField)
               .map((field) => field.inference_id)
               .filter(
                 (inferenceId: string) =>
                   inferenceId &&
-                  inferenceToModelIdMap?.[inferenceId].trainedModelId && // third-party inference models don't have trainedModelId
-                  !inferenceToModelIdMap?.[inferenceId].isDeployed &&
+                  inferenceToModelIdMap?.[inferenceId]?.trainedModelId && // third-party inference models don't have trainedModelId
+                  !inferenceToModelIdMap?.[inferenceId]?.isDeployed &&
                   !isInferencePreconfigured(inferenceId)
-              );
+              )
+          : [];
         setHasSavedFields(true);
         if (inferenceIdsInPendingList.length === 0) {
           const { error } = await updateIndexMappings(indexName, denormalizedFields);
@@ -344,23 +347,20 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
   const errorSavingMappings = saveMappingError && (
     <EuiFlexItem grow={false}>
-      <EuiCallOut
+      <KbnDangerCallout
         announceOnMount
-        color="danger"
         data-test-subj="indexDetailsSaveMappingsError"
-        iconType="error"
         title={i18n.translate('xpack.idxMgmt.indexDetails.mappings.error.title', {
           defaultMessage: 'Error saving mapping',
         })}
-      >
-        <EuiText>
+        text={
           <FormattedMessage
             id="xpack.idxMgmt.indexDetails.mappings.error.description"
             defaultMessage="Error saving mapping: {errorMessage}"
             values={{ errorMessage: saveMappingError }}
           />
-        </EuiText>
-      </EuiCallOut>
+        }
+      />
       <EuiSpacer />
     </EuiFlexItem>
   );
@@ -429,12 +429,9 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           />
         )}
         <EuiFlexGroup direction="column" gutterSize="s">
-          {hasMLPermissions && !hasSemanticText && (
+          {!hasSemanticText && !isPlatinumLicense && isSemanticTextEnabled && (
             <EuiFlexItem grow={false}>
-              <SemanticTextBanner
-                isSemanticTextEnabled={isSemanticTextEnabled}
-                isPlatinumLicense={isPlatinumLicense}
-              />
+              <SemanticTextBanner />
             </EuiFlexItem>
           )}
           {!hasMappings &&

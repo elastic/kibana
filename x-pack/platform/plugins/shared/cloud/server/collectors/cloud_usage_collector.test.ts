@@ -27,7 +27,7 @@ describe('createCloudUsageCollector', () => {
     createCloudUsageCollector(usageCollection, {
       isCloudEnabled: false,
     } as CloudUsageCollectorConfig);
-    expect(usageCollection.makeUsageCollector).toBeCalledTimes(1);
+    expect(usageCollection.makeUsageCollector).toHaveBeenCalledTimes(1);
   });
 
   describe('Fetched Usage data', () => {

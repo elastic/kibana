@@ -224,6 +224,27 @@ describe('tab_state_data_view actions', () => {
       );
       expect(params.getCurrentTab().profileAppStateDefaults.fieldsToReset).toBe('all');
     });
+
+    it('should clear an unresolved expanded document reference when switching data view', async () => {
+      const params = await setupTestParams(dataViewComplexMock);
+      params.internalState.dispatch(
+        params.injectCurrentTab(internalStateActions.updateAppState)({
+          appState: { expandedDoc: { id: 'missing-document', index: 'missing-index' } },
+        })
+      );
+
+      expect(params.getCurrentTab().expandedDoc).toBeUndefined();
+      expect(params.getCurrentTab().appState.expandedDoc).toBeDefined();
+
+      await params.internalState.dispatch(
+        params.injectCurrentTab(internalStateActions.changeDataView)({
+          dataViewOrDataViewId: dataViewComplexMock.id!,
+        })
+      );
+
+      expect(params.getCurrentTab().expandedDoc).toBeUndefined();
+      expect(params.getCurrentTab().appState.expandedDoc).toBeUndefined();
+    });
   });
 
   describe('onDataViewCreated', () => {

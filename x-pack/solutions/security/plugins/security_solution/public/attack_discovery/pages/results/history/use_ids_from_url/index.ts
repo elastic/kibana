@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useSearchParams } from '@kbn/shared-ux-router';
 
 import { useCallback, useMemo } from 'react';
 

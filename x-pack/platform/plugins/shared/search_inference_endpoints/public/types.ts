@@ -102,6 +102,14 @@ export const GEO_ORDER = ['apac', 'eu', 'us', 'other'] as const;
 /** Whether the region policy is expressed as geo zones or specific CSP regions. Mutually exclusive. */
 export type PolicyMode = 'geo' | 'regions';
 
+export type RegionPolicyConflictArtifactType = 'index' | 'pipeline';
+
+export interface RegionPolicyConflictArtifact {
+  type: RegionPolicyConflictArtifactType;
+  name: string;
+  endpointIds: string[];
+}
+
 export interface RegionZoneCount {
   geo: string;
   modelCount: number;

@@ -74,3 +74,5 @@
     - 'src/platform/packages/shared/kbn-tracing/**/*.*'
     - '.buildkite/pipelines/evals/**/*.*'
     - '.buildkite/scripts/steps/evals/**/*.*'
+    - 'x-pack/platform/plugins/shared/inference/**/*.*'
+    - 'x-pack/platform/packages/shared/ai-infra/**/*.*'

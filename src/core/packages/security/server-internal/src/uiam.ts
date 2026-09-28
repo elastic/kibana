@@ -30,6 +30,17 @@ export type UiamClientAuthenticationParams =
       credential: HTTPAuthorizationHeader;
     }
   | {
+      /**
+       * The credential is a user-created (external) UIAM API key. UIAM rejects external keys
+       * presented with client authentication, so the shared secret must never be attached to it.
+       * Consumers signal this by marking the fake request that carries the credential with
+       * `markExternalUiamCredential` from `@kbn/core-security-server`.
+       */
+      credentialSource: 'external';
+      /** The credential that will be sent to Elasticsearch. */
+      credential: HTTPAuthorizationHeader;
+    }
+  | {
       /** The credential rode in over HTTP, so the request has to vouch for it. */
       credentialSource: 'inbound';
       /** The credential that will be sent to Elasticsearch. */
@@ -57,6 +68,8 @@ export interface CoreUiamService {
    *
    * - non-UIAM credential -> `undefined`;
    * - internal UIAM credential -> the shared secret;
+   * - external (user-created) UIAM credential -> `undefined`, UIAM rejects external API keys
+   * presented with client authentication;
    * - inbound UIAM credential -> the shared secret only with a valid attestation, proving the
    * loopback caller is trusted.
    */
@@ -81,6 +94,10 @@ export function createCoreUiamService(sharedSecret: string): CoreUiamService {
   return Object.freeze({
     getElasticsearchClientAuthentication(params: UiamClientAuthenticationParams) {
       if (!isUiamCredential(params.credential)) {
+        return;
+      }
+
+      if (params.credentialSource === 'external') {
         return;
       }
 

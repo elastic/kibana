@@ -6,6 +6,7 @@
  */
 import React, { useCallback, useMemo } from 'react';
 import { createActorContext } from '@xstate/react';
+import type { XYPosition } from '@xyflow/react';
 import type { CanvasStateServiceDeps } from './types';
 import { canvasStateMachine, createCanvasMachineImplementations } from './canvas_state_machine';
 
@@ -30,6 +31,40 @@ export const useCanvasUrlRef = () => {
   return useCanvasStateSelector((state) => state.context.urlState);
 };
 
+export const useCanvasUnitDefinition = () => {
+  return useCanvasStateSelector((state) => state.context.nextUnit);
+};
+
+export const useCanvasHasUnsavedChanges = () => {
+  return useCanvasStateSelector((state) => state.context.unit !== state.context.nextUnit);
+};
+
+export const useCanvasIsSaving = () => {
+  return useCanvasStateSelector(
+    (state) =>
+      state.matches({ ready: { unit: 'validating' } }) ||
+      state.matches({ ready: { unit: 'persisting' } })
+  );
+};
+
+export const useCanvasIsInitializing = () => {
+  return useCanvasStateSelector(
+    (state) => state.matches('initializingFromUrl') || state.matches({ ready: { unit: 'loading' } })
+  );
+};
+
+export const useCanvasIsUnitUnavailable = () => {
+  return useCanvasStateSelector((state) => state.matches({ ready: { unit: 'loadFailed' } }));
+};
+
+export const useCanvasSourcesRef = () => {
+  return useCanvasStateSelector((state) => state.context.sourcesRef);
+};
+
+export const useCanvasNodePositions = () => {
+  return useCanvasStateSelector((state) => state.context.nodePositions);
+};
+
 export const useGetCanvasState = () => {
   const service = CanvasStateContext.useActorRef();
   return useCallback(() => service.getSnapshot(), [service]);
@@ -49,6 +84,12 @@ export const useCanvasEvents = () => {
       },
       selectTab: (flyoutTab: string) => {
         service.send({ type: 'flyout.tab', flyoutTab });
+      },
+      updateNodePositions: (positions: Record<string, XYPosition>) => {
+        service.send({ type: 'nodes.positions.change', positions });
+      },
+      saveUnit: () => {
+        service.send({ type: 'unit.save' });
       },
     }),
     [service]

@@ -8,7 +8,7 @@
  */
 
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
 import {
   callKibanaApi,
   CallKibanaApiResponseTooLargeError,
@@ -82,28 +82,11 @@ function createFakeRequest({
       ...headers,
     },
     isInternalApiRequest,
+    isFakeRequest: true,
   } as unknown as KibanaRequest;
 }
 
-/**
- * Whatever header security uses to carry the attestation is its own business, and the engine never
- * names it - so this suite picks an arbitrary one and drives the contract with it.
- */
-const UIAM_ATTESTATION_HEADER = 'x-some-internal-caller-attestation';
-
-const mockGetAttestationHeaders = jest.fn();
-
-function createCoreStart({
-  uiamAttestation,
-  serverBasePath = '',
-}: {
-  uiamAttestation?: string;
-  serverBasePath?: string;
-} = {}): CoreStart {
-  if (uiamAttestation) {
-    mockGetAttestationHeaders.mockReturnValue({ [UIAM_ATTESTATION_HEADER]: uiamAttestation });
-  }
-
+function createCoreStart({ serverBasePath = '' }: { serverBasePath?: string } = {}): CoreStart {
   return {
     http: {
       basePath: {
@@ -111,15 +94,6 @@ function createCoreStart({
         prepend: jest.fn((path: string) => `${serverBasePath}${path}`),
       },
       selfClient: { asScoped: mockAsScoped },
-    },
-    security: {
-      authc: {
-        apiKeys: {
-          uiam: uiamAttestation
-            ? { getInternalCallerAttestationHeaders: mockGetAttestationHeaders }
-            : null,
-        },
-      },
     },
   } as unknown as CoreStart;
 }
@@ -131,7 +105,6 @@ const lastFetchHeaders = () => lastFetchOptions().headers as Record<string, stri
 describe('callKibanaApi', () => {
   beforeEach(() => {
     mockSelfFetch.mockReset();
-    mockGetAttestationHeaders.mockReset();
     mockAsScoped.mockClear();
     mockAsScoped.mockImplementation(() => ({ fetch: mockSelfFetch }));
   });
@@ -297,52 +270,7 @@ describe('callKibanaApi', () => {
     expect(options.prependBasePath).toBe(false);
   });
 
-  it('stamps the internal-caller attestation for an internal UIAM (essu_) credential', async () => {
-    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
-
-    await callKibanaApi(
-      {
-        fakeRequest: createFakeRequest({ headers: { authorization: 'ApiKey essu_internal_key' } }),
-        coreStart: createCoreStart({ uiamAttestation: 'valid-attestation' }),
-      },
-      { method: 'GET', path: '/api/status' }
-    );
-
-    expect(lastFetchHeaders()[UIAM_ATTESTATION_HEADER]).toBe('valid-attestation');
-  });
-
-  it('asks for an attestation bound to the credential the request carries', async () => {
-    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
-
-    await callKibanaApi(
-      {
-        fakeRequest: createFakeRequest({ headers: { authorization: 'ApiKey essu_internal_key' } }),
-        coreStart: createCoreStart({ uiamAttestation: 'valid-attestation' }),
-      },
-      { method: 'GET', path: '/api/status' }
-    );
-
-    expect(mockGetAttestationHeaders).toHaveBeenCalledTimes(1);
-    expect(mockGetAttestationHeaders).toHaveBeenCalledWith(
-      new HTTPAuthorizationHeader('ApiKey', 'essu_internal_key')
-    );
-  });
-
-  it('does not stamp the attestation for a non-UIAM credential', async () => {
-    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
-
-    await callKibanaApi(
-      {
-        fakeRequest: createFakeRequest({ headers: { authorization: 'ApiKey regular-key' } }),
-        coreStart: createCoreStart({ uiamAttestation: 'valid-attestation' }),
-      },
-      { method: 'GET', path: '/api/status' }
-    );
-
-    expect(lastFetchHeaders()[UIAM_ATTESTATION_HEADER]).toBeUndefined();
-  });
-
-  it('does not stamp the attestation when UIAM is not enabled (no attestation available)', async () => {
+  it('does not pass the UIAM attestation header to the self client', async () => {
     mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
 
     await callKibanaApi(
@@ -353,25 +281,30 @@ describe('callKibanaApi', () => {
       { method: 'GET', path: '/api/status' }
     );
 
-    expect(lastFetchHeaders()[UIAM_ATTESTATION_HEADER]).toBeUndefined();
+    expect(lastFetchHeaders()).not.toHaveProperty(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER);
+    expect(mockAsScoped).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.objectContaining({ authorization: 'ApiKey essu_internal_key' }),
+      })
+    );
   });
 
-  it('ignores a caller-supplied (forged) attestation header and stamps its own', async () => {
+  it('drops a caller-supplied attestation header', async () => {
     mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
 
     await callKibanaApi(
       {
         fakeRequest: createFakeRequest({ headers: { authorization: 'ApiKey essu_internal_key' } }),
-        coreStart: createCoreStart({ uiamAttestation: 'valid-attestation' }),
+        coreStart: createCoreStart(),
       },
       {
         method: 'GET',
         path: '/api/status',
-        headers: { [UIAM_ATTESTATION_HEADER]: 'forged-attestation' },
+        headers: { [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'forged-attestation' },
       }
     );
 
-    expect(lastFetchHeaders()[UIAM_ATTESTATION_HEADER]).toBe('valid-attestation');
+    expect(lastFetchHeaders()).not.toHaveProperty(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER);
   });
 
   it('throws when the fake request has no Authorization header', async () => {

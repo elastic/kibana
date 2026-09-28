@@ -53,6 +53,8 @@ exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = 
       >
         <div
           class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
+          data-display="regular"
+          data-dividers="true"
         />
       </div>
       <div
@@ -155,6 +157,8 @@ exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = 
       >
         <div
           class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
+          data-display="regular"
+          data-dividers="true"
         />
       </div>
       <div

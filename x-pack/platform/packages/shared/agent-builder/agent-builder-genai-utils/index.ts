@@ -39,6 +39,7 @@ export {
   type IndexExplorerResponse,
   generateEsql,
   type GenerateEsqlResponse,
+  GenerateEsqlNoDataError,
   generateEsqlCompletion,
   type GenerateEsqlCompletionResponse,
   relevanceSearch,
@@ -47,6 +48,7 @@ export {
   type NaturalLanguageSearchResponse,
   runSearchTool,
   type TopSnippetsConfig,
+  setDefaultEsqlCacheKey,
 } from './tools';
 export {
   resolveResourceForEsqlWithSamplingStats,

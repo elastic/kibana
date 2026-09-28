@@ -48,6 +48,7 @@ describe('config validation', () => {
           "maxBodyBytes": ByteSizeValue {
             "valueInBytes": 1048576,
           },
+          "maxEmitted": 25,
         },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
@@ -102,6 +103,7 @@ describe('config validation', () => {
           "maxBodyBytes": ByteSizeValue {
             "valueInBytes": 1048576,
           },
+          "maxEmitted": 25,
         },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
@@ -265,6 +267,7 @@ describe('config validation', () => {
           "maxBodyBytes": ByteSizeValue {
             "valueInBytes": 1048576,
           },
+          "maxEmitted": 25,
         },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
@@ -455,6 +458,7 @@ describe('config validation', () => {
           "maxBodyBytes": ByteSizeValue {
             "valueInBytes": 1048576,
           },
+          "maxEmitted": 25,
         },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
@@ -505,14 +509,30 @@ describe('config validation', () => {
     const empty = configSchema.validate({});
     expect(empty.inboundEvents.enabled).toBe(false);
     expect(empty.inboundEvents.maxBodyBytes.getValueInBytes()).toBe(1024 * 1024);
+    expect(empty.inboundEvents.maxEmitted).toBe(25);
 
     const enabled = configSchema.validate({ inboundEvents: { enabled: true } });
     expect(enabled.inboundEvents.enabled).toBe(true);
     expect(enabled.inboundEvents.maxBodyBytes.getValueInBytes()).toBe(1024 * 1024);
+    expect(enabled.inboundEvents.maxEmitted).toBe(25);
 
     const customSize = configSchema.validate({ inboundEvents: { maxBodyBytes: '512kb' } });
     expect(customSize.inboundEvents.enabled).toBe(false);
     expect(customSize.inboundEvents.maxBodyBytes.getValueInBytes()).toBe(512 * 1024);
+
+    const customMax = configSchema.validate({ inboundEvents: { maxEmitted: 100 } });
+    expect(customMax.inboundEvents.maxEmitted).toBe(100);
+
+    expect(() =>
+      configSchema.validate({ inboundEvents: { maxEmitted: 0 } })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[inboundEvents.maxEmitted]: Value must be equal to or greater than [1]."`
+    );
+    expect(() =>
+      configSchema.validate({ inboundEvents: { maxEmitted: 251 } })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[inboundEvents.maxEmitted]: Value must be equal to or lower than [250]."`
+    );
   });
 
   describe('email.services.ses', () => {
@@ -663,6 +683,76 @@ describe('config validation', () => {
       const result = configSchema.validate({ relay: { url: 'http://relay.test' } }, { dev: true });
 
       expect(result.relay?.url).toEqual('http://relay.test');
+    });
+  });
+
+  describe('relay.uiam', () => {
+    test('defaults to disabled on serverless', () => {
+      const result = configSchema.validate(
+        { relay: { url: 'https://relay.test' } },
+        { serverless: true }
+      );
+
+      expect(result.relay?.uiam).toEqual({ enabled: false });
+    });
+
+    test('can be enabled on serverless when mTLS is configured', () => {
+      const result = configSchema.validate(
+        {
+          relay: {
+            url: 'https://relay.test',
+            ssl: { certificate: '/path/to/cert.pem', key: '/path/to/key.pem' },
+            uiam: { enabled: true },
+          },
+        },
+        { serverless: true }
+      );
+
+      expect(result.relay?.uiam).toEqual({ enabled: true });
+    });
+
+    test('rejects being enabled without mTLS configured', () => {
+      expect(() =>
+        configSchema.validate(
+          { relay: { url: 'https://relay.test', uiam: { enabled: true } } },
+          { serverless: true }
+        )
+      ).toThrow(
+        '[relay]: must specify [relay.ssl.certificate] and [relay.ssl.key] when [relay.uiam.enabled] is set'
+      );
+    });
+
+    test('rejects being enabled with only a certificate configured', () => {
+      expect(() =>
+        configSchema.validate(
+          {
+            relay: {
+              url: 'https://relay.test',
+              ssl: { certificate: '/path/to/cert.pem' },
+              uiam: { enabled: true },
+            },
+          },
+          { serverless: true }
+        )
+      ).toThrow('[relay.ssl]: must specify [relay.ssl.key]');
+    });
+
+    test('is rejected outside serverless', () => {
+      expect(() =>
+        configSchema.validate(
+          { relay: { url: 'https://relay.test', uiam: { enabled: true } } },
+          { serverless: false }
+        )
+      ).toThrow(/\[relay\.uiam\]/);
+    });
+
+    test('is absent outside serverless when not specified', () => {
+      const result = configSchema.validate(
+        { relay: { url: 'https://relay.test' } },
+        { serverless: false }
+      );
+
+      expect(result.relay?.uiam).toBeUndefined();
     });
   });
 

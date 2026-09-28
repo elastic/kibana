@@ -10,6 +10,11 @@
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { buildWorkflowExecutionDocument } from './build_workflow_execution_document';
+import {
+  MISSING_EXECUTION_IDENTITY_ERROR_TYPE,
+  MISSING_EXECUTION_IDENTITY_MESSAGE,
+  UNKNOWN_EXECUTION_IDENTITY,
+} from './execution_identity';
 
 const baseWorkflow: WorkflowExecutionEngineModel = {
   id: 'workflow-1',
@@ -37,6 +42,15 @@ const baseParams = {
 };
 
 describe('buildWorkflowExecutionDocument', () => {
+  it('preserves saved-child classification during a test run', () => {
+    expect(
+      buildWorkflowExecutionDocument({
+        ...baseParams,
+        workflow: { ...baseWorkflow, isTestRun: true, isEphemeral: false },
+      })
+    ).toMatchObject({ isTestRun: true, isEphemeral: false });
+  });
+
   it('sets version when workflow has version', () => {
     const workflowExecution = buildWorkflowExecutionDocument({
       ...baseParams,
@@ -73,6 +87,37 @@ describe('buildWorkflowExecutionDocument', () => {
       createdAt: '2024-06-01T12:00:00.000Z',
     });
     expect(workflowExecution.id).toBeDefined();
+  });
+
+  it('fails the execution immediately when no identity is attached', () => {
+    const workflowExecution = buildWorkflowExecutionDocument({
+      ...baseParams,
+      authenticatedUser: undefined,
+    });
+
+    expect(workflowExecution).toMatchObject({
+      status: ExecutionStatus.FAILED,
+      executedBy: UNKNOWN_EXECUTION_IDENTITY,
+      finishedAt: '2024-06-01T12:00:00.000Z',
+      error: {
+        type: MISSING_EXECUTION_IDENTITY_ERROR_TYPE,
+        message: MISSING_EXECUTION_IDENTITY_MESSAGE,
+      },
+    });
+  });
+
+  it('does not treat a real principal named unknown as a missing identity', () => {
+    const workflowExecution = buildWorkflowExecutionDocument({
+      ...baseParams,
+      authenticatedUser: 'unknown',
+    });
+
+    expect(workflowExecution).toMatchObject({
+      status: ExecutionStatus.PENDING,
+      executedBy: 'unknown',
+    });
+    expect(workflowExecution.error).toBeUndefined();
+    expect(workflowExecution.finishedAt).toBeUndefined();
   });
 
   it('copies managed workflow billable metadata', () => {

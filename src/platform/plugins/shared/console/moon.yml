@@ -63,6 +63,9 @@ dependsOn:
   - '@kbn/esql-types'
   - '@kbn/core-application-common'
   - '@kbn/core-chrome-layout-constants'
+  - '@kbn/ui-callout'
+  - '@kbn/core-http-router-server-mocks'
+  - '@kbn/core-http-server'
 tags:
   - plugin
   - prod

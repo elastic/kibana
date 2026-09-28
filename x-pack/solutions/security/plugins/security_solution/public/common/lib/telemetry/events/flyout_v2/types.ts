@@ -199,6 +199,8 @@ export const FLYOUT_ORIGIN = {
   URL_RESTORE: 'url_restore',
   // "Analyze event" row-action button, shared across alerts table, timeline, and rule preview.
   ROW_ACTION: 'row_action',
+  // Clickable alert-id chip in the Attack Summary / Background markdown section.
+  ATTACK_SUMMARY_ALERT: 'attack_summary_alert',
 } as const;
 export type FlyoutOrigin = (typeof FLYOUT_ORIGIN)[keyof typeof FLYOUT_ORIGIN];
 
@@ -237,8 +239,7 @@ export type FlyoutHeaderItem = (typeof FLYOUT_HEADER_ITEM)[keyof typeof FLYOUT_H
  * "Take action" menu.
  */
 export const FLYOUT_ACTION = {
-  ADD_TO_CASE_NEW: 'add_to_case_new',
-  ADD_TO_CASE_EXISTING: 'add_to_case_existing',
+  ADD_TO_CASE: 'add_to_case',
   STATUS_OPEN: 'status_open',
   STATUS_ACKNOWLEDGED: 'status_acknowledged',
   STATUS_CLOSED: 'status_closed',

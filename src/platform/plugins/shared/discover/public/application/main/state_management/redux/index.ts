@@ -17,6 +17,7 @@ export {
   type TabStateGlobalState,
   type RecentlyClosedTabState,
   type DiscoverAppState,
+  type ExpandedDocCascadePath,
   type InternalStateDataRequestParams,
   type CascadedDocumentsState,
   type ProfileAppStateDefaultField,
@@ -46,7 +47,8 @@ export const internalStateActions = {
     'setDefaultProfileAdHocDataViewIds',
     'setAppState',
     'setProfileState',
-    'syncProfileAppStateSnapshot'
+    'syncProfileAppStateSnapshot',
+    'setExpandedDoc'
   ),
   ...actions,
   syncLocallyPersistedTabState,
@@ -94,6 +96,8 @@ export {
   selectCurrentProfileStateDefinition,
   selectCurrentProfileUrlState,
   selectCurrentProfileLocatorState,
+  selectCurrentTabType,
+  selectTabTypeForPersistence,
   selectIsDataViewUsedInMultipleRuntimeTabStates,
   selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,

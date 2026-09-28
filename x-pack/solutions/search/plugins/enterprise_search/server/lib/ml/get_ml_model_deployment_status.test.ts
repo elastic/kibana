@@ -23,7 +23,7 @@ describe('getMlModelDeploymentStatus', () => {
   });
 
   it('should error when there is no trained model provider', async () => {
-    await expect(() => getMlModelDeploymentStatus('mockModelName', undefined)).rejects.toThrowError(
+    await expect(() => getMlModelDeploymentStatus('mockModelName', undefined)).rejects.toThrow(
       'Machine Learning is not enabled'
     );
   });

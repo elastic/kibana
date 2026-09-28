@@ -258,7 +258,7 @@ export function useTriggerEventTableConfig(
               defaultMessage: 'documents',
             })}
             <EuiIconTip
-              type="iInCircle"
+              type="info"
               css={{ marginLeft: euiTheme.size.xs }}
               content={i18n.translate(
                 'workflows.workflowExecuteEventTriggerForm.cappedDocumentCountTooltip',

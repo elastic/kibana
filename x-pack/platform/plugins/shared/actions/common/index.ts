@@ -79,6 +79,11 @@ export { validateEmptyStrings } from './validate_empty_strings';
 
 export const BASE_ACTION_API_PATH = '/api/actions';
 export const INTERNAL_BASE_ACTION_API_PATH = '/internal/actions';
+export {
+  buildInboundEventsPath,
+  buildInboundEventsUrl,
+  INBOUND_EVENTS_TOKEN_MAX_LENGTH,
+} from './inbound_events';
 export const ACTIONS_FEATURE_ID = 'actions';
 
 export const DEFAULT_MICROSOFT_EXCHANGE_URL = 'https://login.microsoftonline.com';
@@ -91,6 +96,8 @@ export const DEFAULT_MICROSOFT_GRAPH_API_SCOPE = 'https://graph.microsoft.com/.d
 export const MAX_EMAIL_BODY_LENGTH = 25 * 1000 * 1000; // 25MB
 
 export const CONNECTOR_ID_MAX_LENGTH = 36;
+export const CONNECTOR_NAME_MAX_LENGTH = 1024;
+export const CONNECTOR_CONFIG_KEY_MAX_LENGTH = 1024;
 export const ISO_DATE_MAX_LENGTH = 100;
 export const MAX_EXECUTION_FILTER_LENGTH = 8192;
 export const MAX_FEATURE_ID_LENGTH = 100;

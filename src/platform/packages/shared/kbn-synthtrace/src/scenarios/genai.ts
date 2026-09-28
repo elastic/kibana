@@ -489,6 +489,22 @@ const OVERLIMIT_OUTPUT_MESSAGES = [
 ];
 
 // ---------------------------------------------------------------------------
+// Service 12: Partially-indexed message array
+// These fields are multi-valued and `ignore_above` drops only the over-long
+// elements, so the indexed value is a non-null PARTIAL array — the short system
+// message survives while the long user message is dropped. The UI cannot detect
+// this by checking for an absent value; it has to re-read the whole field.
+// ---------------------------------------------------------------------------
+
+const PARTIAL_INPUT_MESSAGES = [
+  JSON.stringify({
+    role: 'system',
+    content: 'You are a concise assistant. Answer in at most three sentences.',
+  }),
+  OVERLIMIT_INPUT_MESSAGES[1],
+];
+
+// ---------------------------------------------------------------------------
 // Scenario
 // ---------------------------------------------------------------------------
 
@@ -1020,6 +1036,55 @@ const scenario: Scenario<ApmOtelFields> = async () => {
         );
 
       // =================================================================
+      // Service 12: Partially-indexed array — `fields` returns a non-null
+      // PARTIAL array, so recovery must replace the whole field.
+      // =================================================================
+      const partialInstance = apm
+        .otelService({
+          name: 'genai-partial-service',
+          namespace: ENVIRONMENT,
+          sdkLanguage: 'python',
+          sdkName: 'opentelemetry',
+          distro: 'elastic',
+        })
+        .instance('partial-instance-1');
+
+      const partialSpans = range
+        .interval('13s')
+        .rate(1)
+        .generator((timestamp) =>
+          partialInstance
+            .span({ name: 'POST /v1/chat/completions', kind: 'Server' })
+            .overrides({
+              'attributes.http.request.method': 'POST',
+              'attributes.url.path': '/v1/chat/completions',
+              'attributes.http.response.status_code': 200,
+              'attributes.gen_ai.operation.name': 'chat',
+              'attributes.gen_ai.system': 'openai',
+              'attributes.gen_ai.provider.name': 'openai',
+              'attributes.gen_ai.request.model': 'gpt-4o',
+              'attributes.gen_ai.response.model': 'gpt-4o-2024-08-06',
+              'attributes.gen_ai.usage.input_tokens': 8100,
+              'attributes.gen_ai.usage.output_tokens': 90,
+              'attributes.gen_ai.request.temperature': 0.2,
+              'attributes.gen_ai.response.id': 'chatcmpl-partial-001',
+              'attributes.gen_ai.response.finish_reasons': ['stop'],
+              'attributes.gen_ai.conversation.id': 'conv-partial-001',
+              'attributes.gen_ai.input.messages': PARTIAL_INPUT_MESSAGES,
+              'attributes.gen_ai.output.messages': [
+                JSON.stringify({
+                  role: 'assistant',
+                  content:
+                    'Roll back event-processor to v2.14.3 immediately. The v2.15.0 parallel batch processor spawns unbounded goroutines that exhaust the Redis connection pool. Cap concurrency with a semaphore before re-deploying.',
+                }),
+              ],
+            })
+            .timestamp(timestamp)
+            .duration(9800)
+            .success()
+        );
+
+      // =================================================================
       // Service 8: Non-GenAI HTTP service — GenAI tab must NOT appear.
       // =================================================================
       const regularInstance = apm
@@ -1060,6 +1125,7 @@ const scenario: Scenario<ApmOtelFields> = async () => {
           realworldSpans,
           maxlenSpans,
           overlimitSpans,
+          partialSpans,
           regularSpans,
         ]),
       ];

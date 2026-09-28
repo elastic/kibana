@@ -24,6 +24,7 @@ export const useDefaultDocumentFlyoutProperties = (): OverlaySystemFlyoutOpenOpt
       paddingSize: 'm',
       resizable: true,
       size: 's',
+      flyoutMenuDisplayMode: 'always',
     }),
     [euiTheme.breakpoint.xl, euiTheme.base]
   );
@@ -42,6 +43,7 @@ export const useDefaultToolsFlyoutProperties = (): OverlaySystemFlyoutOpenOption
       paddingSize: 'm',
       resizable: true,
       size: 'm',
+      flyoutMenuDisplayMode: 'always',
     }),
     [euiTheme.base]
   );

@@ -23,6 +23,7 @@ describe('defaults', () => {
     'filter_journeys.tags': [],
     form_monitor_type: 'multistep',
     ignore_https_errors: false,
+    certificate_error_spki_allowlist: [],
     journey_id: '',
     locations: [
       {
@@ -86,6 +87,7 @@ describe('defaults', () => {
       'filter_journeys.tags': [],
       form_monitor_type: 'multistep',
       ignore_https_errors: false,
+      certificate_error_spki_allowlist: [],
       journey_id: '',
       locations: [
         {
@@ -156,6 +158,7 @@ describe('defaults', () => {
     [MonitorTypeEnum.TCP, FormMonitorType.TCP],
     [MonitorTypeEnum.ICMP, FormMonitorType.ICMP],
     [MonitorTypeEnum.BROWSER, FormMonitorType.MULTISTEP],
+    [MonitorTypeEnum.API, FormMonitorType.API],
   ])(
     'correctly formats legacy uptime monitors to include ConfigKey.FORM_MONITOR_TYPE',
     (dataStream, formType) => {

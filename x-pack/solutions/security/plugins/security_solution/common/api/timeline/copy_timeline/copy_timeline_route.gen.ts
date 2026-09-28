@@ -24,7 +24,9 @@ export const CopyTimelineRequestBody = lazySchema(() =>
     /**
      * The `savedObjectId` of the timeline or template to duplicate.
      */
-    timelineIdToCopy: z.string(),
+    timelineIdToCopy: z
+      .string()
+      .describe('The `savedObjectId` of the timeline or template to duplicate.'),
   })
 );
 export type CopyTimelineRequestBody = z.infer<typeof CopyTimelineRequestBody>;

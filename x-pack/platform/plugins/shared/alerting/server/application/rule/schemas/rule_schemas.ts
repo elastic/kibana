@@ -218,6 +218,7 @@ export const ruleDomainSchema = schema.object({
   apiKeyOwner: schema.nullable(schema.string()),
   apiKeyCreatedByUser: schema.maybe(schema.nullable(schema.boolean())),
   uiamApiKey: schema.maybe(schema.nullable(schema.string())),
+  uiamApiKeyExternal: schema.maybe(schema.nullable(schema.boolean())),
   throttle: schema.maybe(schema.nullable(schema.string())),
   muteAll: schema.boolean(),
   notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),

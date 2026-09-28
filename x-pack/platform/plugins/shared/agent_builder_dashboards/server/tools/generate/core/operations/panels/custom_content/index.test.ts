@@ -71,18 +71,7 @@ describe('customContentPanelDefinition', () => {
   });
 
   describe('editCustomContentPanelConfigInputSchema', () => {
-    it('accepts a valid edit payload with template', () => {
-      expect(
-        editCustomContentPanelConfigInputSchema.safeParse({
-          source: 'config',
-          type: 'custom_content',
-          panelId: 'cc-1',
-          config: { prompt: 'Updated KPI', template: '<div>{{ row["value"].value }}</div>' },
-        }).success
-      ).toBe(true);
-    });
-
-    it('accepts a valid edit payload without template (triggers regeneration)', () => {
+    it('accepts a prompt-only edit (server regenerates template)', () => {
       expect(
         editCustomContentPanelConfigInputSchema.safeParse({
           source: 'config',
@@ -91,6 +80,28 @@ describe('customContentPanelDefinition', () => {
           config: { prompt: 'Updated KPI' },
         }).success
       ).toBe(true);
+    });
+
+    it('accepts an esqlQuery-only edit (keeps existing prompt, server regenerates template)', () => {
+      expect(
+        editCustomContentPanelConfigInputSchema.safeParse({
+          source: 'config',
+          type: 'custom_content',
+          panelId: 'cc-1',
+          config: { esqlQuery: 'FROM logs-* | STATS count = COUNT(*)' },
+        }).success
+      ).toBe(true);
+    });
+
+    it('rejects empty config (a no-op update would silently change nothing)', () => {
+      expect(
+        editCustomContentPanelConfigInputSchema.safeParse({
+          source: 'config',
+          type: 'custom_content',
+          panelId: 'cc-1',
+          config: {},
+        }).success
+      ).toBe(false);
     });
 
     it('rejects when panelId is missing', () => {
@@ -103,30 +114,16 @@ describe('customContentPanelDefinition', () => {
       ).toBe(false);
     });
 
-    it('rejects when prompt is missing from config', () => {
-      expect(
-        editCustomContentPanelConfigInputSchema.safeParse({
-          source: 'config',
-          type: 'custom_content',
-          panelId: 'cc-1',
-          config: {},
-        }).success
-      ).toBe(false);
-    });
-
-    it('rejects a template containing a script tag', () => {
+    it('strips unknown fields from config (template is server-generated, not user-supplied)', () => {
       const result = editCustomContentPanelConfigInputSchema.safeParse({
         source: 'config',
         type: 'custom_content',
         panelId: 'cc-1',
-        config: {
-          prompt: 'Updated KPI',
-          template: '<div>hello</div><script>alert(1)</script>',
-        },
+        config: { prompt: 'Updated KPI', template: '<div>{{ row["value"].value }}</div>' },
       });
 
-      expect(result.success).toBe(false);
-      expect(JSON.stringify(result.error)).toMatch(/script/i);
+      expect(result.success).toBe(true);
+      expect((result.data?.config as Record<string, unknown>).template).toBeUndefined();
     });
   });
 

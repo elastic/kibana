@@ -6,6 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
+import semver from 'semver';
 import { schema } from '@kbn/config-schema';
 import {
   bufferCount,
@@ -88,6 +89,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   private telemetryConfigProvider?: TelemetryConfigProvider;
   private integrationResolver?: IntegrationResolver;
   private isServerless = false;
+  private stackVersion = '';
 
   constructor(logger: Logger) {
     const mdc = { task_id: TASK_ID, task_type: TASK_TYPE };
@@ -97,6 +99,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   public setup(setup: HealthDiagnosticServiceSetup) {
     this.logger.debug('Setting up health diagnostic service');
     this.isServerless = setup.isServerless;
+    this.stackVersion = setup.stackVersion;
 
     this.registerTask(setup.taskManager);
   }
@@ -174,7 +177,6 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       numDocs: 0,
       passed: false,
       fieldNames: [],
-      descriptorVersion: 'version' in query ? query.version : 0,
       status: 'skipped',
       skipReason: skipped.reason,
     };
@@ -220,7 +222,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     const now = new Date();
 
     return new Promise<HealthDiagnosticQueryStats>((resolve) => {
-      const queryStats: HealthDiagnosticQueryStats = queryStat(query.name, now, query.version);
+      const queryStats: HealthDiagnosticQueryStats = queryStat(query.name, now);
       let currentPage = 0;
 
       query$
@@ -421,12 +423,37 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       } as LogMeta);
       try {
         if (this.isParseFailureQuery(query)) {
-          // let it pass the filter to send the stats, i.e. this kind of query will be always
-          // skipped in the execution phase, but we want to report it in the stats with the
-          // parse failure reason.
+          if (query.failureReason === 'unknown_version') {
+            this.logger.debug('Skipping query with unknown version (future descriptor)', {
+              queryId: (query as { id?: string }).id,
+              name: query.name,
+            } as LogMeta);
+            return false;
+          }
+          // invalid_descriptor: let it pass so a skipped stat is reported in telemetry.
           return true;
         }
-        const { name, scheduleCron, enabled } = query;
+        const { name, scheduleCron, enabled, expiresAt, stackVersions } = query;
+        if (expiresAt !== undefined && now.getTime() >= new Date(expiresAt).getTime()) {
+          this.logger.debug('Skipping expired health diagnostic query', {
+            queryId: (query as { id?: string }).id,
+            name,
+            expiresAt,
+          } as LogMeta);
+          return false;
+        }
+        if (stackVersions !== undefined) {
+          // e.g. '9.6.0-SNAPSHOT' -> '9.6.0'
+          const coerced = semver.coerce(this.stackVersion)?.version ?? this.stackVersion;
+          if (!semver.satisfies(coerced, stackVersions)) {
+            this.logger.debug('Skipping health diagnostic query outside stack-version window', {
+              queryId: (query as { id?: string }).id,
+              name,
+              stackVersions,
+            } as LogMeta);
+            return false;
+          }
+        }
         const lastExecutedAt = new Date(lastExecutionByQuery[name] ?? 0);
         return enabled && isDueForExecution(lastExecutedAt, now, scheduleCron);
       } catch (error) {

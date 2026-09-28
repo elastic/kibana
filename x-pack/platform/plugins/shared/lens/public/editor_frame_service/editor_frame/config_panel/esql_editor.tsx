@@ -9,6 +9,7 @@ import { css } from '@emotion/react';
 import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { getRepresentativeQuery } from '@kbn/lens-common';
 import { useFetchContext } from '@kbn/presentation-publishing';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { isEqual } from 'lodash';
@@ -84,10 +85,11 @@ export function ESQLEditor({
   updateSuggestion,
   onTextBasedQueryStateChange,
 }: ESQLEditorProps) {
-  const prevQuery = useRef<AggregateQuery | Query>(attributes?.state.query || { esql: '' });
-  const [query, setQuery] = useState<AggregateQuery | Query>(
-    attributes?.state.query || { esql: '' }
-  );
+  // recomputed every render but only read by the useRef/useState initializers
+  // below — do not hoist into a memo, later renders intentionally ignore it
+  const initialQuery = getRepresentativeQuery(attributes) || { esql: '' };
+  const prevQuery = useRef<AggregateQuery | Query>(initialQuery);
+  const [query, setQuery] = useState<AggregateQuery | Query>(initialQuery);
 
   const { visualizationMap, datasourceMap } = useEditorFrameService();
   const { visualization } = useLensSelector((state) => state.lens);
@@ -97,9 +99,7 @@ export function ESQLEditor({
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
   const [errors, setErrors] = useState<Error[]>([]);
-  const [submittedQuery, setSubmittedQuery] = useState<AggregateQuery | Query>(
-    attributes?.state.query || { esql: '' }
-  );
+  const [submittedQuery, setSubmittedQuery] = useState<AggregateQuery | Query>(initialQuery);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
   const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
@@ -168,6 +168,15 @@ export function ESQLEditor({
         currentAttributesRef.current,
         isApproximate
       );
+      // An aborted run (e.g. the user clicked "Cancel", or a re-render tore
+      // down the request) produced no result. Bail out *without* recording the
+      // query as submitted: `onTextLangQuerySubmit` skips queries equal to
+      // `prevQuery.current`, so marking an aborted run here would silently
+      // drop every future resubmission of the same query text.
+      if (abortController?.signal.aborted) {
+        setIsVisualizationLoading(false);
+        return;
+      }
       if (attrs) {
         setCurrentAttributes?.(attrs);
         updateSuggestion?.(attrs);
@@ -280,6 +289,7 @@ export function ESQLEditor({
         queryStats={esqlQueryStats}
         closeFlyout={closeFlyout}
         panelId={panelId}
+        layerId={layerId}
         attributes={attributes}
         parentApi={parentApi}
       />
@@ -327,7 +337,7 @@ type InnerEditorProps = Simplify<
     adHocDataViews: DataViewSpec[];
     esqlVariables: ESQLControlVariable[] | undefined;
     queryStats?: ESQLQueryStats;
-  } & Pick<LayerPanelProps, 'attributes' | 'parentApi' | 'panelId' | 'closeFlyout'>
+  } & Pick<LayerPanelProps, 'attributes' | 'parentApi' | 'panelId' | 'layerId' | 'closeFlyout'>
 >;
 
 function InnerESQLEditor({
@@ -338,6 +348,7 @@ function InnerESQLEditor({
   attributes,
   parentApi,
   panelId,
+  layerId,
   closeFlyout,
   setQuery,
   isVisualizationLoading,
@@ -352,6 +363,7 @@ function InnerESQLEditor({
   const { onSaveControl, onCancelControl } = useESQLVariables({
     parentApi,
     panelId,
+    layerId,
     attributes,
     closeFlyout,
   });

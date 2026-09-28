@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/278431
-type: bug-fix
-products:
-- product: cloud-serverless
-  target: 2026-08-12
-- product: kibana
-title: Fix SIEM migration rules stuck partially translated after index pattern update
-description: "Fixes an issue where partially translated SIEM migration rules did not update to \"Translated\" status after updating their missing index pattern."

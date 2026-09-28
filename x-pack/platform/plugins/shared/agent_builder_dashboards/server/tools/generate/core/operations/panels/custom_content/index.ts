@@ -10,72 +10,33 @@ import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
-  CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
-  CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
-  CUSTOM_CONTENT_SCRIPT_PATTERN,
-  customContentStateSchema,
+  customContentUpdateSchema,
 } from '@kbn/custom-content-common';
 import { z } from '@kbn/zod/v4';
 import { definePanelType } from '../panel_type';
 
-/** Create schema: no template — the embeddable generates it via the generate route. */
-export const customContentPanelConfigSchema = customContentStateSchema
-  .omit({ template: true })
-  .extend({
-    prompt: z
-      .string()
-      .min(1)
-      .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
-      .describe(
-        'Natural language description of what to display. The embeddable generates a visually consistent HTML template from this prompt using EUI color tokens for the active theme — do not supply a template yourself on create.'
-      ),
-    esqlQuery: z
-      .string()
-      .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
-      .optional()
-      .describe(
-        'ES|QL query whose results are passed to the generated template as row objects. Omit for static content.'
-      ),
-  });
-
-/** Edit schema: includes template so the agent can modify the existing generated template. */
-const customContentEditConfigSchema = customContentStateSchema.extend({
+/** Create schema: no template — the server generates it server-side during the tool call. */
+export const customContentPanelConfigSchema = z.object({
   prompt: z
     .string()
     .min(1)
     .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
-    .describe('Updated natural language description of what to display.'),
-  template: z
-    .string()
-    .max(CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH)
-    .check((ctx) => {
-      if (CUSTOM_CONTENT_SCRIPT_PATTERN.test(ctx.value)) {
-        ctx.issues.push({
-          code: 'custom',
-          message: 'Template was rejected: JavaScript (<script> tags) is not allowed.',
-          input: ctx.value,
-        });
-      }
-      if (Buffer.byteLength(ctx.value, 'utf8') > CUSTOM_CONTENT_MAX_TEMPLATE_BYTES) {
-        ctx.issues.push({
-          code: 'custom',
-          message: `Template exceeds the ${CUSTOM_CONTENT_MAX_TEMPLATE_BYTES}-byte limit.`,
-          input: ctx.value,
-        });
-      }
-    })
-    .optional()
     .describe(
-      'The existing LiquidJS HTML template from the panel state, modified to reflect the requested changes. Carry it over from the current panel config and apply targeted edits — do not rewrite from scratch. Omit only if removing the stored template intentionally so the embeddable regenerates from prompt.'
+      'Natural language description of what to display. A visually consistent HTML template is generated server-side from this prompt — do not supply a template yourself.'
     ),
   esqlQuery: z
     .string()
     .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
     .optional()
     .describe(
-      'ES|QL query. Carry over from the existing panel config unless the request changes the data source.'
+      'ES|QL query whose results are passed to the generated template as row objects. Omit for static content. Build it with the generate_esql tool rather than writing it yourself — the server runs the query to sample its schema and fails the panel if Elasticsearch refuses it.'
     ),
 });
+
+export type CustomContentPanelConfig = z.output<typeof customContentPanelConfigSchema>;
+
+/** Edit schema: prompt and esqlQuery only — template is generated server-side. */
+const customContentEditConfigSchema = customContentUpdateSchema;
 
 /**
  * The custom_content variant of a `config`-source panel input, discriminated by
@@ -93,7 +54,7 @@ export const editCustomContentPanelConfigInputSchema = z.object({
   type: z.literal('custom_content'),
   panelId: z.string().max(256).describe('Existing custom_content panel id to update.'),
   config: customContentEditConfigSchema.describe(
-    'Updated config. Carry over prompt, template, and esqlQuery from the existing panel and apply only the requested changes.'
+    'Updated config. Supply only the fields that change. The server refines the existing template based on the merged prompt and esqlQuery — preserving layout and design where possible.'
   ),
 });
 

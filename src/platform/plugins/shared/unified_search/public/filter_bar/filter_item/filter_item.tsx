@@ -69,8 +69,6 @@ export type FilterLabelStatus =
   | typeof FILTER_ITEM_WARNING
   | typeof FILTER_ITEM_ERROR;
 
-export const FILTER_EDITOR_WIDTH = 1200;
-
 const FILTER_ITEM_MENU = 'menu';
 const FILTER_ITEM_EDITOR = 'editFilter';
 
@@ -380,6 +378,12 @@ export function FilterItemComponent(props: FilterItemProps) {
 
 export const FilterItem = withCloseFilterEditorConfirmModal(FilterItemComponent);
 
+export const getFilterItemEditorContainerStyle = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    width: 1200,
+    maxWidth: '100%',
+  });
+
 const filterItemStyles = {
   /** @todo important style should be remove after fixing elastic/eui/issues/6314. */
   popoverDragAndDrop: (euiThemeContext: UseEuiTheme) =>
@@ -390,11 +394,7 @@ const filterItemStyles = {
       filter: none !important;
       ${euiShadowMedium(euiThemeContext)}
     `,
-  filterItemEditorContainer: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      width: FILTER_EDITOR_WIDTH,
-      maxWidth: '100%',
-    }),
+  filterItemEditorContainer: getFilterItemEditorContainerStyle,
   filterItem: ({ euiTheme }: UseEuiTheme) =>
     css({
       lineHeight: euiTheme.size.base,

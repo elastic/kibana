@@ -18,9 +18,9 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/connector_events_bridge
 dependsOn:
   - '@kbn/core'
+  - '@kbn/actions-plugin'
   - '@kbn/workflows-extensions'
-  - '@kbn/core-http-server-utils'
-  - '@kbn/core-spaces-common'
+  - '@kbn/core-http-server-mocks'
 tags:
   - plugin
   - prod

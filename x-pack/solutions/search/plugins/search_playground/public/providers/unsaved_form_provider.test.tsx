@@ -13,11 +13,11 @@ import { useLLMsModels } from '../hooks/use_llms_models';
 import * as ReactHookForm from 'react-hook-form';
 import type { PlaygroundForm } from '../types';
 import { PlaygroundFormFields } from '../types';
-import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useSearchParams } from '@kbn/shared-ux-router';
 
 jest.mock('../hooks/use_load_fields_by_indices');
 jest.mock('../hooks/use_llms_models');
-jest.mock('react-router-dom-v5-compat', () => ({
+jest.mock('@kbn/shared-ux-router', () => ({
   useSearchParams: jest.fn(() => [{ get: jest.fn() }]),
 }));
 jest.mock('../hooks/use_indices_validation', () => ({

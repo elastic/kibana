@@ -12,6 +12,7 @@ import { getCommentAttachmentType } from '../attachments/comment';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { basicCase, getUserAction } from '../../containers/mock';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
+import { allCasesPermissions } from '../../common/mock';
 import type { UserActionBuilderArgs } from './types';
 import type { CommentRenderingContextValue } from './comment/comment_rendering_context';
 import { casesConfigurationsMock } from '../../containers/configure/mock';
@@ -32,6 +33,7 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
     userProfiles: userProfilesMap,
     currentUserProfile: userProfiles[0],
     unifiedAttachmentTypeRegistry,
+    permissions: allCasesPermissions(),
     caseData: basicCase,
     casesConfiguration: casesConfigurationsMock,
     attachments: basicCase.comments,

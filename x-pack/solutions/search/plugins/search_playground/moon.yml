@@ -71,6 +71,8 @@ dependsOn:
   - '@kbn/evals-plugin'
   - '@kbn/core-chrome-browser'
   - '@kbn/ui-callout'
+  - '@kbn/app-header'
+  - '@kbn/core-chrome-browser-context-mocks'
 tags:
   - plugin
   - prod

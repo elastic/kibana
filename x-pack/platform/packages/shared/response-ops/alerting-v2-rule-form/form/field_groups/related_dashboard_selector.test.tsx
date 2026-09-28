@@ -125,7 +125,7 @@ describe('RelatedDashboardSelector', () => {
         expect.objectContaining({
           id: expect.stringMatching(/^dashboard-/),
           type: DASHBOARD_ARTIFACT_TYPE,
-          data: { dashboardId: DASHBOARD_ID },
+          data: { dashboard_id: DASHBOARD_ID },
         }),
       ]);
     });
@@ -165,7 +165,7 @@ describe('RelatedDashboardSelector', () => {
             {
               id: 'dashboard-id',
               type: DASHBOARD_ARTIFACT_TYPE,
-              data: { dashboardId: DASHBOARD_ID },
+              data: { dashboard_id: DASHBOARD_ID },
             },
           ],
         }),
@@ -197,12 +197,12 @@ describe('RelatedDashboardSelector', () => {
             {
               id: 'dashboard-id',
               type: DASHBOARD_ARTIFACT_TYPE,
-              data: { dashboardId: DASHBOARD_ID },
+              data: { dashboard_id: DASHBOARD_ID },
             },
             {
               id: 'missing-dashboard-id',
               type: DASHBOARD_ARTIFACT_TYPE,
-              data: { dashboardId: MISSING_DASHBOARD_ID },
+              data: { dashboard_id: MISSING_DASHBOARD_ID },
             },
           ],
         }),
@@ -236,12 +236,12 @@ describe('RelatedDashboardSelector', () => {
             {
               id: 'dashboard-id',
               type: DASHBOARD_ARTIFACT_TYPE,
-              data: { dashboardId: DASHBOARD_ID },
+              data: { dashboard_id: DASHBOARD_ID },
             },
             {
               id: 'missing-dashboard-id',
               type: DASHBOARD_ARTIFACT_TYPE,
-              data: { dashboardId: MISSING_DASHBOARD_ID },
+              data: { dashboard_id: MISSING_DASHBOARD_ID },
             },
           ],
         }),

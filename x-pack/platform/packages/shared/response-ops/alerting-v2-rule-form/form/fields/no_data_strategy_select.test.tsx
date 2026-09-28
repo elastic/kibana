@@ -22,7 +22,9 @@ describe('NoDataStrategySelect', () => {
 
   it('displays the correct text for each strategy value', () => {
     const { rerender } = render(<NoDataStrategySelect value="recover" onChange={jest.fn()} />);
-    expect(screen.getByTestId('ruleV2NoDataStrategySelect')).toHaveTextContent('Recover');
+    expect(screen.getByTestId('ruleV2NoDataStrategySelect')).toHaveTextContent(
+      'Recover immediately'
+    );
 
     rerender(<NoDataStrategySelect value="none" onChange={jest.fn()} />);
     expect(screen.getByTestId('ruleV2NoDataStrategySelect')).toHaveTextContent('Do nothing');
@@ -43,7 +45,7 @@ describe('NoDataStrategySelect', () => {
     render(<NoDataStrategySelect value="last_known_status" onChange={onChange} />);
 
     await user.click(screen.getByTestId('ruleV2NoDataStrategySelect'));
-    await user.click(screen.getByText('Recover'));
+    await user.click(screen.getByText('Recover immediately'));
 
     expect(onChange).toHaveBeenCalledWith('recover');
   });

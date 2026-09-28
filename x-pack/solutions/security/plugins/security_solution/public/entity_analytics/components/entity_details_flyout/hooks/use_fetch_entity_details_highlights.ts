@@ -139,9 +139,8 @@ export const useFetchEntityDetailsHighlights = ({
   // from the stored summary once it becomes available, but only if the user hasn't
   // already generated a fresh one.
   useEffect(() => {
-    if (storedSummary && !userTriggeredGeneration.current) {
-      setAssistantResult(buildResultFromStoredSummary(storedSummary));
-    }
+    if (userTriggeredGeneration.current) return;
+    setAssistantResult(storedSummary ? buildResultFromStoredSummary(storedSummary) : null);
   }, [storedSummary]);
 
   useEffect(() => {

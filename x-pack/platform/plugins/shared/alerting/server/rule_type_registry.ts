@@ -14,7 +14,7 @@ import type { Logger } from '@kbn/core/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { stateSchemaByVersion } from '@kbn/alerting-state-types';
-import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task';
+import { TaskCost, TaskPriority, TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
 import type { TaskRunnerFactory } from './task_runner';
 import type {
   RuleType,
@@ -278,7 +278,7 @@ export class RuleTypeRegistry {
     }
 
     if (ruleType.priority) {
-      if (![TaskPriority.Normal, TaskPriority.NormalLongRunning].includes(ruleType.priority)) {
+      if (![TaskPriority.Standard, TaskPriority.Deferrable].includes(ruleType.priority)) {
         throw new Error(
           i18n.translate('xpack.alerting.ruleTypeRegistry.register.invalidPriorityRuleTypeError', {
             defaultMessage: 'Rule type "{id}" has invalid priority: {errorMessage}.',
@@ -316,6 +316,7 @@ export class RuleTypeRegistry {
         priority: ruleType.priority,
         timeout: ruleType.ruleTaskTimeout,
         stateSchemaByVersion,
+        taskTypeGroup: TaskTypeGroup.Alerting,
         createTaskRunner: (context: RunContext) =>
           this.taskRunnerFactory.create<
             Params,

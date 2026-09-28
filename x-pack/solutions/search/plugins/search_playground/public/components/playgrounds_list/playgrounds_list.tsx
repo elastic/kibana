@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -67,6 +69,20 @@ export const PlaygroundsList = () => {
     },
     []
   );
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      primaryActionItem: {
+        id: 'newPlayground',
+        label: i18n.translate('xpack.searchPlayground.playgroundsList.page.cta.text', {
+          defaultMessage: 'New Playground',
+        }),
+        iconType: 'plusCircle',
+        testId: 'newPlaygroundButton',
+        run: onNewPlayground,
+      },
+    }),
+    [onNewPlayground]
+  );
 
   if (isLoading) {
     return <PlaygroundsListLoading />;
@@ -101,24 +117,12 @@ export const PlaygroundsList = () => {
 
   return (
     <>
-      <KibanaPageTemplate.Header
-        pageTitle={PLUGIN_NAME}
+      <AppHeader
+        title={PLUGIN_NAME}
         description={i18n.translate('xpack.searchPlayground.playgroundsList.page.description', {
           defaultMessage: 'Use your data to experiment with creating a chat experience.',
         })}
-        rightSideItems={[
-          <EuiButton
-            data-test-subj="newPlaygroundButton"
-            fill
-            iconType="plusCircle"
-            onClick={onNewPlayground}
-          >
-            <FormattedMessage
-              id="xpack.searchPlayground.playgroundsList.page.cta.text"
-              defaultMessage="New Playground"
-            />
-          </EuiButton>,
-        ]}
+        menu={menu}
       />
       <KibanaPageTemplate.Section color="plain">
         <PlaygroundDeprecationNotice />

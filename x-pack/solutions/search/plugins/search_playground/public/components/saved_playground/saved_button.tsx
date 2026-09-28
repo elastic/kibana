@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getErrorMessage } from '../../../common/errors';
 import type { SavedPlaygroundForm } from '../../types';
@@ -21,11 +19,15 @@ import {
 } from '../../utils/saved_playgrounds';
 import { useKibana } from '../../hooks/use_kibana';
 
-export interface SavedPlaygroundSaveButtonProps {
-  hasChanges: boolean;
+export interface UseSavedPlaygroundSaveActionResult {
+  onSave: () => void;
+  isDisabled: boolean;
+  isSaving: boolean;
 }
 
-export const SavedPlaygroundSaveButton = ({ hasChanges }: SavedPlaygroundSaveButtonProps) => {
+export const useSavedPlaygroundSaveAction = (
+  hasChanges: boolean
+): UseSavedPlaygroundSaveActionResult => {
   const { playgroundId } = useSavedPlaygroundParameters();
   const { notifications } = useKibana().services;
   const {
@@ -36,52 +38,33 @@ export const SavedPlaygroundSaveButton = ({ hasChanges }: SavedPlaygroundSaveBut
   const { updateSavedPlayground, isLoading: isSaving } = useUpdateSavedPlayground();
   const hasErrors = hasSavedPlaygroundFormErrors(formErrors);
 
-  const onSave = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
-
-      const formData = getValues();
-      updateSavedPlayground(
-        {
-          playgroundId,
-          playground: buildSavedPlaygroundFromForm(formData),
+  const onSave = useCallback(() => {
+    const formData = getValues();
+    updateSavedPlayground(
+      {
+        playgroundId,
+        playground: buildSavedPlaygroundFromForm(formData),
+      },
+      {
+        onSuccess: () => {
+          reset(formData);
         },
-        {
-          onSuccess: () => {
-            reset(formData);
-          },
-          onError: (error) => {
-            const errorMessage = getErrorMessage(error);
-            notifications.toasts.addError(
-              error instanceof Error ? error : new Error(errorMessage),
-              {
-                title: i18n.translate('xpack.searchPlayground.savedPlayground.updateError.title', {
-                  defaultMessage: 'Error updating playground',
-                }),
-                toastMessage: errorMessage,
-              }
-            );
-          },
-        }
-      );
-    },
-    [playgroundId, getValues, reset, updateSavedPlayground, notifications]
-  );
+        onError: (error) => {
+          const errorMessage = getErrorMessage(error);
+          notifications.toasts.addError(error instanceof Error ? error : new Error(errorMessage), {
+            title: i18n.translate('xpack.searchPlayground.savedPlayground.updateError.title', {
+              defaultMessage: 'Error updating playground',
+            }),
+            toastMessage: errorMessage,
+          });
+        },
+      }
+    );
+  }, [playgroundId, getValues, reset, updateSavedPlayground, notifications]);
 
-  return (
-    <EuiButton
-      data-test-subj="saved-playground-save-button"
-      size="s"
-      iconType="save"
-      fill
-      isDisabled={!hasChanges || hasErrors || isSaving}
-      isLoading={isSaving}
-      onClick={onSave}
-    >
-      <FormattedMessage
-        id="xpack.searchPlayground.savedPlayground.header.saveButton.text"
-        defaultMessage="Save"
-      />
-    </EuiButton>
-  );
+  return {
+    onSave,
+    isDisabled: !hasChanges || hasErrors || isSaving,
+    isSaving,
+  };
 };

@@ -7,6 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    ".storybook/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
@@ -20,7 +21,9 @@
     "@kbn/features-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/app-header",
-    "@kbn/core-doc-links-browser"
+    "@kbn/core-doc-links-browser",
+    "@kbn/ui-callout",
+    "@kbn/storybook",
   ],
   "exclude": [
     "target/**/*",

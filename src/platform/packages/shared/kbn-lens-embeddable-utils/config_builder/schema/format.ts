@@ -9,7 +9,7 @@
 
 import { z } from '@kbn/zod';
 import { LENS_FORMAT_NUMBER_DECIMALS_DEFAULT, LENS_FORMAT_COMPACT_DEFAULT } from './constants';
-import { durationFormatSchema, legacyDurationFormatSchema } from './duration_units';
+import { durationFormatSchema } from './duration_units';
 
 const numericFormatSchema = z
   .object({
@@ -38,7 +38,7 @@ const numericFormatSchema = z
   })
   .strict()
   .meta({
-    id: 'numericFormat',
+    id: 'visNumericFormat',
     title: 'Numeric Format',
     description:
       'Number or percentage format with optional decimal places, suffix, and compact notation.',
@@ -64,7 +64,7 @@ const byteFormatSchema = z
   })
   .strict()
   .meta({
-    id: 'byteFormat',
+    id: 'visByteFormat',
     title: 'Byte Format',
     description: 'Data size format in bits or bytes, with optional decimal places and suffix.',
   });
@@ -81,27 +81,18 @@ const customFormatSchema = z
   })
   .strict()
   .meta({
-    id: 'customFormat',
+    id: 'visCustomFormat',
     title: 'Custom Format',
     description: 'Custom format using a Kibana field format pattern string.',
   });
 
 /**
  * Format configuration for dimension values.
- * Accepts both GA and legacy unit names for the `duration` type so that neither is rejected at
- * the HTTP validation layer. The route handlers enforce exactly one set at runtime based on the
- * `asCode.useGASchemas` feature flag.
  */
 export const formatTypeSchema = z
-  .union([
-    numericFormatSchema,
-    byteFormatSchema,
-    durationFormatSchema,
-    legacyDurationFormatSchema,
-    customFormatSchema,
-  ])
+  .union([numericFormatSchema, byteFormatSchema, durationFormatSchema, customFormatSchema])
   .meta({
-    id: 'formatType',
+    id: 'visFormatType',
     title: 'Format Type',
     description: 'Number display format for the dimension value.',
   });

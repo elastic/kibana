@@ -34,6 +34,7 @@ const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
 
 const mockHttp = httpServiceMock.createStartContract();
 const mockServices = createMockServices({ http: mockHttp });
+const mockGetEpisodeDetailsHref = (episodeId: string) => `/host-aware/inbox/${episodeId}`;
 
 const mockRule = {
   id: 'rule-1',
@@ -66,7 +67,11 @@ describe('AlertEpisodesRelatedSection', () => {
 
     render(
       <I18nProvider>
-        <AlertEpisodesRelatedSection episodeId="ep-1" services={mockServices} />
+        <AlertEpisodesRelatedSection
+          episodeId="ep-1"
+          services={mockServices}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+        />
       </I18nProvider>,
       { wrapper }
     );
@@ -82,7 +87,7 @@ describe('AlertEpisodesRelatedSection', () => {
           ruleId: 'rule-1',
           rule: mockRule,
         },
-        getEpisodeDetailsHref: expect.any(Function),
+        getEpisodeDetailsHref: mockGetEpisodeDetailsHref,
       }),
       expect.anything()
     );
@@ -97,7 +102,11 @@ describe('AlertEpisodesRelatedSection', () => {
 
     render(
       <I18nProvider>
-        <AlertEpisodesRelatedSection episodeId="ep-1" services={mockServices} />
+        <AlertEpisodesRelatedSection
+          episodeId="ep-1"
+          services={mockServices}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+        />
       </I18nProvider>,
       { wrapper }
     );
@@ -117,12 +126,20 @@ describe('AlertEpisodesRelatedSection', () => {
 
     render(
       <I18nProvider>
-        <AlertEpisodesRelatedSection episodeId="ep-1" services={mockServices} />
+        <AlertEpisodesRelatedSection
+          episodeId="ep-1"
+          services={mockServices}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+        />
       </I18nProvider>,
       { wrapper }
     );
 
-    expect(screen.getByTestId('alertingV2EpisodesRelatedSectionLoading')).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('alertingV2EpisodesRelatedSectionLoading')
+        .querySelector('.euiSkeletonRectangle')
+    ).not.toBeNull();
   });
 
   it('renders the error state when the episode fails to load', async () => {
@@ -130,7 +147,11 @@ describe('AlertEpisodesRelatedSection', () => {
 
     render(
       <I18nProvider>
-        <AlertEpisodesRelatedSection episodeId="ep-1" services={mockServices} />
+        <AlertEpisodesRelatedSection
+          episodeId="ep-1"
+          services={mockServices}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+        />
       </I18nProvider>,
       { wrapper }
     );

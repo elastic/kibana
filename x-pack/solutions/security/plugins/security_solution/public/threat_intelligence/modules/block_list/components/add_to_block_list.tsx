@@ -57,6 +57,7 @@ export const AddToBlockListContextMenu = memo(
 
     return (
       <EuiContextMenuItem
+        icon="stopSlash"
         onClick={menuItemClicked}
         data-test-subj={dataTestSub}
         disabled={disabled}

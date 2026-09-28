@@ -51,6 +51,13 @@ export const resumeWorkflowExecutionTool = ({
     **If status has not changed after those polls:** tell the user their resume was **submitted**, but you **could not confirm** the new execution state from Kibana yet - do **not** invent a second approval workflow.
     `),
     schema: resumeWorkflowExecutionSchema,
+    annotations: {
+      title: 'Resume Workflow Execution',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     handler: async ({ executionId, input }, { spaceId, request }) => {
       try {
         await workflowApi.resumeWorkflowExecution(executionId, spaceId, input, request, {
@@ -66,7 +73,7 @@ export const resumeWorkflowExecutionTool = ({
       // Failure here is non-fatal & the resume already happened so the LLM must not retry it
       let execution: Awaited<ReturnType<typeof getExecutionState>>;
       try {
-        execution = await getExecutionState({ executionId, spaceId, workflowApi });
+        execution = await getExecutionState({ executionId, spaceId, workflowApi, request });
       } catch {
         execution = null;
       }

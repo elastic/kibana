@@ -7,12 +7,13 @@
 
 import type {
   CaseAttachmentsWithoutOwner,
-  CommonAttachmentTabViewProps,
+  CommonAttachmentListViewProps,
+  UnifiedReferenceAttachmentViewProps,
 } from '@kbn/cases-plugin/public';
 import { defineAttachment } from '@kbn/cases-plugin/public';
-import { SECURITY_ENTITY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { AttachmentActionType, SECURITY_ENTITY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import React, { Suspense, type ComponentType } from 'react';
-import { EuiAvatar } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { EntityType } from '../../../../common/entity_analytics/types';
@@ -32,12 +33,18 @@ export interface EntityToAttach {
 
 const EntityAttachmentChildrenLazy = React.lazy(() => import('./components/attachment_children'));
 const EntityTabContentLazy = React.lazy(() => import('./components/entity_tab_content'));
+const ShowEntityButton = React.lazy(async () => {
+  const { ShowEntityButton: Component } = await import('./components/show_entity_button');
+  return { default: Component };
+});
 
-const EntityTabContentWrapper: ComponentType<CommonAttachmentTabViewProps> = (props) => (
+const EntityTabContentWrapper: ComponentType<CommonAttachmentListViewProps> = (props) => (
   <Suspense fallback={null}>
     <EntityTabContentLazy {...props} />
   </Suspense>
 );
+
+type EntityAttachmentViewProps = UnifiedReferenceAttachmentViewProps<EntityAttachmentMetadata>;
 
 const DISPLAY_NAME = i18n.translate('xpack.securitySolution.entityAnalytics.cases.displayName', {
   defaultMessage: 'Entities',
@@ -46,25 +53,47 @@ const DISPLAY_NAME = i18n.translate('xpack.securitySolution.entityAnalytics.case
 export const getEntityAttachment = () =>
   defineAttachment({
     id: SECURITY_ENTITY_ATTACHMENT_TYPE,
-    icon: 'globe',
-    displayName: DISPLAY_NAME,
-    schema: EntityAttachmentPayloadSchema,
-    getAttachmentViewObject: (props) => {
+    getIcon: (props) => {
       const entityType = props.metadata?.entityType;
-      const iconType = entityType ? EntityIconByType[entityType as EntityType] ?? 'globe' : 'globe';
-      return {
-        eventColor: 'subdued' as const,
-        event: (
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.cases.eventDescription"
-            defaultMessage="added an entity"
-          />
-        ),
-        timelineAvatar: <EuiAvatar name="entity" color="subdued" iconType={iconType} />,
-        children: EntityAttachmentChildrenLazy,
-      };
+      return entityType ? EntityIconByType[entityType as EntityType] ?? 'globe' : 'globe';
     },
-    getAttachmentTabViewObject: () => ({
+    getLabel: () => DISPLAY_NAME,
+    schema: EntityAttachmentPayloadSchema,
+    getCreationActivity: () => ({
+      eventColor: 'subdued' as const,
+      event: (
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.cases.eventDescription"
+          defaultMessage="added an entity"
+        />
+      ),
+      children: EntityAttachmentChildrenLazy,
+      getActions: (actionProps: EntityAttachmentViewProps) => {
+        const { metadata } = actionProps;
+        if (!metadata) return [];
+        return [
+          {
+            type: AttachmentActionType.CUSTOM as const,
+            isPrimary: true,
+            render: () => (
+              <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+                <ShowEntityButton
+                  id={actionProps.savedObjectId}
+                  entityId={
+                    Array.isArray(actionProps.attachmentId)
+                      ? actionProps.attachmentId[0]
+                      : actionProps.attachmentId
+                  }
+                  entityName={metadata.entityName ?? ''}
+                  entityType={metadata.entityType ?? ''}
+                />
+              </Suspense>
+            ),
+          },
+        ];
+      },
+    }),
+    getAttachmentList: () => ({
       children: EntityTabContentWrapper,
     }),
   });

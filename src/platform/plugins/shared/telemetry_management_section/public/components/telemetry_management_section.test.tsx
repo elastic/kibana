@@ -18,6 +18,9 @@ describe('TelemetryManagementSectionComponent', () => {
   const coreStart = coreMock.createStart();
   const docLinks = {
     legal: { privacyStatement: 'https://some-host/some-url' },
+    telemetry: {
+      securityData: 'https://some-host/telemetry-settings#security-telemetry',
+    },
   } as unknown as DocLinksStart['links'];
 
   it('renders as expected', () => {

@@ -1,0 +1,80 @@
+{
+  "sha1": "77c76ca8f01cfdc97f9429db26ee8230d24e634b",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "68c20e17ad478b8-1cd9661fc0b30ba",
+      "title": "security.createRule workflow step creates a real, disabled-by-default rule when \"enabled\" is omitted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/create_rule_step.spec.ts",
+        "line": 96,
+        "column": 55
+      }
+    },
+    {
+      "id": "68c20e17ad478b8-5cd22f3bcf4f159",
+      "title": "security.createRule workflow step fails the step when the API rejects an invalid rule body",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/create_rule_step.spec.ts",
+        "line": 122,
+        "column": 61
+      }
+    },
+    {
+      "id": "5a232f71bd152f7-1c8a48f6e9e3b2b",
+      "title": "security.patchRule workflow step patches only the provided fields of an existing rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/patch_rule_step.spec.ts",
+        "line": 108,
+        "column": 5
+      }
+    },
+    {
+      "id": "5a232f71bd152f7-00dc7b076afda15",
+      "title": "security.patchRule workflow step fails the step when the rule does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/patch_rule_step.spec.ts",
+        "line": 139,
+        "column": 22
+      }
+    },
+    {
+      "id": "52023b41025cee1-d30ad3ccb96beb6",
+      "title": "Security Solution - Workflow Trigger Registration should register all expected Security Solution event-driven trigger definitions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/security_trigger_registration.spec.ts",
+        "line": 44,
+        "column": 25
+      }
+    }
+  ]
+}

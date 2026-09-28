@@ -19,6 +19,7 @@ export interface MultiselectFilterProps<T = unknown> {
   onSelectionChange?: (selectedItems: T[], changedOption: T, changedStatus: FilterChecked) => void;
   renderItem?: (item: T) => React.ReactChild;
   renderLabel?: (item: T) => string;
+  disabled?: boolean;
   /**
    * Width of the popover content. If undefined, the popover will take the width of the button.
    *  https://eui.elastic.co/#/forms/selectable#sizing-and-containers
@@ -55,6 +56,7 @@ const MultiselectFilterComponent = <T extends unknown>({
   items,
   selectedItems,
   width,
+  disabled = false,
   onSelectionChange = noop,
   renderLabel = String,
   renderItem = renderLabel,
@@ -96,6 +98,7 @@ const MultiselectFilterComponent = <T extends unknown>({
           numActiveFilters={selectedItems.length}
           hasActiveFilters={selectedItems.length > 0}
           isSelected={isPopoverOpen}
+          disabled={disabled}
           onClick={togglePopover}
         >
           {title}

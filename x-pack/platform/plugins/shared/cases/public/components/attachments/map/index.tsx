@@ -36,7 +36,7 @@ const MapAttachmentsTab = createSavedObjectAttachmentsTab({
   soType: MAP_SO_TYPE,
 });
 
-const getMapAttachmentViewObject = ({ attachmentId, metadata, data }: MapViewProps) => {
+const getMapCreationActivity = ({ attachmentId, metadata, data }: MapViewProps) => {
   // Always show "added map <title>" as the timeline event. Inline embed is
   // appended as `children` only when a snapshot was captured at attach time.
   const event = (
@@ -51,7 +51,6 @@ const getMapAttachmentViewObject = ({ attachmentId, metadata, data }: MapViewPro
 
   return {
     event,
-    timelineAvatar: 'gisApp' as const,
     hideDefaultActions: false,
     ...(data ? { children: MapEmbedAttachmentLazy } : {}),
   };
@@ -60,11 +59,11 @@ const getMapAttachmentViewObject = ({ attachmentId, metadata, data }: MapViewPro
 export const getMapAttachmentType = () =>
   defineAttachment({
     id: MAP_ATTACHMENT_TYPE,
-    icon: 'gisApp',
-    displayName: i18n.MAPS,
-    getAttachmentViewObject: getMapAttachmentViewObject,
-    getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_MAP }),
-    getAttachmentTabViewObject: () => ({ children: MapAttachmentsTab }),
+    getIcon: () => 'gisApp',
+    getLabel: () => i18n.MAPS,
+    getCreationActivity: getMapCreationActivity,
+    getRemovalActivity: () => ({ event: i18n.REMOVED_MAP }),
+    getAttachmentList: () => ({ children: MapAttachmentsTab }),
     schema: MapAttachmentPayloadSchema,
     // Exclude pesistable data from the workflow schema
     workflowSchema: MapAttachmentPayloadSchema.omit({ data: true }),

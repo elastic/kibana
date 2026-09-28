@@ -129,6 +129,7 @@ import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { MissingDetectionsPrivilegesCallOut } from '../../../../detections/components/callouts/missing_detections_privileges_callout';
 import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_with_fallback';
+import { useSyncShowBuildingBlockAlerts } from './use_sync_show_building_block_alerts';
 import type { BadgeOptions } from '../../../../common/components/header_page/types';
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
 import { type RuleResponse, type Status } from '../../../../../common/api/detection_engine';
@@ -156,7 +157,6 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 import { useDeprecatedRuleDetailsCallout } from '../../../rule_management/components/rule_deprecation';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { CpsMlRuleCallout } from '../../../rule_management_ui/components/cps_ml_rule_callout/callout';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 
@@ -342,8 +342,11 @@ export const RuleDetailsPage = connector(
             ruleActionsData: null,
           };
 
-    const { showBuildingBlockAlerts, setShowBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } =
-      useDataTableFilters(TableId.alertsOnRuleDetailsPage);
+    const { showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } = useDataTableFilters(
+      TableId.alertsOnRuleDetailsPage
+    );
+    // Page lifetime so tab navigation does not remount and reset the toolbar filter.
+    useSyncShowBuildingBlockAlerts(rule?.building_block_type != null);
 
     const mlCapabilities = useMlCapabilities();
     const { globalFullScreen } = useGlobalFullScreen();
@@ -447,12 +450,6 @@ export const RuleDetailsPage = connector(
       },
       [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]
     );
-
-    const isBuildingBlockTypeNotNull = rule?.building_block_type != null;
-    // Set showBuildingBlockAlerts if rule is a Building Block Rule otherwise we won't show alerts
-    useEffect(() => {
-      setShowBuildingBlockAlerts(isBuildingBlockTypeNotNull);
-    }, [isBuildingBlockTypeNotNull, setShowBuildingBlockAlerts]);
 
     const ruleRuleId = rule?.rule_id ?? '';
     const alertDefaultFilters = useMemo(
@@ -677,7 +674,6 @@ export const RuleDetailsPage = connector(
       <>
         <NeedAdminForUpdateRulesCallOut />
         <MissingDetectionsPrivilegesCallOut />
-        {isMlRule(rule?.type) && <CpsMlRuleCallout />}
         {upgradeCallout}
         {deprecationCallout}
         {isBulkDuplicateConfirmationVisible && (

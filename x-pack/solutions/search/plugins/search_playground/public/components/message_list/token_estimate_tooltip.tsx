@@ -16,8 +16,8 @@ import {
   EuiI18nNumber,
   EuiDescriptionList,
   EuiTextColor,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
@@ -169,7 +169,7 @@ export const TokenEstimateTooltip: React.FC<TokenEstimateTooltipProps> = ({
                   <>
                     {clipped ? (
                       <EuiPanel paddingSize="s" hasShadow={false} color="warning">
-                        <EuiCallOut
+                        <KbnWarningCallout
                           announceOnMount
                           data-test-subj="clipped-tokens-callout"
                           title={
@@ -178,34 +178,33 @@ export const TokenEstimateTooltip: React.FC<TokenEstimateTooltipProps> = ({
                               defaultMessage="Context tokens exceed model limit"
                             />
                           }
-                          color="warning"
-                          iconType="info"
                           size="s"
-                        >
-                          <FormattedMessage
-                            id="xpack.searchPlayground.chat.message.tokenEstimateTooltip.clippedTokensDescription"
-                            defaultMessage="Approximately {clipped} tokens within your context was removed to fit within the model's limit. Learn how to {optimizeLink} to improve your model's performance and avoid clipping."
-                            values={{
-                              clipped: (
-                                <strong data-test-subj="clipped-tokens-description">
-                                  <EuiI18nNumber value={clipped} />
-                                </strong>
-                              ),
-                              optimizeLink: (
-                                <EuiLink
-                                  href={docLinks.retrievalOptimize}
-                                  target="_blank"
-                                  data-test-subj="context-optimization-documentation-link"
-                                >
-                                  <FormattedMessage
-                                    id="xpack.searchPlayground.chat.message.tokenEstimateTooltip.optimizeYourIndex"
-                                    defaultMessage="optimize your context"
-                                  />
-                                </EuiLink>
-                              ),
-                            }}
-                          />
-                        </EuiCallOut>
+                          text={
+                            <FormattedMessage
+                              id="xpack.searchPlayground.chat.message.tokenEstimateTooltip.clippedTokensDescription"
+                              defaultMessage="Approximately {clipped} tokens within your context was removed to fit within the model's limit. Learn how to {optimizeLink} to improve your model's performance and avoid clipping."
+                              values={{
+                                clipped: (
+                                  <strong data-test-subj="clipped-tokens-description">
+                                    <EuiI18nNumber value={clipped} />
+                                  </strong>
+                                ),
+                                optimizeLink: (
+                                  <EuiLink
+                                    href={docLinks.retrievalOptimize}
+                                    target="_blank"
+                                    data-test-subj="context-optimization-documentation-link"
+                                  >
+                                    <FormattedMessage
+                                      id="xpack.searchPlayground.chat.message.tokenEstimateTooltip.optimizeYourIndex"
+                                      defaultMessage="optimize your context"
+                                    />
+                                  </EuiLink>
+                                ),
+                              }}
+                            />
+                          }
+                        />
                       </EuiPanel>
                     ) : (
                       <EuiPanel paddingSize="s" hasShadow={false}>

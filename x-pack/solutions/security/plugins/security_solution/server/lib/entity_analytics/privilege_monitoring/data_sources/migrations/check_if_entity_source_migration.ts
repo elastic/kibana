@@ -13,6 +13,7 @@ export const shouldRunSourceMigrationFactory =
   async (namespace: string): Promise<boolean> => {
     const response = await deps.esClient.count({
       index: getPrivilegedMonitorUsersIndex(namespace),
+      ignore_unavailable: true,
       query: {
         bool: {
           must: [

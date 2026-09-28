@@ -10,26 +10,26 @@ import { EuiBetaBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
+export const betaBadgeLabel = i18n.translate('xpack.apm.betaBadgeLabel', {
+  defaultMessage: 'Beta',
+});
+
+export const betaBadgeDescription = i18n.translate('xpack.apm.betaBadgeDescription', {
+  defaultMessage:
+    'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.',
+});
+
 interface Props {
   icon?: IconType;
 }
 
 export function BetaBadge({ icon }: Props) {
-  const badgeLabel = i18n.translate('xpack.apm.betaBadgeLabel', {
-    defaultMessage: 'Beta',
-  });
-
-  const badgeDescription = i18n.translate('xpack.apm.betaBadgeDescription', {
-    defaultMessage:
-      'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.',
-  });
-
   return (
     <EuiBetaBadge
-      label={badgeLabel}
-      title={badgeLabel}
-      aria-label={badgeDescription}
-      tooltipContent={badgeDescription}
+      label={betaBadgeLabel}
+      title={betaBadgeLabel}
+      aria-label={betaBadgeDescription}
+      tooltipContent={betaBadgeDescription}
       iconType={icon}
     />
   );

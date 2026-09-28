@@ -6,6 +6,7 @@
  */
 
 import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { QueryResponseSizeExceededError } from '../errors/query_response_size_exceeded_error';
 import { errors } from '@elastic/elasticsearch';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
@@ -150,6 +151,7 @@ describe('detectDataPresence', () => {
       createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [[HOST]])
     );
 
+    const input = createRuleExecutionInput();
     const result = await detectDataPresence({
       queryService,
       rule: createRuleResponse({
@@ -162,13 +164,13 @@ describe('detectDataPresence', () => {
           breach: { segment: 'WHERE AVG(cpu) > 0.9' },
         },
       }),
-      input: createRuleExecutionInput(),
+      input,
       logger: loggerService,
     });
 
     expect(scopedEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({ query: baseQuery }),
-      expect.any(Object)
+      expect.objectContaining({ signal: input.executionContext.signal })
     );
     expect(result).toEqual(new Set([hostHash]));
   });
@@ -190,6 +192,25 @@ describe('detectDataPresence', () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
+  });
+
+  it('surfaces content-length-exceeded errors as TaskErrorSource.USER', async () => {
+    const { queryService, scopedEsClient } = setup();
+
+    scopedEsClient.esql.query.mockRejectedValue(
+      new errors.RequestAbortedError('Response size exceeded the limit (content length: 52428800)')
+    );
+
+    const error = await detectDataPresence({
+      queryService,
+      rule: buildRule(),
+      input: createRuleExecutionInput(),
+      logger: loggerService,
+    }).catch((e: Error) => e);
+
+    expect(error).toBeInstanceOf(QueryResponseSizeExceededError);
+    expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
+    expect((error as QueryResponseSizeExceededError).queryType).toBe('data_presence');
   });
 
   it('does not classify ES|QL 5xx errors as user errors (server-side, retryable)', async () => {

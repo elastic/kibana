@@ -87,6 +87,14 @@ export const BaseClassicNavItems: ClassicNavItem[] = [
         },
         id: 'agent_builder',
       },
+      {
+        'data-test-subj': 'searchSideNav-Context',
+        deepLink: {
+          link: 'context_engine',
+          shouldShowActiveForSubroutes: true,
+        },
+        id: 'context_engine',
+      },
     ],
     name: i18n.translate('xpack.searchNavigation.classicNav.applicationsTitle', {
       defaultMessage: 'Build',

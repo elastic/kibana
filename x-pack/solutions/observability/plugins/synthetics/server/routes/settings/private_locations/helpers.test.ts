@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { allLocationsToClientContract, updatePrivateLocationMonitors } from './helpers';
+import {
+  allLocationsToClientContract,
+  toClientContract,
+  updatePrivateLocationMonitors,
+} from './helpers';
 import type { RouteContext } from '../../types';
 
 // Mock the syncEditedMonitorBulk module
@@ -231,5 +235,42 @@ describe('updatePrivateLocationMonitors', () => {
       routeContext: ROUTE_CONTEXT,
       spaceId: SECOND_SPACE_ID,
     });
+  });
+
+  it('throws when a monitor rewrite reports failed configs so the location flag is not persisted', async () => {
+    (syncEditedMonitorBulk as jest.Mock).mockResolvedValueOnce({
+      failedConfigs: {
+        [FIRST_MONITOR_ID]: { config: mockMonitors[0].attributes, error: new Error('fleet') },
+      },
+      errors: [],
+      editedMonitors: [],
+    });
+
+    await expect(
+      updatePrivateLocationMonitors({
+        locationId: LOCATION_ID,
+        newLocationLabel: NEW_LABEL,
+        allPrivateLocations: [],
+        routeContext: {} as RouteContext,
+        monitorsInLocation: [mockMonitors[0]] as any,
+      })
+    ).rejects.toThrow(/failed to update monitors/i);
+  });
+});
+
+describe('contract mappers', () => {
+  it('drops the removed isAgentSharding attribute from legacy saved objects', () => {
+    expect(
+      toClientContract({
+        attributes: {
+          label: 'Loc',
+          id: 'loc-1',
+          agentPolicyId: 'ap-1',
+          isServiceManaged: false,
+          isAgentSharding: true,
+        },
+        namespaces: ['default'],
+      } as any)
+    ).not.toHaveProperty('isAgentSharding');
   });
 });
