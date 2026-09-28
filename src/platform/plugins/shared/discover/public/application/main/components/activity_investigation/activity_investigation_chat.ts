@@ -12,7 +12,10 @@ import { castArray } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { getNamedParams } from '@kbn/esql-utils';
-import { ACTIVITY_INVESTIGATION_ATTACHMENT_TYPE } from '../../../../../common/agent_builder';
+import {
+  ACTIVITY_INVESTIGATION_AGENT_ID,
+  ACTIVITY_INVESTIGATION_ATTACHMENT_TYPE,
+} from '../../../../../common/agent_builder';
 import type {
   ActivityInvestigationAttachment,
   ActivityInvestigationSnapshot,
@@ -21,36 +24,60 @@ import type { ActivityIncrease } from '../../../../../common/activity_investigat
 import type { DiscoverServices } from '../../../../build_services';
 import type { ActivityInvestigationResult } from './fetch_activity_investigation';
 
-const INVESTIGATION_ID = 'discover-activity-investigation';
-
 const messages = {
-  allActivity: (): string =>
-    i18n.translate('discover.activityInvestigation.allActivityLabel', {
-      defaultMessage: 'All activity',
+  queryResults: (): string =>
+    i18n.translate('discover.activityInvestigation.queryResultsLabel', {
+      defaultMessage: 'The query results',
     }),
   actorIncrease: (actor: string, multiplier: string): string =>
     i18n.translate('discover.activityInvestigation.actorMultiplierDropDownOptionLabel', {
       defaultMessage: '{actor} · {multiplier} times as much',
       values: { actor, multiplier },
     }),
+  actorValue: (field: string, value: string): string =>
+    i18n.translate('discover.activityInvestigation.actorValueLabel', {
+      defaultMessage: '{field} = {value}',
+      values: { field, value },
+    }),
+  missingActorValue: (field: string): string =>
+    i18n.translate('discover.activityInvestigation.missingActorValueLabel', {
+      defaultMessage: '{field} is missing',
+      values: { field },
+    }),
   zeroBaselineQuestion: (): string =>
-    i18n.translate('discover.activityInvestigation.increaseWithoutBaselineQuestionButtonLabel', {
-      defaultMessage: 'Why did activity increase during this period?',
+    i18n.translate('discover.activityInvestigation.queryResultsWithoutBaselineQuestionDescription', {
+      defaultMessage: 'Why did activity in {queryResults} increase during this period?',
+      values: { queryResults: messages.queryResults() },
     }),
   increaseQuestion: (multiplier: string): string =>
-    i18n.translate('discover.activityInvestigation.multiplierIncreaseQuestionButtonLabel', {
-      defaultMessage: 'Why is there {multiplier} times as much activity as before?',
-      values: { multiplier },
+    i18n.translate('discover.activityInvestigation.queryResultsMultiplierQuestionDescription', {
+      defaultMessage: 'Why is there {multiplier} times as much activity in {queryResults} as before?',
+      values: { multiplier, queryResults: messages.queryResults() },
     }),
   actorQuestion: (actor: string, multiplier: string): string =>
-    i18n.translate('discover.activityInvestigation.actorMultiplierQuestionButtonLabel', {
+    i18n.translate('discover.activityInvestigation.actorMultiplierQuestionDescription', {
       defaultMessage: 'Why is there {multiplier} times as much activity for {actor} as before?',
       values: { actor, multiplier },
     }),
   actorWithoutBaselineQuestion: (actor: string): string =>
-    i18n.translate('discover.activityInvestigation.actorWithoutBaselineQuestionButtonLabel', {
+    i18n.translate('discover.activityInvestigation.actorWithoutBaselineQuestionDescription', {
       defaultMessage: 'Why did activity for {actor} increase during this period?',
       values: { actor },
+    }),
+  sumLabel: (field: string): string =>
+    i18n.translate('discover.activityInvestigation.sumLabel', {
+      defaultMessage: 'Sum of {field}',
+      values: { field },
+    }),
+  sumQuestion: (field: string, multiplier: string): string =>
+    i18n.translate('discover.activityInvestigation.sumMultiplierQuestionDescription', {
+      defaultMessage: 'Why is the sum of {field} {multiplier} times as much as before?',
+      values: { field, multiplier },
+    }),
+  sumWithoutBaselineQuestion: (field: string): string =>
+    i18n.translate('discover.activityInvestigation.sumWithoutBaselineQuestionDescription', {
+      defaultMessage: 'Why did the sum of {field} increase during this period?',
+      values: { field },
     }),
   snapshotDescription: (): string =>
     i18n.translate('discover.activityInvestigation.frozenSnapshotDescription', {
@@ -61,38 +88,62 @@ const messages = {
 // Keep Discover from replacing the chat settings until the sidebar closes, even when switching chats.
 export const activityInvestigationChatActive$ = new BehaviorSubject(false);
 
-const formatMultiplier = (percentageChange: number): string =>
+/** Formats the internal increase consistently for the inline question and chat. */
+export const formatActivityMultiplier = (percentageChange: number): string =>
   new Intl.NumberFormat(i18n.getLocale(), {
     maximumFractionDigits: 1,
   }).format(1 + percentageChange / 100);
 
-const formatActor = ({ field, value }: NonNullable<ActivityInvestigationResult['actor']>): string =>
-  `${field} = ${JSON.stringify(value)}`;
+const formatActor = ({
+  field,
+  value,
+}: NonNullable<ActivityInvestigationResult['actor']>): string => {
+  if (value === null) {
+    return messages.missingActorValue(field);
+  }
+
+  return messages.actorValue(field, JSON.stringify(value) ?? String(value));
+};
+
+/** Names the selected series without repeating its increase or time interval. */
+export const getActivityInvestigationSubject = ({
+  actor,
+  metricField,
+}: ActivityInvestigationResult): string =>
+  actor
+    ? formatActor(actor)
+    : metricField
+    ? messages.sumLabel(metricField)
+    : messages.queryResults();
 
 /** Labels a detected actor with its own multiplier, without combining separate results. */
-export const getActivityInvestigationLabel = ({
-  actor,
-  increase: { percentageChange },
-}: ActivityInvestigationResult): string => {
-  const label = actor ? formatActor(actor) : messages.allActivity();
+export const getActivityInvestigationLabel = (result: ActivityInvestigationResult): string => {
+  const label = getActivityInvestigationSubject(result);
+  const { percentageChange } = result.increase;
   return percentageChange === null
     ? label
-    : messages.actorIncrease(label, formatMultiplier(percentageChange));
+    : messages.actorIncrease(label, formatActivityMultiplier(percentageChange));
 };
 
 /** The question shown on the suggestion and sent verbatim to the agent, so the two cannot diverge. */
 export const getActivityInvestigationQuestion = (
   { percentageChange }: ActivityIncrease,
-  actor?: ActivityInvestigationResult['actor']
+  actor?: ActivityInvestigationResult['actor'],
+  metricField?: string
 ): string => {
+  if (metricField) {
+    return percentageChange === null
+      ? messages.sumWithoutBaselineQuestion(metricField)
+      : messages.sumQuestion(metricField, formatActivityMultiplier(percentageChange));
+  }
   if (actor) {
     return percentageChange === null
       ? messages.actorWithoutBaselineQuestion(formatActor(actor))
-      : messages.actorQuestion(formatActor(actor), formatMultiplier(percentageChange));
+      : messages.actorQuestion(formatActor(actor), formatActivityMultiplier(percentageChange));
   }
   return percentageChange === null
     ? messages.zeroBaselineQuestion()
-    : messages.increaseQuestion(formatMultiplier(percentageChange));
+    : messages.increaseQuestion(formatActivityMultiplier(percentageChange));
 };
 
 const buildInvestigationSnapshot = ({
@@ -100,6 +151,7 @@ const buildInvestigationSnapshot = ({
   request,
   asOfMs,
   metric,
+  metricField,
   buckets,
   increase,
   actor,
@@ -158,6 +210,7 @@ const buildInvestigationSnapshot = ({
     },
     asOf: new Date(asOfMs).toISOString(),
     metric,
+    metricField,
     increase: {
       kind: increase.kind,
       pvalue: increase.pvalue,
@@ -169,6 +222,26 @@ const buildInvestigationSnapshot = ({
       observedMean: increase.observedMean,
       observedTotal: increase.observedTotal,
       percentageChange: increase.percentageChange,
+      historicalComparison: increase.historicalComparison && {
+        timeRange: {
+          from: new Date(increase.historicalComparison.startTimeMs).toISOString(),
+          to: new Date(increase.historicalComparison.endTimeMs).toISOString(),
+        },
+        observedTotal: increase.historicalComparison.observedTotal,
+        daysAgo: increase.historicalComparison.daysAgo,
+        score: increase.historicalComparison.score,
+      },
+      history: increase.history && {
+        mode: increase.history.mode,
+        spacing: increase.history.spacing,
+        references: increase.history.references.map(({ startTimeMs, endTimeMs }) => ({
+          from: new Date(startTimeMs).toISOString(),
+          to: new Date(endTimeMs).toISOString(),
+        })),
+        expected: increase.history.expected,
+        replicates: increase.history.replicates,
+        version: increase.history.version,
+      },
     },
     comparison: {
       timeRange: comparisonTimeRange,
@@ -206,14 +279,18 @@ export const openActivityInvestigationChat = (
 
   // Agent Builder refreshes screen_context attachments on send; keep the frozen snapshot separate.
   const attachment: ActivityInvestigationAttachment = {
-    id: INVESTIGATION_ID,
+    id: ACTIVITY_INVESTIGATION_AGENT_ID,
     type: ACTIVITY_INVESTIGATION_ATTACHMENT_TYPE,
     description: result.actor
       ? getActivityInvestigationLabel(result)
       : messages.snapshotDescription(),
     data: buildInvestigationSnapshot(result),
   };
-  const question = getActivityInvestigationQuestion(result.increase, result.actor);
+  const question = getActivityInvestigationQuestion(
+    result.increase,
+    result.actor,
+    result.metricField
+  );
 
   const subscriptions = new Subscription();
   const release = () => subscriptions.unsubscribe();
@@ -235,7 +312,8 @@ export const openActivityInvestigationChat = (
   try {
     agentBuilder.openChat({
       newConversation: true,
-      sessionTag: INVESTIGATION_ID,
+      sessionTag: ACTIVITY_INVESTIGATION_AGENT_ID,
+      agentId: ACTIVITY_INVESTIGATION_AGENT_ID,
       initialMessage: question,
       autoSendInitialMessage: true,
       attachments: [attachment],

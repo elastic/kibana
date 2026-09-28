@@ -73,10 +73,13 @@ export const activityInvestigationSnapshotSchema = z.object({
     projectRouting: textSchema.optional(),
   }),
   asOf: z.iso.datetime().max(40),
-  metric: z.literal('query_result_count'),
+  // field_sum: the series is the per-bucket SUM of metricField, not a row count.
+  metric: z.enum(['query_result_count', 'field_sum']),
+  metricField: textSchema.min(1).optional(),
   increase: z.object({
-    // Previously saved snapshots may use a duration label and have no detector score.
-    kind: z.enum([...ACTIVITY_INCREASE_KINDS, 'sustained']),
+    // Previously saved snapshots may use a duration label or the retired spike kind,
+    // and have no detector score.
+    kind: z.enum([...ACTIVITY_INCREASE_KINDS, 'spike', 'sustained']),
     pvalue: z.number().min(0).max(1).optional(),
     timeRange: timeRangeSchema,
     durationMs: z.number().int().positive(),
@@ -86,6 +89,25 @@ export const activityInvestigationSnapshotSchema = z.object({
     observedMean: z.number().nonnegative(),
     observedTotal: z.number().nonnegative(),
     percentageChange: z.number().nonnegative().nullable(),
+    historicalComparison: z
+      .object({
+        timeRange: timeRangeSchema,
+        observedTotal: z.number().nonnegative(),
+        daysAgo: z.number().int().positive().max(42),
+        score: z.number().min(0).max(1),
+      })
+      .optional(),
+    // Present when the interval comes from B (kind historical_interval).
+    history: z
+      .object({
+        mode: z.enum(['weekly', 'daily']),
+        spacing: z.number().int().positive(),
+        references: z.array(timeRangeSchema).max(64),
+        expected: z.number().nonnegative(),
+        replicates: z.number().int().positive(),
+        version: textSchema,
+      })
+      .optional(),
   }),
   comparison: z.object({
     timeRange: timeRangeSchema,

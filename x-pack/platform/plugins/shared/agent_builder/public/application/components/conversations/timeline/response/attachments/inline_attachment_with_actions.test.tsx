@@ -20,6 +20,18 @@ const mockOpenCanvas = jest.fn();
 const mockSetPreviewedAttachmentKey = jest.fn();
 const mockInvalidateConversation = jest.fn();
 const mockOpenSidebarConversation = jest.fn();
+const mockSendMessage = jest.fn();
+let mockStreaming = false;
+let mockReadOnly = false;
+let mockAwaitingPrompt = false;
+
+jest.mock('../../../../../hooks/use_conversation_stream', () => ({
+  useConversationStream: () => ({ sendMessage: mockSendMessage, isStreaming: mockStreaming }),
+}));
+
+jest.mock('../../../../../hooks/use_is_awaiting_prompt', () => ({
+  useIsAwaitingPrompt: () => mockAwaitingPrompt,
+}));
 
 jest.mock('./canvas_context', () => ({
   getAttachmentPreviewKey: (attachmentId: string, version?: number) =>
@@ -33,12 +45,14 @@ jest.mock('./canvas_context', () => ({
 
 jest.mock('../../../../../context/conversation/conversation_context', () => ({
   useConversationContext: () => ({
+    conversationId: 'conversation-1',
     conversationActions: { invalidateConversation: mockInvalidateConversation },
   }),
 }));
 
 jest.mock('../../../../../hooks/use_conversation', () => ({
   useAgentId: () => 'agent-1',
+  useConversationReadOnly: () => ({ isReadOnly: mockReadOnly, isLoading: false }),
 }));
 
 jest.mock('../../../../../hooks/use_agent_builder_service', () => ({
@@ -90,7 +104,48 @@ const createAttachment = (versionedValue: string, version: number): UnknownAttac
 describe('InlineAttachmentWithActions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockStreaming = false;
+    mockReadOnly = false;
+    mockAwaitingPrompt = false;
   });
+
+  it.each(['ready', 'streaming', 'readOnly', 'awaitingPrompt'])(
+    'offers a follow-up only when the conversation is ready: %s',
+    (state) => {
+      mockStreaming = state === 'streaming';
+      mockReadOnly = state === 'readOnly';
+      mockAwaitingPrompt = state === 'awaitingPrompt';
+      const getActionButtons = jest.fn().mockReturnValue([]);
+      const attachmentsService = {
+        getAttachmentUiDefinition: jest.fn().mockReturnValue({
+          getLabel: () => 'Test attachment',
+          getActionButtons,
+        }),
+        updateOrigin: jest.fn(),
+      } as Pick<AttachmentsService, 'getAttachmentUiDefinition' | 'updateOrigin'> as AttachmentsService;
+      render(
+        <InlineAttachmentWithActions
+          attachment={{ id: 'attachment-1', type: 'test', data: {} }}
+          attachmentsService={attachmentsService}
+          conversationId="conversation-1"
+          isSidebar
+        />
+      );
+      const { sendMessage } = getActionButtons.mock.calls[0][0];
+      if (state === 'ready') {
+        sendMessage('Investigate more');
+        sendMessage('Investigate more');
+        expect(mockSendMessage).toHaveBeenCalledTimes(1);
+        expect(mockSendMessage).toHaveBeenCalledWith({
+          message: 'Investigate more',
+          conversationId: 'conversation-1',
+        });
+      } else {
+        expect(sendMessage).toBeUndefined();
+        expect(mockSendMessage).not.toHaveBeenCalled();
+      }
+    }
+  );
 
   it('shows a fallback instead of crashing when renderInlineContent throws', () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});

@@ -17,26 +17,39 @@ import {
 import type { IEsqlSearchParams, IEsqlSearchResult } from '@kbn/search-types';
 import type { ActivityInvestigationSnapshot } from '../../../../../common/activity_investigation/attachment';
 import type { ActivityBucket } from '../../../../../common/activity_investigation/activity_increase';
+import type { TimeWindow } from '../../../../../common/activity_investigation/interval_detector/history_plan';
+import {
+  exceedsActivityGroupLimit,
+  getActivityGroupFieldStats,
+} from './get_activity_group_field_stats';
 
-const CATEGORICAL_TYPES = new Set(['keyword', 'boolean', 'ip']);
 // One spare row reveals truncation instead of silently keeping only the largest groups.
 const MAX_GROUP_ROWS = 9_600;
 
 type Actor = NonNullable<ActivityInvestigationSnapshot['actor']>;
 type GroupValue = string | boolean | null;
-type QueryResult = {
+interface QueryResult {
   request: IEsqlSearchParams;
   rawResponse: IEsqlSearchResult['rawResponse'];
-};
+}
+
+export interface ActivityGroupField {
+  readonly name: string;
+  readonly type: string;
+}
 
 export interface ActivityGroupSeries {
   readonly actor: Actor;
   readonly query: string;
   readonly buckets: readonly ActivityBucket[];
+  /** The same value's counts in each reference window, bucket by bucket, most recent first. */
+  readonly references: readonly (readonly number[])[];
   readonly request: IEsqlSearchParams;
 }
 
-/** Collects complete categorical groups without changing the original query's row population. */
+type GroupCounts = Map<GroupValue, Map<number, number>>;
+
+/** Collects complete categorical groups of the given fields, today and in each reference window. */
 export const collectActivityGroups = async ({
   query,
   timeFieldName,
@@ -44,6 +57,8 @@ export const collectActivityGroups = async ({
   fromMs,
   toMs,
   maxGroups,
+  fields,
+  references,
   execute,
   signal,
 }: {
@@ -53,31 +68,30 @@ export const collectActivityGroups = async ({
   fromMs: number;
   toMs: number;
   maxGroups: number;
-  execute: (query: string) => Promise<QueryResult>;
+  /** Categorical columns of the query's final output, in priority order. */
+  fields: readonly ActivityGroupField[];
+  references: readonly TimeWindow[];
+  execute: (query: string, window?: TimeWindow) => Promise<QueryResult>;
   signal: AbortSignal;
 }): Promise<{ series: ActivityGroupSeries[]; complete: boolean }> => {
   signal.throwIfAborted();
   const series: ActivityGroupSeries[] = [];
   const first = buckets[0];
-  if (!first) return { series, complete: false };
+  if (!first || !fields.length) return { series, complete: Boolean(first) };
   const intervalMs = first.endTimeMs - first.startTimeMs;
-  let metadata: QueryResult;
-  try {
-    metadata = await execute(appendToESQLQuery(query, '| LIMIT 0'));
-  } catch {
-    signal.throwIfAborted();
-    return { series, complete: false };
-  }
-  const columns = metadata.rawResponse.columns;
-  if (!columns.some(({ name }) => name === timeFieldName)) {
-    return { series, complete: false };
-  }
-  const fields = columns.filter(({ type }) => CATEGORICAL_TYPES.has(type));
-  const names = new Set(columns.map(({ name }) => name));
+  const fieldStats = await getActivityGroupFieldStats({
+    query,
+    fields,
+    minimumTotal: buckets.reduce((sum, { count }) => sum + count, 0),
+    execute: (statsQuery) => execute(statsQuery),
+    signal,
+  });
+  const names = new Set([timeFieldName, ...fields.map(({ name }) => name)]);
   const unusedName = (prefix: string): string => {
     let name = prefix;
     while (names.has(name)) name += '_';
     names.add(name);
+
     return name;
   };
   const groupColumn = unusedName('__discover_activity_group');
@@ -85,70 +99,89 @@ export const collectActivityGroups = async ({
   const countColumn = unusedName('__discover_activity_count');
   let complete = true;
 
+  // Reads one window's rows into counts per value, or undefined when the response cannot be trusted.
+  // Buckets must sit on the grid starting at `anchorMs`; partial edge buckets inside `bounds` are read and ignored.
+  const readGroups = (
+    rawResponse: QueryResult['rawResponse'],
+    type: string,
+    anchorMs: number,
+    bounds: TimeWindow
+  ): GroupCounts | undefined => {
+    const timeIndex = rawResponse.columns.findIndex(({ name }) => name === timeColumn);
+    const groupIndex = rawResponse.columns.findIndex(({ name }) => name === groupColumn);
+    const countIndex = rawResponse.columns.findIndex(({ name }) => name === countColumn);
+    if (
+      [timeIndex, groupIndex, countIndex].some((index) => index < 0) ||
+      rawResponse.values.length > MAX_GROUP_ROWS
+    ) {
+      return undefined;
+    }
+    const groups: GroupCounts = new Map();
+    for (const row of rawResponse.values) {
+      const time = row[timeIndex];
+      const start = typeof time === 'string' ? Date.parse(time) : time;
+      const count = row[countIndex];
+      const value = row[groupIndex];
+      if (
+        typeof start !== 'number' ||
+        !Number.isSafeInteger(start) ||
+        (start - anchorMs) % intervalMs !== 0 ||
+        start + intervalMs <= bounds.fromMs ||
+        start > bounds.toMs ||
+        typeof count !== 'number' ||
+        !Number.isSafeInteger(count) ||
+        count < 0 ||
+        (value !== null && typeof value !== 'string' && typeof value !== 'boolean') ||
+        (value !== null &&
+          (type === 'boolean' ? typeof value !== 'boolean' : typeof value !== 'string'))
+      ) {
+        return undefined;
+      }
+      const counts = groups.get(value) ?? new Map<number, number>();
+      if (counts.has(start)) return undefined;
+      counts.set(start, count);
+      groups.set(value, counts);
+    }
+
+    return groups;
+  };
+
   for (const { name: field, type } of fields) {
     signal.throwIfAborted();
-    // One aggregation per field: the response limit bounds output, not the underlying scan.
+    const stats = fieldStats.get(field);
+    // A wholly missing field only repeats the total via its null group.
+    if (stats?.count === 0) continue;
+    if (
+      stats &&
+      stats.cardinality + (stats.count < stats.total ? 1 : 0) > maxGroups &&
+      (await exceedsActivityGroupLimit({
+        query,
+        field: { name: field, type },
+        maxGroups,
+        execute: (limitQuery) => execute(limitQuery),
+        signal,
+      }))
+    ) {
+      complete = false;
+      continue;
+    }
+    // One aggregation per field and window: the response limit bounds output, not the underlying scan.
     const groupedQuery = appendToESQLQuery(
-      convertTimeseriesCommandToFrom(query),
-      `| STATS ${countColumn} = COUNT(*) BY ${timeColumn} = BUCKET(${formatEsqlIdentifier(
-        timeFieldName
-      )}, ${intervalMs / 1000} seconds), ${groupColumn} = ${formatEsqlIdentifier(field)}`
+      appendToESQLQuery(
+        convertTimeseriesCommandToFrom(query),
+        `| STATS ${countColumn} = COUNT(*) BY ${timeColumn} = BUCKET(${formatEsqlIdentifier(
+          timeFieldName
+        )}, ${intervalMs / 1000} seconds), ${groupColumn} = ${formatEsqlIdentifier(field)}`
+      ),
+      `| LIMIT ${MAX_GROUP_ROWS + 1}`
     );
     try {
-      const { rawResponse, request } = await execute(
-        appendToESQLQuery(groupedQuery, `| LIMIT ${MAX_GROUP_ROWS + 1}`)
-      );
-      const timeIndex = rawResponse.columns.findIndex(({ name }) => name === timeColumn);
-      const groupIndex = rawResponse.columns.findIndex(({ name }) => name === groupColumn);
-      const countIndex = rawResponse.columns.findIndex(({ name }) => name === countColumn);
-      if (
-        [timeIndex, groupIndex, countIndex].some((index) => index < 0) ||
-        rawResponse.values.length > MAX_GROUP_ROWS
-      ) {
+      const { rawResponse, request } = await execute(groupedQuery);
+      const groups = readGroups(rawResponse, type, first.startTimeMs, { fromMs, toMs });
+      if (!groups || groups.size > maxGroups) {
         complete = false;
         continue;
       }
-
-      const groups = new Map<GroupValue, Map<number, number>>();
-      let valid = true;
-      for (const row of rawResponse.values) {
-        const time = row[timeIndex];
-        const start = typeof time === 'string' ? Date.parse(time) : time;
-        const count = row[countIndex];
-        const value = row[groupIndex];
-        if (
-          typeof start !== 'number' ||
-          !Number.isSafeInteger(start) ||
-          (start - first.startTimeMs) % intervalMs !== 0 ||
-          start + intervalMs <= fromMs ||
-          start > toMs ||
-          typeof count !== 'number' ||
-          !Number.isSafeInteger(count) ||
-          count < 0 ||
-          (value !== null && typeof value !== 'string' && typeof value !== 'boolean') ||
-          (value !== null &&
-            (type === 'boolean' ? typeof value !== 'boolean' : typeof value !== 'string'))
-        ) {
-          valid = false;
-          break;
-        }
-        const counts = groups.get(value) ?? new Map<number, number>();
-        if (counts.has(start)) {
-          valid = false;
-          break;
-        }
-        counts.set(start, count);
-        groups.set(value, counts);
-        if (groups.size > maxGroups) {
-          valid = false;
-          break;
-        }
-      }
-      if (!valid) {
-        complete = false;
-        continue;
-      }
-
       // Every result must belong to at least one group, including the missing-value group.
       // Multivalued fields can overlap, so their sum may exceed the total but cannot be smaller.
       if (
@@ -163,8 +196,20 @@ export const collectActivityGroups = async ({
         complete = false;
         continue;
       }
+      const referenceGroups: GroupCounts[] = [];
+      for (const window of references) {
+        const response = await execute(groupedQuery, window);
+        const windowGroups = readGroups(response.rawResponse, type, window.fromMs, window);
+        if (!windowGroups) break;
+        referenceGroups.push(windowGroups);
+      }
+      if (referenceGroups.length !== references.length) {
+        complete = false;
+        continue;
+      }
 
       const fieldSeries: ActivityGroupSeries[] = [];
+      let valid = true;
       for (const [value, counts] of groups) {
         const groupBuckets = buckets.map((bucket) => ({
           ...bucket,
@@ -174,6 +219,8 @@ export const collectActivityGroups = async ({
           valid = false;
           break;
         }
+        // Values present only in the discarded edge buckets have no activity to analyze.
+        if (groupBuckets.every(({ count }) => count === 0)) continue;
         // A value present in every result is already represented by the total series.
         if (groupBuckets.every(({ count }, index) => count === buckets[index].count)) continue;
 
@@ -187,6 +234,14 @@ export const collectActivityGroups = async ({
           actor: { field, value },
           query: appendToESQLQuery(query, `| WHERE ${predicate}`),
           buckets: groupBuckets,
+          references: references.map((window, index) => {
+            const windowCounts = referenceGroups[index].get(value);
+
+            return Array.from(
+              { length: Math.round((window.toMs - window.fromMs) / intervalMs) },
+              (_, bucket) => windowCounts?.get(window.fromMs + bucket * intervalMs) ?? 0
+            );
+          }),
           request: {
             ...request,
             query: appendToESQLQuery(
@@ -207,5 +262,6 @@ export const collectActivityGroups = async ({
     }
   }
   signal.throwIfAborted();
+
   return { series, complete };
 };

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getExtendedChangePoint, getWindowParameters } from '@kbn/aiops-log-rate-analysis';
+import { getWindowParameters } from '@kbn/aiops-log-rate-analysis';
 import {
   ACTIVITY_INCREASE_KINDS,
   ACTIVITY_INCREASE_SELECTION_CONFIG,
@@ -30,14 +30,20 @@ const MAX_BATCH_SERIES = 96;
 const MIN_CYCLE_BUCKETS = 6;
 const MIN_CYCLE_CORRELATION = 0.9;
 const CYCLE_DURATIONS_MS = [DAY_MS, 7 * DAY_MS];
-const CHANGE_TYPES = new Set(['spike', 'dip', 'step_change', 'trend_change', 'distribution_change']);
+const CHANGE_TYPES = new Set([
+  'spike',
+  'dip',
+  'step_change',
+  'trend_change',
+  'distribution_change',
+]);
 
 export const ACTIVITY_CHANGE_POINT_CONFIG = {
   // Wait for half of our usual 48 buckets; this is not a confidence guarantee.
   minCompleteBuckets: 24,
   referenceWindow: 'aiops-log-rate-analysis.getWindowParameters',
   referenceStatistic: 'mean-count-per-complete-bucket',
-  spikeIntervalEnd: 'aiops-log-rate-analysis.getExtendedChangePoint',
+  increaseKinds: ACTIVITY_INCREASE_KINDS,
   structuralIntervalEnd: 'local-level-fit',
   minReferenceBuckets: MIN_REFERENCE_BUCKETS,
   maxBatchSeries: MAX_BATCH_SERIES,
@@ -150,7 +156,6 @@ export const describeActivityChangePoints = (
   // This is not seasonal modelling and can hide real increases; short ranges or shifted
   // cycles may escape the screen.
   const periodBuckets = getRepeatingPeriod(counts, intervalMs);
-  const indexedCounts = Object.fromEntries(counts.map((count, index) => [index, count]));
   const candidates = points.map((point): ActivityChangePointCandidate => {
     const previous = boundaries.filter(({ index }) => index < point.index).at(-1)?.index ?? 0;
     const next = boundaries.find(({ index }) => index > point.index)?.index ?? counts.length;
@@ -179,13 +184,7 @@ export const describeActivityChangePoints = (
     const increaseKind = ACTIVITY_INCREASE_KINDS.find((kind) => kind === point.type);
     let endBucket = isStructural(point) ? next : point.index + 1;
     if (baseline !== null && increaseKind !== undefined) {
-      if (point.type === 'spike') {
-        const { endTs } = getExtendedChangePoint(indexedCounts, point.index);
-        // The helper returns the first excluded bucket, or NaN at the right edge.
-        endBucket = Number.isFinite(endTs) ? Math.min(endTs, next) : next;
-      } else {
-        endBucket = estimateIncreaseEnd(counts, point.index, next, baseline);
-      }
+      endBucket = estimateIncreaseEnd(counts, point.index, next, baseline);
     }
     const observed = counts.slice(point.index, endBucket);
     const observedTotal = observed.reduce((sum, count) => sum + count, 0);
@@ -224,6 +223,8 @@ export const describeActivityChangePoints = (
           ? 'fewer-than-six-reference-buckets'
           : baseline === 0
           ? 'zero-reference-no-percentage'
+          : point.type === 'spike'
+          ? 'kind-excluded-from-suggestions'
           : increaseKind === undefined
           ? 'not-an-upward-change-type'
           : status === 'no-signal'
@@ -298,7 +299,8 @@ export const detectActivityChangePointSeries = async ({
     intervalMs <= 0 ||
     !Number.isSafeInteger(startTimeMs) ||
     !Number.isSafeInteger(startTimeMs + length * intervalMs) ||
-    (series.length > 0 && (length < MIN_CHANGE_POINT_BUCKETS || length > MAX_CHANGE_POINT_BUCKETS)) ||
+    (series.length > 0 &&
+      (length < MIN_CHANGE_POINT_BUCKETS || length > MAX_CHANGE_POINT_BUCKETS)) ||
     series.some(
       (counts) =>
         counts.length !== length ||

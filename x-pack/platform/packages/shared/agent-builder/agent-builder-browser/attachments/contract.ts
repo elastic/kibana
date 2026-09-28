@@ -81,6 +81,8 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
   isCanvas: boolean;
   /** Id of the agent the current conversation is using, when known. */
   agentId?: string;
+  /** Send a follow-up in this conversation; absent when sending is unavailable. */
+  sendMessage?: (message: string) => void;
   /** Function to update the attachment's origin reference */
   updateOrigin: (origin: string) => Promise<UpdateOriginResponse | undefined>;
   /** Callback to open the attachment in canvas mode (expanded flyout view). Undefined when already in canvas mode. */

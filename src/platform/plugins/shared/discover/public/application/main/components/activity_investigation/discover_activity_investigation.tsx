@@ -21,7 +21,6 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
-import { compareActivityIncreases } from '../../../../../common/activity_investigation/activity_increase';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { ActivityInvestigationResult } from './fetch_activity_investigation';
 import {
@@ -31,8 +30,9 @@ import {
 import { useActivityInvestigationChat } from './use_activity_investigation_chat';
 import {
   getActivityInvestigationLabel,
-  getActivityInvestigationQuestion,
+  getActivityInvestigationSubject,
 } from './activity_investigation_chat';
+import { ActivityInvestigationQuestion } from './activity_investigation_question';
 
 const INTERVAL_DATE_FORMAT: Intl.DateTimeFormatOptions = {
   year: 'numeric',
@@ -43,29 +43,59 @@ const INTERVAL_DATE_FORMAT: Intl.DateTimeFormatOptions = {
   timeZoneName: 'shortOffset',
 };
 
+const MAX_SELECTOR_LABEL_LENGTH = 80;
+const MAX_OPTION_LABEL_LENGTH = 120;
+
+const truncateMiddle = (value: string, maxLength: number): string => {
+  if (value.length <= maxLength) return value;
+
+  const availableLength = maxLength - 1;
+  const startLength = Math.ceil(availableLength / 2);
+  const endLength = Math.floor(availableLength / 2);
+  return `${value.slice(0, startLength)}…${value.slice(-endLength)}`;
+};
+
 const messages = {
   analysisFailed: (): string =>
     i18n.translate('discover.activityInvestigation.analysisFailedErrorMessage', {
       defaultMessage: 'Activity analysis failed. Refresh the query to try again.',
     }),
+  analysisFailedWithDetails: (details: string): string =>
+    i18n.translate('discover.activityInvestigation.analysisFailedWithDetailsErrorMessage', {
+      defaultMessage: 'Activity analysis failed: {details}',
+      values: { details },
+    }),
+  historyUnavailable: (): string =>
+    i18n.translate('discover.activityInvestigation.historyUnavailableDescription', {
+      defaultMessage: 'Activity analysis needs more historical data for the selected period.',
+    }),
+  historyAvailableFrom: (date: string): string =>
+    i18n.translate('discover.activityInvestigation.historyAvailableFromDescription', {
+      defaultMessage:
+        'The earliest source event is {date}. No increase with an available earlier daily comparison was found.',
+      values: { date },
+    }),
+  clockChange: (): string =>
+    i18n.translate('discover.activityInvestigation.clockChangeDescription', {
+      defaultMessage: 'Activity analysis cannot compare these periods across a clock change.',
+    }),
+  missingTimeField: (): string =>
+    i18n.translate('discover.activityInvestigation.missingTimeFieldDescription', {
+      defaultMessage: 'Activity analysis requires the time field in the query output.',
+    }),
+  historyNotComparable: (): string =>
+    i18n.translate('discover.activityInvestigation.historyNotComparableDescription', {
+      defaultMessage: 'Activity analysis could not compare the selected period with its history.',
+    }),
   analysisTimedOut: (): string =>
     i18n.translate('discover.activityInvestigation.analysisTimedOutErrorMessage', {
       defaultMessage: 'Activity analysis timed out. Refresh the query to try again.',
     }),
-  incompleteGroups: (): string =>
-    i18n.translate('discover.activityInvestigation.incompleteGroupsDescription', {
-      defaultMessage:
-        'Some categorical fields could not be fully analyzed. Increases in those fields may be missing.',
-    }),
   increasesFound: (count: number): string =>
-    i18n.translate('discover.activityInvestigation.increasesFoundButtonLabel', {
+    i18n.translate('discover.activityInvestigation.increasesFoundTitle', {
       defaultMessage:
         '{count, plural, one {# activity increase found} other {# activity increases found}}',
       values: { count },
-    }),
-  selectActors: (): string =>
-    i18n.translate('discover.activityInvestigation.selectActorsTitle', {
-      defaultMessage: 'Activity increases',
     }),
   actorOption: (activity: string, interval: string): string =>
     i18n.translate('discover.activityInvestigation.actorWithIntervalDropDownOptionLabel', {
@@ -94,6 +124,11 @@ const messages = {
       defaultMessage: '{start} – {end}',
       values: { start, end },
     }),
+  detectedInterval: (interval: string, timeZone: string): string =>
+    i18n.translate('discover.activityInvestigation.detectedIntervalDescription', {
+      defaultMessage: 'Detected interval: {interval} · {timeZone}',
+      values: { interval, timeZone },
+    }),
 } as const;
 
 const formatActivityInterval = (start: number, end: number, timeZone: string): string => {
@@ -121,7 +156,7 @@ const formatActivityInterval = (start: number, end: number, timeZone: string): s
 const ActivityInvestigation = (): ReactElement | null => {
   const { euiTheme } = useEuiTheme();
   const intervalId = useId();
-  const { analysis, error: analysisError } = useActivityInvestigation();
+  const { analysis, error: analysisError, errorDetails } = useActivityInvestigation();
   const results = analysis?.results;
   const { canOpenChat, chatOpen, isOpening, error, clearError, investigate } =
     useActivityInvestigationChat(results);
@@ -135,9 +170,24 @@ const ActivityInvestigation = (): ReactElement | null => {
       analysisError === 'timeout'
         ? messages.analysisTimedOut()
         : analysisError === 'failed'
-        ? messages.analysisFailed()
-        : analysis?.groupAnalysisIncomplete
-        ? messages.incompleteGroups()
+        ? errorDetails
+          ? messages.analysisFailedWithDetails(errorDetails)
+          : messages.analysisFailed()
+        : analysis?.unassessableReason === 'insufficient-history'
+        ? analysis.historyStartTimeMs !== undefined
+          ? messages.historyAvailableFrom(
+              new Intl.DateTimeFormat(i18n.getLocale(), {
+                ...INTERVAL_DATE_FORMAT,
+                timeZone: 'UTC',
+              }).format(analysis.historyStartTimeMs)
+            )
+          : messages.historyUnavailable()
+        : analysis?.unassessableReason === 'clock-change'
+        ? messages.clockChange()
+        : analysis?.unassessableReason === 'missing-time-field'
+        ? messages.missingTimeField()
+        : analysis?.unassessableReason
+        ? messages.historyNotComparable()
         : undefined;
     return message ? (
       <EuiText
@@ -155,25 +205,58 @@ const ActivityInvestigation = (): ReactElement | null => {
     ) : null;
   }
 
-  const orderedResults = [...results].sort((left, right) =>
-    compareActivityIncreases(left.increase, right.increase)
-  );
+  // The detector orders the results: total first, then fields by calibrated p or exploratory comparison.
+  const orderedResults = results;
   // Tie selection to the frozen response, so refreshing cannot reuse an old actor or interval.
   const selectedId = selection?.results === results ? selection.id : orderedResults[0].id;
-  const selectedResult =
-    orderedResults.find(({ id }) => id === selectedId) ?? orderedResults[0];
+  const selectedResult = orderedResults.find(({ id }) => id === selectedId) ?? orderedResults[0];
   const hasMultipleResults = results.length > 1;
-  const getInterval = ({ increase, request }: ActivityInvestigationResult): string =>
-    formatActivityInterval(increase.startTimeMs, increase.endTimeMs, request.timeZone ?? 'UTC');
-  const options: SelectableEntry[] = orderedResults.map((result) => ({
-    value: result.id,
-    label: messages.actorOption(getActivityInvestigationLabel(result), getInterval(result)),
-    checked: result.id === selectedResult.id ? 'on' : undefined,
-  }));
-
-  const buttonLabel = hasMultipleResults
-    ? messages.investigate()
-    : getActivityInvestigationQuestion(selectedResult.increase, selectedResult.actor);
+  const getTimeZone = ({ request }: ActivityInvestigationResult): string =>
+    request.timeZone ?? 'UTC';
+  const getInterval = (result: ActivityInvestigationResult): string => {
+    const { increase } = result;
+    return formatActivityInterval(increase.startTimeMs, increase.endTimeMs, getTimeZone(result));
+  };
+  const getIntervalDescription = (result: ActivityInvestigationResult): string =>
+    messages.detectedInterval(getInterval(result), getTimeZone(result));
+  const options: SelectableEntry[] = orderedResults.map((result) => {
+    const label = getActivityInvestigationSubject(result);
+    return {
+      value: result.id,
+      label: truncateMiddle(label, MAX_OPTION_LABEL_LENGTH),
+      searchableLabel: label,
+      toolTipContent: messages.actorOption(getActivityInvestigationLabel(result), getInterval(result)),
+      checked: result.id === selectedResult.id ? 'on' : undefined,
+    };
+  });
+  const selectedLabel = selectedResult.metricField ?? getActivityInvestigationSubject(selectedResult);
+  const selectedTooltip = messages.actorOption(
+    getActivityInvestigationLabel(selectedResult),
+    getInterval(selectedResult)
+  );
+  const subject = hasMultipleResults ? (
+    <div css={css({ display: 'inline-flex', verticalAlign: 'middle', maxWidth: '100%' })}>
+      <ToolbarSelector
+        data-test-subj="discoverActivityInvestigationActors"
+        data-selected-value={selectedResult.id}
+        buttonLabel={truncateMiddle(selectedLabel, MAX_SELECTOR_LABEL_LENGTH)}
+        buttonTooltipContent={selectedTooltip}
+        popoverTitle={messages.increasesFound(results.length)}
+        singleSelection
+        searchable
+        optionMatcher={({ option, searchValue }) =>
+          (option.searchableLabel ?? option.label).toLowerCase().includes(searchValue.toLowerCase())
+        }
+        options={options}
+        disabled={isOpening || chatOpen}
+        onChange={(actor) => {
+          if (!actor) return;
+          setSelection({ results, id: actor.value });
+          clearError();
+        }}
+      />
+    </div>
+  ) : selectedLabel;
 
   return (
     <EuiPanel
@@ -183,29 +266,21 @@ const ActivityInvestigation = (): ReactElement | null => {
       grow={false}
       data-test-subj="discoverActivityInvestigationSuggestion"
     >
-      <EuiFlexGroup alignItems="center" gutterSize="m" wrap responsive={false}>
-        {hasMultipleResults && (
-          <EuiFlexItem grow={false}>
-            <ToolbarSelector
-              data-test-subj="discoverActivityInvestigationActors"
-              data-selected-value={selectedResult.id}
-              buttonLabel={messages.increasesFound(results.length)}
-              popoverTitle={messages.selectActors()}
-              singleSelection
-              searchable
-              optionMatcher={({ option, searchValue }) =>
-                option.label.toLowerCase().includes(searchValue.toLowerCase())
-              }
-              options={options}
-              disabled={isOpening || chatOpen}
-              onChange={(actor) => {
-                if (!actor) return;
-                setSelection({ results, id: actor.value });
-                clearError();
-              }}
-            />
-          </EuiFlexItem>
-        )}
+      <EuiText size="s">
+        <div id={intervalId} aria-live="polite">
+          <div
+            data-test-subj="discoverActivityInvestigationQuestion"
+            css={css({ overflowWrap: 'anywhere', fontWeight: euiTheme.font.weight.semiBold })}
+          >
+            <ActivityInvestigationQuestion result={selectedResult} subject={subject} />
+          </div>
+          <p>
+            <EuiTextColor color="subdued">{getIntervalDescription(selectedResult)}</EuiTextColor>
+          </p>
+        </div>
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButton
             size="s"
@@ -219,33 +294,23 @@ const ActivityInvestigation = (): ReactElement | null => {
             textProps={{ css: css({ whiteSpace: 'normal', textAlign: 'left' }) }}
             data-test-subj="discoverActivityInvestigationButton"
           >
-            {chatOpen ? messages.closeChat() : buttonLabel}
+            {chatOpen ? messages.closeChat() : messages.investigate()}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size={hasMultipleResults ? 'm' : 's'} />
-      <EuiText size="s" color="subdued">
-        <div id={intervalId} aria-live="polite">
-          <p css={css({ overflowWrap: 'anywhere' })}>
-            {hasMultipleResults && (
-              <EuiTextColor
-                color="default"
-                css={css({ display: 'block', marginBottom: euiTheme.size.xs })}
-              >
-                {getActivityInvestigationQuestion(selectedResult.increase, selectedResult.actor)}
-              </EuiTextColor>
+      {(!canOpenChat || error) && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            {!canOpenChat && <p>{messages.chatUnavailable()}</p>}
+            {error && (
+              <p role="alert" css={css({ color: euiTheme.colors.textDanger })}>
+                {error}
+              </p>
             )}
-            {getInterval(selectedResult)}
-          </p>
-        </div>
-        {analysis?.groupAnalysisIncomplete && <p>{messages.incompleteGroups()}</p>}
-        {!canOpenChat && <p>{messages.chatUnavailable()}</p>}
-        {error && (
-          <p role="alert" css={css({ color: euiTheme.colors.textDanger })}>
-            {error}
-          </p>
-        )}
-      </EuiText>
+          </EuiText>
+        </>
+      )}
     </EuiPanel>
   );
 };

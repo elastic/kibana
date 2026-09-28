@@ -12,6 +12,7 @@ import { merge, filter } from 'rxjs';
 import { isEqual, noop } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 import {
@@ -35,11 +36,13 @@ export const ACTIVITY_INVESTIGATION_FEATURE_FLAG = 'discover.activityInvestigati
 interface ActivityInvestigationState {
   readonly analysis?: ActivityInvestigationResponse;
   readonly error?: 'failed' | 'timeout';
+  readonly errorDetails?: string;
 }
 
 /** Observes existing Discover fetches without modifying their lifecycle or the histogram. */
 export const useActivityInvestigation = (): ActivityInvestigationState => {
   const services = useDiscoverServices();
+  const getRecommendedFieldsAccessor = useProfileAccessor('getRecommendedFields');
   const getState = useInternalStateGetState();
   const subscribe = useInternalStateSubscribe();
   const runtimeStateManager = useRuntimeStateManager();
@@ -53,6 +56,9 @@ export const useActivityInvestigation = (): ActivityInvestigationState => {
 
   useEffect(() => {
     if (!enabled) return;
+    const { recommendedFields } = getRecommendedFieldsAccessor(() => ({
+      recommendedFields: [],
+    }))();
     const { timefilter } = services.data.query.timefilter;
     const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
     let controller: AbortController | undefined;
@@ -200,13 +206,19 @@ export const useActivityInvestigation = (): ActivityInvestigationState => {
           projectRouting: services.cps?.cpsManager?.getProjectRouting(),
         },
         services,
-        requestController.signal
+        requestController.signal,
+        { recommendedFields }
       )
         .then((analysis) => {
           if (isCurrentRequest()) setState({ analysis });
         })
-        .catch(() => {
-          if (isCurrentRequest()) setState({ error: 'failed' });
+        .catch((error) => {
+          if (isCurrentRequest()) {
+            setState({
+              error: 'failed',
+              errorDetails: error instanceof Error ? error.message.slice(0, 500) : undefined,
+            });
+          }
         })
         .finally(() => {
           if (controller === requestController) clearTimeout(timeout);
@@ -221,7 +233,16 @@ export const useActivityInvestigation = (): ActivityInvestigationState => {
       documentsSubscription.unsubscribe();
       cancel();
     };
-  }, [dataState, enabled, getState, runtimeStateManager, services, subscribe, tabId]);
+  }, [
+    dataState,
+    enabled,
+    getRecommendedFieldsAccessor,
+    getState,
+    runtimeStateManager,
+    services,
+    subscribe,
+    tabId,
+  ]);
 
   return enabled ? state : {};
 };
