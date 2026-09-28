@@ -5,7 +5,8 @@ default vs custom space.
 Omit Server OS version, Browser and Browser OS versions, Elastic Endpoint
 version, Errors in browser console, and Logs unless the pack has a value.
 Write Unknown only when the human or JSON said they do not know. Never
-write _unknown_.
+write _unknown_. Vague current/expected is a gap. Quote the exact error.
+Stamp the body with: Filed via security-file-bug.
 Include Preconditions only when the repro needs setup before the first step.
 Never describe a failure only as an unspecified error; quote the exact message.
 Functional Area and Screenshots headings are not used.

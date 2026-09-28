@@ -12,6 +12,44 @@ from typing import Callable, Literal
 
 WriteAction = Literal["create", "comment", "reopen_comment", "ask"]
 UNKNOWN_ANSWER = "Unknown"
+FILED_VIA = "Filed via security-file-bug"
+MAX_TITLE_LEN = 72
+_VAGUE_SYMPTOMS = frozenset(
+    {
+        "broken",
+        "error",
+        "an error",
+        "doesn't work",
+        "does not work",
+        "doesnt work",
+        "not working",
+        "fails",
+        "failed",
+        "it doesn't work",
+        "it does not work",
+    }
+)
+_VAGUE_CURRENT_RE = re.compile(
+    r"^(broken|it (doesn'?t|does not) work|doesn'?t work|does not work|not working|"
+    r"an error( appears)?|error( occurs| appears)?|something went wrong|fails|failed)\.?$",
+    re.I,
+)
+_VAGUE_EXPECTED_RE = re.compile(
+    r"^(works|should work|work correctly|as expected|correct(ly)?|it works)\.?$",
+    re.I,
+)
+_QUOTED_OR_TYPED_ERROR_RE = re.compile(
+    r'"[^"]+"|`[^`]+`|\bTypeError\b|\bError:|\bReferenceError\b|\btoast\b',
+    re.I,
+)
+_EMAIL_RE = re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.I)
+_SDH_RE = re.compile(r"\bSDH[A-Z0-9-]{3,}\b", re.I)
+_CASE_RE = re.compile(r"\b(?:case|ticket)\s*#?\s*\d{4,}\b", re.I)
+_SENSITIVE_WORD_RE = re.compile(
+    r"\bnda\b|\bcustomer\s+(?:name|id|org|organization)\b|\bour customer\b",
+    re.I,
+)
+_TITLE_FORMAT_RE = re.compile(r"^\[.+\] .+")
 
 
 @dataclass(frozen=True)
@@ -19,6 +57,7 @@ class IssueMatch:
     number: int
     state: Literal["open", "closed"]
     title: str
+    body: str = ""
 
 
 @dataclass(frozen=True)
@@ -37,10 +76,18 @@ class LabelDecision:
 
 def format_issue_title(team_label: str, symptom: str) -> str:
     name = re.sub(r"^Team:\s*", "", team_label.strip())
-    symptom_text = " ".join(symptom.split()).strip()
+    symptom_text = " ".join(symptom.split()).strip().rstrip(".")
     if not name or not symptom_text:
         raise ValueError("team label and symptom are required")
-    return f"[{name}] {symptom_text}"
+    if symptom_text.lower() in _VAGUE_SYMPTOMS:
+        raise ValueError("symptom is too vague")
+    prefix = f"[{name}] "
+    budget = MAX_TITLE_LEN - len(prefix)
+    if budget < 1:
+        raise ValueError("team name leaves no room for a symptom")
+    if len(symptom_text) > budget:
+        symptom_text = symptom_text[: budget - 1].rstrip() + "…"
+    return f"{prefix}{symptom_text}"
 
 
 def parse_search_results(payload: object) -> list[IssueMatch]:
@@ -61,7 +108,14 @@ def parse_search_results(payload: object) -> list[IssueMatch]:
         state = entry.get("state", "open")
         if state not in ("open", "closed"):
             state = "open"
-        matches.append(IssueMatch(number, state, str(entry.get("title", ""))))
+        matches.append(
+            IssueMatch(
+                number,
+                state,
+                str(entry.get("title", "")),
+                str(entry.get("body", "") or ""),
+            )
+        )
     return matches
 
 
@@ -82,13 +136,18 @@ def finding_from_jsonl(
             if str(finding.get("title", "")).strip().lower() == wanted:
                 return finding
         raise ValueError(f"no finding titled {title!r}")
+    numbered = [
+        finding
+        for finding in findings
+        if finding.get("block_type") != "Observation"
+    ]
     if index is None:
-        if len(findings) == 1:
-            return findings[0]
+        if len(numbered) == 1:
+            return numbered[0]
         raise ValueError("pass --index or --title when jsonl has multiple findings")
-    if index < 0 or index >= len(findings):
+    if index < 0 or index >= len(numbered):
         raise ValueError(f"finding index {index} out of range")
-    return findings[index]
+    return numbered[index]
 
 
 def decide_write_path(matches: list[IssueMatch]) -> WritePath:
@@ -117,6 +176,17 @@ def validate_labels(requested: list[str], catalog: set[str]) -> LabelDecision:
     return LabelDecision(tuple(keep), tuple(dropped), ask_team)
 
 
+def catalog_from_search_results(payloads: list) -> set[str]:
+    names: set[str] = set()
+    for payload in payloads:
+        entries = payload if isinstance(payload, list) else []
+        for entry in entries:
+            name = entry.get("name") if isinstance(entry, dict) else entry
+            if name:
+                names.add(str(name))
+    return names
+
+
 @dataclass(frozen=True)
 class TeamInference:
     status: Literal["confident", "ask"]
@@ -129,8 +199,12 @@ _GENERIC_PATH_SEGMENTS = frozenset({"public", "server", "lib", "common", "api"})
 
 
 def _team_label_slug(label: str) -> str:
-    name = label.removeprefix("Team:")
+    name = label.removeprefix("Team:").strip()
     return name.lower().replace(" ", "-")
+
+
+def _compact_team(value: str) -> str:
+    return re.sub(r"[^a-z0-9]", "", value.lower().removeprefix("team:").strip())
 
 
 def _extract_team_labels(knowledge_md: str) -> tuple[str, ...]:
@@ -209,7 +283,7 @@ def _teams_for_route(route: str, knowledge_md: str) -> list[str]:
     for row in _table_data_rows(routes_section):
         if len(row) < 3:
             continue
-        if row[0] != route:
+        if route not in (row[0], row[1], row[1].strip("`")):
             continue
         for label in _teams_for_code_area(row[2], knowledge_md):
             if label in seen:
@@ -255,15 +329,16 @@ def infer_team_label(
     labels = _extract_team_labels(knowledge_md)
 
     if area is not None:
-        area_lower = area.lower()
+        area_key = _compact_team(area)
         for label in labels:
-            name = label.removeprefix("Team:")
-            if area_lower == name.lower() or area_lower == label.lower():
+            name = label.removeprefix("Team:").strip()
+            if area_key == _compact_team(name) or area_key == _compact_team(label):
                 return TeamInference("confident", label, ())
 
     if area_slug is not None:
+        slug_key = _compact_team(area_slug)
         for label in labels:
-            if _team_label_slug(label) == area_slug:
+            if slug_key == _compact_team(_team_label_slug(label)):
                 return TeamInference("confident", label, ())
 
     route_teams: list[str] = []
@@ -288,8 +363,17 @@ _DEV_INSTALL = "from source (dev)"
 _LOCAL_KINDS = frozenset({"local", "scout"})
 _SCREENSHOT_PREFIX = "Screenshot:"
 _RECORDING_PREFIX = "Recording:"
+_VIDEO_PREFIX = "Video:"
 _CONSOLE_PREFIX = "Console:"
 _NETWORK_PREFIX = "Network:"
+_MEDIA_PREFIXES = (_SCREENSHOT_PREFIX, _RECORDING_PREFIX, _VIDEO_PREFIX)
+_ENV_TYPE_DEPLOYMENT = {
+    "serverless": "Serverless",
+    "stateful-ess": "ECH",
+    "ess": "ECH",
+    "stateful-classic": "ECH",
+    "stateful": "ECH",
+}
 _HEADING_DESCRIBE = "**Describe the bug:**"
 _HEADING_VERSION = "**Version:**"
 _HEADING_FEATURE_FLAGS = "**Feature flags:**"
@@ -344,19 +428,22 @@ def _install_method(environment: dict) -> str | None:
     explicit = _optional_text(environment.get("install_method"))
     if explicit:
         return explicit
-    if environment.get("kind") in _LOCAL_KINDS:
+    env_type = str(environment.get("type") or "").lower()
+    if environment.get("kind") in _LOCAL_KINDS or env_type == "stateful-classic":
         return _DEV_INSTALL
+    if env_type in {"stateful-ess", "serverless"}:
+        return "Elastic Cloud"
     return None
 
 
 def _describe_the_bug(finding: dict) -> str:
     parts: list[str] = []
-    current = finding.get("current_behavior")
-    if current is not None and str(current).strip():
-        parts.append(str(current).strip())
-    why = finding.get("why_issue")
-    if why is not None and str(why).strip():
-        parts.append(str(why).strip())
+    title = _optional_text(finding.get("title"))
+    why = _optional_text(finding.get("why_issue"))
+    if title:
+        parts.append(title)
+    if why:
+        parts.append(why)
     return "\n\n".join(parts)
 
 
@@ -374,17 +461,31 @@ def _evidence_lines(finding: dict) -> list[str]:
     return [str(line) for line in evidence]
 
 
-def _values_with_prefix(lines: list[str], prefix: str) -> list[str]:
-    return [line[len(prefix) :].strip() for line in lines if line.startswith(prefix)]
+def _session_dir(config: dict, environment: dict) -> str | None:
+    return _optional_text(config.get("session_dir"), environment.get("session_dir"))
+
+
+def _normalize_evidence_value(raw: str, session_dir: str | None) -> str:
+    text = raw.strip()
+    if len(text) >= 2 and text[0] == "`" and text[-1] == "`":
+        text = text[1:-1]
+    if session_dir:
+        text = text.replace("$SESSION_DIR", session_dir.rstrip("/"))
+    return text
+
+
+def _values_with_prefix(
+    lines: list[str], prefix: str, session_dir: str | None = None
+) -> list[str]:
+    return [
+        _normalize_evidence_value(line[len(prefix) :], session_dir)
+        for line in lines
+        if line.startswith(prefix)
+    ]
 
 
 def _remaining_evidence(lines: list[str]) -> list[str]:
-    classified = (
-        _SCREENSHOT_PREFIX,
-        _RECORDING_PREFIX,
-        _CONSOLE_PREFIX,
-        _NETWORK_PREFIX,
-    )
+    classified = (*_MEDIA_PREFIXES, _CONSOLE_PREFIX, _NETWORK_PREFIX)
     return [line for line in lines if not line.startswith(classified)]
 
 
@@ -466,6 +567,15 @@ def infer_deployment(finding: dict, config: dict) -> DeploymentInference:
         return DeploymentInference(
             "confident", _DEPLOYMENT_LABELS.get(explicit.lower(), explicit)
         )
+    env_type = _optional_text(environment.get("type"), config.get("type"))
+    if env_type:
+        key = env_type.lower()
+        if key in _ENV_TYPE_DEPLOYMENT:
+            return DeploymentInference("confident", _ENV_TYPE_DEPLOYMENT[key])
+        if "serverless" in key:
+            return DeploymentInference("confident", "Serverless")
+        if "stateful" in key:
+            return DeploymentInference("confident", "ECH")
     arch = _optional_text(
         environment.get("arch"),
         config.get("arch"),
@@ -523,7 +633,19 @@ def _spaces(finding: dict, config: dict, environment: dict) -> str | None:
     if isinstance(raw, list):
         names = [str(item).strip() for item in raw if str(item).strip()]
         return ", ".join(names) or None
-    return _optional_text(raw)
+    explicit = _optional_text(raw)
+    if explicit:
+        return explicit
+    space_id = _optional_text(
+        finding.get("space_id"),
+        environment.get("space_id"),
+        config.get("space_id"),
+    )
+    if not space_id:
+        return None
+    if space_id == "default":
+        return "default"
+    return f"custom ({space_id})"
 
 
 def _additional_information(finding: dict, evidence: list[str]) -> str | None:
@@ -548,14 +670,27 @@ def _browser_and_os(environment: dict) -> str | None:
     return browser or browser_os
 
 
-def _current_behaviour(finding: dict, evidence: list[str]) -> str:
+def _role(finding: dict, config: dict) -> str | None:
+    setup = _as_mapping(config.get("setup"))
+    return _optional_text(
+        finding.get("role"),
+        config.get("role"),
+        setup.get("resolved_role"),
+        setup.get("role"),
+    )
+
+
+def _current_behaviour(
+    finding: dict, evidence: list[str], session_dir: str | None = None
+) -> str:
     parts: list[str] = []
     current = finding.get("current_behavior")
     if current is not None and str(current).strip():
         parts.append(str(current).strip())
     media = [
-        *_values_with_prefix(evidence, _SCREENSHOT_PREFIX),
-        *_values_with_prefix(evidence, _RECORDING_PREFIX),
+        value
+        for prefix in _MEDIA_PREFIXES
+        for value in _values_with_prefix(evidence, prefix, session_dir)
     ]
     if media:
         parts.append("\n".join(media))
@@ -565,12 +700,13 @@ def _current_behaviour(finding: dict, evidence: list[str]) -> str:
 def pack_gaps(finding: dict, config: dict) -> list[str]:
     environment = _environment(config)
     evidence = _evidence_lines(finding)
+    session_dir = _session_dir(config, environment)
     gaps: list[str] = []
     if not _stack_version(config, environment):
         gaps.append("version")
     if not _numbered_steps(finding):
         gaps.append("steps")
-    if not _current_behaviour(finding, evidence):
+    if not _current_behaviour(finding, evidence, session_dir):
         gaps.append("current")
     if not _first_text(finding.get("expected_behavior")):
         gaps.append("expected")
@@ -578,10 +714,18 @@ def pack_gaps(finding: dict, config: dict) -> list[str]:
         gaps.append("feature_flags")
     if infer_deployment(finding, config).status == "ask":
         gaps.append("deployment")
-    if not _optional_text(finding.get("role"), config.get("role")):
+    if not _role(finding, config):
         gaps.append("role")
     if not _spaces(finding, config, environment):
         gaps.append("spaces")
+    current_text = _first_text(finding.get("current_behavior"))
+    if current_text and _is_vague_current(current_text):
+        gaps.append("current_vague")
+    expected_text = _first_text(finding.get("expected_behavior"))
+    if expected_text and _is_vague_expected(expected_text):
+        gaps.append("expected_vague")
+    if _needs_quoted_error(finding, evidence):
+        gaps.append("error_unquoted")
     return gaps
 
 
@@ -589,16 +733,84 @@ def is_thin_pack(finding: dict, config: dict) -> bool:
     return bool(pack_gaps(finding, config))
 
 
+def _is_unknown_value(text: str) -> bool:
+    return text.strip().lower() == UNKNOWN_ANSWER.lower()
+
+
+def _is_vague_current(text: str) -> bool:
+    stripped = text.strip()
+    if not stripped or _is_unknown_value(stripped):
+        return False
+    return bool(_VAGUE_CURRENT_RE.match(stripped))
+
+
+def _is_vague_expected(text: str) -> bool:
+    stripped = text.strip()
+    if not stripped or _is_unknown_value(stripped):
+        return False
+    return bool(_VAGUE_EXPECTED_RE.match(stripped))
+
+
+def _needs_quoted_error(finding: dict, evidence: list[str]) -> bool:
+    current = _first_text(finding.get("current_behavior"))
+    console = "\n".join(_values_with_prefix(evidence, _CONSOLE_PREFIX))
+    hay = f"{current}\n{console}"
+    if not hay.strip() or _is_unknown_value(current):
+        return False
+    if _QUOTED_OR_TYPED_ERROR_RE.search(hay):
+        return False
+    return bool(re.search(r"\berror\b|\bfail", hay, re.I))
+
+
+def with_filed_stamp(body: str) -> str:
+    text = body.rstrip()
+    if FILED_VIA in text:
+        return f"{text}\n"
+    return f"{text}\n\n{FILED_VIA}\n"
+
+
+def scan_sensitive(*texts: object) -> list[str]:
+    blob = "\n".join(str(text) for text in texts if text)
+    hits: list[str] = []
+    if _EMAIL_RE.search(blob):
+        hits.append("email")
+    if _SDH_RE.search(blob):
+        hits.append("support_case")
+    if _CASE_RE.search(blob):
+        hits.append("case_id")
+    if _SENSITIVE_WORD_RE.search(blob):
+        hits.append("customer_or_nda")
+    return hits
+
+
+def check_draft(
+    *,
+    body: str,
+    title: str | None,
+    finding: dict,
+    config: dict,
+) -> list[str]:
+    gaps = list(pack_gaps(finding, config))
+    if title is not None:
+        if len(title) > MAX_TITLE_LEN or not _TITLE_FORMAT_RE.match(title):
+            gaps.append("title")
+    if FILED_VIA not in body:
+        gaps.append("stamp")
+    gaps.extend(f"sensitive:{hit}" for hit in scan_sensitive(body, json.dumps(finding)))
+    return gaps
+
+
 def render_bug_body(finding: dict, config: dict) -> str:
     environment = _environment(config)
     evidence = _evidence_lines(finding)
+    session_dir = _session_dir(config, environment)
     optional = (
         (
             _HEADING_FEATURE_FLAGS,
             _feature_flags(finding, config, environment),
         ),
         (_HEADING_DEPLOYMENT, _deployment(finding, config, environment)),
-        (_HEADING_ROLE, _optional_text(finding.get("role"), config.get("role"))),
+        (_HEADING_ROLE, _role(finding, config)),
         (_HEADING_SPACES, _spaces(finding, config, environment)),
         (
             _HEADING_SERVER_OS,
@@ -640,29 +852,44 @@ def render_bug_body(finding: dict, config: dict) -> str:
         *([( _HEADING_PRECONDITIONS, optional_present[_HEADING_PRECONDITIONS] )]
           if _HEADING_PRECONDITIONS in optional_present else []),
         (_HEADING_STEPS, _numbered_steps(finding)),
-        (_HEADING_CURRENT, _current_behaviour(finding, evidence)),
+        (_HEADING_CURRENT, _current_behaviour(finding, evidence, session_dir)),
         (_HEADING_EXPECTED, _first_text(finding.get("expected_behavior"))),
     ]
-    console = "\n".join(_values_with_prefix(evidence, _CONSOLE_PREFIX))
+    console = "\n".join(_values_with_prefix(evidence, _CONSOLE_PREFIX, session_dir))
     if console:
         sections.append((_HEADING_CONSOLE, console))
-    logs = "\n".join(_values_with_prefix(evidence, _NETWORK_PREFIX))
+    logs = "\n".join(_values_with_prefix(evidence, _NETWORK_PREFIX, session_dir))
     if logs:
         sections.append((_HEADING_LOGS, logs))
     additional = optional_present.get(_HEADING_ADDITIONAL)
     if additional is not None:
         sections.append((_HEADING_ADDITIONAL, additional))
     filled = [(heading, body) for heading, body in sections if body]
-    return "\n\n".join(f"{heading}\n{body}" for heading, body in filled) + "\n"
+    return with_filed_stamp(
+        "\n\n".join(f"{heading}\n{body}" for heading, body in filled) + "\n"
+    )
 
 
 _ASSET_URL = (
-    "https://uploads.github.com/repos/{repo}/issues/{issue_number}/assets?name={name}"
+    "https://uploads.github.com/user-attachments/assets"
+    "?name={name}&content_type={content_type}&repository_id={repository_id}"
 )
 _VIDEO_SUFFIXES = frozenset({".mp4", ".mov", ".webm"})
-_COMPRESS_MAX_SIZE = "9M"
+_MIME_BY_SUFFIX = {
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".gif": "image/gif",
+    ".webp": "image/webp",
+    ".mp4": "video/mp4",
+    ".mov": "video/quicktime",
+    ".webm": "video/webm",
+}
+_MAX_ASSET_BYTES = 10 * 1024 * 1024
+_TARGET_ASSET_BYTES = 8 * 1024 * 1024
+_AUDIO_BITRATE = 96_000
 
-HttpPost = Callable[[str, dict], dict]
+HttpPost = Callable[[str, dict, Path], dict]
 CommandRunner = Callable[[list], object]
 CompressVideo = Callable[[Path, Path], None]
 
@@ -685,9 +912,36 @@ def _run_checked(argv: list) -> object:
     return subprocess.run(argv, check=True, capture_output=True, text=True)
 
 
+def _probe_duration_seconds(src: Path, runner: CommandRunner) -> float | None:
+    completed = runner(
+        [
+            "ffprobe",
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "default=noprint_wrappers=1:nokey=1",
+            str(src),
+        ]
+    )
+    stdout = getattr(completed, "stdout", "") or ""
+    try:
+        duration = float(stdout.strip())
+    except ValueError:
+        return None
+    return duration if duration > 0 else None
+
+
 def compress_video(src: Path, dest: Path, run: CommandRunner | None = None) -> None:
     """Re-encode `src` into `dest` under the GitHub asset size limit."""
     runner = _run_checked if run is None else run
+    duration = _probe_duration_seconds(src, runner)
+    video_bps = 400_000
+    if duration:
+        video_bps = max(
+            80_000, int((_TARGET_ASSET_BYTES * 8) / duration) - _AUDIO_BITRATE
+        )
     runner(
         [
             "ffmpeg",
@@ -698,21 +952,37 @@ def compress_video(src: Path, dest: Path, run: CommandRunner | None = None) -> N
             "libx264",
             "-acodec",
             "aac",
-            "-crf",
-            "28",
-            "-fs",
-            _COMPRESS_MAX_SIZE,
+            "-b:v",
+            str(video_bps),
+            "-maxrate",
+            str(video_bps),
+            "-bufsize",
+            str(video_bps * 2),
+            "-b:a",
+            "96k",
             str(dest),
         ]
     )
 
 
+def _mime_for(path: Path) -> str:
+    return _MIME_BY_SUFFIX.get(path.suffix.lower(), "application/octet-stream")
+
+
+def _asset_url_from_payload(payload: dict) -> str | None:
+    for key in ("url", "href", "browser_download_url"):
+        value = payload.get(key)
+        if value:
+            return str(value)
+    return None
+
+
 def _default_http_post(url: str, headers: dict, file_path: Path) -> dict:
-    """Multipart-POST `file_path` to a GitHub asset URL with `curl`."""
+    """Binary-POST `file_path` to GitHub user-attachments with `curl`."""
     argv = ["curl", "-s", "-X", "POST", "-w", "\n%{http_code}"]
     for key, value in headers.items():
         argv += ["-H", f"{key}: {value}"]
-    argv += ["-F", f"file=@{file_path}", url]
+    argv += ["--data-binary", f"@{file_path}", url]
     completed = subprocess.run(argv, capture_output=True, text=True, check=False)
     if completed.returncode != 0:
         raise UploadError(completed.stderr.strip() or "curl failed", 0)
@@ -722,7 +992,7 @@ def _default_http_post(url: str, headers: dict, file_path: Path) -> dict:
         payload = json.loads(body)
     except json.JSONDecodeError:
         payload = {}
-    asset_url = _as_mapping(payload).get("browser_download_url")
+    asset_url = _asset_url_from_payload(_as_mapping(payload))
     return {
         "ok": 200 <= status < 300 and bool(asset_url),
         "status": status,
@@ -763,6 +1033,8 @@ def _retry_compressed(
             compress_video_fn(path, dest)
         except (OSError, subprocess.SubprocessError) as error:
             return False, "", f"compress failed before the retry ({error})"
+        if dest.exists() and dest.stat().st_size > _MAX_ASSET_BYTES:
+            return False, "", "compressed video still exceeds 10MB"
         ok, status, asset_url = _post(http_post, url, headers, dest)
         if ok:
             return True, asset_url or "", ""
@@ -771,25 +1043,51 @@ def _retry_compressed(
         shutil.rmtree(workdir, ignore_errors=True)
 
 
+def _repository_id(repo: str, run_gh: GhRunner) -> int:
+    returncode, stdout, stderr = _gh_result(run_gh(["gh", "api", f"repos/{repo}", "--jq", ".id"]))
+    if returncode != 0:
+        raise RuntimeError(_gh_failed(["gh", "api", f"repos/{repo}"], stderr))
+    return int(stdout.strip())
+
+
+def embed_uploads(body: str, uploaded: list) -> str:
+    result = body
+    for path, url in uploaded:
+        path_text = str(path)
+        result = result.replace(f"`{path_text}`", str(url))
+        result = result.replace(path_text, str(url))
+    return result
+
+
 def upload_evidence(
     *,
-    issue_number: int,
     repo: str,
     files: list,
     token: str,
+    issue_number: int | None = None,
+    repository_id: int | None = None,
     http_post: HttpPost = _default_http_post,
     compress_video_fn: CompressVideo = compress_video,
+    run_gh: GhRunner | None = None,
 ) -> UploadResult:
-    """Upload every evidence file, compressing a rejected video once before retrying."""
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github+json",
-    }
+    """Upload evidence to user-attachments, compressing a rejected video once."""
+    del issue_number
+    repo_id = repository_id
+    if repo_id is None:
+        repo_id = _repository_id(repo, run_gh or _default_run_gh)
     uploaded: list[tuple[str, str]] = []
     leftovers: list[tuple[str, str]] = []
     for file_path in files:
         path = Path(file_path)
-        url = _ASSET_URL.format(repo=repo, issue_number=issue_number, name=path.name)
+        mime = _mime_for(path)
+        url = _ASSET_URL.format(
+            name=path.name, content_type=mime, repository_id=repo_id
+        )
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/json",
+            "Content-Type": mime,
+        }
         ok, status, asset_url = _post(http_post, url, headers, path)
         if ok:
             uploaded.append((str(path), asset_url or ""))
@@ -814,6 +1112,14 @@ _URL_RE = re.compile(r"https?://\S+")
 
 class CreateFailed(Exception):
     """Raised when `gh issue create` fails; the create is never retried."""
+
+
+class PartialWrite(Exception):
+    """Raised when reopen succeeded but the follow-up comment failed."""
+
+    def __init__(self, message: str, *, number: int) -> None:
+        super().__init__(message)
+        self.number = number
 
 
 def _default_run_gh(argv: list) -> dict:
@@ -893,8 +1199,6 @@ def _gh_comment(
     ]
     returncode, stdout, stderr = _gh_result(run_gh(argv))
     if returncode != 0:
-        returncode, stdout, stderr = _gh_result(run_gh(argv))
-    if returncode != 0:
         raise RuntimeError(_gh_failed(argv, stderr))
     return _first_url(stdout)
 
@@ -921,7 +1225,7 @@ def write_github(
     workdir = Path(tempfile.mkdtemp(prefix="file_bug_body_"))
     try:
         body_file = workdir / "body.md"
-        body_file.write_text(body, encoding="utf-8")
+        body_file.write_text(with_filed_stamp(body), encoding="utf-8")
         if action == "create":
             url = _gh_create(
                 repo=repo,
@@ -933,9 +1237,19 @@ def write_github(
         else:
             if action == "reopen_comment":
                 _gh_reopen(repo=repo, number=number, run_gh=run_gh)
-            url = _gh_comment(
-                repo=repo, number=number, body_file=body_file, run_gh=run_gh
-            )
+                try:
+                    url = _gh_comment(
+                        repo=repo, number=number, body_file=body_file, run_gh=run_gh
+                    )
+                except RuntimeError as error:
+                    raise PartialWrite(
+                        f"reopened #{number} but the comment failed: {error}",
+                        number=number,
+                    ) from error
+            else:
+                url = _gh_comment(
+                    repo=repo, number=number, body_file=body_file, run_gh=run_gh
+                )
     finally:
         shutil.rmtree(workdir, ignore_errors=True)
     return {"url": url}

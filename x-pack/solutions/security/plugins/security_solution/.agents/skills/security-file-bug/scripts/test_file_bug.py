@@ -13,9 +13,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from file_bug import (  # noqa: E402
     CreateFailed,
+    FILED_VIA,
     IssueMatch,
+    PartialWrite,
+    check_draft,
     compress_video,
     decide_write_path,
+    embed_uploads,
     finding_from_jsonl,
     format_issue_title,
     infer_deployment,
@@ -23,6 +27,7 @@ from file_bug import (  # noqa: E402
     pack_gaps,
     parse_search_results,
     render_bug_body,
+    scan_sensitive,
     upload_evidence,
     validate_labels,
     write_github,
@@ -111,6 +116,26 @@ class InferTeamLabelTest(unittest.TestCase):
         self.assertEqual(result.status, "confident")
         self.assertEqual(result.label, "Team:Entity Analytics")
 
+    def test_application_route_is_confident(self):
+        result = infer_team_label(
+            area=None,
+            area_slug=None,
+            route="/app/security/alerts",
+            knowledge_md=self.md,
+        )
+        self.assertEqual(result.status, "confident")
+        self.assertEqual(result.label, "Team:Detection Engine")
+
+    def test_security_solution_alias_is_real_label(self):
+        result = infer_team_label(
+            area="Security Solution",
+            area_slug=None,
+            route=None,
+            knowledge_md=self.md,
+        )
+        self.assertEqual(result.status, "confident")
+        self.assertEqual(result.label, "Team: SecuritySolution")
+
     def test_unknown_area_asks(self):
         result = infer_team_label(
             area="Onboarding", area_slug="onboarding", route=None, knowledge_md=self.md
@@ -162,6 +187,7 @@ class RenderBugBodyTest(unittest.TestCase):
         self.assertNotIn("**Preconditions:**", body)
         self.assertNotIn("**Describe the bug:**\n\n**Version", body)
         self.assertNotIn("_unknown_", body)
+        self.assertIn(FILED_VIA, body)
 
     def test_optional_environment_headings_only_when_needed(self):
         finding = {
@@ -278,6 +304,57 @@ class RenderBugBodyTest(unittest.TestCase):
         self.assertIn("**Version:**\nUnknown", body)
         self.assertNotIn("_unknown_", body)
 
+    def test_video_and_backticked_session_paths_in_current(self):
+        body = render_bug_body(
+            {
+                "title": "Leak across spaces",
+                "why_issue": "Tenant isolation",
+                "current_behavior": "Same record in empty space",
+                "expected_behavior": "Zero anomalies",
+                "steps_followed": ["open flyout"],
+                "evidence": [
+                    "Screenshot: `$SESSION_DIR/screenshots/leak.png`",
+                    "Video: `$SESSION_DIR/videos/flow.mp4`",
+                ],
+            },
+            {"session_dir": "/tmp/session"},
+        )
+        current = body.split("**Current behaviour (with screenshots and recordings):**", 1)[1]
+        additional = current.split("**Any additional information:**", 1)[0] if "**Any additional information:**" in current else current
+        self.assertIn("/tmp/session/screenshots/leak.png", additional)
+        self.assertIn("/tmp/session/videos/flow.mp4", additional)
+        self.assertNotIn("`$SESSION_DIR", additional)
+        describe = body.split("**Describe the bug:**", 1)[1].split("\n\n**", 1)[0]
+        self.assertIn("Leak across spaces", describe)
+        self.assertIn("Tenant isolation", describe)
+        self.assertNotIn("Same record in empty space", describe)
+
+    def test_tester_config_fills_deployment_space_role_install(self):
+        config = {
+            "environment": {
+                "type": "serverless",
+                "url": "https://example.kb.region.elastic.cloud",
+                "space_id": "exploratory-testing",
+            },
+            "setup": {"resolved_role": "exploratory_platform_engineer"},
+        }
+        finding = {
+            "current_behavior": "Table shows 0 entities",
+            "expected_behavior": "Table lists entities",
+            "steps_followed": ["open"],
+        }
+        gaps = pack_gaps(finding, config)
+        self.assertNotIn("deployment", gaps)
+        self.assertNotIn("spaces", gaps)
+        self.assertNotIn("role", gaps)
+        self.assertIn("version", gaps)
+        self.assertIn("feature_flags", gaps)
+        body = render_bug_body(finding, config)
+        self.assertIn("**Deployment:**\nServerless", body)
+        self.assertIn("custom (exploratory-testing)", body)
+        self.assertIn("exploratory_platform_engineer", body)
+        self.assertIn("Elastic Cloud", body)
+
 
 class FormatIssueTitleTest(unittest.TestCase):
     def test_strips_team_prefix(self):
@@ -292,14 +369,31 @@ class FormatIssueTitleTest(unittest.TestCase):
             "[Entity Analytics] risk table",
         )
 
+    def test_strips_trailing_period(self):
+        self.assertEqual(
+            format_issue_title("Entity Analytics", "Risk table empty."),
+            "[Entity Analytics] Risk table empty",
+        )
+
+    def test_rejects_vague_symptom(self):
+        with self.assertRaises(ValueError):
+            format_issue_title("Entity Analytics", "broken")
+
+    def test_truncates_to_72(self):
+        title = format_issue_title("Entity Analytics", "x" * 80)
+        self.assertLessEqual(len(title), 72)
+        self.assertTrue(title.startswith("[Entity Analytics] "))
+        self.assertTrue(title.endswith("…"))
+
 
 class ParseSearchResultsTest(unittest.TestCase):
     def test_parses_gh_array(self):
         matches = parse_search_results(
-            [{"number": 1, "state": "open", "title": "A"}]
+            [{"number": 1, "state": "open", "title": "A", "body": "Same table stays empty"}]
         )
         self.assertEqual(matches[0].number, 1)
         self.assertEqual(matches[0].state, "open")
+        self.assertEqual(matches[0].body, "Same table stays empty")
 
     def test_parses_items_wrapper(self):
         matches = parse_search_results({"items": [{"number": 9, "state": "closed"}]})
@@ -355,6 +449,16 @@ class InferDeploymentTest(unittest.TestCase):
         self.assertEqual(result.status, "ask")
         self.assertIsNone(result.label)
 
+    def test_tester_type_serverless(self):
+        result = infer_deployment({}, {"environment": {"type": "serverless"}})
+        self.assertEqual(result.status, "confident")
+        self.assertEqual(result.label, "Serverless")
+
+    def test_tester_type_stateful_ess(self):
+        result = infer_deployment({}, {"environment": {"type": "stateful-ess"}})
+        self.assertEqual(result.status, "confident")
+        self.assertEqual(result.label, "ECH")
+
 
 class PackGapsTest(unittest.TestCase):
     def test_fixture_is_thin_without_always_ask(self):
@@ -371,8 +475,8 @@ class PackGapsTest(unittest.TestCase):
     def test_unknown_is_not_a_gap(self):
         gaps = pack_gaps(
             {
-                "current_behavior": "broken",
-                "expected_behavior": "works",
+                "current_behavior": "Table shows 0 entities",
+                "expected_behavior": "Table lists entities",
                 "steps_followed": ["click"],
                 "feature_flags": "Unknown",
                 "deployment": "Unknown",
@@ -382,6 +486,82 @@ class PackGapsTest(unittest.TestCase):
             {"kibana_version": "9.3.0"},
         )
         self.assertEqual(gaps, [])
+
+    def test_vague_current_and_unquoted_error(self):
+        gaps = pack_gaps(
+            {
+                "current_behavior": "an error appears",
+                "expected_behavior": "works",
+                "steps_followed": ["click"],
+                "feature_flags": "Unknown",
+                "deployment": "Unknown",
+                "role": "Unknown",
+                "spaces": "Unknown",
+            },
+            {"kibana_version": "9.3.0"},
+        )
+        self.assertIn("current_vague", gaps)
+        self.assertIn("expected_vague", gaps)
+        self.assertIn("error_unquoted", gaps)
+
+
+class ScanSensitiveTest(unittest.TestCase):
+    def test_flags_email_and_case(self):
+        hits = scan_sensitive("Ping ada@elastic.co about SDH12345 and our customer")
+        self.assertIn("email", hits)
+        self.assertIn("support_case", hits)
+        self.assertIn("customer_or_nda", hits)
+
+    def test_clean_text_is_empty(self):
+        self.assertEqual(scan_sensitive("Table shows 0 entities"), [])
+
+
+class CheckDraftTest(unittest.TestCase):
+    def test_complete_draft_is_fileable(self):
+        finding = {
+            "current_behavior": 'Toast: "TypeError: cannot read map"',
+            "expected_behavior": "Table lists entities",
+            "steps_followed": ["Open Entity Analytics"],
+            "feature_flags": "No feature flag (default/GA)",
+            "deployment": "ECH",
+            "role": "none",
+            "spaces": "default",
+        }
+        body = render_bug_body(finding, {"kibana_version": "9.3.0"})
+        gaps = check_draft(
+            body=body,
+            title="[Entity Analytics] Risk table empty",
+            finding=finding,
+            config={"kibana_version": "9.3.0"},
+        )
+        self.assertEqual(gaps, [])
+
+    def test_missing_stamp_and_bad_title(self):
+        gaps = check_draft(
+            body="**Steps to reproduce:**\n1. click\n",
+            title="broken",
+            finding={
+                "current_behavior": "Table shows 0",
+                "expected_behavior": "Table lists entities",
+                "steps_followed": ["click"],
+                "feature_flags": "Unknown",
+                "deployment": "Unknown",
+                "role": "Unknown",
+                "spaces": "Unknown",
+            },
+            config={"kibana_version": "9.3.0"},
+        )
+        self.assertIn("stamp", gaps)
+        self.assertIn("title", gaps)
+
+
+class EmbedUploadsTest(unittest.TestCase):
+    def test_replaces_local_paths(self):
+        body = "See /tmp/session/screenshots/leak.png"
+        updated = embed_uploads(
+            body, [("/tmp/session/screenshots/leak.png", "https://img/leak.png")]
+        )
+        self.assertEqual(updated, "See https://img/leak.png")
 
 
 class UploadEvidenceTest(unittest.TestCase):
@@ -400,12 +580,14 @@ class UploadEvidenceTest(unittest.TestCase):
                 repo="elastic/kibana",
                 files=[png],
                 token="t",
+                repository_id=7833168,
                 http_post=http_post,
                 compress_video_fn=lambda *a, **k: None,
             )
         self.assertEqual(len(result.uploaded), 1)
         self.assertEqual(result.leftovers, ())
-        self.assertIn("/issues/99/assets?name=shot.png", posts[0])
+        self.assertIn("user-attachments/assets", posts[0])
+        self.assertIn("repository_id=7833168", posts[0])
 
     def test_video_rejected_then_compress_retry_succeeds(self):
         calls = {"n": 0}
@@ -430,6 +612,7 @@ class UploadEvidenceTest(unittest.TestCase):
                 repo="elastic/kibana",
                 files=[video],
                 token="t",
+                repository_id=1,
                 http_post=http_post,
                 compress_video_fn=compress,
             )
@@ -449,6 +632,7 @@ class UploadEvidenceTest(unittest.TestCase):
                 repo="elastic/kibana",
                 files=[video],
                 token="t",
+                repository_id=1,
                 http_post=http_post,
                 compress_video_fn=lambda src, dest, run=None: dest.write_bytes(b"x"),
             )
@@ -469,9 +653,9 @@ class UploadEvidenceTest(unittest.TestCase):
             dest = Path(tmp) / "out.mp4"
             src.write_bytes(b"x")
             compress_video(src, dest, run)
-        self.assertEqual(seen[0][0], "ffmpeg")
-        self.assertIn("-fs", seen[0])
-        self.assertIn("9M", seen[0])
+        ffmpeg = next(argv for argv in seen if argv and argv[0] == "ffmpeg")
+        self.assertNotIn("-fs", ffmpeg)
+        self.assertIn("-b:v", ffmpeg)
 
 
 class WriteGithubTest(unittest.TestCase):
@@ -495,30 +679,46 @@ class WriteGithubTest(unittest.TestCase):
         self.assertEqual(len(calls), 1)
         self.assertEqual(calls[0][0:3], ["gh", "issue", "create"])
 
-    def test_comment_retries_once(self):
+    def test_comment_failure_is_not_retried(self):
         calls = []
 
         def run_gh(argv):
             calls.append(argv)
-            if len(calls) == 1:
-                return {"returncode": 1, "stdout": "", "stderr": "tmp"}
-            return {
-                "returncode": 0,
-                "stdout": "https://github.com/elastic/kibana/issues/1#issuecomment-2",
-                "stderr": "",
-            }
+            return {"returncode": 1, "stdout": "", "stderr": "tmp"}
 
-        result = write_github(
-            action="comment",
-            repo="elastic/kibana",
-            title=None,
-            body="evidence",
-            labels=[],
-            number=1,
-            run_gh=run_gh,
-        )
-        self.assertEqual(len(calls), 2)
-        self.assertIn("issues/1", result["url"])
+        with self.assertRaises(RuntimeError):
+            write_github(
+                action="comment",
+                repo="elastic/kibana",
+                title=None,
+                body="evidence",
+                labels=[],
+                number=1,
+                run_gh=run_gh,
+            )
+        self.assertEqual(len(calls), 1)
+
+    def test_reopen_without_comment_is_partial_write(self):
+        calls = []
+
+        def run_gh(argv):
+            calls.append(argv)
+            if argv[2] == "reopen":
+                return {"returncode": 0, "stdout": "", "stderr": ""}
+            return {"returncode": 1, "stdout": "", "stderr": "comment failed"}
+
+        with self.assertRaises(PartialWrite) as raised:
+            write_github(
+                action="reopen_comment",
+                repo="elastic/kibana",
+                title=None,
+                body="evidence",
+                labels=[],
+                number=9,
+                run_gh=run_gh,
+            )
+        self.assertEqual(raised.exception.number, 9)
+        self.assertEqual(calls[0][0:4], ["gh", "issue", "reopen", "9"])
 
     def test_reopen_then_comment(self):
         calls = []
@@ -674,6 +874,125 @@ class FileBugCliTest(unittest.TestCase):
         self.assertTrue(payload["thin"])
         self.assertIn("deployment", payload["gaps"])
 
+    def test_scan_sensitive_cli_asks(self):
+        result = run_cli("scan-sensitive", "--text", "email me at ada@elastic.co")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("email", json.loads(result.stdout)["hits"])
+
+    def test_check_draft_cli_exits_2_without_stamp(self):
+        finding = {
+            "current_behavior": "Table shows 0",
+            "expected_behavior": "Table lists entities",
+            "steps_followed": ["click"],
+            "feature_flags": "Unknown",
+            "deployment": "Unknown",
+            "role": "Unknown",
+            "spaces": "Unknown",
+        }
+        with TemporaryDirectory() as tmp:
+            finding_path = Path(tmp) / "finding.json"
+            body_path = Path(tmp) / "body.md"
+            finding_path.write_text(json.dumps(finding), encoding="utf-8")
+            body_path.write_text("**Version:**\n9.3.0\n", encoding="utf-8")
+            result = run_cli(
+                "check-draft",
+                "--finding",
+                str(finding_path),
+                "--body",
+                str(body_path),
+                "--title",
+                "[Entity Analytics] Risk table empty",
+            )
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("stamp", json.loads(result.stdout)["gaps"])
+
+    def test_format_title_cli_rejects_vague(self):
+        result = run_cli(
+            "format-title",
+            "--label",
+            "Team:Entity Analytics",
+            "--symptom",
+            "broken",
+        )
+        self.assertEqual(result.returncode, 1)
+
+
+TESTER_PARSE = (
+    Path(__file__).resolve().parents[2]
+    / "exploratory-tester"
+    / "scripts"
+    / "parse-findings.py"
+)
+TESTER_SESSION = (
+    Path(__file__).resolve().parents[2]
+    / "exploratory-tester"
+    / "scripts"
+    / "__tests__"
+    / "fixtures"
+    / "report-session-basic"
+)
+KNOWLEDGE = (
+    Path(__file__).resolve().parents[3]
+    / "references"
+    / "security-domain-knowledge.md"
+)
+
+
+class TesterPackIntegrationTest(unittest.TestCase):
+    def test_real_findings_jsonl_and_setup_config(self):
+        with TemporaryDirectory() as tmp:
+            out = Path(tmp) / "findings.jsonl"
+            parsed = subprocess.run(
+                [
+                    sys.executable,
+                    str(TESTER_PARSE),
+                    "--findings",
+                    str(TESTER_SESSION / "findings-flow-1.md"),
+                    str(TESTER_SESSION / "findings-flow-2.md"),
+                    "--out",
+                    str(out),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(parsed.returncode, 0, parsed.stderr)
+            records = [
+                json.loads(line)
+                for line in out.read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            ]
+        finding = finding_from_jsonl(records, index=0)
+        self.assertNotEqual(finding.get("block_type"), "Observation")
+        config = {
+            "area": "Entity Analytics",
+            "area_slug": "entity-analytics",
+            "session_dir": "/tmp/session",
+            "environment": {
+                "type": "serverless",
+                "url": "https://example.kb.region.elastic.cloud",
+                "space_id": "exploratory-testing",
+            },
+            "setup": {"resolved_role": "exploratory_platform_engineer"},
+        }
+        self.assertEqual(infer_deployment(finding, config).label, "Serverless")
+        gaps = pack_gaps(finding, config)
+        self.assertNotIn("deployment", gaps)
+        self.assertNotIn("spaces", gaps)
+        team = infer_team_label(
+            area=config["area"],
+            area_slug=config["area_slug"],
+            route=None,
+            knowledge_md=KNOWLEDGE.read_text(encoding="utf-8"),
+        )
+        self.assertEqual(team.status, "confident")
+        self.assertEqual(team.label, "Team:Entity Analytics")
+        body = render_bug_body(finding, config)
+        self.assertIn("/tmp/session/screenshots/", body)
+        self.assertNotIn("`$SESSION_DIR", body)
+        self.assertIn(f"**Describe the bug:**\n{finding['title']}", body)
+        self.assertNotIn(f"**Describe the bug:**\n{finding['current_behavior']}", body)
+
 
 SKILL = Path(__file__).resolve().parents[1] / "SKILL.md"
 
@@ -736,6 +1055,19 @@ class SkillProtocolTest(unittest.TestCase):
         self.assertIn("URL that contains `cloud`", self.text)
         self.assertIn("stateful", self.text)
         self.assertIn("Never write `_unknown_`", self.text)
+        self.assertIn("Hard stop", self.text)
+        self.assertIn("Fileable checklist", self.text)
+        self.assertIn("check-draft", self.text)
+        self.assertIn("scan-sensitive", self.text)
+        self.assertIn("Filed via security-file-bug", self.text)
+        self.assertIn("open and closed", self.text)
+        self.assertIn("second", self.text.lower())
+        self.assertIn("elastic/security-team", self.text)
+        self.assertIn("vague", self.text.lower())
+        self.assertIn("user-attachments", self.text)
+        self.assertIn("embed-uploads", self.text)
+        self.assertIn("--search", self.text)
+        self.assertIn("Video:", self.text)
 
 
 if __name__ == "__main__":

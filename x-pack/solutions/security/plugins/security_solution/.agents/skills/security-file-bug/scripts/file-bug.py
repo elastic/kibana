@@ -14,8 +14,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from file_bug import (  # noqa: E402
     CreateFailed,
     IssueMatch,
+    PartialWrite,
     _default_run_gh as default_run_gh,
+    catalog_from_search_results,
+    check_draft,
     decide_write_path,
+    embed_uploads,
     finding_from_jsonl,
     format_issue_title,
     infer_deployment,
@@ -23,6 +27,7 @@ from file_bug import (  # noqa: E402
     pack_gaps,
     parse_search_results,
     render_bug_body,
+    scan_sensitive,
     upload_evidence,
     validate_labels,
     write_github,
@@ -69,10 +74,32 @@ def _optional(value: str | None) -> str | None:
     return text or None
 
 
+def _excerpt(text: str, limit: int = 160) -> str:
+    collapsed = " ".join(text.split())
+    if len(collapsed) <= limit:
+        return collapsed
+    return collapsed[: limit - 1].rstrip() + "…"
+
+
+def _match_payload(match: IssueMatch) -> dict:
+    return {
+        "number": match.number,
+        "state": match.state,
+        "title": match.title,
+        "body": match.body,
+        "excerpt": _excerpt(match.body),
+    }
+
+
 def _issue_matches(payload: object) -> list:
     entries = payload.get("matches", []) if isinstance(payload, dict) else []
     return [
-        IssueMatch(int(entry["number"]), entry["state"], str(entry.get("title", "")))
+        IssueMatch(
+            int(entry["number"]),
+            entry["state"],
+            str(entry.get("title", "")),
+            str(entry.get("body", "") or ""),
+        )
         for entry in entries
     ]
 
@@ -87,15 +114,12 @@ def _catalog_names(payload: object) -> set:
 
 
 def _cmd_decide(args: argparse.Namespace) -> int:
-    path = decide_write_path(_issue_matches(_read_json(args.matches)))
+    path = decide_write_path(parse_search_results(_read_json(args.matches)))
     return _emit(
         {
             "action": path.action,
             "number": path.number,
-            "candidates": [
-                {"number": match.number, "state": match.state, "title": match.title}
-                for match in path.candidates
-            ],
+            "candidates": [_match_payload(match) for match in path.candidates],
         },
         EXIT_ASK if path.action == "ask" else EXIT_OK,
     )
@@ -103,7 +127,38 @@ def _cmd_decide(args: argparse.Namespace) -> int:
 
 def _cmd_validate_labels(args: argparse.Namespace) -> int:
     requested = [name.strip() for name in args.labels.split(",") if name.strip()]
-    decision = validate_labels(requested, _catalog_names(_read_json(args.catalog)))
+    if args.catalog:
+        catalog = _catalog_names(_read_json(args.catalog))
+    elif args.repo:
+        payloads = []
+        for label in requested:
+            result = default_run_gh(
+                [
+                    "gh",
+                    "label",
+                    "list",
+                    "--repo",
+                    args.repo,
+                    "--search",
+                    label,
+                    "--limit",
+                    "20",
+                    "--json",
+                    "name",
+                ]
+            )
+            if result.get("returncode"):
+                return _fail(
+                    str(result.get("stderr") or "gh label list --search failed")
+                )
+            try:
+                payloads.append(json.loads(str(result.get("stdout") or "[]")))
+            except json.JSONDecodeError as error:
+                return _fail(f"JSONDecodeError: {error}")
+        catalog = catalog_from_search_results(payloads)
+    else:
+        return _fail("validate-labels needs --catalog or --repo")
+    decision = validate_labels(requested, catalog)
     return _emit(
         {
             "keep": list(decision.keep),
@@ -144,12 +199,7 @@ def _cmd_format_title(args: argparse.Namespace) -> int:
 def _cmd_parse_search(args: argparse.Namespace) -> int:
     matches = parse_search_results(_read_json(args.input))
     return _emit(
-        {
-            "matches": [
-                {"number": match.number, "state": match.state, "title": match.title}
-                for match in matches
-            ]
-        }
+        {"matches": [_match_payload(match) for match in matches]}
     )
 
 
@@ -192,6 +242,39 @@ def _cmd_check_pack(args: argparse.Namespace) -> int:
     )
 
 
+def _cmd_check_draft(args: argparse.Namespace) -> int:
+    finding = _read_json(args.finding) if args.finding else {}
+    config = _read_json(args.config) if args.config else {}
+    if not isinstance(finding, dict) or not isinstance(config, dict):
+        return _fail("finding and config must be JSON objects")
+    body = _read_text(args.body)
+    gaps = check_draft(
+        body=body,
+        title=_optional(args.title),
+        finding=finding,
+        config=config,
+    )
+    return _emit(
+        {"fileable": not gaps, "gaps": gaps},
+        EXIT_ASK if gaps else EXIT_OK,
+    )
+
+
+def _cmd_scan_sensitive(args: argparse.Namespace) -> int:
+    texts: list[str] = []
+    if args.finding:
+        texts.append(_read_text(args.finding))
+    if args.body:
+        texts.append(_read_text(args.body))
+    if args.text:
+        texts.append(args.text)
+    hits = scan_sensitive(*texts)
+    return _emit(
+        {"hits": hits},
+        EXIT_ASK if hits else EXIT_OK,
+    )
+
+
 def _cmd_render_body(args: argparse.Namespace) -> int:
     finding = _read_json(args.finding)
     config = _read_json(args.config) if args.config else {}
@@ -213,6 +296,8 @@ def _cmd_write(args: argparse.Namespace) -> int:
             number=args.number,
         )
     except CreateFailed as error:
+        return _fail(str(error))
+    except PartialWrite as error:
         return _fail(str(error))
     except (RuntimeError, ValueError) as error:
         return _fail(str(error))
@@ -246,6 +331,23 @@ def _cmd_upload(args: argparse.Namespace) -> int:
     )
 
 
+def _uploaded_pairs(payload: object) -> list:
+    entries = payload.get("uploaded", payload) if isinstance(payload, dict) else payload
+    if not isinstance(entries, list):
+        return []
+    return [
+        (str(entry["path"]), str(entry["url"]))
+        for entry in entries
+        if isinstance(entry, dict)
+    ]
+
+
+def _cmd_embed_uploads(args: argparse.Namespace) -> int:
+    return _emit(
+        {"body": embed_uploads(_read_text(args.body), _uploaded_pairs(_read_json(args.map)))}
+    )
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = _Parser(
         prog="file-bug.py",
@@ -265,8 +367,13 @@ def _build_parser() -> argparse.ArgumentParser:
     labels.add_argument("--labels", required=True, help="Comma-separated label names")
     labels.add_argument(
         "--catalog",
-        required=True,
+        default=None,
         help="`gh label list --json name` output, or - to read stdin",
+    )
+    labels.add_argument(
+        "--repo",
+        default=None,
+        help="Search each label with `gh label list --search` (no 1000 cap)",
     )
     labels.set_defaults(handler=_cmd_validate_labels)
 
@@ -314,6 +421,23 @@ def _build_parser() -> argparse.ArgumentParser:
     check.add_argument("--config", default=None)
     check.set_defaults(handler=_cmd_check_pack)
 
+    draft = subparsers.add_parser(
+        "check-draft", help="Fileable-bar gaps on a draft body"
+    )
+    draft.add_argument("--finding", default=None)
+    draft.add_argument("--config", default=None)
+    draft.add_argument("--body", required=True, help="Draft markdown path, or -")
+    draft.add_argument("--title", default=None)
+    draft.set_defaults(handler=_cmd_check_draft)
+
+    sensitive = subparsers.add_parser(
+        "scan-sensitive", help="Flag emails, case IDs, NDA/customer wording"
+    )
+    sensitive.add_argument("--finding", default=None)
+    sensitive.add_argument("--body", default=None)
+    sensitive.add_argument("--text", default=None)
+    sensitive.set_defaults(handler=_cmd_scan_sensitive)
+
     render = subparsers.add_parser(
         "render-body", help="Render the security-file-bug template"
     )
@@ -334,11 +458,18 @@ def _build_parser() -> argparse.ArgumentParser:
     write.add_argument("--number", type=int, default=None, help="Issue number to comment on")
     write.set_defaults(handler=_cmd_write)
 
-    upload = subparsers.add_parser("upload", help="Attach evidence to an issue")
-    upload.add_argument("--issue", type=int, required=True)
+    upload = subparsers.add_parser("upload", help="Upload evidence to user-attachments")
+    upload.add_argument("--issue", type=int, default=None)
     upload.add_argument("--repo", required=True)
     upload.add_argument("--file", action="append", required=True)
     upload.set_defaults(handler=_cmd_upload)
+
+    embed = subparsers.add_parser(
+        "embed-uploads", help="Replace local evidence paths with uploaded URLs"
+    )
+    embed.add_argument("--body", required=True)
+    embed.add_argument("--map", required=True, help="upload JSON or {\"uploaded\":[...]}")
+    embed.set_defaults(handler=_cmd_embed_uploads)
 
     return parser
 
