@@ -78,7 +78,18 @@ Adding a producer is a deliberate change to that enum, reviewed alongside the qu
 
 It is also **immutable**: `create()` is the only writer, `revise()` and `clone()` inherit it through the spread, and `UpdateProposalParams` has no field for it. A chain therefore cannot split across two queues.
 
-The one thing the enum cannot catch is a valid member used by the wrong producer — an AlertZero Worker declaring `nightshift` on a copy-paste. `proposal_origin.test.ts` in the AlertZero plugin sweeps every AlertZero managed definition for `system-create-proposal` call sites and pins each to `ALERTZERO_PROPOSAL_ORIGIN`, so a new Worker cannot be added without one.
+The one thing the enum cannot catch is a valid member used by the wrong producer — an AlertZero Worker declaring `nightshift` on a copy-paste. A producer can close that gap for itself by owning the value rather than asking each call site for it, which is what AlertZero does.
+
+#### Producers may front the gate with a bridge
+
+AlertZero's Workers do not call `system-create-proposal`. They call `system-create-alertzero-proposal`, a managed workflow that forwards every input and supplies `origin: alertzero` as a literal. The bridge declares no `origin` input at all, so there is nothing for a call site to get wrong.
+
+Two properties make this safe to copy for another producer:
+
+- **It must outlive the gate it waits on.** `workflow.execute` parks the caller in `WAITING_FOR_CHILD` for as long as the decision is held, and the engine's default workflow timeout is 6h against the gate's `168h` ceiling. A bridge that leaves `settings.timeout` unset is cancelled mid-decision, and a cancelled parent runs no handler, so the proposal strands `pending`.
+- **It must re-declare the gate's `outputs`.** Callers read `steps.<step>.output.decision`, `.status` and `.proposalId`. A bridge that does not forward them leaves every one of those expressions undefined — falsy, so approval branches simply stop firing, with nothing logged.
+
+`create_proposal.test.ts` next to the bridge pins both, plus input parity with the gate, so an input added to `system-create-proposal` fails the build rather than being silently dropped at the hop. `proposal_origin.test.ts` in the AlertZero plugin sweeps every AlertZero definition to keep the bridge the only thing that reaches the gate.
 
 ### Decision and status are two axes
 

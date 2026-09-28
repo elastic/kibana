@@ -16,6 +16,7 @@ import {
   ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID,
   ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW_ID,
   ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID,
+  ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID,
   ALERTZERO_RULE_CREATION_WORKFLOW_ID,
   ALERTZERO_RULE_PREVIEW_WORKFLOW_ID,
   ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID,
@@ -256,7 +257,8 @@ describe('detection rule workflows', () => {
 
       const proposals = all.filter(
         ({ type, with: input }) =>
-          type === 'workflow.execute' && input?.['workflow-id'] === CREATE_PROPOSAL_WORKFLOW_ID
+          type === 'workflow.execute' &&
+          input?.['workflow-id'] === ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID
       );
       expect(proposals.map(({ name }) => name)).toEqual([
         'propose_entry',

@@ -20,6 +20,7 @@ import {
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+  ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID,
   ALERTZERO_JOURNAL_NOTE_WORKFLOW,
   ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID,
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW,
@@ -1353,7 +1354,9 @@ describe('Attack Discovery worker chain', () => {
 
     it('creates exactly one proposal', () => {
       expect(
-        reviewSteps.filter((step) => step.with?.['workflow-id'] === 'system-create-proposal')
+        reviewSteps.filter(
+          (step) => step.with?.['workflow-id'] === ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID
+        )
       ).toHaveLength(1);
     });
 

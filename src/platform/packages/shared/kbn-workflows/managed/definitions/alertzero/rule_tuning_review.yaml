@@ -190,10 +190,9 @@ steps:
       ${{ inputs.autonomy_level == 'manual'
         and steps.create_investigation.output.conversation_id != null }}
     with:
-      workflow-id: system-create-proposal
+      workflow-id: system-create-alertzero-proposal
       inputs:
         conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-        origin: alertzero
         comment: |-
           **Review rule for tuning?**
 
@@ -743,10 +742,9 @@ steps:
           - name: propose_query
             type: workflow.execute
             with:
-              workflow-id: system-create-proposal
+              workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-                origin: alertzero
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -763,10 +761,9 @@ steps:
           - name: propose_risk_score
             type: workflow.execute
             with:
-              workflow-id: system-create-proposal
+              workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-                origin: alertzero
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -784,10 +781,9 @@ steps:
           - name: propose_exception
             type: workflow.execute
             with:
-              workflow-id: system-create-proposal
+              workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-                origin: alertzero
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-add-rule-exception
                 actionInput:
@@ -816,10 +812,9 @@ steps:
           - name: propose_threshold
             type: workflow.execute
             with:
-              workflow-id: system-create-proposal
+              workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-                origin: alertzero
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -837,10 +832,9 @@ steps:
           - name: propose_schedule
             type: workflow.execute
             with:
-              workflow-id: system-create-proposal
+              workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-                origin: alertzero
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -858,10 +852,9 @@ steps:
       - name: propose_manual
         type: workflow.execute
         with:
-          workflow-id: system-create-proposal
+          workflow-id: system-create-alertzero-proposal
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-            origin: alertzero
             comment: "{{ steps.compose_proposal.output.comment }}"
             impact: low
             # No action, so no inherited category; see the entry gate.
