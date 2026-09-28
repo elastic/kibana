@@ -44,6 +44,14 @@ const GENERIC_VENDOR_TOKENS: ReadonlySet<string> = new Set([
 
 /** Prompt budget: enough IOCs to hint at the platform without drowning the dataset list. */
 const MAX_PROMPT_IOCS = 25;
+
+/**
+ * Cap on the datasets offered to the model. Discovery is uncapped, so a large
+ * estate could put thousands of lines in one prompt and blow the connector's
+ * context window, which would read as the model declining. Datasets arrive
+ * sorted by pattern, so the cut is deterministic and logged.
+ */
+export const MAX_MODEL_DATASET_OPTIONS = 200;
 const MAX_PROMPT_TEXT_CHARS = 6000;
 
 /** Lower-cases and strips everything that is not `[a-z0-9]`, so 'Cisco ASA' and 'cisco_asa' compare equal. */
@@ -204,10 +212,20 @@ export const matchDatasetsWithModel = async ({
 }): Promise<ModelDatasetMatch | undefined> => {
   if (datasets.length === 0) return undefined;
 
+  const options =
+    datasets.length > MAX_MODEL_DATASET_OPTIONS
+      ? datasets.slice(0, MAX_MODEL_DATASET_OPTIONS)
+      : datasets;
+  if (options.length < datasets.length) {
+    logger?.warn(
+      `Hunt dataset model matching offered ${options.length} of ${datasets.length} discovered datasets; the rest cannot be matched by the model this run`
+    );
+  }
+
   let output: DatasetMatchOutput;
   try {
     const structured = model.chatModel.withStructuredOutput(datasetMatchSchema);
-    const raw = await structured.invoke(buildPrompt(datasets, report));
+    const raw = await structured.invoke(buildPrompt(options, report));
     // The structured-output contract is only as good as the provider honours it: a
     // missing or NaN `confidence` would pass the threshold compare below, and a
     // non-array `datasets` would throw outside this try. Validate before trusting.
@@ -226,7 +244,7 @@ export const matchDatasetsWithModel = async ({
     return undefined;
   }
 
-  const optionNames = new Set(datasets.map((dataset) => dataset.dataset));
+  const optionNames = new Set(options.map((dataset) => dataset.dataset));
   const confidenceByName = new Map<string, number>();
   let hallucinated = 0;
   let belowThreshold = 0;

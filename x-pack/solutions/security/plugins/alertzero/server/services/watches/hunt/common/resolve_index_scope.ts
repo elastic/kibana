@@ -9,7 +9,11 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { HuntTechnology, IndexScopeWindow, ResolvedIndexScope } from '@kbn/alertzero-common';
 import { HUNT_ALERTS_INDEX_PATTERN_PREFIX } from '../../../../../common/constants';
-import { discoverHuntDatasets } from './discover_hunt_datasets';
+import {
+  discoverHuntDatasets,
+  HUNT_DISCOVERY_PATTERN,
+  INTERNAL_DATASET_PREFIXES,
+} from './discover_hunt_datasets';
 import type { DiscoveredDataset } from './discover_hunt_datasets';
 import { matchDatasetsDeterministic, matchDatasetsWithModel } from './match_hunt_datasets';
 import type { HuntScopeReportContext, ModelDatasetMatch } from './match_hunt_datasets';
@@ -263,6 +267,17 @@ const mergeStaticScopes = (scopes: ResolvedIndexScope[], pinned: boolean): HuntS
 };
 
 /**
+ * The broad Tier 1 target: the discovery pattern with the agent-internal datasets
+ * excluded, using the multi-target exclusion syntax both `_search` and `_count`
+ * accept. Exclusion entries never match a backing index in `buildMatchesRequired`,
+ * so they do not affect the hit bar; they only keep those streams out of the search.
+ */
+export const broadSearchPatterns = (): string[] => [
+  HUNT_DISCOVERY_PATTERN,
+  ...INTERNAL_DATASET_PREFIXES.map((prefix) => `-logs-${prefix}*`),
+];
+
+/**
  * Builds a hunt scope from discovered datasets. A deterministic match is `ok`;
  * a model match is `degraded` since it is a weaker signal, and a broad scope
  * is always `degraded` since it was chosen by the absence of a better one.
@@ -287,8 +302,15 @@ const buildDiscoveredScope = async ({
   const alertsPattern = alertsIndexPattern(spaceId);
   const [, alertsPresent] = await checkPattern(esClient, alertsPattern);
   // `search_patterns`, not `index_pattern`: a dataset whose name a sibling extends with a
-  // dash searches its own namespaces so the sibling's streams stay out of scope.
-  const required = uniq(matches.flatMap((match) => match.search_patterns));
+  // dash searches its own namespaces so the sibling's streams stay out of scope. A broad
+  // scope is every discovered dataset, and discovery is uncapped, so it is expressed as
+  // one bounded wildcard with the internal datasets excluded rather than as the list:
+  // the client puts the index list in the request path, and a hundred-odd patterns
+  // already exceed Elasticsearch's default initial-line limit.
+  const required =
+    resolution === 'discovered:broad'
+      ? broadSearchPatterns()
+      : uniq(matches.flatMap((match) => match.search_patterns));
   const status = resolution === 'discovered:deterministic' ? 'ok' : 'degraded';
 
   return {

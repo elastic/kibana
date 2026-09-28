@@ -10,6 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { DiscoveredDataset } from './discover_hunt_datasets';
 import {
   HUNT_DATASET_MATCH_MIN_CONFIDENCE,
+  MAX_MODEL_DATASET_OPTIONS,
   HUNT_VENDOR_ALIASES,
   matchDatasetsDeterministic,
   matchDatasetsWithModel,
@@ -404,6 +405,27 @@ describe('matchDatasetsWithModel', () => {
       matchDatasetsWithModel({ model, datasets, report: { vendor: 'Okta' }, logger })
     ).resolves.toBeUndefined();
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('invalid shape'));
+  });
+
+  it('offers the model at most MAX_MODEL_DATASET_OPTIONS datasets and says so', async () => {
+    const logger = loggerMock.create();
+    const many = Array.from({ length: MAX_MODEL_DATASET_OPTIONS + 5 }, (_, i) =>
+      dataset(`vendor${String(i).padStart(3, '0')}.log`)
+    );
+    const invoke = jest.fn().mockResolvedValue({ datasets: [] });
+    const { model } = buildModel(invoke);
+
+    await matchDatasetsWithModel({ model, datasets: many, report: { text: 'x' }, logger });
+
+    const prompt = invoke.mock.calls[0][0] as string;
+    expect(prompt).toContain('vendor000.log');
+    expect(prompt).toContain(`vendor${MAX_MODEL_DATASET_OPTIONS - 1}.log`);
+    expect(prompt).not.toContain(`vendor${MAX_MODEL_DATASET_OPTIONS}.log`);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        `offered ${MAX_MODEL_DATASET_OPTIONS} of ${MAX_MODEL_DATASET_OPTIONS + 5}`
+      )
+    );
   });
 
   it('short-circuits without calling the model when there are no datasets', async () => {

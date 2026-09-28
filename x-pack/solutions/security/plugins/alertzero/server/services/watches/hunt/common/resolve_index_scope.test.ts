@@ -8,14 +8,23 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { resolveIndexScope, resolveHuntScope, parseTechnologyInput } from './resolve_index_scope';
+import {
+  resolveIndexScope,
+  resolveHuntScope,
+  parseTechnologyInput,
+  broadSearchPatterns,
+} from './resolve_index_scope';
 import { HUNT_ALERTS_INDEX_PATTERN_PREFIX } from '../../../../../common/constants';
 import type { HuntIoc, HuntTechnology } from '@kbn/alertzero-common';
 import { discoverHuntDatasets } from './discover_hunt_datasets';
 import type { DiscoveredDataset } from './discover_hunt_datasets';
 import { matchDatasetsDeterministic, matchDatasetsWithModel } from './match_hunt_datasets';
 
-jest.mock('./discover_hunt_datasets');
+// Keep the real constants (an automock would empty `INTERNAL_DATASET_PREFIXES`); mock only the call.
+jest.mock('./discover_hunt_datasets', () => ({
+  ...jest.requireActual('./discover_hunt_datasets'),
+  discoverHuntDatasets: jest.fn(),
+}));
 jest.mock('./match_hunt_datasets');
 
 const mockDiscover = discoverHuntDatasets as jest.MockedFunction<typeof discoverHuntDatasets>;
@@ -662,7 +671,7 @@ describe('resolveHuntScope', () => {
           expect.objectContaining({
             status: 'degraded',
             technologies: [],
-            required: ['logs-okta.system-*', 'logs-cisco_asa.log-*'],
+            required: broadSearchPatterns(),
             optional: [alertsPattern],
             resolution: 'discovered:broad',
           })
@@ -687,7 +696,7 @@ describe('resolveHuntScope', () => {
 
         expect(result.resolution).toBe('discovered:broad');
         expect(result.status).toBe('degraded');
-        expect(result.index_patterns).toEqual(['logs-okta.system-*', 'logs-cisco_asa.log-*']);
+        expect(result.index_patterns).toEqual(broadSearchPatterns());
         expect(mockWithModel).toHaveBeenCalledTimes(1);
         expect(mockDiscover).toHaveBeenCalledTimes(1);
       });
@@ -779,10 +788,10 @@ describe('resolveHuntScope', () => {
         expect(result.resolution).toBe('discovered:broad');
         expect(result.status).toBe('degraded');
         expect(result.missing).toContain(alertsPattern);
-        expect(result.required).toEqual(['logs-okta.system-*', 'logs-cisco_asa.log-*']);
+        expect(result.required).toEqual(broadSearchPatterns());
       });
 
-      it('logs the pattern count and a sample at info instead of every pattern', async () => {
+      it('searches one bounded wildcard with the internal datasets excluded, however many datasets exist', async () => {
         const esClient = createMockEsClient(new Set([alertsPattern]));
         const manyDatasets: DiscoveredDataset[] = ['a', 'b', 'c', 'd', 'e'].map((name) => ({
           index_pattern: `logs-${name}.log-*`,
@@ -792,22 +801,22 @@ describe('resolveHuntScope', () => {
           search_patterns: [`logs-${name}.log-*`],
         }));
         mockDiscover.mockResolvedValue(manyDatasets);
-        await resolveHuntScope({ esClient, spaceId: SPACE_ID, report: iocReport, logger });
+        const result = await resolveHuntScope({
+          esClient,
+          spaceId: SPACE_ID,
+          report: iocReport,
+          logger,
+        });
 
+        // Not the dataset list: the client puts `index` in the request path, and an estate
+        // of a hundred-odd datasets would exceed Elasticsearch's initial-line limit.
+        expect(result.required).toEqual(['logs-*', '-logs-elastic_agent*', '-logs-fleet_server*']);
+        expect(result.index_patterns).toEqual(result.required);
         expect(logger.info).toHaveBeenCalledWith(
-          'Hunt scope resolved via discovered:broad: 5 index pattern(s): logs-a.log-*, logs-b.log-*, logs-c.log-*, ...'
+          'Hunt scope resolved via discovered:broad: 3 index pattern(s): logs-*, -logs-elastic_agent*, -logs-fleet_server*'
         );
         expect(logger.debug).not.toHaveBeenCalledWith(
           expect.stringContaining('Hunt scope blocked')
-        );
-      });
-
-      it('names every pattern in the log line when there are three or fewer', async () => {
-        const esClient = createMockEsClient(new Set([alertsPattern]));
-        await resolveHuntScope({ esClient, spaceId: SPACE_ID, report: iocReport, logger });
-
-        expect(logger.info).toHaveBeenCalledWith(
-          'Hunt scope resolved via discovered:broad: 2 index pattern(s): logs-okta.system-*, logs-cisco_asa.log-*'
         );
       });
     });

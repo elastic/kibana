@@ -163,6 +163,13 @@ describe('isTier1SearchableIoc', () => {
   });
 
   it.each(['ip', 'domain', 'url', 'email'] as const)(
+    'rejects a blank %s, which huntForThreat drops before building a clause',
+    (type) => {
+      expect(isTier1SearchableIoc({ type, value: '   ' })).toBe(false);
+    }
+  );
+
+  it.each(['ip', 'domain', 'url', 'email'] as const)(
     'accepts a %s, which always has fields to search',
     (type) => {
       expect(isTier1SearchableIoc({ type, value: 'anything' })).toBe(true);

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MappingTypeMapping,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   THREAT_REPORTS_INDEX,
@@ -1291,7 +1294,8 @@ const migrateExistingVulnerabilityMappings = async (
  * query (`rank_score` desc, `missing: 0`), and ingest dedup skips an unchanged KEV
  * entry for 90 days, so they never pick the field up on their own. Backfill the
  * adapter's neutral baseline (`severity.score * 0.5`) onto KEV documents that lack
- * it. Idempotent: the query only matches documents still missing `rank_score`.
+ * it. Idempotent, and cheap once done: a `count` on the same query runs first, so a
+ * boot after the backfill costs one count per report index and no scan or refresh.
  */
 const backfillKevRankScore = async (
   esClient: ElasticsearchClient,
@@ -1300,31 +1304,20 @@ const backfillKevRankScore = async (
 ): Promise<void> => {
   const log = logger.get('kev-rank-score-backfill');
 
+  const query = {
+    bool: {
+      filter: [{ term: { 'lineage.extraction_method': 'kev' } }],
+      must_not: [{ exists: { field: 'rank_score' } }],
+    },
+  };
+
   for (const indexName of reportIndices) {
     try {
-      const result = await esClient.updateByQuery({
-        index: indexName,
-        conflicts: 'proceed',
-        refresh: true,
-        query: {
-          bool: {
-            filter: [{ term: { 'lineage.extraction_method': 'kev' } }],
-            must_not: [{ exists: { field: 'rank_score' } }],
-          },
-        },
-        script: {
-          lang: 'painless',
-          source: [
-            'double relevance = 0.5;',
-            'if (ctx._source.extracted == null) { ctx._source.extracted = new HashMap(); }',
-            'ctx._source.extracted.relevance = relevance;',
-            'double score = ctx._source.severity != null && ctx._source.severity.score != null ? ctx._source.severity.score : 70;',
-            'ctx._source.rank_score = score * relevance;',
-          ].join(' '),
-        },
-      });
-      if ((result?.updated ?? 0) > 0) {
-        log.info(`Backfilled rank_score on ${result.updated} KEV report(s) in ${indexName}`);
+      const pending = (await esClient.count({ index: indexName, query }))?.count;
+      // An unknown count (a mocked or unexpected response) falls through to the
+      // backfill, which is idempotent; only a definite zero skips it.
+      if (pending !== 0) {
+        await backfillIndex(esClient, indexName, query, log);
       }
     } catch (err) {
       log.error(
@@ -1333,6 +1326,32 @@ const backfillKevRankScore = async (
         }. Those reports keep sorting last in the hunt candidates query until re-ingested.`
       );
     }
+  }
+};
+
+const backfillIndex = async (
+  esClient: ElasticsearchClient,
+  indexName: string,
+  query: QueryDslQueryContainer,
+  log: Logger
+): Promise<void> => {
+  const result = await esClient.updateByQuery({
+    index: indexName,
+    conflicts: 'proceed',
+    query,
+    script: {
+      lang: 'painless',
+      source: [
+        'double relevance = 0.5;',
+        'if (ctx._source.extracted == null) { ctx._source.extracted = new HashMap(); }',
+        'ctx._source.extracted.relevance = relevance;',
+        'double score = ctx._source.severity != null && ctx._source.severity.score != null ? ctx._source.severity.score : 70;',
+        'ctx._source.rank_score = score * relevance;',
+      ].join(' '),
+    },
+  });
+  if ((result?.updated ?? 0) > 0) {
+    log.info(`Backfilled rank_score on ${result.updated} KEV report(s) in ${indexName}`);
   }
 };
 
