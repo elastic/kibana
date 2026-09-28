@@ -6,4 +6,10 @@
  */
 
 export { AsyncDomainEventBus } from './event_bus';
-export type { EventBus, DomainEvent, Subscription, EventBusContextRest, EventBusHandlerArgs } from './types';
+export type {
+  EventBus,
+  DomainEvent,
+  Subscription,
+  EventBusContextRest,
+  EventBusHandlerArgs,
+} from './types';

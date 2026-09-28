@@ -9,7 +9,11 @@ import type { Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { AlertStatusChangedV1TriggerId } from '../../common/workflows/triggers';
 import type { AsyncDomainEventBus } from '../events/event_bus';
-import type { AlertStatusChangedEvent, AlertingDomainEvent, AlertingPublisherContext } from './events';
+import type {
+  AlertStatusChangedEvent,
+  AlertingDomainEvent,
+  AlertingPublisherContext,
+} from './events';
 import { ALERT_STATUS_CHANGED_EVENT_TYPE } from './events';
 import type { Subscription } from '../events/event_bus/types';
 
@@ -51,7 +55,9 @@ export class AlertStatusChangedWorkflowSubscriber {
       await client.emitEvent(AlertStatusChangedV1TriggerId, event.payload);
     } catch (err) {
       this.logger.error(
-        `[alert_status_changed_subscriber] Failed to emit for rule ${event.payload.rule.id}: ${err instanceof Error ? err.message : String(err)}`
+        `[alert_status_changed_subscriber] Failed to emit for rule ${event.payload.rule.id}: ${
+          err instanceof Error ? err.message : String(err)
+        }`
       );
     }
   }

@@ -60,7 +60,10 @@ import type {
 } from '@kbn/workflows-extensions/server';
 import { ApiKeyType } from './task_runner/types';
 import { AsyncDomainEventBus } from './lib/events/event_bus';
-import type { AlertingDomainEvent, AlertingPublisherContext } from './lib/workflow_extensions/events';
+import type {
+  AlertingDomainEvent,
+  AlertingPublisherContext,
+} from './lib/workflow_extensions/events';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
 import { AlertStatusChangedWorkflowSubscriber } from './lib/workflow_extensions/alert_status_changed_subscriber';
 import { RuleTypeRegistry } from './rule_type_registry';
@@ -508,9 +511,10 @@ export class AlertingPlugin {
     );
 
     if (plugins.workflowsExtensions) {
-      this.alertingEventBus = new AsyncDomainEventBus<AlertingDomainEvent, AlertingPublisherContext>(
-        this.logger
-      );
+      this.alertingEventBus = new AsyncDomainEventBus<
+        AlertingDomainEvent,
+        AlertingPublisherContext
+      >(this.logger);
       registerTriggerDefinitions(plugins.workflowsExtensions);
     }
 

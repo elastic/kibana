@@ -76,14 +76,12 @@ export const alertStatusChangedV1EventSchema = z.object({
             'Stable UUID for this alert instance. Matches kibana.alert.uuid in the alert document.',
         })
       ),
-      status: z
-        .enum(['active', 'recovered'])
-        .describe(
-          i18n.translate('xpack.alerting.triggers.alertStatusChanged.schema.alert.status', {
-            defaultMessage:
-              'Alert status at time of transition: "active" when the alert fires, "recovered" when it resolves.',
-          })
-        ),
+      status: z.enum(['active', 'recovered']).describe(
+        i18n.translate('xpack.alerting.triggers.alertStatusChanged.schema.alert.status', {
+          defaultMessage:
+            'Alert status at time of transition: "active" when the alert fires, "recovered" when it resolves.',
+        })
+      ),
       actionGroup: z
         .string()
         .nullable()
@@ -140,32 +138,26 @@ export const alertStatusChangedV1TriggerDefinition: CommonTriggerDefinition<
       }
     ),
     examples: [
-      i18n.translate(
-        'xpack.alerting.workflowTriggers.alertStatusChanged.documentation.example1',
-        {
-          defaultMessage: `## React to new alerts from rules tagged "k8s"
+      i18n.translate('xpack.alerting.workflowTriggers.alertStatusChanged.documentation.example1', {
+        defaultMessage: `## React to new alerts from rules tagged "k8s"
 \`\`\`yaml
 triggers:
   - type: {triggerId}
     on:
       condition: 'alert.status: "active" and rule.tags: "k8s"'
 \`\`\``,
-          values: { triggerId: AlertStatusChangedV1TriggerId },
-        }
-      ),
-      i18n.translate(
-        'xpack.alerting.workflowTriggers.alertStatusChanged.documentation.example2',
-        {
-          defaultMessage: `## React when any alert from a specific rule recovers
+        values: { triggerId: AlertStatusChangedV1TriggerId },
+      }),
+      i18n.translate('xpack.alerting.workflowTriggers.alertStatusChanged.documentation.example2', {
+        defaultMessage: `## React when any alert from a specific rule recovers
 \`\`\`yaml
 triggers:
   - type: {triggerId}
     on:
       condition: 'alert.status: "recovered" and rule.id: "my-rule-id"'
 \`\`\``,
-          values: { triggerId: AlertStatusChangedV1TriggerId },
-        }
-      ),
+        values: { triggerId: AlertStatusChangedV1TriggerId },
+      }),
     ],
   },
   snippets: {

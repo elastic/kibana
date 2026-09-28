@@ -990,7 +990,10 @@ export class TaskRunner<
       if (batch) {
         const bus = this.context.alertingEventBus;
         for (const payload of batch.events) {
-          bus.publish({ type: ALERT_STATUS_CHANGED_EVENT_TYPE, payload }, { request: batch.request });
+          bus.publish(
+            { type: ALERT_STATUS_CHANGED_EVENT_TYPE, payload },
+            { request: batch.request }
+          );
         }
       }
     }
