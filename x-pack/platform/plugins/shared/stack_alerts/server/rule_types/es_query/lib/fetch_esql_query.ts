@@ -58,10 +58,20 @@ export async function fetchEsqlQuery({
   try {
     response = await esClient.esql.query(query);
   } catch (e) {
-    if (e.message?.includes('verification_exception')) {
+    if (isUnknownIndexError(e)) {
+      response = { columns: [], values: [] };
+      if (ruleResultService) {
+        const warning = i18n.translate('xpack.stackAlerts.esQuery.unknownIndexWarning', {
+          defaultMessage: 'The target index does not exist. The query returned no results.',
+        });
+        ruleResultService.addLastRunWarning(warning);
+        ruleResultService.setLastRunOutcomeMessage(warning);
+      }
+    } else if (e.message?.includes('verification_exception')) {
       throw createTaskRunError(e, TaskErrorSource.USER);
+    } else {
+      throw e;
     }
-    throw e;
   }
 
   const isGroupAgg = isPerRowAggregation(params.groupBy);
@@ -152,6 +162,9 @@ export function generateLink(
 
   return redirectUrl;
 }
+
+const isUnknownIndexError = (e: Error): boolean =>
+  Boolean(e.message?.includes('verification_exception') && e.message.includes('Unknown index'));
 
 function getPartialResultsWarning(response: EsqlQueryResponse) {
   const clusters = response?._clusters?.details ?? {};
