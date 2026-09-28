@@ -348,8 +348,7 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| FORK (WHERE \`var0\` NOT IN (from the-data-view | limit 100 | STATS c = COUNT(*) BY \`var0\` | SORT c DESC | LIMIT 9 | KEEP \`var0\`) | EVAL \`var0\` = "Other"::keyword) (WHERE \`var0\` IN (from the-data-view | limit 100 | STATS c = COUNT(*) BY \`var0\` | SORT c DESC | LIMIT 9 | KEEP \`var0\`) | EVAL \`var0\` = \`var0\`::keyword)
-| STATS results = COUNT(*) BY \`var0\`, timestamp = BUCKET(@timestamp, 5 minute)
+| STATS results = COUNT(*) BY \`var0\`, timestamp = BUCKET(@timestamp, 5 minute) | sort \`var0\` asc
 | LIMIT 10000`,
     };
 
@@ -431,7 +430,6 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| FORK (WHERE \`coordinates\` NOT IN (from the-data-view | limit 100 | STATS c = COUNT(*) BY \`coordinates\` | SORT c DESC | LIMIT 9 | KEEP \`coordinates\`) | EVAL \`coordinates\` = "Other"::keyword) (WHERE \`coordinates\` IN (from the-data-view | limit 100 | STATS c = COUNT(*) BY \`coordinates\` | SORT c DESC | LIMIT 9 | KEEP \`coordinates\`) | EVAL \`coordinates\` = \`coordinates\`::keyword)
 | STATS results = COUNT(*) BY \`coordinates\`, timestamp = BUCKET(@timestamp, 5 minute)
 | LIMIT 10000`,
     };
