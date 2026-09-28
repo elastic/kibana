@@ -543,6 +543,36 @@ describe('AzureFunctions', () => {
       });
     });
 
+    // invoke has two phases, and they classify a 401 differently: a rejected
+    // connector credential on the ARM hostname lookup is a configuration error
+    // and throws, while a 401 from the function itself is returned as a result.
+    it('throws when the ARM hostname lookup is rejected, before the function is reached', async () => {
+      mockClient.get.mockRejectedValue({
+        response: {
+          status: 401,
+          data: {
+            error: {
+              code: 'InvalidAuthenticationToken',
+              message: 'The access token is invalid.',
+            },
+          },
+        },
+      });
+
+      await expect(
+        AzureFunctions.actions.invoke.handler(mockContext, {
+          ...APP_REF,
+          functionName: 'Ping',
+          functionKey: 'k',
+        })
+      ).rejects.toThrow(
+        'Azure API error [InvalidAuthenticationToken]: The access token is invalid.'
+      );
+      // The function was never called, so a 401 here cannot be confused with one
+      // the function itself returned.
+      expect(mockClient.request).not.toHaveBeenCalled();
+    });
+
     it('fails with an actionable error when the app has no hostname', async () => {
       mockClient.get.mockResolvedValue({ data: { properties: {} } });
 
