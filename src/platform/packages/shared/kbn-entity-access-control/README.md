@@ -29,19 +29,22 @@ can add that restriction without changing the stored shape.
 
 ## Administrator access
 
-On the server, use `isEntityAccessControlAdmin(core, request)` to check the caller's
-wildcard Kibana application privileges. This uses the caller's credentials and
-respects API-key restrictions. Missing requests and failed checks do not grant
-an override. Ordinary feature privileges do not grant an override.
+On the server, use `isEntityAccessControlAdmin(core, request)` to check whether
+the authenticated caller has the exact `superuser` role. It uses Core Security's
+`authc.getCurrentUser` API. Custom roles with equivalent privileges do not grant
+the override. API keys and requests without an authenticated user do not grant it.
+Routes must use full authentication to make the caller's roles available.
 
 Pass the result as `isAdmin` to `hasEntityAccess` and `buildEntityReadAccessQuery`.
 Administrators can access private entities and perform owner-only operations.
+Consumers can omit `isAdmin` for operations that still require an explicit grant,
+such as execution.
 The override does not change the owner or stored ACL. Never accept `isAdmin` from
 request input or an ACL entry. Feature and space checks still apply, including
 to queries where the ACL filter returns `match_all`.
 
 ```ts
-const isAdmin = await isEntityAccessControlAdmin(core, request);
+const isAdmin = isEntityAccessControlAdmin(core, request);
 const canManage = hasEntityAccess({
   accessControl: entity.access_control,
   ownerId: entity.owner_id,

@@ -955,7 +955,8 @@ steps:
           expect(access.assertAccess).toHaveBeenCalledWith(
             privateWorkflow,
             permission,
-            mockRequest
+            mockRequest,
+            { allowAdminOverride: false }
           );
           expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
             expect.objectContaining({ yaml: mockWorkflowYaml, isTestRun: true, isEphemeral }),

@@ -13,6 +13,8 @@ import { expect } from '@kbn/scout/api';
 
 apiTest.describe('Workflow administrator recovery', { tag: tags.stateful.classic }, () => {
   const spaceId = `workflow-admin-${randomUUID()}`;
+  const adminUsername = `workflow-superuser-${randomUUID()}`;
+  const adminPassword = randomUUID();
   let workflowId: string;
   let ownerProfileId: string;
   let adminHeaders: Record<string, string>;
@@ -22,14 +24,21 @@ apiTest.describe('Workflow administrator recovery', { tag: tags.stateful.classic
     'elastic-api-version': '2023-10-31',
   };
 
-  apiTest.beforeAll(async ({ kbnClient, samlAuth }) => {
+  apiTest.beforeAll(async ({ kbnClient, esClient }) => {
     await kbnClient.request({
       method: 'POST',
       path: '/api/spaces/space',
       body: { id: spaceId, name: spaceId },
     });
-    const admin = await samlAuth.asInteractiveUser('admin');
-    adminHeaders = { ...headers, ...admin.cookieHeader };
+    await esClient.security.putUser({
+      username: adminUsername,
+      password: adminPassword,
+      roles: ['superuser'],
+    });
+    adminHeaders = {
+      ...headers,
+      Authorization: `Basic ${Buffer.from(`${adminUsername}:${adminPassword}`).toString('base64')}`,
+    };
   });
 
   apiTest.afterAll(async ({ apiClient, kbnClient, esClient }) => {
@@ -43,6 +52,7 @@ apiTest.describe('Workflow administrator recovery', { tag: tags.stateful.classic
       ).toHaveStatusCode(200);
     }
     await kbnClient.request({ method: 'DELETE', path: `/api/spaces/space/${spaceId}` });
+    await esClient.security.deleteUser({ username: adminUsername });
   });
 
   apiTest(
@@ -96,6 +106,18 @@ steps:
           body: { access_mode: 'public' },
         })
       ).toHaveStatusCode(403);
+      const equivalentAdmin = await samlAuth.asInteractiveUser('admin');
+      expect(
+        await apiClient.get(workflowPath, {
+          headers: { ...headers, ...equivalentAdmin.cookieHeader },
+        })
+      ).toHaveStatusCode(404);
+      const adminKey = await requestAuth.getApiKey('admin');
+      expect(
+        await apiClient.get(workflowPath, {
+          headers: { ...headers, ...adminKey.apiKeyHeader },
+        })
+      ).toHaveStatusCode(404);
       const limitedKey = await requestAuth.getApiKeyForCustomRole(role);
       expect(
         await apiClient.get(workflowPath, {
@@ -107,8 +129,42 @@ steps:
       expect(recovered).toHaveStatusCode(200);
       expect(recovered.body).toMatchObject({
         owner_id: ownerProfileId,
-        permissions: { read: true, execute: true, edit: true, manage: true },
+        permissions: { read: true, execute: false, edit: true, manage: true },
       });
+      const profileResponse = await apiClient.get('internal/security/user_profile', {
+        headers: adminHeaders,
+      });
+      expect(profileResponse).toHaveStatusCode(200);
+      const adminProfileId = profileResponse.body.uid;
+      for (const body of [
+        { workflowId, inputs: {} },
+        { workflowId, workflowYaml: recovered.body.yaml, inputs: {} },
+      ]) {
+        expect(
+          await apiClient.post(`s/${spaceId}/api/workflows/test`, { headers: adminHeaders, body })
+        ).toHaveStatusCode(403);
+      }
+      expect(
+        await apiClient.post(`s/${spaceId}/api/workflows/step/test`, {
+          headers: adminHeaders,
+          body: {
+            workflowId,
+            workflowYaml: recovered.body.yaml,
+            stepId: 'message',
+            contextOverride: {},
+          },
+        })
+      ).toHaveStatusCode(403);
+      const grant = await apiClient.put(accessPath, {
+        headers: adminHeaders,
+        body: {
+          access_mode: 'private',
+          entries: [{ type: 'user', id: adminProfileId, role: 'executor' }],
+        },
+      });
+      expect(grant).toHaveStatusCode(200);
+      expect(grant.body.owner_id).toBe(ownerProfileId);
+      expect(grant.body.permissions.execute).toBe(true);
       const run = await apiClient.post(`s/${spaceId}/api/workflows/test`, {
         headers: adminHeaders,
         body: { workflowId, inputs: {} },
@@ -134,6 +190,18 @@ steps:
           expect.objectContaining({ id: run.body.workflowExecutionId, status: 'completed' }),
         ])
       );
+      const revoked = await apiClient.put(accessPath, {
+        headers: adminHeaders,
+        body: { access_mode: 'private', entries: [] },
+      });
+      expect(revoked).toHaveStatusCode(200);
+      expect(revoked.body.permissions.execute).toBe(false);
+      expect(
+        await apiClient.post(`s/${spaceId}/api/workflows/test`, {
+          headers: adminHeaders,
+          body: { workflowId, inputs: {} },
+        })
+      ).toHaveStatusCode(403);
       const updated = await apiClient.put(accessPath, {
         headers: adminHeaders,
         body: { access_mode: 'public', entries: [] },

@@ -416,19 +416,22 @@ Builder conversations: `access_mode` and `entries` with `type`, profile `id`,
 
 | Role | View | Run | Edit and delete | Change access |
 | --- | --- | --- | --- | --- |
-| Administrator | Yes | Yes | Yes | Yes |
+| Superuser | Yes | Requires owner or ACL access | Yes | Yes |
 | Owner | Yes | Yes | Yes | Yes |
 | Editor | Yes | Yes | Yes | No |
 | Executor | Yes | Yes | No | No |
 | Viewer | Yes | No | No | No |
 
 These permissions also require the corresponding feature privileges in the space.
-The shared `@kbn/entity-access-control` administrator override requires wildcard
-Elasticsearch application privileges across resources, as held by `superuser`. Workflows All and Kibana feature
-privileges alone do not grant the override. Checks use the caller's credentials,
-including API-key restrictions. Administrators can recover access after an owner
-is offboarded. Updating access preserves the existing owner. An administrator
-who first sets access on an ownerless legacy workflow becomes its owner.
+The shared `@kbn/entity-access-control` administrator override requires the exact
+`superuser` role. Workflows All and custom roles with equivalent privileges do
+not grant the override. API keys continue to use the normal ACL checks.
+Superusers can recover access after an owner is offboarded. Updating access
+preserves the existing owner. A superuser who first sets access on an ownerless
+legacy workflow becomes its owner. To run a private workflow owned by someone
+else, a superuser must add themselves as Executor or Editor. Draft and step tests
+require Editor. The access dialog shows a notice when a superuser edits another
+user's ACL. Background execution keeps its normal ACL checks.
 
 The owner and administrators can request user suggestions, which require
 Workflows Read in that space. New grants and permission increases require the recipient's current RBAC:

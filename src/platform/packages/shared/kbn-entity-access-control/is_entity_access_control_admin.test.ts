@@ -7,47 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { isEntityAccessControlAdmin } from './is_entity_access_control_admin';
 
 describe('isEntityAccessControlAdmin', () => {
   const request = httpServerMock.createKibanaRequest();
 
-  it.each([true, false])('uses caller privileges: %s', async (allowed) => {
+  it.each([
+    [['superuser'], true],
+    [['other-role', 'superuser'], true],
+    [['system_indices_superuser'], false],
+    [['admin'], false],
+    [[], false],
+  ] as const)('checks the exact role in %j', (roles, expected) => {
     const core = coreMock.createStart();
-    const client = core.elasticsearch.client.asScoped(request).asCurrentUser;
-    jest.spyOn(client.security, 'hasPrivileges').mockResolvedValue({
-      username: 'caller',
-      has_all_requested: allowed,
-      application: {},
-      cluster: {},
-      index: {},
-    });
-    expect(await isEntityAccessControlAdmin(core, request)).toBe(allowed);
-    expect(core.elasticsearch.client.asScoped).toHaveBeenCalledWith(request);
-    expect(client.security.hasPrivileges).toHaveBeenCalledWith({
-      application: [
-        {
-          application: 'kibana-.kibana',
-          resources: ['*'],
-          privileges: ['entity_access_control:admin'],
-        },
-      ],
-    });
-    expect(core.elasticsearch.client.asInternalUser.security.hasPrivileges).not.toHaveBeenCalled();
-  });
-
-  it('does not grant an override without a request', async () => {
-    const core = coreMock.createStart();
-    expect(await isEntityAccessControlAdmin(core)).toBe(false);
+    jest
+      .spyOn(core.security.authc, 'getCurrentUser')
+      .mockReturnValue(securityServiceMock.createMockAuthenticatedUser({ roles: [...roles] }));
+    expect(isEntityAccessControlAdmin(core, request)).toBe(expected);
+    expect(core.security.authc.getCurrentUser).toHaveBeenCalledWith(request);
     expect(core.elasticsearch.client.asScoped).not.toHaveBeenCalled();
   });
 
-  it('does not grant an override if the privilege check fails', async () => {
+  it('does not grant an override without a request', () => {
     const core = coreMock.createStart();
-    jest
-      .spyOn(core.elasticsearch.client.asScoped(request).asCurrentUser.security, 'hasPrivileges')
-      .mockRejectedValue(new Error('unavailable'));
-    expect(await isEntityAccessControlAdmin(core, request)).toBe(false);
+    expect(isEntityAccessControlAdmin(core)).toBe(false);
+    expect(core.security.authc.getCurrentUser).not.toHaveBeenCalled();
+  });
+
+  it('does not grant an override without an authenticated user', () => {
+    const core = coreMock.createStart();
+    jest.spyOn(core.security.authc, 'getCurrentUser').mockReturnValue(null);
+    expect(isEntityAccessControlAdmin(core, request)).toBe(false);
+  });
+
+  it('does not grant API keys a user-role override', () => {
+    const core = coreMock.createStart();
+    jest.spyOn(core.security.authc, 'getCurrentUser').mockReturnValue(
+      securityServiceMock.createMockAuthenticatedUser({
+        roles: ['superuser'],
+        authentication_type: 'api_key',
+      })
+    );
+    expect(isEntityAccessControlAdmin(core, request)).toBe(false);
   });
 });

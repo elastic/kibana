@@ -14,7 +14,6 @@
     "integration_tests/**/*"
   ],
   "kbn_references": [
-    "@kbn/entity-access-control",
     "@kbn/apm-utils",
     "@kbn/core",
     "@kbn/config-schema",

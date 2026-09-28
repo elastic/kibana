@@ -9,27 +9,12 @@
 
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 
-/** Checks wildcard application privileges with the caller's credentials, including API-key limits. */
-export const isEntityAccessControlAdmin = async (
-  core: Pick<CoreStart, 'elasticsearch'>,
+/** Checks whether the authenticated caller has the reserved superuser role. */
+export const isEntityAccessControlAdmin = (
+  core: Pick<CoreStart, 'security'>,
   request?: KibanaRequest
-): Promise<boolean> => {
+): boolean => {
   if (!request) return false;
-  try {
-    const result = await core.elasticsearch.client
-      .asScoped(request)
-      .asCurrentUser.security.hasPrivileges({
-        application: [
-          {
-            application: 'kibana-.kibana',
-            resources: ['*'],
-            // An unregistered privilege excludes ordinary Kibana feature and base privileges.
-            privileges: ['entity_access_control:admin'],
-          },
-        ],
-      });
-    return result.has_all_requested;
-  } catch {
-    return false;
-  }
+  const user = core.security.authc.getCurrentUser(request);
+  return user?.roles?.includes('superuser') === true && user.authentication_type !== 'api_key';
 };

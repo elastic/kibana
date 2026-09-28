@@ -380,12 +380,13 @@ export class WorkflowsManagementApi {
     id: string,
     spaceId: string,
     operation: WorkflowAccessOperation,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { allowAdminOverride?: boolean }
   ): Promise<void> {
     const workflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!workflow) throw new WorkflowNotFoundError(id);
     const access = await this.workflowsService.getAccessControl();
-    await access.assertAccess(workflow, operation, request);
+    await access.assertAccess(workflow, operation, request, options);
   }
 
   public async updateAccessControl(
@@ -967,7 +968,8 @@ export class WorkflowsManagementApi {
         workflowId,
         spaceId,
         workflowYaml ? 'edit' : 'execute',
-        request
+        request,
+        { allowAdminOverride: false }
       );
     }
     let resolvedYaml = workflowYaml;
@@ -1043,7 +1045,11 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<string> {
-    if (workflowId) await this.assertWorkflowAccess(workflowId, spaceId, 'edit', request);
+    if (workflowId) {
+      await this.assertWorkflowAccess(workflowId, spaceId, 'edit', request, {
+        allowAdminOverride: false,
+      });
+    }
     const validation = await this.workflowsService.validateWorkflow(
       workflowYaml,
       spaceId,

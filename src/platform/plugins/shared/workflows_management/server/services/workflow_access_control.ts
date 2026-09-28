@@ -60,7 +60,6 @@ export const assertWorkflowOperation = (
 };
 
 export class WorkflowAccessControlService {
-  private readonly adminChecks = new WeakMap<KibanaRequest, Promise<boolean>>();
   private readonly profileIds = new WeakMap<KibanaRequest, Promise<string | undefined>>();
   private readonly executionFilters = new WeakMap<
     KibanaRequest,
@@ -87,22 +86,17 @@ export class WorkflowAccessControlService {
     return profileId;
   }
 
-  private async isAdmin(request?: KibanaRequest): Promise<boolean> {
-    if (!request) return false;
-    let check = this.adminChecks.get(request);
-    if (!check) {
-      check = isEntityAccessControlAdmin(this.core, request);
-      this.adminChecks.set(request, check);
-    }
-    return check;
-  }
-
   async permissions(
     workflow: WorkflowAccessSubject & { createdBy?: string },
-    request?: KibanaRequest
+    request?: KibanaRequest,
+    allowAdminOverride = true
   ): Promise<WorkflowPermissions> {
     const profileId = request ? await this.getProfileId(request) : undefined;
-    const permissions = getWorkflowPermissions(workflow, profileId, await this.isAdmin(request));
+    const permissions = getWorkflowPermissions(
+      workflow,
+      profileId,
+      allowAdminOverride && isEntityAccessControlAdmin(this.core, request)
+    );
     if (
       !permissions.manage &&
       !workflow.owner_id &&
@@ -132,16 +126,17 @@ export class WorkflowAccessControlService {
   async assertAccess(
     workflow: WorkflowAccessSubject,
     operation: WorkflowAccessOperation,
-    request?: KibanaRequest
+    request?: KibanaRequest,
+    { allowAdminOverride = true }: { allowAdminOverride?: boolean } = {}
   ): Promise<void> {
-    if (!(await this.permissions(workflow, request))[operation]) {
+    if (!(await this.permissions(workflow, request, allowAdminOverride))[operation]) {
       throw new WorkflowAccessDeniedError();
     }
   }
 
   async readFilter(request?: KibanaRequest) {
     return buildEntityReadAccessQuery({
-      isAdmin: await this.isAdmin(request),
+      isAdmin: isEntityAccessControlAdmin(this.core, request),
       profileId: request ? await this.getProfileId(request) : undefined,
       ownerField: 'owner_id',
       accessControlField: 'access_control',
@@ -172,7 +167,7 @@ export class WorkflowAccessControlService {
     spaceId: string,
     request?: KibanaRequest
   ): Promise<estypes.QueryDslQueryContainer> {
-    if (await this.isAdmin(request)) return this.readFilter(request);
+    if (isEntityAccessControlAdmin(this.core, request)) return this.readFilter(request);
     const profileId = request ? await this.getProfileId(request) : undefined;
     const client = this.core.elasticsearch.client.asInternalUser;
     let pitId: string;
@@ -309,6 +304,7 @@ export class WorkflowAccessControlService {
     return {
       owner_id: document.owner_id,
       access_control: document.access_control,
+      permissions: await this.permissions(document, request),
       lastUpdatedAt: document.updated_at,
       lastUpdatedBy: document.lastUpdatedBy,
       ...pickWorkflowDocumentVersion(document),

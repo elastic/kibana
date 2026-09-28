@@ -17,7 +17,6 @@ project:
   owner: '@elastic/workflows-eng'
   sourceRoot: src/platform/plugins/shared/workflows_execution_engine
 dependsOn:
-  - '@kbn/entity-access-control'
   - '@kbn/apm-utils'
   - '@kbn/core'
   - '@kbn/config-schema'

@@ -8,7 +8,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
@@ -314,22 +314,15 @@ describe('bulkScheduleWorkflow', () => {
     ['executor', true],
     ['viewer', false],
     ['outsider', false],
-    ['admin', true],
+    ['admin', false],
     [undefined, false],
   ])('checks current private ACLs for profile %s in the bulk query', async (profileId, allowed) => {
     coreStart.userProfile.getCurrentProfileId.mockResolvedValue(profileId ?? null);
-    jest
-      .spyOn(
-        coreStart.elasticsearch.client.asScoped(request).asCurrentUser.security,
-        'hasPrivileges'
-      )
-      .mockResolvedValue({
-        username: 'caller',
-        has_all_requested: profileId === 'admin',
-        application: {},
-        cluster: {},
-        index: {},
-      });
+    jest.spyOn(coreStart.security.authc, 'getCurrentUser').mockReturnValue(
+      securityServiceMock.createMockAuthenticatedUser({
+        roles: profileId === 'admin' ? ['superuser'] : [],
+      })
+    );
     mockGetWorkflowExecutionStates.mockResolvedValue(
       new Map([
         [

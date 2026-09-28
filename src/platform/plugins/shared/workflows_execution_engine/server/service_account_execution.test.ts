@@ -115,26 +115,11 @@ describe('workflow service account execution', () => {
         actual === request ? profileId : null
       );
 
-      const callerClient = elasticsearchServiceMock.createElasticsearchClient();
-      callerClient.security.hasPrivileges.mockResolvedValue({
-        username: profileId,
-        has_all_requested: profileId === 'admin',
-        application: {},
-        cluster: {},
-        index: {},
-      });
-      const serviceClient = elasticsearchServiceMock.createElasticsearchClient();
-      serviceClient.security.hasPrivileges.mockResolvedValue({
-        username: 'service-account',
-        has_all_requested: true,
-        application: {},
-        cluster: {},
-        index: {},
-      });
-      jest.spyOn(core.elasticsearch.client, 'asScoped').mockImplementation((actual) => ({
-        ...elasticsearchServiceMock.createScopedClusterClient(),
-        asCurrentUser: actual === request ? callerClient : serviceClient,
-      }));
+      core.security.authc.getCurrentUser.mockImplementation((actual) =>
+        securityServiceMock.createMockAuthenticatedUser({
+          roles: actual === scopedRequest || profileId === 'admin' ? ['superuser'] : [],
+        })
+      );
       const allowed = await withWorkflowExecutionIdentity(
         core,
         execution('account-a'),
@@ -147,8 +132,8 @@ describe('workflow service account execution', () => {
           )
       );
 
-      expect(allowed).toBe(profileId !== 'unlisted');
-      expect(serviceClient.security.hasPrivileges).not.toHaveBeenCalled();
+      expect(allowed).toBe(profileId === 'owner');
+      expect(core.security.authc.getCurrentUser).not.toHaveBeenCalledWith(scopedRequest);
       expect(core.userProfile.getCurrentProfileId).toHaveBeenCalledWith({ request });
     }
   );

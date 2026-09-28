@@ -3156,14 +3156,10 @@ describe('WorkflowCrudService administrator writes', () => {
       const request = httpServerMock.createKibanaRequest();
       core.userProfile.getCurrentProfileId.mockResolvedValue('non-owner');
       jest
-        .spyOn(core.elasticsearch.client.asScoped(request).asCurrentUser.security, 'hasPrivileges')
-        .mockResolvedValue({
-          username: 'caller',
-          has_all_requested: isAdmin,
-          application: {},
-          cluster: {},
-          index: {},
-        });
+        .spyOn(core.security.authc, 'getCurrentUser')
+        .mockReturnValue(
+          securityServiceMock.createMockAuthenticatedUser({ roles: isAdmin ? ['superuser'] : [] })
+        );
       const { deps, client } = makeDeps(undefined, { getCoreStart: () => core });
       client.search.mockResolvedValue({
         hits: {
@@ -3226,14 +3222,10 @@ steps:
       const request = httpServerMock.createKibanaRequest();
       core.userProfile.getCurrentProfileId.mockResolvedValue('non-owner');
       jest
-        .spyOn(core.elasticsearch.client.asScoped(request).asCurrentUser.security, 'hasPrivileges')
-        .mockResolvedValue({
-          username: 'caller',
-          has_all_requested: isAdmin,
-          application: {},
-          cluster: {},
-          index: {},
-        });
+        .spyOn(core.security.authc, 'getCurrentUser')
+        .mockReturnValue(
+          securityServiceMock.createMockAuthenticatedUser({ roles: isAdmin ? ['superuser'] : [] })
+        );
       const { deps } = makeDeps(undefined, { getCoreStart: () => core });
       mockedDisableAllWorkflowsLib
         .mockReset()
@@ -3284,19 +3276,11 @@ describe('WorkflowCrudService force deletion access', () => {
   ] as const)('%s', async (_, accessControl, profileId, allowed) => {
     const core = coreMock.createStart();
     core.userProfile.getCurrentProfileId.mockResolvedValue(profileId ?? null);
-    jest
-      .spyOn(
-        core.elasticsearch.client.asScoped(httpServerMock.createKibanaRequest()).asCurrentUser
-          .security,
-        'hasPrivileges'
-      )
-      .mockResolvedValue({
-        username: 'caller',
-        has_all_requested: profileId === 'admin',
-        application: {},
-        cluster: {},
-        index: {},
-      });
+    jest.spyOn(core.security.authc, 'getCurrentUser').mockReturnValue(
+      securityServiceMock.createMockAuthenticatedUser({
+        roles: profileId === 'admin' ? ['superuser'] : [],
+      })
+    );
     const { deps, client } = makeDeps(undefined, { getCoreStart: () => core });
     client.search.mockResolvedValue({
       hits: {

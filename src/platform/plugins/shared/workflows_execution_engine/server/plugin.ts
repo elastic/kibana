@@ -19,7 +19,6 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { isEntityAccessControlAdmin } from '@kbn/entity-access-control';
 import {
   ExecutionStatus,
   getWorkflowPermissions,
@@ -1570,8 +1569,6 @@ export class WorkflowsExecutionEnginePlugin
         ? (await coreStart.userProfile.getCurrentProfileId({ request })) ?? undefined
         : undefined;
 
-      const isAdmin = hasPrivateWorkflows && (await isEntityAccessControlAdmin(coreStart, request));
-
       interface PreparedItem {
         idx: number;
         workflowExecution: Partial<EsWorkflowExecution>;
@@ -1584,7 +1581,7 @@ export class WorkflowsExecutionEnginePlugin
           if (!item.workflow.isEphemeral) {
             const spaceId = spaceIdFor(item);
             const state = executionStates.get(`${spaceId}:${item.workflow.id}`);
-            if (state && !getWorkflowPermissions(state, profileId, isAdmin).execute) {
+            if (state && !getWorkflowPermissions(state, profileId).execute) {
               throw new Error('You do not have permission to execute this workflow.');
             }
             if (!state?.enabled) {

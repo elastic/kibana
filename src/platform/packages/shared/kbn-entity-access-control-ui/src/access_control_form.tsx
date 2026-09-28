@@ -23,6 +23,7 @@ import {
 import { ACCESS_CONTROL_MAX_ENTRIES } from '@kbn/entity-access-control';
 import type { AccessControlInput, AccessControlMode } from '@kbn/entity-access-control';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import {
   getUserDisplayName,
   UserAvatar,
@@ -46,6 +47,7 @@ export interface AccessControlFormProps<Role extends string> {
   publicDescription: string;
   privateDescription?: string;
   allowPublicEntries?: boolean;
+  isAdmin?: boolean;
   isDisabled?: boolean;
   isSearching?: boolean;
 }
@@ -82,6 +84,7 @@ export const AccessControlForm = <Role extends string>({
   publicDescription,
   privateDescription = defaultPrivateDescription,
   allowPublicEntries = true,
+  isAdmin = false,
   isDisabled = false,
   isSearching = false,
 }: AccessControlFormProps<Role>): React.ReactElement => {
@@ -90,7 +93,14 @@ export const AccessControlForm = <Role extends string>({
   const profileById = new Map(
     [...profiles, ...suggestedProfiles].map((profile) => [profile.uid, profile])
   );
-  const excludedIds = new Set([ownerId, currentUserId, ...entries.map(({ id }) => id)]);
+  const isManagingAnotherOwner = Boolean(
+    isAdmin && ownerId && currentUserId && ownerId !== currentUserId
+  );
+  const excludedIds = new Set([
+    ownerId,
+    ...(isManagingAnotherOwner ? [] : [currentUserId]),
+    ...entries.map(({ id }) => id),
+  ]);
   const options = suggestedProfiles
     .filter(({ uid }) => !excludedIds.has(uid))
     .map(({ uid, user }) => {
@@ -165,6 +175,21 @@ export const AccessControlForm = <Role extends string>({
 
   return (
     <>
+      {isManagingAnotherOwner && (
+        <>
+          <KbnWarningCallout
+            size="s"
+            title={i18n.translate('entityAccessControl.adminOverrideTitle', {
+              defaultMessage: "You are editing another user's access settings",
+            })}
+            text={i18n.translate('entityAccessControl.adminOverrideDescription', {
+              defaultMessage:
+                'You can make these changes as a superuser. The owner will stay the same.',
+            })}
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <EuiFormRow
         label={visibilityLabel}
         fullWidth

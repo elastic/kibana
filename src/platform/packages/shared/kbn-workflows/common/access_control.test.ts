@@ -80,15 +80,34 @@ describe('workflow ACL permissions', () => {
       )
     ).toEqual({ read: true, execute: false, edit: false, manage: false });
   });
-  it('grants administrators every ACL operation without an owner profile', () => {
+  it('lets administrators manage access without granting execution', () => {
     expect(
       getWorkflowPermissions(
         { owner_id: 'offboarded-owner', access_control: { access_mode: 'private', entries: [] } },
         undefined,
         true
       )
-    ).toEqual({ read: true, execute: true, edit: true, manage: true });
+    ).toEqual({ read: true, execute: false, edit: true, manage: true });
   });
+
+  it.each(['viewer', 'executor', 'editor'] as const)(
+    'uses a superuser ACL role for execution: %s',
+    (role) => {
+      const permissions = getWorkflowPermissions(
+        {
+          owner_id: 'owner',
+          access_control: {
+            access_mode: 'private',
+            entries: [{ type: 'user', id: 'admin', role, added_at: '2026-09-28T00:00:00Z' }],
+          },
+        },
+        'admin',
+        true
+      );
+      expect(permissions.execute).toBe(role !== 'viewer');
+      expect(permissions.manage).toBe(true);
+    }
+  );
 
   it('denies private access without a profile', () => {
     expect(

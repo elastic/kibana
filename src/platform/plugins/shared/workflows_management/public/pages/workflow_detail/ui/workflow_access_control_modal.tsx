@@ -177,6 +177,9 @@ export const WorkflowAccessControlModal = ({
           onChange={setValue}
           ownerId={ownerId}
           currentUserId={currentProfile?.uid}
+          isAdmin={Boolean(
+            workflow.permissions?.manage && currentProfile && ownerId !== currentProfile.uid
+          )}
           profiles={currentProfile ? [...profiles, currentProfile] : profiles}
           suggestedProfiles={suggestedProfiles}
           onSearch={setSearch}
@@ -185,7 +188,8 @@ export const WorkflowAccessControlModal = ({
           isDisabled={isSaving}
           allowPublicEntries={false}
           privateDescription={i18n.translate('workflows.access.privateDescription', {
-            defaultMessage: 'Only the owner, selected users, and administrators have access.',
+            defaultMessage:
+              'Only the owner, selected users, and superusers have access. The superuser role does not grant permission to run this workflow.',
           })}
           publicDescription={i18n.translate('workflows.access.publicDescription', {
             defaultMessage:

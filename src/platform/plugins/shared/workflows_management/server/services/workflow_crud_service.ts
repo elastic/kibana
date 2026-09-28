@@ -913,7 +913,7 @@ export class WorkflowCrudService {
     const authenticatedUser = getAuthenticatedUser(request, this.deps.getSecurity());
     const profileId =
       (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined;
-    const isAdmin = await isEntityAccessControlAdmin(this.deps.getCoreStart(), request);
+    const isAdmin = isEntityAccessControlAdmin(this.deps.getCoreStart(), request);
     const now = new Date();
     const validationErrors: string[] = [];
     let shouldUpdateScheduler = false;
@@ -1106,7 +1106,7 @@ export class WorkflowCrudService {
     const profileId = request
       ? (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined
       : undefined;
-    const isAdmin = await isEntityAccessControlAdmin(this.deps.getCoreStart(), request);
+    const isAdmin = isEntityAccessControlAdmin(this.deps.getCoreStart(), request);
     const deletionOptions = { ...options, profileId, isAdmin };
     const bindings = this.deps.getServiceAccountBindings?.();
     if (!bindings) return this.deleteWorkflowDocuments(ids, spaceId, deletionOptions);
@@ -1317,7 +1317,7 @@ export class WorkflowCrudService {
     const profileId = request
       ? (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined
       : undefined;
-    const isAdmin = await isEntityAccessControlAdmin(this.deps.getCoreStart(), request);
+    const isAdmin = isEntityAccessControlAdmin(this.deps.getCoreStart(), request);
     let canModifyBoundWorkflows = !request;
     if (request && this.deps.getServiceAccountBindings?.()?.isEnabled()) {
       const privileges = await this.deps
@@ -1476,7 +1476,7 @@ export class WorkflowCrudService {
 
     const client = this.deps.workflowStorage.getClient();
     const { profileId } = params;
-    const isAdmin = await isEntityAccessControlAdmin(this.deps.getCoreStart(), params.request);
+    const isAdmin = isEntityAccessControlAdmin(this.deps.getCoreStart(), params.request);
     const { refreshed: occHits } = await fetchOccHitsByIds(
       client,
       entries.map((entry) => entry.id)
