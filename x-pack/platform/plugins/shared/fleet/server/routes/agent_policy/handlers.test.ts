@@ -369,7 +369,11 @@ describe('Agent policy API handlers', () => {
         await getFullAgentPolicy(context, request, response);
 
         // Space check must use the base ID, not the version-suffixed ID
-        expect(agentPolicyServiceMock.get).toHaveBeenCalledWith(expect.anything(), 'policy-1', false);
+        expect(agentPolicyServiceMock.get).toHaveBeenCalledWith(
+          expect.anything(),
+          'policy-1',
+          false
+        );
         // getFleetServerPolicy must receive the original versioned ID
         expect(agentPolicyServiceMock.getFleetServerPolicy).toHaveBeenCalledWith(
           expect.anything(),
@@ -391,8 +395,14 @@ describe('Agent policy API handlers', () => {
 
         await getFullAgentPolicy(context, request, response);
 
-        expect(agentPolicyServiceMock.get).toHaveBeenCalledWith(expect.anything(), 'policy-1', false);
-        expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 404 }));
+        expect(agentPolicyServiceMock.get).toHaveBeenCalledWith(
+          expect.anything(),
+          'policy-1',
+          false
+        );
+        expect(response.customError).toHaveBeenCalledWith(
+          expect.objectContaining({ statusCode: 404 })
+        );
         expect(agentPolicyServiceMock.getFleetServerPolicy).not.toHaveBeenCalled();
       });
 
@@ -406,7 +416,11 @@ describe('Agent policy API handlers', () => {
 
         await downloadFullAgentPolicy(context, request, response);
 
-        expect(agentPolicyServiceMock.get).toHaveBeenCalledWith(expect.anything(), 'policy-1', false);
+        expect(agentPolicyServiceMock.get).toHaveBeenCalledWith(
+          expect.anything(),
+          'policy-1',
+          false
+        );
         expect(agentPolicyServiceMock.getFleetServerPolicy).toHaveBeenCalledWith(
           expect.anything(),
           'policy-1#9.2',
@@ -427,8 +441,14 @@ describe('Agent policy API handlers', () => {
 
         await downloadFullAgentPolicy(context, request, response);
 
-        expect(agentPolicyServiceMock.get).toHaveBeenCalledWith(expect.anything(), 'policy-1', false);
-        expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 404 }));
+        expect(agentPolicyServiceMock.get).toHaveBeenCalledWith(
+          expect.anything(),
+          'policy-1',
+          false
+        );
+        expect(response.customError).toHaveBeenCalledWith(
+          expect.objectContaining({ statusCode: 404 })
+        );
         expect(agentPolicyServiceMock.getFleetServerPolicy).not.toHaveBeenCalled();
       });
 
