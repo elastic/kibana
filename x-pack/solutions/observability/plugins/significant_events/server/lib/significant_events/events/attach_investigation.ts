@@ -56,7 +56,7 @@ export const attachInvestigationToEvent = async ({
   // the actual EventClient version as its predecessor.
   // If we already fell back to eventClient above, reuse that result — no second round-trip needed.
   const latestLegacy =
-    usedLegacyFallback || eventSearchClient === undefined
+    usedLegacyFallback || resolvedSearchClient === eventClient
       ? latest
       : await eventClient.findLatestByEventId(eventId);
   if (!latestLegacy) {
@@ -86,7 +86,7 @@ export const attachInvestigationToEvent = async ({
   }
 
   if (isEqual(investigations, existing)) {
-    return { event_uuid: latest.event_uuid, updated: 0, ignored: 1 };
+    return { event_uuid: latestLegacy.event_uuid, updated: 0, ignored: 1 };
   }
 
   const now = new Date().toISOString();

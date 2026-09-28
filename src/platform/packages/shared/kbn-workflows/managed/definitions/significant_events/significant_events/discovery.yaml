@@ -386,7 +386,7 @@ steps:
                     type: kibana.request
                     with:
                       method: GET
-                      path: '/s/{{ workflow.spaceId }}/internal/significant_events/events?event_id={{ foreach.item.event_id }}&perPage=1'
+                      path: '/s/{{ workflow.spaceId }}/internal/significant_events/events?event_id={{ foreach.item.event_id | url_encode }}&perPage=1'
                       headers:
                         x-elastic-internal-origin: 'kibana'
                     on-failure:
