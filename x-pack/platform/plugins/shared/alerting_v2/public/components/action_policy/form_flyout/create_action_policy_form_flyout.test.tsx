@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { ActionPolicyFormState } from '../form/types';
@@ -55,12 +55,17 @@ const formValues: ActionPolicyFormState = {
 jest.mock('./action_policy_form_flyout', () => ({
   ActionPolicyFormFlyout: ({
     onSave,
+    isLoading,
   }: {
     onSave: (values: ActionPolicyFormState) => Promise<void>;
+    isLoading: boolean;
   }) => (
-    <button type="button" onClick={() => onSave(formValues)}>
-      Submit
-    </button>
+    <>
+      <button type="button" onClick={() => onSave(formValues)}>
+        Submit
+      </button>
+      <span data-test-subj="isSaving">{String(isLoading)}</span>
+    </>
   ),
 }));
 
@@ -98,5 +103,27 @@ describe('CreateActionPolicyFormFlyout', () => {
 
     await waitFor(() => expect(mockRollbackWorkflows).toHaveBeenCalledWith(['workflow-1']));
     expect(onSuccess).not.toHaveBeenCalled();
+  });
+
+  it('remains in the saving state until workflow rollback finishes', async () => {
+    const user = userEvent.setup();
+    let resolveRollback!: () => void;
+    mockCreatePolicy.mockRejectedValue(new Error('create failed'));
+    mockRollbackWorkflows.mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveRollback = resolve;
+        })
+    );
+
+    render(<CreateActionPolicyFormFlyout onClose={jest.fn()} onSuccess={jest.fn()} />);
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+
+    await waitFor(() => expect(mockRollbackWorkflows).toHaveBeenCalledWith(['workflow-1']));
+    expect(screen.getByTestId('isSaving')).toHaveTextContent('true');
+
+    await act(async () => resolveRollback());
+
+    await waitFor(() => expect(screen.getByTestId('isSaving')).toHaveTextContent('false'));
   });
 });

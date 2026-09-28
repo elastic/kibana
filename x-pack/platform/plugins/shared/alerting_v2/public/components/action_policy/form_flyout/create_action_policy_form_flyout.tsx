@@ -22,50 +22,48 @@ interface Props {
 
 export const CreateActionPolicyFormFlyout = ({ onClose, onSuccess }: Props) => {
   const { toasts } = useService(CoreStart('notifications'));
-  const { mutateAsync: createPolicy, isLoading: isCreatingPolicy } = useCreateActionPolicy();
+  const { mutateAsync: createPolicy } = useCreateActionPolicy();
   const { createInlineWorkflows, rollbackWorkflows } = useCreateInlineWorkflows();
-  const [isCreatingWorkflows, setIsCreatingWorkflows] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const createActionPolicy = useCallback(
     async (values: ActionPolicyFormState) => {
       let createdWorkflowIds: string[] = [];
-      setIsCreatingWorkflows(true);
+      setIsSaving(true);
 
       try {
-        createdWorkflowIds = await createInlineWorkflows(values.inlineActions);
-      } catch (error) {
-        toasts.addError(error instanceof Error ? error : new Error(String(error)), {
-          title: i18n.translate('xpack.alertingV2.actionPolicy.inlineWorkflowsError', {
-            defaultMessage: 'Failed to create simple workflows',
-          }),
-        });
-        return;
+        try {
+          createdWorkflowIds = await createInlineWorkflows(values.inlineActions);
+        } catch (error) {
+          toasts.addError(error instanceof Error ? error : new Error(String(error)), {
+            title: i18n.translate('xpack.alertingV2.actionPolicy.inlineWorkflowsError', {
+              defaultMessage: 'Failed to create simple workflows',
+            }),
+          });
+          return;
+        }
+
+        const destinations: ActionPolicyDestination[] = [
+          ...values.destinations,
+          ...createdWorkflowIds.map((id) => ({ type: 'workflow' as const, id })),
+        ];
+
+        try {
+          await createPolicy(toCreatePayload({ ...values, destinations }));
+        } catch {
+          await rollbackWorkflows(createdWorkflowIds);
+          return;
+        }
+
+        onSuccess();
       } finally {
-        setIsCreatingWorkflows(false);
+        setIsSaving(false);
       }
-
-      const destinations: ActionPolicyDestination[] = [
-        ...values.destinations,
-        ...createdWorkflowIds.map((id) => ({ type: 'workflow' as const, id })),
-      ];
-
-      try {
-        await createPolicy(toCreatePayload({ ...values, destinations }));
-      } catch {
-        await rollbackWorkflows(createdWorkflowIds);
-        return;
-      }
-
-      onSuccess();
     },
     [createInlineWorkflows, createPolicy, onSuccess, rollbackWorkflows, toasts]
   );
 
   return (
-    <ActionPolicyFormFlyout
-      onClose={onClose}
-      onSave={createActionPolicy}
-      isLoading={isCreatingPolicy || isCreatingWorkflows}
-    />
+    <ActionPolicyFormFlyout onClose={onClose} onSave={createActionPolicy} isLoading={isSaving} />
   );
 };
