@@ -54,12 +54,12 @@ import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config';
       set -euo pipefail
       ${projectRoot}/.buildkite/scripts/common/activate_service_account.sh ${BASE_BUCKET_DAILY}
       cp manifest.json manifest-latest-verified.json
-      gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp manifest-latest-verified.json gs://${BASE_BUCKET_DAILY}/${version}/
+      gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" manifest-latest-verified.json gs://${BASE_BUCKET_DAILY}/${version}/
       rm manifest.json
       ${projectRoot}/.buildkite/scripts/common/activate_service_account.sh ${BASE_BUCKET_PERMANENT}
       cp manifest-permanent.json manifest.json
-      gsutil -m cp -r gs://${bucket}/* gs://${BASE_BUCKET_PERMANENT}/${version}/
-      gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp manifest.json gs://${BASE_BUCKET_PERMANENT}/${version}/
+      gcloud storage cp --recursive gs://${bucket}/* gs://${BASE_BUCKET_PERMANENT}/${version}/
+      gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" manifest.json gs://${BASE_BUCKET_PERMANENT}/${version}/
     `,
       { shell: '/bin/bash' }
     );
