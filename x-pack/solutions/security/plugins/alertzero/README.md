@@ -1,21 +1,57 @@
 # AlertZero plugin (`@kbn/alertzero-plugin`)
 
-Security Watch investigation queue and catalog behind `xpack.alertzero.enabled`.
+Security Watch investigation queue and catalog behind the `securitySolution:enableAlertZero` advanced setting.
 
 ## Enablement
 
-Add to `kibana.yml` (or `config/kibana.dev.yml` for local dev):
+### Prerequisite: `xpack.agenticInvestigations.enabled`
+
+AlertZero lists `agenticInvestigations` in `requiredPlugins`, so Kibana will not load the AlertZero plugin at all when `agenticInvestigations` is disabled. That plugin defaults to `false`, so on a stock deployment neither of the two gates below has any effect until this is set first:
+
+```yaml
+xpack.agenticInvestigations.enabled: true
+```
+
+Both gates described below are skipped — and the advanced setting is never registered — unless this prerequisite is satisfied.
+
+### Two independent gates, with different scopes and different jobs
+
+### `securitySolution:enableAlertZero` — the user-facing, per-space gate
+
+A namespace-scoped Kibana advanced setting (default `false`), registered by this plugin in `server/ui_settings.ts`. Turn it on in **Stack Management → Advanced Settings** for the space you want AlertZero in, or pin it for a whole deployment:
+
+```yaml
+uiSettings.overrides:
+  securitySolution:enableAlertZero: true
+```
+
+It controls four things. Enabling takes effect live, but **disabling takes full effect only after a page reload** — the setting is registered with `requiresPageReload: true`, so Advanced Settings prompts for one. Dismiss that prompt and the Agent Builder surfaces in the last row stay in place until the page is reloaded:
+
+| Surface | When off |
+|---------|----------|
+| Browser app `/app/alertzero` | Registered but `AppStatus.inaccessible`; every page renders core's "Application unavailable" |
+| Security solution navigation | AlertZero nodes disappear — core empties `visibleIn` and `deepLinks` for an inaccessible app, and chrome drops nav nodes whose link has no nav link. The navigation trees hold no check of their own |
+| HTTP `/internal/alertzero/*` | `404`, via the `withAlertZeroEnabled` wrapper on every route |
+| Agent Builder Investigation template and its tabs | Absent from the next page load. Agent Builder's conversation template contract has no deregistration counterpart, so a session that already registered them keeps them until it reloads; in that window opening one raises an error instead of loading an investigation |
+
+### `xpack.alertzero.enabled` — the deployment kill switch
+
+A plugin config flag, defaulting to `false`. It is *not* the user-facing toggle; it is a deployment-level gate that must be on for AlertZero to register anything. Turning it on or off requires a restart:
 
 ```yaml
 xpack.alertzero.enabled: true
 ```
 
 - **`xpack.alertzero.enabled`** — deployment-level plugin gate (default `false`). When false, the plugin registers no app, routes, or features; Security nav nodes for AlertZero are omitted automatically.
-- **`xpack.alertzero.ui.useMockData`** — optional presentation-source toggle (default `false`). Set to `true` to serve the mock Investigation catalog from `@kbn/alertzero-common` instead of real data — useful for demos and UI work without a live stack. Worker settings and Watch grouping are live either way.
 
-Workers install when a user enables one or saves settings on one. There is no Watch-level enablement switch. Disable leaves the per-space Worker document and its settings in place. The only bulk cleanup is turning `xpack.alertzero.enabled` off and restarting — AlertZero then stops registering as a managed-workflow owner and orphan cleanup force-deletes its documents across every space.
+AlertZero reads live data only. To work on the UI without waiting for Workers to produce proposals, seed the queue with `scripts/seed_proposal_attachments.sh`, which writes real proposal documents and Agent Builder conversations into your local stack.
 
-Restart Kibana after changing config, then open `/app/alertzero` (or use the Security left rail).
+Everything in the table below is skipped when it is off — including registration of the advanced setting itself, which is why `withAlertZeroEnabled` can never read an unregistered key.
+
+
+### Worker lifecycle
+
+Workers install when a user enables one or saves settings on one. There is no Watch-level enablement switch. Disable leaves the per-space Worker document and its settings in place. The only bulk cleanup is turning `xpack.alertzero.enabled` off and restarting — AlertZero then stops registering as a managed-workflow owner and orphan cleanup force-deletes its documents across every space. Turning the *advanced setting* off does **not** trigger cleanup; it only hides the surfaces.
 
 To inspect a Worker's installed managed workflow — its rendered YAML, triggers, and executions — in the Workflows UI, also set:
 
@@ -26,16 +62,19 @@ uiSettings.overrides:
 
 This is optional. AlertZero's own Watch pages work without it; it only affects what the Workflows UI lists (default `false`).
 
-### When disabled (`xpack.alertzero.enabled: false`) — no production pollution
+### When the kill switch is off (`xpack.alertzero.enabled: false`) — no production pollution
 
 | Surface | Behavior |
 |---------|----------|
+| `securitySolution:enableAlertZero` | Not registered (absent from Advanced Settings) |
 | HTTP `/internal/alertzero/*` | Not registered |
 | Kibana feature / privileges | Not registered |
 | Browser app `/app/alertzero` | Not registered (nav links to `alertzero` / `alertzero:*` are removed by chrome) |
 | Managed workflow **owner** | Not registered (`registerManagedWorkflowOwner` skipped) |
 | Managed workflow initialization | Not called |
 | Leftover installed Worker documents | Global Workflows orphan cleanup removes docs whose owner is unregistered |
+
+With the kill switch on but the advanced setting off, the Kibana feature privileges *are* registered — `features.registerKibanaFeature` cannot be scoped per space — so the `alertzero` read/write privileges appear in the Roles and Spaces pickers regardless of the per-space toggle.
 
 Definitions still exist in `@kbn/workflows/managed` (code registry only). Worker definitions are **not** installed into `.workflows-*` until a user enables that Worker or saves settings on it. AlertZero startup installs only the three global rule workflows before `ready()` reconciles already-installed dynamic documents.
 
@@ -46,14 +85,15 @@ The only always-on cost of a soft flag is the tiny public plugin entry bundle (~
 Real data is served by default. Keep these in mind when running AlertZero in shared or production environments:
 
 - Watch reads require only `alertzero_read`; AlertZero owns the catalog projection and its managed definitions. Recent-run enrichment soft-fails when execution history is unavailable.
-- Settings writes require `alertzero_write`; managed install is requestless, so the AlertZero route is the authorization boundary.
+- Settings writes (autonomy, schedule, extras) require `alertzero_write`; managed install is requestless, so the AlertZero route is the authorization boundary for those fields.
+- Enable/disable also requires Workflows `workflowsManagement:update` **and** `workflowsManagement:managed:update`. `workflows:all` does **not** include `workflow_update_managed` — that sub-feature must be granted explicitly.
 - Autonomy and enablement are durable per Worker. There is no Watch-owned settings write path.
 
 ### Skills projection
 
 Skills are only projected from real data. At startup, AlertZero provisions the required Agent Builder agent in every space that has an installed watch before `ready()` runs reconciliation, so skills resolve correctly in non-default spaces on first request.
 
-`GET /internal/alertzero/skills` returns a per-space `WatchSkill[]` projected from live workflow definitions:
+There is no skills route. Skills ride along on each Worker returned by `GET /internal/alertzero/workers`, projected per space from live workflow definitions:
 
 - Each `ai.agent` step in a workflow's YAML contributes the skills it can invoke. The projection walks all step branches (if/else, cases, parallel branches) so nested agent steps are found.
 - If the step has a `configuration_overrides.skill_ids` list those IDs are used, even when the step's agent-id cannot be resolved from Agent Builder. Otherwise the agent's own `configuration.skill_ids` are used, plus any `baseConfiguration.skill_ids` from its type.
@@ -69,33 +109,32 @@ AlertZero is a **standalone Security-category app** (`/app/alertzero`) that **us
 - Platform footer stays as on Security `main`: Launchpad, Developer tools, Settings / stack management, collapse
 - **Discover** uses the platform `{ link: 'discover' }` destination (real `/app/discover`)
 - **Dashboards** uses Security’s real dashboards destination (same Throughline slot; no AlertZero stub)
-- **Chats** stays in-app and embeds Agent Builder
+- **Chat** is Agent Builder's own conversation page; AlertZero links out to it rather than hosting it
 - Watches keeps a **content-area** secondary nav (Workflows / Skills / … stubs)
-- Ask AlertZero FAB routes to Chats (hidden on `/chats`)
 
 ## Routes
 
 | UI route | Purpose |
 |----------|---------|
 | `/app/alertzero` | Brief — Investigation queue |
-| `/app/alertzero/chats` | Agent Builder embed (`sessionTag: alertzero`) |
 | `/app/discover` | Real Discover (via Security / AlertZero nav Discover item) |
 | `/app/security/dashboards` | Real Security dashboards (via Throughline Dashboards item) |
 | `/app/alertzero/alerts` | Placeholder — coming soon |
 | `/app/alertzero/attacks` | Placeholder — coming soon |
-| `/app/alertzero/records` | Placeholder — coming soon |
 | `/app/alertzero/threat-hunt` | Placeholder — coming soon |
 | `/app/alertzero/streams` | Placeholder — coming soon |
 | `/app/alertzero/watches` | Watch catalog (`system-security-watch-*`) |
 | `/app/alertzero/watches/:watchId` | Watch detail |
 | `/app/alertzero/watches/workflows` … `/guardrails` | Watches section stubs |
-| `/app/alertzero/investigations/:id` | Investigation inspector shell |
-| `/app/alertzero/investigations/:id/proposals/:proposalId` | Proposal detail shell |
 | `/app/alertzero/settings` | Settings stub (no dedicated nav item) |
 
-### Security left-rail order (when AlertZero enabled)
+An investigation has no route of its own: it is a templated Agent Builder conversation, so its
+details open in Agent Builder's conversation flyout (`?selectedConversationId=` on the queue) and
+its chat opens at `/app/agent_builder/agents/{agentId}/conversations/{id}`.
 
-**AlertZero → Chats → Discover → Dashboards → Alerts → Attacks → Records → Threat hunt → Streams → Watches**, then the rest of Security’s existing destinations (including the platform **More** overflow — not an AlertZero stub).
+### Security left-rail order (when `securitySolution:enableAlertZero` is on)
+
+**AlertZero → Discover → Dashboards → Alerts → Attacks → Threat hunt → Streams → Watches**, then the rest of Security’s existing destinations (including the platform **More** overflow — not an AlertZero stub).
 
 ### Internal API (`/internal/alertzero/*`)
 
@@ -106,9 +145,6 @@ AlertZero is a **standalone Security-category app** (`/app/alertzero`) that **us
 | GET | `/internal/alertzero/workers` |
 | PATCH | `/internal/alertzero/workers/{workerId}` |
 | GET | `/internal/alertzero/skills` |
-| GET | `/internal/alertzero/investigations` |
-| GET | `/internal/alertzero/investigations/{id}` |
-| GET | `/internal/alertzero/investigations/{id}/proposals` |
 
 OpenAPI → Zod schemas live in `@kbn/alertzero-common`. Regenerate with:
 
@@ -128,10 +164,11 @@ Managed Worker definitions:
 - `system-security-hunt-continuous-threat-hunt`
 - `system-security-detection-rule-tuning`
 - `system-security-detection-rule-creation`
+- `system-security-forensics-endpoint-analysis`
 
 Those definitions live in `src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/`. Each Worker's settings contract is one `WorkerSettingsDeclaration` in `@kbn/alertzero-common` (`impl/worker_settings/`, one file per Watch team); AlertZero's `server/managed_workflows/workers/` derives defaults, validation, patch application and API projection from it, registered from `server/managed_workflows/worker_registry.ts`. Watch GET/list returns catalog placeholders only.
 
-Worker definitions are `dynamic` + `auto` + `restorable`. They are installed on enable or a settings save with `workflowIdSuffix: spaceId`, so every space owns an independent copy. Disable changes enablement in place. Each Worker is a `yamlTemplate` whose template values mirror the settings API (shared fields flat, Worker-specific fields under `extras`) and are re-used during definition upgrades. Persisted values are validated against the Worker's current declaration on every read and write; there is no migration layer (see [Pre-customer state](#pre-customer-state)). Startup does not enumerate documents before `ready()`.
+Worker definitions are `dynamic` + `auto` + `restorable`. They are installed on enable or a settings save with `workflowIdSuffix: spaceId`, so every space owns an independent copy. Disable changes enablement in place. Each Worker is a `yamlTemplate` whose template values mirror the settings API (shared fields flat, Worker-specific fields under `extras`) and are re-used during definition upgrades. Persisted values are validated against the Worker's current declaration on every read and write. A schedule or extras key the declaration now requires, and the document does not have yet, is filled from the current default at startup (before `ready()`) and again on read. A value that is already stored is left as-is, including when it is out of range. Renames and other breaking shape changes have no compatibility path (see [Pre-customer state](#pre-customer-state)).
 
 The prototype rule workflows remain static global installs and are not advertised to workflow selector UIs:
 
@@ -215,7 +252,7 @@ Tests to update:
 `enabled` sits beside `settings`; `autonomy` and `scheduleInterval` are the shared fields inside it. Anything else lives under `settings.extras`, owned by the Worker's Watch team and closed per Worker. A PATCH is the editable subset of the read body plus the revision GET returned:
 
 ```json
-{ "enabled": true, "settingsRevision": 3, "settings": { "autonomy": "manual", "scheduleInterval": "2h", "extras": { "analysisWindowDays": 14 } } }
+{ "enabled": true, "settingsRevision": 3, "settings": { "autonomy": "manual", "scheduleInterval": "2h", "extras": { "analysisWindowDays": 7, "fpCountThreshold": 10, "fpRateThresholdPct": 50 } } }
 ```
 
 Shared fields are per-field: omitted keeps the stored value, supplied replaces it. `extras` is whole-object: omitted keeps the stored object; supplied must be the complete valid object for that Worker and replaces it. No deep merge, no special `null`. Unknown keys, another Worker's fields, a replacement missing a required field, or an autonomy level the Worker does not allow are rejected with a 400 naming the field.
@@ -223,7 +260,7 @@ Shared fields are per-field: omitted keeps the stored value, supplied replaces i
 Adding a field to an existing Worker touches only Watch-owned code (Rule Tuning's analysis window is the worked example):
 
 1. **Schema** — add the field to the Worker's extras object in `@kbn/alertzero-common/impl/schemas/components/<watch>_watch_settings.schema.yaml` (`additionalProperties: false`, required) and run `yarn openapi:generate` in that package.
-2. **Declaration** — add its fresh-install default to `extras.defaultValue` in `impl/worker_settings/<watch>.ts`.
+2. **Declaration** — add its fresh-install default to `extras.defaultValue` in `impl/worker_settings/<watch>.ts`. An already installed document that lacks the key receives that default at startup and on read. A stored value is not overwritten when the default later changes.
 3. **Template** — forward `values.extras.<field>` in the Worker's `yamlTemplate` renderer and YAML and bump the definition `version`; the setting is done only when the saved value reaches the run.
 4. **Control** — build a real control in the Worker's own folder under `public/pages/watches/custom_settings/<worker>/` (Rule Tuning lives in `custom_settings/rule_tuning/`), registered by Worker id in `custom_settings/registry.ts`. It receives `settings` and `onExtrasChange(extras)` and hands back the complete `extras` object. It never calls an API and there is no form generator or app-load completeness check; cover it with a component test.
 
@@ -231,17 +268,17 @@ The shared Watch page renders the interval control from the presence of `schedul
 
 ### Pre-customer state
 
-AlertZero is not live. Declarations, schemas and template values may change without a compatibility path or migration. Persisted settings must validate against the current shape; when documents from earlier development builds do not, the fix is a clean reset of the affected per-space Worker documents, coordinated with the Watch teams.
+AlertZero is not live. A new required extra or schedule key that has a default is filled when it is absent. Renames, type changes, and other breaking shape changes still have no compatibility path. When documents from earlier development builds do not validate, the fix is a clean reset of the affected per-space Worker documents, coordinated with the Watch teams.
 
 ## Working-group contribution map
 
 | Area | Where to land |
 |------|----------------|
-| Shared types, fixtures, OpenAPI | `@kbn/alertzero-common` |
+| Shared types and OpenAPI | `@kbn/alertzero-common` |
 | Managed Worker YAML, renderers, and template value types | `kbn-workflows/managed/definitions/alertzero` |
 | Worker settings defaults, validation, patches, and API projection | `plugins/alertzero/server/managed_workflows/workers` |
 | Investigation / Proposal conversation projection | Agent Builder / Conversations (optional dep) |
-| Live Watch projection (non-mock) | Workflows Management via `workflowsExtensions` |
+| Live Watch projection | Workflows Management via `workflowsExtensions` |
 | Skills projection | `server/services/utils/skills_projection_service.ts` + `server/services/watches/project_watch.ts` |
 | Brief / in-app pages | `plugins/alertzero/public` |
 | Solution nav nodes | `security_solution_ess` / `security_solution_serverless` navigation trees |
@@ -250,8 +287,8 @@ AlertZero is not live. Declarations, schemas and template values may change with
 
 - Platform chrome (header + Security footer utilities)
 - Throughline body order in Security nav; Discover → real Discover; Dashboards → real Security dashboards
-- Brief queue, Watches catalog/detail, Chats Agent Builder embed
-- Investigation shells + mock internal APIs
+- Brief queue, Watches catalog/detail
+- Investigation details and chat hosted by Agent Builder
 
 ## Non-goals (this PR)
 
@@ -274,11 +311,11 @@ node scripts/jest x-pack/solutions/security/packages/kbn-alertzero-common
 
 ### Page-load budget
 
-Keep `pageLoadAssetSize.alertzero` lean — prefer a thin plugin entry over raising the optimizer limit. Keep the app UI behind `import('./application')` in `public/plugin.ts`. The shared package (`@kbn/alertzero-common`) must use an **explicit export allow-list** in `index.ts` — never `export *` for schemas/samples. Star re-exports defeat optimizer tree-shaking and can pull Zod + mock catalogs into the page-load bundle even when the plugin only imports a few constants.
+Keep `pageLoadAssetSize.alertzero` lean — prefer a thin plugin entry over raising the optimizer limit. Keep the app UI behind `import('./application')` in `public/plugin.ts`. The shared package (`@kbn/alertzero-common`) must use an **explicit export allow-list** in `index.ts` — never `export *` for schemas. Star re-exports defeat optimizer tree-shaking and can pull Zod into the page-load bundle even when the plugin only imports a few constants.
 
 Measure with:
 
 ```bash
-node scripts/build_kibana_platform_plugins.js --filter alertzero --dist --no-cache --no-examples
-# inspect …/alertzero/target/public/metrics.json → "page load bundle size"
+node scripts/build_kibana_platform_plugins.js --dist --no-cache
+# inspect target/public/bundles/metrics.json → "page load bundle size" for alertzero
 ```

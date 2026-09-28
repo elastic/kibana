@@ -147,6 +147,10 @@ export type { RendererTypeDefinition } from './renderers';
 export type {
   ConversationEventTypeDefinition,
   ConversationEventPayloadOf,
+  ConversationEventOf,
+  ConversationEventFormatContext,
+  ConversationEventRepresentation,
+  TextConversationEventRepresentation,
 } from './conversation_events';
 export type {
   AgentBuilderPluginSetup,
@@ -180,9 +184,10 @@ export type {
   ListAttachmentsArgs,
 } from './attachments';
 export type {
-  ConversationAddEventsRequest,
-  ConversationCreatePublicRequest,
   ConversationPublicClient,
+  ConversationCreatePublicRequest,
+  ConversationUpdatePublicRequest,
+  ConversationAddEventsRequest,
 } from './conversations';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
 export type {

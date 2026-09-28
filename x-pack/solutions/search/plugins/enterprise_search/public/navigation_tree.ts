@@ -175,6 +175,7 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     { link: 'management:index_management' },
                     { link: 'management:data_federation' },
+                    { link: 'management:esql_views' },
                     { link: 'management:index_lifecycle_management' },
                     { link: 'management:snapshot_restore' },
                     { link: 'management:transform' },
@@ -194,11 +195,7 @@ export const getNavigationTreeDefinition = ({
                   }),
                 },
                 {
-                  children: [
-                    { link: 'searchSynonyms:synonyms' },
-                    { link: 'searchQueryRules' },
-                    { link: 'searchPlayground' },
-                  ],
+                  children: [{ link: 'searchSynonyms:synonyms' }, { link: 'searchQueryRules' }],
                   id: 'search_relevance',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.ingest.relevance.title', {
                     defaultMessage: 'Relevance',
@@ -338,6 +335,7 @@ export const getNavigationTreeDefinition = ({
                     { link: 'management:roles' },
                     { link: 'management:api_keys' },
                     { link: 'management:role_mappings' },
+                    { link: 'management:service_accounts' },
                   ],
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.management.security', {
                     defaultMessage: 'Security',

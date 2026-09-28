@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { GET_THREAT_REPORT_API_PATH } from '../../../common/threat_intel';
+import {
+  GET_THREAT_REPORT_API_PATH,
+  getThreatReportParamsSchema,
+  getThreatReportResponseSchema,
+} from '../../../common/threat_intel';
 import { getThreatReport, ThreatReportNotFoundError } from '../services/get_threat_report';
 import { resolveCurrentSpaceId } from '../lib/space_filter';
 import { THREAT_INTEL_READ_AUTHZ } from './lib/authz';
 import { rejectUntilBootstrapped } from './lib/bootstrap_ready';
 import type { RouteRegistrationDeps } from '.';
-
-const reportIdParamsSchema = schema.object({
-  reportId: schema.string({ minLength: 1, maxLength: 512 }),
-});
 
 /**
  * GET `/internal/threat_intel/reports/{reportId}` — full report document for
@@ -37,7 +36,10 @@ export const registerGetThreatReportRoute = ({
     .addVersion(
       {
         version: '1',
-        validate: { request: { params: reportIdParamsSchema } },
+        validate: {
+          request: { params: getThreatReportParamsSchema },
+          response: { 200: { body: () => getThreatReportResponseSchema } },
+        },
       },
       async (context, request, response) => {
         const notReady = await rejectUntilBootstrapped(getBootstrapReady, response);

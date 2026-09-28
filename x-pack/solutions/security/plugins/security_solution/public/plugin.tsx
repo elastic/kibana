@@ -92,8 +92,10 @@ import {
   registerEntityRiskScoreHistoryAttachment,
   registerEntityAttachment,
   registerEntityGraphAttachment,
+  registerExceptionAttachment,
   registerRuleAttachment,
   registerRulePreviewAttachment,
+  registerImpactAttachment,
   registerInvestigationTimelineAttachment,
   registerInvestigationIocsAttachment,
 } from './agent_builder/attachment_types';
@@ -160,7 +162,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (workflowsExtensions) {
       registerWorkflowSteps(workflowsExtensions);
       registerSecurityWorkflowTriggers(workflowsExtensions);
-      if (this.experimentalFeatures.threatIntelSupplyEnabled) {
+      if (plugins.alertzero?.enabled) {
         registerThreatIntelWorkflowSteps(workflowsExtensions);
       }
     }
@@ -370,6 +372,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       registerAttackDiscoveryVerdictAttachment({
         attachments: plugins.agentBuilder.attachments,
       });
+      // Unconditional: the Alert Triage Worker (PR 3) writes `security.impact`,
+      // so registration must not race allow-list/setup.
+      registerImpactAttachment({
+        attachments: plugins.agentBuilder.attachments,
+      });
       if (this.experimentalFeatures.aiRuleCreationEnabled) {
         registerRuleAttachment({
           attachments: plugins.agentBuilder.attachments,
@@ -408,6 +415,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           uiSettings: core.uiSettings,
         });
       }
+      registerExceptionAttachment({ attachments: plugins.agentBuilder.attachments });
       registerEntityAttachment({
         attachments: plugins.agentBuilder.attachments,
         application: core.application,

@@ -19,11 +19,7 @@ import {
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
-import {
-  getMappedParams,
-  addMissingUiamKeyTagIfNeeded,
-  API_KEY_ATTRIBUTES_TO_STRIP,
-} from '../../../../rules_client/common';
+import { getMappedParams, API_KEY_ATTRIBUTES_TO_STRIP } from '../../../../rules_client/common';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -340,14 +336,6 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     apiKeyOwnership: { apiKeyCreatedByUser: originalRule.apiKeyCreatedByUser },
   });
 
-  const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
-    updateRuleData.tags,
-    apiKeyAttributes.uiamApiKey,
-    context.isServerless,
-    context.shouldGrantUiam,
-    context.apiKeyType
-  );
-
   const notifyWhen = getRuleNotifyWhenType(
     updateRuleData.notifyWhen ?? null,
     updateRuleData.throttle ?? null
@@ -357,7 +345,6 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     ...omit(originalRule, API_KEY_ATTRIBUTES_TO_STRIP),
     ...omit(updateRuleData, 'actions', 'systemActions', 'artifacts'),
     ...apiKeyAttributes,
-    tags: tagsWithUiamCheck,
     params: updatedParams as RawRule['params'],
     actions: actionsWithRefs,
     notifyWhen,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { queryKeys as platformQueryKeys } from '@kbn/agentic-investigations-plugin/public';
+import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 
 export const queryKeys = {
   /**
@@ -14,10 +14,16 @@ export const queryKeys = {
    * on approve/dismiss sweeps these up without AlertZero needing its own mutations.
    */
   proposals: {
-    grouped: (windowHours: number) =>
-      [...platformQueryKeys.proposals.all, 'grouped', windowHours] as const,
     chartsSummary: (windowHours: number, bucketMinutes: number) =>
       [...platformQueryKeys.proposals.all, 'charts-summary', windowHours, bucketMinutes] as const,
+    /** No offset in the key: one entry holds every page Show more has appended. */
+    byCategory: (category: string) =>
+      [...platformQueryKeys.proposals.all, 'by-category', category] as const,
+    closed: () => [...platformQueryKeys.proposals.all, 'closed'] as const,
+    /** `size: 0` reads, so a collapsed accordion knows its size without its rows. */
+    byCategoryCount: (category: string) =>
+      [...platformQueryKeys.proposals.all, 'by-category-count', category] as const,
+    closedCount: () => [...platformQueryKeys.proposals.all, 'closed-count'] as const,
   },
   watches: {
     all: ['alertzero', 'watches'] as const,
@@ -33,12 +39,5 @@ export const queryKeys = {
   skills: {
     all: ['alertzero', 'skills'] as const,
     list: () => [...queryKeys.skills.all, 'list'] as const,
-  },
-  investigations: {
-    all: ['alertzero', 'investigations'] as const,
-    list: () => [...queryKeys.investigations.all, 'list'] as const,
-    detail: (id: string | undefined) => [...queryKeys.investigations.all, 'detail', id] as const,
-    proposals: (id: string | undefined) =>
-      [...queryKeys.investigations.all, 'proposals', id] as const,
   },
 };

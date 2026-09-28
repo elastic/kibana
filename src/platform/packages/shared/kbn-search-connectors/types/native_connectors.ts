@@ -1454,6 +1454,29 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      include_full_raw_message: {
+        default_value: null,
+        depends_on: [],
+        display: TOGGLE,
+        label: translate('searchConnectors.nativeConnectors.gmail.include_full_raw_message.label', {
+          defaultMessage: 'Index full raw email (including headers)',
+        }),
+        options: [],
+        order: 5,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.gmail.include_full_raw_message.tooltip',
+          {
+            defaultMessage:
+              'When disabled (default), the email body and a small set of headers (such as Subject, From, and To) are indexed. Enable to keep the full raw message including routing and authentication headers - useful for edge cases where body extraction misses content.',
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
       use_document_level_security: {
         default_value: null,
         depends_on: [],
@@ -1465,7 +1488,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 5,
+        order: 6,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -3878,6 +3901,29 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
+      sync_all_mail_folders: {
+        default_value: null,
+        depends_on: [],
+        display: TOGGLE,
+        label: translate('searchConnectors.nativeConnectors.outlook.sync_all_mail_folders.label', {
+          defaultMessage: 'Sync all mail folders',
+        }),
+        options: [],
+        order: 12,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.outlook.sync_all_mail_folders.tooltip',
+          {
+            defaultMessage:
+              'When enabled, indexes the user mail folders in each mailbox, not only Inbox, Sent, Junk, and Archive. System folders such as Deleted Items, Drafts, Outbox, and search folders are never indexed. Expect longer syncs, more Exchange load, and a larger index.',
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
       use_text_extraction_service: {
         default_value: null,
         depends_on: [],
@@ -3889,7 +3935,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 12,
+        order: 13,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -3904,13 +3950,39 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      include_full_raw_message: {
+        default_value: null,
+        depends_on: [],
+        display: TOGGLE,
+        label: translate(
+          'searchConnectors.nativeConnectors.outlook.include_full_raw_message.label',
+          {
+            defaultMessage: 'Index full raw email (including headers)',
+          }
+        ),
+        options: [],
+        order: 13,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.outlook.include_full_raw_message.tooltip',
+          {
+            defaultMessage:
+              'When disabled (default), the email body and a small set of headers (such as Subject, From, and To) are indexed. Enable to keep the full raw message including routing and authentication headers - useful for edge cases where body extraction misses content.',
+          }
+        ),
+        type: BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
       use_document_level_security: {
         default_value: null,
         depends_on: [],
         display: TOGGLE,
         label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
         options: [],
-        order: 13,
+        order: 14,
         required: true,
         sensitive: false,
         tooltip: getEnableDocumentLevelSecurityTooltip(

@@ -14,7 +14,6 @@ import { cspDashboardLink, vulnerabilityDashboardLink } from '../cloud_security_
 import {
   ecsDataQualityDashboardLinks,
   detectionResponseLinks,
-  entityAnalyticsLinks,
   overviewLinks,
 } from '../overview/links';
 import { IconDashboards } from '../common/icons/dashboards';
@@ -25,7 +24,6 @@ const subLinks: LinkItem[] = [
   kubernetesLinks,
   cspDashboardLink,
   vulnerabilityDashboardLink,
-  entityAnalyticsLinks,
   ecsDataQualityDashboardLinks,
 ].map((link) => ({ ...link, sideNavIcon: IconDashboards }));
 
