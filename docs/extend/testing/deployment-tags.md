@@ -155,28 +155,8 @@ Use tags to **include** suites where they make sense, instead of skipping suites
 
 A matching deployment tag makes a suite eligible for a target. Other selection rules still apply:
 
-- **Playwright project and filters**: `--project` selects the connection settings and project exclusions; `--grep` selects matching tests. Choosing a project does not automatically filter tests by deployment tag.
+- **Playwright project and filters**: `--project` selects the connection settings; `--grep` selects matching tests. Choosing a project does not automatically filter tests by deployment tag.
 - **CI configuration**: the module must be [enabled for Scout CI](./setup-scout.md#scout-setup-manual), and the Playwright config must belong to a [test channel](./setup-scout.md#scout-test-channels) selected by the pipeline.
 - **PR scope**: [selective testing](./scout.md#scout-faq-selective-testing) can select only a subset of eligible configs for the change.
 
 Explicit [skips](./skip-tests.md) still apply. CI schedules tests under `test/scout_<name>/` with [custom server configurations](./feature-flags.md#scout-feature-flags-custom-servers) only for local targets; adding a Cloud tag does not make those configurations available in Cloud runs.
-
-### Cloud project exclusions [scout-deployment-tags-cloud-exclusions]
-
-The built-in projects from `createPlaywrightConfig()` currently exclude these files through Playwright's `testIgnore`, even when they contain a matching Cloud deployment tag:
-
-| Project | Environment | Excluded files |
-| ------- | ----------- | -------------- |
-| `ech` | Elastic Cloud Hosted | `**/ai_suggestions_*.spec.ts`, `**/no_data_*.spec.ts` |
-| `mki` | Elastic Cloud Serverless | `**/no_data_*.spec.ts` |
-
-Check which tests Playwright collects for a project and target with `--list`, for example:
-
-```bash
-node scripts/playwright test --config <plugin-path>/test/scout/ui/playwright.config.ts \
-  --project ech \
-  --grep @cloud-stateful-classic \
-  --list
-```
-
-For a serverless target, use `--project mki` and its Cloud tag, such as `--grep @cloud-serverless-search`. This lists collected tests without running them; it does not check CI channel or PR scope selection, and skipped tests can still appear in the list.
