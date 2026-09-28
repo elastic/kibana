@@ -90,6 +90,23 @@ interface DocumentVersion {
   primaryTerm: number;
 }
 
+interface UpdaterSource<TExecution extends { id: string }> {
+  source: TExecution;
+  seqNo: number;
+  primaryTerm: number;
+  index: string;
+}
+
+interface Sendable<TExecution extends { id: string }> {
+  qi: QueueItem<TExecution>;
+  plainItem: BulkPlainItem<TExecution>;
+}
+
+interface Settled {
+  originalIndex: number;
+  response: BulkItemResponse;
+}
+
 const fetchFreshVersions = async (
   esClient: ElasticsearchClient,
   logger: Logger,
@@ -171,6 +188,232 @@ const refreshWrittenIndexes = async (
   await esClient.indices.refresh({ index: indexes });
 };
 
+const mgetUpdaterSources = async <TExecution extends { id: string }>(
+  esClient: ElasticsearchClient,
+  updaterBatch: Array<QueueItem<TExecution> & { item: BulkUpdaterItem<TExecution> }>,
+  fallbackIndexes: string[]
+): Promise<Map<string, UpdaterSource<TExecution>>> => {
+  const foundById = new Map<string, UpdaterSource<TExecution>>();
+  // Each updater item × each index — first found result per id wins.
+  if (updaterBatch.length === 0) {
+    return foundById;
+  }
+
+  const mgetDocs = updaterBatch.flatMap(({ item }) =>
+    fallbackIndexes.map((index) => ({
+      _id: item.documentId,
+      _index: index,
+      ...(item.sourceFields.length > 0 ? { _source_includes: [...item.sourceFields] } : {}),
+    }))
+  );
+
+  const mgetResponse = await esClient.mget<TExecution>({ docs: mgetDocs });
+
+  for (const doc of mgetResponse.docs) {
+    if (
+      'found' in doc &&
+      doc.found &&
+      doc._source &&
+      doc._id &&
+      doc._seq_no !== undefined &&
+      doc._primary_term !== undefined &&
+      !foundById.has(doc._id)
+    ) {
+      // `_source.includes` can omit `id`; updaters and callers key by document.id.
+      foundById.set(doc._id, {
+        source: { ...doc._source, id: doc._id } as TExecution,
+        seqNo: doc._seq_no,
+        primaryTerm: doc._primary_term,
+        index: doc._index,
+      });
+    }
+  }
+
+  return foundById;
+};
+
+const resolveBatchToSend = <TExecution extends { id: string }>(
+  batch: Array<QueueItem<TExecution>>,
+  foundById: Map<string, UpdaterSource<TExecution>>,
+  fallbackIndexes: string[]
+): { toSend: Array<Sendable<TExecution>>; settled: Settled[] } => {
+  const toSend: Array<Sendable<TExecution>> = [];
+  const settled: Settled[] = [];
+
+  for (const qi of batch) {
+    if (isBulkUpdaterItem(qi.item)) {
+      const updaterItem = qi.item;
+      const found = foundById.get(updaterItem.documentId);
+
+      if (!found) {
+        settled.push({
+          originalIndex: qi.originalIndex,
+          response: {
+            id: updaterItem.documentId,
+            index: fallbackIndexes[0] ?? '',
+            error: {
+              type: 'document_missing_exception',
+              reason: `[_doc][${updaterItem.documentId}]: document missing`,
+            },
+          },
+        });
+      } else {
+        const patch = updaterItem.updater(
+          found.source as Pick<TExecution, keyof TExecution & string>
+        );
+
+        if (patch === 'noop') {
+          settled.push({
+            originalIndex: qi.originalIndex,
+            response: {
+              id: updaterItem.documentId,
+              index: found.index,
+              seqNo: found.seqNo,
+              primaryTerm: found.primaryTerm,
+              result: 'noop',
+            },
+          });
+        } else {
+          toSend.push({
+            qi,
+            plainItem: {
+              operation: 'update',
+              document: { ...(patch as Partial<TExecution>), id: updaterItem.documentId },
+              index: found.index,
+              seqNo: found.seqNo,
+              primaryTerm: found.primaryTerm,
+            },
+          });
+        }
+      }
+    } else {
+      toSend.push({ qi, plainItem: qi.item as BulkPlainItem<TExecution> });
+    }
+  }
+
+  return { toSend, settled };
+};
+
+const requeueConflicts = async <TExecution extends { id: string }>(
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  toSend: Array<Sendable<TExecution>>,
+  esResponse: estypes.BulkResponse,
+  fallbackIndexes: string[]
+): Promise<{ nextQueue: Array<QueueItem<TExecution>>; settled: Settled[] }> => {
+  const toBulkItemResponse = (esItem: estypes.BulkResponse['items'][number]): BulkItemResponse => {
+    const esResult = esItem.create ?? esItem.index ?? esItem.update;
+    if (!esResult?._id) {
+      throw new Error(`Unexpected bulk response item without _id: ${JSON.stringify(esItem)}`);
+    }
+
+    return {
+      id: esResult._id,
+      error: esResult.error,
+      index: esResult._index,
+      seqNo: esResult._seq_no,
+      primaryTerm: esResult._primary_term,
+      result: esResult.result as BulkItemResult | undefined,
+    };
+  };
+
+  // - updater-origin: re-queue original BulkUpdaterItem so the next iteration re-mgets
+  // - plain OCC (seqNo set): mget fresh seqNo/primaryTerm before re-queuing
+  // - create already-exists: mget backing index and retry as update (data streams
+  //   convert version-miss upserts to create; retrying create can never succeed)
+  // - plain non-OCC (no seqNo, using retry_on_conflict): re-queue unchanged
+  const conflictingUpdaters: Array<QueueItem<TExecution>> = [];
+  const conflictingOcc: Array<Sendable<TExecution>> = [];
+  const conflictingCreates: Array<Sendable<TExecution> & { responseItem: BulkItemResponse }> = [];
+  const nextQueue: Array<QueueItem<TExecution>> = [];
+  const settled: Settled[] = [];
+
+  esResponse.items.forEach((esItem, idx) => {
+    const { qi, plainItem } = toSend[idx];
+    const responseItem = toBulkItemResponse(esItem);
+    const isConflict = responseItem.error?.type === 'version_conflict_engine_exception';
+
+    if (isConflict && qi.remainingRetries > 0) {
+      if (isBulkUpdaterItem(qi.item)) {
+        conflictingUpdaters.push({ ...qi, remainingRetries: qi.remainingRetries - 1 });
+      } else if (plainItem.seqNo !== undefined) {
+        conflictingOcc.push({ qi, plainItem });
+      } else if (plainItem.operation === 'create') {
+        conflictingCreates.push({ qi, plainItem, responseItem });
+      } else {
+        nextQueue.push({ ...qi, remainingRetries: qi.remainingRetries - 1 });
+      }
+    } else {
+      settled.push({ originalIndex: qi.originalIndex, response: responseItem });
+    }
+  });
+
+  nextQueue.push(...conflictingUpdaters);
+
+  if (conflictingOcc.length > 0) {
+    const versionById = await fetchFreshVersions(
+      esClient,
+      logger,
+      conflictingOcc.map(({ plainItem }) => ({
+        id: plainItem.document.id,
+        index: plainItem.index,
+      })),
+      fallbackIndexes
+    );
+
+    conflictingOcc.forEach(({ qi, plainItem }) => {
+      const version = versionById.get(plainItem.document.id);
+      nextQueue.push({
+        item: version ? { ...plainItem, ...version } : plainItem,
+        originalIndex: qi.originalIndex,
+        remainingRetries: qi.remainingRetries - 1,
+      });
+    });
+  }
+
+  if (conflictingCreates.length > 0) {
+    const versionById = await fetchFreshVersions(
+      esClient,
+      logger,
+      conflictingCreates.map(({ plainItem, responseItem }) => ({
+        id: plainItem.document.id,
+        // Prefer the backing index ES already named on the conflict; mget
+        // against a data-stream alias is not reliable.
+        index: responseItem.index || undefined,
+      })),
+      fallbackIndexes
+    );
+
+    conflictingCreates.forEach(({ qi, plainItem, responseItem }) => {
+      const version = versionById.get(plainItem.document.id);
+      if (version) {
+        nextQueue.push({
+          item: { ...plainItem, operation: 'update', ...version },
+          originalIndex: qi.originalIndex,
+          remainingRetries: qi.remainingRetries - 1,
+        });
+        return;
+      }
+      settled.push({ originalIndex: qi.originalIndex, response: responseItem });
+    });
+  }
+
+  return { nextQueue, settled };
+};
+
+const applySettled = (
+  result: Array<BulkItemResponse>,
+  settled: Settled[],
+  hasErrors: boolean
+): boolean => {
+  let nextHasErrors = hasErrors;
+  for (const { originalIndex, response } of settled) {
+    result[originalIndex] = response;
+    nextHasErrors = nextHasErrors || !!response.error;
+  }
+  return nextHasErrors;
+};
+
 export async function sharedBulk<TExecution extends { id: string }>(params: {
   esClient: ElasticsearchClient;
   request: BulkRequestOptions<TExecution>;
@@ -196,103 +439,17 @@ export async function sharedBulk<TExecution extends { id: string }>(params: {
   while (queuedItems.length > 0) {
     const batch = queuedItems.splice(0);
 
-    // Collect updater items so we can mget their current source + seqNo in one request.
-    // Each updater item × each index — first found result per id wins.
     const updaterBatch = batch.filter(
       (qi): qi is QueueItem<TExecution> & { item: BulkUpdaterItem<TExecution> } =>
         isBulkUpdaterItem(qi.item)
     );
-
-    const foundById = new Map<
-      string,
-      { source: TExecution; seqNo: number; primaryTerm: number; index: string }
-    >();
-
-    if (updaterBatch.length > 0) {
-      const mgetDocs = updaterBatch.flatMap(({ item }) =>
-        fallbackIndexes.map((index) => ({
-          _id: item.documentId,
-          _index: index,
-          ...(item.sourceFields.length > 0 ? { _source_includes: [...item.sourceFields] } : {}),
-        }))
-      );
-
-      const mgetResponse = await esClient.mget<TExecution>({ docs: mgetDocs });
-
-      for (const doc of mgetResponse.docs) {
-        if (
-          'found' in doc &&
-          doc.found &&
-          doc._source &&
-          doc._id &&
-          doc._seq_no !== undefined &&
-          doc._primary_term !== undefined &&
-          !foundById.has(doc._id)
-        ) {
-          // `_source.includes` can omit `id`; updaters and callers key by document.id.
-          foundById.set(doc._id, {
-            source: { ...doc._source, id: doc._id } as TExecution,
-            seqNo: doc._seq_no,
-            primaryTerm: doc._primary_term,
-            index: doc._index,
-          });
-        }
-      }
-    }
-
-    // Resolve each batch item: updater items become plain items (or settle immediately as
-    // noop/missing); plain items pass through unchanged.
-    interface Sendable {
-      qi: QueueItem<TExecution>;
-      plainItem: BulkPlainItem<TExecution>;
-    }
-    const toSend: Sendable[] = [];
-
-    for (const qi of batch) {
-      if (isBulkUpdaterItem(qi.item)) {
-        const updaterItem = qi.item;
-        const found = foundById.get(updaterItem.documentId);
-
-        if (!found) {
-          result[qi.originalIndex] = {
-            id: updaterItem.documentId,
-            index: fallbackIndexes[0] ?? '',
-            error: {
-              type: 'document_missing_exception',
-              reason: `[_doc][${updaterItem.documentId}]: document missing`,
-            },
-          };
-          hasErrors = true;
-        } else {
-          const patch = updaterItem.updater(
-            found.source as Pick<TExecution, keyof TExecution & string>
-          );
-
-          if (patch === 'noop') {
-            result[qi.originalIndex] = {
-              id: updaterItem.documentId,
-              index: found.index,
-              seqNo: found.seqNo,
-              primaryTerm: found.primaryTerm,
-              result: 'noop',
-            };
-          } else {
-            toSend.push({
-              qi,
-              plainItem: {
-                operation: 'update',
-                document: { ...(patch as Partial<TExecution>), id: updaterItem.documentId },
-                index: found.index,
-                seqNo: found.seqNo,
-                primaryTerm: found.primaryTerm,
-              },
-            });
-          }
-        }
-      } else {
-        toSend.push({ qi, plainItem: qi.item as BulkPlainItem<TExecution> });
-      }
-    }
+    const foundById = await mgetUpdaterSources(esClient, updaterBatch, fallbackIndexes);
+    const { toSend, settled: resolvedSettled } = resolveBatchToSend(
+      batch,
+      foundById,
+      fallbackIndexes
+    );
+    hasErrors = applySettled(result, resolvedSettled, hasErrors);
 
     if (toSend.length > 0) {
       const esResponse = await sendBulkRequest(
@@ -300,118 +457,16 @@ export async function sharedBulk<TExecution extends { id: string }>(params: {
         { ...request, refresh: undefined, items: toSend.map(({ plainItem }) => plainItem) },
         logger
       );
-
-      // Separate conflicts into four buckets:
-      // - updater-origin: re-queue original BulkUpdaterItem so the next iteration re-mgets
-      // - plain OCC (seqNo set): mget fresh seqNo/primaryTerm before re-queuing
-      // - create already-exists: mget backing index and retry as update (data streams
-      //   convert version-miss upserts to create; retrying create can never succeed)
-      // - plain non-OCC (no seqNo, using retry_on_conflict): re-queue unchanged
-      const conflictingUpdaters: Array<QueueItem<TExecution>> = [];
-      interface ConflictingPlainOcc {
-        qi: QueueItem<TExecution>;
-        plainItem: BulkPlainItem<TExecution>;
-      }
-      interface ConflictingCreate {
-        qi: QueueItem<TExecution>;
-        plainItem: BulkPlainItem<TExecution>;
-        responseItem: BulkItemResponse;
-      }
-      const conflictingOcc: ConflictingPlainOcc[] = [];
-      const conflictingCreates: ConflictingCreate[] = [];
-      const nextQueue: Array<QueueItem<TExecution>> = [];
-
-      esResponse.items.forEach((esItem, idx) => {
-        const { qi, plainItem } = toSend[idx];
-        const esResult = esItem.create ?? esItem.index ?? esItem.update;
-
-        if (!esResult?._id) {
-          throw new Error(`Unexpected bulk response item without _id: ${JSON.stringify(esItem)}`);
-        }
-
-        const responseItem: BulkItemResponse = {
-          id: esResult._id,
-          error: esResult.error,
-          index: esResult._index,
-          seqNo: esResult._seq_no,
-          primaryTerm: esResult._primary_term,
-          result: esResult.result as BulkItemResult | undefined,
-        };
-
-        const isConflict = responseItem.error?.type === 'version_conflict_engine_exception';
-
-        if (isConflict && qi.remainingRetries > 0) {
-          if (isBulkUpdaterItem(qi.item)) {
-            conflictingUpdaters.push({ ...qi, remainingRetries: qi.remainingRetries - 1 });
-          } else if (plainItem.seqNo !== undefined) {
-            conflictingOcc.push({ qi, plainItem });
-          } else if (plainItem.operation === 'create') {
-            conflictingCreates.push({ qi, plainItem, responseItem });
-          } else {
-            nextQueue.push({ ...qi, remainingRetries: qi.remainingRetries - 1 });
-          }
-        } else {
-          result[qi.originalIndex] = responseItem;
-          hasErrors = hasErrors || !!responseItem.error;
-        }
-      });
-
-      nextQueue.push(...conflictingUpdaters);
-
-      if (conflictingOcc.length > 0) {
-        const docsToRefetch = conflictingOcc.map(({ plainItem }) => ({
-          id: plainItem.document.id,
-          index: plainItem.index,
-        }));
-        const versionById = await fetchFreshVersions(
-          esClient,
-          logger,
-          docsToRefetch,
-          fallbackIndexes
-        );
-
-        conflictingOcc.forEach(({ qi, plainItem }) => {
-          const version = versionById.get(plainItem.document.id);
-          nextQueue.push({
-            item: version ? { ...plainItem, ...version } : plainItem,
-            originalIndex: qi.originalIndex,
-            remainingRetries: qi.remainingRetries - 1,
-          });
-        });
-      }
-
-      if (conflictingCreates.length > 0) {
-        const docsToRefetch = conflictingCreates.map(({ plainItem, responseItem }) => ({
-          id: plainItem.document.id,
-          // Prefer the backing index ES already named on the conflict; mget
-          // against a data-stream alias is not reliable.
-          index: responseItem.index || undefined,
-        }));
-        const versionById = await fetchFreshVersions(
-          esClient,
-          logger,
-          docsToRefetch,
-          fallbackIndexes
-        );
-
-        conflictingCreates.forEach(({ qi, plainItem, responseItem }) => {
-          const version = versionById.get(plainItem.document.id);
-          if (version) {
-            nextQueue.push({
-              item: { ...plainItem, operation: 'update', ...version },
-              originalIndex: qi.originalIndex,
-              remainingRetries: qi.remainingRetries - 1,
-            });
-            return;
-          }
-          result[qi.originalIndex] = responseItem;
-          hasErrors = true;
-        });
-      }
-
+      const { nextQueue, settled: conflictSettled } = await requeueConflicts(
+        esClient,
+        logger,
+        toSend,
+        esResponse,
+        fallbackIndexes
+      );
+      hasErrors = applySettled(result, conflictSettled, hasErrors);
       queuedItems = nextQueue;
     }
-    // toSend empty → queuedItems already empty from splice(0) → loop exits naturally.
   }
 
   await refreshWrittenIndexes(esClient, request.refresh, result);

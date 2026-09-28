@@ -23,7 +23,12 @@ describe('sharedBulk', () => {
   it('returns empty items without calling ES for an empty request', async () => {
     const { esClient, logger } = createSetup();
 
-    const result = await sharedBulk(esClient, { items: [] }, logger);
+    const result = await sharedBulk({
+      esClient,
+      request: { items: [] },
+      logger,
+      fallbackIndexes: [],
+    });
 
     expect(result.items).toHaveLength(0);
     expect(result.errors).toBe(false);
@@ -41,17 +46,18 @@ describe('sharedBulk', () => {
       ],
     } as never);
 
-    const result = await sharedBulk<{ id: string }>(
+    const result = await sharedBulk<{ id: string }>({
       esClient,
-      {
+      request: {
         items: [
           { operation: 'create', document: { id: 'a' }, index: INDEX },
           { operation: 'create', document: { id: 'b' }, index: INDEX },
           { operation: 'create', document: { id: 'c' }, index: INDEX },
         ],
       },
-      logger
-    );
+      logger,
+      fallbackIndexes: [],
+    });
 
     expect(result.items).toHaveLength(3);
     expect(result.items.map((i) => i.id)).toEqual(['a', 'b', 'c']);
@@ -73,16 +79,17 @@ describe('sharedBulk', () => {
       ],
     } as never);
 
-    const result = await sharedBulk<{ id: string }>(
+    const result = await sharedBulk<{ id: string }>({
       esClient,
-      {
+      request: {
         items: [
           { operation: 'create', document: { id: 'a' }, index: INDEX },
           { operation: 'create', document: { id: 'b' }, index: INDEX },
         ],
       },
-      logger
-    );
+      logger,
+      fallbackIndexes: [],
+    });
 
     expect(result.errors).toBe(true);
     expect(result.items).toHaveLength(2);
@@ -137,9 +144,9 @@ describe('sharedBulk', () => {
       ],
     } as never);
 
-    const result = await sharedBulk<{ id: string; status: string }>(
+    const result = await sharedBulk<{ id: string; status: string }>({
       esClient,
-      {
+      request: {
         items: [
           {
             operation: 'create',
@@ -149,8 +156,9 @@ describe('sharedBulk', () => {
           },
         ],
       },
-      logger
-    );
+      logger,
+      fallbackIndexes: [],
+    });
 
     expect(result.errors).toBe(false);
     expect(result.items).toEqual([
@@ -234,9 +242,9 @@ describe('sharedBulk', () => {
         ],
       } as never);
 
-    const result = await sharedBulk<{ id: string; status: string }>(
+    const result = await sharedBulk<{ id: string; status: string }>({
       esClient,
-      {
+      request: {
         refresh: 'wait_for',
         items: [
           {
@@ -249,8 +257,8 @@ describe('sharedBulk', () => {
         ],
       },
       logger,
-      [INDEX]
-    );
+      fallbackIndexes: [INDEX],
+    });
 
     expect(result.errors).toBe(false);
     expect(result.items[0].result).toBe('updated');
@@ -291,9 +299,9 @@ describe('sharedBulk', () => {
       ],
     } as never);
 
-    const result = await sharedBulk<{ id: string; status: string }>(
+    const result = await sharedBulk<{ id: string; status: string }>({
       esClient,
-      {
+      request: {
         refresh: 'wait_for',
         items: [
           {
@@ -306,8 +314,8 @@ describe('sharedBulk', () => {
         ],
       },
       logger,
-      [INDEX]
-    );
+      fallbackIndexes: [INDEX],
+    });
 
     expect(result.items[0].result).toBe('updated');
     expect(esClient.bulk).toHaveBeenCalledTimes(1);
@@ -348,9 +356,9 @@ describe('sharedBulk', () => {
       ],
     } as never);
 
-    await sharedBulk<{ id: string; status: string }>(
+    await sharedBulk<{ id: string; status: string }>({
       esClient,
-      {
+      request: {
         items: [
           {
             operation: 'update',
@@ -361,8 +369,8 @@ describe('sharedBulk', () => {
         ],
       },
       logger,
-      [INDEX]
-    );
+      fallbackIndexes: [INDEX],
+    });
 
     expect(updater).toHaveBeenCalledWith({ id: 'a', status: 'queued' });
   });
@@ -375,11 +383,12 @@ describe('sharedBulk', () => {
     } as never);
 
     await expect(
-      sharedBulk<{ id: string }>(
+      sharedBulk<{ id: string }>({
         esClient,
-        { items: [{ operation: 'create', document: { id: 'a' }, index: INDEX }] },
-        logger
-      )
+        request: { items: [{ operation: 'create', document: { id: 'a' }, index: INDEX }] },
+        logger,
+        fallbackIndexes: [],
+      })
     ).rejects.toThrow('Unexpected bulk response item without _id');
   });
 });
