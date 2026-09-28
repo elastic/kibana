@@ -613,7 +613,7 @@ export function MachineLearningJobTableProvider(
     },
 
     async closeEditJobFlyout() {
-      if (await testSubjects.exists('mlEditJobFlyoutCloseButton')) {
+      if (await testSubjects.waitForExists('mlEditJobFlyoutCloseButton', { timeout: 1000 })) {
         await testSubjects.click('mlEditJobFlyoutCloseButton');
         await testSubjects.missingOrFail('mlJobEditFlyout');
       }

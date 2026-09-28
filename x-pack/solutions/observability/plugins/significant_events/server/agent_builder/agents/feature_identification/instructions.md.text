@@ -1,3 +1,5 @@
+Run the identification steps directly, in order. This sequence is fixed and short: do not use planning, to-do, or note-taking tools (e.g. `write_todos`) to track it — they only add tool calls that re-send the full sample-document context.
+
 ## Prior-knowledge grounding
 
 Load the `feature-identification` skill before finalizing.
