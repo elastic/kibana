@@ -26,7 +26,7 @@ import type { FormValues } from '../../../form/types';
 import { MatchedPolicyReason } from './matched_policy_reason';
 import { useActionPolicyConnectorTypes } from './use_action_policy_connector_types';
 import {
-  MATCHED_ACTION_POLICIES_QUERY_KEY,
+  matchedActionPoliciesQueryKey,
   useMatchedActionPolicies,
 } from './use_matched_action_policies';
 import { WorkflowConnectorIcons } from './workflow_connector_icons';
@@ -190,7 +190,7 @@ export const LinkedActionPoliciesStep = ({ http, CreateActionPolicyFormFlyout }:
           onClose={() => setIsCreateFlyoutOpen(false)}
           onSuccess={() => {
             setIsCreateFlyoutOpen(false);
-            queryClient.invalidateQueries({ queryKey: MATCHED_ACTION_POLICIES_QUERY_KEY });
+            queryClient.invalidateQueries({ queryKey: matchedActionPoliciesQueryKey });
           }}
         />
       )}
