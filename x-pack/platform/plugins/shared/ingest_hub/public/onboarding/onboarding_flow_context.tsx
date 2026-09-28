@@ -126,6 +126,7 @@ interface PersistedDetectAndReviewStep {
   ecfStacks?: Array<{ family: string; stackName: string; templateVersion: string }>;
   pendingCleanupPolicyIds?: Record<string, string>;
   isDirty?: boolean;
+  isAuthDirty?: boolean;
 }
 
 const DEFAULT_SELECTED_IDS: string[] = [];
