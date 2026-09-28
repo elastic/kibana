@@ -13,9 +13,13 @@ import { traceKey, parseDirectTraceKey } from './trace_types';
 
 /**
  * Resolves a direct trace for a `datasetIds`-restricted column: only a trace whose own
- * `datasetId` is in the column's allow-list qualifies. Falling through to the suite-level
- * key (as non-restricted columns do) would attach another dataset's prompt/answer/score to
- * this column, since that key holds the suite's first complete example regardless of dataset.
+ * `datasetId` is in the column's allow-list AND whose suite is one of the column's
+ * configured `suites` qualifies. Checking the dataset id alone is not enough — two selected
+ * suites can reuse the same dataset id, and matching on dataset id only would let a trace
+ * from an unrelated suite (never read by this column) win and get displayed as this
+ * column's prompt/answer/score. Falling through to the suite-level key (as non-restricted
+ * columns do) would attach another dataset's prompt/answer/score to this column, since that
+ * key holds the suite's first complete example regardless of dataset.
  */
 const findDatasetTrace = (
   traces: MatrixTraceData | undefined,
@@ -25,16 +29,15 @@ const findDatasetTrace = (
   if (!traces || !column.datasetIds?.length) {
     return undefined;
   }
-  const allowed = new Set(column.datasetIds);
+  const allowedDatasets = new Set(column.datasetIds);
+  const allowedSuites = new Set(column.suites);
   const modelPrefix = `${traceKey(modelId, '')}`;
   for (const [key, entry] of Object.entries(traces)) {
-    if (
-      key.startsWith(modelPrefix) &&
-      parseDirectTraceKey(key) &&
-      entry.datasetId &&
-      allowed.has(entry.datasetId)
-    ) {
-      return entry;
+    if (key.startsWith(modelPrefix) && entry.datasetId && allowedDatasets.has(entry.datasetId)) {
+      const parsed = parseDirectTraceKey(key);
+      if (parsed && allowedSuites.has(parsed.suiteId)) {
+        return entry;
+      }
     }
   }
   return undefined;

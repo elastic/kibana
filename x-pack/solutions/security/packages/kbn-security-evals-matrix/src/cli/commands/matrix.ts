@@ -458,7 +458,8 @@ export const matrixCmd: Command<void> = {
           commitSha: process.env.BUILDKITE_COMMIT ?? localGit.sha,
           dirtyWorkingTree: localGit.dirty,
         },
-        judgeVerdicts
+        judgeVerdicts,
+        config
       );
       Fs.writeFileSync(Path.join(outDir, 'matrix.reliability.html'), reliabilityHtml);
       log.info(`Wrote matrix.html and matrix.reliability.html to ${outDir}`);

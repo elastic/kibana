@@ -560,6 +560,14 @@ export const queryMatrixScores = async (
             (judge) => Boolean(judge?.id) && describeJudge(judge?.id ?? '', modelId).selfJudged
           );
         };
+        // Reapply the SAME lower (lookback) and upper (asOf) bounds `pickLatestExperimentPerModel`
+        // used to choose `latest`. Checking only `asOf` here would let a complete sweep OUTSIDE
+        // the lookback window win over an incomplete in-window sweep, publishing stale scores the
+        // caller's `--lookback-days` was meant to exclude; it would also admit future-dated
+        // shards when `asOf` is unset, which `pickLatestExperimentPerModel` already rejects.
+        const upperBound = asOf ?? Date.now();
+        const lowerBound =
+          lookbackDays !== undefined ? upperBound - lookbackDays * 24 * 60 * 60 * 1000 : undefined;
         const shardMembers = pickShardExperiments(
           experiments.filter((candidate) => {
             if (candidate.task_model?.id !== modelId) {
@@ -568,11 +576,11 @@ export const queryMatrixScores = async (
             if (!admitsJudgedPolicy(candidate)) {
               return false;
             }
-            if (asOf === undefined) {
-              return true;
-            }
             const at = Date.parse(candidate.timestamp);
-            return Number.isFinite(at) && at <= asOf;
+            if (!Number.isFinite(at) || at > upperBound) {
+              return false;
+            }
+            return lowerBound === undefined || at >= lowerBound;
           })
         );
         // `pickShardExperiments` already resolves the newest COMPLETE sweep, falling back to an

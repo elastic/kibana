@@ -937,6 +937,39 @@ describe('round 9 regression: dataset-scoped columns do not borrow a sibling dat
     expect(html).not.toContain('dataset-a question');
     expect(html).toContain('Trace unavailable.');
   });
+
+  it('does not borrow a same-dataset trace from a suite the column does not read', () => {
+    // Regression (round-3, Libra): two suites can reuse the same dataset id; the
+    // dataset-scoped fallback matched on datasetId alone and could display a trace
+    // from a suite outside `column.suites` as this column's prompt/answer/score.
+    const datasetCfg = {
+      ...mockConfig,
+      columns: [
+        {
+          ...mockConfig.columns[0],
+          datasetIds: ['dataset-b'],
+          suites: ['suite-1'],
+        },
+      ],
+    };
+    const traces = {
+      // Same dataset id, but suite-2 is not one of the column's suites.
+      'test-model:direct:suite-2:example-b': {
+        suiteId: 'suite-2',
+        datasetId: 'dataset-b',
+        question: 'wrong-suite dataset-b question',
+      },
+      // Correct suite AND dataset.
+      'test-model:direct:suite-1:example-b': {
+        suiteId: 'suite-1',
+        datasetId: 'dataset-b',
+        question: 'right-suite dataset-b question',
+      },
+    } as never;
+    const html = renderMatrixHtml(mockMatrix, datasetCfg, {}, traces);
+    expect(html).toContain('right-suite dataset-b question');
+    expect(html).not.toContain('wrong-suite dataset-b question');
+  });
 });
 
 describe('round 8 regression: self-judged disclosure on not-recommended cells', () => {

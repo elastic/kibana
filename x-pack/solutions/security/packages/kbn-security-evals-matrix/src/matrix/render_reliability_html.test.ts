@@ -240,4 +240,93 @@ describe('renderReliabilityHtml', () => {
       expect(html).toContain('both judges can agree and both be wrong');
     });
   });
+
+  describe('round-3 regression: reliability inputs scoped to columns', () => {
+    // Minimal config: one column reading only suite-a's `alert` prefix.
+    const scopedConfig = {
+      columns: [
+        {
+          id: 'alert',
+          label: 'Alert',
+          suites: ['suite-a'],
+          examplePrefixes: ['alert'],
+          weight: 1,
+        },
+      ],
+    } as never;
+
+    it('excludes traces whose example prefix no column reads', () => {
+      // Regression: the reliability artifact pooled EVERY trace from a selected suite,
+      // so unrelated `hunting` examples inflated trajectory agreement even though only
+      // the `alert` prefix contributed to the published matrix.
+      const html = renderReliabilityHtml(
+        matrix,
+        {
+          'measured:direct:suite-a:alert-x': { repTrails: [['a'], ['a']] },
+          // Out-of-scope prefix: disagreeing trails that would drag the rate to 50%.
+          'measured:direct:suite-a:hunting-x': { repTrails: [['a'], ['b']] },
+        },
+        {},
+        [],
+        scopedConfig
+      );
+      // Only the alert cell counts: 1/1 identical -> 100%, 1 pair.
+      expect(html).toContain('<strong>100%</strong>');
+      expect(html).toContain('1 pairs');
+      expect(html).not.toContain('<strong>50%</strong>');
+    });
+
+    it('excludes judge verdicts from examples no column reads', () => {
+      const v = (
+        judgeId: string,
+        example: string,
+        score: number,
+        suiteId = 'suite-a'
+      ): {
+        modelId: string;
+        judgeId: string;
+        suiteId: string;
+        example: string;
+        repetition: number;
+        evaluator: string;
+        score: number;
+      } => ({
+        modelId: 'measured',
+        judgeId,
+        suiteId,
+        example,
+        repetition: 0,
+        evaluator: 'Relevance',
+        score,
+      });
+      const html = renderReliabilityHtml(
+        matrix,
+        {},
+        {},
+        [
+          // In-scope pair: agrees.
+          v('gemini', 'alert-1', 1),
+          v('sonnet', 'alert-1', 1),
+          // Out-of-scope pair: disagrees — must not drag agreement below 100%.
+          v('gemini', 'hunting-1', 1),
+          v('sonnet', 'hunting-1', 0),
+        ],
+        scopedConfig
+      );
+      expect(html).toContain('100.0%');
+      expect(html).toContain('1 paired verdict');
+      expect(html).not.toContain('50.0%');
+    });
+
+    it('keeps traces without a parseable direct key unscoped (legacy shape)', () => {
+      const html = renderReliabilityHtml(
+        matrix,
+        { 'measured:example-a': { repTrails: [['search'], ['search']] } },
+        {},
+        [],
+        scopedConfig
+      );
+      expect(html).toContain('<strong>100%</strong>');
+    });
+  });
 });

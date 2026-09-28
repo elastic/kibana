@@ -7,6 +7,7 @@
 
 import type { Matrix, MatrixCell, MatrixRow } from './build_matrix';
 import type { MatrixProvenance } from './render_matrix';
+import type { MatrixConfig } from './load_matrix_config';
 import type { MatrixTraceData } from './trace_types';
 import { parseDirectTraceKey } from './trace_types';
 import {
@@ -178,14 +179,71 @@ export const renderReliabilityHtml = (
   matrix: Matrix,
   traces: MatrixTraceData = {},
   provenance: MatrixProvenance = {},
-  judgeVerdicts: readonly JudgeVerdict[] = []
+  judgeVerdicts: readonly JudgeVerdict[] = [],
+  /**
+   * Optional matrix config. When supplied, the reliability inputs are scoped to the
+   * columns' suites + `datasetIds`/`examplePrefixes` before agreement is computed —
+   * without it the report pools every trace/verdict from a selected suite, including
+   * examples no column ever read, and can claim measured reliability for work that
+   * never contributed to the published matrix.
+   */
+  config?: MatrixConfig
 ): string => {
-  const cells = reliabilityCellsFromTraces(traces);
+  const isColumnScoped = (
+    suiteId: string | undefined,
+    datasetId: string | undefined,
+    exampleId: string
+  ): boolean => {
+    if (!config) {
+      return true;
+    }
+    // Only base columns carry suites/dataset restrictions; composites/overall are derived.
+    for (const column of config.columns) {
+      if (suiteId === undefined || column.suites.includes(suiteId)) {
+        // Mirrors build_matrix.columnEvaluators: examplePrefixes map to the synthetic
+        // `prefix:<name>` datasets produced by query_matrix_scores.
+        const datasetIds = column.examplePrefixes
+          ? column.examplePrefixes.map((prefix) => `prefix:${prefix}`)
+          : column.datasetIds;
+        if (datasetIds && datasetIds.length > 0) {
+          if (datasetId !== undefined && datasetIds.includes(datasetId)) {
+            return true;
+          }
+          if (
+            column.examplePrefixes &&
+            column.examplePrefixes.some((prefix) => exampleId.startsWith(prefix))
+          ) {
+            return true;
+          }
+        } else {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  const scopedTraces: MatrixTraceData = config
+    ? Object.fromEntries(
+        Object.entries(traces).filter(([key, trace]) => {
+          const parsed = parseDirectTraceKey(key);
+          if (!parsed) {
+            return true;
+          }
+          return isColumnScoped(parsed.suiteId, trace.datasetId, parsed.exampleId);
+        })
+      )
+    : traces;
+  const scopedVerdicts = config
+    ? judgeVerdicts.filter((v) => isColumnScoped(v.suiteId, undefined, v.example))
+    : judgeVerdicts;
+
+  const cells = reliabilityCellsFromTraces(scopedTraces);
   const rows = [...matrix.proprietary, ...matrix.openSource];
   const agreements = new Map(rows.map((row) => [row.modelId, rowAgreement(cells, row.modelId)]));
   const measured = [...agreements.values()].filter((a) => a.status === 'measured');
   const judgeRows = new Map(
-    rows.map((row) => [row.modelId, judgeAgreementForModel(judgeVerdicts, row.modelId)])
+    rows.map((row) => [row.modelId, judgeAgreementForModel(scopedVerdicts, row.modelId)])
   );
   const judgeMeasured = [...judgeRows.values()].filter((j) => j.status === 'measured');
 

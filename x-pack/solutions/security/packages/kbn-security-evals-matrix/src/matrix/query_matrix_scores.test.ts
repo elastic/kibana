@@ -752,6 +752,52 @@ describe('queryMatrixScores', () => {
     expect(getExperimentStats).not.toHaveBeenCalled();
     expect(result).toEqual([]);
   });
+
+  it('does not reconstruct shards from a complete sweep OUTSIDE the lookback window', async () => {
+    // Regression (round-3, Libra): the shard candidate filter checked only `asOf`, so a
+    // stale-but-complete sweep outside `--lookback-days` won over a newer in-window
+    // incomplete sweep and published scores the lookback was meant to exclude.
+    const now = Date.now();
+    const inWindow = new Date(now - 1 * 24 * 60 * 60 * 1000).toISOString();
+    const stale = new Date(now - 60 * 24 * 60 * 60 * 1000).toISOString();
+    const { client, getExperimentStats } = createClient({
+      m1: [
+        // Newest sweep is IN window but INCOMPLETE (only shard 1 of 2 landed).
+        experiment({
+          experiment_id: 'in-window-s1',
+          execution_id: 'sweep-new-s1of2::suite-a::m1',
+          modelId: 'm1',
+          timestamp: inWindow,
+        }),
+        // Older sweep is COMPLETE but OUTSIDE the lookback window.
+        experiment({
+          experiment_id: 'stale-s1',
+          execution_id: 'sweep-old-s1of2::suite-a::m1',
+          modelId: 'm1',
+          timestamp: stale,
+        }),
+        experiment({
+          experiment_id: 'stale-s2',
+          execution_id: 'sweep-old-s2of2::suite-a::m1',
+          modelId: 'm1',
+          timestamp: stale,
+        }),
+      ],
+    });
+
+    const result = await queryMatrixScores(client, log, {
+      suiteIds: ['suite-a'],
+      modelIds: ['m1'],
+      lookbackDays: 7,
+    });
+
+    // The stale sweep's shards must never be fetched — only the in-window shard.
+    const fetchedExecutions = getExperimentStats.mock.calls.map(
+      ([, opts]) => (opts as { executionId?: string }).executionId
+    );
+    expect(fetchedExecutions).toEqual(['sweep-new-s1of2::suite-a::m1']);
+    expect(result).toHaveLength(1);
+  });
 });
 
 describe('scoresByPrefixToDatasets', () => {
