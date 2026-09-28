@@ -49,6 +49,30 @@ describe('article context selection', () => {
     expect(selected.original_chars).toBe(text.length);
   });
 
+  it('keeps usable windows on a short forced overflow instead of nine one-char spans', () => {
+    const text = `START_${'m'.repeat(280)}_MIDDLE_${'n'.repeat(280)}_END`;
+    const selected = selectOverflowRetryArticleContext(text);
+
+    expect(selected.mode).toBe('degraded_context');
+    expect(selected.text.length).toBeLessThan(text.length);
+    expect(selected.text.length).toBeLessThanOrEqual(Math.floor(text.length / 2));
+    // Each retained window must be readable, not a single character around a marker.
+    const windows = selected.text.split('\n\n[... source text omitted for context capacity ...]\n\n');
+    expect(windows.length).toBeGreaterThanOrEqual(2);
+    expect(windows.every((window) => window.length >= 24)).toBe(true);
+    expect(selected.text).toContain('START_');
+    expect(selected.text).toContain('_END');
+  });
+
+  it('falls back to a prefix when omission markers cannot fit a useful window set', () => {
+    const text = 'x'.repeat(80);
+    const selected = selectOverflowRetryArticleContext(text);
+
+    expect(selected.mode).toBe('degraded_context');
+    expect(selected.text).toBe(text.slice(0, 40));
+    expect(selected.text).not.toContain('omitted for context capacity');
+  });
+
   it('recognizes typed context-limit errors', () => {
     expect(
       isContextLengthExceededError(

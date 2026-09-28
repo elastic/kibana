@@ -7,6 +7,8 @@
 
 export const DEGRADED_ARTICLE_CHAR_BUDGET = 240_000;
 const DISTRIBUTED_WINDOW_COUNT = 9;
+/** Floor so a short forced-overflow budget still yields readable spans. */
+const MIN_USEFUL_WINDOW_CHARS = 24;
 const OMISSION_MARKER = '\n\n[... source text omitted for context capacity ...]\n\n';
 
 export interface ArticleContext {
@@ -38,6 +40,50 @@ export const fullArticleContext = (text: string): ArticleContext => ({
 const shrinkBudget = (textLength: number, maxChars: number): number =>
   Math.min(maxChars, Math.max(1, Math.floor(textLength / 2)));
 
+const degradedPrefixContext = (text: string, budget: number): ArticleContext => {
+  const selected = text.slice(0, Math.min(budget, Math.max(1, text.length - 1)));
+  return {
+    text: selected,
+    mode: 'degraded_context',
+    original_chars: text.length,
+    selected_chars: selected.length,
+    coverage: selected.length / text.length,
+  };
+};
+
+/**
+ * Evenly spaced verbatim windows that fit inside `budget` after omission
+ * markers. Drops window count until each span is useful; returns undefined when
+ * even two windows cannot fit (caller should use a prefix fallback).
+ */
+const selectFittingWindows = (text: string, budget: number): ArticleContext | undefined => {
+  for (let count = DISTRIBUTED_WINDOW_COUNT; count >= 2; count--) {
+    const separatorChars = OMISSION_MARKER.length * (count - 1);
+    const sourceBudget = budget - separatorChars;
+    if (sourceBudget < MIN_USEFUL_WINDOW_CHARS * count) continue;
+
+    const windowChars = Math.floor(sourceBudget / count);
+    const maxStart = Math.max(0, text.length - windowChars);
+    const windows: string[] = [];
+
+    for (let index = 0; index < count; index++) {
+      const start =
+        index === count - 1 ? maxStart : Math.round((maxStart * index) / (count - 1));
+      windows.push(text.slice(start, start + windowChars));
+    }
+
+    const selectedChars = windows.reduce((sum, window) => sum + window.length, 0);
+    return {
+      text: windows.join(OMISSION_MARKER),
+      mode: 'degraded_context',
+      original_chars: text.length,
+      selected_chars: selectedChars,
+      coverage: selectedChars / text.length,
+    };
+  }
+  return undefined;
+};
+
 /**
  * Selects evenly distributed, verbatim windows from the whole source. There is
  * deliberately no semantic ranking: early, middle, and late evidence receive
@@ -56,38 +102,10 @@ export const selectDistributedArticleContext = (
   if (text.length <= budget) {
     // Forced shrink on a source already under the char budget: keep a strict
     // prefix so the overflow retry cannot resubmit the identical prompt.
-    const selected = text.slice(0, budget);
-    return {
-      text: selected,
-      mode: 'degraded_context',
-      original_chars: text.length,
-      selected_chars: selected.length,
-      coverage: selected.length / text.length,
-    };
+    return degradedPrefixContext(text, budget);
   }
 
-  const separatorChars = OMISSION_MARKER.length * (DISTRIBUTED_WINDOW_COUNT - 1);
-  const sourceBudget = Math.max(DISTRIBUTED_WINDOW_COUNT, budget - separatorChars);
-  const windowChars = Math.max(1, Math.floor(sourceBudget / DISTRIBUTED_WINDOW_COUNT));
-  const maxStart = text.length - windowChars;
-  const windows: string[] = [];
-
-  for (let index = 0; index < DISTRIBUTED_WINDOW_COUNT; index++) {
-    const start =
-      index === DISTRIBUTED_WINDOW_COUNT - 1
-        ? maxStart
-        : Math.round((maxStart * index) / (DISTRIBUTED_WINDOW_COUNT - 1));
-    windows.push(text.slice(start, start + windowChars));
-  }
-
-  const selectedChars = windows.reduce((sum, window) => sum + window.length, 0);
-  return {
-    text: windows.join(OMISSION_MARKER),
-    mode: 'degraded_context',
-    original_chars: text.length,
-    selected_chars: selectedChars,
-    coverage: selectedChars / text.length,
-  };
+  return selectFittingWindows(text, budget) ?? degradedPrefixContext(text, budget);
 };
 
 /** Context selection for a confirmed overflow retry: always reduce the source. */
