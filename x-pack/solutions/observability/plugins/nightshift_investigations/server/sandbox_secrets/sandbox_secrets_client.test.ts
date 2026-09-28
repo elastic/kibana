@@ -308,6 +308,18 @@ describe('createSandboxSecretsClient', () => {
       expect(soClient.create).not.toHaveBeenCalled();
     });
 
+    it.each([['first-line\nsecond-line'], ['first-line\r\nsecond-line'], ['trailing-newline\n']])(
+      'rejects the multi-line value %p',
+      async (value) => {
+        const { client, soClient, request } = setup({ storedValues: {} });
+
+        await expect(
+          client.replaceEntries(request, { entries: [{ key: 'A_KEY', value }], version: 'v1' })
+        ).rejects.toThrow('must be a single line');
+        expect(soClient.create).not.toHaveBeenCalled();
+      }
+    );
+
     it('rejects values over the maximum length', async () => {
       const { client, soClient, request } = setup({ storedValues: {} });
 

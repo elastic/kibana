@@ -124,7 +124,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'rejects new keys without a value, too short values and reserved keys',
+      'rejects new keys without a value, too short or multi-line values and reserved keys',
       async ({ apiClient }) => {
         const missingValue = await replaceSandboxSecrets(apiClient, manageCookie, SPACE_ID, [
           { key: 'NO_VALUE' },
@@ -135,6 +135,11 @@ apiTest.describe(
           { key: 'TOO_SHORT', value: 'short' },
         ]);
         expect(tooShort).toHaveStatusCode(400);
+
+        const multiLine = await replaceSandboxSecrets(apiClient, manageCookie, SPACE_ID, [
+          { key: 'MULTI_LINE', value: 'first-line\nsecond-line' },
+        ]);
+        expect(multiLine).toHaveStatusCode(400);
 
         const reserved = await replaceSandboxSecrets(apiClient, manageCookie, SPACE_ID, [
           { key: 'CONNECTOR_TOKEN', value: 'reserved-value' },

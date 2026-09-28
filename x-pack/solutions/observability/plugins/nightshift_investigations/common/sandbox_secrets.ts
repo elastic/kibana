@@ -43,10 +43,15 @@ export const validateSandboxSecretKey = (key: string): string | undefined => {
 
 /**
  * Returns a validation error message for a sandbox secret value, or `undefined` when it is
- * valid. The single source of truth for both bounds, so the API, the server client and the
- * flyout apply the same rule instead of checking the two lengths in different places.
+ * valid. The single source of truth for the value rules, so the API, the server client and the
+ * flyout apply the same checks instead of implementing them in different places.
  */
 export const validateSandboxSecretValue = (value: string): string | undefined => {
+  // Output redaction matches a secret as one contiguous string, and tools like view_file reformat
+  // output per line (e.g. prefixing line numbers), which would split a multi-line value past it.
+  if (/[\r\n]/.test(value)) {
+    return 'must be a single line (no line breaks)';
+  }
   if (value.length < MIN_SANDBOX_SECRET_VALUE_LENGTH) {
     return `must be at least ${MIN_SANDBOX_SECRET_VALUE_LENGTH} characters long`;
   }

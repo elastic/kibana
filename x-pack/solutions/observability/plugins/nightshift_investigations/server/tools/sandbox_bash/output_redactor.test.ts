@@ -25,6 +25,24 @@ describe('createOutputRedactor', () => {
     expect(redact(`x ${SECRET}-secret y`)).toBe(`x ${REDACTED_PLACEHOLDER} y`);
   });
 
+  it('fully redacts partially overlapping secrets', () => {
+    const { redact } = createOutputRedactor(['abcdefgh', 'efghijkl']);
+
+    expect(redact('x abcdefghijkl y')).toBe(`x ${REDACTED_PLACEHOLDER} y`);
+  });
+
+  it('redacts adjacent secrets and many secrets in one text', () => {
+    const secrets = Array.from({ length: 100 }, (_, i) => `secret-value-${i}-end`);
+    const { redact } = createOutputRedactor(secrets);
+
+    expect(redact(`${secrets[3]}${secrets[4]}`)).toBe(
+      `${REDACTED_PLACEHOLDER}${REDACTED_PLACEHOLDER}`
+    );
+    expect(redact(secrets.map((secret) => `<${secret}>`).join(' '))).toBe(
+      secrets.map(() => `<${REDACTED_PLACEHOLDER}>`).join(' ')
+    );
+  });
+
   it('ignores values too short to redact without mangling unrelated text', () => {
     expect(createOutputRedactor(['abc']).redact('abc abcabc')).toBe('abc abcabc');
   });
