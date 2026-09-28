@@ -24,7 +24,7 @@ import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 import { dataSetToFormValues, emptyDatasetFormValues } from './dataset_form_initial_values';
 import { StepAdditional } from './options_step/step_additional';
 import { StepDataset } from './define_step/step_dataset';
-import { StepMapping } from './mapping step/step_mapping';
+import { StepMapping } from './mapping_step/step_mapping';
 import { StepReview } from './review_step/step_review';
 import type { DatasetWizardContent, DatasetWizardSection } from './types';
 

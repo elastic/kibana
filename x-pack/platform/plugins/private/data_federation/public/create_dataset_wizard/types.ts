@@ -6,7 +6,7 @@
  */
 
 import type { CreateDatasetSettingsFormValues } from './create_dataset_form_state';
-import type { MappingEditorValue } from './mapping step/mapping_editor';
+import type { MappingEditorValue } from './mapping_step/mapping_editor';
 
 export interface DatasetWizardDatasetStep {
   name: string;

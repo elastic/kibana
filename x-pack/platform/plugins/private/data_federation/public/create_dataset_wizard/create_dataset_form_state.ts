@@ -9,7 +9,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { DatasetSettings, DatasetSettingsFile } from '../../common/dataset_types';
 
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
-import type { MappingEditorValue } from './mapping step/mapping_editor';
+import type { MappingEditorValue } from './mapping_step/mapping_editor';
 
 export type DatasetFormatFormValue = '' | 'parquet' | 'csv' | 'tsv' | 'ndjson' | 'orc';
 export type DatasetErrorModeFormValue = '' | 'fail_fast' | 'skip_row' | 'null_field';

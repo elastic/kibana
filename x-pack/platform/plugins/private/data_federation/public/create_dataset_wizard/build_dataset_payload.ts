@@ -6,7 +6,7 @@
  */
 
 import type { DataSetWithName } from '../../common';
-import { buildDatasetMappings } from './mapping step/mapping_editor';
+import { buildDatasetMappings } from './mapping_step/mapping_editor';
 import {
   buildDatasetSettingsFromFormValues,
   type CreateDatasetFormValues,
