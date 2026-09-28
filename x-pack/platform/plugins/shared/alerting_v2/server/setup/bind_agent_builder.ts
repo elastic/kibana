@@ -139,7 +139,7 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
     const agentBuilderLogger = container.get(LoggerServiceToken).forSubsystem('agentBuilder');
     registerSkills(agentBuilder, {
       logger: agentBuilderLogger,
-      getWorkflow: (id, sid) => workflowsManagementApi.getWorkflow(id, sid),
+      getWorkflowClient: (request) => workflowsManagementApi.getClient(request),
       getAvailableConnectors: (sid, req) => workflowsManagementApi.getAvailableConnectors(sid, req),
     });
   });

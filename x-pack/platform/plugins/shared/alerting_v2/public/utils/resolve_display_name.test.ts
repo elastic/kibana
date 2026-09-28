@@ -7,9 +7,10 @@
 
 import type { UserProfile } from '@kbn/core-user-profile-common';
 import type { UserProfileMap } from '../hooks/use_bulk_get_user_profiles';
-import { NO_USER_PLACEHOLDER, resolveDisplayName } from './resolve_display_name';
+import { collectActorUids, NO_USER_PLACEHOLDER, resolveDisplayName } from './resolve_display_name';
 
 const ALICE_UID = 'u_alice_uid';
+const ALICE_ACTOR = { profile_uid: ALICE_UID };
 
 const makeProfile = (uid: string, user: UserProfile['user']): UserProfile => ({
   uid,
@@ -32,38 +33,57 @@ describe('resolveDisplayName', () => {
       makeProfile(ALICE_UID, { username: 'alice', full_name: 'Alice Example', email: 'a@b.c' })
     );
 
-    expect(resolveDisplayName(ALICE_UID, profiles)).toBe('Alice Example');
+    expect(resolveDisplayName(ALICE_ACTOR, profiles)).toBe('Alice Example');
   });
 
   it('falls back to the username when the profile has no full name', () => {
     const profiles = profileMapWith(makeProfile(ALICE_UID, { username: 'alice', email: 'a@b.c' }));
 
-    expect(resolveDisplayName(ALICE_UID, profiles)).toBe('alice');
+    expect(resolveDisplayName(ALICE_ACTOR, profiles)).toBe('alice');
   });
 
   it('falls back to the UID when no profile matches', () => {
     const profiles = profileMapWith();
 
-    expect(resolveDisplayName(ALICE_UID, profiles)).toBe(ALICE_UID);
+    expect(resolveDisplayName(ALICE_ACTOR, profiles)).toBe(ALICE_UID);
   });
 
-  it('returns the default placeholder when uid is null', () => {
+  it('returns the default placeholder for an unattributed actor', () => {
     expect(resolveDisplayName(null, profileMapWith())).toBe(NO_USER_PLACEHOLDER);
   });
 
-  it('returns the default placeholder when uid is undefined', () => {
+  it('returns the default placeholder when the actor is undefined', () => {
     expect(resolveDisplayName(undefined, profileMapWith())).toBe(NO_USER_PLACEHOLDER);
   });
 
-  it('returns the default placeholder when uid is an empty string', () => {
-    expect(resolveDisplayName('', profileMapWith())).toBe(NO_USER_PLACEHOLDER);
+  it('returns the default placeholder when the actor has an empty profile ID', () => {
+    expect(resolveDisplayName({ profile_uid: '' }, profileMapWith())).toBe(NO_USER_PLACEHOLDER);
   });
 
-  it('uses the caller-provided placeholder when uid is falsy', () => {
+  it('returns the default placeholder for a user whose profile could not be resolved', () => {
+    expect(resolveDisplayName({ profile_uid: null }, profileMapWith())).toBe(NO_USER_PLACEHOLDER);
+  });
+
+  it('uses the caller-provided placeholder for an unattributed actor', () => {
     expect(resolveDisplayName(null, profileMapWith(), 'no user')).toBe('no user');
   });
 
   it('handles an undefined profiles map (loading state)', () => {
-    expect(resolveDisplayName(ALICE_UID, undefined)).toBe(ALICE_UID);
+    expect(resolveDisplayName(ALICE_ACTOR, undefined)).toBe(ALICE_UID);
+  });
+});
+
+describe('collectActorUids', () => {
+  it('collects the profile IDs of attributed actors', () => {
+    expect(collectActorUids([ALICE_ACTOR, { profile_uid: 'u_bob_uid' }])).toEqual([
+      ALICE_UID,
+      'u_bob_uid',
+    ]);
+  });
+
+  it('skips actors with no user and users with no resolvable profile', () => {
+    expect(collectActorUids([null, undefined, { profile_uid: null }, ALICE_ACTOR])).toEqual([
+      ALICE_UID,
+    ]);
   });
 });

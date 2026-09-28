@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { queryKeys as platformQueryKeys } from '@kbn/agentic-investigations-plugin/public';
+import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 
 export const queryKeys = {
   /**
@@ -16,11 +16,14 @@ export const queryKeys = {
   proposals: {
     chartsSummary: (windowHours: number, bucketMinutes: number) =>
       [...platformQueryKeys.proposals.all, 'charts-summary', windowHours, bucketMinutes] as const,
-    /** Pending proposals for one action category — drives a queue accordion. */
+    /** No offset in the key: one entry holds every page Show more has appended. */
     byCategory: (category: string) =>
       [...platformQueryKeys.proposals.all, 'by-category', category] as const,
-    /** Proposals decided in the last 72 h — drives the closed queue accordion. */
     closed: () => [...platformQueryKeys.proposals.all, 'closed'] as const,
+    /** `size: 0` reads, so a collapsed accordion knows its size without its rows. */
+    byCategoryCount: (category: string) =>
+      [...platformQueryKeys.proposals.all, 'by-category-count', category] as const,
+    closedCount: () => [...platformQueryKeys.proposals.all, 'closed-count'] as const,
   },
   watches: {
     all: ['alertzero', 'watches'] as const,

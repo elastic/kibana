@@ -202,7 +202,6 @@ export const GmailConnector: ConnectorSpec = {
       {
         type: 'ears',
         isRecommended: true,
-        isExperimental: true,
         overrides: {
           meta: { scope: { disabled: true } },
         },

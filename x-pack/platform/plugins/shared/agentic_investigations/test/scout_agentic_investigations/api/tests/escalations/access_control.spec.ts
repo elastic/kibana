@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
+import { tags, type ElasticsearchRoleDescriptor } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   apiTest,
@@ -18,6 +18,32 @@ import {
   expectCreated,
   deleteConversations,
 } from '../../fixtures';
+
+const ESCALATIONS_ALL_PRIVILEGE = 'feature_agenticInvestigations.escalations_all';
+
+/**
+ * Stateful editor is base Kibana All. Escalation manage is includeIn: 'none', so All
+ * can list but cannot update. The owner-check test needs a collaborator who holds manage.
+ */
+function editorWithEscalationManage(
+  editor: ElasticsearchRoleDescriptor
+): ElasticsearchRoleDescriptor {
+  const applications = (editor.applications ?? []).map((application) => {
+    if (!application.application.startsWith('kibana')) {
+      return application;
+    }
+    return {
+      ...application,
+      privileges: [...application.privileges, ESCALATIONS_ALL_PRIVILEGE],
+    };
+  });
+  if (
+    !applications.some((application) => application.privileges.includes(ESCALATIONS_ALL_PRIVILEGE))
+  ) {
+    throw new Error('editor role has no Kibana application privileges to extend');
+  }
+  return { ...editor, applications };
+}
 
 /**
  * Resolves the Kibana user profile uid for a user by having them create a temporary
@@ -74,7 +100,10 @@ apiTest.describe(
 
     apiTest.beforeAll(async ({ samlAuth, apiClient }) => {
       ({ cookieHeader: adminCookieHeader } = await samlAuth.asInteractiveUser('admin'));
-      ({ cookieHeader: editorCookieHeader } = await samlAuth.asInteractiveUser('editor'));
+      const editorRole = await samlAuth.fetchBuiltInRoleDescriptor('editor');
+      ({ cookieHeader: editorCookieHeader } = await samlAuth.asInteractiveUser(
+        editorWithEscalationManage(editorRole)
+      ));
       ({ cookieHeader: unrelatedCookieHeader } = await samlAuth.asInteractiveUser('viewer'));
 
       // Resolve the editor's profile uid by creating a probe conversation as them.
@@ -150,12 +179,12 @@ apiTest.describe(
     );
 
     apiTest(
-      'PATCH from a collaborator returns 404 — current limitation: only owner can mutate (tracked in follow-up)',
+      'PATCH title from a collaborator returns 404 — title update requires owner access',
       async ({ apiClient }) => {
-        // The agent_builder conversation client enforces owner-only access for patchMetadata and
-        // update, so a collaborator with manage_escalations gets 404 (not 403) on PATCH.
-        // This test documents the current behaviour; a follow-up issue will address it once
-        // agent_builder exposes a non-owner write access mode.
+        // `client.update` (used for title changes) enforces `owner` access, so a collaborator
+        // holding manage_escalations receives 404 (not 403) on a title PATCH. This is intentional:
+        // assignment and metadata writes go through the dedicated PUT .../assignees route, which
+        // uses `converse` access and allows collaborators.
         const response = await apiClient.patch(ESCALATION_BY_ID_PATH(privateEscalationId), {
           headers: { ...INTERNAL_HEADERS, ...editorCookieHeader },
           body: { title: 'Collaborator rename attempt' },
