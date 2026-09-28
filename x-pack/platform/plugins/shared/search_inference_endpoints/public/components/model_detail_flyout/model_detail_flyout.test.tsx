@@ -218,9 +218,12 @@ describe('ModelDetailFlyout', () => {
       expect(screen.getByTestId('flyoutRegionOptions')).toBeInTheDocument();
     });
 
-    it('does not render region options when the endpoint has no region metadata', () => {
+    it('says region options are not available when the endpoint has no region metadata', () => {
       renderFlyout();
 
+      expect(screen.getByTestId('flyoutRegionOptionsUnavailable')).toHaveTextContent(
+        'Region options are not available for this model.'
+      );
       expect(screen.queryByTestId('flyoutRegionOptions')).not.toBeInTheDocument();
     });
   });

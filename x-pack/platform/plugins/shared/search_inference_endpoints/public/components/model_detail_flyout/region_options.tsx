@@ -23,7 +23,7 @@ interface RegionOptionsProps {
 
 export const RegionOptions = ({ options }: RegionOptionsProps) => {
   const titleId = useGeneratedHtmlId();
-  if (options.length === 0) return null;
+  const hasOptions = options.length > 0;
 
   return (
     <>
@@ -35,25 +35,40 @@ export const RegionOptions = ({ options }: RegionOptionsProps) => {
           })}
         </h3>
       </EuiTitle>
-      <EuiText size="xs" color="subdued">
-        <p>
-          {i18n.translate(
-            'xpack.searchInferenceEndpoints.modelDetailFlyout.regionOptionsDescription',
-            {
-              defaultMessage:
-                'Inference traffic can be restricted to the following regions or geographies.',
-            }
-          )}
-        </p>
-      </EuiText>
-      <EuiSpacer size="s" />
-      <EuiBadgeGroup aria-labelledby={titleId} data-test-subj="flyoutRegionOptions">
-        {options.map(({ key, label }) => (
-          <EuiBadge key={key} data-test-subj={`flyoutRegionOption-${key}`}>
-            {label}
-          </EuiBadge>
-        ))}
-      </EuiBadgeGroup>
+      {hasOptions ? (
+        <>
+          <EuiText size="xs" color="subdued">
+            <p>
+              {i18n.translate(
+                'xpack.searchInferenceEndpoints.modelDetailFlyout.regionOptionsDescription',
+                {
+                  defaultMessage:
+                    'Inference traffic can be restricted to the following regions or geographies.',
+                }
+              )}
+            </p>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiBadgeGroup aria-labelledby={titleId} data-test-subj="flyoutRegionOptions">
+            {options.map(({ key, label }) => (
+              <EuiBadge key={key} data-test-subj={`flyoutRegionOption-${key}`}>
+                {label}
+              </EuiBadge>
+            ))}
+          </EuiBadgeGroup>
+        </>
+      ) : (
+        <EuiText size="xs" color="subdued">
+          <p data-test-subj="flyoutRegionOptionsUnavailable">
+            {i18n.translate(
+              'xpack.searchInferenceEndpoints.modelDetailFlyout.regionOptionsUnavailable',
+              {
+                defaultMessage: 'Region options are not available for this model.',
+              }
+            )}
+          </p>
+        </EuiText>
+      )}
     </>
   );
 };

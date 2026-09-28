@@ -210,7 +210,9 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     });
   });
 
-  test('flyout hides region options when the model has no regions', async ({ pageObjects }) => {
+  test('flyout says region options are not available when the model has no regions', async ({
+    pageObjects,
+  }) => {
     const { eisModels } = pageObjects;
 
     await test.step('open flyout for OpenAI GPT-4.1', async () => {
@@ -218,7 +220,10 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
       await expect(eisModels.flyout).toBeVisible();
     });
 
-    await test.step('Region options section is hidden', async () => {
+    await test.step('Region options explains that none are available', async () => {
+      await expect(eisModels.flyoutRegionOptionsUnavailable).toHaveText(
+        'Region options are not available for this model.'
+      );
       await expect(eisModels.flyoutRegionOptions).toBeHidden();
     });
   });
