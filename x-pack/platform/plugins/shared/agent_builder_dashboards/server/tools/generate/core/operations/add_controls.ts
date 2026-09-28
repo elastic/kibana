@@ -16,17 +16,12 @@ import {
   TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
 import type { DashboardPinnedPanel } from '@kbn/as-code-dashboard-schema';
-import { getIndexFields } from '@kbn/agent-builder-genai-utils';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { formatEsqlIdentifier } from '@kbn/esql-utils';
 import { z } from '@kbn/zod/v4';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { getErrorMessage, type PanelFailure } from '../utils';
 import { defineOperation } from './types';
-import {
-  resolveAggregatableControlField,
-  type ControlFieldTypes,
-} from './resolve_aggregatable_control_field';
 
 const controlWidthSchema = z
   .enum(['small', 'medium', 'large'])
@@ -113,19 +108,36 @@ const filterDuplicateTimeSliders = ({
   });
 };
 
-const loadFieldsByIndex = async (
-  indexes: string[],
-  esClient: ElasticsearchClient
-): Promise<Map<string, ControlFieldTypes>> => {
-  const result = await getIndexFields({ indices: indexes, esClient });
-  return new Map(
-    indexes.map((index) => [
-      index,
-      Object.fromEntries((result[index]?.fields ?? []).map((field) => [field.path, field.type])),
-    ])
+const getFieldCandidates = (fieldName: string): string[] => [fieldName, `${fieldName}.keyword`];
+
+const fetchAggregatableFields = async ({
+  esClient,
+  index,
+  fields,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+  fields: string[];
+}): Promise<Set<string>> => {
+  const response = await esClient.fieldCaps({
+    index,
+    fields,
+    ignore_unavailable: true,
+    allow_no_indices: true,
+  });
+  return new Set(
+    Object.entries(response.fields)
+      .filter(([, capsByType]) =>
+        Object.values(capsByType).some(({ aggregatable }) => aggregatable)
+      )
+      .map(([fieldName]) => fieldName)
   );
 };
 
+/**
+ * Keep controls whose field Elasticsearch can `STATS BY`, rewriting text fields
+ * to their `.keyword` sibling. Other data controls are skipped as failures.
+ */
 const resolveControlFields = async ({
   controls,
   esClient,
@@ -139,27 +151,30 @@ const resolveControlFields = async ({
     return controls;
   }
 
-  const indexes = [
-    ...new Set(controls.flatMap((control) => ('index' in control ? [control.index] : []))),
-  ];
-
-  let fieldsByIndex: Map<string, ControlFieldTypes>;
-  try {
-    fieldsByIndex = indexes.length > 0 ? await loadFieldsByIndex(indexes, esClient) : new Map();
-  } catch (error) {
-    const message = getErrorMessage(error);
-    return controls.filter((control, controlInputIndex) => {
-      if (!('field_name' in control)) {
-        return true;
-      }
-      failures.push({
-        type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
-        identifier: `controls[${controlInputIndex}]`,
-        error: `Could not load mapping for index "${control.index}": ${message}`,
-      });
-      return false;
-    });
+  const candidatesByIndex = new Map<string, string[]>();
+  for (const control of controls) {
+    if ('field_name' in control) {
+      const { index, field_name: fieldName } = control;
+      candidatesByIndex.set(index, [
+        ...(candidatesByIndex.get(index) ?? []),
+        ...getFieldCandidates(fieldName),
+      ]);
+    }
   }
+
+  const lookupByIndex = new Map(
+    await Promise.all(
+      [...candidatesByIndex].map(
+        async ([index, fields]) =>
+          [
+            index,
+            await fetchAggregatableFields({ esClient, index, fields }).catch(
+              (error) => new Error(getErrorMessage(error))
+            ),
+          ] as const
+      )
+    )
+  );
 
   const resolved: ControlInput[] = [];
   for (const [controlInputIndex, control] of controls.entries()) {
@@ -168,21 +183,29 @@ const resolveControlFields = async ({
       continue;
     }
 
-    const result = resolveAggregatableControlField({
-      fieldName: control.field_name,
-      fields: fieldsByIndex.get(control.index) ?? {},
-    });
-
-    if (result.error !== undefined) {
+    const recordFailure = (error: string) =>
       failures.push({
         type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
         identifier: `controls[${controlInputIndex}]`,
-        error: result.error,
+        error,
       });
+
+    const { index, field_name: fieldName } = control;
+    const aggregatableFields = lookupByIndex.get(index);
+    if (!(aggregatableFields instanceof Set)) {
+      recordFailure(`Could not load fields for index "${index}": ${aggregatableFields?.message}`);
       continue;
     }
 
-    resolved.push({ ...control, field_name: result.fieldName });
+    const resolvedFieldName = getFieldCandidates(fieldName).find((candidate) =>
+      aggregatableFields.has(candidate)
+    );
+    if (resolvedFieldName === undefined) {
+      recordFailure(`Field "${fieldName}" is not an aggregatable field on this index.`);
+      continue;
+    }
+
+    resolved.push({ ...control, field_name: resolvedFieldName });
   }
 
   return resolved;
