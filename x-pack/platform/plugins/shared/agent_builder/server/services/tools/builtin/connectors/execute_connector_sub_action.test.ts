@@ -328,7 +328,12 @@ describe('createExecuteConnectorSubActionTool', () => {
         supportedFeatureIds: [],
       },
       actions: {
-        searchMessages: { isTool: true, scope: 'read' as const, input: {} as any, handler: jest.fn() },
+        searchMessages: {
+          isTool: true,
+          scope: 'read' as const,
+          input: {} as any,
+          handler: jest.fn(),
+        },
         archiveChannel: {
           isTool: false,
           scope: 'destroy' as const,

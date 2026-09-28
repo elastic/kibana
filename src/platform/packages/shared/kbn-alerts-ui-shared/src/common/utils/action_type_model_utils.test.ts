@@ -263,9 +263,7 @@ describe('action_type_model_utils', () => {
       };
       const undefinedResult = serializer?.(withUndefined);
       expect(undefinedResult?.config).toEqual({ someField: 'value' });
-      expect(
-        (undefinedResult?.config as Record<string, unknown>)?.selectedActions
-      ).toBeUndefined();
+      expect((undefinedResult?.config as Record<string, unknown>)?.selectedActions).toBeUndefined();
     });
 
     it('serializer preserves selectedActions in config when set to a non-empty array', () => {
