@@ -74,6 +74,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     extractObservables,
     isPersistingConfiguration,
     isLoadingCaseConfiguration,
+    isConfigurationFetchError,
     isLoadingConnectors,
     connectors,
     actionTypes,
@@ -192,6 +193,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                       disabled={
                         isPersistingConfiguration ||
                         isLoadingCaseConfiguration ||
+                        isConfigurationFetchError ||
                         !permissions.settings
                       }
                       data-test-subj="extract-observables-default-switch"
