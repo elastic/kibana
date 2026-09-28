@@ -65,17 +65,17 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
   }
 
   public async bulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse> {
-    return sharedBulk(
-      this.deps.esClient,
-      {
+    return sharedBulk({
+      esClient: this.deps.esClient,
+      request: {
         ...request,
         items: request.items.map((item) =>
           isBulkUpdaterItem(item) ? item : { ...item, index: this.deps.indexName }
         ),
       },
-      this.deps.logger,
-      [this.deps.indexName]
-    );
+      logger: this.deps.logger,
+      fallbackIndexes: [this.deps.indexName],
+    });
   }
 
   public async deleteByQuery(

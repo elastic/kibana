@@ -171,12 +171,15 @@ const refreshWrittenIndexes = async (
   await esClient.indices.refresh({ index: indexes });
 };
 
-export async function sharedBulk<TExecution extends { id: string }>(
-  esClient: ElasticsearchClient,
-  request: BulkRequestOptions<TExecution>,
-  logger: Logger,
-  fallbackIndexes: string[] = []
-): Promise<BulkResponse> {
+export async function sharedBulk<TExecution extends { id: string }>(params: {
+  esClient: ElasticsearchClient;
+  request: BulkRequestOptions<TExecution>;
+  logger: Logger;
+  fallbackIndexes: string[];
+}): Promise<BulkResponse> {
+  const { esClient, request, logger } = params;
+  const fallbackIndexes: string[] = params.fallbackIndexes ?? [];
+
   if (request.items.length === 0) {
     return { items: [], errors: false };
   }
