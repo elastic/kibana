@@ -20,7 +20,7 @@ import type {
   PreLayoutTriggerNode,
   Step,
 } from './types';
-import { CONTAINER_STEP_TYPES, DEFAULT_NODE_STYLE } from './types';
+import { CONTAINER_STEP_TYPES, DEFAULT_NODE_STYLE, FOREACH_GROUP_EMPTY_HEIGHT } from './types';
 import { visitStepChildSlots } from './walk_step_tree';
 import type { IfStep, MergeStep, ParallelStep, SwitchStep, WorkflowYaml } from '../spec/schema';
 
@@ -208,11 +208,14 @@ function transformInternal(
     if (isContainerGroup) {
       // Render the container as a `foreachGroup` node (full-width header +
       // body). The regular step node would overlap with the inner children.
+      // dagLayout preserves the caller-provided height when innerNodes is empty,
+      // so use FOREACH_GROUP_EMPTY_HEIGHT (> DEFAULT_NODE_STYLE.height) to make
+      // an empty container visually distinct from a regular step node.
       const groupNode: PreLayoutForeachGroupNode = {
         id,
         type: 'foreachGroup',
         data: { label: step.name, stepType: step.type, step },
-        style: { ...DEFAULT_NODE_STYLE },
+        style: { ...DEFAULT_NODE_STYLE, height: FOREACH_GROUP_EMPTY_HEIGHT },
       };
       nodes.push(groupNode);
 

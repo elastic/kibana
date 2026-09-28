@@ -26,6 +26,12 @@ export interface WorkflowDetailState {
   /** The yaml string used by the workflow yaml editor */
   yamlString: string;
   /**
+   * Baseline YAML for never-saved workflows (create seed / remix scaffold).
+   * Dirtiness compares `yamlString` to `workflow.yaml` when persisted, otherwise
+   * to this baseline — so empty create and unedited remix start clean.
+   */
+  baselineYaml: string;
+  /**
    * Whether the YAML editor's internal value is synced with the Redux store.
    * When false, there are pending debounced changes that haven't been dispatched yet.
    * The save button should be disabled when this is false to prevent saving stale data.

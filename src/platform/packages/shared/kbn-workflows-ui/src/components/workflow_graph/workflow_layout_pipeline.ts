@@ -22,9 +22,14 @@ import {
 // Workflow-specific layout constants. These encode domain knowledge (foreach
 // header height, gutter widths) that does not belong in @kbn/dag-layout.
 // Exported so tests can import the real values instead of re-declaring them.
-export const WORKFLOW_COMPOUND_PADDING = { top: 70, right: 32, bottom: 32, left: 32 } as const;
+// bottom = TERMINAL_STUB_PX (75) + PORT_DOT_SIZE/2 (4) + margin (17) = 96.
+// This keeps the terminal stub of the last inner step visible inside the container.
+export const WORKFLOW_COMPOUND_PADDING = { top: 70, right: 32, bottom: 96, left: 32 } as const;
 export const WORKFLOW_NODE_SEP = 50;
-export const WORKFLOW_RANK_SEP = 70;
+// Must clear FORK_BUS_TRUNK (80) plus TRUNK_LENGTH_TO_TARGET (64) so fork
+// edges keep a straight lead-in before the arrowhead (room for the Add-step
+// control) instead of curving straight into the marker.
+export const WORKFLOW_RANK_SEP = 150;
 
 export interface LayoutSnapshot {
   nodes: DagPositionedNode[];

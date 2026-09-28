@@ -131,8 +131,13 @@ export const saveYamlThunk = createAsyncThunk<
         queryClient.invalidateQueries({ queryKey: ['workflows'] });
         queryClient.invalidateQueries({ queryKey: ['workflows', id] });
 
-        // Navigate to the workflow detail page
-        application.navigateToApp(PLUGIN_ID, { path: workflow.id });
+        // Preserve query (e.g. ?view=graph) so a visual-builder create does not
+        // remount onto the YAML editor after first save.
+        const search =
+          typeof window !== 'undefined' && window.location.search
+            ? window.location.search
+            : '';
+        application.navigateToApp(PLUGIN_ID, { path: `${workflow.id}${search}` });
       }
       notifications.toasts.addSuccess(
         i18n.translate('workflows.detail.saveYaml.success', {

@@ -79,8 +79,8 @@ export function WorkflowVisualEditorFlyout({
       onRunStep={onRunStep}
       renderMoreMenuItems={renderMoreMenuItems}
       onMoreMenuOpen={handleMoreMenuOpen}
-      renderStepIcon={({ stepType }) => (
-        <StepIcon stepType={stepType} executionStatus={undefined} size="m" />
+      renderStepIcon={({ stepType, isTrigger: _isTrigger, color }) => (
+        <StepIcon stepType={stepType} executionStatus={undefined} size="m" iconColor={color} />
       )}
     />
   );

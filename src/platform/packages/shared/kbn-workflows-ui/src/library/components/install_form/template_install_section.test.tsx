@@ -163,7 +163,7 @@ describe('TemplateInstallSection', () => {
     fireEvent.click(remixButton);
 
     expect(navigateToApp).toHaveBeenCalledWith('workflows', {
-      path: '/create',
+      path: '/create?view=graph',
       state: { initialYaml: PREVIEW_YAML },
     });
   });
@@ -237,6 +237,53 @@ describe('TemplateInstallSection', () => {
     expect(screen.queryByTestId('workflowLibraryTemplateRequirements')).toBeNull();
     expect(screen.queryByTestId('workflowLibraryTemplateSetupButton')).toBeNull();
     expect(screen.getByTestId('workflowLibraryTemplateInstallButton')).toBeEnabled();
+  });
+
+  it('should apply preview YAML in place when onApplyToWorkflow is set', async () => {
+    const onApplyToWorkflow = jest.fn();
+    render(
+      <QueryClientProvider client={queryClient}>
+        <TemplateInstallSection
+          template={TEMPLATE}
+          step="setup"
+          onStepChange={onStepChange}
+          onPreviewValuesChange={onPreviewValuesChange}
+          previewYaml={PREVIEW_YAML}
+          onApplyToWorkflow={onApplyToWorkflow}
+        />
+      </QueryClientProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('workflowLibraryInstallForm-field-demo-connector'));
+    const button = screen.getByTestId('workflowLibraryTemplateInstallButton');
+    expect(button).toHaveTextContent('Add to workflow');
+    expect(button).toBeEnabled();
+    fireEvent.click(button);
+
+    await waitFor(() => expect(onApplyToWorkflow).toHaveBeenCalledWith(PREVIEW_YAML));
+    expect(mockWorkflowApi.installTemplate).not.toHaveBeenCalled();
+    expect(navigateToApp).not.toHaveBeenCalled();
+  });
+
+  it('should keep Remix with AI navigating to create when applying in place', () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <TemplateInstallSection
+          template={TEMPLATE}
+          step="setup"
+          onStepChange={onStepChange}
+          onPreviewValuesChange={onPreviewValuesChange}
+          previewYaml={PREVIEW_YAML}
+          onApplyToWorkflow={jest.fn()}
+        />
+      </QueryClientProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('workflowLibraryTemplateRemixButton'));
+    expect(navigateToApp).toHaveBeenCalledWith('workflows', {
+      path: '/create?view=graph',
+      state: { initialYaml: PREVIEW_YAML },
+    });
   });
 
   it('should render nothing without the create-workflow privilege', () => {

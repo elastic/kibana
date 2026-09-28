@@ -8,6 +8,9 @@
  */
 
 import { createContext, type ReactNode, useContext } from 'react';
+import type { BranchSlot } from '@kbn/workflows';
+import type { NodePortTargets } from './compute_insertion_points';
+import type { PendingInsertVisual } from './pending_insert';
 
 /**
  * Render-prop type for injecting a custom icon resolver into the graph canvas.
@@ -24,6 +27,45 @@ export type RenderStepIcon = (args: {
   color?: string;
 }) => ReactNode;
 
+/**
+ * Where an insertion lands. Name-addressed per ADR-0007:
+ * - `trigger` appends a new trigger.
+ * - `prepend-step` inserts a step at the beginning of the top-level steps array
+ *   (used when clicking the flow port on a trigger node — no preceding step anchor).
+ * - `after` inserts a step after the named anchor step in its containing sequence.
+ * - `branch` inserts at the head of an empty branch owned by the named step.
+ * - `fallback` adds the first fallback step to the named step's `on-failure.fallback`.
+ *
+ * Every handler receives graph node ids; the caller maps them back to step names
+ * via `TransformResult.nodeRefs`. The graph never sees YAML directly.
+ */
+export type WorkflowGraphInsertionContext =
+  | { readonly mode: 'trigger' }
+  | { readonly mode: 'prepend-step' }
+  | { readonly mode: 'after'; readonly stepName: string }
+  | { readonly mode: 'branch'; readonly stepName: string; readonly branch: BranchSlot }
+  | { readonly mode: 'fallback'; readonly stepName: string };
+
+/** Screen-space rectangle of the control that opened an insertion, for anchoring the menu. */
+export interface WorkflowGraphAnchorRect {
+  readonly left: number;
+  readonly top: number;
+  readonly width: number;
+  readonly height: number;
+}
+
+/**
+ * Editing callbacks. Their presence on the context switches the canvas into
+ * edit mode (insertion controls, node action cluster, keyboard delete).
+ * Every handler receives graph node ids; the caller maps them back to the
+ * YAML document via `TransformResult.nodeRefs`.
+ */
+export interface WorkflowGraphEditActions {
+  onInsert: (context: WorkflowGraphInsertionContext, anchor: WorkflowGraphAnchorRect) => void;
+  onEditStep: (nodeId: string) => void;
+  onDeleteNode: (nodeId: string) => void;
+}
+
 export interface WorkflowGraphActions {
   /** Called when the user clicks the Play icon on a node hover. */
   onStepRun?: (stepName: string) => void;
@@ -38,6 +80,20 @@ export interface WorkflowGraphActions {
    * registry). Falls back to the built-in `STEP_TYPE_ICON` table when absent.
    */
   renderStepIcon?: RenderStepIcon;
+  /** Edit-mode callbacks; undefined renders the read-only canvas. */
+  edit?: WorkflowGraphEditActions;
+  /** Node ids whose step is missing a schema-required field. */
+  incompleteNodeIds?: ReadonlySet<string>;
+  /**
+   * Connection-point targets per node id. Present only in edit mode when
+   * insertion controls are not suppressed; read-only omits ports entirely.
+   */
+  portTargetsByNodeId?: ReadonlyMap<string, NodePortTargets>;
+  /**
+   * In-progress insert (Actions menu / placeholder). Ports use this so an
+   * error-path definition keeps the origin port visibly active.
+   */
+  pendingInsert?: PendingInsertVisual | null;
 }
 
 export const WorkflowGraphActionsContext = createContext<WorkflowGraphActions>({});

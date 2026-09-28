@@ -18,7 +18,7 @@ const CORNER_RADIUS = 4;
 // (`if` / `parallel`) bend tight under the source instead of leaving a
 // large gap to the divergence point.
 const TRUNK_LENGTH_FROM_SOURCE = 9;
-const TRUNK_LENGTH_TO_TARGET = 14;
+export const TRUNK_LENGTH_TO_TARGET = 14;
 
 // Vertical offset from the source for branch labels (TB layout). Anchoring
 // labels at a fixed Y instead of the source/target midpoint keeps sibling
@@ -31,13 +31,13 @@ const TB_LABEL_Y_OFFSET = 30;
 // (switch case/default, if-then, if-else). Labels are anchored at a further
 // fixed offset below/right of the bus so all branch labels sit on an aligned
 // row (TB) / column (LR) regardless of sibling node heights.
-const FORK_BUS_TRUNK = 20;
+export const FORK_BUS_TRUNK = 20;
 const FORK_BUS_LABEL_OFFSET = 20;
 
 // Merge single-bus routing: distance from the shared horizontal bus (TB) or
 // vertical bus (LR) to the target handle. Mirrors FORK_BUS_TRUNK so the
 // fan-in and fan-out bus trunks are the same length.
-const MERGE_BUS_TRUNK = 20;
+export const MERGE_BUS_TRUNK = 20;
 
 const EPS = 0.5;
 

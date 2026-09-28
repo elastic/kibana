@@ -460,17 +460,17 @@ export const useAgentBuilderIntegration = ({
     ]
   );
 
-  // Auto-open only on /workflows/create, or on a saved workflow whose sidebar
-  // the save thunk requested we restore. Never on an existing workflow the
+  // Restore the sidebar only when the save thunk requested it (create → first
+  // save → detail remount). Never auto-open on /create — the canvas creation
+  // panel owns the AI entry point there. Never on an existing workflow the
   // user navigated to directly. Guarded per-mount so a manual close stays.
   useEffect(() => {
     if (!isEditorMounted || !agentBuilder || !isChatAccessible) return;
     if (hasAutoOpenedRef.current) return;
+    if (workflowId == null) return;
 
-    const shouldRestoreForSavedWorkflow =
-      workflowId != null && consumeSidebarRestoreFor(workflowId);
-
-    if (workflowId != null && !shouldRestoreForSavedWorkflow) return;
+    const shouldRestoreForSavedWorkflow = consumeSidebarRestoreFor(workflowId);
+    if (!shouldRestoreForSavedWorkflow) return;
 
     hasAutoOpenedRef.current = true;
     openAgentChat({ isAutoOpen: true });

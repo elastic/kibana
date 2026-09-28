@@ -18,7 +18,9 @@ import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zo
 import { applyInputDefaults, hasDefaultsRecursive } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { generateSampleFromJsonSchema, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
+import { isBuilderEditableSchema } from '../../../shared/ui/schema_property_builder';
 import { InputValidationCallout } from './input_validation_callout';
+import { WorkflowExecuteManualFieldsForm } from './workflow_execute_manual_fields_form';
 
 const SCHEMA_URI = `inmemory://schemas/workflow-manual-json-editor-schema`;
 
@@ -88,15 +90,52 @@ export const WorkflowExecuteManualForm = ({
   setErrors,
 }: WorkflowExecuteManualFormProps): React.JSX.Element => {
   const inputsValidator = useMemo(() => buildFieldsZodValidator(inputs), [inputs]);
+  const useFieldsForm = isBuilderEditableSchema(inputs) && Boolean(inputs?.properties);
 
   /** Same root merge as workflow YAML Monaco schema so `#/kibana/definitions/*` $ref resolves. */
   const monacoInputsJsonSchema = useMemo(() => {
-    if (!inputs) {
+    if (!inputs || useFieldsForm) {
       return undefined;
     }
     return (mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema(inputs as object) ??
       inputs) as JsonModelSchemaType;
-  }, [inputs]);
+  }, [inputs, useFieldsForm]);
+
+  const fieldErrors = useMemo(() => {
+    const map = new Map<string, string>();
+    if (!value || !useFieldsForm) return map;
+    try {
+      const res = inputsValidator.safeParse(JSON.parse(value));
+      if (!res.success) {
+        for (const issue of res.error.issues) {
+          const key = issue.path[0] != null ? String(issue.path[0]) : '';
+          if (key && !map.has(key)) map.set(key, issue.message);
+        }
+      }
+    } catch {
+      // ignore parse errors — top-level callout covers them
+    }
+    return map;
+  }, [inputsValidator, useFieldsForm, value]);
+
+  const handleFieldsChange = useCallback(
+    (next: Record<string, unknown>) => {
+      setValue(JSON.stringify(next, null, 2));
+    },
+    [setValue]
+  );
+
+  const fieldsValue = useMemo(() => {
+    if (!useFieldsForm) return {};
+    try {
+      const parsed = JSON.parse(value || '{}');
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+        ? (parsed as Record<string, unknown>)
+        : {};
+    } catch {
+      return {};
+    }
+  }, [useFieldsForm, value]);
 
   useEffect(() => {
     setValue(JSON.stringify(getDefaultWorkflowInput(inputs), null, 2));
@@ -179,59 +218,75 @@ export const WorkflowExecuteManualForm = ({
           overflow: hidden;
         `}
       >
-        <EuiFormRow
-          label={i18n.translate('workflows.workflowExecuteManualForm.inputDataLabel', {
-            defaultMessage: 'Input Data',
-          })}
-          fullWidth
-          css={css`
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 0;
-            .euiFormRow__fieldWrapper {
+        {useFieldsForm && inputs ? (
+          <div
+            css={css`
+              overflow: auto;
+              height: 100%;
+            `}
+          >
+            <WorkflowExecuteManualFieldsForm
+              inputs={inputs}
+              value={fieldsValue}
+              onChange={handleFieldsChange}
+              fieldErrors={fieldErrors}
+            />
+          </div>
+        ) : (
+          <EuiFormRow
+            label={i18n.translate('workflows.workflowExecuteManualForm.inputDataLabel', {
+              defaultMessage: 'Input Data',
+            })}
+            fullWidth
+            css={css`
               flex: 1;
-              min-height: 0;
               display: flex;
               flex-direction: column;
-            }
-          `}
-        >
-          <CodeEditor
-            languageId="json"
-            value={value}
-            width="100%"
-            height="100%"
-            onChange={setValue}
-            editorDidMount={handleMount}
-            dataTestSubj={'workflow-manual-json-editor'}
-            overflowWidgetsContainerZIndexOverride={6001}
-            options={{
-              language: 'json',
-              minimap: { enabled: false },
-              scrollBeyondLastLine: false,
-              wordWrap: 'on',
-              automaticLayout: true,
-              lineNumbers: 'on',
-              glyphMargin: true,
-              tabSize: 2,
-              lineNumbersMinChars: 2,
-              insertSpaces: true,
-              fontSize: 14,
-              renderWhitespace: 'all',
-              wordWrapColumn: 80,
-              wrappingIndent: 'indent',
-              theme: WORKFLOWS_MONACO_EDITOR_THEME,
-              formatOnType: true,
-              quickSuggestions: false,
-              suggestOnTriggerCharacters: false,
-              wordBasedSuggestions: false,
-              parameterHints: {
-                enabled: false,
-              },
-            }}
-          />
-        </EuiFormRow>
+              min-height: 0;
+              .euiFormRow__fieldWrapper {
+                flex: 1;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
+              }
+            `}
+          >
+            <CodeEditor
+              languageId="json"
+              value={value}
+              width="100%"
+              height="100%"
+              onChange={setValue}
+              editorDidMount={handleMount}
+              dataTestSubj={'workflow-manual-json-editor'}
+              overflowWidgetsContainerZIndexOverride={6001}
+              options={{
+                language: 'json',
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                wordWrap: 'on',
+                automaticLayout: true,
+                lineNumbers: 'on',
+                glyphMargin: true,
+                tabSize: 2,
+                lineNumbersMinChars: 2,
+                insertSpaces: true,
+                fontSize: 14,
+                renderWhitespace: 'all',
+                wordWrapColumn: 80,
+                wrappingIndent: 'indent',
+                theme: WORKFLOWS_MONACO_EDITOR_THEME,
+                formatOnType: true,
+                quickSuggestions: false,
+                suggestOnTriggerCharacters: false,
+                wordBasedSuggestions: false,
+                parameterHints: {
+                  enabled: false,
+                },
+              }}
+            />
+          </EuiFormRow>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

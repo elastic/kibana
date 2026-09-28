@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { Handle } from '@xyflow/react';
 import type { Node, NodeProps } from '@xyflow/react';
 import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { WorkflowGraphForeachGroupNode } from './workflow_graph_foreach_group_node';
+import { WorkflowGraphActionsContext } from './workflow_graph_actions_context';
+import type { WorkflowGraphEditActions } from './workflow_graph_actions_context';
 
 // Stub @xyflow/react's Handle as a spy — records calls so handle ids can be
 // asserted, but has no React Flow context requirements.
@@ -142,6 +144,90 @@ describe('WorkflowGraphForeachGroupNode', () => {
       // explicitly buckets CANCELLED as neutral: not an effective execution
       // outcome. This test is the regression guard for that behaviour change.
       expect(iconColor(ExecutionStatus.CANCELLED)).toBe(iconColor());
+    });
+  });
+
+  describe('empty-body add-first-step button', () => {
+    const editActions: WorkflowGraphEditActions = {
+      onInsert: jest.fn(),
+      onEditStep: jest.fn(),
+      onDeleteNode: jest.fn(),
+    };
+
+    const renderWithEdit = (data: Partial<ForeachGroupNodeData> = {}) =>
+      render(
+        <WorkflowGraphActionsContext.Provider value={{ edit: editActions }}>
+          <WorkflowGraphForeachGroupNode {...makeNodeProps(data)} />
+        </WorkflowGraphActionsContext.Provider>
+      );
+
+    it('renders the + button when hasBodySteps is false and edit is available', () => {
+      renderWithEdit({ hasBodySteps: false } as any);
+      expect(
+        screen.getByTestId('workflowGraphForeachGroupAddFirstStep')
+      ).toBeInTheDocument();
+    });
+
+    it('does not render the + button when hasBodySteps is true', () => {
+      renderWithEdit({ hasBodySteps: true } as any);
+      expect(
+        screen.queryByTestId('workflowGraphForeachGroupAddFirstStep')
+      ).not.toBeInTheDocument();
+    });
+
+    it('does not render the + button in read-only mode (no edit context)', () => {
+      // The dashed body area is always shown for empty containers, but the
+      // interactive + button requires edit context.
+      renderGroup({ hasBodySteps: false } as any);
+      expect(
+        screen.queryByTestId('workflowGraphForeachGroupAddFirstStep')
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('3-dots action menu', () => {
+    const editActions: WorkflowGraphEditActions = {
+      onInsert: jest.fn(),
+      onEditStep: jest.fn(),
+      onDeleteNode: jest.fn(),
+    };
+
+    const renderWithEdit = (data: Partial<ForeachGroupNodeData> = {}) =>
+      render(
+        <WorkflowGraphActionsContext.Provider value={{ edit: editActions }}>
+          <WorkflowGraphForeachGroupNode {...makeNodeProps(data)} />
+        </WorkflowGraphActionsContext.Provider>
+      );
+
+    beforeEach(() => {
+      (editActions.onEditStep as jest.Mock).mockClear();
+      (editActions.onDeleteNode as jest.Mock).mockClear();
+    });
+
+    it('renders the 3-dots button in edit mode', () => {
+      renderWithEdit();
+      expect(screen.getByTestId('workflowGraphForeachGroupMenuButton')).toBeInTheDocument();
+    });
+
+    it('does not render the 3-dots button in read-only mode', () => {
+      renderGroup();
+      expect(
+        screen.queryByTestId('workflowGraphForeachGroupMenuButton')
+      ).not.toBeInTheDocument();
+    });
+
+    it('calls onEditStep when Edit step is clicked', () => {
+      renderWithEdit();
+      fireEvent.click(screen.getByTestId('workflowGraphForeachGroupMenuButton'));
+      fireEvent.click(screen.getByTestId('workflowGraphForeachGroupMenuEdit'));
+      expect(editActions.onEditStep).toHaveBeenCalledWith('group-1');
+    });
+
+    it('calls onDeleteNode when Delete step is clicked', () => {
+      renderWithEdit();
+      fireEvent.click(screen.getByTestId('workflowGraphForeachGroupMenuButton'));
+      fireEvent.click(screen.getByTestId('workflowGraphForeachGroupMenuDelete'));
+      expect(editActions.onDeleteNode).toHaveBeenCalledWith('group-1');
     });
   });
 });

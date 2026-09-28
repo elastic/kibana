@@ -59,6 +59,8 @@ interface UseWorkflowLayoutParams {
 interface UseWorkflowLayoutResult {
   nodes: Node[];
   edges: Edge[];
+  /** The graph transform the layout was computed from (for edit-mode overlays). */
+  transformed: TransformResult;
 }
 
 /**
@@ -156,10 +158,16 @@ export function useWorkflowLayout({
     ]);
 
     const innerNodeToGroupId = new Map<string, string>();
+    const innerNodeCountByGroupId = new Map<string, number>();
     for (const g of transformed.foreachGroups) {
       for (const n of g.innerNodes) {
         innerNodeToGroupId.set(n.id, g.id);
       }
+      // Count only real body nodes, not structural bypass-lane pass-throughs.
+      innerNodeCountByGroupId.set(
+        g.id,
+        g.innerNodes.filter((n) => !allBypassLaneIds.has(n.id)).length
+      );
     }
 
     const allDomainNodes = [
@@ -194,6 +202,7 @@ export function useWorkflowLayout({
     return {
       allBypassLaneIds,
       innerNodeToGroupId,
+      innerNodeCountByGroupId,
       allDomainNodes,
       nodeById,
       allEdges,
@@ -304,7 +313,7 @@ export function useWorkflowLayout({
   }, [stepExecutionMap, scopeIdsByStepId, topologyMeta]);
 
   const derivedNodes = useMemo<Node[]>(() => {
-    const { allBypassLaneIds, innerNodeToGroupId, allDomainNodes } = topologyMeta;
+    const { allBypassLaneIds, innerNodeToGroupId, innerNodeCountByGroupId, allDomainNodes } = topologyMeta;
     const positionedById = new Map(layoutSnapshot.nodes.map((n) => [n.id, n]));
 
     const isHorizontal = direction === 'LR';
@@ -347,9 +356,15 @@ export function useWorkflowLayout({
         height: pos.height,
         targetPosition,
         sourcePosition,
+        // Without `nopan`, panOnDrag swallows clicks on the card so selection
+        // never reaches onNodeClick / the config panel.
+        className: 'nopan',
         data: {
           ...(n.data as Record<string, unknown>),
           stepExecution: exec,
+          ...(n.type === 'foreachGroup'
+            ? { hasBodySteps: (innerNodeCountByGroupId.get(n.id) ?? 0) > 0 }
+            : {}),
         },
       };
     });
@@ -406,6 +421,10 @@ export function useWorkflowLayout({
     const { allBypassLaneIds, nodeById, allEdges, mergeNodeIds } = topologyMeta;
     const layoutEdgeById = new Map(layoutSnapshot.edges.map((e) => [e.id, e]));
     const { traversedForkEdgeIds, traversedBypassIds } = branchTraversal;
+    // Sources that mount dual `step`/`error` handles (any outgoing failure edge).
+    const nodesWithFailureHandle = new Set(
+      allEdges.filter((e) => e.isFailure).map((e) => e.source)
+    );
 
     const getExec = (nodeId: string): WorkflowStepExecutionDto | undefined => {
       const nodeData = nodeById.get(nodeId)?.data as Record<string, unknown> | undefined;
@@ -438,7 +457,10 @@ export function useWorkflowLayout({
       // plan assumption 8 — step records are created at RUNNING, never SKIPPED);
       // everything else falls back to source-step completion.
       let traversed: boolean;
-      if (e.branchType) {
+      if (e.isFailure) {
+        // An error route only lights up when its fallback step actually ran.
+        traversed = getExec(e.target)?.status !== undefined;
+      } else if (e.branchType) {
         traversed = traversedForkEdgeIds.has(e.id);
       } else if (allBypassLaneIds.has(e.source)) {
         traversed = traversedBypassIds.has(e.source);
@@ -464,13 +486,22 @@ export function useWorkflowLayout({
             : undefined);
         traversed = sourceExec?.status === ExecutionStatus.COMPLETED;
       }
+      let sourceHandle: string | undefined;
+      if (e.isFailure) {
+        sourceHandle = 'fallback';
+      } else if (e.branchType === 'then' || e.branchType === 'else') {
+        sourceHandle = e.branchType;
+      } else if (nodesWithFailureHandle.has(e.source)) {
+        // Owner mounts dual handles (`step` + `error`) once a fallback exists.
+        sourceHandle = 'step';
+      }
       return {
         id: e.id,
         source: e.source,
         target: e.target,
         // Failure edges exit via the dedicated bottom-right handle so React Flow
         // hands computeEdgePath the correct sourceX (right edge, not centre).
-        sourceHandle: isFailure ? 'fallback' : undefined,
+        sourceHandle: isFailure ? 'fallback' : sourceHandle,
         type: 'workflowEdge',
         data: {
           label: e.label,
@@ -500,5 +531,5 @@ export function useWorkflowLayout({
     syntheticTriggerExecution,
   ]);
 
-  return { nodes: derivedNodes, edges: derivedEdges };
+  return { nodes: derivedNodes, edges: derivedEdges, transformed };
 }
