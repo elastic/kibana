@@ -1374,6 +1374,19 @@ describe('ProposalsService', () => {
       expect(reviseArgs.document.origin).toBe('nightshift');
     });
 
+    it('clears the title when the override is blank, rather than storing one', async () => {
+      const storage = createStorage(baseDocument({ title: 'Tune the Okta rule' }));
+      const { service } = createService(storage);
+
+      await service.revise({ id: 'proposal-1', title: '   ' }, SPACE_ID, request);
+
+      // The revision is written first; the second call marks the predecessor.
+      const [[revisionArgs]] = storage.index.mock.calls;
+      // Not `''`: the renderers fall back with `??`, so a blank would win and
+      // show an empty label where the action's name belongs.
+      expect(revisionArgs.document.title).toBeUndefined();
+    });
+
     it('applies a title override, since renaming is exactly what produces a revision', async () => {
       const storage = createStorage(baseDocument({ title: 'Tune noisy rule' }));
       const { service } = createService(storage);
@@ -1897,6 +1910,21 @@ describe('ProposalsService', () => {
           { term: { status: 'pending' } },
           { term: { conversationId: 'conv-1' } },
         ])
+      );
+    });
+
+    // The only thing keeping another producer's proposals out of a solution's
+    // queue, and the callers that rely on it assert against a mocked `list` —
+    // so nothing else checks that the filter reaches Elasticsearch at all.
+    it('should filter by origin, which is what scopes a queue to its producer', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(listQuery({ origin: 'alertzero' }), SPACE_ID, request);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.query.bool.filter).toEqual(
+        expect.arrayContaining([{ term: { origin: 'alertzero' } }])
       );
     });
 

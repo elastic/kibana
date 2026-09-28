@@ -711,7 +711,10 @@ export class ProposalsService {
       // this clears the one the predecessor itself inherited rather than
       // carrying a two-attempts-ago failure forward as if it were the last.
       previousExecutionError: original.executionError,
-      ...(title !== undefined ? { title } : {}),
+      // Blanked like `create()` does, so a caller clearing the title gets the
+      // action's name back rather than an empty label: every renderer falls
+      // back with `??`, which an empty string satisfies.
+      ...(title !== undefined ? { title: blankToUndefined(title) } : {}),
       ...(comment !== undefined ? { comment } : {}),
       ...(mergedActionInput !== undefined ? { actionInput: mergedActionInput } : {}),
       impact: nextImpact,

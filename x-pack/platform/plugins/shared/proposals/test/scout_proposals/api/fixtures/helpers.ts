@@ -30,13 +30,31 @@ const SUITE_NAMESPACE = `scout-proposals-${uuidv4()}`;
 
 /** The client reports a status at either level depending on how it threw. */
 interface EsError {
+  message?: string;
   statusCode?: number;
-  body?: { error?: { type?: string } };
-  meta?: { statusCode?: number; body?: { error?: { type?: string } } };
+  body?: { error?: { type?: string; reason?: string } };
+  meta?: { statusCode?: number; body?: { error?: { type?: string; reason?: string } } };
 }
 
 const statusOf = (error: EsError | undefined): number | undefined =>
   error?.statusCode ?? error?.meta?.statusCode;
+
+/**
+ * The concurrent-create race, whichever API reported it, and nothing else.
+ *
+ * `indices.create` raises `resource_already_exists_exception`, but the
+ * index-template API raises a plain `illegal_argument_exception` and only says
+ * "already exists" in the reason — so matching on the type alone would rethrow
+ * a benign race, while matching on the 400 alone would swallow an invalid
+ * mapping in the mirror below and leave the index without its alias.
+ */
+const isAlreadyExists = (error: EsError | undefined): boolean => {
+  if (statusOf(error) !== 400) {
+    return false;
+  }
+  const { type, reason } = error?.body?.error ?? error?.meta?.body?.error ?? {};
+  return /already[ _]exists/i.test(`${type ?? ''} ${reason ?? ''} ${error?.message ?? ''}`);
+};
 
 /**
  * Same convention as the Agent Builder spaces suite: the default Space is
@@ -58,18 +76,15 @@ export const spaceUrl = (url: string, spaceId: string): string =>
  * runs afterwards, with nothing to repair it if no service call gets that far.
  */
 let indexReady: Promise<void> | undefined;
-let templateCreatedBySuite = false;
 
 const ensureProposalsIndex = (esClient: Client): Promise<void> => {
   if (!indexReady) {
+    // Unguarded on purpose: an exists API answers a missing template with
+    // `false` rather than an error, so anything thrown here is a real failure.
+    // Reading one as "it exists" would skip the install and leave the index
+    // below without its alias, which seeding then collides with.
     indexReady = esClient.indices
       .existsIndexTemplate({ name: PROPOSALS_INDEX_ALIAS })
-      .catch(() => {
-        // A stack too old for the `_index_template` API still gets the
-        // template; treating that as "exists" only skips an install we are not
-        // in a position to reason about.
-        return true;
-      })
       .then((exists) => {
         if (exists) {
           return undefined;
@@ -138,13 +153,10 @@ const ensureProposalsIndex = (esClient: Client): Promise<void> => {
               aliases: { [PROPOSALS_INDEX_ALIAS]: { is_write_index: true } },
             },
           })
-          .then(() => {
-            templateCreatedBySuite = true;
-          })
           .catch((error: EsError) => {
             // Another worker won the race and installed it first, which is the
             // same outcome as finding one already there.
-            if (statusOf(error) === 400) {
+            if (isAlreadyExists(error)) {
               return;
             }
             throw error;
@@ -154,12 +166,7 @@ const ensureProposalsIndex = (esClient: Client): Promise<void> => {
         esClient.indices.create({ index: PROPOSALS_WRITE_INDEX }).catch((error: EsError) => {
           // Only the concurrent-create race is benign; any other 400 means the
           // write target is not the alias this seed assumes.
-          const type = error?.body?.error?.type ?? error?.meta?.body?.error?.type;
-          // Read the status from both locations for the same reason
-          // `isNotFound` below does: the client surfaces it at `meta.statusCode`
-          // on a `ResponseError`, so checking only the top level would rethrow
-          // the benign race and make this suite flaky on a shared server.
-          if (statusOf(error) === 400 && type === 'resource_already_exists_exception') {
+          if (isAlreadyExists(error)) {
             return;
           }
           throw error;
@@ -176,10 +183,12 @@ const isNotFound = (error: unknown): boolean => statusOf(error as EsError) === 4
  * Removes everything this suite put into the stack, so a rerun starts from the
  * same state as the first run. Called from the specs' `afterAll`.
  *
- * Deliberately leaves the write index in place. It is the application's own
- * `.kibana-proposals-000001`, not a suite-namespaced fixture, and on a shared
- * server winning the race to create it does not make this suite its owner:
- * deleting it would take every proposal another spec or worker wrote with it.
+ * Deliberately leaves the write index and the index template in place. Both
+ * are the application's own, not suite-namespaced fixtures, and on a shared
+ * server winning the race to create one does not make this suite its owner:
+ * deleting the index would take every proposal another spec or worker wrote
+ * with it, and the template may since have been replaced by the adapter's own
+ * versioned copy, which nothing here would reinstall.
  */
 export const cleanupProposalFixtures = async (esClient: Client): Promise<void> => {
   try {
@@ -195,17 +204,8 @@ export const cleanupProposalFixtures = async (esClient: Client): Promise<void> =
     if (!isNotFound(error)) throw error;
   }
 
-  if (templateCreatedBySuite) {
-    try {
-      await esClient.indices.deleteIndexTemplate({ name: PROPOSALS_INDEX_ALIAS });
-    } catch (error) {
-      if (!isNotFound(error)) throw error;
-    }
-    templateCreatedBySuite = false;
-  }
-
-  // The next suite in this worker has to re-run the readiness dance: the
-  // template may be gone now.
+  // The next suite in this worker re-runs the readiness check rather than
+  // trusting this one's: another worker may have moved underneath it.
   indexReady = undefined;
 };
 
