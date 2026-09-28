@@ -60,7 +60,6 @@ export interface LibraryPanelProps<T extends LibraryItem> {
   readOnlyItemIdSet?: Set<string>;
   callout?: React.ReactNode;
   ebtEntityType?: string;
-  dataTestSubj?: string;
 }
 
 const defaultGetItemName = <T extends LibraryItem>(item: T): string => item.id;
@@ -79,7 +78,6 @@ export const LibraryPanel = <T extends LibraryItem>({
   readOnlyItemIdSet,
   callout,
   ebtEntityType,
-  dataTestSubj,
 }: LibraryPanelProps<T>) => {
   const { createAgentBuilderUrl } = useNavigation();
   const manageLibraryUrl = createAgentBuilderUrl(manageLibraryPath);
@@ -109,7 +107,6 @@ export const LibraryPanel = <T extends LibraryItem>({
       onClose={onClose}
       aria-labelledby={flyoutTitleId}
       pushMinBreakpoint="xs"
-      data-test-subj={dataTestSubj}
       hideCloseButton={false}
     >
       <EuiFlyoutHeader hasBorder>

@@ -73,7 +73,6 @@ export const ConnectorsCustomizeEmptyState: React.FC<ConnectorsCustomizeEmptySta
                   key="from-library"
                   icon="download"
                   disabled={isAddDisabled}
-                  data-test-subj="agentConnectorsAddFromLibraryMenuItem"
                   onClick={() => {
                     setIsMenuOpen(false);
                     onAddFromLibrary();
@@ -84,7 +83,6 @@ export const ConnectorsCustomizeEmptyState: React.FC<ConnectorsCustomizeEmptySta
                 <EuiContextMenuItem
                   key="create-new"
                   icon="plusCircle"
-                  data-test-subj="agentConnectorsCreateNewMenuItem"
                   onClick={() => {
                     setIsMenuOpen(false);
                     onCreateNew();

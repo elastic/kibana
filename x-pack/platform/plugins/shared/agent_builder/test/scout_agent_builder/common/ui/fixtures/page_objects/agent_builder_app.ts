@@ -558,37 +558,6 @@ export class AgentBuilderApp {
     });
   }
 
-  async navigateToAgentConnectors(agentId: string) {
-    await this.page.gotoApp(`agent_builder/agents/${agentId}/connectors`);
-    const emptyState = this.page.testSubj.locator('agentConnectorsCustomizeEmptyState');
-    const addButton = this.page.testSubj.locator('agentBuilderAddConnectorButton');
-    await emptyState.or(addButton).waitFor({ state: 'visible', timeout: 60_000 });
-  }
-
-  async clickEmptyStateAddConnector() {
-    await this.page.testSubj.click('agentConnectorsCustomizeEmptyStateAddButton');
-  }
-
-  async clickAddConnectorFromLibrary() {
-    await this.page.testSubj
-      .locator('agentConnectorsAddFromLibraryMenuItem')
-      .waitFor({ state: 'visible' });
-    await this.page.testSubj.click('agentConnectorsAddFromLibraryMenuItem');
-  }
-
-  async clickCreateNewConnector() {
-    await this.page.testSubj
-      .locator('agentConnectorsCreateNewMenuItem')
-      .waitFor({ state: 'visible' });
-    await this.page.testSubj.click('agentConnectorsCreateNewMenuItem');
-  }
-
-  async waitForConnectorLibraryFlyout() {
-    await this.page.testSubj
-      .locator('agentConnectorLibraryFlyout')
-      .waitFor({ state: 'visible', timeout: 30_000 });
-  }
-
   async openEditDetailsFlyout() {
     await this.page.testSubj.click('agentOverviewEditDetailsButton');
     await this.page.testSubj.locator('editDetailsFlyout').waitFor({ state: 'visible' });
