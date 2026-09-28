@@ -18,9 +18,9 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
-import { ResponseMessage } from '../conversation_rounds/round_response/response_message';
-import { RoundEvents } from '../conversation_rounds/round_events/round_events';
-import { RoundAttachmentReferences } from '../conversation_rounds/round_attachment_references';
+import { ResponseMessage } from './response/response_message';
+import { EventSteps } from './event_steps/event_steps';
+import { AttachmentReferences } from './attachments/attachment_references';
 
 interface AgentResponseProps {
   steps: ConversationRoundStep[];
@@ -51,7 +51,7 @@ export const AgentResponse: React.FC<AgentResponseProps> = ({
     <EuiFlexGroup direction="column" gutterSize="s">
       {steps.length > 0 && (
         <EuiFlexItem grow={false}>
-          <RoundEvents
+          <EventSteps
             steps={steps}
             conversationAttachments={conversationAttachments}
             attachmentRefs={attachmentRefs}
@@ -71,7 +71,7 @@ export const AgentResponse: React.FC<AgentResponseProps> = ({
         />
       </EuiFlexItem>
       {!isLoading && (
-        <RoundAttachmentReferences
+        <AttachmentReferences
           attachmentRefs={triggerAttachmentRefs}
           conversationAttachments={conversationAttachments}
           actorFilter={[ATTACHMENT_REF_ACTOR.agent, ATTACHMENT_REF_ACTOR.system]}

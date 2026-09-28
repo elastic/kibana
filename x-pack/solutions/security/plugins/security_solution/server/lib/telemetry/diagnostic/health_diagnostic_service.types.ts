@@ -57,6 +57,7 @@ export enum QueryType {
 export interface HealthDiagnosticServiceSetup {
   taskManager: TaskManagerSetupContract;
   isServerless: boolean;
+  stackVersion: string;
 }
 
 export interface HealthDiagnosticServiceStart {
@@ -106,6 +107,7 @@ export interface IndexQuery {
   encryptionKeyId?: string;
   encryptDocument?: true;
   expiresAt?: string;
+  stackVersions?: string;
 }
 
 /**
@@ -127,6 +129,7 @@ export interface ApiQuery {
   encryptionKeyId?: string;
   encryptDocument?: true;
   expiresAt?: string;
+  stackVersions?: string;
 }
 
 /**

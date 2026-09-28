@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { ENABLE_IAC_PROVISIONER_FLAG } from '../../../common/constants';
 import { appContextService } from '../app_context';
 
@@ -34,7 +35,7 @@ const mockEnvironment = ({
     jest.spyOn(appContextService, 'getFeatureFlags').mockReturnValue(undefined);
   } else {
     jest.spyOn(appContextService, 'getFeatureFlags').mockReturnValue({
-      getBooleanValue: jest.fn().mockResolvedValue(iacProvisionerEnabled),
+      getBooleanValue$: jest.fn().mockReturnValue(of(iacProvisionerEnabled)),
     } as any);
   }
 };
@@ -84,7 +85,7 @@ describe('isIacProvisionerEnabled', () => {
 
     await isIacProvisionerEnabled();
 
-    expect(appContextService.getFeatureFlags()?.getBooleanValue).toHaveBeenCalledWith(
+    expect(appContextService.getFeatureFlags()?.getBooleanValue$).toHaveBeenCalledWith(
       ENABLE_IAC_PROVISIONER_FLAG,
       false
     );
