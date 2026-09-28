@@ -12,7 +12,6 @@ import { ACTION_POLICY_EVENT_ACTIONS } from '../dispatcher/steps/constants';
 import {
   collectIdsFromEvents,
   buildExecutionHistoryItem,
-  isPolicyOutcome,
   isString,
   type NameMaps,
 } from './build_execution_history_item';
@@ -45,25 +44,6 @@ describe('isString', () => {
     expect(isString(null)).toBe(false);
     expect(isString(42)).toBe(false);
     expect(isString({})).toBe(false);
-  });
-});
-
-describe('isPolicyOutcome', () => {
-  it('accepts dispatched, throttled, and dispatch_failed', () => {
-    expect(isPolicyOutcome('dispatched')).toBe(true);
-    expect(isPolicyOutcome('throttled')).toBe(true);
-    expect(isPolicyOutcome('dispatch_failed')).toBe(true);
-  });
-
-  it('rejects unmatched and other strings', () => {
-    expect(isPolicyOutcome('unmatched')).toBe(false);
-    expect(isPolicyOutcome('foo')).toBe(false);
-  });
-
-  it('rejects non-strings', () => {
-    expect(isPolicyOutcome(undefined)).toBe(false);
-    expect(isPolicyOutcome(null)).toBe(false);
-    expect(isPolicyOutcome(42)).toBe(false);
   });
 });
 
@@ -274,7 +254,7 @@ describe('buildExecutionHistoryItem', () => {
     expect(historyItem?.workflows[0]?.name).toBeNull();
   });
 
-  it('preserves the outcome verbatim', () => {
+  it('projects the stored event action onto the API outcome', () => {
     const dispatchedItem = buildExecutionHistoryItem(
       buildEvent({
         event: { action: ACTION_POLICY_EVENT_ACTIONS.DISPATCHED, provider: 'alerting_v2' },
@@ -302,7 +282,7 @@ describe('buildExecutionHistoryItem', () => {
       EMPTY_NAME_MAPS
     );
 
-    expect(dispatchedItem?.outcome).toBe('dispatched');
+    expect(dispatchedItem?.outcome).toBe('success');
     expect(throttledItem?.outcome).toBe('throttled');
   });
 
