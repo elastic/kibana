@@ -115,10 +115,15 @@ steps:
               rss_body_text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.rss_body_text | default: steps.load_full_doc.output.hits.hits[0]._source.content.body_text }}"
               rendered_body_text: "{{ steps.materialize_article.output.rendered_body_text }}"
               materialization: "${{ steps.materialize_article.output.materialization }}"
-        # Do not continue on failure: a successful Jina render that fails to
-        # persist must leave the report pending. Continuing would let the gate
-        # or core mark workflow_v4 / workflow_v4_rejected with no retained
-        # article, and load_pending_reports would never retry it.
+        # Continue the foreach so one bad update cannot stall the other 49
+        # pending reports. The next step skips this item so the gate/core never
+        # finalize a report whose retained article failed to write.
+        on-failure:
+          continue: true
+
+      - name: retry_materialization_persist_failure
+        type: loop.continue
+        if: "${{ steps.persist_materialization.error != null }}"
 
       # Cheap hard gate: a negative Haiku verdict stops this report before
       # deterministic extraction, Sonnet core extraction, or Opus Diamond.
@@ -151,6 +156,13 @@ steps:
           gate_needs_render: "${{ steps.assess_relevance.output.needs_render }}"
           gate_has_original_commentary: "${{ steps.assess_relevance.output.has_original_commentary }}"
           gate_reason: "{{ steps.assess_relevance.output.reason }}"
+
+      # A negative verdict on teaser/fallback text is not final: needs_render
+      # means the substantive article was never available (e.g. Jina outage).
+      # Leave the report pending so a later run can re-materialize and re-gate.
+      - name: defer_unrendered_rejection
+        type: loop.continue
+        if: "${{ variables.gate_is_intelligence == false and variables.gate_needs_render == true }}"
 
       - name: persist_gate_rejection
         type: elasticsearch.update

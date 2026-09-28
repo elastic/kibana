@@ -123,16 +123,34 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
     });
   });
 
+  it('defers a negative gate when needs_render says the article was unavailable', () => {
+    expect(findStepByName(workflow.steps, 'defer_unrendered_rejection')).toMatchObject({
+      type: 'loop.continue',
+      if: expect.stringContaining('gate_needs_render'),
+    });
+    const defer = findStepByName(workflow.steps, 'defer_unrendered_rejection');
+    expect(String(defer?.if)).toContain('gate_is_intelligence');
+    // Must run before the permanent rejection write.
+    const yaml = THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml;
+    expect(yaml.indexOf('name: defer_unrendered_rejection')).toBeLessThan(
+      yaml.indexOf('name: persist_gate_rejection')
+    );
+  });
+
   it('sends complete article text and contains no blind 30K prefix slice', () => {
     expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain('slice: 0, 30000');
     expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain('30000');
   });
 
-  it('does not continue past a failed materialization persist for RSS reports', () => {
-    const step = findStepByName(workflow.steps, 'persist_materialization') as {
+  it('skips a report on materialization persist failure without aborting the foreach', () => {
+    const persist = findStepByName(workflow.steps, 'persist_materialization') as {
       'on-failure'?: { continue?: boolean };
     };
-    expect(step?.['on-failure']?.continue).not.toBe(true);
+    expect(persist?.['on-failure']?.continue).toBe(true);
+    expect(findStepByName(workflow.steps, 'retry_materialization_persist_failure')).toMatchObject({
+      type: 'loop.continue',
+      if: '${{ steps.persist_materialization.error != null }}',
+    });
   });
 
   // Dropped in this PR: it was a closed-set taxonomy field nothing consumed, and the
