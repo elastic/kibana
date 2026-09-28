@@ -9,7 +9,6 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function UptimeOverviewProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
 
   return {
     async expandMonitorDetail(id: string): Promise<void> {
@@ -31,15 +30,6 @@ export function UptimeOverviewProvider({ getService }: FtrProviderContext) {
       }
       await testSubjects.click('xpack.synthetics.alertsPopover.toggleButton');
       return testSubjects.click('xpack.synthetics.openAlertContextPanel');
-    },
-
-    async clickDefineSettings() {
-      return retry.tryForTime(60 * 1000, async () => {
-        if (await testSubjects.exists('errorToastBtn', { timeout: 0 })) {
-          await testSubjects.click('toastCloseButton');
-        }
-        await testSubjects.click('uptimeSettingsLink');
-      });
     },
   };
 }

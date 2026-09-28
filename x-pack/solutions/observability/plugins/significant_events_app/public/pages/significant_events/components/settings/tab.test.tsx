@@ -177,15 +177,17 @@ describe('SettingsTab developer mode', () => {
     expect(screen.queryByTestId('streams-settings-tuning-editor')).not.toBeInTheDocument();
   });
 
-  it('hides the cost estimate when developer mode is off', () => {
+  it('hides stale event cleanup and the cost estimate when developer mode is off', () => {
     setup({ isDeveloperMode: false });
 
+    expect(screen.queryByTestId('stale-event-cleanup-section')).not.toBeInTheDocument();
     expect(screen.queryByTestId('cost-estimate')).not.toBeInTheDocument();
   });
 
-  it('shows the cost estimate when developer mode is on', () => {
+  it('shows stale event cleanup and the cost estimate when developer mode is on', () => {
     setup({ isDeveloperMode: true });
 
+    expect(screen.getByTestId('stale-event-cleanup-section')).toBeInTheDocument();
     expect(screen.getByTestId('cost-estimate')).toBeInTheDocument();
   });
 

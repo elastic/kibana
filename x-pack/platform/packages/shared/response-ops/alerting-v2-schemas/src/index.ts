@@ -9,7 +9,15 @@ export * from './rule_data_schema';
 export * from './rule_attachment_schema';
 export * from './error_response_schema';
 export * from './constants';
-export { actorSchema, durationSchema, tagsResponseSchema, tagsSchema } from './common';
+export {
+  actorSchema,
+  durationSchema,
+  entityIdSchema,
+  ENTITY_ID_NOTE,
+  groupHashSchema,
+  tagsResponseSchema,
+  tagsSchema,
+} from './common';
 export type { Actor, TagsResponse } from './common';
 export {
   validateDuration,
