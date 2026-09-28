@@ -26,8 +26,8 @@ import type { TimeRange } from '../../use_time_range_param';
 
 const TIME_RANGE_TO_ESQL: Record<TimeRange, { fetchWindow: string; period: string }> = {
   '24h': { fetchWindow: '26h', period: '24h' },
-  '7d': { fetchWindow: '170h', period: '7d' },   // 7*24 + 2 = 170h
-  '30d': { fetchWindow: '722h', period: '30d' },  // 30*24 + 2 = 722h
+  '7d': { fetchWindow: '170h', period: '7d' }, // 7*24 + 2 = 170h
+  '30d': { fetchWindow: '722h', period: '30d' }, // 30*24 + 2 = 722h
 };
 
 export const buildRiskMoversCountQuery = (
