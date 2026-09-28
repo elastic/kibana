@@ -48,6 +48,9 @@ import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/regist
 import { registerAfterExecutionWorkflowsHook } from './hooks/agent_workflows/register_after_execution_workflows_hook';
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
 import { registerTaskDefinitions } from './services/execution';
+import { registerConversationSummaryTask } from './services/conversation_summary/task';
+import { ConversationSummaryScheduler } from './services/conversation_summary/scheduler';
+import { getTemplate } from './services/conversation/templates/registry';
 import { createModelProviderFactory } from './services/execution/runner/model_provider';
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
@@ -146,6 +149,23 @@ export class AgentBuilderPlugin
           throw new Error('getTaskHandler called before service init');
         }
         return services.taskHandler;
+      },
+    });
+
+    registerConversationSummaryTask({
+      taskManager: setupDeps.taskManager,
+      getRunner: () => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('conversation summary runner called before service init');
+        }
+        return {
+          executeAgent: (params) => services.execution.executeAgent(params),
+          patchSummary: async ({ request, conversationId, field, summary }) => {
+            const client = await services.conversations.getScopedClient({ request });
+            await client.patchMetadata(conversationId, { [field]: summary });
+          },
+        };
       },
     });
 
@@ -382,6 +402,13 @@ export class AgentBuilderPlugin
       this.logger,
       this.isExperimentalEnabled!
     );
+
+    new ConversationSummaryScheduler({
+      bus: this.conversationEventBus,
+      taskManager,
+      getTemplate,
+      logger: this.logger.get('conversation-summary'),
+    }).start();
 
     const {
       tools,

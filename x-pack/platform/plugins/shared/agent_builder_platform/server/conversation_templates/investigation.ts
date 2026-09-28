@@ -12,6 +12,7 @@ export const investigationTemplate: ConversationTemplate = {
   version: 1,
   name: 'Investigation',
   description: 'Use for investigations',
+  summary: { skillId: 'summarize-conversation' },
   fields: {
     status: {
       input_type: 'SELECT',

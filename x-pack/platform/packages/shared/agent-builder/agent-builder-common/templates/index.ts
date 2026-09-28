@@ -76,4 +76,12 @@ export interface ConversationTemplate {
    * Do not use integer-like keys — insertion order is only guaranteed for string keys.
    */
   fields: Record<string, ConversationTemplateFieldDefinition>;
+  /**
+   * When set, content changes on a conversation of this template schedule a side agent run
+   * that writes `field` (default `summary`) using `skillId`. The run does not append a chat round.
+   */
+  summary?: {
+    skillId: string;
+    field?: string;
+  };
 }

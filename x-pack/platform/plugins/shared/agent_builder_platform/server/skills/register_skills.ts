@@ -18,6 +18,7 @@ import { analyzeAndImproveSkill } from './analyze_and_improve';
 import { contextEngineSignalsSkill } from './context_engine_signals';
 import { aiIndexSourcesSkill } from './ai_index_sources';
 import { aiIndexAutomationsSkill } from './ai_index_automations';
+import { summarizeConversationSkill } from './summarize_conversation/summarize_conversation_skill';
 import { loadElasticSkills } from './elastic_skills';
 
 export const registerSkills = (
@@ -35,6 +36,7 @@ export const registerSkills = (
   agentBuilder.skills.register(contextEngineSignalsSkill);
   agentBuilder.skills.register(aiIndexSourcesSkill);
   agentBuilder.skills.register(aiIndexAutomationsSkill);
+  agentBuilder.skills.register(summarizeConversationSkill);
 
   loadElasticSkills({ logger: logger.get('elastic-skills') }).forEach((skill) => {
     agentBuilder.skills.register(skill);
