@@ -125,9 +125,7 @@ describe('escalation routes', () => {
       expect(byPath(posts, ESCALATIONS_INTERNAL_URL).config.access).toBe('internal');
       expect(byPath(patches, ESCALATION_BY_ID_URL).config.access).toBe('internal');
       expect(byPath(puts, ESCALATION_ASSIGN_URL).config.access).toBe('internal');
-      expect(byPath(plainPosts, SUGGEST_USER_PROFILES_URL).config.options?.access).toBe(
-        'internal'
-      );
+      expect(byPath(plainPosts, SUGGEST_USER_PROFILES_URL).config.options?.access).toBe('internal');
     });
 
     it('gates suggest-users on either ESCALATIONS_API_PRIVILEGE_MANAGE or INVESTIGATIONS_API_PRIVILEGE_MANAGE', () => {

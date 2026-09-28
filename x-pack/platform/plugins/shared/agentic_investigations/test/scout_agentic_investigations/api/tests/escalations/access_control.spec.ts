@@ -150,19 +150,17 @@ apiTest.describe(
     );
 
     apiTest(
-      'PATCH title from a collaborator returns 404 — title update requires owner access',
+      'PATCH title from a collaborator returns 403 — collaborator lacks manage_escalations',
       async ({ apiClient }) => {
-        // `client.update` (used for title changes) enforces `owner` access, so a collaborator
-        // holding manage_escalations receives 404 (not 403) on a title PATCH. This is intentional:
-        // assignment and metadata writes go through the dedicated PUT .../assignees route, which
-        // uses `converse` access and allows collaborators.
+        // The editor role does not include escalations_all (includeIn: 'none'), so the privilege
+        // gate fires before the ownership check and returns 403.
         const response = await apiClient.patch(ESCALATION_BY_ID_PATH(privateEscalationId), {
           headers: { ...INTERNAL_HEADERS, ...editorCookieHeader },
           body: { title: 'Collaborator rename attempt' },
           responseType: 'json',
         });
 
-        expect(response).toHaveStatusCode(404);
+        expect(response).toHaveStatusCode(403);
       }
     );
   }

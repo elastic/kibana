@@ -143,7 +143,7 @@ describe('AgenticInvestigationsPlugin', () => {
       expect(escalationsAll).toEqual(
         expect.objectContaining({
           id: 'escalations_all',
-          includeIn: 'all',
+          includeIn: 'none',
           api: [ESCALATIONS_API_PRIVILEGE_READ, ESCALATIONS_API_PRIVILEGE_MANAGE],
           ui: [ESCALATIONS_UI_CAPABILITY_SHOW, ESCALATIONS_UI_CAPABILITY_MANAGE],
         })
