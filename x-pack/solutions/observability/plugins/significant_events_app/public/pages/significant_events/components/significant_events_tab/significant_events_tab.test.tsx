@@ -155,6 +155,18 @@ describe('Significant Events timestamp rendering', () => {
 
 describe('SignificantEventFlyout actions menu', () => {
   it('shows Dismiss and Close for an open event and opens the dismiss modal', () => {
+    // Provide a non-empty lifecycle so hasCanonicalLifecycle is true and
+    // close/dismiss actions are enabled.
+    const { useFetchSignificantEventLifecycle } = jest.requireMock(
+      '../../../../hooks/use_fetch_significant_event_lifecycle'
+    );
+    useFetchSignificantEventLifecycle.mockReturnValueOnce({
+      data: { events: [event], detections: [] },
+      isLoading: false,
+      isSuccess: true,
+      isError: false,
+      refetch: jest.fn(),
+    });
     render(<SignificantEventFlyout event={event} onClose={jest.fn()} />);
 
     fireEvent.click(screen.getByTestId('sigEventFlyoutActionsButton'));
