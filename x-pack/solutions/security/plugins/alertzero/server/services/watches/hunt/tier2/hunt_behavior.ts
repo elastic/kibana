@@ -360,13 +360,16 @@ const executeValidatedEsql = async ({
  * Wildcard patterns for the integrations that produced Tier 1 hits, derived
  * from concrete backing indices (`.ds-logs-okta.system-default-2026.09.01-000001`
  * → `logs-okta.system-default*`). A confirmed hit only says WHICH integration
- * to target, never a dated index name.
+ * to target, never a dated index name. A pattern that already ends in `*` (a
+ * discovered scope hands those over as-is) is kept as it is.
  */
 const matchedIndexPatterns = (articleContext: HuntBehaviorArticleContext | undefined): string[] => [
   ...new Set(
-    (articleContext?.matched_indices ?? []).map(
-      (index) => `${index.replace(/^\.ds-/, '').replace(/[-.]\d{4}[.-]\d{2}[.-]\d{2}.*$/, '')}*`
-    )
+    (articleContext?.matched_indices ?? []).map((index) => {
+      const base = index.replace(/^\.ds-/, '').replace(/[-.]\d{4}[.-]\d{2}[.-]\d{2}.*$/, '');
+      // A discovered scope already hands over wildcard patterns; do not double the star.
+      return base.endsWith('*') ? base : `${base}*`;
+    })
   ),
 ];
 

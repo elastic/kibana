@@ -337,6 +337,7 @@ describe('huntCoordinator', () => {
         technologies: [],
         index_patterns: [],
         status: 'blocked',
+        resolution: 'blocked:no_report',
         required: ['logs-aws.*', 'logs-fortinet.*'],
         optional: [],
         missing: ['logs-aws.*', 'logs-fortinet.*'],
@@ -383,104 +384,166 @@ describe('huntCoordinator', () => {
     });
   });
 
-  it('says neither a known technology nor a discovered dataset matched when a report was given and nothing was pinned', async () => {
+  describe('what a blocked scope tells the caller', () => {
     const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
-    mockScope.mockResolvedValueOnce({
+
+    const blockedScope = (
+      resolution: string,
+      overrides: Record<string, unknown> = {}
+    ): Record<string, unknown> => ({
       technologies: [],
       index_patterns: [],
       status: 'blocked',
+      resolution,
       required: ['logs-aws.*', 'logs-fortinet.*'],
       optional: [],
       missing: ['logs-aws.*', 'logs-fortinet.*'],
       window: { from: 'now-24h', to: 'now' },
       row_limit: 100,
+      ...overrides,
     });
 
-    const result = await huntCoordinator(
-      { esClient, reportsEsClient: esClient },
-      undefined,
-      logger,
-      {
+    const runBlocked = async (
+      resolution: string,
+      params: Record<string, unknown> = {},
+      overrides: Record<string, unknown> = {}
+    ) => {
+      mockScope.mockResolvedValueOnce(blockedScope(resolution, overrides));
+      return huntCoordinator({ esClient, reportsEsClient: esClient }, undefined, logger, {
         spaceId: 'default',
         trigger: 'scheduled',
-        run_id: 'run-7',
+        run_id: `run-${resolution}`,
         iocs: [{ type: 'ip', value: '203.0.113.10' }],
-      }
-    );
+        ...params,
+      });
+    };
 
-    expect(result.status).toBe('blocked');
-    expect(result.message).toContain("No known technology's indices exist in space default");
-    expect(result.message).toContain('no discovered dataset matched the report');
-    expect(result.next_step).toContain("Install an integration for the report's vendor");
-    expect(result.next_step).toContain('pin a technology');
-  });
+    it('reports no index patterns on the wire even when the blocked scope carried some', async () => {
+      const result = await runBlocked(
+        'blocked:model_declined',
+        {},
+        { index_patterns: ['logs-aws.*', 'logs-fortinet.*'] }
+      );
 
-  it('names the pinned technology when a pinned scope is blocked', async () => {
-    const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
-    mockScope.mockResolvedValueOnce({
-      technologies: ['fortigate'],
-      index_patterns: [],
-      status: 'blocked',
-      required: ['logs-fortinet.*'],
-      optional: [],
-      missing: ['logs-fortinet.*'],
-      window: { from: 'now-24h', to: 'now' },
-      row_limit: 100,
+      expect(result.status).toBe('blocked');
+      expect(result.index_patterns).toEqual([]);
     });
 
-    const result = await huntCoordinator(
-      { esClient, reportsEsClient: esClient },
-      undefined,
-      logger,
-      {
-        spaceId: 'default',
-        trigger: 'scheduled',
-        run_id: 'run-7-pinned',
-        technology: 'fortigate',
-      }
-    );
+    it('names the pinned technology when a pinned scope is blocked', async () => {
+      const result = await runBlocked(
+        'blocked:pinned',
+        { technology: 'fortigate', iocs: undefined },
+        { technologies: ['fortigate'], required: ['logs-fortinet.*'], missing: ['logs-fortinet.*'] }
+      );
 
-    expect(result.status).toBe('blocked');
-    expect(result.message).toContain('No required index resolved for fortigate');
-    expect(result.next_step).toContain('pass a technology whose indices exist');
-  });
-
-  it('returns a blocked dynamic scope with no index patterns when discovery found nothing for the report', async () => {
-    const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
-    mockScope.mockResolvedValueOnce({
-      technologies: [],
-      index_patterns: [],
-      status: 'blocked',
-      required: [],
-      optional: [],
-      missing: [],
-      window: { from: 'now-24h', to: 'now' },
-      row_limit: 100,
+      expect(result.status).toBe('blocked');
+      expect(result.message).toBe(
+        'No required index resolved for fortigate in space default (missing: logs-fortinet.*).'
+      );
+      expect(result.next_step).toBe(
+        'Install the integration whose indices this hunt needs, or pass a technology whose indices exist in this space.'
+      );
     });
 
-    const result = await huntCoordinator(
-      { esClient, reportsEsClient: esClient },
-      undefined,
-      logger,
-      {
-        spaceId: 'hunt-a',
-        trigger: 'scheduled',
-        run_id: 'run-dynamic-blocked',
-        report_id: 'rpt-1',
-      }
-    );
+    it('keeps the pinned wording for any blocked result while a technology is pinned', async () => {
+      const result = await runBlocked(
+        'blocked:model_declined',
+        { technology: 'fortigate' },
+        { required: ['logs-fortinet.*'], missing: ['logs-fortinet.*'] }
+      );
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        status: 'blocked',
-        technologies: [],
-        index_patterns: [],
-        tier2_skipped_reason: 'scope_blocked',
-        message: expect.stringContaining('no discovered dataset matched the report'),
-        next_step: expect.stringContaining("Install an integration for the report's vendor"),
-        completed_successfully: false,
-      })
-    );
+      expect(result.message).toBe(
+        'No required index resolved for fortigate in space default (missing: logs-fortinet.*).'
+      );
+      expect(result.next_step).toContain('pass a technology whose indices exist in this space');
+    });
+
+    it('keeps the static wording for a bare call that had no report to match against', async () => {
+      const result = await runBlocked('blocked:no_report', { iocs: undefined });
+
+      expect(result.message).toBe(
+        'No required index resolved for any configured technology in space default (missing: logs-aws.*, logs-fortinet.*).'
+      );
+      expect(result.next_step).toBe(
+        'Install the integration whose indices this hunt needs, or pass a technology whose indices exist in this space.'
+      );
+    });
+
+    it('says the model declined every discovered dataset', async () => {
+      const result = await runBlocked('blocked:model_declined');
+
+      expect(result.message).toBe(
+        "No known technology's indices are visible to this hunt and no discovered dataset matched the report (checked: logs-aws.*, logs-fortinet.*)."
+      );
+      expect(result.next_step).toBe(
+        "Install an integration for the report's vendor so its data is ingested, or pin a technology whose indices exist."
+      );
+    });
+
+    it('says no model was there to widen a missed deterministic match', async () => {
+      const result = await runBlocked('blocked:model_unavailable');
+
+      expect(result.message).toBe(
+        "No known technology's indices are visible to this hunt and the report's vendor matched no discovered dataset; no model was available to widen the match (checked: logs-aws.*, logs-fortinet.*)."
+      );
+      expect(result.next_step).toBe(
+        "Configure a connector on the reasoning tier so scope resolution can use the model, install an integration for the report's vendor, or pin a technology."
+      );
+    });
+
+    it('says no log datasets were discovered at all', async () => {
+      const result = await runBlocked('blocked:no_datasets');
+
+      expect(result.message).toBe(
+        "No known technology's indices are visible to this hunt and no log datasets were discovered (checked: logs-aws.*, logs-fortinet.*)."
+      );
+      expect(result.next_step).toBe(
+        'Install an integration whose data this hunt can search, or pin a technology.'
+      );
+    });
+
+    it('says discovery itself failed', async () => {
+      const result = await runBlocked('blocked:discovery_failed');
+
+      expect(result.message).toBe(
+        "No known technology's indices are visible to this hunt and dataset discovery failed (checked: logs-aws.*, logs-fortinet.*)."
+      );
+      expect(result.next_step).toBe(
+        "Check Elasticsearch connectivity and the calling user's index privileges, then retry."
+      );
+    });
+
+    it('never says "in space" on a dynamic path, since index resolution is cluster-wide', async () => {
+      for (const resolution of [
+        'blocked:model_declined',
+        'blocked:model_unavailable',
+        'blocked:no_datasets',
+        'blocked:discovery_failed',
+      ]) {
+        const result = await runBlocked(resolution);
+        expect(result.message).not.toContain('in space');
+      }
+    });
+
+    it('returns a blocked dynamic scope with no index patterns when discovery found nothing for the report', async () => {
+      const result = await runBlocked(
+        'blocked:model_declined',
+        { spaceId: 'hunt-a', report_id: 'rpt-1', iocs: undefined },
+        { required: [], missing: [] }
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          status: 'blocked',
+          technologies: [],
+          index_patterns: [],
+          tier2_skipped_reason: 'scope_blocked',
+          message: expect.stringContaining('no discovered dataset matched the report'),
+          next_step: expect.stringContaining("Install an integration for the report's vendor"),
+          completed_successfully: false,
+        })
+      );
+    });
   });
 
   it('skips Tier 2 with configured_never and still completes', async () => {

@@ -257,6 +257,25 @@ describe('huntBehavior', () => {
     );
   });
 
+  it('does not double the wildcard on matched indices that already carry one', async () => {
+    await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      {
+        text: REPORT_TEXT,
+        required_indices: ['logs-*'],
+        article_context: {
+          // A discovered scope hands over wildcard patterns, not concrete backing indices.
+          matched_indices: ['logs-cisco_asa.log-*', 'logs-aws.*'],
+        },
+      },
+      esClient
+    );
+    expect(generateEsqlMock).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 'logs-cisco_asa.log-*,logs-aws.*' })
+    );
+  });
+
   it('returns generateEsql targeting the required indices when Tier 1 had no hits', async () => {
     await huntBehavior(
       buildMockModel([t1078Candidate]),

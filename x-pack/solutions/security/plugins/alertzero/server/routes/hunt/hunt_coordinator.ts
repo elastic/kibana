@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { HuntCoordinatorResponse } from '@kbn/alertzero-common';
 import {
   ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
@@ -20,6 +22,31 @@ import { huntCoordinator } from '../../services/watches/hunt/hunt_coordinator';
 import { parseTechnologyInput } from '../../services/watches/hunt/common/resolve_index_scope';
 import { resolveScopedModel } from './lib/scoped_model';
 import type { RouteDependencies } from '../register_routes';
+
+/**
+ * Resolves the Reasoning-tier model, or `undefined` when none is available. A missing
+ * connector is the ordinary outcome, not an error, so it never fails the request: the
+ * coordinator degrades (no dynamic scope widening, Tier 2 reports `no_inference`).
+ */
+const resolveModelForHunt = async ({
+  resolve,
+  logger,
+}: {
+  resolve: () => ReturnType<typeof resolveScopedModel>;
+  logger: Logger;
+}): Promise<ScopedModel | undefined> => {
+  try {
+    const outcome = await resolve();
+    return outcome.ok ? outcome.model : undefined;
+  } catch (err) {
+    logger.debug(
+      `hunt_coordinator: model resolution failed, running without a model — ${
+        (err as Error).message
+      }`
+    );
+    return undefined;
+  }
+};
 
 export const HUNT_COORDINATOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_coordinator` as const;
 
@@ -90,20 +117,23 @@ export const registerHuntCoordinatorRoute = ({
           } = request.body;
 
           // Same Reasoning tier as the standalone hunt_behavior route, so this path (the
-          // one that actually runs Tier 2 in production) resolves the same model. A
-          // `never` run has no use for a model, so it skips resolution entirely.
-          const modelOutcome =
-            tier2_when === 'never'
-              ? undefined
-              : await resolveScopedModel({
-                  inference: getInference(),
-                  searchInferenceEndpoints: getSearchInferenceEndpoints(),
-                  featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
-                  request,
-                  uiSettingsClient: core.uiSettings.client,
-                  logger,
-                });
-          const model = modelOutcome?.ok ? modelOutcome.model : undefined;
+          // one that actually runs Tier 2 in production) resolves the same model. It is
+          // resolved regardless of `tier2_when`: scope resolution uses it to widen the
+          // dataset match once every static entry is blocked and the deterministic match
+          // misses, and resolving a connector spends no tokens. Tier 2 itself is still
+          // gated on `tier2_when` inside the coordinator, so a `never` run stays `never`.
+          const model = await resolveModelForHunt({
+            resolve: () =>
+              resolveScopedModel({
+                inference: getInference(),
+                searchInferenceEndpoints: getSearchInferenceEndpoints(),
+                featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+                request,
+                uiSettingsClient: core.uiSettings.client,
+                logger,
+              }),
+            logger,
+          });
 
           const body: HuntCoordinatorResponse = await huntCoordinator(
             { esClient, reportsEsClient },

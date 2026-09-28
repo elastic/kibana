@@ -19,7 +19,7 @@ import type {
 import { completedSuccessfully, huntCompletenessOf } from './common/completeness';
 import { resolveHuntScope } from './common/resolve_index_scope';
 import { loadReportHuntContext, MAX_HUNT_REPORT_TEXT_CHARS } from './common/load_report_context';
-import type { HuntScope } from './common/resolve_index_scope';
+import type { HuntScope, HuntScopeResolution } from './common/resolve_index_scope';
 import { SUMMARIZE_HIT_SOURCE_FIELDS, summarizeHit } from './common/summarize_hit';
 import { huntForThreat, emptyHuntForThreatResult } from './tier1/hunt_for_threat';
 import type { HuntForThreatServiceResult } from './tier1/types';
@@ -239,6 +239,72 @@ const buildArticleContext = (
   }
   if (tier1.time_range) context.time_range = tier1.time_range;
   return Object.keys(context).length === 0 ? undefined : context;
+};
+
+/**
+ * What to tell the caller when the scope is blocked, keyed on which path blocked it.
+ *
+ * A pinned technology (or any blocked scope while one is set) keeps the original
+ * wording. A bare call with nothing to match against does too. The dynamic paths say
+ * what actually happened: the report matched no dataset, no model was there to widen
+ * the match, no dataset was discovered at all, or discovery itself failed.
+ * `_resolve/index` is cluster-wide and privilege-scoped, so the dynamic wording talks
+ * about what is visible to this hunt rather than what exists in a space.
+ */
+const blockedScopeGuidance = ({
+  resolution,
+  technology,
+  spaceId,
+  missing,
+}: {
+  resolution: HuntScopeResolution;
+  technology: HuntTechnology | undefined;
+  spaceId: string;
+  missing: string[];
+}): { message: string; nextStep: string } => {
+  const checked = missing.join(', ');
+  const noKnownIndices = "No known technology's indices are visible to this hunt";
+
+  switch (resolution) {
+    case 'blocked:model_declined':
+      if (technology !== undefined) break;
+      return {
+        message: `${noKnownIndices} and no discovered dataset matched the report (checked: ${checked}).`,
+        nextStep:
+          "Install an integration for the report's vendor so its data is ingested, or pin a technology whose indices exist.",
+      };
+    case 'blocked:model_unavailable':
+      if (technology !== undefined) break;
+      return {
+        message: `${noKnownIndices} and the report's vendor matched no discovered dataset; no model was available to widen the match (checked: ${checked}).`,
+        nextStep:
+          "Configure a connector on the reasoning tier so scope resolution can use the model, install an integration for the report's vendor, or pin a technology.",
+      };
+    case 'blocked:no_datasets':
+      if (technology !== undefined) break;
+      return {
+        message: `${noKnownIndices} and no log datasets were discovered (checked: ${checked}).`,
+        nextStep: 'Install an integration whose data this hunt can search, or pin a technology.',
+      };
+    case 'blocked:discovery_failed':
+      if (technology !== undefined) break;
+      return {
+        message: `${noKnownIndices} and dataset discovery failed (checked: ${checked}).`,
+        nextStep:
+          "Check Elasticsearch connectivity and the calling user's index privileges, then retry.",
+      };
+    default:
+      break;
+  }
+
+  // `blocked:pinned`, `blocked:no_report`, and any blocked result while a technology
+  // is pinned: the static wording, unchanged.
+  const target = technology ?? 'any configured technology';
+  return {
+    message: `No required index resolved for ${target} in space ${spaceId} (missing: ${checked}).`,
+    nextStep:
+      'Install the integration whose indices this hunt needs, or pass a technology whose indices exist in this space.',
+  };
 };
 
 const decideTier2Skip = (
@@ -512,25 +578,20 @@ export const huntCoordinator = async (
   // A blocked scope is a failed run, never a clean one: no required index exists,
   // so there is nothing to hunt and the caller must not write hunt evidence.
   if (indexScope.status === 'blocked') {
-    // With no pinned technology, none resolved, and a report to match against, the
-    // dynamic path also ran and matched nothing: the space holds neither a known
-    // technology's indices nor a dataset the report's vendor or product points at.
-    const nothingMatched =
-      technology === undefined && technologies.length === 0 && hasReportContext;
-    const target = technology ?? 'any configured technology';
-    const message = nothingMatched
-      ? `No known technology's indices exist in space ${spaceId} and no discovered dataset matched the report (missing: ${indexScope.missing.join(
-          ', '
-        )}).`
-      : `No required index resolved for ${target} in space ${spaceId} (missing: ${indexScope.missing.join(
-          ', '
-        )}).`;
+    const { message, nextStep } = blockedScopeGuidance({
+      resolution: scope.resolution,
+      technology,
+      spaceId,
+      missing: indexScope.missing,
+    });
     return {
       status: 'blocked',
       report_id: reportId,
       run_id,
       technologies,
-      index_patterns: scope.index_patterns,
+      // The wire contract says empty when blocked, whatever the scope carried: nothing
+      // was hunted, so nothing is reported as hunted.
+      index_patterns: [],
       tier1: {
         tier: 1,
         ...emptyHuntForThreatResult(
@@ -543,9 +604,7 @@ export const huntCoordinator = async (
       },
       tier2_skipped_reason: 'scope_blocked',
       message,
-      next_step: nothingMatched
-        ? "Install an integration for the report's vendor so its data lands in this space, or pin a technology whose indices exist here."
-        : 'Install the integration whose indices this hunt needs, or pass a technology whose indices exist in this space.',
+      next_step: nextStep,
       has_confirmed_hit: false,
       // Nothing about this run says whether the environment is clean, and a later run
       // can differ: the report may be indexed, the scope may resolve, the index may
