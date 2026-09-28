@@ -26,7 +26,11 @@ export async function collectSpacesForUninstallClosure(
   savedObjectsClient: SavedObjectsClientContract,
   rootInstallation: Installation,
   rootPackagePolicies: PackagePolicy[],
-  visited: Set<string> = new Set()
+  // beingRemoved tracks every package already decided to be removed in this closure.
+  // A shared transitive dep C (depended on by both A and B) will be removed at runtime
+  // once its last dependant is removed — so we must include it when all its dependants
+  // are in beingRemoved, not just the current root.
+  beingRemoved: Set<string> = new Set()
 ): Promise<{ spaceIds: Set<string>; truncated: boolean }> {
   const spaceIds = new Set<string>();
   let truncated = false;
@@ -49,13 +53,21 @@ export async function collectSpacesForUninstallClosure(
   }
 
   addFromInstallationAndPolicies(rootInstallation, rootPackagePolicies);
-  visited.add(rootInstallation.name);
+  beingRemoved.add(rootInstallation.name);
+
+  // Mirror the feature-flag guard in cleanupDependenciesStep: when dependency
+  // resolution is disabled the cleanup step does nothing, so we must not
+  // pre-authorize dependency spaces either (it would 403 callers who can manage
+  // the parent but not an incidentally-installed dep they'd never touch).
+  if (appContextService.getExperimentalFeatures().enableResolveDependencies !== true) {
+    return { spaceIds, truncated };
+  }
 
   // Walk the dependency closure: for each auto-installed dependency that would
   // also be removed, collect its affected spaces before any deletion starts.
   const dependencies = rootInstallation.dependencies ?? [];
   for (const dep of dependencies) {
-    if (visited.has(dep.name)) {
+    if (beingRemoved.has(dep.name)) {
       continue;
     }
     const depInstallation = await getInstallation({ savedObjectsClient, pkgName: dep.name });
@@ -63,14 +75,17 @@ export async function collectSpacesForUninstallClosure(
       continue;
     }
 
-    // Only check deps that would actually be removed (same logic as cleanupDependenciesStep)
+    // A dependency is removed at runtime when all its dependants have been removed.
+    // Use `beingRemoved` (the full set of packages removed in this closure) rather
+    // than just the current root, so shared transitive deps (C depended on by both
+    // A and B) are correctly identified as eventually-removed when A and B are both
+    // in the closure — matching the sequential runtime behaviour of cleanupDependenciesStep.
+    if (!depInstallation.installed_as_dependency) {
+      continue;
+    }
     const isDependencyOf = depInstallation.is_dependency_of ?? [];
-    const remainingDependants = isDependencyOf.filter(
-      (p) => !(p.name === rootInstallation.name && p.version === rootInstallation.version)
-    );
-    const wouldBeRemoved =
-      remainingDependants.length === 0 && depInstallation.installed_as_dependency === true;
-    if (!wouldBeRemoved) {
+    const allDependantsBeingRemoved = isDependencyOf.every((p) => beingRemoved.has(p.name));
+    if (!allDependantsBeingRemoved) {
       continue;
     }
 
@@ -90,14 +105,14 @@ export async function collectSpacesForUninstallClosure(
     }
 
     addFromInstallationAndPolicies(depInstallation, depPolicies);
-    visited.add(dep.name);
+    beingRemoved.add(dep.name);
 
     // Recurse into transitive dependencies
     const nested = await collectSpacesForUninstallClosure(
       savedObjectsClient,
       depInstallation,
       depPolicies,
-      visited
+      beingRemoved
     );
     if (nested.truncated) {
       truncated = true;

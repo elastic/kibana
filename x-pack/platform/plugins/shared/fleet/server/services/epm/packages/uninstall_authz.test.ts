@@ -13,6 +13,7 @@ import { FleetUnauthorizedError } from '../../../errors';
 import { appContextService, packagePolicyService } from '../..';
 
 import { assertUninstallAuthorizedForAffectedSpaces } from './uninstall_authz';
+import { getInstallation } from '.';
 
 // Mutable fns closed over by the mock factory so individual tests can override them.
 const mockFns = {
@@ -24,6 +25,7 @@ jest.mock('../..', () => ({
   appContextService: {
     getSecurity: jest.fn(),
     getInternalUserSOClientWithoutSpaceExtension: jest.fn().mockReturnValue({}),
+    getExperimentalFeatures: jest.fn().mockReturnValue({ enableResolveDependencies: false }),
   },
   packagePolicyService: {
     list: jest.fn(),
@@ -39,6 +41,8 @@ jest.mock('.', () => ({
 }));
 
 const mockGetSecurity = appContextService.getSecurity as jest.Mock;
+const mockGetExperimentalFeatures = appContextService.getExperimentalFeatures as jest.Mock;
+const mockGetInstallation = getInstallation as jest.MockedFunction<typeof getInstallation>;
 
 /** Convenience: return a full security stub using the shared mockFns. */
 function makeSecurityStub() {
@@ -83,6 +87,10 @@ beforeEach(() => {
   mockFns.useRbacForRequest.mockReturnValue(true);
   mockFns.atSpaces.mockResolvedValue({ hasAllRequested: true });
   mockGetSecurity.mockReturnValue(makeSecurityStub());
+  // Dependency resolution disabled by default — walker exits early, tests are root-only.
+  mockGetExperimentalFeatures.mockReturnValue({ enableResolveDependencies: false });
+  // getInstallation returns undefined — no dep installations to traverse.
+  mockGetInstallation.mockResolvedValue(undefined);
   // Return empty policy list so the dependency walker finds nothing to traverse.
   mockPackagePolicyList.mockResolvedValue({ items: [], total: 0, page: 1, perPage: 10000 });
 });
@@ -319,6 +327,144 @@ describe('assertUninstallAuthorizedForAffectedSpaces', () => {
 
       expect(err).toBeInstanceOf(FleetUnauthorizedError);
       expect(err.message).toContain('my-package');
+    });
+  });
+
+  describe('dependency closure', () => {
+    it('does not traverse dependencies when enableResolveDependencies is false', async () => {
+      // dep-space is only reachable through the dependency; root is in default.
+      // If the walker incorrectly traverses deps, it would add dep-space and could 403.
+      mockGetExperimentalFeatures.mockReturnValue({ enableResolveDependencies: false });
+      mockGetInstallation.mockResolvedValue(
+        makeInstallation({ name: 'dep-pkg', installed_kibana_space_id: 'dep-space' })
+      );
+
+      await assertUninstallAuthorizedForAffectedSpaces({
+        request: mockRequest,
+        pkgName: 'nginx',
+        installation: makeInstallation({
+          dependencies: [{ name: 'dep-pkg', version: '1.0.0' }],
+        }),
+        packagePolicies: [],
+        savedObjectsClient: mockSavedObjectsClient,
+      });
+
+      const [calledSpaces] = mockFns.atSpaces.mock.calls[0];
+      expect(calledSpaces).not.toContain('dep-space');
+    });
+
+    it('includes dependency spaces when enableResolveDependencies is true and dep would be removed', async () => {
+      mockGetExperimentalFeatures.mockReturnValue({ enableResolveDependencies: true });
+
+      const depInstallation = makeInstallation({
+        name: 'dep-pkg',
+        installed_kibana_space_id: 'dep-space',
+        installed_as_dependency: true,
+        is_dependency_of: [{ name: 'nginx', version: '1.0.0' }],
+        dependencies: [],
+      });
+      mockGetInstallation.mockResolvedValue(depInstallation);
+      // Dep has no package policies
+      mockPackagePolicyList.mockResolvedValue({ items: [], total: 0, page: 1, perPage: 10000 });
+
+      await assertUninstallAuthorizedForAffectedSpaces({
+        request: mockRequest,
+        pkgName: 'nginx',
+        installation: makeInstallation({
+          dependencies: [{ name: 'dep-pkg', version: '1.0.0' }],
+        }),
+        packagePolicies: [],
+        savedObjectsClient: mockSavedObjectsClient,
+      });
+
+      const [calledSpaces] = mockFns.atSpaces.mock.calls[0];
+      expect(calledSpaces).toContain(DEFAULT_SPACE_ID); // root
+      expect(calledSpaces).toContain('dep-space'); // dependency
+    });
+
+    it('includes shared transitive dep spaces when all its parents are in the closure', async () => {
+      // Root -> A -> C (shared), Root -> B -> C (shared).
+      // C.is_dependency_of = [A, B]. Pre-auth must include C's space because both A
+      // and B are being removed, making C eventually orphaned at runtime.
+      mockGetExperimentalFeatures.mockReturnValue({ enableResolveDependencies: true });
+
+      const depC = makeInstallation({
+        name: 'dep-c',
+        installed_kibana_space_id: 'shared-dep-space',
+        installed_as_dependency: true,
+        is_dependency_of: [
+          { name: 'dep-a', version: '1.0.0' },
+          { name: 'dep-b', version: '1.0.0' },
+        ],
+        dependencies: [],
+      });
+      const depA = makeInstallation({
+        name: 'dep-a',
+        installed_kibana_space_id: 'dep-a-space',
+        installed_as_dependency: true,
+        is_dependency_of: [{ name: 'nginx', version: '1.0.0' }],
+        dependencies: [{ name: 'dep-c', version: '1.0.0' }],
+      });
+      const depB = makeInstallation({
+        name: 'dep-b',
+        installed_kibana_space_id: 'dep-b-space',
+        installed_as_dependency: true,
+        is_dependency_of: [{ name: 'nginx', version: '1.0.0' }],
+        dependencies: [{ name: 'dep-c', version: '1.0.0' }],
+      });
+
+      mockGetInstallation.mockImplementation(async ({ pkgName }: { pkgName: string }) => {
+        if (pkgName === 'dep-a') return depA;
+        if (pkgName === 'dep-b') return depB;
+        if (pkgName === 'dep-c') return depC;
+        return undefined;
+      });
+      mockPackagePolicyList.mockResolvedValue({ items: [], total: 0, page: 1, perPage: 10000 });
+
+      await assertUninstallAuthorizedForAffectedSpaces({
+        request: mockRequest,
+        pkgName: 'nginx',
+        installation: makeInstallation({
+          dependencies: [
+            { name: 'dep-a', version: '1.0.0' },
+            { name: 'dep-b', version: '1.0.0' },
+          ],
+        }),
+        packagePolicies: [],
+        savedObjectsClient: mockSavedObjectsClient,
+      });
+
+      const [calledSpaces] = mockFns.atSpaces.mock.calls[0];
+      expect(calledSpaces).toContain('dep-a-space');
+      expect(calledSpaces).toContain('dep-b-space');
+      expect(calledSpaces).toContain('shared-dep-space'); // shared dep correctly included
+    });
+
+    it('throws FleetUnauthorizedError when dep is in an inaccessible space and would be removed', async () => {
+      mockGetExperimentalFeatures.mockReturnValue({ enableResolveDependencies: true });
+      mockFns.atSpaces.mockResolvedValue({ hasAllRequested: false });
+
+      const depInstallation = makeInstallation({
+        name: 'dep-pkg',
+        installed_kibana_space_id: 'restricted-space',
+        installed_as_dependency: true,
+        is_dependency_of: [{ name: 'nginx', version: '1.0.0' }],
+        dependencies: [],
+      });
+      mockGetInstallation.mockResolvedValue(depInstallation);
+      mockPackagePolicyList.mockResolvedValue({ items: [], total: 0, page: 1, perPage: 10000 });
+
+      await expect(
+        assertUninstallAuthorizedForAffectedSpaces({
+          request: mockRequest,
+          pkgName: 'nginx',
+          installation: makeInstallation({
+            dependencies: [{ name: 'dep-pkg', version: '1.0.0' }],
+          }),
+          packagePolicies: [],
+          savedObjectsClient: mockSavedObjectsClient,
+        })
+      ).rejects.toThrow(FleetUnauthorizedError);
     });
   });
 });
