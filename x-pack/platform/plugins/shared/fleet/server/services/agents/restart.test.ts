@@ -133,13 +133,11 @@ describe('restart', () => {
     it('should use RestartActionRunner for kuery when total > batchSize', async () => {
       mockGetAgentsByKuery.mockResolvedValue({ total: 10001, agents: [] } as any);
       mockOpenPointInTime.mockResolvedValue('pit-id');
-      const mockProcessAgentsInBatches = jest
-        .fn()
-        .mockResolvedValue({ actionId: 'runner-action-1' });
+      const mockRunActionAsyncTask = jest.fn().mockResolvedValue({ actionId: 'runner-action-1' });
       mockRestartActionRunner.mockImplementation(
         () =>
           ({
-            processAgentsInBatches: mockProcessAgentsInBatches,
+            runActionAsyncTask: mockRunActionAsyncTask,
           } as any)
       );
 
@@ -147,6 +145,7 @@ describe('restart', () => {
 
       expect(result).toEqual({ actionId: 'runner-action-1' });
       expect(mockRestartActionRunner).toHaveBeenCalled();
+      expect(mockRunActionAsyncTask).toHaveBeenCalled();
       expect(mockRestartBatch).not.toHaveBeenCalled();
     });
   });
