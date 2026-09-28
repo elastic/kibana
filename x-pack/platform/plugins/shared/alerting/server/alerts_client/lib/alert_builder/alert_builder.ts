@@ -233,7 +233,7 @@ export class AlertBuilder<
               dangerouslyCreateAlertsInAllSpaces: this.createAlertsInAllSpaces,
             })
           );
-        } else {
+        } else if (!this.shouldSkipUntrackedAlert(uuid, activeAlert.getId())) {
           activeAlertsToIndex.push(
             buildNewAlert<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>({
               legacyAlert: activeAlert,
@@ -279,13 +279,14 @@ export class AlertBuilder<
     for (const id of keys(rawRecoveredAlerts)) {
       const uuid = rawRecoveredAlerts[id].meta?.uuid;
       const trackedAlert = uuid ? this.trackedAlerts.get(uuid) : undefined;
-      // See if there's an existing alert document
-      // If there is not, log an error because there should be
+      const recoveredAlert = recoveredAlerts[id];
+      // Update the existing document when the tracked query or the by-id
+      // fetch found it. Create a recovered document only when both missed.
       if (trackedAlert) {
-        const alertDoc = recoveredAlerts[id]
+        const alertDoc = recoveredAlert
           ? buildRecoveredAlert<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>({
               alert: trackedAlert,
-              legacyAlert: recoveredAlerts[id],
+              legacyAlert: recoveredAlert,
               rule: this.rule,
               ruleData: this.alertRuleData,
               runTimestamp: this.runTimestampString,
@@ -306,56 +307,55 @@ export class AlertBuilder<
         recoveredAlertsToIndex.push(
           stopTrackingIds.has(id) ? { ...alertDoc, [ALERT_TRACKED]: false } : alertDoc
         );
-      } else {
-        this.logger.error(
-          `Error writing recovered alert(${id}) to ${this.indexTemplateAndPattern.alias} - existing alert document not found ${this.ruleInfoMessage}.`,
-          this.logTags
-        );
-      } else {
-        this.logger.error(
-          `Error writing recovered alert(${id}) to ${this.indexTemplateAndPattern.alias} - alert(${id}) doesn't exist in tracked alerts ${this.ruleInfoMessage}.`,
-          this.logTags
-        );
+      } else if (recoveredAlert && !this.shouldSkipUntrackedAlert(uuid, id)) {
         // The tracked AAD document is missing, but the alert recovered this
         // run. Synthesize a recovered document from current state so the
         // instance is not left status: active with no kibana.alert.end.
-        const recoveredAlert = recoveredAlerts[id];
-        if (recoveredAlert) {
-          const synthesizedAlert = buildNewAlert<
-            AlertData,
-            State,
-            Context,
-            ActionGroupIds,
-            RecoveryActionGroupId
-          >({
-            legacyAlert: recoveredAlert,
-            rule: this.rule,
-            ruleData: this.alertRuleData,
-            runTimestamp: this.runTimestampString,
-            timestamp: this.currentTime,
-            payload: this.reportedAlerts[id],
-            kibanaVersion: this.kibanaVersion,
-            dangerouslyCreateAlertsInAllSpaces: this.createAlertsInAllSpaces,
-          });
-          const previousActionGroup = recoveredAlert.getLastScheduledActions()?.group;
-          if (previousActionGroup) {
-            synthesizedAlert[ALERT_ACTION_GROUP] = previousActionGroup;
-          }
-          recoveredAlertsToIndex.push(
-            buildRecoveredAlert<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>({
-              alert: synthesizedAlert,
-              legacyAlert: recoveredAlert,
-              rule: this.rule,
-              ruleData: this.alertRuleData,
-              runTimestamp: this.runTimestampString,
-              timestamp: this.currentTime,
-              payload: this.reportedAlerts[id],
-              recoveryActionGroup: this.ruleType.recoveryActionGroup.id,
-              kibanaVersion: this.kibanaVersion,
-              dangerouslyCreateAlertsInAllSpaces: this.createAlertsInAllSpaces,
-            })
-          );
+        this.logger.warn(
+          `Creating recovered alert document for alert(${id}) in ${this.indexTemplateAndPattern.alias} - no existing alert document found ${this.ruleInfoMessage}.`,
+          this.logTags
+        );
+        const synthesizedAlert = buildNewAlert<
+          AlertData,
+          State,
+          Context,
+          ActionGroupIds,
+          RecoveryActionGroupId
+        >({
+          legacyAlert: recoveredAlert,
+          rule: this.rule,
+          ruleData: this.alertRuleData,
+          runTimestamp: this.runTimestampString,
+          timestamp: this.currentTime,
+          payload: this.reportedAlerts[id],
+          kibanaVersion: this.kibanaVersion,
+          dangerouslyCreateAlertsInAllSpaces: this.createAlertsInAllSpaces,
+        });
+        const previousActionGroup = recoveredAlert.getLastScheduledActions()?.group;
+        if (previousActionGroup) {
+          synthesizedAlert[ALERT_ACTION_GROUP] = previousActionGroup;
         }
+        const recoveredDoc = buildRecoveredAlert<
+          AlertData,
+          State,
+          Context,
+          ActionGroupIds,
+          RecoveryActionGroupId
+        >({
+          alert: synthesizedAlert,
+          legacyAlert: recoveredAlert,
+          rule: this.rule,
+          ruleData: this.alertRuleData,
+          runTimestamp: this.runTimestampString,
+          timestamp: this.currentTime,
+          payload: this.reportedAlerts[id],
+          recoveryActionGroup: this.ruleType.recoveryActionGroup.id,
+          kibanaVersion: this.kibanaVersion,
+          dangerouslyCreateAlertsInAllSpaces: this.createAlertsInAllSpaces,
+        });
+        recoveredAlertsToIndex.push(
+          stopTrackingIds.has(id) ? { ...recoveredDoc, [ALERT_TRACKED]: false } : recoveredDoc
+        );
       }
     }
 
@@ -391,6 +391,9 @@ export class AlertBuilder<
     const delayedAlerts = this.legacyAlertsClient.getProcessedAlerts(ALERT_STATUS_DELAYED);
     const delayedAlertsToIndex = [];
     for (const delayedAlert of values(delayedAlerts)) {
+      if (this.shouldSkipUntrackedAlert(delayedAlert.getUuid(), delayedAlert.getId())) {
+        continue;
+      }
       delayedAlertsToIndex.push(
         buildDelayedAlert<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>({
           legacyAlert: delayedAlert,
@@ -452,6 +455,17 @@ export class AlertBuilder<
       },
       alert,
     ];
+  }
+
+  private shouldSkipUntrackedAlert(uuid: string | undefined, id: string): boolean {
+    if (!uuid || !this.trackedAlerts.untracked.has(uuid)) {
+      return false;
+    }
+    this.logger.debug(
+      `Skipping update of untracked alert (${id}) in ${this.indexTemplateAndPattern.alias} ${this.ruleInfoMessage}.`,
+      this.logTags
+    );
+    return true;
   }
 
   private isRecoveredDelayedAlert(alert: Alert & AlertData) {

@@ -98,6 +98,7 @@ describe('get_tracked_alerts', () => {
       expect(tracked.all).toEqual({});
       expect(tracked.seqNo).toEqual({});
       expect(tracked.primaryTerm).toEqual({});
+      expect(tracked.untracked).toEqual(new Set());
     });
 
     it('get returns alert by uuid', () => {
@@ -186,12 +187,32 @@ describe('get_tracked_alerts', () => {
 
       populateTrackedAlerts(tracked, [hit as SearchResult<RuleAlertData>['hits'][number]]);
 
+      expect(tracked.untracked.has('uuid-1')).toBe(false);
       expect(tracked.all['uuid-1']).toBeDefined();
       expect(tracked.active['uuid-1']).toBeDefined();
       expect(tracked.recovered['uuid-1']).toBeUndefined();
       expect(tracked.indices['uuid-1']).toBe('.alerts-test-000001');
       expect(tracked.seqNo['uuid-1']).toBe(1);
       expect(tracked.primaryTerm['uuid-1']).toBe(1);
+    });
+
+    it('records untracked alerts without making them updatable', () => {
+      const tracked = createEmptyTrackedAlerts<{}>();
+      const hit = makeHit({
+        uuid: 'uuid-untracked',
+        instanceId: 'alert-untracked',
+        status: ALERT_STATUS_UNTRACKED,
+        executionUuid: 'exec-1',
+      });
+
+      populateTrackedAlerts(tracked, [hit as SearchResult<RuleAlertData>['hits'][number]]);
+
+      expect(tracked.untracked.has('uuid-untracked')).toBe(true);
+      expect(tracked.all['uuid-untracked']).toBeUndefined();
+      expect(tracked.active['uuid-untracked']).toBeUndefined();
+      expect(tracked.indices['uuid-untracked']).toBeUndefined();
+      expect(tracked.seqNo['uuid-untracked']).toBeUndefined();
+      expect(tracked.primaryTerm['uuid-untracked']).toBeUndefined();
     });
 
     it('populates recovered alerts', () => {
@@ -380,11 +401,12 @@ describe('get_tracked_alerts', () => {
         expect.objectContaining({
           size: 1,
           seq_no_primary_term: true,
-          query: expect.objectContaining({
-            bool: expect.objectContaining({
+          query: {
+            bool: {
+              must: [{ term: { [ALERT_RULE_UUID]: ruleId } }],
               filter: [{ ids: { values: ['uuid-2'] } }],
-            }),
-          }),
+            },
+          },
         })
       );
 
@@ -399,6 +421,38 @@ describe('get_tracked_alerts', () => {
         ),
         logTags
       );
+    });
+
+    it('records an untracked document found by id without indexing fields', async () => {
+      const search = jest
+        .fn()
+        .mockResolvedValueOnce({ hits: [] })
+        .mockResolvedValueOnce({
+          hits: [
+            makeHit({
+              uuid: 'uuid-1',
+              instanceId: 'alert-1',
+              status: ALERT_STATUS_UNTRACKED,
+              executionUuid: 'exec-old',
+              seqNo: 4,
+              primaryTerm: 2,
+            }),
+          ],
+        });
+
+      const result = await getTrackedAlerts({
+        ruleId,
+        ...makeStateFromUuids(['uuid-1']),
+        search,
+        logger,
+        ruleInfoMessage,
+        logTags,
+      });
+
+      expect(result.untracked.has('uuid-1')).toBe(true);
+      expect(result.all['uuid-1']).toBeUndefined();
+      expect(result.indices['uuid-1']).toBeUndefined();
+      expect(result.seqNo['uuid-1']).toBeUndefined();
     });
 
     it('does not fetch missing alerts when all state uuids are tracked', async () => {
