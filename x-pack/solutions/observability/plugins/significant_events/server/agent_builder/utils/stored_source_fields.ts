@@ -7,9 +7,9 @@
 
 import { nightshiftSourceSlugsField } from '@kbn/nightshift-shared';
 import {
+  findSource,
   presentSlug,
   resolveSourcesBySlug,
-  UnknownSourceSlugError,
   type SourceCatalog,
 } from './resolve_source_slugs';
 
@@ -34,9 +34,6 @@ interface StoredStreamNames {
   blast_radius?: ReadonlyArray<NestedStreamName>;
 }
 
-const nestedSlugs = (entries: ReadonlyArray<NestedStreamName> | undefined): string[] =>
-  (entries ?? []).flatMap((entry) => (entry.stream_name === undefined ? [] : [entry.stream_name]));
-
 const rewriteNested = <T extends NestedStreamName>(
   entries: readonly T[],
   mapName: (name: string) => string
@@ -49,30 +46,20 @@ const rewriteNested = <T extends NestedStreamName>(
  * Copies resolved source ids into the stored `stream_names` and nested
  * `stream_name` keys. This is the only assignment site; a later rename of
  * those keys happens here.
+ *
+ * Only `slugs` must resolve. A nested value that matches no source is kept as
+ * is: continuing an event stored against a stream name must not fail the batch.
  */
 export function assignStoredSourceIds<T extends SlugScopedEvent>(
   catalog: SourceCatalog,
   item: T
 ): Omit<T, 'slugs'> & { stream_names: string[] } {
-  resolveSourcesBySlug(catalog, [
-    ...item.slugs,
-    ...nestedSlugs(item.signals),
-    ...nestedSlugs(item.causal_features),
-    ...nestedSlugs(item.blast_radius),
-  ]);
-  const idOf = (slug: string): string => {
-    const source = catalog.bySlug.get(slug);
-    if (!source) {
-      throw new UnknownSourceSlugError([slug]);
-    }
-    return source.id;
-  };
-
-  const { slugs: _slugs, ...rest } = item;
+  const { slugs, ...rest } = item;
+  const idOf = (slugOrId: string): string => findSource(catalog, slugOrId)?.id ?? slugOrId;
 
   return {
     ...rest,
-    stream_names: item.slugs.map(idOf),
+    stream_names: resolveSourcesBySlug(catalog, slugs).map((source) => source.id),
     ...(item.signals ? { signals: rewriteNested(item.signals, idOf) } : {}),
     ...(item.causal_features ? { causal_features: rewriteNested(item.causal_features, idOf) } : {}),
     ...(item.blast_radius ? { blast_radius: rewriteNested(item.blast_radius, idOf) } : {}),

@@ -40,8 +40,17 @@ export async function loadSourceCatalog(sourcesClient: SourcesClient): Promise<S
 }
 
 /**
- * Resolves slugs to sources in the caller's order. Duplicate slugs repeat the
- * same source. Throws {@link UnknownSourceSlugError} if any slug is missing.
+ * Source for a slug, or for a source id. Ids are accepted because tool results
+ * and workflow inputs (the Discovery detection batch) carry stored ids, and the
+ * model copies them back into writes.
+ */
+export function findSource(catalog: SourceCatalog, slugOrId: string): NightshiftSource | undefined {
+  return catalog.bySlug.get(slugOrId) ?? catalog.byId.get(slugOrId);
+}
+
+/**
+ * Resolves slugs (or source ids) to sources in the caller's order. Duplicates
+ * repeat the same source. Throws {@link UnknownSourceSlugError} if any is missing.
  */
 export function resolveSourcesBySlug(
   catalog: SourceCatalog,
@@ -50,7 +59,7 @@ export function resolveSourcesBySlug(
   const sources: NightshiftSource[] = [];
   const missing: string[] = [];
   for (const slug of slugs) {
-    const source = catalog.bySlug.get(slug);
+    const source = findSource(catalog, slug);
     if (source) {
       sources.push(source);
     } else {

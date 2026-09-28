@@ -19,10 +19,10 @@ const DEFAULT_SOURCES_PER_PAGE = 25;
 export type SourceHealth = 'ok' | 'view_missing' | 'view_drift' | 'unresolvable' | 'unknown';
 
 const NIGHTSHIFT_SOURCE_SLUG_DESCRIPTION =
-  'Nightshift source slug, e.g. "nginx-errors". Not the title and not the view name.';
+  'Nightshift source slug, e.g. "nginx-errors", or the source id. Not the title and not the view name.';
 
 const NIGHTSHIFT_SOURCE_SLUGS_DESCRIPTION =
-  'Nightshift source slugs, e.g. "nginx-errors". Not titles and not view names.';
+  'Nightshift source slugs, e.g. "nginx-errors", or source ids. Not titles and not view names.';
 
 /** A single request can name at most a page of sources. */
 export const MAX_NIGHTSHIFT_SOURCE_SLUGS = 100;

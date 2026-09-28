@@ -77,6 +77,13 @@ describe('resolveSourcesBySlug', () => {
     ]);
   });
 
+  it('resolves a source id the same as its slug', () => {
+    expect(resolveSourcesBySlug(catalog, ['source-checkout', 'payments'])).toEqual([
+      checkout,
+      payments,
+    ]);
+  });
+
   it('throws UnknownSourceSlugError naming every missing slug', () => {
     expect(() => resolveSourcesBySlug(catalog, ['checkout', 'missing', 'also-missing'])).toThrow(
       new UnknownSourceSlugError(['missing', 'also-missing'])
