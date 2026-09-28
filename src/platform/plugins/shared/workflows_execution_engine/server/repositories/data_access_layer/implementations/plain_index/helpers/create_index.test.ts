@@ -182,7 +182,10 @@ describe('createOrUpdateIndex', () => {
         logger: logger as any,
       })
     ).rejects.toThrow('mapping conflict');
-    expect(esClient.indices.putSettings).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.putSettings).toHaveBeenNthCalledWith(2, {
+      index: '.test-index',
+      settings: { index: { hidden: true } },
+    });
   });
 
   it('rethrows if the hidden setting update fails', async () => {

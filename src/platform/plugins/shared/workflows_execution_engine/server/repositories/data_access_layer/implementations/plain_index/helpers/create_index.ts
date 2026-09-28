@@ -117,16 +117,6 @@ export const createOrUpdateIndex = async ({
 
       await retryTransientEsErrors(
         () =>
-          esClient.indices.putMapping({
-            index: indexName,
-            ...mappings,
-          }),
-        { logger }
-      );
-      logger?.debug(`Updated mappings for existing index ${indexName}`);
-
-      await retryTransientEsErrors(
-        () =>
           esClient.indices.putSettings({
             index: indexName,
             settings: HIDDEN_SETTINGS,
@@ -134,6 +124,16 @@ export const createOrUpdateIndex = async ({
         { logger }
       );
       logger?.debug(`Applied hidden setting for existing index ${indexName}`);
+
+      await retryTransientEsErrors(
+        () =>
+          esClient.indices.putMapping({
+            index: indexName,
+            ...mappings,
+          }),
+        { logger }
+      );
+      logger?.debug(`Updated mappings for existing index ${indexName}`);
     }
   } catch (error) {
     logger?.error(`Failed to create or update index ${indexName}: ${error}`);
