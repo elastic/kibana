@@ -8,3 +8,5 @@
 export { pairScores, resolveDirection, isImproved } from './pairing';
 export type { PairedScore, Direction } from './pairing';
 export { computePairedTTestResults } from './compare';
+export { inferMetricType } from './metric_type';
+export type { MetricType } from './metric_type';
