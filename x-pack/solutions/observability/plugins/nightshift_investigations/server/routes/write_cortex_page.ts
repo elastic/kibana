@@ -19,6 +19,7 @@ const MAX_CONTENT_LENGTH = 100_000;
 /** The `version` a page was read at; writes carrying it fail if the page changed since. */
 export const cortexPageVersion = z
   .string()
+  .max(39)
   .regex(/^\d{1,19}:\d{1,19}$/)
   .optional();
 
