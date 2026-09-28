@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { isAgentRestartSupported, MINIMUM_RESTART_AGENT_VERSION } from './is_agent_restart_supported';
+import {
+  isAgentRestartSupported,
+  MINIMUM_RESTART_AGENT_VERSION,
+} from './is_agent_restart_supported';
 
 function makeAgent(version: string | undefined, active = true) {
   return {
