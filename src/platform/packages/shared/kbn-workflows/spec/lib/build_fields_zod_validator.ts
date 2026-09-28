@@ -14,7 +14,7 @@ import { resolveRef } from './field_conversion';
 
 const schemaTypeList = (jsonSchema: JSONSchema7): string[] => {
   if (Array.isArray(jsonSchema.type)) {
-    return jsonSchema.type.filter((type): type is string => typeof type === 'string');
+    return jsonSchema.type;
   }
   return typeof jsonSchema.type === 'string' ? [jsonSchema.type] : [];
 };
