@@ -4,8 +4,8 @@ Server-side plugin for the Context Engine.
 
 ## AI Indices API
 
-AI indices attach a logical name to an existing user index pattern or data
-stream. AI index records are stored in a hidden Kibana system index
+AI indices attach a logical name to a single user index or data stream. AI
+index records are stored in a hidden Kibana system index
 (`.contextengine-ai-indices`), separate from the backing data.
 
 | Method   | Path                                                            | Description                          |
@@ -13,6 +13,8 @@ stream. AI index records are stored in a hidden Kibana system index
 | `PUT`    | `/api/context_engine/ai_index/{id}`                               | Create or update an AI index         |
 | `GET`    | `/api/context_engine/ai_index/{id}`                               | Get an AI index by id                |
 | `GET`    | `/api/context_engine/ai_index`                                    | List AI indices (max 100)            |
+| `POST`   | `/api/context_engine/ai_index/_query`                             | Run ES\|QL against AI indices        |
+| `GET`    | `/api/context_engine/ai_index/{id}/_describe`                     | Describe an AI index for querying    |
 | `DELETE` | `/api/context_engine/ai_index/{id}`                               | Delete an AI index                   |
 | `PUT`    | `/internal/context_engine/ai_index/{id}/feedback_analysis`        | Update the feedback analysis config  |
 
@@ -519,10 +521,10 @@ turned analysis on. The conversation it creates is private to that user, Agent
 Builder's default: a run reads the index's data under the owner's privileges,
 and its rounds quote what it read.
 
-A managed workflow instance is keyed by `(workflowId, spaceId)`, but an AI index
-is global and writable from any space, so the instance is installed in the
-default space rather than the caller's. Enable, disable and delete therefore
-address the same instance whichever space the write came from.
+A managed workflow instance is keyed by `(workflowId, aiIndexId, spaceId)`: one
+instance per AI index per space. Enable, disable and delete address the instance
+for the space the request came from, so two spaces holding an AI index with the
+same id have independent schedules.
 
 The workflow carries a `concurrency` guard keyed on the AI index with
 `strategy: drop`, so two runs for one index never overlap.
