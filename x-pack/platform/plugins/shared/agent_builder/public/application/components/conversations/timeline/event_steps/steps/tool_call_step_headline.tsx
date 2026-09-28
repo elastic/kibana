@@ -10,7 +10,6 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
@@ -93,21 +92,6 @@ export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({
           </span>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {step.progression
-        ?.filter((p) => !p.metadata?.agent_execution_id)
-        .map((p, idx) => (
-          <EuiText key={`progression-${idx}`} size="s">
-            <p>
-              <span
-                css={css`
-                  color: ${euiTheme.colors.textDisabled};
-                `}
-              >
-                {p.message}
-              </span>
-            </p>
-          </EuiText>
-        ))}
     </>
   );
 };
