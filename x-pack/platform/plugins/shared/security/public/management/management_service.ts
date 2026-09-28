@@ -40,7 +40,7 @@ interface SetupParams {
   fatalErrors: FatalErrorsSetup;
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
   buildFlavor: BuildFlavor;
-  serviceAccountsAPIClient?: ServiceAccountsAPIClient;
+  serviceAccountsAPIClient: ServiceAccountsAPIClient;
 }
 
 interface StartParams {
@@ -96,11 +96,6 @@ export class ManagementService {
     this.securitySection.registerApp(apiKeysManagementApp.create({ authc, getStartServices }));
 
     if (this.serviceAccountsEnabled) {
-      if (!serviceAccountsAPIClient) {
-        throw new Error(
-          'Service accounts API client is required when service accounts are enabled.'
-        );
-      }
       this.securitySection.registerApp(
         serviceAccountsManagementApp.create({
           getStartServices,

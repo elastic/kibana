@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
+import type { CriteriaWithPagination, EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
 import {
   EuiAvatar,
   EuiBadge,
@@ -18,7 +18,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -40,8 +40,8 @@ export interface ServiceAccountsTableProps {
   onLoadMore: () => void;
 }
 
-const unavailableValue = (
-  <EuiText color="subdued" size="s">
+const unavailableValue = (tabIndex?: number) => (
+  <EuiText color="subdued" size="s" tabIndex={tabIndex}>
     &mdash;
   </EuiText>
 );
@@ -77,6 +77,7 @@ export const ServiceAccountsTable = ({
   hasLoadMoreError,
   onLoadMore,
 }: ServiceAccountsTableProps) => {
+  const [pageIndex, setPageIndex] = useState(0);
   const roleOptions = useMemo(
     () =>
       Array.from(new Set(serviceAccounts.flatMap(({ roles }) => roles)))
@@ -87,6 +88,10 @@ export const ServiceAccountsTable = ({
 
   const search = useMemo<EuiSearchBarProps>(
     () => ({
+      onChange: () => {
+        setPageIndex(0);
+        return true;
+      },
       box: {
         incremental: true,
         placeholder: i18n.translate(
@@ -155,7 +160,7 @@ export const ServiceAccountsTable = ({
           defaultMessage: 'Description',
         }),
         truncateText: true,
-        render: (description?: string) => description || unavailableValue,
+        render: (description?: string) => description || unavailableValue(),
       },
       {
         field: 'roles',
@@ -173,7 +178,7 @@ export const ServiceAccountsTable = ({
               ))}
             </EuiBadgeGroup>
           ) : (
-            unavailableValue
+            unavailableValue()
           ),
       },
       {
@@ -207,9 +212,7 @@ export const ServiceAccountsTable = ({
                 { defaultMessage: 'Workload associations are not available yet.' }
               )}
             >
-              <EuiText color="subdued" size="s" tabIndex={0}>
-                &mdash;
-              </EuiText>
+              {unavailableValue(0)}
             </EuiToolTip>
           ) : (
             <EuiBadge color="primary">{workloadCount}</EuiBadge>
@@ -232,7 +235,10 @@ export const ServiceAccountsTable = ({
         rowHeader="name"
         columns={columns}
         items={serviceAccounts}
-        pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
+        pagination={{ pageIndex, initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
+        onTableChange={({ page }: CriteriaWithPagination<ServiceAccountTableItem>) =>
+          setPageIndex(page.index)
+        }
         search={search}
         sorting={{ sort: { field: 'name', direction: 'asc' } }}
         data-test-subj="serviceAccountsTable"

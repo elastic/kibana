@@ -8,10 +8,11 @@
 import { EuiProvider } from '@elastic/eui';
 import { act, screen, within } from '@testing-library/react';
 import user from '@testing-library/user-event';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
+import type { ServiceAccountTableItem } from './service_accounts_table';
 import { ServiceAccountsTable } from './service_accounts_table';
 
 describe('ServiceAccountsTable', () => {
@@ -59,6 +60,32 @@ describe('ServiceAccountsTable', () => {
     );
 
     return { onLoadMore };
+  };
+
+  const renderPaginatedTable = () => {
+    const accounts = Array.from({ length: 20 }, (_, index) => ({
+      ...firstAccount,
+      id: `account-${index}`,
+      name: `account-${String(index).padStart(2, '0')}`,
+      roles: index === 0 ? ['editor'] : ['viewer'],
+    }));
+    const TableWithLoadMore = () => {
+      const [loadedAccounts, setLoadedAccounts] = useState<ServiceAccountTableItem[]>(accounts);
+      return (
+        <ServiceAccountsTable
+          serviceAccounts={loadedAccounts}
+          hasMore={true}
+          isLoadingMore={false}
+          hasLoadMoreError={false}
+          onLoadMore={() => setLoadedAccounts([...accounts, secondAccount])}
+        />
+      );
+    };
+    renderWithI18n(
+      <EuiProvider>
+        <TableWithLoadMore />
+      </EuiProvider>
+    );
   };
 
   it('renders directory metadata without unavailable follow-up actions', () => {
@@ -150,6 +177,41 @@ describe('ServiceAccountsTable', () => {
     await user.click(screen.getByTestId('serviceAccountsLoadMore'));
 
     expect(onLoadMore).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the current page after loading more accounts', async () => {
+    renderPaginatedTable();
+
+    await user.click(screen.getByTestId('pagination-button-next'));
+    expect(screen.getByText('account-10')).toBeVisible();
+    expect(screen.queryByText('account-00')).not.toBeInTheDocument();
+
+    await user.click(screen.getByTestId('serviceAccountsLoadMore'));
+    expect(screen.getByText('account-10')).toBeVisible();
+    expect(screen.queryByText('account-00')).not.toBeInTheDocument();
+    await user.click(screen.getByTestId('pagination-button-next'));
+    expect(screen.getByText('incident-responder')).toBeVisible();
+  });
+
+  it('resets the page when searching from a later page', async () => {
+    renderPaginatedTable();
+
+    await user.click(screen.getByTestId('pagination-button-next'));
+    await user.type(screen.getByTestId('serviceAccountsSearch'), 'account-00');
+
+    expect(screen.getByText('account-00')).toBeVisible();
+    expect(screen.queryByText('account-10')).not.toBeInTheDocument();
+  });
+
+  it('resets the page when filtering by role from a later page', async () => {
+    renderPaginatedTable();
+
+    await user.click(screen.getByTestId('pagination-button-next'));
+    await user.click(screen.getByRole('button', { name: 'Role Selection' }));
+    await user.click(screen.getByRole('option', { name: 'editor' }));
+
+    expect(screen.getByText('account-00')).toBeVisible();
+    expect(screen.queryByText('account-10')).not.toBeInTheDocument();
   });
 
   it('offers to retry when loading the next cursor page fails', () => {

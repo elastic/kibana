@@ -71,6 +71,7 @@ describe('ManagementService', () => {
         authc,
         management: managementSetup,
         buildFlavor: 'traditional',
+        serviceAccountsAPIClient: {} as ServiceAccountsAPIClient,
       });
 
       expect(mockSection.registerApp).toHaveBeenCalledTimes(4);
@@ -152,6 +153,7 @@ describe('ManagementService', () => {
         authc,
         management: managementSetup,
         buildFlavor: 'serverless',
+        serviceAccountsAPIClient: {} as ServiceAccountsAPIClient,
       });
 
       expect(mockServerlessSection.registerApp).not.toHaveBeenCalledWith(
@@ -220,6 +222,7 @@ describe('ManagementService', () => {
         authc,
         management: managementSetup,
         buildFlavor: 'traditional',
+        serviceAccountsAPIClient: {} as ServiceAccountsAPIClient,
       });
 
       expect(mockSectionWithConfig.registerApp).toHaveBeenCalledTimes(1);
