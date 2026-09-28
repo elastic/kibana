@@ -12,15 +12,30 @@ import { z } from '@kbn/zod/v4';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import { resolveRef } from './field_conversion';
 
-const hasNamedProperties = (jsonSchema: JSONSchema7): boolean =>
-  jsonSchema.properties != null && Object.keys(jsonSchema.properties).length > 0;
+const schemaTypeList = (jsonSchema: JSONSchema7): string[] => {
+  if (Array.isArray(jsonSchema.type)) {
+    return jsonSchema.type.filter((type): type is string => typeof type === 'string');
+  }
+  return typeof jsonSchema.type === 'string' ? [jsonSchema.type] : [];
+};
+
+/**
+ * `fromJSONSchema` only compiles a single `type`. `['object', 'null']` becomes
+ * `z.unknown()`, so a typed map on that node has to be rebuilt here.
+ */
+const isObjectOrNullTypeList = (types: string[]): boolean =>
+  types.includes('object') && types.every((type) => type === 'object' || type === 'null');
 
 /**
  * Applies `additionalProperties` that fromJSONSchema does not preserve at this wrapper layer.
  *
  * - `false` → `.strict()` so extra keys are rejected
- * - a schema object → `z.record` (no named properties) or `.catchall` (named + extras), so
- *   `getSchemaAtPath` can walk unknown keys into the value shape
+ * - a schema object on a compiled object → `.catchall`, so `getSchemaAtPath` walks unknown keys
+ *   into the value shape (including map-only objects such as `rules`)
+ * - `type: ['object', 'null']` → that catchall object unioned with `null`
+ *
+ * `anyOf` / `oneOf` results are left as compiled. Replacing them with a record drops the
+ * composition.
  *
  * Limitation: this only applies at the schema node passed directly to the converter
  * mainly for maintaining backwards compatibility with legacy flat inputs.
@@ -37,18 +52,28 @@ function applyAdditionalProperties(
   }
 
   const additional = jsonSchema.additionalProperties;
-  if (convertValue && additional && typeof additional === 'object') {
-    const valueSchema = convertValue(additional as JSONSchema7);
-    if (!hasNamedProperties(jsonSchema)) {
-      return z.record(z.string(), valueSchema);
-    }
-    if (zodResult instanceof z.ZodObject) {
-      return zodResult.catchall(valueSchema);
-    }
-    if (zodResult instanceof z.ZodRecord) {
-      return zodResult;
-    }
-    return z.record(z.string(), valueSchema);
+  if (
+    !(convertValue && additional && typeof additional === 'object' && !Array.isArray(additional))
+  ) {
+    return zodResult;
+  }
+
+  const valueSchema = convertValue(additional as JSONSchema7);
+  if (zodResult instanceof z.ZodObject) {
+    return zodResult.catchall(valueSchema);
+  }
+  if (zodResult instanceof z.ZodRecord) {
+    return zodResult;
+  }
+
+  const types = schemaTypeList(jsonSchema);
+  if (zodResult instanceof z.ZodUnknown && isObjectOrNullTypeList(types)) {
+    const compiled = fromJSONSchema({ ...jsonSchema, type: 'object' } as Record<string, unknown>);
+    const mapSchema =
+      compiled instanceof z.ZodObject
+        ? compiled.catchall(valueSchema)
+        : z.object({}).catchall(valueSchema);
+    return types.includes('null') ? z.union([mapSchema, z.null()]) : mapSchema;
   }
 
   return zodResult;
@@ -138,12 +163,22 @@ export function convertJsonSchemaToZodWithRefs(
 export function buildFieldsZodValidator(
   schema: RootSchemaType | null | undefined
 ): z.ZodType<Record<string, unknown>> {
-  if (!schema?.properties || typeof schema.properties !== 'object') {
+  const jsonRoot = schema as JSONSchema7 | null | undefined;
+  const hasProperties =
+    !!jsonRoot?.properties &&
+    typeof jsonRoot.properties === 'object' &&
+    !Array.isArray(jsonRoot.properties);
+  const hasTypedAdditionalProperties =
+    !!jsonRoot?.additionalProperties &&
+    typeof jsonRoot.additionalProperties === 'object' &&
+    !Array.isArray(jsonRoot.additionalProperties);
+
+  if (!schema || (!hasProperties && !hasTypedAdditionalProperties)) {
     return z.object({});
   }
 
   const shape: Record<string, z.ZodType> = {};
-  for (const [propertyName, propertySchema] of Object.entries(schema.properties)) {
+  for (const [propertyName, propertySchema] of Object.entries(jsonRoot?.properties ?? {})) {
     if (propertySchema && typeof propertySchema === 'object') {
       const jsonSchema = propertySchema as JSONSchema7;
       const resolvedSchema = jsonSchema.$ref

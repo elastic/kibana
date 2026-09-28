@@ -79,6 +79,42 @@ describe('convertJsonSchemaToZod', () => {
     expect(zodSchema.safeParse({ name: 'Alice', extra: 'not a number' }).success).toBe(false);
   });
 
+  it('accepts null when a typed map type includes null', () => {
+    const jsonSchema: JSONSchema7 = {
+      type: ['object', 'null'],
+      additionalProperties: { type: 'string' },
+    };
+    const zodSchema = convertJsonSchemaToZod(jsonSchema);
+
+    expect(zodSchema.safeParse(null).success).toBe(true);
+    expect(zodSchema.safeParse({ extra: 'ok' }).success).toBe(true);
+    expect(zodSchema.safeParse({ extra: 1 }).success).toBe(false);
+  });
+
+  it('keeps named properties when a nullable typed map also declares them', () => {
+    const jsonSchema: JSONSchema7 = {
+      type: ['object', 'null'],
+      properties: { name: { type: 'string' } },
+      additionalProperties: { type: 'string' },
+    };
+    const zodSchema = convertJsonSchemaToZod(jsonSchema);
+
+    expect(zodSchema.safeParse(null).success).toBe(true);
+    expect(zodSchema.safeParse({ name: 'Alice', extra: 'ok' }).success).toBe(true);
+    expect(zodSchema.safeParse({ name: 'Alice', extra: 1 }).success).toBe(false);
+  });
+
+  it('keeps anyOf composition when a branch is a typed map', () => {
+    const jsonSchema: JSONSchema7 = {
+      anyOf: [{ type: 'object', additionalProperties: { type: 'string' } }, { type: 'null' }],
+    };
+    const zodSchema = convertJsonSchemaToZod(jsonSchema);
+
+    expect(zodSchema.safeParse(null).success).toBe(true);
+    expect(zodSchema.safeParse({ extra: 'ok' }).success).toBe(true);
+    expect(zodSchema.safeParse({ extra: 1 }).success).toBe(false);
+  });
+
   it('should convert a nested object schema to Zod', () => {
     const jsonSchema: JSONSchema7 = {
       type: 'object',
@@ -454,6 +490,20 @@ describe('buildFieldsZodValidator', () => {
     const validator = buildFieldsZodValidator(inputs);
     expect(getSchemaAtPath(validator, 'payload.rules.rule-1.name').schema).not.toBeNull();
     expect(getSchemaAtPath(validator, 'payload.rules.rule-1.nmae').schema).toBeNull();
+    expect(getSchemaAtPath(validator, 'payload.rules[ep.rule_id].name').schema).not.toBeNull();
+    expect(getSchemaAtPath(validator, 'payload.rules[ep.rule_id].nmae').schema).toBeNull();
+  });
+
+  it('validates a map-only root additionalProperties schema', () => {
+    const schema = {
+      type: 'object',
+      additionalProperties: { type: 'string' },
+    } as Parameters<typeof buildFieldsZodValidator>[0];
+    const validator = buildFieldsZodValidator(schema);
+
+    expect(validator.safeParse({ anyKey: 'ok' }).success).toBe(true);
+    expect(validator.safeParse({ anyKey: 1 }).success).toBe(false);
+    expect(validator.safeParse(null).success).toBe(false);
   });
 
   it('should return empty object schema when schema has no properties', () => {
