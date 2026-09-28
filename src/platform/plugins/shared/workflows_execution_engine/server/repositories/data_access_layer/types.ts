@@ -134,17 +134,30 @@ export type StepExecutionSourceProjectionField =
 export type GetWorkflowExecutionsByIdsOptions = GetExecutionsByIdsOptions<EsWorkflowExecution>;
 export type GetStepExecutionsByIdsOptions = GetExecutionsByIdsOptions<EsWorkflowStepExecution>;
 
-export interface BulkPlainItem<TDocument extends { id: string }> {
-  operation: 'create' | 'update' | 'upsert';
+interface BulkPlainItemBase<TDocument extends { id: string }> {
   document: Partial<TDocument> & { id: string };
   index?: string;
   seqNo?: number;
   primaryTerm?: number;
-  retryOnConflict?: number;
   documentId?: never;
   sourceFields?: never;
   updater?: never;
 }
+
+export interface BulkCreateItem<TDocument extends { id: string }>
+  extends BulkPlainItemBase<TDocument> {
+  operation: 'create';
+}
+
+export interface BulkUpdateOrUpsertItem<TDocument extends { id: string }>
+  extends BulkPlainItemBase<TDocument> {
+  operation: 'update' | 'upsert';
+  retryOnConflict?: number;
+}
+
+export type BulkPlainItem<TDocument extends { id: string }> =
+  | BulkCreateItem<TDocument>
+  | BulkUpdateOrUpsertItem<TDocument>;
 
 export interface BulkUpdaterItem<
   TDocument extends { id: string },

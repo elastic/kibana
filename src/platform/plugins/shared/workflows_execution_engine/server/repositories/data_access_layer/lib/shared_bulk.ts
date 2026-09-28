@@ -319,12 +319,10 @@ const requeueConflicts = async <TExecution extends { id: string }>(
 
   // - updater-origin: re-queue original BulkUpdaterItem so the next iteration re-mgets
   // - plain OCC (seqNo set): mget fresh seqNo/primaryTerm before re-queuing
-  // - create already-exists: mget backing index and retry as update (data streams
-  //   convert version-miss upserts to create; retrying create can never succeed)
   // - plain non-OCC (no seqNo, using retry_on_conflict): re-queue unchanged
+  // Create 409s always settle: retryOnConflict is not valid for create.
   const conflictingUpdaters: Array<QueueItem<TExecution>> = [];
   const conflictingOcc: Array<Sendable<TExecution>> = [];
-  const conflictingCreates: Array<Sendable<TExecution> & { responseItem: BulkItemResponse }> = [];
   const nextQueue: Array<QueueItem<TExecution>> = [];
   const settled: Settled[] = [];
 
@@ -332,14 +330,14 @@ const requeueConflicts = async <TExecution extends { id: string }>(
     const { qi, plainItem } = toSend[idx];
     const responseItem = toBulkItemResponse(esItem);
     const isConflict = responseItem.error?.type === 'version_conflict_engine_exception';
+    const canRetryConflict =
+      isConflict && qi.remainingRetries > 0 && plainItem.operation !== 'create';
 
-    if (isConflict && qi.remainingRetries > 0) {
+    if (canRetryConflict) {
       if (isBulkUpdaterItem(qi.item)) {
         conflictingUpdaters.push({ ...qi, remainingRetries: qi.remainingRetries - 1 });
       } else if (plainItem.seqNo !== undefined) {
         conflictingOcc.push({ qi, plainItem });
-      } else if (plainItem.operation === 'create') {
-        conflictingCreates.push({ qi, plainItem, responseItem });
       } else {
         nextQueue.push({ ...qi, remainingRetries: qi.remainingRetries - 1 });
       }
@@ -368,33 +366,6 @@ const requeueConflicts = async <TExecution extends { id: string }>(
         originalIndex: qi.originalIndex,
         remainingRetries: qi.remainingRetries - 1,
       });
-    });
-  }
-
-  if (conflictingCreates.length > 0) {
-    const versionById = await fetchFreshVersions(
-      esClient,
-      logger,
-      conflictingCreates.map(({ plainItem, responseItem }) => ({
-        id: plainItem.document.id,
-        // Prefer the backing index ES already named on the conflict; mget
-        // against a data-stream alias is not reliable.
-        index: responseItem.index || undefined,
-      })),
-      fallbackIndexes
-    );
-
-    conflictingCreates.forEach(({ qi, plainItem, responseItem }) => {
-      const version = versionById.get(plainItem.document.id);
-      if (version) {
-        nextQueue.push({
-          item: { ...plainItem, operation: 'update', ...version },
-          originalIndex: qi.originalIndex,
-          remainingRetries: qi.remainingRetries - 1,
-        });
-        return;
-      }
-      settled.push({ originalIndex: qi.originalIndex, response: responseItem });
     });
   }
 
@@ -430,7 +401,7 @@ export async function sharedBulk<TExecution extends { id: string }>(params: {
   let queuedItems: Array<QueueItem<TExecution>> = request.items.map((item, index) => ({
     item,
     originalIndex: index,
-    remainingRetries: item.retryOnConflict ?? 0,
+    remainingRetries: item.operation === 'create' ? 0 : (item.retryOnConflict ?? 0),
   }));
 
   const result = new Array<BulkItemResponse>(request.items.length);
