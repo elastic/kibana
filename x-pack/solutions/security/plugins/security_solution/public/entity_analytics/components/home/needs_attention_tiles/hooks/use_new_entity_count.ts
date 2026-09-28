@@ -9,8 +9,10 @@ import { useMemo } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useRiskEngineStatus } from '../../../../api/hooks/use_risk_engine_status';
+import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { getEntitiesAlias, ENTITY_LATEST } from '../../constants';
 import type { TimeRange } from '../../use_time_range_param';
 import {
@@ -37,8 +39,6 @@ export const useNewEntityCount = ({
   entityFilters?: EntityFilters;
 }) => {
   const { data } = useKibana().services;
-  const { data: riskEngineStatus, isLoading: isStatusLoading } = useRiskEngineStatus();
-
   const index = getEntitiesAlias(ENTITY_LATEST, spaceId);
   const parts = [
     `FROM ${index}`,
@@ -49,8 +49,7 @@ export const useNewEntityCount = ({
   ];
   const query = parts.join('\n');
 
-  const isEnabled =
-    !skip && !isStatusLoading && riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED';
+  const isEnabled = !skip;
 
   const queryKey = useMemo(() => ['newEntityCount', query], [query]);
 
@@ -96,10 +95,17 @@ export const useNewEntityCount = ({
     }
   );
 
+  useErrorToast(
+    i18n.translate('xpack.securitySolution.entityAnalytics.home.newEntity.queryError', {
+      defaultMessage: 'There was an error loading new entity data',
+    }),
+    error as SecurityAppError | undefined
+  );
+
   return {
     count: result?.count ?? 0,
     entityIds: result?.entityIds ?? [],
-    isLoading: isLoading || isFetching || isStatusLoading,
+    isLoading: isLoading || isFetching,
     error,
   };
 };

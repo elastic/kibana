@@ -10,8 +10,9 @@ import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useRiskEngineStatus } from '../../../../api/hooks/use_risk_engine_status';
+import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { buildRiskMoversCountQuery } from '../queries/tile_risk_movers_query';
 import type { TimeRange } from '../../use_time_range_param';
@@ -33,16 +34,10 @@ export const useRiskMoversCount = ({
   entityFilters?: EntityFilters;
 }) => {
   const { data } = useKibana().services;
-  const { data: riskEngineStatus, isLoading: isStatusLoading } = useRiskEngineStatus();
   const { data: resolvedIndex, isLoading: isIndexLoading } =
     useResolvedLatestEntitiesIndexName(spaceId);
 
-  const isEnabled =
-    !skip &&
-    !isStatusLoading &&
-    !isIndexLoading &&
-    riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED' &&
-    Boolean(resolvedIndex?.indexName);
+  const isEnabled = !skip && !isIndexLoading && Boolean(resolvedIndex?.indexName);
 
   const query = useMemo(
     () =>
@@ -94,10 +89,17 @@ export const useRiskMoversCount = ({
     (error as SecurityAppError | undefined)?.message?.includes('Unknown index') ?? false;
   const filteredError = isMissingIndex ? undefined : (error as SecurityAppError | undefined);
 
+  useErrorToast(
+    i18n.translate('xpack.securitySolution.entityAnalytics.home.riskMovers.queryError', {
+      defaultMessage: 'There was an error loading risk movers data',
+    }),
+    filteredError
+  );
+
   return {
     count: queryResult?.count ?? 0,
     entityIds: queryResult?.entityIds ?? [],
-    isLoading: isStatusLoading || isIndexLoading || isLoading,
+    isLoading: isIndexLoading || isLoading,
     isMissingIndex,
     error: filteredError,
   };
