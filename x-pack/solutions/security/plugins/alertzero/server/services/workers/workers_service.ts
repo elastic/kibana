@@ -34,7 +34,14 @@ import {
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import type { AgentLookup } from '../utils';
 import { buildAgentLookup, projectSkillsFromDefinition } from '../utils';
-import type { AlertTriageAttachmentServiceProvider } from '../../types';
+import type {
+  AlertTriageAttachmentService,
+  AlertTriageAttachmentServiceProvider,
+} from '../../types';
+import {
+  attachAlertTriageWorkerToAllRules,
+  detachAlertTriageWorkerFromAllRules,
+} from './alert_triage_rule_attachments';
 
 interface AlertTriageOpts {
   getAttachmentService?: AlertTriageAttachmentServiceProvider;
@@ -77,10 +84,17 @@ const templateValuesEqual = (
   left != null &&
   Object.keys(right).every((key) => Object.hasOwn(left, key) && isEqual(left[key], right[key]));
 
+/** Why an Alert Triage Worker enable was refused before anything was written. */
+export type AlertTriageEnableBlockedReason =
+  | 'alertAnalysisWorkflowDisabled'
+  | 'alertAnalysisRuntimeDisabled'
+  | 'ruleAttachmentUnavailable';
+
 export type WorkerUpdateResult =
   | { outcome: 'updated'; response: UpdateWorkerResponse }
   | { outcome: 'not-found' }
   | { outcome: 'rejected'; what: string }
+  | { outcome: 'blocked'; reason: AlertTriageEnableBlockedReason }
   | { outcome: 'invalid'; message: string }
   | { outcome: 'conflict' }
   | { outcome: 'unavailable' }
@@ -282,29 +296,28 @@ export class WorkersService {
         if (!status.installed) return { outcome: 'unavailable' };
       }
 
-      const isAlertTriageEnabled = workerId === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
-
-      const isAlertTriageWorker =
-        isAlertTriageEnabled && this.alertTriageOpts.getAttachmentService != null;
-
-      if (isAlertTriageEnabled && patch.enabled) {
-        const preflight = await this.checkAlertAnalysisPreflight(request);
-        if (preflight) {
-          return {
-            outcome: 'rejected',
-            what: preflight.message,
-          };
-        }
-      }
+      const isAlertTriageWorker = workerId === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
 
       if (isAlertTriageWorker && patch.enabled) {
-        // Attach-then-enable: a failed bulk edit leaves the Worker off, not enabled-but-unattached.
-        await this.attachAlertTriageWorkerToAllRules(request, status.workflowId).catch(
-          (err: Error) => {
-            this.logger.error(`Alert Triage Worker: rule attachment failed: ${err.message}`);
-            throw err;
-          }
+        const blockedReason = await this.checkAlertAnalysisPreflight(request);
+        if (blockedReason) {
+          return { outcome: 'blocked', reason: blockedReason };
+        }
+
+        // Attach-then-enable: the Worker only fires from rules carrying its action, so enabling
+        // without attaching produces a Worker that never runs.
+        const attachmentService = await this.getAlertTriageAttachmentService(
+          request,
+          status.workflowId
         );
+        if (!attachmentService) {
+          return { outcome: 'blocked', reason: 'ruleAttachmentUnavailable' };
+        }
+        // A failed bulk edit leaves the Worker off, not enabled-but-unattached.
+        await attachAlertTriageWorkerToAllRules(attachmentService).catch((err: Error) => {
+          this.logger.error(`Alert Triage Worker: rule attachment failed: ${err.message}`);
+          throw err;
+        });
       }
 
       await management.updateWorkflow(
@@ -316,11 +329,19 @@ export class WorkersService {
 
       if (isAlertTriageWorker && !patch.enabled) {
         // Detach after disabling; don't let a partial detach fail the disable.
-        await this.detachAlertTriageWorkerFromAllRules(request, status.workflowId).catch(
-          (err: Error) => {
-            this.logger.error(`Alert Triage Worker: rule detachment failed: ${err.message}`);
-          }
+        const attachmentService = await this.getAlertTriageAttachmentService(
+          request,
+          status.workflowId
         );
+        if (attachmentService) {
+          await detachAlertTriageWorkerFromAllRules(attachmentService).catch((err: Error) => {
+            this.logger.error(`Alert Triage Worker: rule detachment failed: ${err.message}`);
+          });
+        } else {
+          this.logger.warn(
+            'Alert Triage Worker: disabled without detaching rules; the rule-attachment service is unavailable'
+          );
+        }
       }
     }
 
@@ -330,9 +351,9 @@ export class WorkersService {
   }
 
   /**
-   * Returns an error message if the Alert Analysis workflow cannot do the Worker's work, null
-   * if the enable may proceed. The Worker wraps that workflow, so enabling it against an
-   * unusable one produces a Worker that triages nothing.
+   * Returns why the Alert Analysis workflow cannot do the Worker's work, or null if the enable
+   * may proceed. The Worker wraps that workflow, so enabling it against an unusable one
+   * produces a Worker that triages nothing.
    *
    * Two independent things have to hold, and they fail differently:
    *
@@ -345,23 +366,21 @@ export class WorkersService {
    *   The Worker then completes successfully having classified, tagged and closed nothing.
    *
    * Refusing rather than switching it on is deliberate: that setting is `readonly` and owned
-   * by security_solution, so it is not ours to flip. See FOLLOW_UPS.md.
+   * by security_solution, so it is not ours to flip.
    */
   private async checkAlertAnalysisPreflight(
     request: KibanaRequest
-  ): Promise<{ message: string } | null> {
+  ): Promise<AlertTriageEnableBlockedReason | null> {
     const management = this.management;
     if (!management) return null;
     try {
       const workflow = await management.getWorkflow(
         SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
-        GLOBAL_WORKFLOW_SPACE_ID
+        GLOBAL_WORKFLOW_SPACE_ID,
+        request
       );
       if (workflow && !workflow.enabled) {
-        return {
-          message:
-            'Alert Triage requires the Alert Analysis workflow, which is disabled in this deployment. Enable it before turning on the Alert Triage Worker.',
-        };
+        return 'alertAnalysisWorkflowDisabled';
       }
     } catch (err) {
       this.logger.warn(
@@ -375,10 +394,7 @@ export class WorkersService {
     if (isAlertAnalysisRuntimeEnabled) {
       try {
         if (!(await isAlertAnalysisRuntimeEnabled(request))) {
-          return {
-            message:
-              'Alert Triage requires alert analysis to be turned on for this space. Go to Alert analysis settings, then turn on the Alert Triage Worker.',
-          };
+          return 'alertAnalysisRuntimeDisabled';
         }
       } catch (err) {
         // Refusing on an unreadable setting would make the Worker un-enableable whenever the
@@ -394,42 +410,12 @@ export class WorkersService {
     return null;
   }
 
-  private async attachAlertTriageWorkerToAllRules(
+  private async getAlertTriageAttachmentService(
     request: KibanaRequest,
     installedWorkflowId: string
-  ): Promise<void> {
+  ): Promise<AlertTriageAttachmentService | undefined> {
     const { getAttachmentService } = this.alertTriageOpts;
-    if (!getAttachmentService) return;
-    const service = await getAttachmentService(request, installedWorkflowId);
-    if (!service) return;
-    const selection = await service.getRuleAttachmentSelection({
-      search: '',
-      attachmentFilter: 'not_attached',
-    });
-    if (selection.ruleIds.length === 0) return;
-    await service.updateRuleAttachments({
-      attachRuleIds: selection.ruleIds,
-      detachRuleIds: [],
-    });
-  }
-
-  private async detachAlertTriageWorkerFromAllRules(
-    request: KibanaRequest,
-    installedWorkflowId: string
-  ): Promise<void> {
-    const { getAttachmentService } = this.alertTriageOpts;
-    if (!getAttachmentService) return;
-    const service = await getAttachmentService(request, installedWorkflowId);
-    if (!service) return;
-    const selection = await service.getRuleAttachmentSelection({
-      search: '',
-      attachmentFilter: 'attached',
-    });
-    if (selection.attachedRuleIds.length === 0) return;
-    await service.updateRuleAttachments({
-      attachRuleIds: [],
-      detachRuleIds: selection.attachedRuleIds,
-    });
+    return getAttachmentService?.(request, installedWorkflowId);
   }
 
   private async projectWorker(
