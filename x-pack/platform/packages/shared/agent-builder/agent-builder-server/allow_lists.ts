@@ -385,6 +385,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   // Security Solution – AlertZero (Hunt Watch)
   // gated behind xpack.alertzero.enabled
   'security.threat',
+  'security.significant_security_event',
 
   // Observability
   'observability.ai_insight',
