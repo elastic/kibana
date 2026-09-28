@@ -22,8 +22,13 @@ describe('getInventoryRuleSchema', () => {
   it('follows the stored pod schema when the selector is enabled, defaulting to ecs', () => {
     expect(getInventoryRuleSchema('pod', 'semconv', true)).toBe('semconv');
     expect(getInventoryRuleSchema('pod', 'ecs', true)).toBe('ecs');
+    // Omitted schema still defaults to ecs so the kubernetes node filter is kept.
     expect(getInventoryRuleSchema('pod', undefined, true)).toBe('ecs');
     expect(getInventoryRuleSchema('pod', null, true)).toBe('ecs');
+  });
+
+  it('keeps the pod coerce when the control is explicitly disabled', () => {
+    expect(getInventoryRuleSchema('pod', 'semconv', false)).toBe('ecs');
   });
 
   it('ignores the pod flag for every other node type', () => {
@@ -62,6 +67,7 @@ describe('getInventoryAlertGroupingField', () => {
   it('groups a pod rule by its stored schema when the selector is enabled, defaulting to ecs', () => {
     expect(getInventoryAlertGroupingField('pod', 'semconv', true)).toBe('k8s.pod.uid');
     expect(getInventoryAlertGroupingField('pod', 'ecs', true)).toBe('kubernetes.pod.uid');
+    expect(getInventoryAlertGroupingField('pod', undefined, true)).toBe('kubernetes.pod.uid');
     expect(getInventoryAlertGroupingField('pod', null, true)).toBe('kubernetes.pod.uid');
   });
 

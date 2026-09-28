@@ -200,6 +200,7 @@ export const createInventoryMetricThresholdExecutor =
           nodeType,
           source,
           schema,
+          isPodSchemaSelectorEnabled,
         })
       )
     );
@@ -282,7 +283,7 @@ export const createInventoryMetricThresholdExecutor =
 
         const evaluationValues = getEvaluationValues<ConditionResult>(results, group);
         const thresholds = getThresholds<InventoryMetricConditions>(criteria);
-        const field = getInventoryAlertGroupingField(nodeType, schema);
+        const field = getInventoryAlertGroupingField(nodeType, schema, isPodSchemaSelectorEnabled);
         const grouping = field ? unflattenGrouping({ [field]: group }) : undefined;
 
         const { uuid, start } = alertsClient.report({

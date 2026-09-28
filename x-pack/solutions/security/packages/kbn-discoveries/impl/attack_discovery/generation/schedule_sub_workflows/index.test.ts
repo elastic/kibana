@@ -109,10 +109,11 @@ describe('scheduleSubWorkflows', () => {
 
   it('delegates non-runWorkflow methods to the wrapped api unchanged', async () => {
     const management = buildManagementApi();
+    const request = buildRequest();
 
-    await scheduleSubWorkflows(management).getWorkflow('workflow-1', 'default');
+    await scheduleSubWorkflows(management).getWorkflow('workflow-1', 'default', request);
 
-    expect(management.getWorkflow).toHaveBeenCalledWith('workflow-1', 'default');
+    expect(management.getWorkflow).toHaveBeenCalledWith('workflow-1', 'default', request);
   });
 
   describe('when the api is already wrapped', () => {

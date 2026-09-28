@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { snapshotMetricForCatalog } from './snapshot_metric_for_catalog';
+import {
+  POD_SNAPSHOT_METRIC_TYPES,
+  snapshotMetricForCatalog,
+  snapshotMetricForInventoryRequest,
+} from './snapshot_metric_for_catalog';
 
-const podCatalog = ['cpu', 'memory', 'rx', 'tx'];
+const podCatalog = [...POD_SNAPSHOT_METRIC_TYPES];
 
 describe('snapshotMetricForCatalog', () => {
   it('keeps a metric the catalog offers', () => {
@@ -34,5 +38,23 @@ describe('snapshotMetricForCatalog', () => {
   it('keeps the current metric while the catalog is still loading', () => {
     const metric = { type: 'cpuV2' as const };
     expect(snapshotMetricForCatalog(metric, [], 'cpu')).toBe(metric);
+  });
+});
+
+describe('snapshotMetricForInventoryRequest', () => {
+  it('replaces cpuV2 with cpu before the first pod snapshot', () => {
+    expect(snapshotMetricForInventoryRequest('pod', { type: 'cpuV2' }, 'cpu')).toEqual({
+      type: 'cpu',
+    });
+  });
+
+  it('keeps the stored metric for hosts', () => {
+    const metric = { type: 'cpuV2' as const };
+    expect(snapshotMetricForInventoryRequest('host', metric, 'cpuV2')).toBe(metric);
+  });
+
+  it('keeps a pod metric the catalog offers', () => {
+    const metric = { type: 'memory' as const };
+    expect(snapshotMetricForInventoryRequest('pod', metric, 'cpu')).toBe(metric);
   });
 });
