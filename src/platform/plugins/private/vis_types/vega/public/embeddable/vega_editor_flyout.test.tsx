@@ -10,9 +10,11 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import type { VegaPluginStartDependencies } from '../plugin';
+import { setData } from '../services';
 import type { VegaEmbeddableApi } from './vega_embeddable';
 import { VegaEditorFlyout } from './vega_editor_flyout';
 
@@ -62,7 +64,8 @@ const renderFlyout = ({
   } as unknown as VegaEmbeddableApi;
 
   const SearchBar = ((props: unknown) => {
-    const { filters, indexPatterns, onQuerySubmit, onFiltersUpdated } = props as {
+    const { query, filters, indexPatterns, onQuerySubmit, onFiltersUpdated } = props as {
+      query?: Query;
       filters: Filter[];
       indexPatterns: DataView[];
       onQuerySubmit: (payload: { dateRange: unknown; query?: Query }) => void;
@@ -71,6 +74,7 @@ const renderFlyout = ({
 
     return (
       <div>
+        <div>{`query:${query ? `${query.language}:${query.query}` : 'none'}`}</div>
         <div>{`filtersLength:${filters.length}`}</div>
         <div>{`dataViews:${indexPatterns.map(({ id }) => id).join(',')}`}</div>
         <button
@@ -120,6 +124,14 @@ const renderFlyout = ({
 };
 
 describe('VegaEditorFlyout', () => {
+  beforeEach(() => {
+    const data = dataPluginMock.createStartContract();
+    jest
+      .mocked(data.query.queryString.getDefaultQuery)
+      .mockReturnValue({ language: 'lucene', query: '' });
+    setData(data);
+  });
+
   it('renders the title with the flyout label id and all footer actions', async () => {
     renderFlyout();
 
@@ -204,6 +216,20 @@ describe('VegaEditorFlyout', () => {
 
     await waitFor(() => expect(api.setFilters).toHaveBeenCalled());
     expect(screen.getByRole('button', { name: 'Apply and close' })).toBeDisabled();
+  });
+
+  // SearchBar hides the query input when it gets no query, and with useDefaultBehaviors={false}
+  // it doesn't substitute a default.
+  it('passes the default query to the search bar when the panel has no query', async () => {
+    renderFlyout();
+
+    expect(await screen.findByText('query:lucene:')).toBeInTheDocument();
+  });
+
+  it('passes the panel query to the search bar', async () => {
+    renderFlyout({ initialQuery: { language: 'kuery', query: 'bytes > 1000' } });
+
+    expect(await screen.findByText('query:kuery:bytes > 1000')).toBeInTheDocument();
   });
 
   it('passes an empty filters array to the search bar when the panel has no filters', async () => {

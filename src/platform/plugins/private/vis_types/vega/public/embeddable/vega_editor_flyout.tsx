@@ -29,6 +29,7 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { isEqual } from 'lodash';
 import type { VegaByValueState } from '../../server';
 import type { VegaPluginStartDependencies } from '../plugin';
+import { getData } from '../services';
 import { vegaTitleInWizard } from '../vega_icon';
 import type { VegaEmbeddableApi } from './vega_embeddable';
 
@@ -168,7 +169,11 @@ export const VegaEditorFlyout = ({
           <EuiFlexItem grow={false}>
             <SearchBar
               appName="vegaEditorFlyout"
-              query={isOfQueryType(search.query) ? search.query : undefined}
+              query={
+                isOfQueryType(search.query)
+                  ? search.query
+                  : getData().query.queryString.getDefaultQuery()
+              }
               filters={search.filters ?? []}
               indexPatterns={dataViews}
               showQueryInput
