@@ -7,7 +7,7 @@
 
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../types';
 import type { SignificantEventsAvailabilityResponse } from '../../../common';
 import {
   SIGNIFICANT_EVENTS_REQUIRED_PLUGINS,
@@ -20,7 +20,7 @@ import { FeatureNotEnabledError } from '../../lib/errors/feature_not_enabled_err
 import { MissingDependencyError } from '../../lib/errors/missing_dependency_error';
 
 interface SignificantEventsAccessContext {
-  server: StreamsServer;
+  server: SignificantEventsServer;
   licensing: LicensingPluginStart;
 }
 

@@ -40,8 +40,6 @@ import type {
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableByValueState,
   DiscoverSessionEmbeddableState,
-} from '../../server';
-import type {
   SearchEmbeddableByReferenceState,
   SearchEmbeddableState,
   StoredSearchEmbeddableByReferenceState,
@@ -238,18 +236,24 @@ export function fromStoredTab(
   references: SavedObjectReference[] = []
 ): DiscoverSessionApiTabBase {
   const {
-    sort,
-    sampleSize,
-    rowsPerPage,
-    viewMode,
     kibanaSavedObjectMeta: { searchSourceJSON },
   } = tab;
+  const searchSource = injectReferences(parseSearchSourceJSON(searchSourceJSON), references);
+
+  return fromStoredTabWithSearchSource(tab, searchSource);
+}
+
+/** Maps a stored tab using the SearchSource prepared by the caller. */
+export function fromStoredTabWithSearchSource(
+  tab: DiscoverSessionTabAttributes,
+  { index, query, filter }: SerializedSearchSourceFields
+): DiscoverSessionApiTabBase {
+  const { sort, sampleSize, rowsPerPage, viewMode } = tab;
   const apiTab = {
     ...toDiscoverSessionEmbeddableOverrides(tab),
     sort: fromStoredSort(sort),
   };
-  const searchSourceValues = parseSearchSourceJSON(searchSourceJSON);
-  const { index, query, filter } = injectReferences(searchSourceValues, references);
+
   return isOfAggregateQueryType(query)
     ? {
         ...apiTab,

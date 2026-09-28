@@ -863,7 +863,7 @@ describe('enable()', () => {
   });
 
   describe('missing UIAM API key tagging', () => {
-    test('should add missing UIAM API key tag when enabling rule with missing UIAM key in serverless', async () => {
+    test('should defer missing UIAM API key tagging until rule execution', async () => {
       // Set up serverless environment
       const serverlessRulesClient = new RulesClient({
         ...rulesClientParams,
@@ -895,17 +895,17 @@ describe('enable()', () => {
 
       await serverlessRulesClient.enableRule({ id: '1' });
 
-      // Verify the missing UIAM key tag was added
+      // Rule execution owns the missing UIAM key tag.
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         'alert',
         expect.objectContaining({
-          tags: expect.arrayContaining(['existing-tag', 'Missing Elastic Cloud API Key']),
+          tags: ['existing-tag'],
         }),
         expect.anything()
       );
     });
 
-    test('should add missing UIAM API key tag when enabling rule without existing API key', async () => {
+    test('should preserve tags when enabling a rule without an existing API key', async () => {
       // Set up serverless environment
       const serverlessRulesClient = new RulesClient({
         ...rulesClientParams,
@@ -945,11 +945,11 @@ describe('enable()', () => {
 
       await serverlessRulesClient.enableRule({ id: '1' });
 
-      // Verify the missing UIAM key tag was added
+      // Rule execution owns the missing UIAM key tag.
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         'alert',
         expect.objectContaining({
-          tags: expect.arrayContaining(['existing-tag', 'Missing Elastic Cloud API Key']),
+          tags: ['existing-tag'],
         }),
         expect.anything()
       );

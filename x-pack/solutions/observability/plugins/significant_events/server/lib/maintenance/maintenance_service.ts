@@ -11,7 +11,7 @@ import { brandSpaceId, DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-c
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../types';
 import type {
   SignificantEventsMaintenanceFailure,
   SignificantEventsMaintenanceStatus,
@@ -216,7 +216,7 @@ export const createSignificantEventsMaintenanceService = ({
   getScopedClients,
 }: {
   logger: Logger;
-  server: StreamsServer;
+  server: SignificantEventsServer;
   getScopedClients: GetScopedClients;
 }): SignificantEventsMaintenanceService => {
   const log = logger.get('significant-events-maintenance');
@@ -428,7 +428,7 @@ export const createSignificantEventsMaintenanceService = ({
   ): Promise<boolean> => {
     const target = `workflow:${id}@${spaceId}`;
     try {
-      const workflow = await mgmt.getWorkflow(id, spaceId);
+      const workflow = await mgmt.getClient(request).getWorkflow(id, spaceId);
       if (!workflow || !workflow.enabled) {
         return false;
       }
@@ -546,7 +546,7 @@ export const createSignificantEventsMaintenanceService = ({
   ): Promise<'toggled' | 'already' | 'gone' | 'failed'> => {
     const target = `workflow:${id}@${spaceId}`;
     try {
-      const workflow = await mgmt.getWorkflow(id, spaceId);
+      const workflow = await mgmt.getClient(request).getWorkflow(id, spaceId);
       if (!workflow) {
         // Gone — surface it, but don't keep the deployment paused on a workflow
         // that no longer exists.
