@@ -8,7 +8,6 @@
 import { useMemo, useCallback } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { useBulkClosingReasonItems } from '@kbn/response-ops-detections-close-reason';
-import { flattenObject } from '@kbn/object-utils';
 import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
 import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
 import type {
@@ -234,27 +233,21 @@ export const useBulkActionItems = ({
       },
     });
 
-  const workflowDocuments = useMemo(() => {
+  // Send only (id, index) pairs and let the server fetch each source. Embedding the flattened
+  // ECS of every selected row put the request over the payload limit on large selections.
+  const workflowDocumentIds = useMemo(() => {
     if (!data) return [];
     return data
       .filter((item) => eventIds.includes(item._id))
-      .map((item) => {
-        const flattened = flattenObject(item.ecs);
-        const fields: Record<string, unknown> = {};
-        for (const [field, value] of Object.entries(flattened)) {
-          fields[field] = value;
-        }
-        return {
-          _id: item._id,
-          _index: item._index ?? '',
-          ...fields,
-        };
-      });
+      .map((item) => ({
+        _id: item._id,
+        _index: item._index ?? '',
+      }));
   }, [data, eventIds]);
 
   const noop = useCallback(() => {}, []);
   const { runWorkflowMenuItem, runDocumentWorkflowPanel } = useRunDocumentWorkflowPanel({
-    documents: workflowDocuments,
+    documentIds: workflowDocumentIds,
     closePopover: closePopover ?? noop,
   });
 
