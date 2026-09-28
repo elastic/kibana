@@ -20,8 +20,12 @@ consts:
     category: respond
     description: Closes the specified alerts with workflow_status=closed and workflow_reason=false_positive.
     impact: high
-    reversible: false
-    approvalPolicy: always-gate
+    # A closed alert can be reopened by an analyst.
+    reversible: true
+    # Deferred to the caller's autonomy level: the Alert Triage epic has Supervised close
+    # false positives without waiting, and `always-gate` would make `supervised` identical
+    # to `manual`. At manual autonomy `autonomy-dependent` still gates.
+    approvalPolicy: autonomy-dependent
 triggers:
   - type: manual
     inputs:

@@ -13,10 +13,11 @@ tags:
   - watch-floor
 
 settings:
-  # Must exceed the gate workflow's 72 h timeout. `system-create-proposal`
-  # parks this Worker run on `waitForApproval` for up to 72 h at Manual autonomy.
-  # The 6 h default would kill the run mid-gate.
-  timeout: '80h'
+  # Must exceed the proposal gate's ceiling. `system-create-proposal` parks this run for up
+  # to 72 h at Manual autonomy, and a failed or unauthorized attempt re-parks within the same
+  # deadline, so the Worker Investigation lifecycle contract puts the ceiling at 168 h. The 6 h
+  # default would kill the run mid-gate.
+  timeout: '170h'
 
 triggers:
   - type: alert
@@ -38,38 +39,36 @@ consts:
 #
 # ORDERING IS LOAD-BEARING — do not rearrange.
 #
-# Abort / preflight steps MUST stay above create_investigation. A disabled or
-# unusable Alert Analysis path must not open an Investigation.
+# Preflight steps MUST stay above create_investigation: a disabled Alert Analysis path must
+# not open an Investigation.
 #
-# The conclusion metadata-patch, tags, and notes MUST be written before the
-# gate (`workflow.execute system-create-proposal`). The gate
-# parks this Worker for up to 72 h at Manual autonomy; anything sequenced
-# after it is invisible to the analyst until a decision arrives.
+# Tags and notes MUST be written before the gate (`workflow.execute system-create-proposal`).
+# The gate parks this Worker for up to 72 h at Manual autonomy; anything sequenced after it
+# is invisible to the analyst until a decision arrives.
 #
 # Pipeline:
-#   0. require_analysis_enabled  — fail the run before create_investigation when
-#                                  the space has Alert Analysis turned off
-#   1. create_investigation      — open an Investigation conversation
-#   2. attach_alerts             — attach the alert batch by value
-#   3. classify_alerts           — run the classification sub-workflow
-#   4. compute_fp_candidates     — filter verdicts to FP + threshold
-#   5. set_az_tags               — static AZ classification tags (R5, always)
-#   6. add_verdict_notes         — verdict + investigation ref per alert (R4/R13, always)
-#   7. gate_fp_close             — proposal gate (if any FP candidates)
-#   8. close_investigation_no_fp — explicit close when zero FPs (the branch that
-#                                  gets forgotten — must exist, see test)
+#   1. require_analysis_enabled  — fail the run before create_investigation when the space
+#                                  has Alert Analysis turned off
+#   2. create_investigation      — open an Investigation conversation
+#   3. attach_alerts             — attach the alert batch
+#   4. classify_alerts           — run the classification sub-workflow
+#   5. compute_fp_candidates     — filter verdicts to false_positive at or above the floor
+#   6. attach_impact             — entity × verdict summary
+#   7. set_az_tags               — static AZ classification tags (R5, always)
+#   8. add_verdict_notes         — verdict + Investigation reference per alert (R4/R13, always)
+#   9. gate_fp_close             — proposal gate and one branch per outcome (if any FP candidates)
+#  10. close_investigation_no_fp — explicit close when there are no FP candidates
 #
-# Comments (D41): five kibana.request posts with trigger_mode:'never' serve as the
-# Investigation narrative. No write_conclusion step — the framework generates the summary.
-# TODO: replace kibana.request comment posts with ai.conversation.message.add once kibana#291688 merges.
+# Investigation narrative: messages are posted with `POST /api/chat/converse` and
+# `trigger_mode: 'never'`, so they are recorded without running the Investigation's agent.
 
 steps:
   # ---------------------------------------------------------------------------
-  # 0. Abort before opening an Investigation when Alert Analysis is off in this
+  # 1. Abort before opening an Investigation when Alert Analysis is off in this
   #    space. Enablement is checked at Worker turn-on; this is the runtime
   #    complement for the case where the operator later turns analysis off and
   #    leaves the Worker running. Empty verdicts are not a substitute — the
-  #    sub-workflow also returns [] when every alert is already tagged.
+  #    sub-workflow also returns [] when no connector resolves for the model tier.
   #
   #    Same runtime_config endpoint the analysis workflow reads. Fail-closed: a
   #    failed fetch after retries fails the run rather than creating a hollow
@@ -101,9 +100,9 @@ steps:
             Turn it on under Alert analysis settings, or turn this Worker off.
 
   # ---------------------------------------------------------------------------
-  # 1. Open an Investigation conversation seeded from the `investigation`
-  #    template. Seeds status, severity, and the workflow_execution_id so a
-  #    Worker retry can detect an existing Investigation for this execution.
+  # 2. Open an Investigation conversation seeded from the `investigation`
+  #    template. Seeds status, severity, and the workflow_execution_id that links
+  #    the Investigation to this run.
   # ---------------------------------------------------------------------------
   - name: create_investigation
     type: ai.conversation.create
@@ -121,7 +120,7 @@ steps:
         workflow_execution_id: "{{ execution.id }}"
 
   # ---------------------------------------------------------------------------
-  # 2. Attach the analysed alerts to the Investigation in chunks of 20.
+  # 3. Attach the analysed alerts to the Investigation in chunks of 20.
   #    security.alerts caps at 20 ids per call; foreach+chunk splits larger
   #    batches into multiple chips. render_inline: true so chips show in the
   #    Investigation flyout without a separate attachment panel.
@@ -142,26 +141,6 @@ steps:
             alertIds: "${{ foreach.item }}"
           description: "Alerts analysed in this triage run"
 
-  # ---------------------------------------------------------------------------
-  # 3. Run the Security Alert Analysis sub-workflow.
-  #
-  #    autoCloseEnabled: false — the Worker owns the close decision (R11 says
-  #    every close is a Proposal, so the sub-workflow must not close inline).
-  #
-  #    connectorIdByFeature: alertzero_reasoning — uses the Reasoning tier
-  #    (Claude Sonnet 5 / Opus 5) rather than Fast. Per-alert classification
-  #    benefits from a stronger model: each verdict drives a tag, a note, and
-  #    potentially a HITL proposal, so quality matters more than throughput here.
-  #    Model choice remains operator-configurable via Stack Management → Model Settings.
-  #
-  #    autoCloseConfidenceScoreMinThreshold is passed through so the
-  #    sub-workflow uses the same floor for tagging/noting (the max threshold
-  #    defaults to 1, collapsing the range to a floor on this path — PR 1).
-  # ---------------------------------------------------------------------------
-  # ---------------------------------------------------------------------------
-  # Comment 1 — triage started
-  # TODO: replace with ai.conversation.message.add once kibana#291688 merges
-  # ---------------------------------------------------------------------------
   - name: post_comment_triage_started
     type: kibana.request
     on-failure:
@@ -182,24 +161,24 @@ steps:
           [View execution]({{ execution.url }})
 
   # ---------------------------------------------------------------------------
-  # 3. Run the Security Alert Analysis sub-workflow.
+  # 4. Run the Security Alert Analysis sub-workflow.
   #
-  #    autoCloseEnabled: false — the Worker owns the close decision (R11 says
-  #    every close is a Proposal, so the sub-workflow must not close inline).
+  #    autoCloseEnabled: false — the Worker owns the close decision (R11: every
+  #    close is a Proposal, so the sub-workflow must not close inline).
   #
-  #    connectorIdByFeature: alertzero_reasoning — uses the Reasoning tier
-  #    (Claude Sonnet 5 / Opus 5) rather than Fast. Per-alert classification
-  #    benefits from a stronger model: each verdict drives a tag, a note, and
-  #    potentially a HITL proposal, so quality matters more than throughput here.
-  #    Model choice remains operator-configurable via Stack Management → Model Settings.
+  #    calledByWorker: true — the sub-workflow classifies and tags but leaves the
+  #    verdict note to this Worker (add_verdict_notes), so each alert gets one note.
   #
-  #    autoCloseConfidenceScoreMinThreshold is passed through so the
-  #    sub-workflow uses the same floor for tagging/noting (the max threshold
-  #    defaults to 1, collapsing the range to a floor on this path — PR 1).
+  #    connectorIdByFeature: alertzero_reasoning — the Reasoning tier rather than
+  #    Fast. Each verdict drives a tag, a note, and potentially a HITL proposal, so
+  #    classification quality matters more than throughput here. Operators pick the
+  #    model for the tier in Stack Management → Model Settings.
   #
-  #    investigationConversationId is passed so the sub-workflow can post
-  #    per-batch progress comments into the Investigation (guarded by
-  #    calledByWorker inside the sub-workflow).
+  #    autoCloseConfidenceScoreMinThreshold is passed through so the sub-workflow
+  #    reports against the same floor this Worker applies in compute_fp_candidates.
+  #
+  #    investigationConversationId lets the sub-workflow post per-batch progress
+  #    comments into the Investigation.
   # ---------------------------------------------------------------------------
   - name: classify_alerts
     type: workflow.execute
@@ -220,7 +199,7 @@ steps:
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               trigger_mode: "never"
               input: >-
-                🤖 **Alert Triage** ⚠️ — Classification step failed for {{ event.alerts | size }} alert(s).
+                ⚠️ Classification step failed for {{ event.alerts | size }} alert(s).
                 The Alert Analysis workflow may be disabled, or `workflow.execute` threw.
                 Alerts have NOT been tagged or closed.
 
@@ -246,7 +225,7 @@ steps:
         investigationConversationId: "{{ steps.create_investigation.output.conversation_id }}"
 
   # ---------------------------------------------------------------------------
-  # 4. Compute the FP candidate list: verdicts classified as false_positive
+  # 5. Compute the FP candidate list: verdicts classified as false_positive
   #    at or above the configured confidence floor.
   # ---------------------------------------------------------------------------
   # The confidence floor is applied here rather than in the sub-workflow: this path passes
@@ -275,9 +254,9 @@ steps:
     with:
       fp_candidate_count: "${{ variables.fp_candidate_ids | size }}"
 
-  # Guard: analysis is on (or this run would have aborted at step 0) but the
-  # sub-workflow returned 0 verdicts for a non-empty batch — already-tagged
-  # alerts, a missing Model Management connector, or the sub-workflow skipped.
+  # Guard: analysis is on (or this run would have aborted at step 1) but the
+  # sub-workflow returned 0 verdicts for a non-empty batch — a missing Model
+  # Management connector, or the sub-workflow skipped.
   # Counts are materialised first: `${{ event.alerts | size > 0 }}` is invalid Liquid
   # (the engine parses `size > 0` as a filter name). The if-condition engine also
   # rejects `and`, so the two comparisons stay nested.
@@ -310,16 +289,12 @@ steps:
                 conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                 trigger_mode: "never"
                 input: >-
-                  🤖 **Alert Triage** ⚠️ — Alert Analysis returned no verdicts for {{ event.alerts | size }} alert(s).
+                  ⚠️ Alert Analysis returned no verdicts for {{ event.alerts | size }} alert(s).
                   Analysis is on for this space (a disabled setting aborts before an Investigation is opened).
-                  Likely causes: the alerts already carry the analysis tag, the `alertzero_fast`
-                  Model Management feature has no connector, or the sub-workflow skipped the batch.
+                  Likely causes: the `alertzero_reasoning` Model Management feature has no connector,
+                  or the sub-workflow skipped the batch.
                   Alerts have NOT been tagged or closed.
 
-  # ---------------------------------------------------------------------------
-  # Comment 2 — classification results
-  # TODO: replace with ai.conversation.message.add once kibana#291688 merges
-  # ---------------------------------------------------------------------------
   - name: post_comment_classification_results
     type: kibana.request
     on-failure:
@@ -342,9 +317,9 @@ steps:
           {{ steps.classify_alerts.output.generated_summary }}{% if steps.classify_alerts.output.connector_id != '' %} _(Connector: `{{ steps.classify_alerts.output.connector_id }}`, Agent: `{{ steps.classify_alerts.output.agent_id }}`)_{% endif %}
 
   # ---------------------------------------------------------------------------
-  # 4b. Attach impact summary (entity × verdict breakdown) to the Investigation.
-  #     Capped at 50 entities per attachment; truncated flag set when the sub-
-  #     workflow emitted more (the sub-workflow already caps at MAX_IMPACTED_ENTITIES).
+  # 6. Attach impact summary (entity × verdict breakdown) to the Investigation.
+  #    The sub-workflow caps impacted_entities at MAX_IMPACTED_ENTITIES and sets
+  #    impacted_entities_truncated when it dropped any.
   # ---------------------------------------------------------------------------
   - name: attach_impact
     type: ai.attachment.add
@@ -361,7 +336,7 @@ steps:
       description: "Impacted entities from alert triage"
 
   # ---------------------------------------------------------------------------
-  # 5. Apply static AZ classification tags to every analysed alert (R5).
+  # 7. Apply static AZ classification tags to every analysed alert (R5).
   #    Tags are always written — never gated on autonomy level or FP count.
   #    Replaces any stale AZ classification tag before adding the current one.
   # ---------------------------------------------------------------------------
@@ -405,8 +380,9 @@ steps:
               - "az:{{ foreach.item.classification }}"
 
   # ---------------------------------------------------------------------------
-  # 6. Write a verdict note to each alert referencing the Investigation (R4, R13).
-  #    Always written — never gated on autonomy level.
+  # 8. Write a verdict note to each alert referencing the Investigation (R4, R13).
+  #    Always written — never gated on autonomy level. The only verdict note on the
+  #    Worker path: the sub-workflow skips its own when calledByWorker is true.
   # ---------------------------------------------------------------------------
   - name: add_verdict_notes
     foreach: "${{ steps.classify_alerts.output.verdicts | json }}"
@@ -423,20 +399,22 @@ steps:
           eventId: "{{ foreach.item.alert_id }}"
           timelineId: ''
           note: |
-            🤖 **Alert Triage Worker** — [Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }})
+            [Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}) · [Workflow execution]({{ execution.url }})
 
             **Verdict:** {{ foreach.item.classification }}
             **Confidence:** {{ foreach.item.confidence_score }}
 
             {{ foreach.item.rationale }}
+            {% if foreach.item.contributing_factors.size > 0 %}
+            **Contributing factors**
+            {% for factor in foreach.item.contributing_factors %}
+            - {{ factor }}
+            {%- endfor %}
+            {% endif %}
       headers:
         kbn-xsrf: string
         Content-Type: application/json
 
-  # ---------------------------------------------------------------------------
-  # Comment 3 — what was written back to the alerts
-  # TODO: replace with ai.conversation.message.add once kibana#291688 merges
-  # ---------------------------------------------------------------------------
   - name: post_comment_alert_updates
     type: kibana.request
     on-failure:
@@ -455,29 +433,24 @@ steps:
           Tags and verdict notes written to {{ steps.classify_alerts.output.verdicts | size }} alert(s).
 
   # ---------------------------------------------------------------------------
-  # 7. Autonomy gate — create a proposal to close FP alerts if any qualify.
+  # 9. Autonomy gate — create a proposal to close FP alerts if any qualify.
   #
   #    Autonomy mapping (two levels — `assisted` from WATCH_AUTONOMY_LEVELS is not offered):
   #      manual     → autoApprove: false  (human gate, 72 h queue row)
-  #      supervised → autoApprove: true   (auto-closes; analyst notified and can undo)
+  #      supervised → autoApprove: true   (closes without waiting; the analyst can reopen)
   #
   #    Both levels go through the proposal gate so the proposal record always
   #    exists (R11) and there is one mapping site if the semantics ever change.
+  #    `autoApprove` only takes effect because the close action declares
+  #    `approvalPolicy: autonomy-dependent`; `always-gate` would override it.
   #
-  #    Idempotency: the conversation carries `workflow_execution_id` seeded in
-  #    step 1. A Worker retry re-creates the Investigation (which 409s on a
-  #    duplicate `conversation_id` if one is supplied) rather than re-creating
-  #    a proposal for the same execution. Platform-level idempotency for
-  #    ProposalsService is an open gap (see plan §PR4 non-blocking).
+  #    The gate completes normally on every outcome, including an unanswered
+  #    deadline (`status: expired`), so each outcome gets its own branch below.
   # ---------------------------------------------------------------------------
   - name: gate_fp_close
     type: if
     condition: "${{ variables.fp_candidate_count > 0 }}"
     steps:
-      # -------------------------------------------------------------------------
-      # Comment 4 — what is being proposed and why
-      # TODO: replace with ai.conversation.message.add once kibana#291688 merges
-      # -------------------------------------------------------------------------
       - name: post_comment_proposal
         type: kibana.request
         on-failure:
@@ -495,41 +468,17 @@ steps:
             input: >-
               Proposing closure of {{ variables.fp_candidate_count }} alert(s) classified as false positive at or above the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor.
               Autonomy level: {{ consts.worker_settings.autonomy }}.
-              {% if consts.worker_settings.autonomy == 'supervised' %}This proposal will auto-approve immediately; you will be notified and can undo.{% else %}A human decision is required.{% endif %}
+              {% if consts.worker_settings.autonomy == 'supervised' %}The closure is approved automatically at this autonomy level; reopen any alert you disagree with.{% else %}A human decision is required.{% endif %}
 
       - name: create_fp_proposal
         type: workflow.execute
-        # A 72 h gate timeout surfaces as a step failure in the parent
-        # (create_proposal.yaml: "A gate timeout surfaces as a step failure rather
-        # than a branch"). Patch the Investigation closed so the analyst sees a
-        # legible terminal state rather than a perpetually open one.
+        # Reached only when the proposal workflow itself fails (for example, the proposal could
+        # not be created); gate outcomes, including an expired deadline, complete normally and
+        # are handled by the branches below. The fallback re-throws afterwards, so the run
+        # fails and shows up in execution history.
         on-failure:
           fallback:
-            # Patching the Investigation closed is best-effort cleanup for an already-failed
-            # gate: `ai.conversation.metadata.patch` 404s when `agentBuilder:experimentalFeatures`
-            # is off, and that must not swallow the fallback's own error (the gate timeout) or
-            # skip post_comment_outcome_gate_timeout below.
-            - name: close_investigation_on_gate_timeout
-              type: ai.conversation.metadata.patch
-              on-failure:
-                continue: true
-                fallback:
-                  - name: log_gate_timeout_close_failed
-                    type: console
-                    with:
-                      message: >-
-                        Gate timed out and the Investigation could not be marked closed:
-                        {{ error.message }}. Investigation
-                        {{ steps.create_investigation.output.conversation_id }} stays open
-                        until the reconciliation sweep resolves it.
-              with:
-                conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-                updates:
-                  status: closed
-                  close_reason: other
-
-            # TODO: replace with ai.conversation.message.add once kibana#291688 merges
-            - name: post_comment_outcome_gate_timeout
+            - name: post_comment_proposal_failed
               type: kibana.request
               on-failure:
                 continue: true
@@ -544,14 +493,14 @@ steps:
                   conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                   trigger_mode: "never"
                   input: >-
-                    No decision received within 72 hours. {{ variables.fp_candidate_ids | size }} alert(s) remain open and tagged az:false_positive.
-                    Re-run the Worker to create a new proposal.
+                    ⚠️ The closure proposal could not be completed: {{ error.message }}.
+                    {{ variables.fp_candidate_count }} alert(s) remain open and tagged az:false_positive.
         with:
           workflow-id: system-create-proposal
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
             comment: >-
-              {{ variables.fp_candidate_ids | size }} alert(s) from rule "{{ event.rule.name }}" were classified as false positives at or above the configured confidence floor ({{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }}).
+              {{ variables.fp_candidate_count }} alert(s) from rule "{{ event.rule.name }}" were classified as false positives at or above the configured confidence floor ({{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }}).
               Approving this proposal will close them with workflow_reason=false_positive.
             actionWorkflowId: system-alertzero-action-close-alerts-fp
             actionInput:
@@ -562,7 +511,8 @@ steps:
             # Autonomy → autoApprove mapping. One site: update here if semantics change.
             autoApprove: "${{ consts.worker_settings.autonomy == 'supervised' }}"
 
-      # Fetch proposal details for outcome comment attribution (decision, decidedBy).
+      # Fetch proposal details for outcome comment attribution (decision, decidedBy,
+      # dismissReason, rationale).
       - name: get_proposal
         type: proposals.getProposal
         on-failure:
@@ -570,22 +520,26 @@ steps:
         with:
           proposalId: "{{ steps.create_fp_proposal.output.proposalId }}"
 
-      # After the gate resolves (human approve or auto-approved), verify the
-      # close landed by comparing the action workflow's output closed_count
-      # against the proposed alert count. A mismatch means alerts stayed open
-      # while nothing notified the analyst — which is the failure D37 says
-      # "logged and shown in the UI" is not good enough for.
-      - name: verify_and_close
+      # One value per outcome so every branch below is a single comparison (if-conditions
+      # take neither filters nor `and`). `decision` and `status` are separate axes (D48):
+      # an approved close ends `succeeded`, a dismissal ends with `decision: dismissed`, and
+      # an unanswered deadline ends `expired` with no decision.
+      - name: resolve_proposal_outcome
+        type: data.set
+        with:
+          proposal_outcome: >-
+            {% if steps.create_fp_proposal.output.status == 'succeeded' %}approved{% elsif steps.create_fp_proposal.output.decision == 'dismissed' %}dismissed{% elsif steps.create_fp_proposal.output.status == 'expired' %}expired{% else %}unknown{% endif %}
+
+      - name: handle_approved
         type: if
-        condition: "${{ steps.create_fp_proposal.output.status == 'succeeded' }}"
+        condition: "${{ variables.proposal_outcome == 'approved' }}"
         steps:
           # Everything the analyst approved has already happened by this point: the alerts are
           # closed and the proposal is `succeeded`. Failing the run on the bookkeeping patch
           # would report a successful triage as a failure, so the patch is allowed to fail.
           # `continue: true` is required for that: fallback alone still re-throws the original
           # error afterwards (see on_failure/README.md), which would abort the run and skip
-          # post_comment_outcome_approved below — exactly the "successful triage reported as a
-          # failure" this step exists to avoid. Also the failure mode `ai.conversation.metadata.patch`
+          # the outcome comment below. Also the failure mode `ai.conversation.metadata.patch`
           # hits when `agentBuilder:experimentalFeatures` is off.
           - name: close_investigation_after_approval
             type: ai.conversation.metadata.patch
@@ -598,15 +552,13 @@ steps:
                     message: >-
                       Alerts were closed and the proposal succeeded, but the Investigation
                       could not be marked closed: {{ error.message }}. Investigation
-                      {{ steps.create_investigation.output.conversation_id }} stays open
-                      until the reconciliation sweep resolves it.
+                      {{ steps.create_investigation.output.conversation_id }} stays open.
             with:
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               updates:
                 status: closed
                 close_reason: false_positive
 
-          # TODO: replace with ai.conversation.message.add once kibana#291688 merges
           - name: post_comment_outcome_approved
             type: kibana.request
             on-failure:
@@ -624,7 +576,10 @@ steps:
                 input: >-
                   Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert(s) closed as false positive.
 
-        else:
+      - name: handle_dismissed
+        type: if
+        condition: "${{ variables.proposal_outcome == 'dismissed' }}"
+        steps:
           # Map the dismiss reason to the correct re-tag:
           #   wrong → az:true_positive (analyst contradicts the classification itself)
           #   any other reason → az:inconclusive (analyst rejects the *action*, not the verdict)
@@ -671,7 +626,26 @@ steps:
                     tags_to_add:
                       - "{{ variables.dismissed_tag }}"
 
-          # TODO: replace with ai.conversation.message.add once kibana#291688 merges
+          # Same failure tolerance as close_investigation_after_approval: the decision has
+          # landed, so a failed bookkeeping patch must not fail the run.
+          - name: close_investigation_after_dismissal
+            type: ai.conversation.metadata.patch
+            on-failure:
+              continue: true
+              fallback:
+                - name: log_dismissed_close_failed
+                  type: console
+                  with:
+                    message: >-
+                      The proposal was dismissed, but the Investigation could not be marked
+                      closed: {{ error.message }}. Investigation
+                      {{ steps.create_investigation.output.conversation_id }} stays open.
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              updates:
+                status: closed
+                close_reason: other
+
           - name: post_comment_outcome_dismissed
             type: kibana.request
             on-failure:
@@ -689,8 +663,72 @@ steps:
                 input: >-
                   Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %} (reason: {{ steps.get_proposal.output.dismissReason | default: 'not specified' }}). {{ variables.fp_candidate_count }} alert(s) re-tagged {{ variables.dismissed_tag }}.{% if steps.get_proposal.output.rationale != blank %} Rationale: "{{ steps.get_proposal.output.rationale | truncate: 500 | escape }}".{% endif %}
 
+      # An unanswered deadline is not a dismissal: nobody rejected the verdict, so the alerts
+      # keep their az:false_positive tag and stay open for an analyst to pick up.
+      - name: handle_expired
+        type: if
+        condition: "${{ variables.proposal_outcome == 'expired' }}"
+        steps:
+          - name: close_investigation_after_expiry
+            type: ai.conversation.metadata.patch
+            on-failure:
+              continue: true
+              fallback:
+                - name: log_expired_close_failed
+                  type: console
+                  with:
+                    message: >-
+                      The proposal expired, but the Investigation could not be marked
+                      closed: {{ error.message }}. Investigation
+                      {{ steps.create_investigation.output.conversation_id }} stays open.
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              updates:
+                status: closed
+                close_reason: other
+
+          - name: post_comment_outcome_expired
+            type: kibana.request
+            on-failure:
+              continue: true
+            with:
+              method: POST
+              path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+              headers:
+                kbn-xsrf: string
+                Content-Type: application/json
+                elastic-api-version: "2023-10-31"
+              body:
+                conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                trigger_mode: "never"
+                input: >-
+                  No decision was made before the proposal expired. {{ variables.fp_candidate_count }} alert(s) remain open and tagged az:false_positive.
+
+      # Any other terminal status means the gate settled in a way this Worker does not
+      # expect. Leave the Investigation open so an analyst looks at it.
+      - name: handle_unknown_outcome
+        type: if
+        condition: "${{ variables.proposal_outcome == 'unknown' }}"
+        steps:
+          - name: post_comment_outcome_unknown
+            type: kibana.request
+            on-failure:
+              continue: true
+            with:
+              method: POST
+              path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+              headers:
+                kbn-xsrf: string
+                Content-Type: application/json
+                elastic-api-version: "2023-10-31"
+              body:
+                conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                trigger_mode: "never"
+                input: >-
+                  ⚠️ The closure proposal ended with status "{{ steps.create_fp_proposal.output.status }}". {{ variables.fp_candidate_count }} alert(s) remain open and tagged az:false_positive; this Investigation stays open for review.
+
   # ---------------------------------------------------------------------------
-  # 9. No-FP branch: close the Investigation immediately (D31, D41).
+  # 10. No-FP branch: close the Investigation immediately.
   #
   #     This branch MUST be explicit. A batch that classifies nothing as a
   #     false positive still needs a closed Investigation — it is the branch
@@ -716,14 +754,12 @@ steps:
                 message: >-
                   Triage completed with no false-positive candidates, but the Investigation
                   could not be marked closed: {{ error.message }}. Investigation
-                  {{ steps.create_investigation.output.conversation_id }} stays open until
-                  the reconciliation sweep resolves it.
+                  {{ steps.create_investigation.output.conversation_id }} stays open.
         with:
           conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
           updates:
             status: closed
 
-      # TODO: replace with ai.conversation.message.add once kibana#291688 merges
       - name: post_comment_outcome_no_fp
         type: kibana.request
         on-failure:
@@ -741,4 +777,3 @@ steps:
             input: >-
               Triage complete. No false positive alerts met the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor; no proposal created.
               {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.false_positive_count }} false positive (below threshold), {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.
-
