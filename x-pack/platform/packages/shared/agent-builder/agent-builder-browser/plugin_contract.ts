@@ -157,11 +157,27 @@ export interface OpenConversationSidebarOptions extends EmbeddableConversationPr
 }
 
 /**
+ * Opens conversation details as a Flyout V2 session root so a child flyout can offer Back.
+ * Callers that omit this keep the legacy flyout, which cannot host a child session.
+ */
+export interface OpenConversationDetailsSystemFlyout {
+  /** Shared with child flyouts so Back returns to this conversation. */
+  historyKey: symbol;
+  /** History label the child flyout's Back button returns to. */
+  title?: string;
+}
+
+/**
  * Options passed when opening conversation details.
  */
 export interface OpenConversationDetailsOptions {
   conversationId: string;
   onClose?: () => void;
+  /**
+   * When set, the flyout starts a Flyout V2 session on `historyKey`. Other callers stay on the
+   * legacy flyout.
+   */
+  systemFlyout?: OpenConversationDetailsSystemFlyout;
 }
 
 /**

@@ -69,6 +69,7 @@ export type {
   EmbeddableConversationInputRef,
   OpenConversationSidebarOptions,
   OpenConversationDetailsOptions,
+  OpenConversationDetailsSystemFlyout,
   ConversationSidebarRef,
   OpenConversationSidebarReturn,
 } from './plugin_contract';

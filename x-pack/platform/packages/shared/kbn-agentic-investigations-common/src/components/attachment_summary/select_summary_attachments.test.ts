@@ -49,6 +49,15 @@ const idsOf = (selected: ReturnType<typeof selectSummaryAttachments>) =>
   selected.map(({ attachment }) => attachment.id);
 
 describe('selectSummaryAttachments', () => {
+  it('leaves investigation impact out of the overview inventory', () => {
+    const attachments = [
+      makeAttachment({ id: 'impact', type: 'investigation_impact' }),
+      makeAttachment({ id: 'entity', type: 'security.entity' }),
+    ];
+
+    expect(idsOf(selectSummaryAttachments(attachments, SUMMARY_TYPES))).toEqual(['entity']);
+  });
+
   it('orders by group before time', () => {
     const entity = makeAttachment({
       id: 'entity',

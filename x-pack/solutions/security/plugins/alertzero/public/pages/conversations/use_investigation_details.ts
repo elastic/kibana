@@ -6,8 +6,14 @@
  */
 
 import { useEffect, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import { investigationFlyoutHistoryKey } from '@kbn/agentic-investigations-common';
+
+const DEFAULT_FLYOUT_TITLE = i18n.translate('xpack.alertzero.detailsFlyout.systemFlyoutTitle', {
+  defaultMessage: 'Investigation',
+});
 
 /**
  * Opens Agent Builder's conversation details flyout for the conversation named in the URL.
@@ -22,9 +28,12 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 export const useInvestigationDetails = ({
   conversationId,
   onClose,
+  flyoutTitle = DEFAULT_FLYOUT_TITLE,
 }: {
   conversationId?: string;
   onClose: () => void;
+  /** History label a child flyout's Back button returns to. */
+  flyoutTitle?: string;
 }): void => {
   const {
     services: { agentBuilder },
@@ -52,6 +61,10 @@ export const useInvestigationDetails = ({
     void agentBuilder
       .openConversationDetails({
         conversationId,
+        systemFlyout: {
+          historyKey: investigationFlyoutHistoryKey,
+          title: flyoutTitle,
+        },
         onClose: () => {
           if (!isTearingDown) {
             onCloseRef.current();
@@ -75,5 +88,5 @@ export const useInvestigationDetails = ({
       isTearingDown = true;
       closeFlyout?.();
     };
-  }, [agentBuilder, conversationId]);
+  }, [agentBuilder, conversationId, flyoutTitle]);
 };

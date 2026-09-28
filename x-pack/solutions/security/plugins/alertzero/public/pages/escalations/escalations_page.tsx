@@ -59,6 +59,7 @@ export const EscalationsPage: React.FC = () => {
   useInvestigationDetails({
     conversationId: selectedConversationId,
     onClose: handleFlyoutClose,
+    flyoutTitle: ESCALATIONS_PAGE_INFO.flyoutTitle,
   });
 
   // When the flyout's status toggle changes status (isolated QueryClient), bump the signal

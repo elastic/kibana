@@ -30,6 +30,9 @@ export interface SummaryAttachmentType {
  * `AGENT_BUILDER_BUILTIN_ATTACHMENTS` in `@kbn/agent-builder-server` is the registry of every
  * valid id. They are spelled out rather than imported because this package cannot depend on a
  * solution plugin.
+ *
+ * `investigation_impact` is intentionally absent. It renders as its own group on the Attachments
+ * tab, not as another row in this overview inventory.
  */
 export const SUMMARY_ATTACHMENT_TYPES: readonly SummaryAttachmentType[] = [
   {
