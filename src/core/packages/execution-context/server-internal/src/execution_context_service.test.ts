@@ -639,6 +639,17 @@ describe('ExecutionContextService', () => {
       expect(onEnd).toHaveBeenCalledTimes(1);
     });
 
+    it('ends the activity when probing the result throws', () => {
+      const { setupContract, onEnd } = setup(true);
+      const hostile = Object.defineProperty({}, 'then', {
+        get() {
+          throw new Error('bad then');
+        },
+      });
+      expect(() => setupContract.withContext(context, () => hostile)).toThrow('bad then');
+      expect(onEnd).toHaveBeenCalledTimes(1);
+    });
+
     it('returns the original promise for untracked contexts', () => {
       const { setupContract } = setup(true);
       const original = Promise.resolve(1);

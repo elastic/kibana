@@ -82,19 +82,10 @@ export class EventLoopWatchdog {
     );
     this.heartbeatTimer.unref();
 
-    try {
-      this.spawnWorker(buffer);
-    } catch (error) {
-      // roll back so that a later enable can retry from a clean state
-      this.running = false;
-      clearInterval(this.heartbeatTimer);
-      this.heartbeatTimer = undefined;
-      this.discardWorker();
-      throw error;
-    }
     this.logger.info(
       `Event loop watchdog started (threshold ${this.params.options.thresholdMs}ms, heartbeat ${this.params.options.heartbeatIntervalMs}ms)`
     );
+    this.trySpawnWorker(buffer);
   }
 
   /** Stops the heartbeat and terminates the worker. Idempotent. */
@@ -177,16 +168,20 @@ export class EventLoopWatchdog {
     );
     this.restartTimer = setTimeout(() => {
       this.restartTimer = undefined;
-      if (!this.running) return;
-      try {
-        this.spawnWorker(buffer);
-      } catch (error) {
-        // never let a restart failure escape a timer callback on the main thread
-        this.discardWorker();
-        this.scheduleRestart(buffer, `failed to start (${error.message})`);
-      }
+      if (this.running) this.trySpawnWorker(buffer);
     }, delay);
     this.restartTimer.unref();
+  }
+
+  /** Spawns the worker; failures (initial or on restart) go through the bounded restart path. */
+  private trySpawnWorker(buffer: SharedArrayBuffer): void {
+    try {
+      this.spawnWorker(buffer);
+    } catch (error) {
+      // never let a spawn failure escape, e.g. from a timer callback on the main thread
+      this.discardWorker();
+      this.scheduleRestart(buffer, `failed to start (${error.message})`);
+    }
   }
 
   private discardWorker(): void {

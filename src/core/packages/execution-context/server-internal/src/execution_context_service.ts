@@ -156,14 +156,12 @@ export class ExecutionContextService
       return this.runWithContext(context, fn);
     }
 
-    let result: R;
     try {
-      result = this.runWithContext(context, fn);
-    } catch (error) {
-      onActivityEnd();
-      throw error;
-    }
-    if (isThenable(result)) {
+      const result = this.runWithContext(context, fn);
+      if (!isThenable(result)) {
+        onActivityEnd();
+        return result;
+      }
       // Return a derived native promise that re-throws, so that the activity ends when the result
       // settles and a rejection the caller drops is still reported as unhandled instead of being
       // swallowed by the bookkeeping. Non-native thenables are adopted, i.e. callers of tracked
@@ -178,9 +176,11 @@ export class ExecutionContextService
           throw error;
         }
       ) as typeof result;
+    } catch (error) {
+      // `onActivityEnd` is idempotent for the registry, so ending twice is harmless
+      onActivityEnd();
+      throw error;
     }
-    onActivityEnd();
-    return result;
   }
 
   private runWithContext<R>(

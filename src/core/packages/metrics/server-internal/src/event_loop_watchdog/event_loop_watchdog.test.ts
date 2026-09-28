@@ -122,14 +122,16 @@ describe('EventLoopWatchdog', () => {
     expect(MockWorker.instances).toHaveLength(count + 1);
   });
 
-  it('rolls back when the worker cannot be created and can start again', () => {
+  it('retries a failed initial worker start with backoff', () => {
     MockWorker.failNextConstruction = 1;
-    expect(() => watchdog.start()).toThrow('cannot start worker');
-    expect(watchdog.isRunning).toBe(false);
-    expect(jest.getTimerCount()).toBe(0);
-
-    watchdog.start();
+    expect(() => watchdog.start()).not.toThrow();
     expect(watchdog.isRunning).toBe(true);
+    expect(MockWorker.instances).toHaveLength(0);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringMatching(/failed to start.*restart 1\/3/)
+    );
+
+    jest.advanceTimersByTime(RESTART_BASE_DELAY_MS);
     expect(MockWorker.instances).toHaveLength(1);
   });
 
