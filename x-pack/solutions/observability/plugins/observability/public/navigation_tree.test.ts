@@ -13,7 +13,9 @@ import { STACK_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { createDefinition } from './navigation_tree';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
-const getAlertsAndInsightsLinks = async (): Promise<Array<string | undefined>> => {
+const getStackManagementSectionLinks = async (
+  sectionId: string
+): Promise<Array<string | undefined>> => {
   const coreStart = coreMock.createStart();
   coreStart.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
   coreStart.settings.client.get$ = jest.fn().mockReturnValue(of(AIChatExperience.Classic));
@@ -27,16 +29,16 @@ const getAlertsAndInsightsLinks = async (): Promise<Array<string | undefined>> =
 
   const { footer } = (await firstValueFrom(definition.navigationTree$)) as NavigationTreeDefinition;
   const stackManagement = footer?.find((item) => item.id === STACK_MANAGEMENT_NAV_ID);
-  const alertsSection = stackManagement?.children?.find(
-    (item) => item.id === 'alerts_and_insights'
-  ) as NodeDefinition | undefined;
+  const section = stackManagement?.children?.find((item) => item.id === sectionId) as
+    | NodeDefinition
+    | undefined;
 
-  return alertsSection?.children?.map((item) => item.link) ?? [];
+  return section?.children?.map((item) => item.link) ?? [];
 };
 
 describe('Observability solution navigation tree', () => {
   it('does not include Stack Alerts in Stack Management > Alerts and Insights', async () => {
-    const alertsLinks = await getAlertsAndInsightsLinks();
+    const alertsLinks = await getStackManagementSectionLinks('alerts_and_insights');
 
     expect(alertsLinks).not.toContain('management:triggersActionsAlerts');
     expect(alertsLinks).toEqual(
@@ -46,5 +48,11 @@ describe('Observability solution navigation tree', () => {
         'management:maintenanceWindows',
       ])
     );
+  });
+
+  it('includes service accounts in Stack Management > Security', async () => {
+    const securityLinks = await getStackManagementSectionLinks('security');
+
+    expect(securityLinks).toContain('management:service_accounts');
   });
 });
