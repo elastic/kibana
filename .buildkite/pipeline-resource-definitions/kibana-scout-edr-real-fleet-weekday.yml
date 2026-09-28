@@ -15,7 +15,7 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: kibana / security solution / scout edr real fleet / weekday
+      name: kibana / security solution / scout edr real fleet
       description: Weekday Scout EDR real-Fleet tests (live Fleet Server + Endpoint host)
     spec:
       env:
