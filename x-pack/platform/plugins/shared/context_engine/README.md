@@ -70,9 +70,10 @@ and cannot be overridden:
 - **Space filter.** Documents are visible when they carry no
   `permissions.kibana.privileges` element (public), or when one is scoped to
   the request's space or to `*`. The space comes from the request URL
-  (`/s/{spaceId}/api/...`, default space otherwise), so a caller cannot read
-  another space's documents on any path. `contextEngine:enabled` is a per-space
-  setting, so the route 404s in any space where it is off.
+  (`/s/{spaceId}/api/...`, default space otherwise). It applies on backing
+  stores, not through views, so only managed AI indices get per-document
+  scoping. `contextEngine:enabled` is a per-space setting, so the route 404s
+  in any space where it is off.
 - **Row limit.** `limit` defaults to 100 and cannot exceed 1000. A trailing
   `LIMIT` in the query is capped to it; otherwise one is appended.
 
