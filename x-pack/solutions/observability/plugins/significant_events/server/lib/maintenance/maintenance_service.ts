@@ -367,7 +367,7 @@ export const createSignificantEventsMaintenanceService = ({
     request,
     access,
   }: {
-    spaces: NonNullable<StreamsServer['spaces']>;
+    spaces: NonNullable<SignificantEventsServer['spaces']>;
     request: KibanaRequest;
     access: MaintenanceAccess;
   }): Promise<SpaceId[]> => {
