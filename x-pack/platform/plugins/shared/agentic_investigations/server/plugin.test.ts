@@ -8,7 +8,7 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { AGENTIC_INVESTIGATIONS_PLUGIN_ID } from '../common/constants';
+import { AGENTIC_INVESTIGATIONS_PLUGIN_ID, ESCALATIONS_FEATURE_ID } from '../common/constants';
 import {
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   ESCALATIONS_UI_CAPABILITY_SHOW,
@@ -90,9 +90,8 @@ const startPlugin = (plugin: AgenticInvestigationsPlugin) => {
   return { coreStart, contract, agentBuilder };
 };
 
-/** The single registered feature config, for assertions on its shape. */
-const registeredFeature = (features: { registerKibanaFeature: jest.Mock }) =>
-  features.registerKibanaFeature.mock.calls[0][0];
+const registeredFeature = (features: { registerKibanaFeature: jest.Mock }, id: string) =>
+  features.registerKibanaFeature.mock.calls.find(([f]: [{ id: string }]) => f.id === id)[0];
 
 describe('AgenticInvestigationsPlugin', () => {
   beforeEach(() => {
@@ -114,7 +113,7 @@ describe('AgenticInvestigationsPlugin', () => {
 
     it('leaves impact off the base privileges until it needs its own', () => {
       const { features } = setupPlugin();
-      const { privileges } = registeredFeature(features);
+      const { privileges } = registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID);
 
       expect(privileges.all.api).toEqual([]);
       expect(privileges.all.ui).toEqual([]);
@@ -122,21 +121,18 @@ describe('AgenticInvestigationsPlugin', () => {
       expect(privileges.read.ui).toEqual([]);
     });
 
-    it('keeps escalation manage off the base privileges and joins view to Read', () => {
+    it('registers escalations as a top-level feature with all/read base privileges', () => {
       const { features } = setupPlugin();
-      const { subFeatures } = registeredFeature(features);
-      const [escalationsAll, escalationsRead] = subFeatures[0].privilegeGroups[0].privileges;
+      const { privileges } = registeredFeature(features, ESCALATIONS_FEATURE_ID);
 
-      expect(escalationsAll).toEqual(
+      expect(privileges.all).toEqual(
         expect.objectContaining({
-          includeIn: 'none',
           api: [ESCALATIONS_API_PRIVILEGE_READ, ESCALATIONS_API_PRIVILEGE_MANAGE],
           ui: [ESCALATIONS_UI_CAPABILITY_SHOW, ESCALATIONS_UI_CAPABILITY_MANAGE],
         })
       );
-      expect(escalationsRead).toEqual(
+      expect(privileges.read).toEqual(
         expect.objectContaining({
-          includeIn: 'read',
           api: [ESCALATIONS_API_PRIVILEGE_READ],
           ui: [ESCALATIONS_UI_CAPABILITY_SHOW],
         })
@@ -145,8 +141,8 @@ describe('AgenticInvestigationsPlugin', () => {
 
     it('keeps investigations in a sub-feature with a manage privilege', () => {
       const { features } = setupPlugin();
-      const { subFeatures } = registeredFeature(features);
-      const [investigationsAll] = subFeatures[1].privilegeGroups[0].privileges;
+      const { subFeatures } = registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID);
+      const [investigationsAll] = subFeatures[0].privilegeGroups[0].privileges;
 
       expect(investigationsAll).toEqual(
         expect.objectContaining({
@@ -178,7 +174,7 @@ describe('AgenticInvestigationsPlugin', () => {
     it('grants no proposals privilege, which the proposals feature owns instead', () => {
       const { features } = setupPlugin();
 
-      expect(JSON.stringify(registeredFeature(features))).not.toMatch(/proposals/i);
+      expect(JSON.stringify(registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID))).not.toMatch(/proposals/i);
     });
 
     it('registers the HTTP routes for every entity', () => {

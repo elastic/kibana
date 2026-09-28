@@ -19,7 +19,7 @@ import {
   deleteConversations,
 } from '../../fixtures';
 
-const ESCALATIONS_ALL_PRIVILEGE = 'feature_agenticInvestigations.escalations_all';
+const ESCALATIONS_ALL_PRIVILEGE = 'feature_escalations.all';
 
 /**
  * Stateful editor is base Kibana All. Escalation manage is includeIn: 'none', so All

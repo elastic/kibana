@@ -10,6 +10,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import {
   AGENTIC_INVESTIGATIONS_PLUGIN_ID,
+  ESCALATIONS_FEATURE_ID,
   ESCALATIONS_UI_CAPABILITY_SHOW,
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   INVESTIGATIONS_UI_CAPABILITY_MANAGE,
@@ -28,11 +29,12 @@ export interface AgenticInvestigationsCapabilities {
 export const getAgenticInvestigationsCapabilities = (
   capabilities: Capabilities
 ): AgenticInvestigationsCapabilities => {
-  const cap = capabilities[AGENTIC_INVESTIGATIONS_PLUGIN_ID];
+  const escalationsCap = capabilities[ESCALATIONS_FEATURE_ID];
+  const investigationsCap = capabilities[AGENTIC_INVESTIGATIONS_PLUGIN_ID];
   return {
-    showEscalations: cap?.[ESCALATIONS_UI_CAPABILITY_SHOW] === true,
-    manageEscalations: cap?.[ESCALATIONS_UI_CAPABILITY_MANAGE] === true,
-    manageInvestigations: cap?.[INVESTIGATIONS_UI_CAPABILITY_MANAGE] === true,
+    showEscalations: escalationsCap?.[ESCALATIONS_UI_CAPABILITY_SHOW] === true,
+    manageEscalations: escalationsCap?.[ESCALATIONS_UI_CAPABILITY_MANAGE] === true,
+    manageInvestigations: investigationsCap?.[INVESTIGATIONS_UI_CAPABILITY_MANAGE] === true,
   };
 };
 

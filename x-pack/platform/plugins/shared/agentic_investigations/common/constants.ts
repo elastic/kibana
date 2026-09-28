@@ -6,6 +6,7 @@
  */
 
 export const AGENTIC_INVESTIGATIONS_PLUGIN_ID = 'agenticInvestigations' as const;
+export const ESCALATIONS_FEATURE_ID = 'escalations' as const;
 
 /** Shared by every entity's routes, so a caller versions the whole surface at once. */
 export const AGENTIC_INVESTIGATIONS_API_VERSION = '1' as const;
