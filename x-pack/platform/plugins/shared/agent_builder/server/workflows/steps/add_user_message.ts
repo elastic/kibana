@@ -29,14 +29,14 @@ export const addUserMessageStepDefinition = ({
           };
         }
 
-        const { conversation_id: conversationId, message, attachments } = context.input;
+        const { conversation_id: conversationId, message } = context.input;
 
         await getExecutionService().maybeExecuteAgent({
           mode: AgentExecutionMode.conversation,
           request,
           params: {
             conversationId,
-            nextInput: { message, attachments },
+            nextInput: { message },
             triggerMode: ChatTriggerMode.Never,
           },
         });

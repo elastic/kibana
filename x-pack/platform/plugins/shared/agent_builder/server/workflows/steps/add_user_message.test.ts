@@ -60,37 +60,17 @@ describe('addUserMessageStepDefinition', () => {
 
   it('adds the user message without running the agent', async () => {
     const { execution, definition } = buildDefinition();
-    const attachments = [{ type: 'text', data: { content: 'alert reason' } }];
 
-    const result = await definition.handler(
-      createStepHandlerContext({ input: { ...baseInput, attachments } })
-    );
+    const result = await definition.handler(createStepHandlerContext({ input: baseInput }));
 
     expect(execution.maybeExecuteAgent).toHaveBeenCalledWith({
       mode: AgentExecutionMode.conversation,
       request: expect.any(Object),
       params: {
         conversationId,
-        nextInput: { message: 'Deployment finished', attachments },
+        nextInput: { message: 'Deployment finished' },
         triggerMode: ChatTriggerMode.Never,
       },
-    });
-    expect(result).toEqual({ output: { conversation_id: conversationId } });
-  });
-
-  it('adds an attachment-only user message', async () => {
-    const { execution, definition } = buildDefinition();
-    const attachments = [{ type: 'text', data: { content: 'alert reason' } }];
-
-    const result = await definition.handler(
-      createStepHandlerContext({ input: { conversation_id: conversationId, attachments } })
-    );
-
-    const [[{ params }]] = execution.maybeExecuteAgent.mock.calls;
-    expect(params).toEqual({
-      conversationId,
-      nextInput: { attachments },
-      triggerMode: ChatTriggerMode.Never,
     });
     expect(result).toEqual({ output: { conversation_id: conversationId } });
   });
@@ -131,29 +111,14 @@ describe('addUserMessageStepDefinition', () => {
       expect(schema.safeParse({ message: 'hi' }).success).toBe(false);
     });
 
-    it('accepts attachments without a message', () => {
-      expect(
-        schema.safeParse({
-          conversation_id: conversationId,
-          attachments: [{ type: 'text', data: { content: 'hi' } }],
-        }).success
-      ).toBe(true);
+    it('requires a message', () => {
+      expect(schema.safeParse({ conversation_id: conversationId }).success).toBe(false);
     });
 
-    it('rejects a blank message without attachments', () => {
+    it('rejects a blank message', () => {
       expect(schema.safeParse({ conversation_id: conversationId, message: '  ' }).success).toBe(
         false
       );
-    });
-
-    it('rejects attachments without data or origin', () => {
-      expect(
-        schema.safeParse({
-          conversation_id: conversationId,
-          message: 'hi',
-          attachments: [{ type: 'text' }],
-        }).success
-      ).toBe(false);
     });
   });
 });

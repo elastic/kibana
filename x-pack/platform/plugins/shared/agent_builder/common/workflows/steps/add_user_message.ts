@@ -10,26 +10,18 @@ import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
 import { CONVERSATION_ID_MAX_LENGTH } from '@kbn/agent-builder-common';
-import { AttachmentInputSchema } from '../../step_types/run_agent_step';
 
 export const AddUserMessageStepTypeId = 'ai.conversation.add_user_message';
 
-const InputSchema = z
-  .object({
-    conversation_id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH).meta({
-      description: 'The unique identifier of the conversation to add the user message to.',
-    }),
-    message: z.string().optional().meta({
-      description: 'The user message text. Required unless attachments are provided.',
-    }),
-    attachments: z.array(AttachmentInputSchema).max(100).optional().meta({
-      description:
-        'Optional attachments to send with the user message. Required unless a message is provided.',
-    }),
-  })
-  .refine((val) => Boolean(val.message?.trim()) || Boolean(val.attachments?.length), {
-    message: 'A user message requires a non-empty message or at least one attachment',
-  });
+const InputSchema = z.object({
+  conversation_id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH).meta({
+    description: 'The unique identifier of the conversation to add the user message to.',
+  }),
+  message: z
+    .string()
+    .refine((value) => value.trim().length > 0, { message: 'message must not be blank' })
+    .meta({ description: 'The user message text.' }),
+});
 
 const OutputSchema = z.object({
   conversation_id: z
@@ -57,7 +49,7 @@ export const addUserMessageStepCommonDefinition: CommonStepDefinition<
       'xpack.agentBuilder.workflowSteps.addUserMessage.documentation.details',
       {
         defaultMessage:
-          'Adds a user message, with optional attachments, to an existing conversation without running the agent. The message becomes part of the conversation context, so the agent reads it the next time it runs on that conversation, for example from a later `ai.agent` step. The conversation must already exist; create one first with `ai.conversation.create` when needed.',
+          'Adds a user message to an existing conversation without running the agent. The message becomes part of the conversation context, so the agent reads it the next time it runs on that conversation, for example from a later `ai.agent` step. The conversation must already exist; create one first with `ai.conversation.create` when needed. To add attachments to the conversation, use `ai.attachment.add`.',
       }
     ),
     examples: [
@@ -80,11 +72,7 @@ export const addUserMessageStepCommonDefinition: CommonStepDefinition<
   type: ${AddUserMessageStepTypeId}
   with:
     conversation_id: "{{ steps.create_conversation.output.conversation_id }}"
-    message: "A new alert fired"
-    attachments:
-      - type: text
-        data:
-          content: "{{ event.alert.reason }}"
+    message: "A new alert fired: {{ event.alert.reason }}"
 
 - name: triage
   type: ai.agent
