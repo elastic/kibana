@@ -6,7 +6,12 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
+import type {
+  KibanaRequest,
+  RequestHandler,
+  ResponseHeaders,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
@@ -756,6 +761,21 @@ export const deleteAgentPoliciesHandler: RequestHandler<
   });
 };
 
+async function assertPolicyInSpace(
+  soClient: SavedObjectsClientContract,
+  agentPolicyId: string
+): Promise<void> {
+  const basePolicyId = removeVersionSuffixFromPolicyId(agentPolicyId);
+  try {
+    await agentPolicyService.get(soClient, basePolicyId, false);
+  } catch (err) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      throw new AgentPolicyNotFoundError(`Agent policy ${basePolicyId} not found`);
+    }
+    throw err;
+  }
+}
+
 export const getFullAgentPolicy: FleetRequestHandler<
   TypeOf<typeof GetFullAgentPolicyRequestSchema.params>,
   TypeOf<typeof GetFullAgentPolicyRequestSchema.query>
@@ -776,14 +796,10 @@ export const getFullAgentPolicy: FleetRequestHandler<
   if (request.query.revision) {
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
-    // getFleetServerPolicy queries .fleet-policies as internal user; verify the policy
-    // exists in the caller's Space first so the soClient enforces Space scoping.
-    // Strip any version suffix (e.g. policy-1#9.2 → policy-1) since SO objects are keyed by base ID.
-    const basePolicyId = removeVersionSuffixFromPolicyId(agentPolicyId);
     try {
-      await agentPolicyService.get(soClient, basePolicyId, false);
+      await assertPolicyInSpace(soClient, agentPolicyId);
     } catch (err) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      if (err instanceof AgentPolicyNotFoundError) {
         return response.customError({
           statusCode: 404,
           body: { message: 'Agent policy not found' },
@@ -880,14 +896,10 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
   if (request.query.revision) {
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
-    // getFleetServerPolicy queries .fleet-policies as internal user; verify the policy
-    // exists in the caller's Space first so the soClient enforces Space scoping.
-    // Strip any version suffix (e.g. policy-1#9.2 → policy-1) since SO objects are keyed by base ID.
-    const basePolicyId = removeVersionSuffixFromPolicyId(agentPolicyId);
     try {
-      await agentPolicyService.get(soClient, basePolicyId, false);
+      await assertPolicyInSpace(soClient, agentPolicyId);
     } catch (err) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      if (err instanceof AgentPolicyNotFoundError) {
         return response.customError({
           statusCode: 404,
           body: { message: 'Agent policy not found' },
