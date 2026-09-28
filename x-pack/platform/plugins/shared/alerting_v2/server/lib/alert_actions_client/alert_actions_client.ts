@@ -27,7 +27,15 @@ import {
   getAlertSeriesNotFoundMessage,
   getEpisodeNotLatestMessage,
 } from '../errors/alert_error_messages';
-import type { AlertActionDocument } from '../../resources/datastreams/alert_actions';
+import {
+  ALERT_ACTIONS_RESOURCE_KEY,
+  type AlertActionDocument,
+} from '../../resources/datastreams/alert_actions';
+import { ALERT_EVENTS_RESOURCE_KEY } from '../../resources/datastreams/alert_events';
+import {
+  ResourceManager,
+  type ResourceManagerContract,
+} from '../services/resource_service/resource_manager';
 import { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
 import { type QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
@@ -119,7 +127,8 @@ export class AlertActionsClient {
     @inject(Request) private readonly request: KibanaRequest,
     @inject(RequestSpaceIdToken) private readonly spaceId: string,
     @inject(AlertActionEventPublisher)
-    private readonly eventPublisher: AlertActionEventPublisher
+    private readonly eventPublisher: AlertActionEventPublisher,
+    @inject(ResourceManager) private readonly resourceManager: ResourceManagerContract
   ) {}
 
   /**
@@ -256,6 +265,12 @@ export class AlertActionsClient {
           ]
         : [{ index: ALERT_ACTIONS_DATA_STREAM, doc: alertActionDoc }]
     );
+
+    // Docs omit `@timestamp`, so the ingest pipelines must be in place before writing.
+    await Promise.all([
+      this.resourceManager.ensureResourceReady(ALERT_ACTIONS_RESOURCE_KEY),
+      this.resourceManager.ensureResourceReady(ALERT_EVENTS_RESOURCE_KEY),
+    ]);
 
     await this.storageService.bulkIndexDocsAcrossIndices({
       docs,

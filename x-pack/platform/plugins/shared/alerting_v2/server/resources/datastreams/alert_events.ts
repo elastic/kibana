@@ -14,6 +14,7 @@ import type { ResourceDefinition } from './types';
 
 export const ALERT_EVENTS_DATA_STREAM_VERSION = 7;
 export const ALERT_EVENTS_BACKING_INDEX = '.ds-.rule-events-*';
+export const ALERT_EVENTS_RESOURCE_KEY = `data_stream:${ALERT_EVENTS_DATA_STREAM}`;
 
 const mappings: MappingsDefinition = {
   dynamic: false,
@@ -110,10 +111,10 @@ export const buildRuleEventDocument = (params: AlertEventDocument): AlertEventDo
 };
 
 export const getAlertEventsResourceDefinition = (): ResourceDefinition => ({
-  key: `data_stream:${ALERT_EVENTS_DATA_STREAM}`,
+  key: ALERT_EVENTS_RESOURCE_KEY,
   dataStreamName: ALERT_EVENTS_DATA_STREAM,
   version: ALERT_EVENTS_DATA_STREAM_VERSION,
   mappings,
   lifecycle: {},
-  ingestPipeline: getIngestTimestampPipeline(ALERT_EVENTS_DATA_STREAM),
+  finalPipeline: getIngestTimestampPipeline(ALERT_EVENTS_DATA_STREAM),
 });

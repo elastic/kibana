@@ -23,5 +23,5 @@ export interface ResourceDefinition {
   version: number;
   mappings: MappingsDefinition;
   lifecycle: IndicesDataStreamLifecycleWithRollover;
-  ingestPipeline: IngestPipelineDefinition;
+  finalPipeline: IngestPipelineDefinition;
 }

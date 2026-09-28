@@ -13,6 +13,7 @@ import type { ResourceDefinition } from './types';
 
 export const ALERT_ACTIONS_DATA_STREAM_VERSION = 6;
 export const ALERT_ACTIONS_BACKING_INDEX = '.ds-.alert-actions-*';
+export const ALERT_ACTIONS_RESOURCE_KEY = `data_stream:${ALERT_ACTIONS_DATA_STREAM}`;
 
 const mappings: MappingsDefinition = {
   dynamic: false,
@@ -60,10 +61,10 @@ export type AlertAction = z.infer<typeof alertActionSchema>;
 export type AlertActionDocument = Omit<AlertAction, '@timestamp'> & { '@timestamp'?: string };
 
 export const getAlertActionsResourceDefinition = (): ResourceDefinition => ({
-  key: `data_stream:${ALERT_ACTIONS_DATA_STREAM}`,
+  key: ALERT_ACTIONS_RESOURCE_KEY,
   dataStreamName: ALERT_ACTIONS_DATA_STREAM,
   version: ALERT_ACTIONS_DATA_STREAM_VERSION,
   mappings,
   lifecycle: {},
-  ingestPipeline: getIngestTimestampPipeline(ALERT_ACTIONS_DATA_STREAM),
+  finalPipeline: getIngestTimestampPipeline(ALERT_ACTIONS_DATA_STREAM),
 });

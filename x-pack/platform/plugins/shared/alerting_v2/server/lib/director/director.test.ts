@@ -594,7 +594,7 @@ describe('DirectorService', () => {
 
       try {
         const ruleWithTransition = createRuleResponse({
-          state_transition: { pending_timeframe: '5m' },
+          state_transition: { pending: { timeframe: '5m' } },
         });
 
         const { '@timestamp': ignoredTimestamp, ...alertEvent } = createAlertEvent({

@@ -10,7 +10,11 @@ import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { AlertEventsClient, getGroupHash, getValueByDottedPath } from './alert_events_client';
 import { createMockStorageServiceContract } from '../services/storage_service/storage_service.mock';
 import type { QueryServiceContract } from '../services/query_service/query_service';
-import { alertEpisodeStatus } from '../../resources/datastreams/alert_events';
+import { createMockResourceManager } from '../services/resource_service/resource_manager.mock';
+import {
+  ALERT_EVENTS_RESOURCE_KEY,
+  alertEpisodeStatus,
+} from '../../resources/datastreams/alert_events';
 
 const sha256 = (value: string) => createHash('sha256').update(value).digest('hex');
 
@@ -126,14 +130,38 @@ describe('AlertEventsClient.createAlertEvent episode lifecycle', () => {
       executeQueryRows: jest.fn().mockResolvedValue(queryRows),
     };
 
+    const resourceManager = createMockResourceManager();
+
     const client = new AlertEventsClient(
       storageService,
       queryService as unknown as QueryServiceContract,
-      spaceId
+      spaceId,
+      resourceManager
     );
 
-    return { client, storageService, queryService };
+    return { client, storageService, queryService, resourceManager };
   };
+
+  it('waits for the rule events data stream to be ready before writing', async () => {
+    const { client, storageService, resourceManager } = createClient([]);
+
+    await client.createAlertEvent({ source: 'datadog', fingerprint: 'ready-fp' });
+
+    expect(resourceManager.ensureResourceReady).toHaveBeenCalledWith(ALERT_EVENTS_RESOURCE_KEY);
+    expect(resourceManager.ensureResourceReady.mock.invocationCallOrder[0]).toBeLessThan(
+      storageService.bulkIndexDocs.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('does not write when the data stream fails to initialize', async () => {
+    const { client, storageService, resourceManager } = createClient([]);
+    resourceManager.ensureResourceReady.mockRejectedValue(new Error('init failed'));
+
+    await expect(
+      client.createAlertEvent({ source: 'datadog', fingerprint: 'ready-fp' })
+    ).rejects.toThrow('init failed');
+    expect(storageService.bulkIndexDocs).not.toHaveBeenCalled();
+  });
 
   it('mints a new episode id when no prior episode exists', async () => {
     const { client, storageService } = createClient([]);

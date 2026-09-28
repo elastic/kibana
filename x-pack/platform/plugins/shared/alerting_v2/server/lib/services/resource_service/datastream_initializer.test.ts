@@ -31,7 +31,7 @@ describe('DatastreamInitializer', () => {
       },
     },
     lifecycle: {},
-    ingestPipeline: {
+    finalPipeline: {
       id: '.alerting-test-ingest-timestamp',
       version: 2,
       processors: [{ set: { field: '@timestamp', value: '{{{_ingest.timestamp}}}' } }],
@@ -62,9 +62,9 @@ describe('DatastreamInitializer', () => {
       await initializer.initialize();
 
       expect(esClient.ingest.putPipeline).toHaveBeenCalledWith({
-        id: resourceDefinition.ingestPipeline.id,
-        version: resourceDefinition.ingestPipeline.version,
-        processors: resourceDefinition.ingestPipeline.processors,
+        id: resourceDefinition.finalPipeline.id,
+        version: resourceDefinition.finalPipeline.version,
+        processors: resourceDefinition.finalPipeline.processors,
         _meta: { managed: true },
       });
       expect(esClient.ingest.putPipeline.mock.invocationCallOrder[0]).toBeLessThan(
@@ -81,7 +81,7 @@ describe('DatastreamInitializer', () => {
         expect.objectContaining({
           template: expect.objectContaining({
             settings: expect.objectContaining({
-              'index.final_pipeline': resourceDefinition.ingestPipeline.id,
+              'index.final_pipeline': resourceDefinition.finalPipeline.id,
             }),
           }),
         })
@@ -90,7 +90,7 @@ describe('DatastreamInitializer', () => {
 
     it('skips the pipeline install when the deployed version is current', async () => {
       esClient.ingest.getPipeline.mockResolvedValue({
-        [resourceDefinition.ingestPipeline.id]: { version: 2, processors: [] },
+        [resourceDefinition.finalPipeline.id]: { version: 2, processors: [] },
       });
 
       const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
@@ -101,7 +101,7 @@ describe('DatastreamInitializer', () => {
 
     it('upgrades the pipeline when the deployed version is older', async () => {
       esClient.ingest.getPipeline.mockResolvedValue({
-        [resourceDefinition.ingestPipeline.id]: { version: 1, processors: [] },
+        [resourceDefinition.finalPipeline.id]: { version: 1, processors: [] },
       });
 
       const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
@@ -135,7 +135,7 @@ describe('DatastreamInitializer', () => {
 
       expect(esClient.indices.putSettings).toHaveBeenCalledWith({
         index: resourceDefinition.dataStreamName,
-        settings: { 'index.final_pipeline': resourceDefinition.ingestPipeline.id },
+        settings: { 'index.final_pipeline': resourceDefinition.finalPipeline.id },
       });
     });
 

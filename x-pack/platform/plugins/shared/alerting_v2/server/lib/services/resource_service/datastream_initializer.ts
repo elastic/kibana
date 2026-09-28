@@ -50,7 +50,7 @@ export class DatastreamInitializer implements IResourceInitializer {
           'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
           'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
           'index.lifecycle.prefer_ilm': false,
-          'index.final_pipeline': this.resourceDefinition.ingestPipeline.id,
+          'index.final_pipeline': this.resourceDefinition.finalPipeline.id,
         },
         _meta: {
           managed: true,
@@ -82,7 +82,7 @@ export class DatastreamInitializer implements IResourceInitializer {
    * `@kbn/data-streams` gates index template upgrades.
    */
   private async installIngestPipeline(): Promise<void> {
-    const { id, version, processors } = this.resourceDefinition.ingestPipeline;
+    const { id, version, processors } = this.resourceDefinition.finalPipeline;
 
     const deployedVersion = await this.getDeployedPipelineVersion(id);
     if (deployedVersion !== undefined && deployedVersion >= version) {
@@ -119,10 +119,10 @@ export class DatastreamInitializer implements IResourceInitializer {
    * the replica patch this failure must block initialization.
    */
   private async updateExistingIndicesFinalPipeline(): Promise<void> {
-    const { dataStreamName, ingestPipeline } = this.resourceDefinition;
+    const { dataStreamName, finalPipeline } = this.resourceDefinition;
     const { acknowledged } = await this.esClient.indices.putSettings({
       index: dataStreamName,
-      settings: { 'index.final_pipeline': ingestPipeline.id },
+      settings: { 'index.final_pipeline': finalPipeline.id },
     });
     if (!acknowledged) {
       throw new EsUnacknowledgedError(

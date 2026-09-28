@@ -308,10 +308,7 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
               metadata: { name: 'executor-multi-batch-timestamps' },
               grouping: { fields: ['host.name'] },
               query: {
-                format: 'standalone',
-                breach: {
-                  query: `FROM ${SOURCE_INDEX} | WHERE host.name LIKE "${hostPrefix}*" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-                },
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name LIKE "${hostPrefix}*" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             })
           );
@@ -329,6 +326,11 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
             size: groupCount,
           });
           expect(events).toHaveLength(groupCount);
+
+          // All events must come from a single run and cover every group; otherwise a
+          // later run could backfill batches that an earlier run dropped.
+          expect(new Set(events.map((event) => event.scheduled_timestamp)).size).toBe(1);
+          expect(new Set(events.map((event) => event.group_hash)).size).toBe(groupCount);
 
           const scheduled = Date.parse(events[0].scheduled_timestamp!);
           for (const event of events) {
