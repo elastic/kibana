@@ -8,7 +8,7 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { AGENTIC_INVESTIGATIONS_PLUGIN_ID, ESCALATIONS_FEATURE_ID } from '../common/constants';
+import { AGENTIC_INVESTIGATIONS_PLUGIN_ID } from '../common/constants';
 import {
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   ESCALATIONS_UI_CAPABILITY_SHOW,
@@ -121,24 +121,6 @@ describe('AgenticInvestigationsPlugin', () => {
       expect(privileges.read.ui).toEqual([]);
     });
 
-    it('registers escalations as a top-level feature with all/read base privileges', () => {
-      const { features } = setupPlugin();
-      const { privileges } = registeredFeature(features, ESCALATIONS_FEATURE_ID);
-
-      expect(privileges.all).toEqual(
-        expect.objectContaining({
-          api: [ESCALATIONS_API_PRIVILEGE_READ, ESCALATIONS_API_PRIVILEGE_MANAGE],
-          ui: [ESCALATIONS_UI_CAPABILITY_SHOW, ESCALATIONS_UI_CAPABILITY_MANAGE],
-        })
-      );
-      expect(privileges.read).toEqual(
-        expect.objectContaining({
-          api: [ESCALATIONS_API_PRIVILEGE_READ],
-          ui: [ESCALATIONS_UI_CAPABILITY_SHOW],
-        })
-      );
-    });
-
     it('keeps investigations in a sub-feature with a manage privilege', () => {
       const { features } = setupPlugin();
       const { subFeatures } = registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID);
@@ -149,6 +131,29 @@ describe('AgenticInvestigationsPlugin', () => {
           id: 'investigations_all',
           includeIn: 'all',
           api: [INVESTIGATIONS_API_PRIVILEGE_MANAGE],
+        })
+      );
+    });
+
+    it('registers escalations as a sub-feature alongside investigations with all/read privileges', () => {
+      const { features } = setupPlugin();
+      const { subFeatures } = registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID);
+      const [escalationsAll, escalationsRead] = subFeatures[1].privilegeGroups[0].privileges;
+
+      expect(escalationsAll).toEqual(
+        expect.objectContaining({
+          id: 'escalations_all',
+          includeIn: 'all',
+          api: [ESCALATIONS_API_PRIVILEGE_READ, ESCALATIONS_API_PRIVILEGE_MANAGE],
+          ui: [ESCALATIONS_UI_CAPABILITY_SHOW, ESCALATIONS_UI_CAPABILITY_MANAGE],
+        })
+      );
+      expect(escalationsRead).toEqual(
+        expect.objectContaining({
+          id: 'escalations_read',
+          includeIn: 'read',
+          api: [ESCALATIONS_API_PRIVILEGE_READ],
+          ui: [ESCALATIONS_UI_CAPABILITY_SHOW],
         })
       );
     });

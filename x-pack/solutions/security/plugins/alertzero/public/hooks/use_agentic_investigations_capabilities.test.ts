@@ -19,18 +19,16 @@ const caps = (
     navLinks: {},
     management: {},
     catalogue: {},
-    escalations: {
+    agenticInvestigations: {
+      manageInvestigations: false,
+      ...('manageInvestigations' in overrides
+        ? { manageInvestigations: overrides.manageInvestigations }
+        : {}),
       showEscalations: false,
       manageEscalations: false,
       ...('showEscalations' in overrides ? { showEscalations: overrides.showEscalations } : {}),
       ...('manageEscalations' in overrides
         ? { manageEscalations: overrides.manageEscalations }
-        : {}),
-    },
-    agenticInvestigations: {
-      manageInvestigations: false,
-      ...('manageInvestigations' in overrides
-        ? { manageInvestigations: overrides.manageInvestigations }
         : {}),
     },
   } as unknown as Capabilities);

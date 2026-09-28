@@ -29,11 +29,10 @@ export interface AgenticInvestigationsCapabilities {
 export const getAgenticInvestigationsCapabilities = (
   capabilities: Capabilities
 ): AgenticInvestigationsCapabilities => {
-  const escalationsCap = capabilities[ESCALATIONS_FEATURE_ID];
   const investigationsCap = capabilities[AGENTIC_INVESTIGATIONS_PLUGIN_ID];
   return {
-    showEscalations: escalationsCap?.[ESCALATIONS_UI_CAPABILITY_SHOW] === true,
-    manageEscalations: escalationsCap?.[ESCALATIONS_UI_CAPABILITY_MANAGE] === true,
+    showEscalations: investigationsCap?.[ESCALATIONS_UI_CAPABILITY_SHOW] === true,
+    manageEscalations: investigationsCap?.[ESCALATIONS_UI_CAPABILITY_MANAGE] === true,
     manageInvestigations: investigationsCap?.[INVESTIGATIONS_UI_CAPABILITY_MANAGE] === true,
   };
 };

@@ -19,11 +19,11 @@ import {
   deleteConversations,
 } from '../../fixtures';
 
-const ESCALATIONS_ALL_PRIVILEGE = 'feature_escalations.all';
+const ESCALATIONS_ALL_PRIVILEGE = 'feature_agenticInvestigations.escalations_all';
 
 /**
- * Stateful editor is base Kibana All. Escalation manage is includeIn: 'none', so All
- * can list but cannot update. The owner-check test needs a collaborator who holds manage.
+ * Stateful editor is base Kibana All. Escalation manage is a sub-feature privilege
+ * (includeIn: 'all'), so the editor role needs it explicitly added for collaborator tests.
  */
 function editorWithEscalationManage(
   editor: ElasticsearchRoleDescriptor
