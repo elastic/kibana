@@ -458,7 +458,7 @@ export const CreateCaseRequest = lazySchema(() =>
     category: CaseCategory.optional(),
     title: CaseTitle,
     /**
-      * Deprecated. Use `extended_fields` instead. Custom field values for a case. Any optional custom fields that are not specified in the request are set to null. Values written here continue to work during the migration to `extended_fields`.
+      * Custom field values for a case. Omitted optional fields default to null. Deprecated: use `extended_fields` instead.
 
       */
     customFields: z
@@ -496,7 +496,7 @@ export const CreateCaseRequest = lazySchema(() =>
       .max(10)
       .optional()
       .describe(
-        'Deprecated. Use `extended_fields` instead. Custom field values for a case. Any optional custom fields that are not specified in the request are set to null. Values written here continue to work during the migration to `extended_fields`.\n'
+        'Custom field values for a case. Omitted optional fields default to null. Deprecated: use `extended_fields` instead.\n'
       ),
     extended_fields: CaseExtendedFields.optional(),
     /**
@@ -933,7 +933,7 @@ export const UpdateCaseRequest = lazySchema(() =>
             ])
             .optional(),
           /**
-      * Deprecated. Use `extended_fields` instead. Custom field values for a case. Any optional custom fields that are not specified in the request are set to null. Values written here continue to work during the migration to `extended_fields`.
+      * Custom field values for a case. Omitted optional fields default to null. Deprecated: use `extended_fields` instead.
 
       */
           customFields: z
@@ -971,7 +971,7 @@ export const UpdateCaseRequest = lazySchema(() =>
             .max(10)
             .optional()
             .describe(
-              'Deprecated. Use `extended_fields` instead. Custom field values for a case. Any optional custom fields that are not specified in the request are set to null. Values written here continue to work during the migration to `extended_fields`.\n'
+              'Custom field values for a case. Omitted optional fields default to null. Deprecated: use `extended_fields` instead.\n'
             ),
           /**
       * The case template to apply, clear, or leave unchanged. Requires the `xpack.cases.templates.enabled` setting. Omit to keep the current template; set to `null` to clear it; set to `{ id, version }` to switch. Switching is an explicit versioned action: both `id` and `version` are required. If `extended_fields` is also provided in the same request, those values are validated against the new template's fields. Use the get case fields API to see what fields the new template exposes.
@@ -1140,7 +1140,7 @@ export const TemplateTags = lazySchema(() => z.array(z.string().max(256)).max(20
 export type TemplateTags = z.infer<typeof TemplateTags>;
 
 /**
-  * Deprecated. These configuration-embedded templates are superseded by the case templates system. Manage templates through the templates API (`GET /api/cases/templates`) and apply their fields via the case `extended_fields`.
+  * Configuration-embedded templates. Deprecated: use the templates API (`GET /api/cases/templates`) and case `extended_fields` instead.
 
   * @deprecated
   */
