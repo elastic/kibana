@@ -65,6 +65,7 @@ import {
   useAvailableConnectors,
   useFetchConnector,
 } from '../../../entities/connectors/model/use_available_connectors';
+import { ServiceAccountName } from '../../../entities/service_accounts';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
 import { selectStepExecutionsTotal } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
@@ -1472,7 +1473,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                               defaultMessage: 'Run as',
                             })}
                             {': '}
-                            {workflowExecution.effectiveIdentity.id}
+                            <ServiceAccountName id={workflowExecution.effectiveIdentity.id} />
                           </EuiText>
                         )}
                       </div>

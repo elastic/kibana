@@ -39,6 +39,7 @@ const templates = () =>
 interface WorkflowStep {
   name?: string;
   type?: string;
+  condition?: string;
   with?: Record<string, unknown>;
   steps?: WorkflowStep[];
   else?: WorkflowStep[];
@@ -156,6 +157,30 @@ describe('aiIndexAutomationsSkill', () => {
       expect(reference.content).toContain('context-engine.createKi');
       expect(reference.content).toContain('verifiers:');
       expect(reference.content).toContain('esql-valid-runtime');
+    }
+  });
+
+  it('verifies inside create_ki and reports a rejected KI from its verification output', () => {
+    for (const name of TEMPLATE_NAMES) {
+      const template = parsedTemplate(name);
+      const createKi = stepNamed(template, 'create_ki');
+      const gate = stepNamed(template, 'check_verification');
+      const failureLog = stepNamed(template, 'log_verification_failure');
+
+      expect(allSteps(template.steps).map(({ type }) => type)).not.toContain(
+        'context-engine.verifyKi'
+      );
+      expect(createKi.type).toBe('context-engine.createKi');
+      expect(createKi.with?.verifiers).toEqual(['esql-valid-syntax', 'esql-valid-runtime']);
+      expect(createKi.with?.ki).toBeDefined();
+      expect(gate.type).toBe('if');
+      expect(gate.condition).toBe('steps.create_ki.output.verification.passed : false');
+      expect(gate.else).toBeUndefined();
+      expect(gate.steps).toContain(failureLog);
+      expect(failureLog.type).toBe('console');
+      expect(failureLog.with?.message).toContain(
+        '{{ steps.create_ki.output.verification.results | json }}'
+      );
     }
   });
 
@@ -606,7 +631,7 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('states the sink contract every automation has to satisfy', () => {
-      expect(content).toContain('context-engine.verifyKi');
+      expect(content).toMatch(/pass\s+`verifiers` to every `context-engine\.createKi`/);
       expect(content).toContain('ki_id');
       expect(content).toContain('attributes.esql');
     });
@@ -827,7 +852,6 @@ describe('aiIndexAutomationsSkill', () => {
         'data.set',
         'console',
         'context-engine.createKi',
-        'context-engine.verifyKi',
       ];
 
       for (const reference of templates()) {
