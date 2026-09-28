@@ -21,12 +21,8 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { ActivityInvestigationResult } from './fetch_activity_investigation';
-import {
-  ACTIVITY_INVESTIGATION_FEATURE_FLAG,
-  useActivityInvestigation,
-} from './use_activity_investigation';
+import { useActivityInvestigation } from './use_activity_investigation';
 import { useActivityInvestigationChat } from './use_activity_investigation_chat';
 import {
   getActivityInvestigationLabel,
@@ -315,10 +311,4 @@ const ActivityInvestigation = (): ReactElement | null => {
   );
 };
 
-export const DiscoverActivityInvestigation = (): ReactElement | null => {
-  const { core } = useDiscoverServices();
-
-  return core.featureFlags.getBooleanValue(ACTIVITY_INVESTIGATION_FEATURE_FLAG, false) ? (
-    <ActivityInvestigation />
-  ) : null;
-};
+export const DiscoverActivityInvestigation = (): ReactElement => <ActivityInvestigation />;

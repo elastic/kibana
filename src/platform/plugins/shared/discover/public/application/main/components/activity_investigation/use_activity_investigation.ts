@@ -31,8 +31,6 @@ import {
   type ActivityInvestigationResponse,
 } from './fetch_activity_investigation';
 
-export const ACTIVITY_INVESTIGATION_FEATURE_FLAG = 'discover.activityInvestigation';
-
 interface ActivityInvestigationState {
   readonly analysis?: ActivityInvestigationResponse;
   readonly error?: 'failed' | 'timeout';
@@ -48,14 +46,9 @@ export const useActivityInvestigation = (): ActivityInvestigationState => {
   const runtimeStateManager = useRuntimeStateManager();
   const tabId = useCurrentTabSelector((tab) => tab.id);
   const dataState = useCurrentTabDataStateContainer();
-  const enabled = services.core.featureFlags.getBooleanValue(
-    ACTIVITY_INVESTIGATION_FEATURE_FLAG,
-    false
-  );
   const [state, setState] = useState<ActivityInvestigationState>({});
 
   useEffect(() => {
-    if (!enabled) return;
     const { recommendedFields } = getRecommendedFieldsAccessor(() => ({
       recommendedFields: [],
     }))();
@@ -235,7 +228,6 @@ export const useActivityInvestigation = (): ActivityInvestigationState => {
     };
   }, [
     dataState,
-    enabled,
     getRecommendedFieldsAccessor,
     getState,
     runtimeStateManager,
@@ -244,5 +236,5 @@ export const useActivityInvestigation = (): ActivityInvestigationState => {
     tabId,
   ]);
 
-  return enabled ? state : {};
+  return state;
 };

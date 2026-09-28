@@ -19,11 +19,7 @@ import {
 } from './activity_investigation_chat';
 import { ActivityInvestigationQuestion } from './activity_investigation_question';
 
-jest.mock('../../../../hooks/use_discover_services', () => ({
-  useDiscoverServices: () => ({ core: { featureFlags: { getBooleanValue: () => true } } }),
-}));
 jest.mock('./use_activity_investigation', () => ({
-  ACTIVITY_INVESTIGATION_FEATURE_FLAG: 'discover.activityInvestigation',
   useActivityInvestigation: jest.fn(),
 }));
 jest.mock('./use_activity_investigation_chat', () => ({

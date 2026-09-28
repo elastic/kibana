@@ -98,11 +98,6 @@ const setup = async ({
   });
   const { services, internalState } = toolkit;
   jest
-    .spyOn(services.core.featureFlags, 'getBooleanValue')
-    .mockImplementation((key, fallback) =>
-      key === 'discover.activityInvestigation' ? true : fallback
-    );
-  jest
     .spyOn(services.uiSettings, 'get')
     .mockImplementation((key) => (key === 'dateFormat:tz' ? 'UTC' : undefined));
   jest.spyOn(services.data.query.timefilter.timefilter, 'getTime').mockReturnValue(TIME_RANGE);
