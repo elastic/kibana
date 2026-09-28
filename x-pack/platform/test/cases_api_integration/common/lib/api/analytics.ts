@@ -46,11 +46,14 @@ export const runCasesBackfillTask = async (supertest: SuperTest.Agent) => {
     .expect(200);
 };
 
-export const runCAISynchronizationTask = async (supertest: SuperTest.Agent) => {
+export const runCAISynchronizationTask = async (
+  supertest: SuperTest.Agent,
+  spaceId: string = 'default'
+) => {
   await supertest
     .post('/api/analytics_index/synchronization/run_soon')
     .set('kbn-xsrf', 'xxx')
-    .send({ taskId: getSynchronizationTaskId('default', 'securitySolution') })
+    .send({ taskId: getSynchronizationTaskId(spaceId, 'securitySolution') })
     .expect(200);
 };
 
