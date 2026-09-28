@@ -43,6 +43,7 @@ export const ALERTZERO_MANAGED_WORKFLOW_OWNER_ID = 'alertzero' as const;
  */
 export const ALERTZERO_ATTACHMENT_TYPES = {
   threat: 'security.threat',
+  significantSecurityEvent: 'security.significant_security_event',
 } as const;
 
 // --- Hunt services ---
