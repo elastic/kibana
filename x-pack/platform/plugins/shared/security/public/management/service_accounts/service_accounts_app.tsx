@@ -17,6 +17,7 @@ import type { ServiceAccountsAPIClient } from '../../service_accounts';
 import type { RolesAPIClient } from '../roles';
 
 interface Props {
+  isServerless: boolean;
   canCreate: boolean;
   serviceAccountsAPIClient: Pick<PublicMethodsOf<ServiceAccountsAPIClient>, 'create' | 'list'>;
   rolesAPIClient: Pick<PublicMethodsOf<RolesAPIClient>, 'getRoles'>;
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export const ServiceAccountsApp = ({
+  isServerless,
   canCreate,
   serviceAccountsAPIClient,
   rolesAPIClient,
@@ -45,6 +47,7 @@ export const ServiceAccountsApp = ({
       />
       {canCreate && location.pathname === '/create' && (
         <CreateServiceAccountFlyout
+          isServerless={isServerless}
           serviceAccountsAPIClient={serviceAccountsAPIClient}
           rolesAPIClient={rolesAPIClient}
           createRoleUrl={createRoleUrl}

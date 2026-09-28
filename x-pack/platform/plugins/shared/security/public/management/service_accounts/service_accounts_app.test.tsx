@@ -35,7 +35,12 @@ const availableRoles: Role[] = [
 ];
 const account = { id: 'account-id', name: 'workflow-runner', roles: ['workflow_reader'] };
 
-const renderApp = ({ canCreate = true, pathname = '/create', canCreateRole = true } = {}) => {
+const renderApp = ({
+  canCreate = true,
+  pathname = '/create',
+  canCreateRole = true,
+  isServerless = false,
+} = {}) => {
   const history = createMemoryHistory({ initialEntries: [pathname] });
   const list = jest.fn().mockResolvedValue({ serviceAccounts: [] });
   const create = jest.fn().mockResolvedValue(account);
@@ -46,6 +51,7 @@ const renderApp = ({ canCreate = true, pathname = '/create', canCreateRole = tru
       <MockAppHeaderProvider>
         <Router history={history}>
           <ServiceAccountsApp
+            isServerless={isServerless}
             canCreate={canCreate}
             serviceAccountsAPIClient={{ list, create }}
             rolesAPIClient={{ getRoles }}
@@ -105,8 +111,9 @@ describe('ServiceAccountsApp', () => {
   });
 
   it('shows custom and built-in roles without preselecting any role', async () => {
-    renderApp();
+    const { getRoles } = renderApp();
     await waitFor(() => expect(screen.getByTestId('createServiceAccountSubmit')).toBeEnabled());
+    expect(getRoles).toHaveBeenCalledWith({ includeReservedRoles: true });
     await user.click(screen.getByRole('combobox'));
 
     expect(screen.getByText('Custom roles')).toBeVisible();
@@ -153,6 +160,36 @@ describe('ServiceAccountsApp', () => {
     await act(async () => resolveCreation(account));
   });
 
+  it('does not redirect after leaving while creation is pending', async () => {
+    const { create, history, onCreated } = renderApp();
+    let resolveCreation: (value: ServiceAccount) => void = () => {};
+    create.mockReturnValue(
+      new Promise<ServiceAccount>((resolve) => {
+        resolveCreation = resolve;
+      })
+    );
+    await fillForm();
+    await user.click(screen.getByTestId('createServiceAccountSubmit'));
+    act(() => history.push('/another-page'));
+
+    await act(async () => resolveCreation(account));
+
+    expect(history.location.pathname).toBe('/another-page');
+    expect(onCreated).not.toHaveBeenCalled();
+  });
+
+  it('requires removing roles that disappeared when refreshing the role list', async () => {
+    const { create, getRoles } = renderApp();
+    await fillForm();
+    getRoles.mockResolvedValue([availableRoles[1]]);
+    await user.click(screen.getByRole('button', { name: 'Refresh roles' }));
+    await waitFor(() => expect(screen.getByTestId('createServiceAccountSubmit')).toBeEnabled());
+    await user.click(screen.getByTestId('createServiceAccountSubmit'));
+
+    expect(screen.getByText(/Remove roles that are no longer available/)).toBeVisible();
+    expect(create).not.toHaveBeenCalled();
+  });
+
   it('allows retrying role loading without losing the name', async () => {
     const { getRoles, create } = renderApp({ pathname: '/' });
     getRoles.mockRejectedValueOnce(new Error('Unavailable'));
@@ -185,6 +222,21 @@ describe('ServiceAccountsApp', () => {
     expect(screen.queryByTestId('serviceAccountsPageCreateButton')).not.toBeInTheDocument();
     expect(getRoles).not.toHaveBeenCalled();
   });
+
+  it.each([true, false])(
+    'explains cross-project role behavior only on serverless (%s)',
+    async (isServerless) => {
+      renderApp({ isServerless });
+      await waitFor(() => expect(screen.getByTestId('createServiceAccountSubmit')).toBeEnabled());
+
+      const explanation = screen.queryByText(/For cross-project search/);
+      if (isServerless) {
+        expect(explanation).toBeVisible();
+      } else {
+        expect(explanation).not.toBeInTheDocument();
+      }
+    }
+  );
 
   it('hides create-role navigation without permission', async () => {
     renderApp({ canCreateRole: false });

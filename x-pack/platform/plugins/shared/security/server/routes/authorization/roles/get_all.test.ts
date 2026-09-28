@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 
+import type { BuildFlavor } from '@kbn/config';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
@@ -22,6 +23,7 @@ const application = 'kibana-.kibana';
 const reservedPrivilegesApplicationWildcard = 'kibana-*';
 
 interface TestOptions {
+  buildFlavor?: BuildFlavor;
   name?: string;
   licenseCheckResult?: LicenseCheck;
   apiResponse?: () => unknown;
@@ -145,10 +147,17 @@ const features: KibanaFeature[] = [
 describe('GET all roles', () => {
   const getRolesTest = (
     description: string,
-    { licenseCheckResult = { state: 'valid' }, apiResponse, asserts, query }: TestOptions
+    {
+      licenseCheckResult = { state: 'valid' },
+      apiResponse,
+      asserts,
+      query,
+      buildFlavor = 'traditional',
+    }: TestOptions
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
+      mockRouteDefinitionParams.buildFlavor = buildFlavor;
       const versionedRouterMock = mockRouteDefinitionParams.router
         .versioned as MockedVersionedRouter;
       mockRouteDefinitionParams.authz.applicationName = application;
@@ -196,6 +205,41 @@ describe('GET all roles', () => {
       expect(mockLicensingContext.license.check).toHaveBeenCalledWith('security', 'basic');
     });
   };
+
+  describe('built-in role visibility', () => {
+    for (const buildFlavor of ['traditional', 'serverless'] as const) {
+      for (const includeReservedRoles of [undefined, false, true]) {
+        const customRole = {
+          cluster: [],
+          indices: [],
+          applications: [],
+          run_as: [],
+          metadata: {},
+        };
+        const builtinRole = { ...customRole, metadata: { _reserved: true } };
+        const returnedRole = {
+          elasticsearch: { cluster: [], indices: [], run_as: [] },
+          kibana: [],
+          _transform_error: [],
+          _unrecognized_applications: [],
+        };
+        getRolesTest(`${buildFlavor} with includeReservedRoles=${includeReservedRoles}`, {
+          buildFlavor,
+          query: includeReservedRoles === undefined ? {} : { includeReservedRoles },
+          apiResponse: () => ({ custom: customRole, viewer: builtinRole }),
+          asserts: {
+            statusCode: 200,
+            result: [
+              { ...returnedRole, name: 'custom', metadata: {} },
+              ...(buildFlavor === 'traditional' || includeReservedRoles
+                ? [{ ...returnedRole, name: 'viewer', metadata: { _reserved: true } }]
+                : []),
+            ],
+          },
+        });
+      }
+    }
+  });
 
   describe('failure', () => {
     getRolesTest('returns result of license checker', {

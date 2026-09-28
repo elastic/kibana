@@ -10,6 +10,7 @@ import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
+import type { BuildFlavor } from '@kbn/config';
 import type { CoreStart, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -26,13 +27,14 @@ import type { PluginStartDependencies } from '../../plugin';
 import type { ServiceAccountsAPIClient } from '../../service_accounts';
 
 interface CreateParams {
+  buildFlavor: BuildFlavor;
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
   serviceAccountsAPIClient: ServiceAccountsAPIClient;
 }
 
 export const serviceAccountsManagementApp = Object.freeze({
   id: 'service_accounts',
-  create({ getStartServices, serviceAccountsAPIClient }: CreateParams) {
+  create({ buildFlavor, getStartServices, serviceAccountsAPIClient }: CreateParams) {
     const title = i18n.translate('xpack.security.management.serviceAccountsTitle', {
       defaultMessage: 'Service accounts',
     });
@@ -62,6 +64,7 @@ export const serviceAccountsManagementApp = Object.freeze({
             >
               <Breadcrumb text={title} href="/">
                 <ServiceAccountsApp
+                  isServerless={buildFlavor === 'serverless'}
                   canCreate={canCreate}
                   serviceAccountsAPIClient={serviceAccountsAPIClient}
                   rolesAPIClient={rolesAPIClient}

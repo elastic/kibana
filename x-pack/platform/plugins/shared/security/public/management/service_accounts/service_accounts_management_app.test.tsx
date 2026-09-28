@@ -32,7 +32,7 @@ describe('serviceAccountsManagementApp', () => {
     let unmount: Unmount = noop;
     await act(async () => {
       unmount = await serviceAccountsManagementApp
-        .create({ getStartServices, serviceAccountsAPIClient })
+        .create({ buildFlavor: 'traditional', getStartServices, serviceAccountsAPIClient })
         .mount({
           basePath: '/',
           element,
@@ -53,6 +53,7 @@ describe('serviceAccountsManagementApp', () => {
   it('registers under id "service_accounts" with order 35', () => {
     const { getStartServices } = coreMock.createSetup();
     const app = serviceAccountsManagementApp.create({
+      buildFlavor: 'traditional',
       getStartServices,
       serviceAccountsAPIClient,
     });

@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import React, { useRef, useState } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
+import useMountedState from 'react-use/lib/useMountedState';
 
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { ServiceAccount } from '@kbn/core-security-browser';
@@ -41,6 +42,7 @@ import { RoleComboBox } from '../role_combo_box';
 import type { RolesAPIClient } from '../roles';
 
 interface Props {
+  isServerless: boolean;
   serviceAccountsAPIClient: Pick<PublicMethodsOf<ServiceAccountsAPIClient>, 'create'>;
   rolesAPIClient: Pick<PublicMethodsOf<RolesAPIClient>, 'getRoles'>;
   createRoleUrl?: string;
@@ -49,6 +51,7 @@ interface Props {
 }
 
 export const CreateServiceAccountFlyout = ({
+  isServerless,
   serviceAccountsAPIClient,
   rolesAPIClient,
   createRoleUrl,
@@ -65,7 +68,27 @@ export const CreateServiceAccountFlyout = ({
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string>();
   const saving = useRef(false);
-  const availableRoles = useAsyncRetry(() => rolesAPIClient.getRoles(), [rolesAPIClient]);
+  const isMounted = useMountedState();
+  const availableRoles = useAsyncRetry(
+    () => rolesAPIClient.getRoles({ includeReservedRoles: true }),
+    [rolesAPIClient]
+  );
+  const unavailableRoleNames = roles.filter(
+    (roleName) => !availableRoles.value?.some((role) => role.name === roleName)
+  );
+  const isRolesInvalid = roles.length === 0 || unavailableRoleNames.length > 0;
+  const rolesError =
+    unavailableRoleNames.length > 0
+      ? i18n.translate(
+          'xpack.security.management.serviceAccounts.create.unavailableRolesErrorMessage',
+          {
+            defaultMessage: 'Remove roles that are no longer available: {roles}.',
+            values: { roles: i18n.formatList('conjunction', unavailableRoleNames) },
+          }
+        )
+      : i18n.translate('xpack.security.management.serviceAccounts.create.rolesErrorMessage', {
+          defaultMessage: 'Select at least one role.',
+        });
   const normalizedName = name.trim();
   const isNameInvalid =
     !SERVICE_ACCOUNT_NAME_REGEX.test(normalizedName) ||
@@ -74,16 +97,17 @@ export const CreateServiceAccountFlyout = ({
   const submit = async () => {
     if (saving.current) return;
     setHasSubmitted(true);
-    if (isNameInvalid || roles.length === 0 || availableRoles.loading || availableRoles.error) {
+    if (isNameInvalid || isRolesInvalid || availableRoles.loading || availableRoles.error) {
       return;
     }
     saving.current = true;
     setIsSaving(true);
     setSaveError(undefined);
+    let account: ServiceAccount;
     try {
-      const account = await serviceAccountsAPIClient.create({ name: normalizedName, roles });
-      onCreated(account);
+      account = await serviceAccountsAPIClient.create({ name: normalizedName, roles });
     } catch (error) {
+      if (!isMounted()) return;
       const message =
         isHttpFetchError(error) &&
         error.body &&
@@ -95,10 +119,12 @@ export const CreateServiceAccountFlyout = ({
               defaultMessage: 'Unable to create the service account. Try again.',
             });
       setSaveError(message);
+      return;
     } finally {
       saving.current = false;
-      setIsSaving(false);
+      if (isMounted()) setIsSaving(false);
     }
+    if (isMounted()) onCreated(account);
   };
 
   return (
@@ -135,6 +161,7 @@ export const CreateServiceAccountFlyout = ({
           error={saveError}
         >
           <EuiFormRow
+            id={nameId}
             fullWidth
             label={i18n.translate('xpack.security.management.serviceAccounts.create.nameLabel', {
               defaultMessage: 'Name',
@@ -150,7 +177,6 @@ export const CreateServiceAccountFlyout = ({
             )}
           >
             <EuiFieldText
-              id={nameId}
               fullWidth
               value={name}
               maxLength={SERVICE_ACCOUNT_NAME_MAX_LENGTH}
@@ -161,6 +187,7 @@ export const CreateServiceAccountFlyout = ({
             />
           </EuiFormRow>
           <EuiFormRow
+            id={rolesId}
             fullWidth
             label={i18n.translate('xpack.security.management.serviceAccounts.create.rolesLabel', {
               defaultMessage: 'Set privileges',
@@ -175,23 +202,28 @@ export const CreateServiceAccountFlyout = ({
                 </EuiLink>
               ) : undefined
             }
-            isInvalid={hasSubmitted && roles.length === 0}
-            error={i18n.translate(
-              'xpack.security.management.serviceAccounts.create.rolesErrorMessage',
-              { defaultMessage: 'Select at least one role.' }
-            )}
-            helpText={i18n.translate(
-              'xpack.security.management.serviceAccounts.create.rolesHelpDescription',
-              {
-                defaultMessage:
-                  'An account can only use privileges allowed by both its selected roles and your own access. Selecting a role does not grant privileges you do not have.',
-              }
-            )}
+            isInvalid={hasSubmitted && isRolesInvalid}
+            error={rolesError}
+            helpText={
+              <>
+                <FormattedMessage
+                  id="xpack.security.management.serviceAccounts.create.rolesHelpDescription"
+                  defaultMessage="An account can only use privileges allowed by both its selected roles and your access at creation time. Selecting a role does not grant privileges you do not have."
+                />
+                {isServerless && (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.security.management.serviceAccounts.create.crossProjectRolesHelpDescription"
+                      defaultMessage="For cross-project search, selected role names also apply in linked projects where those roles exist. Custom roles are not copied between projects."
+                    />
+                  </p>
+                )}
+              </>
+            }
           >
             <RoleComboBox
-              id={rolesId}
               fullWidth
-              isInvalid={hasSubmitted && roles.length === 0}
+              isInvalid={hasSubmitted && isRolesInvalid}
               availableRoles={availableRoles.value ?? []}
               selectedRoleNames={roles}
               onChange={setRoles}
