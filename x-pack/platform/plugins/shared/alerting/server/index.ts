@@ -55,8 +55,8 @@ export type {
   GetRuleHistoryParams,
   RuleChangeHistoryDocument,
   GetRuleHistoryResult,
-  RuleChangeTrackingDisabledError,
 } from './rules_client';
+export { RuleChangeTrackingDisabledError } from './rules_client/lib/change_tracking/errors';
 export type {
   BulkCreateRulesItem,
   BulkCreateRulesParams,

@@ -44,9 +44,28 @@ export function useInfiniteChangeHistory({ ruleId }: UseInfiniteChangeHistoryArg
         const totalLoaded = lastPage.page * lastPage.per_page;
         return totalLoaded < lastPage.total ? lastPage.page + 1 : undefined;
       },
+      retry: shouldRetryChangeHistoryFetch,
       onError: (error) => {
-        addError(error, { title: i18n.HISTORY_FETCH_ERROR });
+        if (!isRuleChangeTrackingDisabledError(error)) {
+          addError(error, { title: i18n.HISTORY_FETCH_ERROR });
+        }
       },
     }
   );
 }
+
+/**
+ * The history API returns 403 when rule changes history is disabled, either via the
+ * advanced setting or because `security` isn't included in the alerting plugin's
+ * `xpack.alerting.ruleChangeTracking.scope`.
+ */
+export const isRuleChangeTrackingDisabledError = (error: unknown): boolean =>
+  (error as { response?: { status?: number } } | null | undefined)?.response?.status === 403;
+
+/**
+ * Disabled is a stable condition, not a transient failure: retrying just delays the
+ * disabled placeholder from showing. Other failures still get react-query's default
+ * retry count.
+ */
+const shouldRetryChangeHistoryFetch = (failureCount: number, error: unknown): boolean =>
+  !isRuleChangeTrackingDisabledError(error) && failureCount < 3;
