@@ -168,6 +168,8 @@ export const entityNodeDataSchema = schema.allOf([
     count: schema.maybe(schema.number()),
     ips: schema.maybe(schema.arrayOf(schema.string())),
     countryCodes: schema.maybe(schema.arrayOf(schema.string())),
+    /** Entity data sources (e.g. Active Directory) — group cards show first + overflow. */
+    sources: schema.maybe(schema.arrayOf(schema.string())),
     documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
     // Risk and criticality fields — populated by the entity store when available
     assetCriticality: schema.maybe(schema.string()),

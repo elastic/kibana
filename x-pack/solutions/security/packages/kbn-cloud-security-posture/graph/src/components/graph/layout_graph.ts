@@ -51,50 +51,61 @@ const CARD_LAYOUT_BODY_PADDING = 24;
 const CARD_LAYOUT_METADATA_BLOCK = 40;
 /** Vertical gap between metadata sections in the card body. */
 const CARD_LAYOUT_SECTION_GAP = 16;
-/** Grouped-entity stack tab under the card. */
-const CARD_LAYOUT_GROUP_STACK = 8;
+/** Grouped-entity stack tabs under the card (2 layers + gap). */
+const CARD_LAYOUT_GROUP_STACK = 22;
 
 /**
  * Estimates entity card height from visible metadata so Dagre can pack nodes
  * tightly (close but non-overlapping) instead of always reserving the max card.
  */
 const estimateEntityCardLayoutHeight = (data: EntityNodeViewModel): number => {
+  const isGroup = showStackedShape(data.count);
   const showIp = Boolean(data.ips && data.ips.length > 0);
   const showGeo = Boolean(data.countryCodes && data.countryCodes.length > 0);
   const showCriticality = Boolean(data.assetCriticality || data.assetCriticalityCounts);
-  const showRisk =
-    data.riskScore !== undefined ||
-    (data.riskScoreMin !== undefined && data.riskScoreMax !== undefined);
-  const showEntityId = Boolean(data.showEntityId);
-  const hasBody = showIp || showGeo || showEntityId || showCriticality || showRisk;
+  const showSource = Boolean(data.sources && data.sources.length > 0);
+  const showEntityId = !isGroup && Boolean(data.showEntityId);
+  // Groups always expose a subtype row when metadata is on (derived from label).
+  const showSubType = isGroup && Boolean(data.label);
+  // Risk score lives in the card header badge — it does not add body height.
+  const hasBody =
+    showIp || showGeo || showEntityId || showCriticality || showSource || showSubType;
 
   let height = CARD_LAYOUT_HEADER_HEIGHT;
 
   if (hasBody) {
     height += CARD_LAYOUT_BODY_PADDING;
 
-    if (showIp || showGeo) {
-      height += CARD_LAYOUT_METADATA_BLOCK;
-    }
+    if (isGroup) {
+      if (showSubType || showSource) {
+        height += CARD_LAYOUT_METADATA_BLOCK;
+      }
+      if (showIp || showGeo) {
+        height += CARD_LAYOUT_SECTION_GAP + CARD_LAYOUT_METADATA_BLOCK;
+      }
+      if (showCriticality) {
+        height += CARD_LAYOUT_SECTION_GAP + CARD_LAYOUT_METADATA_BLOCK;
+      }
+    } else {
+      if (showIp || showGeo) {
+        height += CARD_LAYOUT_METADATA_BLOCK;
+      }
 
-    if (showEntityId) {
-      height += CARD_LAYOUT_SECTION_GAP + CARD_LAYOUT_METADATA_BLOCK;
-    }
+      if (showEntityId) {
+        height += CARD_LAYOUT_SECTION_GAP + CARD_LAYOUT_METADATA_BLOCK;
+      }
 
-    if (showCriticality) {
-      height += CARD_LAYOUT_SECTION_GAP + CARD_LAYOUT_METADATA_BLOCK;
-    }
-
-    if (showRisk) {
-      height += CARD_LAYOUT_SECTION_GAP + CARD_LAYOUT_METADATA_BLOCK;
+      if (showCriticality || showSource) {
+        height += CARD_LAYOUT_SECTION_GAP + CARD_LAYOUT_METADATA_BLOCK;
+      }
     }
   }
 
-  if (showStackedShape(data.count)) {
+  if (isGroup) {
     height += CARD_LAYOUT_GROUP_STACK;
   }
 
-  return Math.min(height, CARD_NODE_DEFAULT_HEIGHT);
+  return Math.min(height, CARD_NODE_DEFAULT_HEIGHT + (isGroup ? CARD_LAYOUT_GROUP_STACK : 0));
 };
 
 export const layoutGraph = (

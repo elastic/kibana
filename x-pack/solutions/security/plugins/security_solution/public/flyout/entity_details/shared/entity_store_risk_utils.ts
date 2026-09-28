@@ -30,50 +30,63 @@ export function buildEntitySummaryStalenessEntitySnapshot(
   };
 }
 
+/**
+ * Risk score for the Graph preview origin card.
+ * Must match the flyout Entity risk: `null` when Unknown / missing so the preview
+ * does not show a mock Critical badge.
+ */
+export function getOriginRiskScoreForGraphPreview(
+  record?: EntityStoreRecord | null
+): number | null {
+  if (!record) return null;
+  const risk = getRiskFromEntityRecord(record);
+  if (!risk) return null;
+  if (risk.calculated_level === 'Unknown') return null;
+  if (risk.calculated_score_norm == null) return null;
+  return risk.calculated_score_norm;
+}
+
 function getRiskFromRecord(record: EntityStoreRecord): {
   calculated_level?: string;
   calculated_score?: number;
   calculated_score_norm?: number;
 } | null {
   const entityRisk = record.entity?.risk;
-  if (entityRisk) {
-    return {
-      calculated_level: entityRisk.calculated_level,
-      calculated_score: entityRisk.calculated_score,
-      calculated_score_norm: entityRisk.calculated_score_norm,
-    };
+  const typedRisk =
+    ('host' in record && record.host?.risk) ||
+    ('user' in record && record.user?.risk) ||
+    ('service' in record && record.service?.risk) ||
+    undefined;
+
+  const toFields = (
+    risk:
+      | {
+          calculated_level?: string;
+          calculated_score?: number;
+          calculated_score_norm?: number;
+        }
+      | undefined
+      | null
+  ) =>
+    risk
+      ? {
+          calculated_level: risk.calculated_level,
+          calculated_score: risk.calculated_score,
+          calculated_score_norm: risk.calculated_score_norm,
+        }
+      : null;
+
+  // Prefer entity.risk when it has a real score. Risk engine / Entity Store often
+  // rewrites entity.risk → Unknown/0 while host|user|service.risk still holds the
+  // seeded Critical→Low values — fall back to the typed risk in that case.
+  const entityScore = entityRisk?.calculated_score_norm;
+  if (entityRisk != null && entityScore != null && entityScore > 0) {
+    return toFields(entityRisk);
   }
-  if ('host' in record && record.host) {
-    const hostRisk = record.host.risk;
-    if (hostRisk) {
-      return {
-        calculated_level: hostRisk.calculated_level,
-        calculated_score: hostRisk.calculated_score,
-        calculated_score_norm: hostRisk.calculated_score_norm,
-      };
-    }
+  if (typedRisk != null && (typedRisk.calculated_score_norm ?? 0) > 0) {
+    return toFields(typedRisk);
   }
-  if ('user' in record && record.user) {
-    const userRisk = record.user.risk;
-    if (userRisk) {
-      return {
-        calculated_level: userRisk.calculated_level,
-        calculated_score: userRisk.calculated_score,
-        calculated_score_norm: userRisk.calculated_score_norm,
-      };
-    }
-  }
-  if ('service' in record && record.service) {
-    const serviceRisk = record.service.risk;
-    if (serviceRisk) {
-      return {
-        calculated_level: serviceRisk.calculated_level,
-        calculated_score: serviceRisk.calculated_score,
-        calculated_score_norm: serviceRisk.calculated_score_norm,
-      };
-    }
-  }
-  return null;
+  return toFields(entityRisk) ?? toFields(typedRisk);
 }
 
 function getEntityNameFromRecord(record: EntityStoreRecord, entityType: EntityType): string {

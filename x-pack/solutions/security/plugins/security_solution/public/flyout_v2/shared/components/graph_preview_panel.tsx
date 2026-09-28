@@ -38,6 +38,11 @@ export interface GraphPreviewPanelProps {
   data?: GraphPreviewData;
   /** Entity that opened the flyout — keeps left preview pill in sync with the graph origin. */
   originEntityId?: string;
+  /**
+   * Flyout Entity risk score. When set, overrides graph-node risk on the origin card
+   * so the preview matches the flyout (including Unknown via `null`).
+   */
+  originRiskScore?: number | null;
 }
 
 /** Displays a graph preview panel or graph visualization upsell for the current document. */
@@ -50,6 +55,7 @@ export const GraphPreviewPanel = ({
   showIcon,
   disableNavigation,
   originEntityId,
+  originRiskScore,
 }: GraphPreviewPanelProps) => {
   const GraphVisualizationUpsell = useUpsellingComponent('graph_visualization');
 
@@ -71,7 +77,7 @@ export const GraphPreviewPanel = ({
         title: (
           <FormattedMessage
             id="xpack.securitySolution.flyout.document.visualizations.graphPreview.graphPreviewTitle"
-            defaultMessage="Graph view"
+            defaultMessage="Entity graph"
           />
         ),
         headerContent: (
@@ -123,19 +129,19 @@ export const GraphPreviewPanel = ({
                 }
               : undefined
           }
-          css={
-            showLink
-              ? {
-                  cursor: 'pointer',
-                }
-              : undefined
-          }
+          css={{
+            minWidth: 0,
+            width: '100%',
+            overflow: 'hidden',
+            ...(showLink ? { cursor: 'pointer' } : undefined),
+          }}
         >
           <GraphPreview
             isLoading={isLoading}
             isError={isError}
             data={data}
             originEntityId={originEntityId}
+            originRiskScore={originRiskScore}
           />
         </div>
       ) : (

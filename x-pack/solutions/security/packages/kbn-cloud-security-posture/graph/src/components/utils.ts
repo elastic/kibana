@@ -24,7 +24,10 @@ import type {
   RelationshipNodeViewModel,
   EdgeViewModel,
 } from './types';
-import { mapEdgeViewModelToReactFlowEdge } from './edge/edge_processing';
+import {
+  assignBundleArrowLeaders,
+  mapEdgeViewModelToReactFlowEdge,
+} from './edge/edge_processing';
 
 export const isEntityNode = (node: NodeViewModel): node is EntityNodeViewModel =>
   node.shape === 'ellipse' ||
@@ -233,9 +236,11 @@ export const buildGraphFromViewModels = (
     return node;
   });
 
-  const edges: Array<Edge<EdgeViewModel>> = edgesModel
-    .map((edgeData) => mapEdgeViewModelToReactFlowEdge(edgeData, nodesById))
-    .filter((edge): edge is Edge<EdgeViewModel> => edge !== null);
+  const edges: Array<Edge<EdgeViewModel>> = assignBundleArrowLeaders(
+    edgesModel
+      .map((edgeData) => mapEdgeViewModelToReactFlowEdge(edgeData, nodesById))
+      .filter((edge): edge is Edge<EdgeViewModel> => edge !== null)
+  );
 
   return { nodes, edges };
 };

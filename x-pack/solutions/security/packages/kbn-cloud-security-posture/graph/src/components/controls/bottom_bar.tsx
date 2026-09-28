@@ -367,6 +367,7 @@ export const BottomBar = ({
                 onClose={() => setIsFiltersOpen(false)}
                 filtersState={filtersState}
                 onFiltersChange={onFiltersChange}
+                placement="graphTopLeft"
               >
                 <GraphControlTooltip
                   content={<ToolShortcutTooltip label={displayLabel} shortcut={DISPLAY_SHORTCUT} />}

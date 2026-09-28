@@ -48,6 +48,9 @@ export const GRAPH_CONTROLS_FULL_SCREEN_ID = `${GRAPH_INVESTIGATION_TEST_ID}Full
 
 export const GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}ApplyFilters` as const;
+/** Entity-node hover shortcut — Entity Metadata section of Display (layers). */
+export const GRAPH_ENTITY_HOVER_METADATA_FILTERS_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}EntityHoverMetadataFilters` as const;
 export const GRAPH_BOTTOM_BAR_KEYBOARD_SHORTCUTS_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}KeyboardShortcuts` as const;
 export const GRAPH_BOTTOM_BAR_SEARCH_ID = `${GRAPH_INVESTIGATION_TEST_ID}Search` as const;

@@ -26,6 +26,7 @@ import type { IdentityFields } from '../../../../flyout/document_details/shared/
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import type { EntityRiskScore, HostItem } from '../../../../../common/search_strategy';
 import { VisualizationsSection } from '../../../../flyout/entity_details/shared/components/right/visualizations_section';
+import { getOriginRiskScoreForGraphPreview } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import { ResolutionSection } from '../../../../entity_analytics/components/entity_resolution/resolution_section';
 import {
   AnomaliesSection,
@@ -180,7 +181,7 @@ export const Content = ({
             isPreviewMode={isPreviewMode}
             scopeId={scopeId}
             openDetailsPanel={enableGraphAndResolutionNavigation ? openDetailsPanel : undefined}
-            hideHeaderIcons={hideHeaderIcons}
+            originRiskScore={getOriginRiskScoreForGraphPreview(entityRecord)}
           />
           <EuiHorizontalRule margin="m" />
         </>

@@ -8,15 +8,16 @@
 import React from 'react';
 import { useEdgeColor } from './styles';
 
+/** Filled equilateral tip — sits cleanly on the target node edge. */
 const getArrowPoints = (width: number, height: number): string => {
-  return `${-width},${-height} 0,0 ${-width},${height} ${-width},${-height}`;
+  return `${-width},${-height} 0,0 ${-width},${height}`;
 };
 
 const ArrowMarker = ({
   id,
   color,
-  width = 5,
-  height = 4,
+  width = 9,
+  height = 6,
 }: {
   id: string;
   color: string;
@@ -28,22 +29,16 @@ const ArrowMarker = ({
   return (
     <marker
       id={id}
-      markerWidth={width * 2.4} // Scale marker width
-      markerHeight={height * 3} // Scale marker height
-      viewBox={`${-width * 2} ${-height * 2.5} ${width * 4} ${height * 5}`} // Dynamic viewBox
+      markerWidth={width * 2}
+      markerHeight={height * 2.5}
+      viewBox={`${-width - 1} ${-height - 1} ${width + 2} ${height * 2 + 2}`}
       markerUnits="userSpaceOnUse"
       orient="auto-start-reverse"
-      refX="0"
-      refY="0"
+      /* Tip lands on the path end (node border). */
+      refX={0}
+      refY={0}
     >
-      <polyline
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        points={points}
-        strokeWidth="1"
-        stroke={color}
-        fill={color}
-      />
+      <polygon points={points} fill={color} stroke={color} strokeWidth={0.5} strokeLinejoin="round" />
     </marker>
   );
 };
@@ -64,10 +59,10 @@ export const SvgDefsMarker = () => {
   return (
     <svg css={{ position: 'absolute', width: 0, height: 0 }}>
       <defs>
-        <ArrowMarker id="arrowPrimary" color={useEdgeColor('primary')} width={6} height={4.8} />
-        <ArrowMarker id="arrowSubdued" color={useEdgeColor('subdued')} width={6} height={4.8} />
-        <ArrowMarker id="arrowWarning" color={useEdgeColor('warning')} width={6} height={4.8} />
-        <ArrowMarker id="arrowDanger" color={useEdgeColor('danger')} width={6} height={4.8} />
+        <ArrowMarker id="arrowPrimary" color={useEdgeColor('primary')} />
+        <ArrowMarker id="arrowSubdued" color={useEdgeColor('subdued')} />
+        <ArrowMarker id="arrowWarning" color={useEdgeColor('warning')} />
+        <ArrowMarker id="arrowDanger" color={useEdgeColor('danger')} />
       </defs>
     </svg>
   );

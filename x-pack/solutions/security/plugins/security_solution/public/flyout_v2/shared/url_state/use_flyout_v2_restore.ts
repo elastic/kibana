@@ -98,11 +98,11 @@ interface RestoreContext {
 /**
  * Builds the tool-header "show entity" callback for a restored entity tool flyout.
  *
- * Entity tools open with `session: 'start'`, so the entity main flyout is not persisted alongside
- * the tool: on refresh only the tool descriptor is in the URL and there is no parent entity flyout.
- * The shared tools header hides its source context (the entity name + icon) unless it is given a
- * title-click handler, so without this callback a restored tool flyout would lose the host/user
- * info in its header. Rebuilding it here restores both the header label and the
+ * Most entity tools open with `session: 'start'`, so the entity main flyout is not persisted
+ * alongside the tool: on refresh only the tool descriptor is in the URL and there is no parent
+ * entity flyout. The shared tools header hides its source context (the entity name + icon) unless
+ * it is given a title-click handler, so without this callback a restored tool flyout would lose
+ * the host/user info in its header. Rebuilding it here restores both the header label and the
  * click-to-open-entity behaviour the live flyout provides via its own `onShowEntity` handler.
  */
 const buildShowEntityCallback = (

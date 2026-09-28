@@ -63,9 +63,9 @@ export interface EntityNodeViewModel
   countryClickHandler?: CountryClickCallback;
   showEntityId?: boolean;
   /**
-   * How entity actions popover is opened.
-   * - `button`: show `⋯` and open on click
-   * - `hover` (Test A): hide `⋯` and open on card hover
+   * How entity actions are revealed.
+   * - `hover` (default): action buttons above the card on hover — no `⋯` menu
+   * - `button`: legacy `⋯` in header (dev prototyping only)
    */
   entityActionsMode?: 'button' | 'hover';
   /**
@@ -131,6 +131,11 @@ export type EdgeProps = xyEdgeProps<
       targetShape: NodeShape;
       targetColor: NodeColor;
       isOriginHighlightEdge?: boolean;
+      /**
+       * False on bundled siblings — only the leader draws the final stem + arrow.
+       * Siblings truncate their path at the trunk join (`truncateAtTrunk`).
+       */
+      showArrowHead?: boolean;
     }
   >
 >;

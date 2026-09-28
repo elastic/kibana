@@ -20,6 +20,7 @@ import type { ObservedEntityData } from '../../../flyout_v2/entity/shared/compon
 import { useObservedServiceItems } from './hooks/use_observed_service_items';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { VisualizationsSection } from '../shared/components/right/visualizations_section';
+import { getOriginRiskScoreForGraphPreview } from '../shared/entity_store_risk_utils';
 import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
 import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 
@@ -116,7 +117,7 @@ export const ServicePanelContent = ({
             isPreviewMode={isPreviewMode}
             scopeId={scopeId}
             openDetailsPanel={openDetailsPanel}
-            hideHeaderIcons={hideHeaderIcons}
+            originRiskScore={getOriginRiskScoreForGraphPreview(entityRecord)}
           />
           <EuiHorizontalRule margin="m" />
         </>

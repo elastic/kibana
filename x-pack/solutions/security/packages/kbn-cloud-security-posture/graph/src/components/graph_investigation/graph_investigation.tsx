@@ -31,6 +31,7 @@ import { Actions } from '../controls/actions';
 import { BottomBar } from '../controls/bottom_bar';
 import { DEFAULT_GRAPH_FILTERS } from '../controls/apply_filters_popover';
 import type { GraphFiltersState } from '../controls/apply_filters_popover';
+import { GraphFiltersProvider } from '../graph/graph_filters_context';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
 import { GRAPH_PANEL_INSET } from '../constants';
 import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from '../filters/search_filters';
@@ -234,9 +235,9 @@ export interface GraphInvestigationProps {
   searchControlsVariant?: 'split' | 'unified';
 
   /**
-   * Entity actions popover interaction for prototyping (dev-graph).
-   * - `button`: `⋯` in header, open on click
-   * - `hover` (Test A): hide `⋯`, open popover on entity hover
+   * Entity actions interaction.
+   * - `hover` (default): action buttons appear above the entity on hover — no `⋯` menu
+   * - `button`: legacy `⋯` in header (dev prototyping only)
    */
   entityActionsMode?: 'button' | 'hover';
 
@@ -267,7 +268,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     showInvestigateInTimeline = false,
     showToggleSearch = false,
     searchControlsVariant = 'unified',
-    entityActionsMode = 'button',
+    entityActionsMode = 'hover',
     entityStyleMode = 'default',
     onInvestigateInTimeline,
     onOpenEventPreview,
@@ -485,25 +486,23 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
             return {
               ...node,
               isOrigin: originEntityIdsSet.has(node.id),
-              showEntityId: nodeMetadata.entityId,
+              // Risk score badge is always shown in the card header (not a Layers toggle).
+              // Entity ID is not exposed in Layers and is never shown on the card.
+              // Group cards show the same Node metadata toggles as singles (with +N
+              // counters and asset-criticality range).
+              showEntityId: false,
               ips: nodeMetadata.ipAddress ? node.ips : undefined,
               countryCodes: nodeMetadata.geolocation ? node.countryCodes : undefined,
-              assetCriticality: nodeMetadata.assetCriticality ? node.assetCriticality : undefined,
+              sources: nodeMetadata.source ? node.sources : undefined,
+              assetCriticality: nodeMetadata.assetCriticality
+                ? node.assetCriticality
+                : undefined,
               assetCriticalityCounts: nodeMetadata.assetCriticality
                 ? node.assetCriticalityCounts
                 : undefined,
-              riskScore:
-                entityStyleMode === 'colored' || nodeMetadata.riskScore
-                  ? node.riskScore
-                  : undefined,
-              riskScoreMin:
-                entityStyleMode === 'colored' || nodeMetadata.riskScore
-                  ? node.riskScoreMin
-                  : undefined,
-              riskScoreMax:
-                entityStyleMode === 'colored' || nodeMetadata.riskScore
-                  ? node.riskScoreMax
-                  : undefined,
+              riskScore: node.riskScore,
+              riskScoreMin: node.riskScoreMin,
+              riskScoreMax: node.riskScoreMax,
               expandButtonClick: nodeExpandButtonClickHandler,
               closeEntityActions: () => nodeExpandPopover.actions.closePopover(),
               getEntityActionItems: () =>
@@ -513,7 +512,9 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               entityActionsMode,
               entityStyleMode,
               cardWidth: entityCardWidth,
-              ipClickHandler: createIpClickHandler(nodeMetadata.ipAddress ? nodeIps : []),
+              ipClickHandler: createIpClickHandler(
+                nodeMetadata.ipAddress ? nodeIps : []
+              ),
               countryClickHandler: createCountryClickHandler(
                 nodeMetadata.geolocation ? nodeCountryCodes : []
               ),
@@ -604,144 +605,146 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     const showGraphTopBorder = searchToggled || !showToggleSearch;
 
     return (
-      <div
-        css={css`
-          height: 100%;
-          min-height: 0;
-          display: flex;
-          flex-direction: column;
-          overflow: hidden;
-        `}
-      >
-        <EuiFlexGroup
-          data-test-subj={GRAPH_INVESTIGATION_TEST_ID}
-          direction="column"
-          gutterSize="none"
-          onPointerDownCapture={handlePointerDownCapture}
+      <GraphFiltersProvider filtersState={graphFilters} onFiltersChange={setGraphFilters}>
+        <div
           css={css`
-            flex: 1 1 auto;
-            min-height: 0;
             height: 100%;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
-
-            .react-flow__panel.top.right {
-              margin-top: ${GRAPH_PANEL_INSET}px;
-              margin-right: ${GRAPH_PANEL_INSET}px;
-            }
-
-            .react-flow__panel.bottom {
-              overflow: visible;
-            }
-
-            .react-flow__panel.bottom.center {
-              overflow: visible;
-            }
-
-            .react-flow__panel.bottom.right {
-              overflow: visible;
-              margin-right: ${GRAPH_PANEL_INSET}px;
-              margin-bottom: ${GRAPH_PANEL_INSET}px;
-            }
-
-            .react-flow__panel.bottom.left {
-              overflow: visible;
-              margin-left: ${GRAPH_PANEL_INSET}px;
-              margin-bottom: ${GRAPH_PANEL_INSET}px;
-            }
           `}
         >
-          {dataView && (
-            <EuiFlexItem grow={false}>
-              <AnimatedSearchBarContainer
-                className={!searchToggled && showToggleSearch ? 'toggled-off' : undefined}
-              >
-                <SearchBar<Query>
-                  showFilterBar={true}
-                  showDatePicker={true}
-                  showAutoRefreshOnly={false}
-                  showSaveQuery={false}
-                  showQueryInput={true}
-                  disableQueryLanguageSwitcher={true}
-                  isLoading={isFetching}
-                  isAutoRefreshDisabled={true}
-                  dateRangeFrom={timeRange.from}
-                  dateRangeTo={timeRange.to}
-                  query={kquery}
-                  indexPatterns={[dataView]}
-                  filters={searchFilters}
-                  submitButtonStyle={'iconOnly'}
-                  onFiltersUpdated={(newFilters) => {
-                    setSearchFilters(newFilters);
-                  }}
-                  onQuerySubmit={(payload, isUpdate) => {
-                    if (isUpdate) {
-                      setTimeRange({ ...payload.dateRange });
-                      setKQuery(payload.query || EMPTY_QUERY);
-                    } else {
-                      refresh();
-                    }
-                  }}
-                />
-              </AnimatedSearchBarContainer>
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem
+          <EuiFlexGroup
+            data-test-subj={GRAPH_INVESTIGATION_TEST_ID}
+            direction="column"
+            gutterSize="none"
+            onPointerDownCapture={handlePointerDownCapture}
             css={css`
-              /* Avoid a double divider under flyout tabs when the KQL bar is collapsed. */
-              border-top: ${showGraphTopBorder ? graphTopBorder : 'none'};
-              position: relative;
+              flex: 1 1 auto;
               min-height: 0;
+              height: 100%;
               overflow: hidden;
+
+              .react-flow__panel.top.right {
+                margin-top: ${GRAPH_PANEL_INSET}px;
+                margin-right: ${GRAPH_PANEL_INSET}px;
+              }
+
+              .react-flow__panel.bottom {
+                overflow: visible;
+              }
+
+              .react-flow__panel.bottom.center {
+                overflow: visible;
+              }
+
+              .react-flow__panel.bottom.right {
+                overflow: visible;
+                margin-right: ${GRAPH_PANEL_INSET}px;
+                margin-bottom: ${GRAPH_PANEL_INSET}px;
+              }
+
+              .react-flow__panel.bottom.left {
+                overflow: visible;
+                margin-left: ${GRAPH_PANEL_INSET}px;
+                margin-bottom: ${GRAPH_PANEL_INSET}px;
+              }
             `}
           >
-            {isFetching && <EuiProgress size="xs" color="accent" position="absolute" />}
-            <Graph
+            {dataView && (
+              <EuiFlexItem grow={false}>
+                <AnimatedSearchBarContainer
+                  className={!searchToggled && showToggleSearch ? 'toggled-off' : undefined}
+                >
+                  <SearchBar<Query>
+                    showFilterBar={true}
+                    showDatePicker={true}
+                    showAutoRefreshOnly={false}
+                    showSaveQuery={false}
+                    showQueryInput={true}
+                    disableQueryLanguageSwitcher={true}
+                    isLoading={isFetching}
+                    isAutoRefreshDisabled={true}
+                    dateRangeFrom={timeRange.from}
+                    dateRangeTo={timeRange.to}
+                    query={kquery}
+                    indexPatterns={[dataView]}
+                    filters={searchFilters}
+                    submitButtonStyle={'iconOnly'}
+                    onFiltersUpdated={(newFilters) => {
+                      setSearchFilters(newFilters);
+                    }}
+                    onQuerySubmit={(payload, isUpdate) => {
+                      if (isUpdate) {
+                        setTimeRange({ ...payload.dateRange });
+                        setKQuery(payload.query || EMPTY_QUERY);
+                      } else {
+                        refresh();
+                      }
+                    }}
+                  />
+                </AnimatedSearchBarContainer>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem
               css={css`
-                height: 100%;
-                width: 100%;
+                /* Avoid a double divider under flyout tabs when the KQL bar is collapsed. */
+                border-top: ${showGraphTopBorder ? graphTopBorder : 'none'};
+                position: relative;
+                min-height: 0;
+                overflow: hidden;
               `}
-              nodes={nodes}
-              edges={data?.edges ?? []}
-              interactive={true}
-              isLocked={isPopoverOpen}
-              showMinimap={true}
-              highlightOriginsOnly={graphFilters.highlightOriginsOnly}
             >
-              <GraphExpandPopoverSync onClosePopovers={closeGraphExpandPopovers} />
-              <Panel
-                position="top-right"
-                style={{ marginTop: GRAPH_PANEL_INSET, marginRight: GRAPH_PANEL_INSET }}
+              {isFetching && <EuiProgress size="xs" color="accent" position="absolute" />}
+              <Graph
+                css={css`
+                  height: 100%;
+                  width: 100%;
+                `}
+                nodes={nodes}
+                edges={data?.edges ?? []}
+                interactive={true}
+                isLocked={isPopoverOpen}
+                showMinimap={true}
+                highlightOriginsOnly={graphFilters.highlightOriginsOnly}
               >
-                <Actions
-                  showInvestigateInTimeline={false}
-                  showToggleSearch={showToggleSearch}
-                  searchControlsVariant={searchControlsVariant}
-                  nodes={nodes}
-                  onSearchToggle={(isSearchToggle) => setSearchToggled(isSearchToggle)}
-                  searchFilterCounter={searchFilterCounter}
-                  searchToggled={searchToggled}
-                  searchWarningMessage={searchWarningMessage}
-                />
-              </Panel>
-              <Panel position="bottom-center" style={{ overflow: 'visible' }}>
-                <BottomBar
-                  showInvestigateInTimeline={showInvestigateInTimeline}
-                  onInvestigateInTimeline={onInvestigateInTimelineCallback}
-                  filtersState={graphFilters}
-                  onFiltersChange={setGraphFilters}
-                  nodes={nodes}
-                  showInGraphSearch={searchControlsVariant !== 'unified'}
-                />
-              </Panel>
-            </Graph>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <nodeExpandPopover.PopoverComponent />
-        <labelExpandPopover.PopoverComponent />
-        <ipPopover.PopoverComponent />
-        <countryFlagsPopover.PopoverComponent />
-        <eventPopover.PopoverComponent />
-      </div>
+                <GraphExpandPopoverSync onClosePopovers={closeGraphExpandPopovers} />
+                <Panel
+                  position="top-right"
+                  style={{ marginTop: GRAPH_PANEL_INSET, marginRight: GRAPH_PANEL_INSET }}
+                >
+                  <Actions
+                    showInvestigateInTimeline={false}
+                    showToggleSearch={showToggleSearch}
+                    searchControlsVariant={searchControlsVariant}
+                    nodes={nodes}
+                    onSearchToggle={(isSearchToggle) => setSearchToggled(isSearchToggle)}
+                    searchFilterCounter={searchFilterCounter}
+                    searchToggled={searchToggled}
+                    searchWarningMessage={searchWarningMessage}
+                  />
+                </Panel>
+                <Panel position="bottom-center" style={{ overflow: 'visible' }}>
+                  <BottomBar
+                    showInvestigateInTimeline={showInvestigateInTimeline}
+                    onInvestigateInTimeline={onInvestigateInTimelineCallback}
+                    filtersState={graphFilters}
+                    onFiltersChange={setGraphFilters}
+                    nodes={nodes}
+                    showInGraphSearch={searchControlsVariant !== 'unified'}
+                  />
+                </Panel>
+              </Graph>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <nodeExpandPopover.PopoverComponent />
+          <labelExpandPopover.PopoverComponent />
+          <ipPopover.PopoverComponent />
+          <countryFlagsPopover.PopoverComponent />
+          <eventPopover.PopoverComponent />
+        </div>
+      </GraphFiltersProvider>
     );
   }
 );

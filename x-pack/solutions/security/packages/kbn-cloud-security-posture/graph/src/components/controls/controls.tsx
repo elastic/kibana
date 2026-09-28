@@ -106,6 +106,10 @@ const ZOOM_BUTTON_GAP = 4;
 const SECTION_GAP = 8;
 /** Distance from the left edge of the graph canvas to the controls panel. */
 export const CONTROL_PANEL_MARGIN_LEFT = GRAPH_PANEL_INSET;
+/** Width of the left zoom/fit controls chrome (used to offset top-left floating panels). */
+export const CONTROL_PANEL_WIDTH_PX = CONTROL_PANEL_WIDTH;
+/** Gap between the left controls and Display / Keyboard shortcut panels. */
+export const GRAPH_FLOATING_PANEL_GAP_FROM_CONTROLS = 16;
 /** EUI medium drop shadow for the controls panel. */
 const CONTROL_PANEL_SHADOW = 'm' as const;
 /** Relative zoom factor per button click — smaller than xyflow's default 1.2 for smoother steps. */

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { mockContextValue } from '../../../flyout/document_details/shared/mocks/mock_context';
@@ -33,22 +33,106 @@ describe('<GraphPreview />', () => {
     const graphProps: GraphPreviewProps = {
       isLoading: false,
       isError: false,
+      originEntityId: 'host:macbook-john-work',
+      originRiskScore: 90.01,
       data: {
         nodes: [
           {
-            id: '1',
+            id: 'host:macbook-john-work',
+            label: 'macbook-john-work',
             color: 'primary',
-            shape: 'ellipse',
+            shape: 'hexagon',
+            icon: 'storage',
+            riskScore: 90.01,
+          },
+          {
+            id: 'host:peer-critical',
+            label: 'peer-critical',
+            color: 'primary',
+            shape: 'hexagon',
+            icon: 'storage',
+            riskScore: 95.5,
+          },
+          {
+            id: 'host:peer-high',
+            label: 'peer-high',
+            color: 'primary',
+            shape: 'hexagon',
+            icon: 'storage',
+            riskScore: 80.01,
           },
         ],
-        edges: [],
+        edges: [
+          {
+            id: 'e1',
+            source: 'host:macbook-john-work',
+            target: 'host:peer-critical',
+            color: 'primary',
+          },
+          {
+            id: 'e2',
+            source: 'host:macbook-john-work',
+            target: 'host:peer-high',
+            color: 'primary',
+          },
+        ],
       },
     };
 
-    const { findByTestId } = renderGraphPreview(mockContextValue, graphProps);
+    const { findByTestId, findByText } = renderGraphPreview(mockContextValue, graphProps);
 
-    // Using findByTestId to wait for the component to be rendered because it is a lazy loaded component
     expect(await findByTestId(GRAPH_PREVIEW_TEST_ID)).toBeInTheDocument();
+    // Origin risk badge must reflect the flyout Entity risk score
+    expect(await findByText('90.01')).toBeInTheDocument();
+    expect(screen.getByTestId('graph-preview-relationships-pill')).toBeInTheDocument();
+    expect(screen.getAllByTestId('graph-preview-risk-badge').length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('shows Unknown on origin when flyout entity risk is Unknown', async () => {
+    const graphProps: GraphPreviewProps = {
+      isLoading: false,
+      isError: false,
+      originEntityId: 'host:edge-sec',
+      // Explicit null = flyout Unknown — must not use mock Critical score from nodes
+      originRiskScore: null,
+      data: {
+        nodes: [
+          {
+            id: 'host:edge-sec',
+            label: 'edge-sec-ubuntu',
+            color: 'primary',
+            shape: 'hexagon',
+            icon: 'storage',
+            riskScore: 98.72,
+          },
+          {
+            id: 'host:peer',
+            label: 'peer',
+            color: 'primary',
+            shape: 'hexagon',
+            icon: 'storage',
+            riskScore: 90.01,
+          },
+        ],
+        edges: [
+          {
+            id: 'e1',
+            source: 'host:edge-sec',
+            target: 'host:peer',
+            color: 'primary',
+          },
+        ],
+      },
+    };
+
+    const { findByTestId, findByText, queryByText } = renderGraphPreview(
+      mockContextValue,
+      graphProps
+    );
+
+    expect(await findByTestId(GRAPH_PREVIEW_TEST_ID)).toBeInTheDocument();
+    expect(await findByText('Unknown')).toBeInTheDocument();
+    expect(queryByText('98.72')).not.toBeInTheDocument();
   });
 
   it('shows loading when data is loading', () => {

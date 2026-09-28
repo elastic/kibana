@@ -43,14 +43,21 @@ export const DefaultEdge = memo(
     const color = getGraphEdgeRenderColor(data);
     const sourceMargin = getShapeHandlePosition(data?.sourceShape);
     const targetMargin = getShapeHandlePosition(data?.targetShape);
-    const markerEnd =
-      !data?.targetShape || !NODES_WITHOUT_MARKER.includes(data?.targetShape)
-        ? getMarkerEnd(color)
-        : undefined;
+    const canHaveArrow =
+      !data?.targetShape || !NODES_WITHOUT_MARKER.includes(data?.targetShape);
+    // Bundle siblings: only the leader draws tip + final stem into the target.
+    const showArrow = canHaveArrow && data?.showArrowHead !== false;
+    const markerEnd = showArrow ? getMarkerEnd(color) : undefined;
+    // Truncate for entity *and* group fans (groups have no tip, but still need one stem).
+    const truncateAtTrunk =
+      useBundledEdgeRouting && data?.showArrowHead === false;
 
+    // Integer endpoints — sub-pixel handle drift was stacking parallel stems.
+    // Same tX for every edge into a tipped target (clearance must not depend on leader).
     const sX = Math.round(sourceX - sourceMargin);
     const sY = Math.round(sourceY);
-    const tX = Math.round(targetX + targetMargin);
+    const arrowClearance = canHaveArrow ? 1 : 0;
+    const tX = Math.round(targetX + targetMargin - arrowClearance);
     const tY = Math.round(targetY);
 
     const edgePath = getGraphEdgePath({
@@ -60,7 +67,9 @@ export const DefaultEdge = memo(
       targetX: tX,
       targetY: tY,
       targetPosition,
+      // Bundled mode: shared trunk (offset 0). Unbundled: stagger parallel edges.
       stepOffset: useBundledEdgeRouting ? 0 : GRAPH_EDGE_STEP_OFFSET,
+      truncateAtTrunk,
     });
 
     const isOriginHighlightEdge = Boolean(data?.isOriginHighlightEdge);

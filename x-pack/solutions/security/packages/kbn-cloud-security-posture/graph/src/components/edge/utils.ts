@@ -7,18 +7,21 @@
 
 import type { NodeShape } from '@kbn/cloud-security-posture-common/types/graph/latest';
 
+/**
+ * Path endpoint inset from the XYFlow handle.
+ *
+ * Entity shapes render as edge-handle cards (`CardNode`), so the handle already sits on
+ * the card border — no inset (otherwise the arrow tip is buried under the opaque card).
+ * Label / relationship pills keep a small inset for their rounded edges.
+ */
 export function getShapeHandlePosition(shape?: NodeShape) {
   switch (shape) {
     case 'hexagon':
-      return 18;
     case 'pentagon':
-      return 18;
     case 'ellipse':
-      return 17;
     case 'rectangle':
-      return 21;
     case 'diamond':
-      return 14;
+      return 0;
     case 'label':
     case 'relationship':
       return 3;

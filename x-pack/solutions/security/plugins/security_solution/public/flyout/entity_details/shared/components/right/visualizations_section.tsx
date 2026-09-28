@@ -9,7 +9,7 @@ import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { FLYOUT_STORAGE_KEYS } from '../../../../../flyout_v2/document/main/constants/local_storage';
 import { useExpandSection } from '../../../../../flyout_v2/shared/hooks/use_expand_section';
@@ -34,20 +34,29 @@ const KEY = 'visualizations';
 
 /**
  * Visualizations section in overview.
- * Clicking the graph preview opens a resizable system flyout (wider than the entity flyout).
- * Back closes it and returns to the entity-only flyout — no left/right side-by-side.
+ *
+ * Prefer the caller's `openDetailsPanel` (v2 Host/User → `openEntityGraphView`) when provided.
+ * Otherwise open a standalone system flyout with {@link EntityGraphFlyoutContent} (legacy /
+ * surfaces that do not wire GRAPH_VIEW).
  */
 export const VisualizationsSection = memo(
   ({
     entityId,
     isPreviewMode,
     scopeId,
+    openDetailsPanel,
+    originRiskScore,
   }: {
     entityId: string;
     isPreviewMode: boolean;
     scopeId: string;
-    /** @deprecated Kept for call-site compatibility; graph opens a system flyout instead. */
+    /** When set (v2 entity flyout), opens the native graph tool via GRAPH_VIEW. */
     openDetailsPanel?: (path: EntityDetailsPath) => void;
+    /**
+     * Flyout Entity risk (`calculated_score_norm`).
+     * `null` = Unknown — preview origin badge must match (not mock Critical).
+     */
+    originRiskScore?: number | null;
   }) => {
     const { services } = useKibana();
     const { overlays } = services;
@@ -84,7 +93,13 @@ export const VisualizationsSection = memo(
     }, []);
 
     const handleOpenGraphView = useCallback(() => {
-      // Never open expandable left/preview side-by-side for graph.
+      // Prefer the v2 entity flyout graph tool (openEntityGraphView) when the parent wires it.
+      if (openDetailsPanel) {
+        openDetailsPanel({ tab: EntityDetailsLeftPanelTab.GRAPH_VIEW });
+        return;
+      }
+
+      // Fallback: standalone system flyout (legacy expandable-flyout callers).
       closeLeftPanel();
       closePreviewPanel();
       graphFlyoutRef.current?.close();
@@ -120,6 +135,7 @@ export const VisualizationsSection = memo(
       closePreviewPanel,
       entityId,
       history,
+      openDetailsPanel,
       overlays,
       scopeId,
       services,
@@ -140,9 +156,10 @@ export const VisualizationsSection = memo(
       >
         <EntityGraphPreviewContainer
           entityId={entityId}
-          showIcon={true}
+          showIcon={false}
           disableNavigation={isPreviewMode || scopeId === TableId.rulePreview}
           onShowGraph={handleOpenGraphView}
+          originRiskScore={originRiskScore}
         />
       </ExpandableSection>
     );

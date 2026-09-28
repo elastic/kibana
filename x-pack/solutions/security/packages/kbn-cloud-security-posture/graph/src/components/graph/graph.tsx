@@ -32,7 +32,10 @@ import { SvgDefsMarker } from '../edge/markers';
 import { CardNode, LabelNode, EdgeGroupNode, RelationshipNode } from '../node';
 import { layoutGraph } from './layout_graph';
 import { DefaultEdge } from '../edge';
-import { mapEdgeViewModelToReactFlowEdge } from '../edge/edge_processing';
+import {
+  assignBundleArrowLeaders,
+  mapEdgeViewModelToReactFlowEdge,
+} from '../edge/edge_processing';
 import { Minimap } from '../minimap/minimap';
 import type { EdgeViewModel, NodeViewModel } from '../types';
 import {
@@ -734,9 +737,13 @@ const processGraph = (
     return node;
   });
 
-  const initialEdges: Array<Edge<EdgeViewModel>> = edgesModel
-    .map((edgeData) => mapEdgeViewModelToReactFlowEdge(edgeData, nodesById, highlightOriginsOnly))
-    .filter((edge): edge is Edge<EdgeViewModel> => edge !== null);
+  const initialEdges: Array<Edge<EdgeViewModel>> = assignBundleArrowLeaders(
+    edgesModel
+      .map((edgeData) =>
+        mapEdgeViewModelToReactFlowEdge(edgeData, nodesById, highlightOriginsOnly)
+      )
+      .filter((edge): edge is Edge<EdgeViewModel> => edge !== null)
+  );
 
   return { initialNodes, initialEdges };
 };

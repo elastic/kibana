@@ -37,21 +37,42 @@ export const TEST_SUBJ_HANDLE = 'label-node-handle';
 
 const MAX_LABEL_LENGTH = 27;
 
+/**
+ * Fixed layout width matches Dagre/`NODE_LABEL_WIDTH` so event/alert pills
+ * center on the edge corridor. Through-line keeps the edge continuous under the pill.
+ */
 const LabelNodeContainer = styled.div`
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
   gap: 6px;
-  width: max-content;
+  box-sizing: border-box;
+  width: ${NODE_LABEL_WIDTH}px;
   max-width: ${NODE_LABEL_WIDTH}px;
+`;
+
+const EdgeThroughLine = styled.div<{ $color: string }>`
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* Center on the handle Y (pill mid) — not the top of a 1px box at mid. */
+  top: ${EVENT_PILL_HEIGHT / 2}px;
+  height: 1px;
+  transform: translateY(-50%);
+  background: ${({ $color }) => $color};
+  z-index: 0;
+  pointer-events: none;
 `;
 
 const PillShell = styled.div`
   position: relative;
-  display: inline-flex;
+  z-index: 1;
+  display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
 `;
 
 const pillHitTargetCss = css`
@@ -79,11 +100,12 @@ const EventPill = styled.div<{
   gap: 4px;
   min-height: ${EVENT_PILL_HEIGHT}px;
   height: ${EVENT_PILL_HEIGHT}px;
-  padding: 4px 8px;
+  padding: 4px 12px;
   border-radius: 999px;
   border: 1px solid ${({ borderColor }) => borderColor};
   background: ${({ backgroundColor }) => backgroundColor};
   max-width: 100%;
+  margin: 0 auto;
   ${({ defaultShadow }) => defaultShadow ?? ''}
   transition: box-shadow 0.2s ease, border-width 0.2s ease;
 
@@ -133,6 +155,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
 
   const pillTone = getEventPillTone(analysis);
   const pillColors = getEventPillColors(pillTone, isActive, euiTheme);
+  const edgeThroughColor = euiTheme.colors.borderBaseProminent;
   const originOutlineBorderColor =
     pillTone === 'alert' ? euiTheme.colors.borderStrongDanger : euiTheme.colors.borderBasePlain;
 
@@ -141,8 +164,8 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
     line-height: 16px;
     font-weight: ${euiTheme.font.weight.semiBold};
     color: ${pillColors.textColor};
-    flex: 1;
     min-width: 0;
+    text-align: center;
   `;
 
   const renderLabelText = () => {
@@ -165,7 +188,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
     );
 
     return (
-      <EuiToolTip content={text} display="block" data-test-subj={TEST_SUBJ_TOOLTIP}>
+      <EuiToolTip content={text} display="inline" data-test-subj={TEST_SUBJ_TOOLTIP}>
         {truncatedLabel}
       </EuiToolTip>
     );
@@ -173,6 +196,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
 
   return (
     <LabelNodeContainer data-test-subj={GRAPH_LABEL_NODE_ID}>
+      <EdgeThroughLine $color={edgeThroughColor} aria-hidden={true} />
       <PillShell>
         {highlightAsOrigin && (
           <OriginNodeOutline borderColor={originOutlineBorderColor} borderRadius="999px" />

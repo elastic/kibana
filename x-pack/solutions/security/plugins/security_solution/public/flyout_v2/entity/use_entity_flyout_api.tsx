@@ -804,6 +804,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   const openEntityGraphView = useCallback(
     ({ title, origin, flyoutType, ...props }: OpenEntityGraphViewParams) => {
       const { entityId, scopeId, entityName } = props;
+      // Parent flyout (session start) — same pattern as Resolution, not beside the entity.
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.entityGraphView,
         entityId,

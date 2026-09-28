@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+  <!-- Bottom stack layer — short inset peek (same stroke weight as EUI glyphs) -->
+  <path
+    d="M4.5 11v1c0 .55.45 1 1 1h5c.55 0 1-.45 1-1V11"
+    stroke="currentColor"
+    stroke-width="1"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+  />
+  <!-- Front card -->
+  <rect
+    x="3"
+    y="2.5"
+    width="10"
+    height="8.5"
+    rx="1.75"
+    stroke="currentColor"
+    stroke-width="1"
+    stroke-linejoin="round"
+    fill="none"
+  />
+</svg>

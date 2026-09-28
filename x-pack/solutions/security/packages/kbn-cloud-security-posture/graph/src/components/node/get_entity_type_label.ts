@@ -19,6 +19,7 @@ const ICON_ENTITY_TYPE_LABELS: Record<string, string> = {
   user: 'User',
   storage: 'Host',
   desktop: 'Host',
+  laptop: 'Host',
   globe: 'IP',
 };
 

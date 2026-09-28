@@ -6,16 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiText,
-  useEuiTheme,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -27,7 +18,7 @@ import {
   ZOOM_IN_SHORTCUT,
   ZOOM_OUT_SHORTCUT,
 } from './graph_keyboard_shortcuts';
-import { useGraphFullscreenContext } from '../graph/graph_fullscreen_context';
+import { GraphTopLeftFloatingPanel } from './graph_top_left_floating_panel';
 
 const panelTitle = i18n.translate(
   'securitySolutionPackages.csp.graph.controls.keyboardShortcuts.title',
@@ -116,57 +107,53 @@ export const GraphKeyboardShortcutsPanel = ({
     `,
     [euiTheme]
   );
-  const popoverTitleId = useGeneratedHtmlId();
-  const fullscreenContext = useGraphFullscreenContext();
+  const titleId = useGeneratedHtmlId();
 
-  const panelCss = useMemo(
+  const bodyCss = useMemo(
     () => css`
       width: 320px;
-      padding: 0 ${euiTheme.size.m} ${euiTheme.size.m};
+      padding: ${euiTheme.size.m};
+      box-sizing: border-box;
     `,
     [euiTheme]
   );
 
   return (
-    <EuiPopover
-      button={children}
+    <GraphTopLeftFloatingPanel
       isOpen={isOpen}
-      closePopover={onClose}
-      anchorPosition="upLeft"
-      panelPaddingSize="none"
-      aria-labelledby={popoverTitleId}
-      container={fullscreenContext?.overlayContainerRef.current ?? undefined}
+      onClose={onClose}
+      title={panelTitle}
+      titleId={titleId}
       data-test-subj="graphKeyboardShortcutsPanel"
+      body={
+        <div css={bodyCss}>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {shortcuts.map(({ label, keys }) => (
+              <EuiFlexItem key={label}>
+                <EuiFlexGroup
+                  alignItems="center"
+                  justifyContent="spaceBetween"
+                  gutterSize="m"
+                  responsive={false}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">{label}</EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" css={keysCss}>
+                      {keys.map((key) => (
+                        <kbd key={key}>{key}</kbd>
+                      ))}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </div>
+      }
     >
-      <EuiPopoverTitle id={popoverTitleId} paddingSize="s">
-        {panelTitle}
-      </EuiPopoverTitle>
-      <EuiHorizontalRule margin="none" />
-      <div css={panelCss}>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {shortcuts.map(({ label, keys }) => (
-            <EuiFlexItem key={label}>
-              <EuiFlexGroup
-                alignItems="center"
-                justifyContent="spaceBetween"
-                gutterSize="m"
-                responsive={false}
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">{label}</EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" css={keysCss}>
-                    {keys.map((key) => (
-                      <kbd key={key}>{key}</kbd>
-                    ))}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      </div>
-    </EuiPopover>
+      {children}
+    </GraphTopLeftFloatingPanel>
   );
 };

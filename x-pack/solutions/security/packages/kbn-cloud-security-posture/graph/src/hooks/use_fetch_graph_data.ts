@@ -57,6 +57,7 @@ interface EnhancedNode {
   uniqueEventsCount?: number;
   ips?: string[];
   countryCodes?: string[];
+  sources?: string[];
   tag?: string;
   documentsData?: Array<{ id: string; type: string; entity?: Record<string, unknown> }>;
   assetCriticality?: string;
@@ -181,6 +182,7 @@ const scenarioLargeGraph = (): GraphResponse =>
       assetCriticalityCounts: { extreme: 152, high: 1648, medium: 1982, low: 542 },
       riskScoreMin: 40.5,
       riskScoreMax: 90.01,
+      sources: ['Active Directory', 'Endpoint', 'CloudTrail'],
     },
     {
       id: '213.180.204.3',
@@ -1065,6 +1067,7 @@ const scenarioComplexPreview = (): GraphResponse =>
       tag: 'User',
       ips: ['10.128.0.1'],
       countryCodes: ['US'],
+      assetCriticality: 'High impact',
       riskScore: 95.5,
       documentsData: mockEntityDocuments(DEV_ORIGIN_ENTITY_ID, 'user', 'User'),
     },
@@ -1079,6 +1082,7 @@ const scenarioComplexPreview = (): GraphResponse =>
       tag: 'Host',
       ips: ['10.128.0.93'],
       countryCodes: ['US'],
+      assetCriticality: 'Extreme impact',
       // Critical — Figma entity card example score
       riskScore: 90.01,
       documentsData: mockEntityDocuments('macbook-john-work', 'host', 'Host'),
@@ -1092,6 +1096,7 @@ const scenarioComplexPreview = (): GraphResponse =>
       tag: 'Host',
       ips: ['10.128.0.94'],
       countryCodes: ['US'],
+      assetCriticality: 'Medium impact',
       // High
       riskScore: 85.0,
       documentsData: mockEntityDocuments('john-pc-home', 'host', 'Host'),
@@ -1105,6 +1110,7 @@ const scenarioComplexPreview = (): GraphResponse =>
       tag: 'Host',
       ips: ['192.0.2.146'],
       countryCodes: ['US'],
+      assetCriticality: 'High impact',
       // Moderate
       riskScore: 55.2,
       documentsData: mockEntityDocuments('admin-pc', 'host', 'Host'),
@@ -1118,6 +1124,7 @@ const scenarioComplexPreview = (): GraphResponse =>
       tag: 'Service',
       ips: ['192.0.2.50'],
       countryCodes: ['US'],
+      assetCriticality: 'High impact',
       // High
       riskScore: 78.0,
       documentsData: mockEntityDocuments('entities-services', 'service', 'Service'),
@@ -1133,6 +1140,7 @@ const scenarioComplexPreview = (): GraphResponse =>
       tag: 'Host',
       ips: ['10.128.0.20'],
       countryCodes: ['US'],
+      assetCriticality: 'Low impact',
       // Low
       riskScore: 28.1,
       documentsData: mockEntityDocuments('entity-auth-target', 'host', 'Host'),
@@ -1146,6 +1154,7 @@ const scenarioComplexPreview = (): GraphResponse =>
       tag: 'Host',
       ips: ['10.128.0.30'],
       countryCodes: ['US'],
+      assetCriticality: 'Medium impact',
       // Moderate
       riskScore: 48.0,
       documentsData: mockEntityDocuments('entity-send-target', 'host', 'Host'),
@@ -1159,6 +1168,7 @@ const scenarioComplexPreview = (): GraphResponse =>
       tag: 'Host',
       ips: ['10.128.0.40'],
       countryCodes: ['US'],
+      // No criticality — still has IP/geo for metadata demos
       // Unknown
       riskScore: 12.0,
       documentsData: mockEntityDocuments('entity-grant-target', 'host', 'Host'),
@@ -1251,6 +1261,173 @@ const SCENARIO_FUNCTIONS = [
   (id: string) => scenarioSimple(id),
 ];
 
+/**
+ * Host-centric preview graph aligned with Entity Analytics seed risk scores.
+ * Origin is a single high-risk host; neighbors are **subtype group nodes**
+ * (EC2 / S3 / guests) — matching the Graph preview narrative
+ * (origin → 8 relationships → 3 group cards with counts + risk).
+ */
+const scenarioHostRiskPreview = (
+  originId: string,
+  originLabel: string,
+  originRiskScore: number
+): GraphResponse => {
+  // Overflow helpers so IP / geo / source counters are demoable (+99 style).
+  const manyIps = (primary: string): string[] => [
+    primary,
+    ...Array.from({ length: 99 }, (_, i) => `10.${Math.floor(i / 254)}.${i % 254}.1`),
+  ];
+  const manyCountries = (primary: string): string[] => [
+    primary,
+    ...['DE', 'GB', 'FR', 'JP', 'BR', 'CA', 'AU', 'IN'].flatMap((c) => Array(12).fill(c)),
+  ].slice(0, 100);
+  const manySources = (primary: string, extras: string[]): string[] => [primary, ...extras];
+
+  // Groups by entity subtype (not type) — EC2 vs S3 vs guests, all Host type.
+  // All group cards use the stacked-cards glyph (`group_entities`).
+  const subtypeGroups = [
+    {
+      id: `${originId}__group-ec2`,
+      label: 'EC2 instances',
+      count: 3,
+      icon: 'group_entities',
+      riskScoreMin: 90.01,
+      riskScoreMax: 95.5,
+      assetCriticalityCounts: { extreme: 1, high: 2 },
+      ips: manyIps('10.0.0.11'),
+      countryCodes: manyCountries('US'),
+      sources: manySources('Active Directory', ['Endpoint', 'CloudTrail']),
+    },
+    {
+      id: `${originId}__group-s3`,
+      label: 'S3 buckets',
+      count: 2,
+      icon: 'group_entities',
+      riskScoreMin: 70.0,
+      riskScoreMax: 85.0,
+      assetCriticalityCounts: { high: 1, medium: 1 },
+      ips: manyIps('10.0.1.21'),
+      countryCodes: manyCountries('US'),
+      sources: manySources('AWS', ['CloudTrail']),
+    },
+    {
+      id: `${originId}__group-macbook`,
+      label: 'Macbook Entities',
+      count: 3,
+      icon: 'group_entities',
+      riskScoreMin: 50.0,
+      riskScoreMax: 90.01,
+      assetCriticalityCounts: { extreme: 1, high: 2 },
+      ips: manyIps('10.128.0.93'),
+      countryCodes: ['US', 'BR', ...manyCountries('BR').slice(2)],
+      sources: manySources('Active Directory', ['Endpoint', 'Osquery']),
+    },
+  ];
+
+  // Eight relationship edges across the three subtype groups → preview “8 rela…”.
+  const relationshipLabels = [
+    'Communicates with',
+    'Depends on',
+    'Owns',
+    'Accesses frequently',
+    'Depends on',
+    'Communicates with',
+    'Reports to',
+    'Communicates with',
+  ];
+  const relationshipTargets = [
+    subtypeGroups[0].id,
+    subtypeGroups[0].id,
+    subtypeGroups[0].id,
+    subtypeGroups[1].id,
+    subtypeGroups[1].id,
+    subtypeGroups[1].id,
+    subtypeGroups[2].id,
+    subtypeGroups[2].id,
+  ];
+
+  return extractEdges([
+    {
+      id: originId,
+      label: originLabel,
+      color: 'primary',
+      shape: 'hexagon',
+      icon: 'storage',
+      tag: 'Host',
+      ips: ['10.128.0.93', '10.128.0.94'],
+      countryCodes: ['US'],
+      sources: ['Endpoint', 'System'],
+      assetCriticality: 'High impact',
+      riskScore: originRiskScore,
+      documentsData: mockEntityDocuments(originId, 'host', 'Host'),
+    },
+    ...subtypeGroups.map((group) => ({
+      id: group.id,
+      label: group.label,
+      color: 'primary' as const,
+      shape: 'hexagon' as const,
+      icon: group.icon,
+      tag: 'Host',
+      count: group.count,
+      ips: group.ips,
+      countryCodes: group.countryCodes,
+      sources: group.sources,
+      assetCriticalityCounts: group.assetCriticalityCounts,
+      riskScoreMin: group.riskScoreMin,
+      riskScoreMax: group.riskScoreMax,
+      documentsData: mockEntityDocuments(group.id, 'host', 'Host'),
+    })),
+    ...relationshipLabels.map((label, index) => ({
+      id: `${originId}__rel-${index}`,
+      source: originId,
+      target: relationshipTargets[index],
+      label,
+      shape: 'relationship' as const,
+    })),
+  ]);
+};
+
+/** Sample scores covering Critical → High → Moderate → Low → Unknown for mock UI review. */
+const MOCK_ENTITY_RISK_SAMPLES = [95.5, 90.01, 85.0, 75.0, 55.2, 48.0, 28.1, 12.0] as const;
+
+const ENTITY_NODE_SHAPES = new Set(['hexagon', 'pentagon', 'ellipse', 'rectangle', 'diamond']);
+
+/**
+ * Ensures every mock entity node has a risk score so badge colors are visible.
+ * Nodes that already declare riskScore / riskScoreMin|Max are left unchanged.
+ */
+const ensureEntityRiskScores = (graph: GraphResponse): GraphResponse => {
+  let sampleIndex = 0;
+  return {
+    ...graph,
+    nodes: graph.nodes.map((node) => {
+      const shape = (node as { shape?: string }).shape;
+      if (!shape || !ENTITY_NODE_SHAPES.has(shape)) return node;
+      const entityNode = node as {
+        riskScore?: number;
+        riskScoreMin?: number;
+        riskScoreMax?: number;
+      };
+      if (
+        entityNode.riskScore !== undefined ||
+        entityNode.riskScoreMin !== undefined ||
+        entityNode.riskScoreMax !== undefined
+      ) {
+        return node;
+      }
+      const riskScore = MOCK_ENTITY_RISK_SAMPLES[sampleIndex % MOCK_ENTITY_RISK_SAMPLES.length];
+      sampleIndex += 1;
+      return { ...node, riskScore };
+    }),
+  };
+};
+
+/** Origin risk bands for round-robin entity mocks (one of each severity). */
+const MOCK_ORIGIN_RISK_BY_BAND = [95.5, 85.0, 55.0, 28.1, 12.0] as const;
+
+const hashString = (value: string): number =>
+  value.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+
 // Named overrides for specific entities — add your entity IDs here for fine control
 const ENTITY_SCENARIO_MAP: Record<string, (id: string) => GraphResponse> = {
   'service:auth-service': (id) => scenarioLargeGraph(),
@@ -1274,13 +1451,32 @@ const ENTITY_SCENARIO_MAP: Record<string, (id: string) => GraphResponse> = {
   'host:api-server-03': (id) => scenarioLargeGraph(),
   'host:monitoring-host': (id) => scenarioAttack(id),
   [DEV_ORIGIN_ENTITY_ID]: () => scenarioComplexPreview(),
-  // Entity Analytics seeded hosts — all risk colors preview
-  'macbook-john-work': () => scenarioComplexPreview(),
-  'host:macbook-john-work': () => scenarioComplexPreview(),
-  'john-pc-home': () => scenarioComplexPreview(),
-  'host:john-pc-home': () => scenarioComplexPreview(),
-  'admin-pc': () => scenarioComplexPreview(),
-  'host:admin-pc': () => scenarioComplexPreview(),
+  'user:john.doe': () => scenarioComplexPreview(),
+  // Entity Analytics seed — origin riskScore MUST match flyout Entity risk score
+  'edge-sec-ubuntu-2004-obtc-estec-0': () =>
+    scenarioHostRiskPreview(
+      'host:9e4316b8589de4d3dd3cc8c4658f11dc',
+      'edge-sec-ubuntu-2004-obtc-estec-0',
+      98.72
+    ),
+  'host:9e4316b8589de4d3dd3cc8c4658f11dc': () =>
+    scenarioHostRiskPreview(
+      'host:9e4316b8589de4d3dd3cc8c4658f11dc',
+      'edge-sec-ubuntu-2004-obtc-estec-0',
+      98.72
+    ),
+  'macbook-john-work': () =>
+    scenarioHostRiskPreview('host:macbook-john-work', 'macbook-john-work', 90.01),
+  'host:macbook-john-work': () =>
+    scenarioHostRiskPreview('host:macbook-john-work', 'macbook-john-work', 90.01),
+  'admin-pc': () => scenarioHostRiskPreview('host:admin-pc', 'admin-pc', 75.0),
+  'host:admin-pc': () => scenarioHostRiskPreview('host:admin-pc', 'admin-pc', 75.0),
+  'john-pc-home': () => scenarioHostRiskPreview('host:john-pc-home', 'john-pc-home', 55.0),
+  'host:john-pc-home': () => scenarioHostRiskPreview('host:john-pc-home', 'john-pc-home', 55.0),
+  'low-risk-host': () => scenarioHostRiskPreview('host:low-risk-host', 'low-risk-host', 25.0),
+  'host:low-risk-host': () => scenarioHostRiskPreview('host:low-risk-host', 'low-risk-host', 25.0),
+  'guest-unknown': () => scenarioHostRiskPreview('host:guest-unknown', 'guest-unknown', 12.0),
+  'host:guest-unknown': () => scenarioHostRiskPreview('host:guest-unknown', 'guest-unknown', 12.0),
 };
 
 // Dev graph page (/app/security/dev-graph) — screenshot layout preview
@@ -1303,11 +1499,12 @@ const isDevGraphPreviewRequest = (req: GraphRequest): boolean => {
 
 /**
  * Returns a mock graph for the given entity/event IDs.
- * Tries the named map first, then falls back to round-robin by hash.
+ * Tries the named map first, then falls back to a host-risk preview with a
+ * varied origin score so badge colors (Critical → Unknown) are easy to review.
  */
 const getMockGraphForRequest = (req: GraphRequest): GraphResponse => {
   if (isDevGraphPreviewRequest(req)) {
-    return scenarioComplexPreview();
+    return ensureEntityRiskScores(scenarioComplexPreview());
   }
 
   const entityIds = req.query.entityIds;
@@ -1316,21 +1513,27 @@ const getMockGraphForRequest = (req: GraphRequest): GraphResponse => {
   // Entity mode: use entity ID
   if (entityIds?.length) {
     const id = entityIds[0].id;
-    if (ENTITY_SCENARIO_MAP[id]) return ENTITY_SCENARIO_MAP[id](id);
-    // Round-robin fallback based on string hash
-    const hash = id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-    return SCENARIO_FUNCTIONS[hash % SCENARIO_FUNCTIONS.length](id);
+    if (ENTITY_SCENARIO_MAP[id]) {
+      return ensureEntityRiskScores(ENTITY_SCENARIO_MAP[id](id));
+    }
+    // Default: colorful host-risk preview — origin band rotates by id hash
+    const hash = hashString(id);
+    const originRisk = MOCK_ORIGIN_RISK_BY_BAND[hash % MOCK_ORIGIN_RISK_BY_BAND.length];
+    const label = id.split(':').pop() ?? id;
+    return scenarioHostRiskPreview(id, label, originRisk);
   }
 
   // Event/alert mode: use first event ID
   if (originEventIds?.length) {
     const id = originEventIds[0].id;
-    if (ORIGIN_EVENT_SCENARIO_MAP[id]) return ORIGIN_EVENT_SCENARIO_MAP[id](id);
-    const hash = id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-    return SCENARIO_FUNCTIONS[hash % SCENARIO_FUNCTIONS.length](id);
+    if (ORIGIN_EVENT_SCENARIO_MAP[id]) {
+      return ensureEntityRiskScores(ORIGIN_EVENT_SCENARIO_MAP[id](id));
+    }
+    const hash = hashString(id);
+    return ensureEntityRiskScores(SCENARIO_FUNCTIONS[hash % SCENARIO_FUNCTIONS.length](id));
   }
 
-  return scenarioDense();
+  return ensureEntityRiskScores(scenarioDense());
 };
 
 // =============================================================================

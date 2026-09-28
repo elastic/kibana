@@ -327,7 +327,6 @@ describe('useEntityFlyoutApi', () => {
     'openEntityAlertsInsights',
     'openEntityMisconfigurationInsights',
     'openEntityVulnerabilityInsights',
-    'openEntityGraphView',
     'openEntityResolution',
     'openEntityEntraInsights',
     'openEntityOktaInsights',
@@ -346,6 +345,21 @@ describe('useEntityFlyoutApi', () => {
       scopeId: '',
       document: {},
       managedUser,
+    });
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      'FLYOUT_CONTENT',
+      expect.objectContaining({ size: 'm', session: 'start' })
+    );
+  });
+
+  it('openEntityGraphView opens as a parent tool flyout (session start)', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityGraphView({
+      entityId: 'entity-1',
+      scopeId: 'scope-1',
+      entityName: 'entity-name',
+      onShowEntity: jest.fn(),
     });
 
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
@@ -432,7 +446,7 @@ describe('useEntityFlyoutApi', () => {
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
   });
 
-  it('openEntityGraphView writes an entityGraphView descriptor and clears the param on close', () => {
+  it('openEntityGraphView writes an entityGraphView descriptor in start mode', () => {
     const { result } = renderHook(() => useEntityFlyoutApi());
     result.current.openEntityGraphView({
       entityId: 'entity-1',
@@ -441,12 +455,14 @@ describe('useEntityFlyoutApi', () => {
       onShowEntity: jest.fn(),
     });
 
-    expect(mockWriteOnOpen).toHaveBeenCalledWith({
-      kind: FLYOUT_DESCRIPTOR_KIND.entityGraphView,
-      entityId: 'entity-1',
-      scopeId: 'scope-1',
-      entityName: 'entity-name',
-    });
+    expect(mockWriteOnOpen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: FLYOUT_DESCRIPTOR_KIND.entityGraphView,
+        entityId: 'entity-1',
+        scopeId: 'scope-1',
+        entityName: 'entity-name',
+      })
+    );
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
   });
 

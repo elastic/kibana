@@ -32,20 +32,42 @@ const MAX_LABEL_LENGTH = 27;
 
 export const TEST_SUBJ_RELATIONSHIP_EXPAND_BTN = TEST_SUBJ_PILL_EXPAND_BTN;
 
+/**
+ * Fixed layout width matches Dagre/`NODE_LABEL_WIDTH` so pills of different
+ * lengths share one center axis. A through-line bridges the handles so the
+ * edge visually runs through the centered pill (Figma).
+ */
 const RelationshipNodeContainer = styled.div`
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: max-content;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  width: ${NODE_LABEL_WIDTH}px;
   max-width: ${NODE_LABEL_WIDTH}px;
+`;
+
+const EdgeThroughLine = styled.div<{ $color: string }>`
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* Center on the handle Y (pill mid) — not the top of a 1px box at mid. */
+  top: ${EVENT_PILL_HEIGHT / 2}px;
+  height: 1px;
+  transform: translateY(-50%);
+  background: ${({ $color }) => $color};
+  z-index: 0;
+  pointer-events: none;
 `;
 
 const PillShell = styled.div`
   position: relative;
-  display: inline-flex;
+  z-index: 1;
+  display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
 `;
 
 const RelationshipPill = styled.div<{
@@ -60,11 +82,12 @@ const RelationshipPill = styled.div<{
   justify-content: center;
   min-height: ${EVENT_PILL_HEIGHT}px;
   height: ${EVENT_PILL_HEIGHT}px;
-  padding: 4px 8px;
+  padding: 4px 12px;
   border-radius: 999px;
   border: 1px solid ${({ borderColor }) => borderColor};
   background: ${({ backgroundColor }) => backgroundColor};
   max-width: 100%;
+  margin: 0 auto;
   ${({ defaultShadow }) => defaultShadow ?? ''}
   transition: box-shadow 0.2s ease, border-color 0.2s ease, border-width 0.2s ease;
 
@@ -98,14 +121,15 @@ export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
     [euiTheme]
   );
   const activeBorderColor = euiTheme.colors.primary;
+  const edgeThroughColor = euiTheme.colors.borderBaseProminent;
 
   const labelTextCss = css`
-    flex: 1;
     min-width: 0;
     font-weight: ${euiTheme.font.weight.semiBold};
     font-size: 10.5px;
     line-height: 16px;
     color: ${textColor};
+    text-align: center;
   `;
 
   const renderLabelText = () => {
@@ -130,7 +154,7 @@ export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
     return (
       <EuiToolTip
         content={text}
-        display="block"
+        display="inline"
         data-test-subj={GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID}
       >
         {truncatedLabel}
@@ -140,6 +164,7 @@ export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
 
   return (
     <RelationshipNodeContainer data-test-subj={GRAPH_RELATIONSHIP_NODE_ID}>
+      <EdgeThroughLine $color={edgeThroughColor} aria-hidden={true} />
       <PillShell>
         <RelationshipPill
           data-test-subj={GRAPH_RELATIONSHIP_NODE_SHAPE_ID}

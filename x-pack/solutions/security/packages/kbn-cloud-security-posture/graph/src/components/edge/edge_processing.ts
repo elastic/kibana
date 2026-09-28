@@ -121,6 +121,66 @@ export const mapEdgeViewModelToReactFlowEdge = (
       targetShape,
       targetColor: targetNode.color,
       isOriginHighlightEdge,
+      // Default true; {@link assignBundleArrowLeaders} clears siblings.
+      showArrowHead: true,
     },
   };
+};
+
+type GraphRfEdge = Edge<
+  EdgeViewModel & {
+    sourceShape?: NodeViewModel['shape'];
+    targetShape?: NodeViewModel['shape'];
+    showArrowHead?: boolean;
+  }
+>;
+
+/**
+ * When several edges share a target handle (entity or group), pick one leader:
+ * - leader draws the final stem (+ arrow tip on entities)
+ * - siblings set `showArrowHead: false` so DefaultEdge truncates at the trunk join
+ */
+export const assignBundleArrowLeaders = <T extends GraphRfEdge>(edges: T[]): T[] => {
+  const byTarget = new Map<string, T[]>();
+
+  edges.forEach((edge) => {
+    const targetShape = edge.data?.targetShape;
+    // Connectors never receive a stem tip / bundle endpoint.
+    if (!targetShape || isConnectorShape(targetShape)) {
+      return;
+    }
+    const key = `${edge.target}::${edge.targetHandle ?? 'in'}`;
+    const group = byTarget.get(key);
+    if (group) {
+      group.push(edge);
+    } else {
+      byTarget.set(key, [edge]);
+    }
+  });
+
+  const leaderIds = new Set<string>();
+  byTarget.forEach((group) => {
+    if (group.length === 0) return;
+    // Prefer a middle source so the leader is the visual “trunk” of the fan.
+    const leader = group[Math.floor((group.length - 1) / 2)];
+    leaderIds.add(leader.id);
+  });
+
+  return edges.map((edge) => {
+    const targetShape = edge.data?.targetShape;
+    if (!targetShape || isConnectorShape(targetShape)) {
+      return edge;
+    }
+    const key = `${edge.target}::${edge.targetHandle ?? 'in'}`;
+    if (!byTarget.has(key) || (byTarget.get(key)?.length ?? 0) <= 1) {
+      return edge;
+    }
+    return {
+      ...edge,
+      data: {
+        ...edge.data,
+        showArrowHead: leaderIds.has(edge.id),
+      },
+    };
+  });
 };
