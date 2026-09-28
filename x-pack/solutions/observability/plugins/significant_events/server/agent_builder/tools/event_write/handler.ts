@@ -346,14 +346,23 @@ const fetchPriorDocsByEventId = async (
     candidates
       .filter((c) => c.input.event_id !== undefined)
       .map(async (c) => {
-        const { hits } = await eventSearchClient.findByEventId(c.eventId);
         // When flag is OFF, eventSearchClient === eventClient (same shared instance from
         // getSharedEventClient()). The identity check avoids a redundant second ES round-trip
         // by reusing the already-fetched hits as the canonical legacy lineage.
-        const legacyHits =
-          eventSearchClient === eventClient
-            ? hits
-            : (await eventClient.findByEventId(c.eventId)).hits;
+        // Fall back to the canonical write client if the read store is unavailable, so a
+        // temporary read-store failure cannot abort a write that would otherwise succeed.
+        let readClientHits: SignificantEvent[];
+        let readClientIsCanonical = eventSearchClient === eventClient;
+        try {
+          readClientHits = (await eventSearchClient.findByEventId(c.eventId)).hits;
+        } catch {
+          readClientHits = (await eventClient.findByEventId(c.eventId)).hits;
+          readClientIsCanonical = true;
+        }
+        const hits = readClientHits;
+        const legacyHits = readClientIsCanonical
+          ? hits
+          : (await eventClient.findByEventId(c.eventId)).hits;
         priorDocsByEventId.set(c.eventId, hits);
         const latest = hits.at(-1);
         if (latest !== undefined) {
@@ -520,14 +529,33 @@ export async function eventsWriteBulkHandler({
   const validCandidates = markDuplicateKeys(candidates, results);
 
   const dedupCandidates = validCandidates.filter((c): c is DedupCandidate => c.mode === 'dedup');
-  const searchClientActiveEvents = await fetchActiveEventsForDedup(client, dedupCandidates);
+  // Fall back to the canonical write client if the read store is unavailable, so a temporary
+  // .rule-events failure cannot block a canonical write.
+  let searchClientActiveEvents: SignificantEvent[];
+  try {
+    searchClientActiveEvents = await fetchActiveEventsForDedup(client, dedupCandidates);
+  } catch (err) {
+    if (client === eventClient) throw err;
+    logger?.warn(`Read store dedup scan failed; falling back to canonical write client: ${err}`);
+    searchClientActiveEvents = await fetchActiveEventsForDedup(eventClient, dedupCandidates);
+  }
   // When the flag-aware read client differs from the canonical write client, also scan the
   // canonical store. A write succeeds with `wait_for` refresh on the legacy store, but the
   // dual-write to `.rule-events` is fire-and-forget with no matching refresh guarantee — a scan
   // of `.rule-events` alone can miss a recently written event and produce a permanent duplicate.
   const canonicalActiveEvents =
-    client !== eventClient ? await fetchActiveEventsForDedup(eventClient, dedupCandidates) : [];
-  const activeEvents = [...searchClientActiveEvents, ...canonicalActiveEvents];
+    client !== eventClient
+      ? await fetchActiveEventsForDedup(eventClient, dedupCandidates)
+      : [];
+  // Canonical takes precedence: if the same event_id appears in both stores, use the canonical
+  // version to prevent a stale .rule-events active entry from suppressing a valid new-event write.
+  const canonicalEventIds = new Set(
+    canonicalActiveEvents.map((ev) => ev.event_id).filter((id): id is string => id !== undefined)
+  );
+  const activeEvents = [
+    ...canonicalActiveEvents,
+    ...searchClientActiveEvents.filter((ev) => !canonicalEventIds.has(ev.event_id)),
+  ];
   const toWrite = resolveDedupSkips(validCandidates, activeEvents, results);
 
   const { latestByEventId, latestLegacyByEventId, priorDocsByEventId } =

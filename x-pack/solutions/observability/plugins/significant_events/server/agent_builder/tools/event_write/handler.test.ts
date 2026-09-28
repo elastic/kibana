@@ -1209,7 +1209,8 @@ describe('eventsWriteBulkHandler — eventSearchClient (flag-aware read path)', 
 
     expect(eventSearchClient.findLatestActive).toHaveBeenCalled();
     expect(eventSearchClient.findByEventId).toHaveBeenCalledWith('existing-event-id');
-    expect(eventClient.findLatestActive).not.toHaveBeenCalled();
+    // The canonical dual scan also runs when client !== eventClient and dedupCandidates exist.
+    expect(eventClient.findLatestActive).toHaveBeenCalled();
     expect(eventClient.findByEventId).toHaveBeenCalledWith('existing-event-id');
   });
 
