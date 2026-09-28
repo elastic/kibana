@@ -185,7 +185,7 @@ describe('getFinalizedQueries', () => {
         ],
         'logs.test'
       )
-    ).toThrow('KI query generation agent finalized for unexpected target "logs.other"');
+    ).toThrow('KI query generation agent finalized for unexpected source "logs.other"');
   });
 
   it('does not fall back when the latest validation is not finalized', () => {

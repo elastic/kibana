@@ -142,7 +142,8 @@ export function createSearchKnowledgeIndicatorsTool({
       - Query-based indicators (stored detection queries)
 
       Pass source slugs in \`slugs\`. Omit \`slugs\` to search every source in this space.
-      Results report each source as its slug, with \`title\` and \`view_name\` alongside.
+      Results report each source as its slug. The \`sources\` list gives \`slug\`, \`title\`, and
+      \`view_name\` for every source the results belong to, with or without \`slugs\`.
 
       Use this tool to:
       - Gather domain context for a specific source or group of sources

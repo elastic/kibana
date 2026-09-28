@@ -69,7 +69,7 @@ interface KISearchEnvelope {
   total: number;
   has_more: boolean;
   next_page: number | null;
-  sources?: Array<ReturnType<typeof toSourceRef>>;
+  sources: Array<ReturnType<typeof toSourceRef>>;
 }
 
 export type KISearchOutput =
@@ -227,6 +227,26 @@ function presentIndicator<T extends KnowledgeIndicator>(catalog: SourceCatalog, 
   };
 }
 
+function storedSourceIdOf(indicator: KnowledgeIndicator): string {
+  return indicator.kind === 'feature' ? indicator.feature.stream_name : indicator.stream_name;
+}
+
+/**
+ * Sources owning the returned KIs. Grounding copies `view_name` from here into
+ * `FROM`, so an unscoped search must still report them. Ids missing from the
+ * catalog have no view to report and are skipped.
+ */
+function sourcesInResults(
+  catalog: SourceCatalog,
+  indicators: readonly KnowledgeIndicator[]
+): NightshiftSource[] {
+  const storedIds = new Set(indicators.map(storedSourceIdOf));
+  return [...storedIds].flatMap((storedId) => {
+    const source = catalog.byId.get(storedId);
+    return source ? [source] : [];
+  });
+}
+
 export async function searchKnowledgeIndicatorsToolHandler({
   catalog,
   sources,
@@ -279,7 +299,7 @@ export async function searchKnowledgeIndicatorsToolHandler({
     total: output.total,
     has_more: output.has_more,
     next_page: output.next_page,
-    ...(sources ? { sources: sources.map(toSourceRef) } : {}),
+    sources: (sources ?? sourcesInResults(catalog, output.knowledge_indicators)).map(toSourceRef),
   };
 
   const knowledgeIndicators = output.knowledge_indicators.map((indicator) =>

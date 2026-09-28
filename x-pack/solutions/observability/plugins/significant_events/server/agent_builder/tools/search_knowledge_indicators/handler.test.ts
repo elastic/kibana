@@ -308,6 +308,47 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     );
   });
 
+  it('reports the sources owning returned KIs when slugs are omitted', async () => {
+    catalog = catalogFor(['logs.checkout', 'logs.payments']);
+    kiClient.getFeatures = jest.fn().mockResolvedValue({ hits: [], total: 0 });
+    kiClient.getQueryLinks = jest.fn().mockResolvedValue([
+      {
+        'asset.uuid': 'a1',
+        'asset.type': 'query',
+        'asset.id': 'q1',
+        stream_name: 'logs.payments',
+        rule_backed: true,
+        rule_id: 'rule-1',
+        query: makeStreamQuery({ id: 'q1' }),
+      },
+      {
+        'asset.uuid': 'a2',
+        'asset.type': 'query',
+        'asset.id': 'q2',
+        stream_name: 'logs.legacy',
+        rule_backed: true,
+        rule_id: 'rule-2',
+        query: makeStreamQuery({ id: 'q2' }),
+      },
+    ]);
+
+    const result = await searchKnowledgeIndicatorsToolHandler({
+      catalog,
+      kiClient,
+      logger,
+      params: { kind: ['query'] },
+      view: 'compact',
+    });
+
+    expect(result.sources).toEqual([
+      {
+        slug: 'logs.payments',
+        title: 'logs.payments',
+        view_name: '$.nightshift.sources.default.logs.payments',
+      },
+    ]);
+  });
+
   it('searches every catalog source when slugs are omitted', async () => {
     catalog = catalogFor(['logs.checkout', 'logs.payments']);
     kiClient.getFeatures = jest.fn().mockResolvedValue({ hits: [], total: 0 });

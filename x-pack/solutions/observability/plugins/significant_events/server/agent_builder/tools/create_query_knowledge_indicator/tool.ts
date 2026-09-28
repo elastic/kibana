@@ -67,7 +67,7 @@ export function createQueryKnowledgeIndicatorTool({
       significant events query storage.
 
       Use this tool when the conversation discovers a new detection query that should be saved for
-      future investigations. Pass the source slug, not its id.
+      future investigations. Pass the source slug.
     `,
     annotations: {
       title: 'Create Query Knowledge Indicator',

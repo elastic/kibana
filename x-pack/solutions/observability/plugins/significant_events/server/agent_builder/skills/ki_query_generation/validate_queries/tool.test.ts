@@ -217,7 +217,7 @@ describe('ki_queries_validate tool', () => {
     ]);
   });
 
-  it('finalizes an explicit empty batch without loading target state', async () => {
+  it('finalizes an explicit empty batch with the resolved source and no KI reads', async () => {
     const result = await invokeHandler(
       createTool(),
       { slug: 'logs.test', queries: [] },
@@ -227,17 +227,35 @@ describe('ki_queries_validate tool', () => {
       throw new Error('Expected a standard tool result');
     }
 
-    expect(getScopedClients).not.toHaveBeenCalled();
+    expect(getFeatures).not.toHaveBeenCalled();
+    expect(getStreamToQueryLinksMap).not.toHaveBeenCalled();
     expect(result.results).toEqual([
       {
         type: 'other',
         data: {
           slug: 'logs.test',
+          title: 'logs.test',
+          view_name: '$.nightshift.sources.default.logs.test',
           queries: [],
           finalized: true,
           finalized_queries: [],
         },
       },
+    ]);
+  });
+
+  it('rejects an empty batch for an unknown slug instead of finalizing it', async () => {
+    const result = await invokeHandler(
+      createTool(),
+      { slug: 'logs.missing', queries: [] },
+      createMockToolContext()
+    );
+    if (!('results' in result)) {
+      throw new Error('Expected a standard tool result');
+    }
+
+    expect(result.results).toEqual([
+      { type: 'error', data: { message: 'Source not found in this space: logs.missing' } },
     ]);
   });
 

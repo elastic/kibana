@@ -216,7 +216,7 @@ const isFinalizedValidationResult = (
 
 export const getFinalizedQueries = (
   steps: ConverseStep[],
-  expectedTargetId: string
+  expectedSlug: string
 ): AcceptedQuery[] => {
   const validationStep = steps
     .filter(
@@ -231,9 +231,9 @@ export const getFinalizedQueries = (
   if (!validationResult) {
     throw new Error('KI query generation agent did not finalize validate_queries');
   }
-  if (validationResult.data.slug !== expectedTargetId) {
+  if (validationResult.data.slug !== expectedSlug) {
     throw new Error(
-      `KI query generation agent finalized for unexpected target "${validationResult.data.slug}"`
+      `KI query generation agent finalized for unexpected source "${validationResult.data.slug}"`
     );
   }
   return validationResult.data.finalized_queries;

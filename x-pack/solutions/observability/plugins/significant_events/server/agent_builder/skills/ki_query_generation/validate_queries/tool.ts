@@ -116,26 +116,29 @@ export const createValidateQueriesTool = ({
       'Validate and finalize a complete KI query batch. Rewrites sources, verifies feature links, rejects duplicates and over-broad predicates, and executes ES|QL with LIMIT 0. A batch is finalized only when every query passes.',
     schema: validateQueriesSchema,
     handler: async ({ slug, queries }, context) => {
-      if (queries.length === 0) {
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: {
-                slug,
-                queries: [],
-                finalized: true,
-                finalized_queries: [],
-              },
-            },
-          ],
-        };
-      }
-
       try {
         const scopedClients = await getScopedClients({ request: context.request });
         const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
         const [source] = resolveSourcesBySlug(catalog, [slug]);
+
+        // Resolved even for an empty batch: the caller checks the finalized
+        // slug, and the model may have passed a source id or an unknown slug.
+        if (queries.length === 0) {
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  ...toSourceRef(source),
+                  queries: [],
+                  finalized: true,
+                  finalized_queries: [],
+                },
+              },
+            ],
+          };
+        }
+
         const target = sourceToAnalysisTarget(source);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
         const featureIds = [...new Set(queries.flatMap(({ feature_ids: ids }) => ids))];

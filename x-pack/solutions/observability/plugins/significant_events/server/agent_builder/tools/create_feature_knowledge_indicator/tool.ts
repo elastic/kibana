@@ -62,7 +62,7 @@ export function createFeatureKnowledgeIndicatorTool({
       significant events feature storage.
 
       Use this tool when the conversation discovers a new source behavior pattern and it should be
-      saved as a feature KI for future investigations. Pass the source slug, not its id.
+      saved as a feature KI for future investigations. Pass the source slug.
     `,
     annotations: {
       title: 'Create Feature Knowledge Indicator',
