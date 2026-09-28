@@ -396,7 +396,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should return 403 when user lacks privileges in spaces where package policies exist', async () => {
         // Create an agent policy + package policy in TEST_SPACE_1 using superuser
         const agentPolicyRes = await apiClient.createAgentPolicy(TEST_SPACE_1);
-        await apiClient.createPackagePolicy(TEST_SPACE_1, {
+        const packagePolicyRes = await apiClient.createPackagePolicy(TEST_SPACE_1, {
           policy_ids: [agentPolicyRes.item.id],
           name: `test-nginx-authz-${Date.now()}`,
           description: 'test',
@@ -406,6 +406,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           inputs: {},
         });
+        const packagePolicyId = packagePolicyRes.item.id;
 
         // The default-space-only user tries to uninstall from default space — should be rejected
         // because there are package policies in TEST_SPACE_1 which the user cannot access
@@ -427,6 +428,10 @@ export default function (providerContext: FtrProviderContext) {
           pkgVersion: NGINX_PACKAGE_VERSION,
         });
         expect(installedPkg.item.status).to.eql('installed');
+
+        // The TEST_SPACE_1 package policy must not have been deleted
+        const survivingPolicy = await apiClient.getPackagePolicy(packagePolicyId, TEST_SPACE_1);
+        expect(survivingPolicy.item.id).to.eql(packagePolicyId);
       });
 
       it('should allow uninstall when user has privileges in all affected spaces and no agents', async () => {
@@ -441,6 +446,40 @@ export default function (providerContext: FtrProviderContext) {
           err = _err;
         }
         expect(err).to.be(undefined);
+      });
+
+      it('should return 403 on bulk uninstall when user lacks privileges in spaces where package policies exist', async () => {
+        // Create a package policy in TEST_SPACE_1
+        const agentPolicyRes = await apiClient.createAgentPolicy(TEST_SPACE_1);
+        await apiClient.createPackagePolicy(TEST_SPACE_1, {
+          policy_ids: [agentPolicyRes.item.id],
+          name: `test-nginx-bulk-authz-${Date.now()}`,
+          description: 'test',
+          package: {
+            name: 'nginx',
+            version: NGINX_PACKAGE_VERSION,
+          },
+          inputs: {},
+        });
+
+        // The default-space-only user tries bulk uninstall — should be rejected
+        const res = await supertestWithoutAuth
+          .post(`/api/fleet/epm/packages/_bulk_uninstall`)
+          .auth(
+            testUsers.fleet_all_int_all_default_space_only.username,
+            testUsers.fleet_all_int_all_default_space_only.password
+          )
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packages: [{ name: 'nginx', version: NGINX_PACKAGE_VERSION }] });
+
+        expect(res.status).to.eql(403);
+
+        // Package must still be installed
+        const installedPkg = await apiClient.getPackage({
+          pkgName: 'nginx',
+          pkgVersion: NGINX_PACKAGE_VERSION,
+        });
+        expect(installedPkg.item.status).to.eql('installed');
       });
     });
 

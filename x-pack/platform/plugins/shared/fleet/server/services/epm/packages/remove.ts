@@ -168,8 +168,15 @@ export async function removeInstallation(options: {
     }
   );
 
-  // Check that the caller has privileges in all spaces affected by this uninstall
+  // Check that the caller has privileges in all spaces affected by this uninstall.
+  // Fail closed if SO_SEARCH_LIMIT was reached — there may be policies in spaces
+  // we haven't enumerated yet.
   if (options.request) {
+    if (items.length < total) {
+      throw new PackageRemovalError(
+        `Unable to verify uninstall authorization for package ${pkgName}: too many package policies to enumerate`
+      );
+    }
     await assertUninstallAuthorizedForAffectedSpaces({
       request: options.request,
       pkgName,

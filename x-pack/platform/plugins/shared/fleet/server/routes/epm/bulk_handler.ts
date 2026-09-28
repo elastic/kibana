@@ -119,12 +119,23 @@ export const postBulkUninstallPackagesHandler: FleetRequestHandler<
   const allPoliciesKuery = installations
     .map((i) => `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${i.name}`)
     .join(' OR ');
-  const { items: allPackagePolicies } = await packagePolicyService.list(internalSoClient, {
-    kuery: allPoliciesKuery,
-    page: 1,
-    perPage: SO_SEARCH_LIMIT,
-    spaceId: '*',
-  });
+  const { total: allPoliciesTotal, items: allPackagePolicies } = await packagePolicyService.list(
+    internalSoClient,
+    {
+      kuery: allPoliciesKuery,
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+      spaceId: '*',
+    }
+  );
+
+  // Fail closed if SO_SEARCH_LIMIT was reached — there may be policies in spaces
+  // we haven't enumerated yet.
+  if (allPackagePolicies.length < allPoliciesTotal) {
+    throw new FleetUnauthorizedError(
+      `Unable to verify uninstall authorization: too many package policies to enumerate`
+    );
+  }
 
   // Group policies by package name for per-package authz check
   const policiesByPkg = new Map<string, typeof allPackagePolicies>();

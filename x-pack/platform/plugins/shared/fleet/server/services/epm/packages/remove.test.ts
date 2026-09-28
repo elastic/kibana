@@ -585,6 +585,51 @@ describe('removeInstallation', () => {
 
     expect(mockPackagePolicyService.delete).toHaveBeenCalled();
   });
+
+  it('should throw when request is provided and total exceeds items returned (truncated result)', async () => {
+    // Simulate SO_SEARCH_LIMIT truncation: total > items.length
+    mockPackagePolicyService.list.mockResolvedValueOnce({
+      total: 999,
+      items: [{ id: 'elastic_agent-1' } as any, { id: 'elastic_agent-2' } as any],
+      page: 1,
+      perPage: 10000,
+    });
+    const mockRequest = {} as KibanaRequest;
+
+    await expect(
+      removeInstallation({
+        savedObjectsClient: soClientMock,
+        pkgName: 'elastic_agent',
+        pkgVersion: '1.0.0',
+        esClient: esClientMock,
+        force: false,
+        request: mockRequest,
+      })
+    ).rejects.toThrow(/too many package policies to enumerate/);
+
+    // Nothing should be deleted when the result is truncated
+    expect(mockPackagePolicyService.delete).not.toHaveBeenCalled();
+  });
+
+  it('should not fail-closed on truncated results when no request is provided', async () => {
+    // Without request there is no authz check, so truncation is irrelevant — behaves as today
+    mockPackagePolicyService.list.mockResolvedValueOnce({
+      total: 999,
+      items: [{ id: 'elastic_agent-1' } as any, { id: 'elastic_agent-2' } as any],
+      page: 1,
+      perPage: 10000,
+    });
+
+    await removeInstallation({
+      savedObjectsClient: soClientMock,
+      pkgName: 'elastic_agent',
+      pkgVersion: '1.0.0',
+      esClient: esClientMock,
+      force: false,
+    });
+
+    expect(mockPackagePolicyService.delete).toHaveBeenCalled();
+  });
 });
 
 describe('deleteESAsset', () => {
