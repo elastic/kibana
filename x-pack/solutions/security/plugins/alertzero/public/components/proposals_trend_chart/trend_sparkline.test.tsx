@@ -111,11 +111,12 @@ describe('TrendSparkline', () => {
     renderSparkline();
 
     const accessor = MockedAreaSeries.mock.calls[0][0].pointStyleAccessor as PointStyleAccessor;
-    const datum = { x: series[2].x, y: series[2].y };
-    const lastStyle = accessor(datum, { specId: 'configure', key: 'configure' } as never);
+    const seriesIdentifier = { specId: 'configure', key: 'configure' } as never;
+    const datum = { x: series[2].x, y: series[2].y } as never;
+    const lastStyle = accessor(datum, seriesIdentifier, false);
     expect(lastStyle).toEqual(expect.objectContaining({ radius: 3 }));
 
-    const earlier = { x: series[0].x, y: series[0].y };
-    expect(accessor(earlier, { specId: 'configure', key: 'configure' } as never)).toBeNull();
+    const earlier = { x: series[0].x, y: series[0].y } as never;
+    expect(accessor(earlier, seriesIdentifier, false)).toBeNull();
   });
 });
