@@ -25,7 +25,7 @@ import {
   THREAT_INTEL_INDICATORS_INDEX,
   THREAT_REPORTS_INDEX_PATTERN,
 } from '../../../common/threat_intel';
-import { HIDDEN_INDEX_SEARCH_OPTIONS } from '../lib/es_options';
+import { HIDDEN_INDEX_PIT_OPTIONS } from '../lib/es_options';
 import { isTransientEsStatus } from '../lib/es_retry';
 import { normalizeProvenanceUrl } from '../services/provenance_url';
 
@@ -629,7 +629,8 @@ export const registerPromoteThreatIndicatorsTask = ({
               index: THREAT_REPORTS_INDEX_PATTERN,
               keep_alive: PIT_KEEP_ALIVE,
               // Reports live in a hidden index, which a wildcard skips by default.
-              ...HIDDEN_INDEX_SEARCH_OPTIONS,
+              // PIT-valid options only: `allow_no_indices` is search-only.
+              ...HIDDEN_INDEX_PIT_OPTIONS,
             });
             pitId = pit.id;
           } catch (err) {

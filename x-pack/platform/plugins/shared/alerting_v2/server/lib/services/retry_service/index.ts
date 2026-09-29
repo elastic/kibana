@@ -6,3 +6,4 @@
  */
 
 export { AlertingRetryService } from './alerting_retry_service';
+export { EsUnacknowledgedError } from './es_unacknowledged_error';
