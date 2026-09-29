@@ -254,6 +254,28 @@ export default function (providerContext: FtrProviderContext) {
 
         downloadSourceId = '';
       });
+
+      it('returns 403 when download source is referenced by a policy shared across multiple spaces', async () => {
+        await apiClient.putAgentPolicy(
+          agentPolicyId,
+          {
+            name: 'shared-policy',
+            namespace: 'default',
+            download_source_id: downloadSourceId,
+            space_ids: ['default', TEST_SPACE_1],
+          },
+          TEST_SPACE_1
+        );
+
+        const res = await supertestWithoutAuth
+          .delete(`/api/fleet/agent_download_sources/${downloadSourceId}`)
+          .auth(
+            testUsers.fleet_all_int_all_default_space_only.username,
+            testUsers.fleet_all_int_all_default_space_only.password
+          )
+          .set('kbn-xsrf', 'xxxx');
+        expect(res.status).to.eql(403);
+      });
     });
 
     // ---------------------------------------------------------------------------
@@ -343,6 +365,28 @@ export default function (providerContext: FtrProviderContext) {
         expect(policyRes.body.item.fleet_server_host_id).to.eql(null);
 
         fleetServerHostId = '';
+      });
+
+      it('returns 403 when Fleet Server host is referenced by a policy shared across multiple spaces', async () => {
+        await apiClient.putAgentPolicy(
+          agentPolicyId,
+          {
+            name: 'shared-policy',
+            namespace: 'default',
+            fleet_server_host_id: fleetServerHostId,
+            space_ids: ['default', TEST_SPACE_1],
+          },
+          TEST_SPACE_1
+        );
+
+        const res = await supertestWithoutAuth
+          .delete(`/api/fleet/fleet_server_hosts/${fleetServerHostId}`)
+          .auth(
+            testUsers.fleet_all_int_all_default_space_only.username,
+            testUsers.fleet_all_int_all_default_space_only.password
+          )
+          .set('kbn-xsrf', 'xxxx');
+        expect(res.status).to.eql(403);
       });
     });
   });
