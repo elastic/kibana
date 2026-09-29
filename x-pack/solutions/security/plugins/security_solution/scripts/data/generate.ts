@@ -54,9 +54,10 @@ import {
   THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_DEFAULT,
 } from './lib/threat_intel_fixtures';
 import {
-  cleanAwsIamHostCorrelation,
-  seedAwsIamHostCorrelation,
-} from './lib/aws_iam_host_correlation';
+  cleanPackHostCorrelation,
+  seedPackHostCorrelation,
+  PACK_HOST_CORRELATION_CONFIGS,
+} from './lib/pack_host_correlation';
 import { listPacks } from './packs';
 import {
   generateAndIndexAttackDiscoveries,
@@ -1091,8 +1092,17 @@ export const cli = () => {
             log,
             packIds: packIds.length > 0 ? packIds : undefined,
           });
-          if (packIds.includes('aws-iam')) {
-            await cleanAwsIamHostCorrelation({ esClient, log, startMs, endMs });
+          for (const packId of packIds) {
+            const hostCorrelationConfig = PACK_HOST_CORRELATION_CONFIGS[packId];
+            if (hostCorrelationConfig) {
+              await cleanPackHostCorrelation({
+                esClient,
+                log,
+                startMs,
+                endMs,
+                config: hostCorrelationConfig,
+              });
+            }
           }
         }
 
@@ -1146,8 +1156,11 @@ export const cli = () => {
           packResults.push(result);
         }
 
-        if (packIds.includes('aws-iam')) {
-          await seedAwsIamHostCorrelation({ esClient, log, endMs });
+        for (const packId of packIds) {
+          const hostCorrelationConfig = PACK_HOST_CORRELATION_CONFIGS[packId];
+          if (hostCorrelationConfig) {
+            await seedPackHostCorrelation({ esClient, log, endMs, config: hostCorrelationConfig });
+          }
         }
 
         if (threatIntel) {
