@@ -5,15 +5,25 @@
  * 2.0.
  */
 
+import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 
-/** Aggregatable ES field types keyed by field name. */
+/** ES field types keyed by name, for fields that can back a `STATS BY` across the whole index. */
 export type AggregatableFieldTypes = Map<string, string[]>;
 
 export type LoadAggregatableFieldTypes = (params: {
   index: string;
   projectRouting?: string;
 }) => Promise<AggregatableFieldTypes>;
+
+/**
+ * A field spanning several indices is only usable when it is aggregatable in all of them and
+ * its mappings share one Kibana field type; otherwise `STATS BY` can hit a conflicting mapping.
+ */
+const isAggregatableEverywhere = (capabilities: FieldCapsFieldCapability[]): boolean =>
+  capabilities.every(({ aggregatable }) => aggregatable) &&
+  new Set(capabilities.map(({ type }) => castEsToKbnFieldTypeName(type))).size === 1;
 
 const fetchAggregatableFieldTypes = async (
   esClient: ElasticsearchClient,
@@ -29,17 +39,12 @@ const fetchAggregatableFieldTypes = async (
     ...(projectRouting ? { project_routing: projectRouting } : {}),
   });
   return new Map(
-    Object.entries(response.fields)
-      .map(
-        ([fieldName, capsByType]) =>
-          [
-            fieldName,
-            Object.values(capsByType)
-              .filter(({ aggregatable }) => aggregatable)
-              .map(({ type }) => type),
-          ] as const
-      )
-      .filter(([, types]) => types.length > 0)
+    Object.entries(response.fields).flatMap(([fieldName, capsByType]) => {
+      const capabilities = Object.values(capsByType);
+      return isAggregatableEverywhere(capabilities)
+        ? [[fieldName, capabilities.map(({ type }) => type)] as const]
+        : [];
+    })
   );
 };
 
