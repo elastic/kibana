@@ -25,17 +25,15 @@ const baseRuleAttrs: RuleSavedObjectAttributes = {
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '15m' },
-  query: {
-    format: 'standalone',
-    breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
-  },
-  state_transition: null,
+  query: { base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
+  recovery: { strategy: 'no_breach' },
+  no_data: { strategy: 'ignore' },
   enabled: true,
   createdBy: { profile_uid: 'elastic' },
   createdAt: '2026-04-01T00:00:00.000Z',
   updatedBy: { profile_uid: 'elastic' },
   updatedAt: '2026-04-10T00:00:00.000Z',
-} as RuleSavedObjectAttributes;
+};
 
 // `getRule` returns the snake_case API response, not the saved object attributes.
 const { createdBy, createdAt, updatedBy, updatedAt, ...restRuleAttrs } = baseRuleAttrs;
@@ -203,7 +201,7 @@ describe('createRuleSmlType', () => {
           'CPU breach detection',
           'alert',
           'ops, cpu',
-          (baseRuleAttrs.query as { breach: { query: string } }).breach.query,
+          baseRuleAttrs.query.base,
         ].join('\n'),
       });
       expect(result).not.toHaveProperty('permissions');

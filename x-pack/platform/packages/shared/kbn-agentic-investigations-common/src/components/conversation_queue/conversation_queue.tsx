@@ -78,6 +78,8 @@ interface ConversationQueueProps {
   selectedIds?: readonly string[];
   /** When true escalation actions are shown on every card. Requires the manage capability. */
   canManageEscalations?: boolean;
+  /** When true the "Close investigation" action is shown on every card. */
+  canCloseInvestigation?: boolean;
   /**
    * Optional: render the assignee picker widget for a non-closed investigation card.
    * Supplied by the page so that hook calls stay outside this package.
@@ -123,6 +125,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     getOutcomeLabel,
     selectedIds,
     canManageEscalations,
+    canCloseInvestigation,
     renderAssignees,
   }) => {
     const { euiTheme } = useEuiTheme();
@@ -176,6 +179,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
             onClickRecommendedAction,
             chatHref: getChatHref?.(investigation.id),
             canManageEscalations,
+            canCloseInvestigation,
           };
 
           return (
