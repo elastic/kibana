@@ -122,13 +122,14 @@ describe('enrichReportCore', () => {
       .fn()
       .mockRejectedValueOnce(overflow)
       .mockResolvedValueOnce({ raw: { response_metadata: {} }, parsed: OUTPUT });
-    const text = `${'start '.repeat(50_000)}MIDDLE_EVIDENCE${' end'.repeat(50_000)}`;
+    const text = `${'L'.repeat(200_000)}MIDDLE_EVIDENCE${'R'.repeat(200_000)}`;
 
     const result = await enrichReportCore(buildModel(invoke), logger, { text, iocs });
 
     expect(invoke).toHaveBeenCalledTimes(2);
     expect(result.context.mode).toBe('degraded_context');
     expect(result.context.coverage).toBeLessThan(1);
+    expect(result.context.selected_chars).toBeLessThanOrEqual(30_000);
     expect(invoke.mock.calls[1][0]).toContain('MIDDLE_EVIDENCE');
   });
 

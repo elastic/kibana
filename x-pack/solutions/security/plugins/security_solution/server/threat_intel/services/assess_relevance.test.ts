@@ -138,13 +138,14 @@ describe('assessRelevance', () => {
       connector: { connectorId: 'test-connector' },
       chatModel: { withStructuredOutput },
     } as unknown as ScopedModel;
-    const text = `${'start '.repeat(50_000)}MIDDLE_RELEVANCE${' end'.repeat(50_000)}`;
+    const text = `${'L'.repeat(200_000)}MIDDLE_RELEVANCE${'R'.repeat(200_000)}`;
 
     const result = await assessRelevance(model, logger, { text });
 
     expect(invoke).toHaveBeenCalledTimes(2);
     expect(result.context.mode).toBe('degraded_context');
     expect(result.context.coverage).toBeLessThan(1);
+    expect(result.context.selected_chars).toBeLessThanOrEqual(30_000);
     expect(result.context.selected_chars).toBeLessThan(result.context.original_chars);
     expect(String(invoke.mock.calls[1][0])).toContain('MIDDLE_RELEVANCE');
     expect(String(invoke.mock.calls[1][0]).length).toBeLessThan(

@@ -11,7 +11,10 @@ import { isContextLengthExceededError } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
 import { THREAT_CATEGORIES, THREAT_REGIONS } from '../../../common/threat_intel';
 import { logStageUsage } from '../lib/cost_tracker';
-import { selectOverflowRetryArticleContext } from './article_context';
+import {
+  furtherShrinkOverflowArticleContext,
+  selectOverflowRetryArticleContext,
+} from './article_context';
 
 /**
  * Keeps only values from the closed set and caps the array length. A filter
@@ -113,11 +116,22 @@ export const enrichTaxonomy = async (
     };
   } catch (error) {
     if (!isContextLengthExceededError(error as Error)) throw error;
-    text = selectOverflowRetryArticleContext(params.text).text;
-    result = (await structured.invoke(buildTaxonomyPrompt({ ...params, text }))) as {
-      raw: { response_metadata: Record<string, unknown> };
-      parsed: TaxonomyOutput;
-    };
+    let context = selectOverflowRetryArticleContext(params.text);
+    text = context.text;
+    try {
+      result = (await structured.invoke(buildTaxonomyPrompt({ ...params, text }))) as {
+        raw: { response_metadata: Record<string, unknown> };
+        parsed: TaxonomyOutput;
+      };
+    } catch (retryError) {
+      if (!isContextLengthExceededError(retryError as Error)) throw retryError;
+      context = furtherShrinkOverflowArticleContext(context);
+      text = context.text;
+      result = (await structured.invoke(buildTaxonomyPrompt({ ...params, text }))) as {
+        raw: { response_metadata: Record<string, unknown> };
+        parsed: TaxonomyOutput;
+      };
+    }
   }
 
   logStageUsage(logger, 'enrich_taxonomy', inferenceEndpointId, result.raw.response_metadata ?? {});

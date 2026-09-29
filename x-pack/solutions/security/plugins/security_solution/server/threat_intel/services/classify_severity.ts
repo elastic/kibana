@@ -16,7 +16,10 @@ import {
 } from '../../../common/threat_intel';
 import { severityScore } from './severity';
 import { logStageUsage } from '../lib/cost_tracker';
-import { selectOverflowRetryArticleContext } from './article_context';
+import {
+  furtherShrinkOverflowArticleContext,
+  selectOverflowRetryArticleContext,
+} from './article_context';
 
 const severityLevelSchema = z.enum(['low', 'medium', 'high', 'critical']);
 
@@ -128,11 +131,22 @@ export const classifySeverity = async (
     };
   } catch (error) {
     if (!isContextLengthExceededError(error as Error)) throw error;
-    text = selectOverflowRetryArticleContext(params.text).text;
-    result = (await structured.invoke(buildSeverityPrompt({ ...params, text }))) as {
-      raw: { response_metadata: Record<string, unknown> };
-      parsed: ClassifySeverityLlmOutput | undefined;
-    };
+    let context = selectOverflowRetryArticleContext(params.text);
+    text = context.text;
+    try {
+      result = (await structured.invoke(buildSeverityPrompt({ ...params, text }))) as {
+        raw: { response_metadata: Record<string, unknown> };
+        parsed: ClassifySeverityLlmOutput | undefined;
+      };
+    } catch (retryError) {
+      if (!isContextLengthExceededError(retryError as Error)) throw retryError;
+      context = furtherShrinkOverflowArticleContext(context);
+      text = context.text;
+      result = (await structured.invoke(buildSeverityPrompt({ ...params, text }))) as {
+        raw: { response_metadata: Record<string, unknown> };
+        parsed: ClassifySeverityLlmOutput | undefined;
+      };
+    }
   }
 
   logStageUsage(

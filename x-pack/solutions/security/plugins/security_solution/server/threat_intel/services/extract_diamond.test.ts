@@ -125,7 +125,7 @@ describe('extractDiamond', () => {
       'context window exceeded',
       {}
     );
-    const text = `${'start '.repeat(50_000)}MIDDLE_DIAMOND${' end'.repeat(50_000)}`;
+    const text = `${'L'.repeat(200_000)}MIDDLE_DIAMOND${'R'.repeat(200_000)}`;
     const { model, singleInvoke, vertexInvoke } = buildModel({
       singleCall: jest
         .fn()
@@ -148,6 +148,7 @@ describe('extractDiamond', () => {
     expect(result.extraction_mode).toBe('single_call');
     expect(result.context_mode).toBe('degraded_context');
     expect(result.context_coverage).toBeLessThan(1);
+    expect(result.context_chars).toBeLessThanOrEqual(30_000);
     expect(result.context_chars).toBeLessThan(result.source_chars);
     expect(String(singleInvoke.mock.calls[1][0])).toContain('MIDDLE_DIAMOND');
     expect(String(singleInvoke.mock.calls[1][0]).length).toBeLessThan(
@@ -161,7 +162,7 @@ describe('extractDiamond', () => {
       'context window exceeded',
       {}
     );
-    const text = `${'start '.repeat(50_000)}MIDDLE_DIAMOND${' end'.repeat(50_000)}`;
+    const text = `${'L'.repeat(200_000)}MIDDLE_DIAMOND${'R'.repeat(200_000)}`;
     const { model, singleInvoke, vertexInvoke } = buildModel({
       singleCall: jest.fn().mockRejectedValue(overflow),
       perVertex: [ok(HIGH_VERTEX), ok(NONE_VERTEX), ok(NONE_VERTEX), ok(NONE_VERTEX)],

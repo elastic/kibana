@@ -13,6 +13,7 @@ import { logStageUsage } from '../lib/cost_tracker';
 import { MAX_URL_LENGTH } from '../../../common/threat_intel';
 import {
   fullArticleContext,
+  furtherShrinkOverflowArticleContext,
   selectOverflowRetryArticleContext,
   type ArticleContext,
 } from './article_context';
@@ -143,10 +144,19 @@ export const assessRelevance = async (
   } catch (error) {
     if (!isContextLengthExceededError(error as Error)) throw error;
     context = selectOverflowRetryArticleContext(params.text);
-    result = (await structured.invoke(buildRelevancePrompt(params, context.text))) as {
-      raw: { response_metadata: Record<string, unknown> };
-      parsed: RelevanceOutput;
-    };
+    try {
+      result = (await structured.invoke(buildRelevancePrompt(params, context.text))) as {
+        raw: { response_metadata: Record<string, unknown> };
+        parsed: RelevanceOutput;
+      };
+    } catch (retryError) {
+      if (!isContextLengthExceededError(retryError as Error)) throw retryError;
+      context = furtherShrinkOverflowArticleContext(context);
+      result = (await structured.invoke(buildRelevancePrompt(params, context.text))) as {
+        raw: { response_metadata: Record<string, unknown> };
+        parsed: RelevanceOutput;
+      };
+    }
   }
 
   logStageUsage(

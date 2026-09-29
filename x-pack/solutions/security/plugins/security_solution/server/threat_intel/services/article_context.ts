@@ -6,6 +6,12 @@
  */
 
 export const DEGRADED_ARTICLE_CHAR_BUDGET = 240_000;
+/**
+ * Hard cap for a confirmed context-overflow retry. 240K chars still overflows a
+ * 32K-token Reasoning window after prompt/IOC overhead; 30K matches the prior
+ * safe prefix scale while keeping evenly distributed windows.
+ */
+export const OVERFLOW_RETRY_ARTICLE_CHAR_BUDGET = 30_000;
 const DISTRIBUTED_WINDOW_COUNT = 9;
 /** Floor so a short forced-overflow budget still yields readable spans. */
 const MIN_USEFUL_WINDOW_CHARS = 24;
@@ -109,4 +115,19 @@ export const selectDistributedArticleContext = (
 
 /** Context selection for a confirmed overflow retry: always reduce the source. */
 export const selectOverflowRetryArticleContext = (text: string): ArticleContext =>
-  selectDistributedArticleContext(text, DEGRADED_ARTICLE_CHAR_BUDGET, { force: true });
+  selectDistributedArticleContext(text, OVERFLOW_RETRY_ARTICLE_CHAR_BUDGET, { force: true });
+
+/**
+ * Shrink an already-degraded overflow selection again while preserving the true
+ * source length for coverage metadata. Used when the first reduced retry still
+ * exceeds a small model window.
+ */
+export const furtherShrinkOverflowArticleContext = (context: ArticleContext): ArticleContext => {
+  const originalChars = context.original_chars;
+  const shrunk = selectOverflowRetryArticleContext(context.text);
+  return {
+    ...shrunk,
+    original_chars: originalChars,
+    coverage: originalChars > 0 ? shrunk.selected_chars / originalChars : 0,
+  };
+};

@@ -12,6 +12,7 @@ import { z } from '@kbn/zod/v4';
 import type { CostTraceBuilder } from '../lib/cost_tracker';
 import { logStageUsage, extractUsageFromMetadata } from '../lib/cost_tracker';
 import {
+  furtherShrinkOverflowArticleContext,
   fullArticleContext,
   selectOverflowRetryArticleContext,
   type ArticleContext,
@@ -363,16 +364,9 @@ export const extractDiamond = async (
     );
     // The single-call overflow retry already selected a degraded window. Reuse
     // that same text for four vertex prompts and a smaller Reasoning window can
-    // overflow every call. Shrink again before the fallback loop, but keep the
-    // true source length for coverage metadata.
+    // overflow every call. Shrink again before the fallback loop.
     if (context.mode === 'degraded_context') {
-      const originalChars = context.original_chars;
-      const shrunk = selectOverflowRetryArticleContext(context.text);
-      context = {
-        ...shrunk,
-        original_chars: originalChars,
-        coverage: originalChars > 0 ? shrunk.selected_chars / originalChars : 0,
-      };
+      context = furtherShrinkOverflowArticleContext(context);
     }
   }
 

@@ -11,7 +11,9 @@ import {
   isContextLengthExceededError,
 } from '@kbn/inference-common';
 import {
+  OVERFLOW_RETRY_ARTICLE_CHAR_BUDGET,
   fullArticleContext,
+  furtherShrinkOverflowArticleContext,
   selectDistributedArticleContext,
   selectOverflowRetryArticleContext,
 } from './article_context';
@@ -73,6 +75,27 @@ describe('article context selection', () => {
     expect(selected.mode).toBe('degraded_context');
     expect(selected.text).toBe(text.slice(0, 40));
     expect(selected.text).not.toContain('omitted for context capacity');
+  });
+
+  it('caps a long overflow retry well below the 240K degraded budget', () => {
+    // Balanced padding so the distributed middle window lands on the marker.
+    const text = `${'L'.repeat(200_000)}MIDDLE_EVIDENCE${'R'.repeat(200_000)}`;
+    const selected = selectOverflowRetryArticleContext(text);
+
+    expect(selected.mode).toBe('degraded_context');
+    expect(selected.text.length).toBeLessThanOrEqual(OVERFLOW_RETRY_ARTICLE_CHAR_BUDGET);
+    expect(selected.text).toContain('MIDDLE_EVIDENCE');
+    expect(selected.original_chars).toBe(text.length);
+  });
+
+  it('further shrinks an already-degraded overflow selection without losing source length', () => {
+    const text = 'y'.repeat(80_000);
+    const first = selectOverflowRetryArticleContext(text);
+    const second = furtherShrinkOverflowArticleContext(first);
+
+    expect(second.text.length).toBeLessThan(first.text.length);
+    expect(second.original_chars).toBe(text.length);
+    expect(second.coverage).toBeLessThan(first.coverage);
   });
 
   it('recognizes typed context-limit errors', () => {

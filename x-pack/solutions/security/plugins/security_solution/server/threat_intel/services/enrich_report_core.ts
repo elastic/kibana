@@ -27,6 +27,7 @@ import {
 import { severityScore } from './severity';
 import { logStageUsage } from '../lib/cost_tracker';
 import {
+  furtherShrinkOverflowArticleContext,
   fullArticleContext,
   selectOverflowRetryArticleContext,
   type ArticleContext,
@@ -222,10 +223,23 @@ export const enrichReportCore = async (
     // re-overflow the window. Bound the payload before the retry.
     context = selectOverflowRetryArticleContext(params.text);
     prepared = boundIocAdjudicationForOverflow(prepared);
-    result = (await structured.invoke(buildPrompt(params, context.text, prepared.reviewable))) as {
-      raw: { response_metadata: Record<string, unknown> };
-      parsed: ReportCoreModelOutput;
-    };
+    try {
+      result = (await structured.invoke(
+        buildPrompt(params, context.text, prepared.reviewable)
+      )) as {
+        raw: { response_metadata: Record<string, unknown> };
+        parsed: ReportCoreModelOutput;
+      };
+    } catch (retryError) {
+      if (!isContextLengthExceededError(retryError as Error)) throw retryError;
+      context = furtherShrinkOverflowArticleContext(context);
+      result = (await structured.invoke(
+        buildPrompt(params, context.text, prepared.reviewable)
+      )) as {
+        raw: { response_metadata: Record<string, unknown> };
+        parsed: ReportCoreModelOutput;
+      };
+    }
   }
 
   logStageUsage(
