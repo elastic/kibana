@@ -260,4 +260,35 @@ describe('fetchEsql', () => {
       snippets: { preTag: '<em>', postTag: '</em>' },
     });
   });
+
+  it('should add inline_highlights for HIGHLIGHT command columns', async () => {
+    const hits = [
+      { _index: 'i', _id: '1', highlight_title: '<em>bar</em>' },
+      { _index: 'i', _id: '2', highlight_title: '<em>baz</em>' },
+    ] as unknown as EsHitRecord[];
+    const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
+    expressionsExecuteSpy.mockReturnValueOnce({
+      cancel: jest.fn(),
+      getData: jest.fn(() =>
+        of({
+          result: {
+            columns: ['_id', 'highlight_title'],
+            rows: hits,
+          },
+        })
+      ),
+    } as unknown as ExecutionContract);
+
+    const result = await fetchEsql({
+      ...fetchEsqlMockProps,
+      query: { esql: 'from * | HIGHLIGHT "bar" ON title' },
+    });
+
+    expect(result.records[0].raw.inline_highlights).toEqual({
+      highlight_title: { preTag: '<em>', postTag: '</em>' },
+    });
+    expect(result.records[1].raw.inline_highlights).toEqual({
+      highlight_title: { preTag: '<em>', postTag: '</em>' },
+    });
+  });
 });

@@ -10,11 +10,12 @@ import { filter, firstValueFrom } from 'rxjs';
 import { z } from '@kbn/zod/v4';
 import { ToolType, isRoundCompleteEvent, internalTools } from '@kbn/agent-builder-common';
 import { EffortLevels, type EffortLevel } from '@kbn/agent-builder-common/model_provider';
-import type { AgentCapabilities, ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
+import type { ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
 import type { InternalBuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type { BackgroundExecutionService } from '../background_execution_service';
 import type { SubagentTracker } from '../subagent_tracker';
+import { filterReachableSubagents } from '../utils/filter_reachable_subagents';
 
 const schema = z.object({
   to: z.string().describe('Name of the persistent sub-agent to talk to.'),
@@ -44,19 +45,19 @@ The sub-agent sees the full history of your prior exchanges with it.
 
 export const createSendMessageTool = ({
   executionId: parentExecutionId,
-  capabilities,
   subAgentExecutor,
   abortSignal,
   backgroundExecutionService,
   subagentTracker,
+  allowedIds,
 }: {
   agentId: string;
   executionId: string;
-  capabilities?: AgentCapabilities;
   subAgentExecutor: SubAgentExecutor;
   abortSignal?: AbortSignal;
   backgroundExecutionService?: BackgroundExecutionService;
   subagentTracker?: SubagentTracker;
+  allowedIds: Set<string>;
 }): InternalBuiltinToolDefinition<typeof schema> => {
   return {
     id: internalTools.sendMessageToAgent,
@@ -78,15 +79,30 @@ export const createSendMessageTool = ({
         };
       }
 
-      const childId = subagentTracker.get(to);
-      if (!childId) {
-        const roster = Object.keys(subagentTracker.snapshot());
+      const snapshot = subagentTracker.snapshot();
+      const reachable = filterReachableSubagents({ entries: snapshot, allowedIds });
+      const entry = reachable[to];
+
+      if (!entry) {
+        const rawEntry = snapshot[to];
+        if (rawEntry) {
+          // The entry exists but its backing agent left the parent's allowlist.
+          return {
+            results: [
+              createErrorResult(
+                `Sub-agent "${to}" is backed by agent "${rawEntry.agent_id}", ` +
+                  `which is not in this agent's subagent_ids allowlist.`
+              ),
+            ],
+          };
+        }
+        const reachableNames = Object.keys(reachable);
         return {
           results: [
             createErrorResult(
               `No sub-agent named "${to}" exists in this conversation. ` +
-                (roster.length > 0
-                  ? `Available: ${roster.join(', ')}. `
+                (reachableNames.length > 0
+                  ? `Available: ${reachableNames.join(', ')}. `
                   : `No persistent sub-agents have been created yet. `) +
                 `Use run_subagent to create one first.`
             ),
@@ -100,10 +116,9 @@ export const createSendMessageTool = ({
         });
         const { executionId, events$ } = await subAgentExecutor.sendToSubAgent({
           parentExecutionId,
-          conversationId: childId,
+          conversationId: entry.conversation_id,
           prompt,
           connectorId: subAgentModel.connector.connectorId,
-          capabilities,
           ...(run_in_background ? {} : { abortSignal }),
         });
 

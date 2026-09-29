@@ -44,9 +44,9 @@ test.describe(
       await expect(suggestWidget.getByRole('option', { name: 'spaceId' })).toBeVisible();
 
       // Alert-specific properties should NOT be present
-      await expect(suggestWidget.getByRole('option', { name: 'alerts' })).not.toBeVisible();
-      await expect(suggestWidget.getByRole('option', { name: 'rule' })).not.toBeVisible();
-      await expect(suggestWidget.getByRole('option', { name: 'params' })).not.toBeVisible();
+      await expect(suggestWidget.getByRole('option', { name: 'alerts' })).toBeHidden();
+      await expect(suggestWidget.getByRole('option', { name: 'rule' })).toBeHidden();
+      await expect(suggestWidget.getByRole('option', { name: 'params' })).toBeHidden();
     });
 
     test('alert trigger: event.* should suggest alerts, rule, params, and spaceId', async ({

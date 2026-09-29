@@ -16,6 +16,7 @@ import type {
 import type {
   BulkScheduleWorkflowItem,
   WorkflowsServerPluginSetup,
+  WorkflowsManagementClient,
 } from '@kbn/workflows-management-plugin/server';
 import { inject, injectable } from 'inversify';
 import { isError } from 'lodash';
@@ -32,10 +33,18 @@ import type {
   DispatcherStepOutput,
   DispatchFailure,
 } from '../types';
+import { DispatchOutcome, DispatchPlan, PolicyCatalog } from '../state';
 import { DISPATCH_FAILURE_REASONS, type DispatchFailureReason } from './constants';
 import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
 
 const ACTION_POLICY_TRIGGER = 'action_policy';
+
+interface DispatchBatch {
+  groups: ActionGroup[];
+  request: KibanaRequest;
+  workflowsBySpace: Map<string, Map<string, WorkflowDetailDto>>;
+  failedSpaces: Map<string, Error>;
+}
 
 interface PendingSchedule {
   group: ActionGroup;
@@ -79,23 +88,28 @@ export class DispatchStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     logger: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { dispatch = [], policies } = state;
+    const { plan = DispatchPlan.empty(), policies = PolicyCatalog.empty() } = state;
     const { signal } = state.input;
 
     const dispatchedExecutions = new Map<ActionGroupId, string[]>();
     const dispatchFailures: DispatchFailure[] = [];
     const done = (): DispatcherStepOutput => ({
       type: 'continue',
-      data: { dispatchedExecutions, dispatchFailures },
+      data: {
+        outcome: DispatchOutcome.of({
+          executionsByGroup: dispatchedExecutions,
+          failures: dispatchFailures,
+        }),
+      },
     });
 
-    if (dispatch.length === 0 || signal.aborted) {
+    if (plan.toDispatch.length === 0 || signal.aborted) {
       return done();
     }
 
     const groupsByApiKey = new Map<string, ActionGroup[]>();
-    for (const group of dispatch) {
-      const apiKey = policies?.get(group.policyId)?.apiKey;
+    for (const group of plan.toDispatch) {
+      const apiKey = policies.apiKeyOf(group.policyId);
       if (!apiKey) {
         this.recordMissingApiKey(group, dispatchFailures, logger);
         continue;
@@ -107,11 +121,15 @@ export class DispatchStep implements DispatcherStep {
       return done();
     }
 
-    const { workflowsBySpace, failedSpaces } = await this.prefetchWorkflows(
-      [...groupsByApiKey.values()].flat()
-    );
-
-    for (const [apiKey, groups] of groupsByApiKey) {
+    const batches: DispatchBatch[] = [...groupsByApiKey].map(([apiKey, groups]) => ({
+      groups,
+      request: this.craftFakeRequest(apiKey),
+      workflowsBySpace: new Map(),
+      failedSpaces: new Map(),
+    }));
+    await this.prefetchWorkflows(batches);
+    for (const { groups, request, workflowsBySpace, failedSpaces } of batches) {
+      if (signal.aborted) break;
       const pending = this.buildPendingSchedules(
         groups,
         workflowsBySpace,
@@ -119,14 +137,13 @@ export class DispatchStep implements DispatcherStep {
         dispatchFailures,
         logger
       );
-      const request = this.craftFakeRequest(apiKey);
       for (let offset = 0; offset < pending.length; offset += DISPATCH_CHUNK_SIZE) {
         if (signal.aborted) {
           break;
         }
         await this.dispatchChunk(
           pending.slice(offset, offset + DISPATCH_CHUNK_SIZE),
-          request,
+          this.workflowsManagement.getClient(request),
           dispatchedExecutions,
           dispatchFailures,
           logger
@@ -144,7 +161,7 @@ export class DispatchStep implements DispatcherStep {
   ): void {
     const message = `No API key found for policy ${group.policyId}, skipping dispatch of group ${group.id}`;
     logger.warn({
-      message: () => message,
+      message: 'Action policy has no API key, skipping dispatch',
       code: ALERTING_LOG_CODES.DISPATCH_POLICY_MISSING_API_KEY,
       labels: { group_id: group.id, policy_id: group.policyId },
     });
@@ -153,32 +170,38 @@ export class DispatchStep implements DispatcherStep {
     );
   }
 
-  private async prefetchWorkflows(groups: ActionGroup[]): Promise<{
-    workflowsBySpace: Map<string, Map<string, WorkflowDetailDto>>;
-    failedSpaces: Map<string, Error>;
-  }> {
-    const idsBySpace = new Map<string, Set<string>>();
-    for (const group of groups) {
-      for (const destination of workflowDestinations(group)) {
-        addMapSet(idsBySpace, group.spaceId, destination.id);
+  private async prefetchWorkflows(batches: DispatchBatch[]): Promise<void> {
+    const lookups: Array<{
+      batch: DispatchBatch;
+      ids: string[];
+      spaceId: string;
+      request: KibanaRequest;
+    }> = [];
+    for (const batch of batches) {
+      const idsBySpace = new Map<string, Set<string>>();
+      for (const group of batch.groups) {
+        for (const destination of workflowDestinations(group)) {
+          addMapSet(idsBySpace, group.spaceId, destination.id);
+        }
+      }
+      for (const [spaceId, ids] of idsBySpace) {
+        lookups.push({ batch, ids: [...ids], spaceId, request: batch.request });
       }
     }
-
-    const workflowsBySpace = new Map<string, Map<string, WorkflowDetailDto>>();
-    const failedSpaces = new Map<string, Error>();
-    for (const [spaceId, ids] of idsBySpace) {
-      try {
-        const workflows = await this.workflowsManagement.getWorkflowsByIds([...ids], spaceId);
-        workflowsBySpace.set(
+    const results = await this.workflowsManagement.getWorkflowsByIdsForRequests(
+      lookups.map(({ ids, spaceId, request }) => ({ ids, spaceId, request }))
+    );
+    results.forEach((result, index) => {
+      const { batch, spaceId } = lookups[index];
+      if (result.status === 'rejected') {
+        batch.failedSpaces.set(spaceId, toError(result.reason));
+      } else {
+        batch.workflowsBySpace.set(
           spaceId,
-          new Map(workflows.map((workflow) => [workflow.id, workflow]))
+          new Map(result.value.map((workflow) => [workflow.id, workflow]))
         );
-      } catch (err) {
-        failedSpaces.set(spaceId, toError(err));
       }
-    }
-
-    return { workflowsBySpace, failedSpaces };
+    });
   }
 
   private buildPendingSchedules(
@@ -208,6 +231,7 @@ export class DispatchStep implements DispatcherStep {
             destination.id,
             DISPATCH_FAILURE_REASONS.WORKFLOW_NOT_FOUND,
             ALERTING_LOG_CODES.DISPATCH_WORKFLOW_NOT_FOUND,
+            'Workflow not found, skipping dispatch',
             `Workflow ${destination.id} not found, skipping dispatch for group ${group.id}`,
             dispatchFailures,
             logger
@@ -220,6 +244,7 @@ export class DispatchStep implements DispatcherStep {
             destination.id,
             DISPATCH_FAILURE_REASONS.WORKFLOW_DISABLED,
             ALERTING_LOG_CODES.DISPATCH_WORKFLOW_DISABLED,
+            'Workflow is disabled, skipping dispatch',
             `Workflow ${destination.id} is disabled, enable it to dispatch for group ${group.id}`,
             dispatchFailures,
             logger
@@ -242,12 +267,13 @@ export class DispatchStep implements DispatcherStep {
     workflowId: string,
     reason: DispatchFailureReason,
     code: AlertingV2LogCode,
+    logMessage: string,
     message: string,
     dispatchFailures: DispatchFailure[],
     logger: LoggerServiceContract
   ): void {
     logger.warn({
-      message: () => message,
+      message: logMessage,
       code,
       labels: { group_id: group.id, workflow_id: workflowId },
     });
@@ -306,17 +332,15 @@ export class DispatchStep implements DispatcherStep {
 
   private async dispatchChunk(
     chunk: PendingSchedule[],
-    request: KibanaRequest,
+    client: WorkflowsManagementClient,
     dispatchedExecutions: Map<ActionGroupId, string[]>,
     dispatchFailures: DispatchFailure[],
     logger: LoggerServiceContract
   ): Promise<void> {
     try {
-      const results: BulkScheduleWorkflowResult =
-        await this.workflowsManagement.bulkScheduleWorkflow(
-          chunk.map((pending) => pending.item),
-          request
-        );
+      const results: BulkScheduleWorkflowResult = await client.bulkScheduleWorkflow(
+        chunk.map((pending) => pending.item)
+      );
       for (let i = 0; i < chunk.length; i++) {
         this.applyScheduleResult(
           chunk[i],
@@ -368,6 +392,7 @@ export class DispatchStep implements DispatcherStep {
       pending.workflowId,
       DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
       ALERTING_LOG_CODES.DISPATCH_WORKFLOW_SCHEDULE_FAILED,
+      'Workflow scheduling returned no execution id',
       `Workflow ${pending.workflowId} scheduling returned no execution id for group ${pending.group.id}`,
       dispatchFailures,
       logger

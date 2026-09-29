@@ -76,7 +76,6 @@ describe('TableGrid', () => {
     columns: [GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE],
     onFindSearchTermMatch: jest.fn(),
     searchTerm: '',
-    initialPageSize: 0,
   };
 
   it('renders the grid and displays field names and values', () => {

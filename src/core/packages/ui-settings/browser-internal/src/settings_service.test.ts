@@ -59,7 +59,7 @@ describe('#start', () => {
 describe('#stop', () => {
   it('runs fine if service never set up', () => {
     const service = new SettingsService();
-    expect(() => service.stop()).not.toThrowError();
+    expect(() => service.stop()).not.toThrow();
   });
 
   it('stops the uiSettingsClient and uiSettingsApi', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { seriesStatisticsEsqlGuidance } from './series_statistics_prompt';
+
 /**
  * Bind the source command to the index the caller grounded the request against.
  *
@@ -32,6 +34,10 @@ You are generating an ES|QL query for a Kibana visualization. The query will be 
 
 For that purpose, follow these guidelines:
 ${index ? buildTargetIndexGuidance(index) : ''}
+## Existing visualization edits
+
+When given existing queries, modify only what the request asks to change. Keep their source indices and unrelated filters, aggregations, and limits. This preservation takes precedence over the defaults below, which apply to new queries and requested changes only. A chart title or presentation change is not a request to select a different data source. Change sources only when explicitly requested.
+
 ## Human-readable column aliases
 
 Use human-readable column aliases in STATS/EVAL (e.g. \`Unique Visitors\` not \`unique_visitors\`). Wrap multi-word aliases in backticks.
@@ -70,6 +76,8 @@ TS logs-tsds | STATS count = COUNT() BY bucket = TBUCKET(75, ?_tstart, ?_tend)
 \`\`\`
 
 Also omit \`LIMIT\` and \`SORT\` (same reasons as with FROM).
+
+${seriesStatisticsEsqlGuidance}
 
 ## Grouping dimensions (BY)
 

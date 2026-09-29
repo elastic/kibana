@@ -1,8 +1,7 @@
 {
-  "sha1": "4eced103d162a881b507a8ec4ec6633713428f8c",
+  "sha1": "0fba84a03ccdb91f4663590607e5cb9b45bfbf02",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -44,7 +43,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/main/document_flyout.spec.ts",
-        "line": 36,
+        "line": 37,
         "column": 52
       }
     },
@@ -60,7 +59,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/main/document_flyout.spec.ts",
-        "line": 62,
+        "line": 63,
         "column": 9
       }
     },
@@ -140,8 +139,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/tools/correlations.spec.ts",
-        "line": 32,
-        "column": 45
+        "line": 37,
+        "column": 15
       }
     },
     {

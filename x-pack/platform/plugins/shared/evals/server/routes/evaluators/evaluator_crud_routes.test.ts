@@ -60,6 +60,7 @@ const evaluatorRegistry = createEvaluatorRegistryMock([
     kind: 'llm',
     origin: 'built_in',
     description: 'Built-in correctness evaluator',
+    direction: 'maximize',
     evaluate: jest.fn(),
   },
 ]);

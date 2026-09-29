@@ -16,7 +16,7 @@ import {
   testData,
 } from '../fixtures';
 
-const TAGS_URL = `${testData.RULE_API_PATH}/tags`;
+const TAGS_URL = `${testData.INTERNAL_RULE_API_PATH}/tags`;
 const OLD_TAGS_URL = `${testData.RULE_API_PATH}/_tags`;
 
 const tagsUrl = (params: Record<string, string | undefined> = {}): string => {
@@ -113,7 +113,8 @@ apiTest.describe('Get rule tags API', { tag: '@local-stateful-classic' }, () => 
         buildCreateRuleData({
           kind: 'signal',
           state_transition: undefined,
-          recovery_strategy: undefined,
+          recovery: undefined,
+          no_data: undefined,
           metadata: { name: 'signal-rule', tags: ['signal-tag'] },
         })
       );
@@ -141,7 +142,8 @@ apiTest.describe('Get rule tags API', { tag: '@local-stateful-classic' }, () => 
         buildCreateRuleData({
           kind: 'signal',
           state_transition: undefined,
-          recovery_strategy: undefined,
+          recovery: undefined,
+          no_data: undefined,
           metadata: { name: 'signal-rule', tags: ['signal-tag'] },
         })
       );

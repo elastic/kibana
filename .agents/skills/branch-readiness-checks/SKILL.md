@@ -18,9 +18,9 @@ If `max_wait_ms` is exceeded, report a timeout and continue to the next workflow
 |---|---:|---:|
 | `git diff`, `git merge-base` | 15000 | 1000 |
 | `node scripts/check_changes.ts --ref "$BASE"` | 180000 | 2000 |
-| `node scripts/lint_ts_projects.js`, `yarn test:type_check --project` | 120000 | 2000 |
+| `node scripts/lint_ts_projects.js`, `pnpm test:type_check --project` | 120000 | 2000 |
 | `node scripts/generate codeowners`, `node scripts/regenerate_moon_projects.js` | 60000 | 2000 |
-| `yarn test:jest` (per package) | 300000 | 5000 |
+| `pnpm test:jest` (per package) | 300000 | 5000 |
 
 ## Workflow
 
@@ -43,7 +43,7 @@ Combine and deduplicate results. From the changed file paths, identify:
 - The affected packages — walk up from each changed file to the nearest `kibana.jsonc` and read its `id` field for the package ID.
 - The `tsconfig.json` files for those packages (sibling to `kibana.jsonc`).
 
-**Prerequisite check**: verify the TS project map exists by running a quick type check on one package. If it fails with `TS Project map missing`, **stop** and ask the user if they'd like you to run `yarn kbn bootstrap`. Once bootstrap completes (or if the user declines), proceed with the remaining steps.
+**Prerequisite check**: verify the TS project map exists by running a quick type check on one package. If it fails with `TS Project map missing`, **stop** and ask the user if they'd like you to run `pnpm kbn bootstrap`. Once bootstrap completes (or if the user declines), proceed with the remaining steps.
 
 ### Step 1: Run `check_changes` against branch base
 
@@ -71,7 +71,7 @@ Run type checking scoped to each affected package's `tsconfig.json`.
 Only one `--project` flag per invocation — run separate commands for each package.
 
 ```bash
-yarn test:type_check --project path/to/tsconfig.json
+pnpm test:type_check --project path/to/tsconfig.json
 ```
 
 **Also check downstream dependents** — find packages whose `kbn_references` include any affected
@@ -95,7 +95,7 @@ tsconfigs, skip the downstream check and warn the user that a full `tsc -b` may 
 Run unit tests **per affected package** with coverage enabled.
 
 ```bash
-yarn test:jest --coverage path/to/package/src/
+pnpm test:jest --coverage path/to/package/src/
 ```
 
 If your environment provides a package-scoped unit-test tool, use the equivalent command.

@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LoopContinueNode, WorkflowGraph } from '@kbn/workflows/graph';
+import type { LoopContinueNode } from '@kbn/workflows/graph';
 import { isLoopEnterScope } from './is_loop_enter_scope';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../workflow_context_manager/step_execution_runtime_factory';
 import type { StepIoService } from '../../workflow_context_manager/step_io_service';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { RuntimeGraphView } from '../../workflow_context_manager/workflow_runtime_graph';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { NodeImplementation } from '../node_implementation';
 
@@ -24,7 +25,7 @@ export class LoopContinueNodeImpl implements NodeImplementation {
     private workflowLogger: IWorkflowEventLogger,
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
     private stepIoService: StepIoService,
-    private workflowGraph: WorkflowGraph
+    private workflowGraph: RuntimeGraphView
   ) {}
 
   public run(): void {
@@ -41,7 +42,11 @@ export class LoopContinueNodeImpl implements NodeImplementation {
     // Evict stale outputs from the current iteration before looping back.
     // Without this, a 1000-iteration loop accumulates all stale outputs
     // in memory until the loop fully exits.
-    const loopStepId = this.workflowGraph.getNode(this.node.loopExitNodeId).stepId;
+    const loopExit = this.workflowGraph.getNode(this.node.loopExitNodeId);
+    if (!loopExit) {
+      throw new Error(`Node not found for node id: ${this.node.loopExitNodeId}`);
+    }
+    const loopStepId = loopExit.stepId;
     const innerStepIds = this.workflowGraph.getInnerStepIds(loopStepId);
     this.stepIoService.evictStaleLoopOutputs(innerStepIds);
     this.workflowLogger.logDebug(

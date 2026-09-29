@@ -8,6 +8,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type {
   ESDocumentWithOperation,
   InfraDocument,
@@ -24,6 +25,10 @@ import type { PipelineOptions } from '../../cli/utils/clients_manager';
 import type { PackageManagement } from '../shared/types';
 
 export type InfraSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
+
+const HOSTMETRICS_OTEL_TEMPLATE = 'metrics-hostmetricsreceiver.otel';
+const KUBELETSTATS_OTEL_TEMPLATE = 'metrics-kubeletstatsreceiver.otel';
+const OTEL_INDEX_TEMPLATE_NAMES = [HOSTMETRICS_OTEL_TEMPLATE, KUBELETSTATS_OTEL_TEMPLATE] as const;
 
 export interface InfraSynthtraceEsClient
   extends SynthtraceEsClient<InfraDocument>,
@@ -53,6 +58,7 @@ export class InfraSynthtraceEsClientImpl
       'metrics-docker*',
       'metrics-aws*',
       'metrics-hostmetricsreceiver.otel*',
+      'metrics-kubeletstatsreceiver.otel*',
     ];
   }
 
@@ -71,12 +77,135 @@ export class InfraSynthtraceEsClientImpl
     return super.index(streamOrGenerator, pipelineCallback);
   }
 
+  override async clean(): Promise<void> {
+    await super.clean();
+    // super.clean() deletes data streams only; index templates remain until deleted here.
+    await Promise.all(
+      OTEL_INDEX_TEMPLATE_NAMES.map(async (name) => {
+        await this.client.indices.deleteIndexTemplate({ name }, { ignore: [404] });
+        this.logger.info(`Deleted index template "${name}"`);
+      })
+    );
+    this.otelTemplateCreated = false;
+  }
+
   private async ensureOtelDataStreamTemplate() {
-    const templateName = 'metrics-hostmetricsreceiver.otel';
+    const keyword = { type: 'keyword' as const, ignore_above: 1024 };
+    const double = { type: 'double' as const };
+    const dataStreamProperties = {
+      dataset: keyword,
+      type: keyword,
+      namespace: keyword,
+    };
+    const k8sPodMetricProperties = {
+      cpu_limit_utilization: double,
+      cpu: {
+        properties: {
+          node: { properties: { utilization: double } },
+          usage: double,
+        },
+      },
+      memory_limit_utilization: double,
+      memory: {
+        properties: {
+          node: { properties: { utilization: double } },
+          working_set: double,
+          usage: double,
+        },
+      },
+      network: { properties: { io: double } },
+    };
+    const k8sIdentityProperties = {
+      pod: {
+        properties: {
+          uid: keyword,
+          name: keyword,
+        },
+      },
+      namespace: { properties: { name: keyword } },
+      node: { properties: { name: keyword } },
+      deployment: { properties: { name: keyword } },
+    };
+    // Unprefixed metrics live on k8s.pod beside uid and name. resource.attributes.k8s stays identity-only.
+    const k8sWithMetricsProperties = {
+      ...k8sIdentityProperties,
+      pod: {
+        properties: {
+          uid: keyword,
+          name: keyword,
+          ...k8sPodMetricProperties,
+        },
+      },
+    };
+
+    await this.putOtelDataStreamTemplate(
+      HOSTMETRICS_OTEL_TEMPLATE,
+      [`${HOSTMETRICS_OTEL_TEMPLATE}-*`],
+      {
+        '@timestamp': { type: 'date' },
+        host: {
+          properties: {
+            name: keyword,
+            hostname: keyword,
+            ip: { type: 'ip' },
+            os: { properties: { name: keyword } },
+          },
+        },
+        cloud: {
+          properties: {
+            provider: keyword,
+            region: keyword,
+          },
+        },
+        data_stream: { properties: dataStreamProperties },
+      }
+    );
+
+    // Production OTel data streams use passthrough mappings for resource.attributes.
+    // Synthtrace writes both flat k8s.pod.uid and resource.attributes.k8s.pod.uid so
+    // queries against either form hit, matching semconvHost's host.name approach.
+    await this.putOtelDataStreamTemplate(
+      KUBELETSTATS_OTEL_TEMPLATE,
+      [`${KUBELETSTATS_OTEL_TEMPLATE}-*`],
+      {
+        '@timestamp': { type: 'date' },
+        direction: keyword,
+        interface: keyword,
+        k8s: { properties: k8sWithMetricsProperties },
+        resource: {
+          properties: {
+            attributes: {
+              properties: {
+                k8s: { properties: k8sIdentityProperties },
+              },
+            },
+          },
+        },
+        data_stream: { properties: dataStreamProperties },
+        metrics: {
+          properties: {
+            k8s: {
+              properties: {
+                pod: {
+                  properties: k8sPodMetricProperties,
+                },
+              },
+            },
+          },
+        },
+      }
+    );
+  }
+
+  private async putOtelDataStreamTemplate(
+    name: string,
+    indexPatterns: string[],
+    properties: NonNullable<MappingTypeMapping['properties']>
+  ): Promise<void> {
     try {
       await this.client.indices.putIndexTemplate({
-        name: templateName,
-        index_patterns: ['metrics-hostmetricsreceiver.otel-*'],
+        name,
+        index_patterns: indexPatterns,
         data_stream: {},
         priority: 500,
         template: {
@@ -90,36 +219,14 @@ export class InfraSynthtraceEsClientImpl
                 },
               },
             ],
-            properties: {
-              '@timestamp': { type: 'date' },
-              host: {
-                properties: {
-                  name: { type: 'keyword' },
-                  hostname: { type: 'keyword' },
-                  ip: { type: 'ip' },
-                  os: { properties: { name: { type: 'keyword' } } },
-                },
-              },
-              cloud: {
-                properties: {
-                  provider: { type: 'keyword' },
-                  region: { type: 'keyword' },
-                },
-              },
-              data_stream: {
-                properties: {
-                  dataset: { type: 'keyword' },
-                  type: { type: 'keyword' },
-                  namespace: { type: 'keyword' },
-                },
-              },
-            },
+            properties,
           },
         },
       });
-      this.logger.info(`Created index template "${templateName}"`);
+      this.logger.info(`Created index template "${name}"`);
     } catch (error) {
-      this.logger.warning(`Failed to create index template "${templateName}": ${error}`);
+      this.logger.warning(`Failed to create index template "${name}": ${error}`);
+      throw error;
     }
   }
 

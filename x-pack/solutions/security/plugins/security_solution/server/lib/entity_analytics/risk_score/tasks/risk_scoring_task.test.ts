@@ -24,9 +24,13 @@ import {
 } from './risk_scoring_task';
 import type { ConfigType } from '../../../../config';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { EntityType } from '../../../../../common/search_strategy';
+import { TYPE } from './constants';
+import { defaultState } from './state';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../../execution_context';
 
 const ISO_8601_PATTERN = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
 
@@ -87,6 +91,42 @@ describe('Risk Scoring Task', () => {
       });
       expect(mockTaskManagerSetup.registerTaskDefinitions).not.toHaveBeenCalled();
     });
+
+    it('wraps the run in coreStart.executionContext.withContext with the expected label and id', async () => {
+      const withContext = jest.fn().mockImplementation(<T>(_ctx: unknown, fn: () => T): T => fn());
+      const mockCoreStart = { executionContext: { withContext } };
+      const getStartServicesMock = jest.fn().mockResolvedValue([mockCoreStart, {}]);
+
+      // Well-formed id built for namespace 'default', but state.namespace is
+      // 'stale-namespace' — runTask's first check ("outdated task; exiting")
+      // short-circuits without touching any collaborator. The wrap fires beforehand.
+      const taskInstance = riskScoringTaskMock.createInstance({
+        state: { ...defaultState, namespace: 'stale-namespace' },
+      });
+
+      const taskManager = taskManagerMock.createSetup();
+      registerRiskScoringTask({
+        getStartServices: getStartServicesMock,
+        kibanaVersion: '8.10.0',
+        taskManager,
+        logger: mockLogger,
+        telemetry: mockTelemetry,
+        entityAnalyticsConfig,
+        auditLogger: undefined,
+        experimentalFeatures: mockExperimentalFeatures,
+      });
+
+      const createTaskRunner =
+        taskManager.registerTaskDefinitions.mock.calls[0][0][TYPE].createTaskRunner;
+      const runner = createTaskRunner({ taskInstance } as unknown as RunContext);
+      await runner.run();
+
+      expect(withContext).toHaveBeenCalledTimes(1);
+      expect(withContext).toHaveBeenCalledWith(
+        buildEaExecutionContext(EA_EXECUTION_CONTEXT_NAMES.RISK_SCORING_TASK, taskInstance.id),
+        expect.any(Function)
+      );
+    });
   });
 
   describe('startRiskScoringTask()', () => {
@@ -133,7 +173,7 @@ describe('Risk Scoring Task', () => {
           taskManager: mockTaskManagerStart,
           riskEngineDataClient: mockRiskEngineDataClient,
         })
-      ).rejects.toThrowError('whoops');
+      ).rejects.toThrow('whoops');
     });
   });
 
@@ -184,7 +224,7 @@ describe('Risk Scoring Task', () => {
           logger: mockLogger,
           taskManager: mockTaskManagerStart,
         })
-      ).rejects.toThrowError('whoops');
+      ).rejects.toThrow('whoops');
 
       expect(mockLogger.error).toHaveBeenCalledWith('Failed to remove risk scoring task: whoops');
     });
@@ -730,7 +770,7 @@ describe('Risk Scoring Task', () => {
           logger: mockLogger,
           namespace: 'default',
         })
-      ).rejects.toThrowError('whoops');
+      ).rejects.toThrow('whoops');
     });
 
     it('throws a 409 when the task is already running', async () => {

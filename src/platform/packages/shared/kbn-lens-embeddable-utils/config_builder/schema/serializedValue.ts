@@ -29,7 +29,7 @@ const rangeKeySchema = z
       .max(100),
   })
   .strict()
-  .meta({ id: 'range_key', title: 'Range Key' });
+  .meta({ id: 'visRangeKey', title: 'Range Key' });
 
 const multiFieldKeySchema = z
   .object({
@@ -37,7 +37,7 @@ const multiFieldKeySchema = z
     keys: z.array(z.string()).max(100),
   })
   .strict()
-  .meta({ id: 'multi_field_key', title: 'Multi Field Key' });
+  .meta({ id: 'visMultiFieldKey', title: 'Multi Field Key' });
 
 export const serializedValueSchema = z.union([
   z.string(),

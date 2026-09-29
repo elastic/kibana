@@ -17,6 +17,7 @@ import type { CaseAttachmentsWithoutOwner } from '../../types';
 import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
 import { useApplication } from '../../common/lib/kibana/use_application';
 import { useAttachEventsEBT } from '../../analytics/use_attach_events_ebt';
+import { useTemplateAppliedOnCreateEBT } from '../../analytics/templates/use_template_apply_ebt';
 
 export interface UseSubmitCaseProps {
   afterCaseCreated?: (
@@ -44,6 +45,7 @@ export const useSubmitCase = ({
     usePostPushToService();
   const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
   const trackAttachEvents = useAttachEventsEBT();
+  const reportTemplateAppliedOnCreate = useTemplateAppliedOnCreateEBT();
 
   const submitCase = useCallback(
     async (data: CasePostRequest, isValid: boolean) => {
@@ -53,6 +55,13 @@ export const useSubmitCase = ({
         });
 
         if (theCase) {
+          // Read the template off the created case, not off the request, so the event reflects what
+          // the server stored. Reported before the attachment and connector work, because the case
+          // already exists and a later attachment failure must not lose the event.
+          if (theCase.template) {
+            reportTemplateAppliedOnCreate({ entryPoint: 'create_form' });
+          }
+
           const resolvedAttachments = getAttachments
             ? getAttachments(theCase.owner)
             : attachments ?? [];
@@ -104,6 +113,7 @@ export const useSubmitCase = ({
       onSuccess,
       createAttachments,
       trackAttachEvents,
+      reportTemplateAppliedOnCreate,
       pushCaseToExternalService,
     ]
   );

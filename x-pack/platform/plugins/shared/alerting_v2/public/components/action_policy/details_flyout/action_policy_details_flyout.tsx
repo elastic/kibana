@@ -8,37 +8,39 @@
 import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiDescriptionList,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiHorizontalRule,
-  EuiPanel,
+  EuiLoadingSpinner,
   EuiSpacer,
-  EuiTitle,
-  EuiToolTip,
-  type EuiDescriptionListProps,
+  EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { CoreStart, useService } from '@kbn/core-di-browser';
+import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
-import React, { useMemo } from 'react';
+import React, { useState } from 'react';
 import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
-import { resolveDisplayName } from '../../../utils/resolve_display_name';
+import { useIsActionPoliciesLicenseValid } from '../../../hooks/use_is_action_policies_license_valid';
+import { collectActorUids, resolveDisplayName } from '../../../utils/resolve_display_name';
 import { ActionPolicyActionsMenu } from '../action_policy_actions_menu';
-import { ActionPolicySnoozeButton } from '../action_policy_snooze_button';
-import { ActionPolicyStateBadge } from '../action_policy_state_badge';
+import { BadgeList } from '../badge_list';
 import { isSnoozed } from '../is_snoozed';
-import { ActionPolicyDefinitionList } from './action_policy_definition_list';
+import {
+  ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE,
+  DISPATCH_PER_LABEL,
+  FREQUENCY_LABEL,
+  GROUP_BY_LABEL,
+  getFrequencyLabel,
+  getGroupingModeLabel,
+} from '../labels';
+import { DestinationCard } from './destination_card';
+import { Column, SubsectionColumns } from './subsection_columns';
 
-const FLYOUT_TITLE_ID = 'actionPolicyDetailsFlyoutTitle';
+const TAKE_ACTION_BUTTON_ID = 'actionPolicyDetailsFlyoutTakeAction';
 const EMPTY_VALUE = '-';
 
 interface Props {
@@ -57,8 +59,10 @@ interface Props {
   isSnoozeLoading?: boolean;
   session?: EuiFlyoutProps['session'];
   ownFocus?: EuiFlyoutProps['ownFocus'];
-  hasAnimation?: EuiFlyoutProps['hasAnimation'];
 }
+
+const { Header, Body, Footer } = FlyoutTemplate;
+const { Badge, InfoBlock } = Header;
 
 export const ActionPolicyDetailsFlyout = ({
   policy,
@@ -74,247 +78,307 @@ export const ActionPolicyDetailsFlyout = ({
   onUpdateApiKey,
   isStateLoading = false,
   isSnoozeLoading = false,
-  session,
-  ownFocus = true,
-  hasAnimation = true,
+  session = 'never',
+  ownFocus = false,
 }: Props) => {
   const settings = useService(CoreStart('settings'));
   const dateTimeFormat = settings.client.get<string>('dateFormat');
   const formatDate = (value: string) => moment(value).format(dateTimeFormat);
 
-  const metadataUids = useMemo(
-    () => [policy.created_by, policy.updated_by].filter((uid): uid is string => Boolean(uid)),
-    [policy.created_by, policy.updated_by]
-  );
+  const metadataUids = collectActorUids([policy.created_by, policy.updated_by]);
 
   const { data: profileByUid } = useBulkGetUserProfiles({ uids: metadataUids });
 
-  const { snoozed_until: snoozedUntil } = policy;
+  const { snoozed_until: snoozedUntil, grouping_mode: groupingMode, group_by: groupBy } = policy;
   const snoozedActive = isSnoozed(snoozedUntil);
-  // Writers get the interactive snooze bell instead, which already shows the state.
-  const canSnooze = canWrite && policy.enabled;
+  const isLicenseValid = useIsActionPoliciesLicenseValid();
+  const isEnableBlockedByLicense = !policy.enabled && !isLicenseValid;
 
-  const handleEdit = () => {
-    onClose();
-    onEdit(policy.id);
-  };
+  const [isTakeActionOpen, setIsTakeActionOpen] = useState(false);
 
-  const handleClone = (p: ActionPolicyResponse) => {
-    onClone(p);
-  };
+  const matcherTags = policy.matcher?.tags?.length ? policy.matcher.tags : null;
+  const matcherExpression = policy.matcher?.expression?.trim() || null;
 
-  const handleDelete = (p: ActionPolicyResponse) => {
-    onDelete(p);
-  };
-
-  const handleUpdateApiKey = (id: string) => {
-    onUpdateApiKey(id);
-  };
-
-  const metadataItems: EuiDescriptionListProps['listItems'] = [
-    {
-      title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.metadata.createdBy', {
-        defaultMessage: 'Created by',
-      }),
-      description: resolveDisplayName(policy.created_by, profileByUid, EMPTY_VALUE),
-    },
-    {
-      title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.metadata.createdAt', {
-        defaultMessage: 'Created at',
-      }),
-      description: formatDate(policy.created_at),
-    },
-    {
-      title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.metadata.updatedBy', {
-        defaultMessage: 'Updated by',
-      }),
-      description: resolveDisplayName(policy.updated_by, profileByUid, EMPTY_VALUE),
-    },
-    {
-      title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.metadata.updatedAt', {
-        defaultMessage: 'Updated at',
-      }),
-      description: formatDate(policy.updated_at),
-    },
-  ];
+  const policyScopeSummary =
+    matcherTags && matcherExpression
+      ? i18n.translate(
+          'xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.tagsAndExpression',
+          {
+            defaultMessage:
+              'This policy matches all alerts from rules with one of the following tags AND the matching query.',
+          }
+        )
+      : matcherTags
+      ? i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.tags', {
+          defaultMessage:
+            'This policy matches all alerts from rules with one of the following tags.',
+        })
+      : matcherExpression
+      ? i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.expression', {
+          defaultMessage: 'This policy matches all alerts matching this query.',
+        })
+      : i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.matchesAll', {
+          defaultMessage: 'This policy matches all alerts.',
+        });
 
   return (
-    <EuiFlyout
-      type="push"
-      hasAnimation={hasAnimation}
-      size="s"
-      ownFocus={ownFocus}
-      session={session}
-      hideCloseButton
-      paddingSize="none"
-      onClose={onClose}
-      aria-labelledby={FLYOUT_TITLE_ID}
-      data-test-subj="actionPolicyDetailsFlyout"
-    >
-      <EuiPanel
-        paddingSize="xs"
-        hasShadow={false}
-        hasBorder={false}
-        borderRadius="none"
-        color="transparent"
+    <>
+      <FlyoutTemplate
+        type="overlay"
+        size="m"
+        resizable
+        ownFocus={ownFocus}
+        session={session}
+        onClose={onClose}
+        closeButtonProps={{ 'data-test-subj': 'detailsFlyoutCloseIcon' }}
+        data-test-subj="actionPolicyDetailsFlyout"
       >
-        <EuiFlexGroup
-          justifyContent="flexEnd"
-          gutterSize="s"
-          responsive={false}
-          alignItems="center"
-        >
-          {canSnooze && (
-            <EuiFlexItem grow={false}>
-              <ActionPolicySnoozeButton
-                policy={policy}
-                onSnooze={onSnooze}
-                onCancelSnooze={onCancelSnooze}
-                isLoading={isSnoozeLoading}
-              />
-            </EuiFlexItem>
-          )}
-          {canWrite && (
-            <EuiFlexItem grow={false}>
-              <ActionPolicyActionsMenu
-                policy={policy}
-                onClone={handleClone}
-                onDelete={handleDelete}
-                onEnable={onEnable}
-                onDisable={onDisable}
-                onUpdateApiKey={handleUpdateApiKey}
-                isStateLoading={isStateLoading}
-                data-test-subj="detailsFlyoutActionsMenuButton"
-              />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.closeIcon', {
-                defaultMessage: 'Close',
-              })}
-              disableScreenReaderOutput
+        <Header title={policy.name}>
+          <Badge
+            color={policy.enabled ? 'success' : 'default'}
+            data-test-subj={
+              policy.enabled
+                ? 'actionPolicyDetailsFlyoutEnabledBadge'
+                : 'actionPolicyDetailsFlyoutDisabledBadge'
+            }
+          >
+            {policy.enabled
+              ? i18n.translate('xpack.alertingV2.actionPolicy.stateBadge.enabled', {
+                  defaultMessage: 'Enabled',
+                })
+              : i18n.translate('xpack.alertingV2.actionPolicy.stateBadge.disabled', {
+                  defaultMessage: 'Disabled',
+                })}
+          </Badge>
+          {snoozedActive && (
+            <Badge
+              color="accent"
+              iconType="bellSlash"
+              data-test-subj="actionPolicyDetailsFlyoutSnoozedBadge"
             >
-              <EuiButtonIcon
-                iconType="cross"
-                color="text"
-                onClick={onClose}
-                aria-label={i18n.translate(
-                  'xpack.alertingV2.actionPolicy.detailsFlyout.closeIcon',
-                  {
-                    defaultMessage: 'Close',
+              <FormattedMessage
+                id="xpack.alertingV2.actionPolicy.detailsFlyout.snoozedUntil"
+                defaultMessage="Snoozed until {date}"
+                values={{ date: formatDate(snoozedUntil!) }}
+              />
+            </Badge>
+          )}
+
+          <InfoBlock
+            title={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.header.enabled', {
+              defaultMessage: 'Enabled',
+            })}
+            data-test-subj="actionPolicyDetailsFlyoutEnabledBlock"
+          >
+            {isStateLoading ? (
+              <EuiLoadingSpinner size="m" />
+            ) : (
+              <EuiSwitch
+                compressed
+                showLabel={false}
+                checked={policy.enabled}
+                disabled={!canWrite || isEnableBlockedByLicense}
+                title={
+                  isEnableBlockedByLicense ? ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE : undefined
+                }
+                label={
+                  policy.enabled
+                    ? i18n.translate('xpack.alertingV2.actionPolicy.stateBadge.enabled', {
+                        defaultMessage: 'Enabled',
+                      })
+                    : i18n.translate('xpack.alertingV2.actionPolicy.stateBadge.disabled', {
+                        defaultMessage: 'Disabled',
+                      })
+                }
+                onChange={() => {
+                  if (policy.enabled) {
+                    onDisable(policy.id);
+                  } else {
+                    onEnable(policy.id);
                   }
-                )}
-                data-test-subj="detailsFlyoutCloseIcon"
+                }}
+                data-test-subj="actionPolicyDetailsFlyoutEnabledSwitch"
               />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-      <EuiHorizontalRule margin="none" />
-      <EuiFlyoutBody>
-        <EuiPanel
-          paddingSize="m"
-          hasShadow={false}
-          hasBorder={false}
-          borderRadius="none"
-          color="transparent"
-        >
-          <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
-            <h2 data-test-subj="actionPolicyDetailsFlyoutTitle">{policy.name}</h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <ActionPolicyStateBadge policy={policy} isLoading={false} />
-            </EuiFlexItem>
-            {snoozedActive && !canSnooze && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="accent" iconType="bellSlash">
-                  <FormattedMessage
-                    id="xpack.alertingV2.actionPolicy.detailsFlyout.snoozedUntil"
-                    defaultMessage="Snoozed until {date}"
-                    values={{ date: formatDate(snoozedUntil) }}
-                  />
-                </EuiBadge>
-              </EuiFlexItem>
             )}
-          </EuiFlexGroup>
-        </EuiPanel>
-        <EuiHorizontalRule margin="xs" />
-        <EuiPanel
-          paddingSize="m"
-          hasShadow={false}
-          hasBorder={false}
-          borderRadius="none"
-          color="transparent"
-        >
-          <EuiTitle size="xs">
-            <h3>
-              <FormattedMessage
-                id="xpack.alertingV2.actionPolicy.detailsFlyout.actionPolicy.title"
-                defaultMessage="Definition"
-              />
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <ActionPolicyDefinitionList policy={policy} />
-          <EuiHorizontalRule />
-          <EuiTitle size="xs">
-            <h3>
-              <FormattedMessage
-                id="xpack.alertingV2.actionPolicy.detailsFlyout.metadata.title"
-                defaultMessage="Metadata"
-              />
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiDescriptionList compressed type="column" listItems={metadataItems} />
-        </EuiPanel>
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiPanel
-          paddingSize="m"
-          hasShadow={false}
-          hasBorder={false}
-          borderRadius="none"
-          color="transparent"
-        >
-          <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={onClose}
-                data-test-subj="detailsFlyoutCloseButton"
-                iconType="cross"
+          </InfoBlock>
+          <InfoBlock
+            title={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.header.createdBy', {
+              defaultMessage: 'Created by',
+            })}
+            data-test-subj="actionPolicyDetailsFlyoutCreatedByBlock"
+          >
+            {resolveDisplayName(policy.created_by, profileByUid, EMPTY_VALUE)}
+          </InfoBlock>
+          <InfoBlock
+            title={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.header.updatedBy', {
+              defaultMessage: 'Updated by',
+            })}
+            data-test-subj="actionPolicyDetailsFlyoutUpdatedByBlock"
+          >
+            {resolveDisplayName(policy.updated_by, profileByUid, EMPTY_VALUE)}
+          </InfoBlock>
+          <InfoBlock
+            title={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.header.updatedOn', {
+              defaultMessage: 'Updated on',
+            })}
+            data-test-subj="actionPolicyDetailsFlyoutUpdatedOnBlock"
+          >
+            {formatDate(policy.updated_at)}
+          </InfoBlock>
+        </Header>
+
+        <Body>
+          <Body.Section
+            id="definition"
+            title={i18n.translate(
+              'xpack.alertingV2.actionPolicy.detailsFlyout.actionPolicy.title',
+              { defaultMessage: 'Definition' }
+            )}
+            hasBorder
+            data-test-subj="actionPolicyDetailsFlyoutDefinition"
+          >
+            <Body.Section.Subsection
+              title={i18n.translate(
+                'xpack.alertingV2.actionPolicy.detailsFlyout.description.label',
+                { defaultMessage: 'Description' }
+              )}
+              data-test-subj="actionPolicyDetailsFlyoutDescriptionBlock"
+            >
+              <EuiText size="s">{policy.description || EMPTY_VALUE}</EuiText>
+            </Body.Section.Subsection>
+            <Body.Section.Subsection
+              title={i18n.translate(
+                'xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.label',
+                { defaultMessage: 'Policy scope' }
+              )}
+              data-test-subj="actionPolicyDetailsFlyoutPolicyScopeBlock"
+            >
+              <EuiText size="s">{policyScopeSummary}</EuiText>
+              {matcherTags && (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s" color="subdued">
+                        {i18n.translate(
+                          'xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.ruleTags',
+                          { defaultMessage: 'Rule tags:' }
+                        )}
+                      </EuiText>
+                    </EuiFlexItem>
+                    {matcherTags.map((tag) => (
+                      <EuiFlexItem grow={false} key={tag}>
+                        <EuiBadge color="hollow">{tag}</EuiBadge>
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                </>
+              )}
+              {matcherExpression && (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiText size="s" color="subdued">
+                    {i18n.translate(
+                      'xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.advancedQuery',
+                      { defaultMessage: 'Advanced matching query:' }
+                    )}{' '}
+                    <EuiCode>{matcherExpression}</EuiCode>
+                  </EuiText>
+                </>
+              )}
+            </Body.Section.Subsection>
+          </Body.Section>
+          <Body.Section
+            id="notification"
+            title={i18n.translate(
+              'xpack.alertingV2.actionPolicy.detailsFlyout.notification.title',
+              { defaultMessage: 'Notification' }
+            )}
+            data-test-subj="actionPolicyDetailsFlyoutNotification"
+          >
+            <SubsectionColumns hasBorder>
+              <Column
+                title={DISPATCH_PER_LABEL}
+                data-test-subj="actionPolicyDetailsFlyoutDispatchModeBlock"
               >
-                <FormattedMessage
-                  id="xpack.alertingV2.actionPolicy.detailsFlyout.close"
-                  defaultMessage="Close"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            {canWrite && (
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  iconType="pencil"
-                  onClick={handleEdit}
-                  data-test-subj="detailsFlyoutEditButton"
-                  aria-label={i18n.translate(
-                    'xpack.alertingV2.actionPolicy.detailsFlyout.edit.ariaLabel',
-                    { defaultMessage: 'Edit this action policy' }
-                  )}
+                {getGroupingModeLabel(groupingMode)}
+              </Column>
+              {groupingMode === 'per_field' && (
+                <Column
+                  title={GROUP_BY_LABEL}
+                  data-test-subj="actionPolicyDetailsFlyoutGroupByBlock"
                 >
-                  <FormattedMessage
-                    id="xpack.alertingV2.actionPolicy.detailsFlyout.edit"
-                    defaultMessage="Edit"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
+                  {groupBy && groupBy.length > 0 ? <BadgeList items={groupBy} /> : EMPTY_VALUE}
+                </Column>
+              )}
+              <Column
+                title={FREQUENCY_LABEL}
+                data-test-subj="actionPolicyDetailsFlyoutFrequencyBlock"
+              >
+                {getFrequencyLabel(policy.throttle, groupingMode)}
+              </Column>
+            </SubsectionColumns>
+          </Body.Section>
+          <Body.Section
+            id="destinations"
+            title={i18n.translate(
+              'xpack.alertingV2.actionPolicy.detailsFlyout.destinations.title',
+              { defaultMessage: 'Destinations' }
             )}
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+            data-test-subj="actionPolicyDetailsFlyoutDestinations"
+          >
+            {policy.destinations.length === 0 ? (
+              <EuiText size="s" color="subdued">
+                <p>-</p>
+              </EuiText>
+            ) : (
+              <EuiFlexGroup direction="column" gutterSize="s">
+                {policy.destinations.map((destination) => (
+                  <EuiFlexItem key={`${destination.type}-${destination.id}`}>
+                    <DestinationCard destination={destination} />
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            )}
+          </Body.Section>
+        </Body>
+
+        <Footer>
+          {canWrite && (
+            <Footer.PrimaryAction
+              id={TAKE_ACTION_BUTTON_ID}
+              label={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.takeAction', {
+                defaultMessage: 'Take action',
+              })}
+              iconType="chevronSingleDown"
+              onClick={() => setIsTakeActionOpen((open) => !open)}
+              data-test-subj="detailsFlyoutTakeActionButton"
+            />
+          )}
+        </Footer>
+      </FlyoutTemplate>
+      {canWrite && (
+        <ActionPolicyActionsMenu
+          policy={policy}
+          anchorId={TAKE_ACTION_BUTTON_ID}
+          isOpen={isTakeActionOpen}
+          onOpenChange={setIsTakeActionOpen}
+          anchorPosition="upRight"
+          onEdit={(id) => {
+            onClose();
+            onEdit(id);
+          }}
+          onClone={onClone}
+          onDelete={onDelete}
+          onEnable={onEnable}
+          onDisable={onDisable}
+          onSnooze={onSnooze}
+          onCancelSnooze={onCancelSnooze}
+          onUpdateApiKey={onUpdateApiKey}
+          isStateLoading={isStateLoading}
+          isSnoozeLoading={isSnoozeLoading}
+        />
+      )}
+    </>
   );
 };

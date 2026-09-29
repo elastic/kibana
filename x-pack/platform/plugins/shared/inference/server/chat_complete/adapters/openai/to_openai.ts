@@ -178,10 +178,13 @@ export function messagesToOpenAI({
               ? message.content
               : message.content.map((contentPart) => {
                   if (contentPart.type === 'image') {
+                    const { data, mimeType } = contentPart.source;
                     return {
                       type: 'image_url',
                       image_url: {
-                        url: contentPart.source.data,
+                        // The OpenAI-compatible API expects a data URL, not raw base64. Callers
+                        // that already pass a full URL leave mimeType empty, so keep those as-is.
+                        url: mimeType ? `data:${mimeType};base64,${data}` : data,
                       },
                     } satisfies ChatCompletionContentPartImage;
                   }

@@ -22,13 +22,17 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export type DeploymentMethod = 'managed_integrations';
+import type { DeploymentMethod } from '../../aws_service_matrix';
+
+// Re-export the canonical type from the matrix so all consumers use the same spelling.
+export type { DeploymentMethod };
 
 interface DeploymentMethodOption {
   value: DeploymentMethod;
@@ -42,7 +46,7 @@ interface DeploymentMethodOption {
 
 const DEPLOYMENT_METHOD_OPTIONS: DeploymentMethodOption[] = [
   {
-    value: 'managed_integrations',
+    value: 'managed_integration',
     text: i18n.translate(
       'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.managedIntegrations.selectText',
       { defaultMessage: 'Elastic Managed Integrations' }
@@ -56,20 +60,45 @@ const DEPLOYMENT_METHOD_OPTIONS: DeploymentMethodOption[] = [
       { defaultMessage: 'Simpler setup, no agent required.' }
     ),
   },
+  {
+    value: 'agent_based',
+    text: i18n.translate(
+      'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.agentBased.selectText',
+      { defaultMessage: 'Agent-based' }
+    ),
+    name: i18n.translate(
+      'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.agentBased.name',
+      { defaultMessage: 'Agent-based' }
+    ),
+    tagline: i18n.translate(
+      'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.agentBased.tagline',
+      { defaultMessage: 'For environments that require an Elastic Agent.' }
+    ),
+  },
 ];
 
 interface DeploymentMethodCardProps {
   selectedMethod: DeploymentMethod;
   onChange: (method: DeploymentMethod) => void;
+  /** When true, the Edit button is disabled with a tooltip — deployment method is locked after the first deploy. */
+  disabled?: boolean;
 }
 
-export function DeploymentMethodCard({ selectedMethod, onChange }: DeploymentMethodCardProps) {
+export function DeploymentMethodCard({
+  selectedMethod,
+  onChange,
+  disabled,
+}: DeploymentMethodCardProps) {
   const { euiTheme } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [draftMethod, setDraftMethod] = useState<DeploymentMethod>(selectedMethod);
 
-  const selectedOption = DEPLOYMENT_METHOD_OPTIONS.find((o) => o.value === selectedMethod)!;
+  // Defensive fallback: if a stale/hand-edited session-storage value carries an unknown method,
+  // show the first option rather than crashing. The type permits any DeploymentMethod string.
+  const selectedOption =
+    DEPLOYMENT_METHOD_OPTIONS.find((o) => o.value === selectedMethod) ??
+    DEPLOYMENT_METHOD_OPTIONS[0];
 
   const panelCss = css`
     border: 1px solid ${euiTheme.colors.borderBaseSubdued};
@@ -115,16 +144,35 @@ export function DeploymentMethodCard({ selectedMethod, onChange }: DeploymentMet
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              onClick={openModal}
-              data-test-subj="deploymentMethodCard-editButton"
+            <EuiToolTip
+              content={
+                disabled
+                  ? i18n.translate(
+                      'xpack.ingestHub.authenticateAndDeployStep.deploymentMethodCard.disabledTooltip',
+                      {
+                        defaultMessage:
+                          'Deployment method cannot be changed after services have been deployed. Start a new session to choose a different method.',
+                      }
+                    )
+                  : undefined
+              }
             >
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.deploymentMethodCard.editButton"
-                defaultMessage="Edit"
-              />
-            </EuiButtonEmpty>
+              {/* span needed: disabled EuiButtonEmpty has pointer-events:none; span intercepts hover
+                  and keyboard focus (tabIndex) so the tooltip fires for mouse and keyboard users */}
+              <span style={{ display: 'inline-block' }} tabIndex={disabled ? 0 : undefined}>
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={disabled ? undefined : openModal}
+                  disabled={disabled}
+                  data-test-subj="deploymentMethodCard-editButton"
+                >
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.deploymentMethodCard.editButton"
+                    defaultMessage="Edit"
+                  />
+                </EuiButtonEmpty>
+              </span>
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

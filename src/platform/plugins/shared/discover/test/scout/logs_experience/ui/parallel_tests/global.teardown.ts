@@ -8,24 +8,14 @@
  */
 
 import { globalTeardownHook } from '@kbn/scout';
-import { LOGS } from '../fixtures';
+import { deleteLogsExperienceData } from '../fixtures';
 
 globalTeardownHook('Teardown logs experience tests data', async ({ esClient, log }) => {
-  await esClient.indices
-    .deleteDataStream({ name: `logs-${LOGS.SYNTH_LOGS_DATASET}-${LOGS.SYNTH_LOGS_NAMESPACE}` })
-    .then(() =>
-      log.debug(
-        `[teardown:logs] Deleted logs-${LOGS.SYNTH_LOGS_DATASET}-${LOGS.SYNTH_LOGS_NAMESPACE} data stream`
-      )
-    )
+  // Warn rather than throw: a failed teardown shouldn't fail an otherwise green run, and the
+  // next run deletes the same resources before seeding.
+  await deleteLogsExperienceData(esClient)
+    .then(() => log.debug('[teardown:logs] Deleted the synthetic logs and non-logs data'))
     .catch((err: Error) =>
-      log.warning(`[teardown:logs] Failed to delete logs data stream: ${err.message}`)
-    );
-
-  await esClient.indices
-    .delete({ index: LOGS.NON_LOGS_INDEX })
-    .then(() => log.debug(`[teardown:logs] Deleted ${LOGS.NON_LOGS_INDEX}`))
-    .catch((err: Error) =>
-      log.warning(`[teardown:logs] Failed to delete ${LOGS.NON_LOGS_INDEX}: ${err.message}`)
+      log.warning(`[teardown:logs] Failed to delete the synthetic data: ${err.message}`)
     );
 });

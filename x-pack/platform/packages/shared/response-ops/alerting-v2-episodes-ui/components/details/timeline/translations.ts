@@ -74,15 +74,13 @@ export const getAfterNEventsLabel = (count: number, prevStatus: string): string 
   });
 
 /** --- Timeline (action sentences) --- */
+/** Complete sentences for actions that carry no inline details. */
 export const ACTION_LABELS: Record<string, string> = {
   ack: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.ack', {
     defaultMessage: 'acknowledged the episode',
   }),
   unack: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.unack', {
     defaultMessage: 'unacknowledged the episode',
-  }),
-  snooze: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.snooze', {
-    defaultMessage: 'snoozed the episode',
   }),
   unsnooze: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.unsnooze', {
     defaultMessage: 'unsnoozed the episode',
@@ -91,27 +89,21 @@ export const ACTION_LABELS: Record<string, string> = {
     defaultMessage: 'resolved the episode',
   }),
   activate: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.activate', {
-    defaultMessage: 're-opened the episode',
-  }),
-  tag: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.tag', {
-    defaultMessage: 'updated the tags',
-  }),
-  assign: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.assign', {
-    defaultMessage: 'updated the assignee',
+    defaultMessage: 'reopened the episode',
   }),
 };
-
-export const ASSIGNED_TO = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.timeline.assignedTo',
-  {
-    defaultMessage: 'assigned the episode to',
-  }
-);
 
 export const REMOVED_ASSIGNEE = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.timeline.removedAssignee',
   {
     defaultMessage: 'removed the assignee',
+  }
+);
+
+export const REMOVED_ALL_TAGS = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.timeline.removedAllTags',
+  {
+    defaultMessage: 'removed all tags',
   }
 );
 
@@ -130,18 +122,24 @@ export const STATUS_LABELS: Record<string, string> = {
   }),
 };
 
-/** --- Timeline (action event details) --- */
+/** --- Timeline (snooze sentences) --- */
 export const SNOOZED_INDEFINITELY = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.timeline.snoozedIndefinitely',
+  'xpack.alertingV2EpisodesUi.details.timeline.snoozedEpisodeIndefinitely',
   {
-    defaultMessage: 'Indefinitely',
+    defaultMessage: 'snoozed the episode indefinitely',
   }
 );
 
 export const getSnoozedUntilLabel = (date: string): string =>
-  i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.snoozedUntil', {
-    defaultMessage: 'Until {date}',
+  i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.snoozedEpisodeUntil', {
+    defaultMessage: 'snoozed the episode until {date}',
     values: { date },
+  });
+
+export const getSnoozedForLabel = (duration: string, date: string): string =>
+  i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.snoozedEpisodeForDuration', {
+    defaultMessage: 'snoozed the episode for {duration}, until {date}',
+    values: { duration, date },
   });
 
 export const formatSnoozeDuration = (startIso: string, endIso: string): string | null => {

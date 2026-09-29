@@ -7,9 +7,9 @@
 
 import { z } from '@kbn/zod/v4';
 import { validateDataView } from '@kbn/data-view-validation';
-import type { LogExtractionBodyParams } from '../../constants';
-import { LogExtractionInstallParams, LogExtractionUpdateParams } from '../../constants';
+import { LogExtractionInstallParams } from '../../constants';
 import { parseDurationToMs } from '../../../infra/time';
+import type { LogExtractionTypeOverride } from '../../../domain/saved_objects';
 import {
   LOG_EXTRACTION_DELAY_DEFAULT,
   LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT,
@@ -17,8 +17,11 @@ import {
 
 const MIN_FREQUENCY_MS = 30 * 1000;
 
-function validateFrequencyParam(data: LogExtractionBodyParams, ctx: z.RefinementCtx): void {
-  if (data.frequency === undefined) {
+/** Params of either config layer. Fields are only checked when a value is supplied: `undefined` and `null` both mean "nothing to check". */
+type LogExtractionParams = LogExtractionInstallParams | LogExtractionTypeOverride;
+
+function validateFrequencyParam(data: LogExtractionParams, ctx: z.RefinementCtx): void {
+  if (data.frequency == null) {
     return;
   }
   if (!isValidFrequency(data.frequency)) {
@@ -39,11 +42,11 @@ function isValidFrequency(frequency: string): boolean {
 }
 
 function validateIndexPatternList(
-  patterns: string[] | undefined,
+  patterns: string[] | null | undefined,
   fieldName: 'additionalIndexPatterns' | 'excludedIndexPatterns',
   ctx: z.RefinementCtx
 ): void {
-  if (patterns === undefined) {
+  if (patterns == null) {
     return;
   }
   patterns.forEach((value, i) => {
@@ -63,9 +66,9 @@ function validateIndexPatternList(
   });
 }
 
-function validateDelayVsLookbackPeriod(data: LogExtractionBodyParams, ctx: z.RefinementCtx): void {
-  const hasDelay = data.delay !== undefined;
-  const hasLookback = data.lookbackPeriod !== undefined;
+function validateDelayVsLookbackPeriod(data: LogExtractionParams, ctx: z.RefinementCtx): void {
+  const hasDelay = data.delay != null;
+  const hasLookback = data.lookbackPeriod != null;
   if (!hasDelay && !hasLookback) {
     return;
   }
@@ -79,7 +82,7 @@ function validateDelayVsLookbackPeriod(data: LogExtractionBodyParams, ctx: z.Ref
   }
 }
 
-function isDelayGteLookbackPeriod(delay?: string, lookbackPeriod?: string): boolean {
+function isDelayGteLookbackPeriod(delay?: string | null, lookbackPeriod?: string | null): boolean {
   const lookbackPeriodValue = lookbackPeriod ?? LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT;
   const delayValue = delay ?? LOG_EXTRACTION_DELAY_DEFAULT;
   try {
@@ -92,7 +95,7 @@ function isDelayGteLookbackPeriod(delay?: string, lookbackPeriod?: string): bool
 }
 
 export function validateLogExtractionParams(
-  data: LogExtractionBodyParams | undefined,
+  data: LogExtractionParams | undefined,
   ctx: z.RefinementCtx
 ): void {
   if (!data) return;
@@ -107,6 +110,6 @@ export const LogExtractionInstallSchema = LogExtractionInstallParams.superRefine
   validateLogExtractionParams
 ).optional();
 
-export const LogExtractionUpdadeSchema = LogExtractionUpdateParams.superRefine(
+export const LogExtractionUpdadeSchema = LogExtractionInstallParams.superRefine(
   validateLogExtractionParams
 );

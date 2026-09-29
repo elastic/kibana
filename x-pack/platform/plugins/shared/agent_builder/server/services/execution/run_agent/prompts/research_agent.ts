@@ -9,18 +9,14 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
 import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
-import {
-  getSkillsInstructions,
-  getRelevantSkillsPointerInstructions,
-  createRelevantSkillsNoticeMessage,
-} from './utils/skills';
-import { convertPreviousRounds } from '../utils/to_langchain_messages';
+import { getSkillsInstructions, getRelevantSkillsPointerInstructions } from './utils/skills';
+import { prepareMessages } from '../utils/to_langchain_messages';
+import { renderCurrentRun } from '../utils/render_steps_to_messages';
 import { attachmentToolsInstructions, renderAttachmentPrompt } from './utils/attachments';
 import { structuredOutputDescription } from './utils/custom_instructions';
-import { formatResearcherActionHistory } from './utils/actions';
 import { getFileSystemInstructions } from './utils/filestore';
+import { getAiIndicesInstructions } from './utils/ai_indices';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
-import { renderVisualizationPrompt } from './utils/visualizations';
 import { renderRenderersPrompt } from './utils/renderers';
 
 type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntimeParams;
@@ -28,43 +24,32 @@ type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntim
 export const getResearchAgentPrompt = async (
   params: ResearchAgentPromptParams
 ): Promise<BaseMessageLike[]> => {
-  const {
-    actions,
-    cycleLimit,
-    processedConversation,
-    resultTransformer,
-    toolManager,
-    conversationTimestamp,
-    relevantSkillsEnabled,
-    relevantSkills,
-  } = params;
+  const { run, processedConversation, resultTransformer, conversationTimestamp, imageResolver } =
+    params;
 
   // Generate messages from the conversation's rounds, optionally
   // injecting a compaction summary for older compacted rounds.
   // The summary is sourced from processedConversation.compactionSummary,
   // which is set during the compaction phase in the conversation pipeline.
-  const previousRoundsAsMessages = await convertPreviousRounds({
+  const previousRoundsAsMessages = await prepareMessages({
     conversation: processedConversation,
     resultTransformer,
     compactionSummary: processedConversation.compactionSummary,
     conversationTimestamp,
   });
 
-  const relevantSkillsMessages =
-    relevantSkillsEnabled && relevantSkills && relevantSkills.skills.length > 0
-      ? [createRelevantSkillsNoticeMessage(relevantSkills.skills)]
-      : [];
+  // The current run: the relevant_skills step (if any) is rendered in place by the renderer.
+  const currentRunMessages = await renderCurrentRun({
+    run,
+    phase: 'research',
+    imageResolver,
+    resultTransformer,
+  });
 
   return [
     ['system', await getAgentSystemMessage(params)],
     ...previousRoundsAsMessages,
-    ...relevantSkillsMessages,
-    ...(await formatResearcherActionHistory({
-      actions,
-      cycleLimit,
-      resultTransformer,
-      toolManager,
-    })),
+    ...currentRunMessages,
   ];
 };
 
@@ -109,12 +94,12 @@ ${fieldLines}
 };
 
 const getAgentSystemMessage = async ({
-  configuration: { instructions: customInstructions },
+  configuration: { instructions: customInstructions, aiIndexCatalog },
   outputSchema,
   skills,
+  spaceId,
   experimentalFeatures,
   relevantSkillsEnabled,
-  capabilities,
   renderers,
   processedConversation,
   conversationTemplates,
@@ -123,7 +108,6 @@ const getAgentSystemMessage = async ({
   const conversationMetadata = processedConversation.metadata as
     | Record<string, SerializedMetadataValue>
     | undefined;
-  const visEnabled = capabilities.visualizations;
 
   const conversationMetadataSection = await getConversationMetadataSection(
     conversationTemplateId,
@@ -196,6 +180,13 @@ ${
 }
 
 ${conversationMetadataSection}
+
+${getAiIndicesInstructions({
+  enabled: experimentalFeatures.aiIndices,
+  catalog: aiIndexCatalog ?? [],
+  spaceId,
+})}
+
 ## INSTRUCTIONS
 
 ${customInstructions}
@@ -222,8 +213,6 @@ Sub-actions listed in a connector attachment may carry a bracketed scope tag:
 - No tag — the action is read-only and has no external side effects.
 
 ## CUSTOM RENDERING
-
-${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 
 ${renderAttachmentPrompt()}
 

@@ -6,20 +6,18 @@
  */
 
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
-import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/server';
+import { getSmlOriginId, kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   dashboardStateToAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
+import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type {
   DashboardPanel,
-  DashboardPluginStart,
   DashboardSection,
   DashboardState,
-} from '@kbn/dashboard-plugin/server';
+} from '@kbn/as-code-dashboard-schema';
 import { DASHBOARD_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
-
-const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
 
 interface CreateDashboardSmlTypeOptions {
   getDashboardClient: () => Promise<DashboardPluginStart['client']>;
@@ -109,16 +107,13 @@ export const createDashboardSmlType = ({
     }
   },
 
-  getPermissions: () =>
-    kibanaSavedObjectPermissions({ savedObjectType: DASHBOARD_SAVED_OBJECT_TYPE }),
+  getPermissions: () => kibanaPermissions({ kiType: DASHBOARD_KI_TYPE }),
 
   toAttachment: async (item, context) => {
+    const originId = getSmlOriginId(item);
     try {
       const dashboardClient = await getDashboardClient();
-      const dashboard = await dashboardClient.read(
-        context.savedObjectsClient,
-        item.origin_id ?? ''
-      );
+      const dashboard = await dashboardClient.read(context.savedObjectsClient, originId);
 
       return {
         type: DASHBOARD_ATTACHMENT_TYPE,
@@ -127,7 +122,7 @@ export const createDashboardSmlType = ({
       };
     } catch (error) {
       throw new Error(
-        `SML dashboard: failed to get data for '${item.origin_id}': ${(error as Error).message}`
+        `SML dashboard: failed to get data for '${originId}': ${(error as Error).message}`
       );
     }
   },

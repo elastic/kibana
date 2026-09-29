@@ -1,5 +1,5 @@
 {
-  "sha1": "c9290c0b21d632782bf8b42451fb40d8eef6ec65",
+  "sha1": "d498804885fa62c1281873833f3ce7be4f6552fc",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -34,6 +34,66 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/internal_actions/national_parks.spec.ts",
         "line": 56,
         "column": 13
+      }
+    },
+    {
+      "id": "478a0cfe64d4fb9-8627e04223e9fc9",
+      "title": "Workflow access dialog saves private and public access through the shared form",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_access_control.spec.ts",
+        "line": 39,
+        "column": 8
+      }
+    },
+    {
+      "id": "478a0cfe64d4fb9-cbce59d83ce1e29",
+      "title": "Workflow access dialog lets an executor test a saved workflow with enabled=true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_access_control.spec.ts",
+        "line": 97,
+        "column": 24
+      }
+    },
+    {
+      "id": "478a0cfe64d4fb9-44fe125f3b43fe5",
+      "title": "Workflow access dialog lets an executor test a saved workflow with enabled=false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_access_control.spec.ts",
+        "line": 97,
+        "column": 24
+      }
+    },
+    {
+      "id": "19444d1b23e18a3-5e19e05711f14c3",
+      "title": "Workflow editor actions menu on the executions tab shows the actions menu only while the workflow is editable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/actions_menu_executions.spec.ts",
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -311,6 +371,48 @@
       }
     },
     {
+      "id": "35e1b13303eb455-503470e3a1c5be6",
+      "title": "Service account UI with the feature flag disabled omits run_as from settings autocomplete and inserted snippets",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/service_accounts_disabled.spec.ts",
+        "line": 69,
+        "column": 7
+      }
+    },
+    {
+      "id": "35e1b13303eb455-6d3fd990e830902",
+      "title": "Service account UI with the feature flag disabled keeps a typed run_as ID without resolving names or showing account suggestions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/service_accounts_disabled.spec.ts",
+        "line": 90,
+        "column": 9
+      }
+    },
+    {
+      "id": "35e1b13303eb455-12e39ee89151417",
+      "title": "Service account UI with the feature flag disabled shows historical raw identity without name badges or directory calls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/service_accounts_disabled.spec.ts",
+        "line": 118,
+        "column": 21
+      }
+    },
+    {
       "id": "a4934baed7bcf96-773061bd6f9afcd",
       "title": "Event autocomplete should be dynamic based on triggers manual trigger: event.* should only suggest spaceId",
       "expectedStatus": "passed",
@@ -341,7 +443,7 @@
     {
       "id": "84b864bf30250b9-1e36b15992c9e68",
       "title": "Workflow editor: validation performance [large_perf (87 steps, 431 vars)] setModelMarkers cascade completes within frame budget after edit",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -352,14 +454,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 65,
-        "column": 22
+        "line": 74,
+        "column": 25
       }
     },
     {
-      "id": "84b864bf30250b9-bb6c00e207d6b96",
-      "title": "Workflow editor: validation performance [large_perf (87 steps, 431 vars)] frame rate stays above threshold during rapid edits",
-      "expectedStatus": "skipped",
+      "id": "84b864bf30250b9-426daf58e791802",
+      "title": "Workflow editor: validation performance [large_perf (87 steps, 431 vars)] editor stays responsive during rapid edits",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -370,14 +472,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 205,
-        "column": 18
+        "line": 230,
+        "column": 33
       }
     },
     {
       "id": "84b864bf30250b9-b92795356361dc9",
       "title": "Workflow editor: validation performance [infosec_demo (150 steps, 361 vars)] setModelMarkers cascade completes within frame budget after edit",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -388,14 +490,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 65,
-        "column": 22
+        "line": 74,
+        "column": 25
       }
     },
     {
-      "id": "84b864bf30250b9-c189381fa89f5ce",
-      "title": "Workflow editor: validation performance [infosec_demo (150 steps, 361 vars)] frame rate stays above threshold during rapid edits",
-      "expectedStatus": "skipped",
+      "id": "84b864bf30250b9-9672ab6054b564c",
+      "title": "Workflow editor: validation performance [infosec_demo (150 steps, 361 vars)] editor stays responsive during rapid edits",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -406,14 +508,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 205,
-        "column": 18
+        "line": 230,
+        "column": 33
       }
     },
     {
       "id": "bd47170adc03761-1eaf3f4c5859ccb",
       "title": "Sanity tests for workflows Create, save, run and view a dummy workflow",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -424,14 +526,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 40,
+        "line": 39,
         "column": 50
       }
     },
     {
       "id": "bd47170adc03761-e6122565b6ea818",
       "title": "Sanity tests for workflows should show validation errors for invalid workflow YAML and clear them when fixed",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -442,14 +544,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 63,
+        "line": 62,
         "column": 73
       }
     },
     {
       "id": "bd47170adc03761-c4c083e0976f05e",
       "title": "Sanity tests for workflows should render \"console\" step type icon styled via mask-image",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -460,14 +562,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 97,
+        "line": 96,
         "column": 5
       }
     },
     {
       "id": "bd47170adc03761-18a9b2ea0bd01f9",
       "title": "Sanity tests for workflows should render \"if\" step type icon styled via mask-image",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -478,14 +580,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 97,
+        "line": 96,
         "column": 5
       }
     },
     {
       "id": "bd47170adc03761-deaf864c8e913aa",
       "title": "Sanity tests for workflows should render \"foreach\" step type icon styled via mask-image",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -496,14 +598,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 97,
+        "line": 96,
         "column": 5
       }
     },
     {
       "id": "bd47170adc03761-e01ca91455c1a7b",
       "title": "Sanity tests for workflows should render \"http\" step type icon styled via mask-image",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -514,14 +616,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 97,
+        "line": 96,
         "column": 5
       }
     },
     {
       "id": "bd47170adc03761-6b35c868f86ce6c",
       "title": "Sanity tests for workflows should render \"loop.continue\" step type icon styled via mask-image",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -532,14 +634,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 97,
+        "line": 96,
         "column": 5
       }
     },
     {
       "id": "bd47170adc03761-c8e4185679b827e",
       "title": "Sanity tests for workflows should render \"workflow.fail\" step type icon styled via mask-image",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -550,14 +652,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 97,
+        "line": 96,
         "column": 5
       }
     },
     {
       "id": "bd47170adc03761-459fd6ac3eccef8",
       "title": "Sanity tests for workflows should show step type autocompletion suggestions",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -568,14 +670,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 106,
+        "line": 105,
         "column": 11
       }
     },
     {
       "id": "bd47170adc03761-097049eb176efd2",
       "title": "Sanity tests for workflows should show root-level property suggestions on empty lines",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -586,14 +688,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 144,
+        "line": 141,
         "column": 51
       }
     },
     {
       "id": "bd47170adc03761-f9053316b789cab",
       "title": "Sanity tests for workflows should not show validation errors for YAML comment lines with liquid variables",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -604,8 +706,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 158,
-        "column": 31
+        "line": 154,
+        "column": 87
       }
     },
     {
@@ -710,8 +812,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/foreach_iterations.spec.ts",
-        "line": 72,
-        "column": 7
+        "line": 94,
+        "column": 9
       }
     },
     {

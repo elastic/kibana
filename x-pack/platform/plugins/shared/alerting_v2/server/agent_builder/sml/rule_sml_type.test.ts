@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -14,7 +14,6 @@ import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { RULE_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { RulesClient } from '../../lib/rules_client';
 import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../saved_objects';
-import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { createRuleSmlType } from './rule_sml_type';
 
 const baseRuleAttrs: RuleSavedObjectAttributes = {
@@ -23,21 +22,18 @@ const baseRuleAttrs: RuleSavedObjectAttributes = {
     name: 'High CPU',
     description: 'CPU breach detection',
     tags: ['ops', 'cpu'],
-    owner: 'observability',
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '15m' },
-  query: {
-    format: 'standalone',
-    breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
-  },
-  state_transition: null,
+  query: { base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
+  recovery: { strategy: 'no_breach' },
+  no_data: { strategy: 'ignore' },
   enabled: true,
-  createdBy: 'elastic',
+  createdBy: { profile_uid: 'elastic' },
   createdAt: '2026-04-01T00:00:00.000Z',
-  updatedBy: 'elastic',
+  updatedBy: { profile_uid: 'elastic' },
   updatedAt: '2026-04-10T00:00:00.000Z',
-} as RuleSavedObjectAttributes;
+};
 
 // `getRule` returns the snake_case API response, not the saved object attributes.
 const { createdBy, createdAt, updatedBy, updatedAt, ...restRuleAttrs } = baseRuleAttrs;
@@ -50,12 +46,6 @@ const baseRuleResponse = {
   metadata: { ...baseRuleAttrs.metadata, version: baseRuleAttrs.metadata?.version ?? 1 },
 };
 
-const buildSmlContext = (logger = loggingSystemMock.createLogger()) => ({
-  esClient: {} as ElasticsearchClient,
-  savedObjectsClient: {} as SavedObjectsClientContract,
-  logger,
-});
-
 const buildToAttachmentContext = () => ({
   request: {} as KibanaRequest,
   savedObjectsClient: {} as SavedObjectsClientContract,
@@ -64,30 +54,34 @@ const buildToAttachmentContext = () => ({
 
 describe('createRuleSmlType', () => {
   let getRule: jest.Mock;
-  let getRepoSo: jest.Mock;
-  let createFinder: jest.Mock;
   let getIsAlertingV2Enabled: jest.Mock;
-  let repository: ISavedObjectsRepository;
+  let soClient: ReturnType<typeof savedObjectsClientMock.create>;
   let rulesClient: RulesClient;
+
+  const buildSmlContext = (logger = loggingSystemMock.createLogger()) => ({
+    esClient: {} as ElasticsearchClient,
+    savedObjectsClient: soClient,
+    logger,
+  });
+
+  const stubFinder = (find: () => AsyncGenerator<unknown>) => {
+    const close = jest.fn().mockResolvedValue(undefined);
+    soClient.createPointInTimeFinder.mockReturnValue({ find, close } as unknown as ReturnType<
+      typeof soClient.createPointInTimeFinder
+    >);
+    return close;
+  };
 
   beforeEach(() => {
     getRule = jest.fn();
-    getRepoSo = jest.fn();
-    createFinder = jest.fn();
     getIsAlertingV2Enabled = jest.fn().mockResolvedValue(true);
-
-    repository = {
-      get: getRepoSo,
-      createPointInTimeFinder: createFinder,
-    } as unknown as ISavedObjectsRepository;
-
+    soClient = savedObjectsClientMock.create();
     rulesClient = { getRule } as unknown as RulesClient;
   });
 
   const buildDefinition = () =>
     createRuleSmlType({
       getScopedRulesClient: () => rulesClient,
-      getInternalRepository: () => repository,
       getIsAlertingV2Enabled: () => getIsAlertingV2Enabled(),
     });
 
@@ -112,8 +106,7 @@ describe('createRuleSmlType', () => {
     };
 
     it('yields items from the saved objects finder and closes it when done', async () => {
-      const close = jest.fn().mockResolvedValue(undefined);
-      const find = jest.fn(async function* () {
+      const close = stubFinder(async function* () {
         yield {
           saved_objects: [
             {
@@ -129,7 +122,6 @@ describe('createRuleSmlType', () => {
           ],
         };
       });
-      createFinder.mockReturnValue({ find, close });
 
       const items = await drainList();
 
@@ -141,7 +133,7 @@ describe('createRuleSmlType', () => {
         },
         { id: 'rule-2', updatedAt: '2026-04-11T00:00:00.000Z', spaces: ['default'] },
       ]);
-      expect(createFinder).toHaveBeenCalledWith(
+      expect(soClient.createPointInTimeFinder).toHaveBeenCalledWith(
         expect.objectContaining({
           type: RULE_SAVED_OBJECT_TYPE,
           namespaces: ['*'],
@@ -152,13 +144,11 @@ describe('createRuleSmlType', () => {
     });
 
     it('falls back to "default" namespace and a fresh timestamp when missing', async () => {
-      const close = jest.fn().mockResolvedValue(undefined);
-      const find = jest.fn(async function* () {
+      stubFinder(async function* () {
         yield {
           saved_objects: [{ id: 'rule-no-meta' }],
         };
       });
-      createFinder.mockReturnValue({ find, close });
 
       const items = await drainList();
 
@@ -172,34 +162,37 @@ describe('createRuleSmlType', () => {
     });
 
     it('closes the finder even if iteration throws', async () => {
-      const close = jest.fn().mockResolvedValue(undefined);
-      const find = jest.fn(async function* () {
+      const close = stubFinder(async function* () {
         yield { saved_objects: [{ id: 'rule-1' }] };
         throw new Error('boom');
       });
-      createFinder.mockReturnValue({ find, close });
 
       await expect(drainList()).rejects.toThrow('boom');
       expect(close).toHaveBeenCalledTimes(1);
     });
 
-    it('yields nothing and never touches the repository when alerting v2 is disabled', async () => {
+    it('yields nothing and never opens a PIT finder when alerting v2 is disabled', async () => {
       getIsAlertingV2Enabled.mockResolvedValue(false);
 
       const items = await drainList();
 
       expect(items).toEqual([]);
-      expect(createFinder).not.toHaveBeenCalled();
+      expect(soClient.createPointInTimeFinder).not.toHaveBeenCalled();
     });
   });
 
   describe('getSmlEntry', () => {
-    it('returns a single entry built from rule metadata + query', async () => {
-      getRepoSo.mockResolvedValueOnce({ id: 'rule-1', attributes: baseRuleAttrs });
+    it('reads the origin through the shared client and builds an entry from metadata + query', async () => {
+      soClient.get.mockResolvedValueOnce({
+        id: 'rule-1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: baseRuleAttrs,
+      });
 
       const result = await buildDefinition().getSmlEntry('rule-1', buildSmlContext());
 
-      expect(getRepoSo).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, 'rule-1');
+      expect(soClient.get).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, 'rule-1');
       expect(result).toEqual({
         type: RULE_KI_TYPE,
         title: 'High CPU',
@@ -208,15 +201,17 @@ describe('createRuleSmlType', () => {
           'CPU breach detection',
           'alert',
           'ops, cpu',
-          (baseRuleAttrs.query as { breach: { query: string } }).breach.query,
+          baseRuleAttrs.query.base,
         ].join('\n'),
       });
       expect(result).not.toHaveProperty('permissions');
     });
 
     it('falls back to originId for title when metadata.name is missing', async () => {
-      getRepoSo.mockResolvedValueOnce({
+      soClient.get.mockResolvedValueOnce({
         id: 'rule-bare',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
         attributes: {
           ...baseRuleAttrs,
           metadata: undefined,
@@ -229,7 +224,7 @@ describe('createRuleSmlType', () => {
     });
 
     it('returns undefined and logs a warning when the saved object lookup throws', async () => {
-      getRepoSo.mockRejectedValueOnce(new Error('not found'));
+      soClient.get.mockRejectedValueOnce(new Error('not found'));
       const logger = loggingSystemMock.createLogger();
 
       const result = await buildDefinition().getSmlEntry('rule-missing', buildSmlContext(logger));
@@ -246,15 +241,15 @@ describe('createRuleSmlType', () => {
       const result = await buildDefinition().getSmlEntry('rule-1', buildSmlContext());
 
       expect(result).toBeUndefined();
-      expect(getRepoSo).not.toHaveBeenCalled();
+      expect(soClient.get).not.toHaveBeenCalled();
     });
   });
 
   describe('getPermissions', () => {
-    it('returns the rules-read API privilege', () => {
+    it('returns the registered ai_index read action for rules', () => {
       const permissions = buildDefinition().getPermissions!('rule-1', buildSmlContext());
       expect(permissions).toEqual({
-        kibana: { privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.rules.read}` }] },
+        kibana: { privileges: { name: [`ai_index:${RULE_KI_TYPE}/read`] } },
       });
     });
   });
@@ -263,17 +258,26 @@ describe('createRuleSmlType', () => {
     const buildSmlDocument = (overrides: Partial<{ origin_id: string }> = {}) => {
       const originId = overrides.origin_id ?? 'rule-1';
       return {
-        id: 'sml-1',
         type: RULE_KI_TYPE,
         title: 'High CPU',
-        origin_id: originId,
-        origin: { uri: `${RULE_KI_TYPE}://${originId}` },
         content: '',
-        created_at: '2026-04-10T00:00:00.000Z',
-        updated_at: '2026-04-10T00:00:00.000Z',
-        spaces: ['default'],
         permissions: { kibana: { privileges: [] } },
-        ingestion_method: 'crawled' as const,
+        id: 'sml-1',
+        '@timestamp': '2026-04-10T00:00:00.000Z',
+        updated_at: '2026-04-10T00:00:00.000Z',
+        references: [{ uri: `${RULE_KI_TYPE}://${originId}`, relation: 'derived_from' as const }],
+        governance: {
+          provenance: {
+            created_by: {
+              uri: 'crawler://sml',
+              metadata: { ingestion_method: 'crawled' as const },
+            },
+            updated_by: {
+              uri: 'crawler://sml',
+              metadata: { ingestion_method: 'crawled' as const },
+            },
+          },
+        },
       };
     };
 

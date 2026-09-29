@@ -82,8 +82,9 @@ export const registerSuggestFixRoute = (
           logger,
           nlQuery: 'Fix the following ES|QL query. Return only the corrected query.',
           additionalContext: buildSuggestFixContext(queryString, errorMessage),
-          executeQuery: false,
+          execute: 'none',
           includeDatasets,
+          includeViews: true,
         });
 
         return response.ok({

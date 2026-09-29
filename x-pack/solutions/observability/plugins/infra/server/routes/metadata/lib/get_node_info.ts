@@ -8,7 +8,7 @@
 import { set } from '@kbn/safer-lodash-set';
 import { first, startsWith } from 'lodash';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import type { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import type { InfraSourceConfiguration } from '../../../lib/sources';
@@ -19,7 +19,7 @@ import type {
 import { getPodNodeName } from './get_pod_node_name';
 import { CLOUD_METRICS_MODULES } from '../../../lib/constants';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
-import { unflattenMetadataInfoFields } from './unflatten_metadata_info_fileds';
+import { unflattenMetadataInfoFields } from './unflatten_metadata_info_fields';
 
 export const getNodeInfo = async (
   framework: KibanaFramework,
@@ -27,7 +27,8 @@ export const getNodeInfo = async (
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
   nodeType: InventoryItemType,
-  timeRange: { from: number; to: number }
+  timeRange: { from: number; to: number },
+  schema?: DataSchemaFormat
 ): Promise<InfraMetadataInfo> => {
   // If the nodeType is a Kubernetes pod then we need to get the node info
   // from a host record instead of a pod. This is due to the fact that any host
@@ -41,7 +42,8 @@ export const getNodeInfo = async (
       sourceConfiguration,
       nodeId,
       nodeType,
-      timeRange
+      timeRange,
+      schema
     );
     if (kubernetesNodeName) {
       return getNodeInfo(

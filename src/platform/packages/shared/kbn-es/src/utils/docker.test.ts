@@ -803,9 +803,7 @@ describe('setupServerlessVolumes()', () => {
     });
 
     await volumeCmdTest(volumeCmd);
-    await expect(
-      Fsp.access(`${serverlessObjectStorePath}/cluster_state/lease`)
-    ).rejects.toThrowError();
+    await expect(Fsp.access(`${serverlessObjectStorePath}/cluster_state/lease`)).rejects.toThrow();
   });
 
   test('should add SSL and IDP metadata volumes when ssl is passed', async () => {
@@ -1088,6 +1086,39 @@ describe('runServerlessCluster()', () => {
       esArgs: ['xpack.security.enabled=false'],
     });
     expect(waitForSecurityIndexMock).not.toHaveBeenCalled();
+  });
+
+  test('should call onReady after the cluster is ready', async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
+    waitForSecurityIndexMock.mockResolvedValue();
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    const onReady = jest.fn().mockResolvedValue(undefined);
+    await runServerlessCluster(log, {
+      projectType,
+      basePath: baseEsPath,
+      waitForReady: true,
+      onReady,
+    });
+
+    expect(onReady).toHaveBeenCalledTimes(1);
+    expect(waitUntilClusterReadyMock).toHaveBeenCalledTimes(1);
+    expect(waitForSecurityIndexMock).toHaveBeenCalledTimes(1);
+  });
+
+  test('should not call onReady when waitForReady is false', async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    const onReady = jest.fn().mockResolvedValue(undefined);
+    await runServerlessCluster(log, { projectType, basePath: baseEsPath, onReady });
+    expect(onReady).not.toHaveBeenCalled();
   });
 });
 

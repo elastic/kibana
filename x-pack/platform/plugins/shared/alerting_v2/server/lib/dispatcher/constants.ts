@@ -9,9 +9,10 @@
  * How far behind the persisted watermark each scan re-reads. Re-reads are
  * free: the INLINE STATS dedup in `getDispatchableAlertEventsQuery`
  * (queries.ts:38-39) drops already-recorded episodes server-side before
- * LIMIT. The overlap absorbs rule events indexed with a `@timestamp` behind
- * the watermark, so the settle buffer is a tuning knob rather than a
- * correctness constant.
+ * LIMIT. `@timestamp` is set by ES at ingest, so the gap between when it's set
+ * and searchability is bounded by the refresh interval and covered by the
+ * settle buffer; the overlap is slack for anything else (e.g. a paused
+ * dispatcher), not a correctness constant.
  */
 export const OVERLAP_WINDOW_MINUTES = 10;
 
@@ -22,7 +23,12 @@ export const OVERLAP_WINDOW_MINUTES = 10;
  */
 export const MAX_WINDOW_MINUTES = 15;
 
-/** Excludes the most recent slice so in-flight indexing is not scanned mid-write. */
+/**
+ * Excludes the most recent slice so in-flight indexing is not scanned
+ * mid-write. Must exceed the `.rule-events` refresh interval: ES sets
+ * `@timestamp` at ingest, so a doc is searchable at most one refresh after
+ * its set.
+ */
 export const SETTLE_BUFFER_SECONDS = 5;
 
 /**
@@ -38,6 +44,13 @@ export const STUCK_TICK_LIMIT = 10;
  * of retrying forever. Unread episodes in that window are skipped.
  */
 export const PRE_FETCH_STUCK_ADVANCE_LAG_MS = MAX_WINDOW_MINUTES * 60_000;
+
+/**
+ * Grouping mode applied when an action policy does not specify one. Applied
+ * once at policy hydration (FetchPoliciesStep); `PolicyCatalog.groupingModeOf`
+ * falls back to it only for policies missing from the catalog.
+ */
+export const DEFAULT_GROUPING_MODE = 'per_episode' as const;
 
 /** Task Manager timeout for one dispatcher tick. Also consumed by task_definition.ts. */
 export const DISPATCHER_TASK_TIMEOUT = '1m' as const;

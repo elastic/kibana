@@ -11,6 +11,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
+      diskSizeGb: 130
     retry:
       automatic:
         - exit_status: '*'
@@ -72,13 +73,14 @@ steps:
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
     label: Build Kibana Distribution
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod
       provider: gcp
       machineType: c4d-standard-16
       diskType: hyperdisk-balanced
+      diskSizeGb: 50
+      buildDirectory: /dev/shm/bk
       zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d
-      diskSizeGb: 200
     key: build
     timeout_in_minutes: 60
     retry:
@@ -150,24 +152,6 @@ steps:
       spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
       diskSizeGb: 130
     key: linting_with_types
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
-  - command: .buildkite/scripts/steps/lint_with_oxlint.sh
-    label: 'Linting (with oxlint)'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n4-standard-4
-      diskType: hyperdisk-balanced
-      preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
-      diskSizeGb: 130
-    key: linting_with_oxlint
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -325,6 +309,7 @@ steps:
       machineType: n2-standard-2
       preemptible: true
       spotZones: us-central1-b,us-central1-c,us-central1-f
+      diskSizeGb: 130
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -343,6 +328,7 @@ steps:
       machineType: n2-standard-4
       preemptible: true
       spotZones: us-central1-b,us-central1-c,us-central1-f
+      diskSizeGb: 130
     artifact_paths: 'target/plugin_so_types_snapshot.json'
     depends_on:
       - build
@@ -359,10 +345,18 @@ steps:
     label: Post-Build
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
+      provider: k8s
+      image: docker.elastic.co/ci-agent-images/kibana/ci-minimal
+      imageUID: 1000
+    plugins:
+      - sparse-checkout#v1.6.0:
+          paths:
+            - .buildkite
+            - .node-version
+            - package.json
+            - tsconfig.base.json
+            - versions.json
+          cleanup_sparse_state: true
 
   - wait
 

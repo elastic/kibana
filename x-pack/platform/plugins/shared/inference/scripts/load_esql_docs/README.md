@@ -9,7 +9,7 @@ The generated documentation is validated and will emit warnings when invalid que
 - an installed Generative AI connector
 
 ### Run
-yarn es snapshot --license trial
+pnpm es snapshot --license trial
 node scripts/kibana --dev --no-base-path
 
 ## Incremental Updates

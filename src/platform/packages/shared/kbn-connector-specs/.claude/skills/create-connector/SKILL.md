@@ -92,9 +92,17 @@ user you could not find one. Search for existing SVG/PNG files in:
 
 AI agents rely on descriptions to choose the right action and construct valid inputs. Every action and parameter must have high-quality descriptive text.
 
-### `isTool` and action descriptions
+### `isTool`, `scope`, and action descriptions
 
 Actions should set `isTool: true` to be discoverable by AI agents in Agent Builder. This is the default for most actions. Use `isTool: false` only for actions that should not be invoked autonomously (e.g. destructive or admin-only operations).
+
+Every `isTool: true` action **must** also have an explicit `scope` field — never omit it. Classify each action:
+
+- `scope: 'read'` — pure reads; no external state modified (GET-only, searches, listings, downloads)
+- `scope: 'write'` — creates or appends new data without touching existing state (send message, create resource, add comment)
+- `scope: 'destroy'` — overwrites, updates, or deletes existing state (resolve/update/delete anything, patch a record); also use for generic escape-hatch actions (`request`, `callTool`, `callRestApi`) since they can do anything
+
+When uncertain, prefer `'destroy'` over `'write'` — it's safer to over-classify. See the `scope` section in [reference/connector-patterns.md](reference/connector-patterns.md) for the full table and examples.
 
 Every entry MUST have a `description` field (plain string, NOT `i18n.translate()`) that explains:
 - What the action does
@@ -144,7 +152,7 @@ forbidden non-null assertion (`@typescript-eslint/no-non-null-assertion`) in a t
 `Connector.action!.handler` — that a code-reading self-review or an AI PR reviewer can miss, and that
 otherwise only surface once CI's lint step fails the build.
 
-Unit tests that mock `ctx.client`/`ctx.request` yourself cannot catch bugs where the mock encodes the same
+Unit tests that mock `ctx.client` yourself cannot catch bugs where the mock encodes the same
 wrong assumption as the handler (e.g. asserting on the axios default array-param serialization when the
 vendor actually needs a different form, or asserting that an optional modifier param is sent as a query
 param when the vendor actually expects it in the body). For any handler you flagged during vendor API
@@ -152,10 +160,58 @@ research as having non-obvious update, serialization, or query-string-vs-body se
 asserts on the *exact* request shape sent (URL, method, body, and params/paramsSerializer) against what the
 docs say the vendor expects — not just that the handler resolves without throwing.
 
+A mock also goes stale. When live testing or vendor docs disprove a response shape you had assumed, the
+mock that encodes the old shape is a second place to fix — and a test that never asserts on the handler's
+return value will keep passing with the wrong mock in place. Assert the returned value, not just that the
+call resolved.
+
+**Write tests for the paths live testing will not reach.** Verifying a connector against one real account
+exercises the happy path and little else. The edges that review finds instead are predictable, so cover
+them with unit tests up front — each one only if your connector has the thing it tests:
+
+- **if an action proxies a call whose non-2xx answers are meaningful** — that non-2xx returned as a
+  result, with its error body intact. An ordinary `GET` that 404s is an error and stays one; do not add
+  this test by turning a real error into a result.
+- **if a request sends a credential in a custom header** — a 3xx response, asserting both
+  `maxRedirects: 0` and the returned `Location`
+- **if a list action follows a continuation link** — a multi-page response, asserting every page is
+  followed and that the page cap reports `truncated`
+- **if a list action follows a continuation link** — an off-origin link, asserting pagination stops and
+  no authenticated follow-up request is made. Cover a protocol-relative link (`//evil.example/items`)
+  as well as an absolute one, because it reads as relative and resolves to a different origin. Without
+  this case a regression that drops the origin guard still passes every test above, and the connector's
+  credentials go to the host the link names
+- **if an input carries a size or byte bound** — an over-sized input rejected at the schema boundary,
+  including a **non-ASCII** case for a byte bound
+- **if a regex constrains a URL path** — every accept *and* reject case, table-driven
+
+A connector with none of these (an MCP-only spec, or one whose actions are plain `GET` reads) owes none
+of them. Write the tests its own surface needs instead.
+
 ### Self-review before handing off
 
 Before treating the connector as done, re-read the whole diff once, end to end, specifically hunting for:
 
+- Any `isTool: true` action missing a `scope` field — every tool action must have one
+- A `scope` that looks wrong: a "get"/"list"/"search" action marked `write` or `destroy`, or an update/delete/patch action marked `read`
+- A `scope: 'read'` on an action whose request is a `POST`/`PATCH` — read the vendor's documentation for
+  that route and keep `read` when it only reads (a GraphQL query and a search-with-a-body are read-only
+  `POST`s); change it when the documentation says the call changes state
+- Any request carrying a credential in a custom header (`x-api-key`, `x-functions-key`, `private-token`)
+  without both `maxRedirects: 0` and a `validateStatus` that accepts the 3xx — axios forwards a custom
+  header across a cross-host redirect, and rejects the 3xx by default
+- An action that proxies a call to caller-controlled code or a caller-named route, with no
+  `validateStatus` — a deliberate non-2xx answer becomes a connector error the agent cannot inspect
+- A status code used as the sole evidence for a classification, *inside a proxying action* (e.g. treating
+  every 401/403 as a bad credential) — the service's own authorization responses are indistinguishable
+  by status. Conversely, a `test` handler or plain read that accepts 401/403 as a result — a failed
+  credential check must fail
+- A list action that reads `response.data.value` (or equivalent) without following the vendor's
+  continuation link, or that follows a continuation URL with `ctx.client` without resolving it against
+  `ctx.client.getUri()` and checking its origin first — that sends the connector's credentials to
+  whatever host the link names
+- A size bound measured with `.length` on a serialized string where the message says "bytes"
+- A regex guarding a URL path that has only been tested for what it accepts, never for what it must reject
 - Handlers still typed with implicit `any` (missing the `input: XInput` annotation)
 - `test.enabled` missing or set to `false`
 - Leftover schemas/constants from earlier iterations that are no longer referenced anywhere
@@ -204,6 +260,30 @@ This step requires documentation skills from https://github.com/elastic/elastic-
 
 1. Read 1-2 existing connector docs from `docs/reference/connectors-kibana/` as templates (for example, `zendesk-action-type.md`, `jira-cloud-action-type.md`). Follow the same structure.
 2. Write the new doc page. Use `docs-syntax-help` if unsure about MyST Markdown syntax.
+
+   Three things a template page will not teach you:
+
+   - **State what the connector can be used with.** A recent convention, because it is common for a
+     connector to work with only Agent Builder or only Workflows. A first-PR connector ships
+     `supportedFeatureIds: ['agentBuilder']` (see Step 2), so the page must say so rather than implying
+     workflow support — follow `gitlab-action-type.md`:
+
+     ```
+     ::::{note}
+     This connector is currently available in **Agent Builder** only. Workflow support is planned for a
+     future release.
+     ::::
+     ```
+
+     Check the opening sentence too: "a workflow or agent can..." promises the same thing in prose.
+   - **Do not use internal vocabulary.** "custom connector", "MCP-native", "connector spec" and
+     "stack connector" are our words for our implementation; a reader has no way to tell what a
+     *non*-custom connector would be. Describe what the connector does instead.
+   - **Do not interrupt a Markdown table.** A paragraph inserted between two rows ends the table, and
+     every row after it renders as raw pipe-delimited text with no header of its own. When you add a note
+     about an action, put it below the final row — then count the rendered rows against the number of
+     actions to confirm the table is still contiguous.
+
 3. Run these skills on the new file and fix any issues:
    - `frontmatter-description` — generate the `description` frontmatter field
    - `page-opening-optimizer` — verify H1 and opening paragraph

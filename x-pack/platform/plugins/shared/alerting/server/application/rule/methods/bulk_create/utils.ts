@@ -21,20 +21,17 @@ import {
   extractReferences,
   validateActions,
 } from '../../../../rules_client/lib';
-import {
-  addMissingUiamKeyTagIfNeeded,
-  apiKeyAsRuleDomainProperties,
-} from '../../../../rules_client/common';
-import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import type { BulkOperationError, RulesClientContext } from '../../../../rules_client/types';
+import { apiKeyAsRuleDomainProperties } from '../../../../rules_client/common';
+import type { BulkOperationError } from '../../../../rules_client/types';
 import type { RuleParams } from '../../types';
 import { transformRuleDomainToRuleAttributes } from '../../transforms';
-import type { PreparedRule, PrepareRuleArgs, ApiKeyEntry } from './types';
+import type { PreparedRule, PrepareRuleArgs } from './types';
 
 export const prepareRule = async <Params extends RuleParams>({
   context,
   actionsClient,
   username,
+  profileUid,
   id,
   rule,
   apiKeys,
@@ -70,15 +67,18 @@ export const prepareRule = async <Params extends RuleParams>({
       | Awaited<ReturnType<typeof createNewAPIKeySet>> = apiKeyAsRuleDomainProperties(
       null,
       username,
-      false
+      false,
+      profileUid
     );
     if (data.enabled) {
       apiKeyProps = await createNewAPIKeySet(context, {
         id: ruleType.id,
         ruleName: data.name,
         username,
+        profileUid,
         shouldUpdateApiKey: true,
         errorMessage: 'Error creating rule: could not create API key',
+        refresh: false,
       });
       apiKeys.set(id, {
         apiKey: apiKeyProps.apiKey ?? null,
@@ -103,25 +103,18 @@ export const prepareRule = async <Params extends RuleParams>({
     const throttle = data.throttle ?? null;
     const { systemActions: _sa, actions: _a, ...restData } = data;
 
-    const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
-      data.tags,
-      apiKeyProps.uiamApiKey,
-      apiKeyProps.apiKeyCreatedByUser,
-      context.isServerless,
-      context.featureFlags
-    );
-
     const ruleAttributes = transformRuleDomainToRuleAttributes({
       actionsWithRefs,
       artifactsWithRefs,
       rule: {
         ...restData,
-        tags: tagsWithUiamCheck,
         ...apiKeyProps,
         enabled: data.enabled,
         id,
         createdBy: username,
         updatedBy: username,
+        createdByProfileUid: profileUid,
+        updatedByProfileUid: profileUid,
         createdAt: new Date(createTime),
         updatedAt: new Date(createTime),
         snoozeSchedule: [],
@@ -169,22 +162,4 @@ export const prepareRule = async <Params extends RuleParams>({
     };
     return { error };
   }
-};
-
-export const invalidateKeys = async (
-  entries: Iterable<ApiKeyEntry>,
-  context: RulesClientContext
-): Promise<void> => {
-  const keys: string[] = [];
-  for (const { apiKey, uiamApiKey, apiKeyCreatedByUser } of entries) {
-    if (apiKey && !apiKeyCreatedByUser) keys.push(apiKey);
-    if (uiamApiKey && !apiKeyCreatedByUser) keys.push(uiamApiKey);
-  }
-  if (keys.length === 0) return;
-  // Writes pending-invalidation SOs; logs errors internally, never throws.
-  await bulkMarkApiKeysForInvalidation(
-    { apiKeys: [...new Set(keys)] },
-    context.logger,
-    context.unsecuredSavedObjectsClient
-  );
 };

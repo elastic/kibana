@@ -89,6 +89,7 @@ export const compileUserDefinedEvaluator = (
     kind: 'llm',
     origin: 'user_defined',
     description,
+    direction: 'maximize',
     referenceDataSchema: buildReferenceDataSchema(judge.reference_data_keys),
     evidenceSchema: buildEvidenceSchema(judge.evidence),
     async evaluate({ round, referenceData, inferenceClient }) {

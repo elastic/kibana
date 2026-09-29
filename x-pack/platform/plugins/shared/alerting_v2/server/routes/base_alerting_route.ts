@@ -14,15 +14,19 @@ import type {
 } from '@kbn/core-http-server';
 import type { RouteHandler } from '@kbn/core-di-server';
 import { errorResponseSchema, type ErrorResponse } from '@kbn/alerting-v2-schemas';
+import { treeifyError } from '@kbn/zod/v4';
 import { injectable } from 'inversify';
 import merge from 'lodash/merge';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { ALERTING_ERROR_CODES } from '../lib/errors/error_codes';
+import { ALERTING_LOG_CODES } from '../lib/errors/error_codes';
+import type { AlertingLabels } from '../lib/services/logger_service/types';
 import type { AlertingRouteContext } from './alerting_route_context';
 import { getCommonErrorOasOperationObject } from './common_error_oas_examples';
 import { deepMergeRouteOptions } from './deep_merge_route_options';
 import { deriveErrorCodeFromStatus } from './derive_error_code';
 import { computeRouteValidate, type AlertingRouteSchemas } from './compute_route_validate';
+import { ZodRequestValidationError } from './zod_request_validation';
 
 /**
  * Re-exported so route authors keep a single import surface
@@ -46,7 +50,7 @@ export interface AlertingBoomData {
 @injectable()
 export abstract class BaseAlertingRoute implements RouteHandler {
   protected static readonly defaultOptions: RouteConfigOptions<RouteMethod> = {
-    access: 'public',
+    access: 'internal',
     tags: ['oas-tag:alerting-v2'],
     availability: { stability: 'experimental', since: '9.5.0' },
   };
@@ -118,7 +122,9 @@ export abstract class BaseAlertingRoute implements RouteHandler {
   /**
    * Maps a request schema-validation failure to the alerting v2
    * {@link ErrorResponse} shape so validation errors are indistinguishable from
-   * the domain errors produced by {@link BaseAlertingRoute.onError}. Wired into
+   * the domain errors produced by {@link BaseAlertingRoute.onError}. `details.errors`
+   * mirrors the tree the domain-level parsers attach, so a caller reads one
+   * shape whichever layer rejected the body. Wired into
    * `validate.onRequestValidationError` by the `validate` getter for routes that
    * declare request schemas. `bypassErrorFormat` keeps the flat body verbatim,
    * matching `errorResponseSchema` (see `onError` for the rationale).
@@ -128,11 +134,18 @@ export abstract class BaseAlertingRoute implements RouteHandler {
     _request,
     response
   ) => {
+    const { rawError } = error;
+
     const body: ErrorResponse = {
       code: deriveErrorCodeFromStatus(400),
       error: 'Bad Request',
       message: error.message,
-      details: { source: error.source },
+      details: {
+        source: error.source,
+        ...(rawError instanceof ZodRequestValidationError && {
+          errors: treeifyError(rawError.zodError),
+        }),
+      },
     };
 
     return response.customError({ statusCode: 400, body, bypassErrorFormat: true });
@@ -199,13 +212,24 @@ export abstract class BaseAlertingRoute implements RouteHandler {
     }
   }
 
+  protected errorLabels(_e: Boom.Boom | Error): AlertingLabels | undefined {
+    return undefined;
+  }
+
   protected onError(e: Boom.Boom | Error): IKibanaResponse {
     const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
 
     if (boom.output.statusCode >= 500) {
-      this.ctx.logger.error(`${this.routeName} error: ${boom.message}`, { error: e });
+      this.ctx.logger.error({
+        error: e,
+        code: ALERTING_LOG_CODES.ROUTES_HANDLER_FAILED,
+        labels: this.errorLabels(e),
+      });
     } else {
-      this.ctx.logger.debug(`${this.routeName} error: ${boom.message}`);
+      this.ctx.logger.debug({
+        message: 'Route handler returned client error',
+        labels: { resource: this.routeName },
+      });
     }
 
     const data = (boom.data ?? undefined) as AlertingBoomData | undefined;

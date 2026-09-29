@@ -11,9 +11,10 @@ import type { DispatcherPipelineInput, DispatcherPipelineResult } from './types'
  * Derives the next persisted watermark from a tick's outcome.
  *
  * Rules (applied in order):
- * - Aborted before StoreActionsStep (recordedEpisodes undefined): no advance.
+ * - Aborted before StoreActionsStep (recordedEpisodes undefined), or
+ *   inline_stats_too_large (scan query rejected): no advance.
  * - No actions: window fully consumed. Advance to windowEnd.
- * - Truncated (row count === EPISODE_QUERY_LIMIT): advance to the last fetched
+ * - Truncated (row count === ESQL_QUERY_ROW_LIMIT): advance to the last fetched
  *   episode's timestamp (the truncation edge); the deferred tail is re-read next tick.
  * - All other outcomes (no_episodes, normal completion): advance to windowEnd.
  *
@@ -31,20 +32,26 @@ export const computeNextWatermark = ({
 
   let nextWatermark: Date;
 
-  if (haltReason === 'aborted' && finalState.recordedEpisodes === undefined) {
-    // Pipeline stopped before StoreActionsStep — no records written, do not advance.
+  if (
+    (haltReason === 'aborted' && finalState.recordedEpisodes === undefined) ||
+    haltReason === 'inline_stats_too_large'
+  ) {
+    // Pipeline stopped before any records were written — do not advance.
+    //   'aborted': TM signal or tick deadline stopped the pipeline before StoreActionsStep.
+    //   'inline_stats_too_large': ES rejected the INLINE STATS pre-fetch query (sub-plan
+    //     too large); scan was refused, not executed. stuckTicks increments so the
+    //     pre-fetch escape hatch can eventually force-advance. Do NOT fall through to the
+    //     no_episodes path — that would advance to windowEnd on the first hit.
     nextWatermark = eventWatermark;
   } else if (haltReason === 'no_actions') {
     // All episodes were filtered (e.g. maintenance window) — window fully consumed.
     // Must be checked before the truncated branch: a truncated batch where all
     // episodes were filtered still advanced through the full window logically.
     nextWatermark = windowEnd;
-  } else if (finalState.truncated) {
-    // EPISODE_QUERY_LIMIT hit: episodes arrive sorted asc by last_event_timestamp,
-    // so the last element is the truncation edge. Advance there; the tail will be
+  } else if (finalState.scan?.truncated) {
+    // ESQL_QUERY_ROW_LIMIT hit: advance to the truncation edge; the tail will be
     // re-read from eventWatermark - OVERLAP on the next tick.
-    const lastEpisode = finalState.episodes?.[finalState.episodes.length - 1];
-    nextWatermark = lastEpisode ? new Date(lastEpisode.last_event_timestamp) : eventWatermark;
+    nextWatermark = finalState.scan.truncationEdge() ?? eventWatermark;
   } else {
     // Window fully consumed (no_episodes, or normal completion).
     nextWatermark = windowEnd;

@@ -10,8 +10,11 @@ import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server
 import {
   actionPolicySavedObjectAttributesSchemaV1,
   actionPolicySavedObjectAttributesSchemaV2,
+  actionPolicySavedObjectAttributesSchemaV3,
+  actionPolicySavedObjectAttributesSchemaV4,
 } from '../schemas/action_policy_saved_object_attributes';
 import type { ActionPolicySavedObjectAttributesV1 } from '../schemas/action_policy_saved_object_attributes';
+import { toActor } from './to_actor';
 
 export const actionPolicyModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -91,6 +94,84 @@ export const actionPolicyModelVersions: SavedObjectsModelVersionMap = {
         { unknowns: 'ignore' }
       ),
       create: actionPolicySavedObjectAttributesSchemaV2,
+    },
+  },
+  /**
+   * v3 migrates `matcher` from a raw KQL string to a structured object
+   * `{ tags, expression }`. Existing string matchers are wrapped in
+   * `{ expression: oldMatcher }` so they continue to be stored identically.
+   * Note: pre-v3 expressions referencing `rule.*` fields will no longer match
+   * in the dispatcher (those fields are not present in the evaluation context).
+   *
+   * This reshapes an existing attribute, so it is NOT rollback-compatible: the
+   * v1/v2 `forwardCompatibility` schemas type `matcher` as a string and reject
+   * the object, meaning a node rolled back to v2 fails to read any policy that
+   * carries a matcher. Accepted while alerting v2 is in technical preview; the
+   * SO migration fixtures therefore only cover matcher-less documents, and the
+   * string → object conversion is covered by unit tests instead.
+   */
+  '3': {
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: (doc) => {
+          const matcher = (doc.attributes as { matcher?: unknown }).matcher;
+          if (typeof matcher !== 'string') return { attributes: {} };
+          return { attributes: { matcher: { expression: matcher } } };
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: actionPolicySavedObjectAttributesSchemaV3.extends(
+        {},
+        { unknowns: 'ignore' }
+      ),
+      create: actionPolicySavedObjectAttributesSchemaV3,
+    },
+  },
+  '4': {
+    /**
+     * v4 migrates `createdBy` and `updatedBy` from the profile UID string to a
+     * structured actor object. Only string values are rewritten: a `null` actor
+     * (an unattributed write) stays `null`, which the v4 schema still allows, and
+     * an already-structured actor is left alone so the backfill is idempotent.
+     *
+     * This reshapes existing attributes, so it is NOT rollback-compatible: the
+     * v1-v3 schemas type both fields as strings and reject the object, meaning a
+     * node rolled back to v3 fails to read any policy with an attributed actor.
+     * Accepted while alerting v2 is in technical preview. The SO migration
+     * fixtures therefore only carry `null` actors, which round-trip through the
+     * rollback check; the string -> object conversion is covered by unit tests.
+     *
+     * The stored `apiKeyOwner` / `apiKeyCreatedByUser` attributes are untouched,
+     * so the decryption AAD is unaffected and a plain model version is correct.
+     */
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: (doc) => {
+          const { createdBy, updatedBy } = doc.attributes as {
+            createdBy?: unknown;
+            updatedBy?: unknown;
+          };
+          const createdByActor = toActor(createdBy);
+          const updatedByActor = toActor(updatedBy);
+
+          return {
+            attributes: {
+              ...(createdByActor ? { createdBy: createdByActor } : {}),
+              ...(updatedByActor ? { updatedBy: updatedByActor } : {}),
+            },
+          };
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: actionPolicySavedObjectAttributesSchemaV4.extends(
+        {},
+        { unknowns: 'ignore' }
+      ),
+      create: actionPolicySavedObjectAttributesSchemaV4,
     },
   },
 };

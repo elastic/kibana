@@ -27,6 +27,7 @@ export const groundednessEvaluator: EvaluatorDefinition = {
   version: '1.0.0',
   kind: 'llm',
   origin: 'built_in',
+  direction: 'maximize',
   description: 'Measures whether the response is grounded in tool-call outputs from the trace.',
   evidenceSchema: groundednessEvidenceSchema,
   async evaluate({ round, inferenceClient }) {

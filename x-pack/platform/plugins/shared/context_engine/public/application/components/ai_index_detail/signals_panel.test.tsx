@@ -44,6 +44,7 @@ const aiIndex: GetAiIndexResponse = {
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [],
+  traces: [],
   date_created: '2026-01-01T00:00:00.000Z',
   date_modified: '2026-01-01T00:00:00.000Z',
 };
@@ -86,7 +87,10 @@ const renderPanel = ({
   );
 };
 
-const aiIndexWithAgent: GetAiIndexResponse = { ...aiIndex, feedback_agent_id: 'my-agent' };
+const aiIndexWithAgent: GetAiIndexResponse = {
+  ...aiIndex,
+  feedback_analysis: { enabled: false, agent_id: 'my-agent' },
+};
 
 describe('SignalsPanel', () => {
   beforeEach(() => {

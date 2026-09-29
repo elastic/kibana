@@ -141,6 +141,14 @@ lands.
 | ----------------------------- | ------------------------------------------ |
 | `tags.serverless.workplaceai` | {icon}`logo_workplace_search` Workplace AI |
 
+#### VectorDB [scout-deployment-tags-serverless-vectordb]
+
+| Helper                    | Project type |
+| ------------------------- | ------------ |
+| `tags.serverless.vectordb` | VectorDB     |
+
+This expands to `@local-serverless-vectordb` and `@cloud-serverless-vectordb`. VectorDB is included in `tags.serverless.all`, but not in `tags.deploymentAgnostic` (this project type doesn't have a stateful counterpart). Add its explicit tags when the test needs VectorDB coverage.
+
 ### `tags.performance` [scout-deployment-tags-performance]
 
 Use `tags.performance` for performance tests. It assigns the `@perf` tag.

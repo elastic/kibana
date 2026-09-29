@@ -52,34 +52,40 @@ export type {
   RuleFormMeta,
   RuleFormLayout,
   RuleRequestCommon,
-  RuleNotificationsValue,
   RuleQuery,
-  ComposedQuery,
-  StandaloneQuery,
+  RuleRecovery,
+  RuleNoData,
   RuleKind,
+  RecoveryStrategy,
+  NoDataStrategy,
 } from './form';
 
 export {
   buildInlineWorkflowYaml,
-  buildRuleScopedMatcher,
   InlineWorkflowEditor,
   INLINE_ACTION_STEP_DEFINITIONS,
   getInlineActionStepDefinition,
   getDefaultInlineActionStepDefinition,
   isActionValid,
-  isExplicitlyLinkedToRule,
-  isRuleScopedCatchAllMatcher,
-  summarizeExplicitlyLinkedActionPolicies,
 } from './actions_form';
 export type {
   ActionDraft,
-  LinkedActionPolicySummary,
+  ConnectorCreationConfig,
   InlineActionStepDefinition,
   InlineActionStepType,
   InlineWorkflowActionDraft,
 } from './actions_form';
-export { useMatchedActionPolicies } from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';
+export {
+  matchedActionPoliciesQueryKey,
+  useMatchedActionPolicies,
+} from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';
 export type { UseMatchedActionPoliciesResult } from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';
+export { MatchedPolicyReason } from './flyout/compose_discover/compose_discover_form/matched_policy_reason';
+export { WorkflowConnectorIcons } from './flyout/compose_discover/compose_discover_form/workflow_connector_icons';
+export {
+  useActionPolicyConnectorTypes,
+  type UseActionPolicyConnectorTypesResult,
+} from './flyout/compose_discover/compose_discover_form/use_action_policy_connector_types';
 
 // Threshold rule-builder ES|QL parser + types — consumed by the episode trend chart
 export { parseThresholdEsql } from './flyout/compose_discover/rule_builder/threshold/parse_esql';
@@ -109,3 +115,24 @@ export { mapArtifacts } from './form/utils/artifact_mappers';
 export type { RuleArtifactPayload } from './form/utils/artifact_mappers';
 export { getRunbookContent, getDashboardId } from './form';
 export type { RunbookArtifactData, DashboardArtifactData } from './form';
+
+export { composeFormToCreateRequest } from './flyout/compose_discover/compose_mappers';
+
+// Sequence builder
+export type { SequenceFormValues, SequenceRule, HopWindow } from './sequence/form_types';
+export {
+  RULE_DRAG_MIME_TYPE,
+  generateStepId,
+  DEFAULT_SEQUENCE_FORM_VALUES,
+  isSequenceValid,
+  totalLookbackSeconds,
+  getCommonGroupingFields,
+  formatLookbackString,
+} from './sequence/form_types';
+export { buildSequenceRuleQueryData } from './sequence/build_esql';
+export { SequenceNode } from './sequence/sequence_node';
+export type { SequenceNodeType } from './sequence/sequence_node';
+export { SequenceEdge, WINDOW_OPTIONS } from './sequence/sequence_edge';
+export type { SequenceEdgeType } from './sequence/sequence_edge';
+export { layoutSequence } from './sequence/layout_sequence';
+export type { LayoutSequenceOptions } from './sequence/layout_sequence';

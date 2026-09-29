@@ -91,6 +91,7 @@ export const Outlook: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/search-concept-messages
     searchMessages: {
       isTool: true,
+      scope: 'read',
       description:
         "Search Outlook emails using the Microsoft Graph Search API with KQL syntax. Supports filtering by sender, subject, body content, attachment presence, and date ranges. Searches the signed-in user's mailbox. Returns hits with message ID, subject, sender, received date, and a short summary.",
       input: SearchMessagesInputSchema,
@@ -118,6 +119,7 @@ export const Outlook: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/user-list-messages
     listMessages: {
       isTool: true,
+      scope: 'read',
       description:
         'List Outlook email messages from the inbox or a specific folder. Returns message metadata including id, subject, sender, receivedDateTime, isRead, and hasAttachments. Use searchMessages when you have a keyword query; use listMessages when you want to browse a folder or apply OData filters.',
       input: ListMessagesInputSchema,
@@ -145,6 +147,7 @@ export const Outlook: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/message-get
     getMessage: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve the full details of a single Outlook email message by ID, including the HTML or text body. Use listMessages or searchMessages to discover message IDs.',
       input: GetMessageInputSchema,
@@ -166,6 +169,7 @@ export const Outlook: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/message-list-attachments
     listAttachments: {
       isTool: true,
+      scope: 'read',
       description:
         'List the attachments on an Outlook email message. Returns attachment metadata including id, name, contentType, size, and isInline. Use this before calling getAttachment to discover attachment IDs.',
       input: ListAttachmentsInputSchema,
@@ -186,6 +190,7 @@ export const Outlook: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/attachment-get
     getAttachment: {
       isTool: true,
+      scope: 'read',
       description:
         'Download an attachment from an Outlook email message. Returns the attachment content as a base64-encoded string (contentBytes). WARNING: Attachment content can be large; only call this when you have a plan to process the binary data (for example, via an Elasticsearch ingest pipeline attachment processor). Use listAttachments first to get the attachment ID and verify the content type and size before downloading.',
       input: GetAttachmentInputSchema,
@@ -211,6 +216,7 @@ export const Outlook: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/user-list-mailfolders
     listFolders: {
       isTool: true,
+      scope: 'read',
       description:
         'List the mail folders in an Outlook mailbox, including well-known folders (inbox, sentitems, drafts, deleteditems, junkemail) and custom folders. Returns folder id, displayName, totalItemCount, and unreadItemCount. Use folder IDs with listMessages to browse a specific folder.',
       input: ListFoldersInputSchema,

@@ -65,7 +65,7 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
     );
 
     expect(result.current.esqlQueryString).toBe(
-      'SET unmapped_fields = "NULLIFY"; FROM logs-*\n  | WHERE trace.id == "abc123"'
+      'SET unmapped_fields = "NULLIFY";\nFROM logs-*\n  | WHERE trace.id == "abc123"'
     );
     expect(result.current.esqlQueryString).toContain('SET unmapped_fields = "NULLIFY";');
   });
@@ -84,7 +84,7 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
     );
 
     expect(result.current.esqlQueryString).toBe(
-      'SET unmapped_fields = "NULLIFY"; FROM logs-*\n  | WHERE service.name == "payment" AND error.culprit == "charge"'
+      'SET unmapped_fields = "NULLIFY";\nFROM logs-*\n  | WHERE service.name == "payment" AND error.culprit == "charge"'
     );
   });
 

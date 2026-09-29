@@ -35,6 +35,7 @@ export const createAttachmentUpdateTool = ({
     'Update the content of an existing attachment. This creates a new version if the content changed. Use this to modify data you previously stored.',
   schema: attachmentUpdateSchema,
   tags: ['attachment'],
+  excludeFromMcp: true,
   handler: async ({ attachment_id: attachmentId, data, description }) => {
     const existing = attachmentManager.getAttachmentRecord(attachmentId);
 

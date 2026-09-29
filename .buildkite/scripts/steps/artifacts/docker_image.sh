@@ -124,25 +124,37 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
   buildkite-agent artifact upload "dependencies-$GIT_ABBREV_COMMIT.csv"
 
   echo "--- Upload CDN assets"
-  gcloud auth activate-service-account --key-file <(echo "$GCS_SA_CDN_KEY")
+  CDN_CREDS_DIR="$(mktemp -d)"
 
-  CDN_ASSETS_FOLDER=$(mktemp -d)
+  gcloud iam workload-identity-pools create-cred-config \
+    "${GCS_SA_CDN_AUDIENCE#//iam.googleapis.com/}" \
+    --service-account="$GCS_SA_CDN_EMAIL" \
+    --credential-source-file="$CDN_CREDS_DIR/token.jwt" \
+    --credential-source-type=text \
+    --output-file="$CDN_CREDS_DIR/credentials.json"
+
+  cdn_gcloud() {
+    buildkite-agent oidc request-token --audience "$GCS_SA_CDN_AUDIENCE" > "$CDN_CREDS_DIR/token.jwt"
+    CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE="$CDN_CREDS_DIR/credentials.json" gcloud "$@"
+  }
+
+  CDN_ASSETS_FOLDER="$(mktemp -d)"
   tar -xf "kibana-$BASE_VERSION-cdn-assets.tar.gz" -C "$CDN_ASSETS_FOLDER" --strip=1
 
-  gsutil -m cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_BUCKET/$GIT_ABBREV_COMMIT"
+  cdn_gcloud storage cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_BUCKET/$GIT_ABBREV_COMMIT"
 
   echo "--- Validate CDN assets"
-  ts-node "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/validate_cdn_assets.ts" \
+  node "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/validate_cdn_assets.ts" \
     "$GCS_SA_CDN_URL" \
     "$CDN_ASSETS_FOLDER"
 
   echo "--- Upload CDN readiness file"
   # Upload readiness file to mark CDN assets as complete
   # This file is checked at the start to determine if a rebuild is needed
-  echo "ready" | gsutil cp - "gs://$GCS_SA_CDN_BUCKET/$CDN_READINESS_FILE"
+  echo "ready" | cdn_gcloud storage cp - "gs://$GCS_SA_CDN_BUCKET/$CDN_READINESS_FILE"
   echo "Readiness file uploaded to gs://$GCS_SA_CDN_BUCKET/$CDN_READINESS_FILE"
 
-  gcloud auth revoke "$GCS_SA_CDN_EMAIL"
+  rm -rf "$CDN_CREDS_DIR"
 fi
 
 cat << EOF | buildkite-agent annotate --style "info" --context image
@@ -158,6 +170,21 @@ EOF
 if [[ "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
   buildkite-agent meta-data set pr_comment:build_serverless:head "* Kibana Serverless Image: \`$KIBANA_IMAGE\`"
   buildkite-agent meta-data set pr_comment:early_comment_job_id "$BUILDKITE_JOB_ID"
+fi
+
+# Publish the workflow step-schema artifact to the rolling serverless CDN path
+# on every main-branch image promotion. This runs before the image-tag-update
+# trigger so that a Vault or GCS failure does not block the trigger upload.
+if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
+  echo "--- Publish workflow step schema to CDN"
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    echo "DRY_RUN enabled — skipping workflow step schema CDN publish"
+  elif ! (cd "$(git rev-parse --show-toplevel)" && .buildkite/scripts/steps/workflow_step_schema/publish_schema.sh serverless); then
+    echo "^^^ Workflow step schema CDN publish failed; continuing so the image-tag-update trigger is not blocked."
+    buildkite-agent annotate \
+      "**Workflow step schema CDN publish (serverless) failed.** The schema at https://workflows.elastic.co/schema/v1/serverless may be stale. Check the job log for details." \
+      --style warning --context workflow-schema-cdn
+  fi
 fi
 
 # This part is related with updating the configuration of kibana-controller,

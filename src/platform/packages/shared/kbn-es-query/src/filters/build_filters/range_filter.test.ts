@@ -117,11 +117,11 @@ describe('Range filter builder', () => {
 
     expect(() => {
       buildRangeFilter(field!, { gte: 1, gt: 3 }, indexPattern);
-    }).toThrowError();
+    }).toThrow();
 
     expect(() => {
       buildRangeFilter(field!, { lte: 1, lt: 3 }, indexPattern);
-    }).toThrowError();
+    }).toThrow();
   });
 
   it('to use the right operator for each of gte, gt, lt and lte', () => {

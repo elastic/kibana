@@ -43,6 +43,7 @@ import {
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
+  removeCustomYaraSignatures,
   removeDeviceControl,
 } from '../../common/endpoint/models/policy_config_helpers';
 import {
@@ -291,6 +292,18 @@ export const getPackagePolicyUpdateCallback = (
 
     // Validate that Endpoint Security policy uses only enabled App Features
     validatePolicyAgainstProductFeatures(endpointIntegrationData.inputs, productFeatures);
+
+    // Stripped before license validation so deployments with the feature gated off never get a
+    // license error about a field they cannot set.
+    if (
+      (!productFeatures.isEnabled(ProductFeatureSecurityKey.endpointCustomYaraSignatures) ||
+        !experimentalFeatures.customYaraSignaturesEnabled) &&
+      endpointIntegrationData.inputs?.[0]?.config?.policy?.value
+    ) {
+      endpointIntegrationData.inputs[0].config.policy.value = removeCustomYaraSignatures(
+        endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
+      );
+    }
 
     // Validate that Endpoint Security policy is valid against current license
     if (endpointIntegrationData.inputs?.[0]?.config?.policy?.value) {

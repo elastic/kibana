@@ -13,11 +13,11 @@ import { findWithTagFilter } from '@kbn/as-code-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
-import type { DiscoverSessionSearchParams, DiscoverSessionSearchResponse } from './schema';
+import type { DiscoverSessionSearchRequestParams, DiscoverSessionSearchResponse } from './schema';
 
 export const searchDiscoverSessions = async (
   requestContext: RequestHandlerContext,
-  params: DiscoverSessionSearchParams
+  params: DiscoverSessionSearchRequestParams
 ): Promise<DiscoverSessionSearchResponse> => {
   const { core } = await requestContext.resolve(['core']);
   const { query, page, per_page: perPage } = params;

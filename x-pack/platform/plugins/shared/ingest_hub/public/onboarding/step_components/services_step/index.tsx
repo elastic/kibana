@@ -21,11 +21,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useLocation } from 'react-router-dom';
+
 import { ServiceRow } from './service_row';
 import { SIGNAL_TYPE_LABELS } from './signal_type_badge';
 import { useServicesStep } from './use_services_step';
 import { getCategoryTitle } from '../../service_categories';
 import { ServiceSearchFilter } from '../service_search_filter';
+import { DataFormatSelect } from './data_format_select';
+import { useOnboardingFlow } from '../../onboarding_flow_context';
 
 interface ServicesStepProps {
   onContinue: () => void;
@@ -51,18 +55,40 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
     handleSelectAllInCategory,
     handleDeselectAllInCategory,
     handleNext,
+    dataFormat,
+    setDataFormat,
   } = useServicesStep({ onContinue });
+
+  const { detectAndReviewStep } = useOnboardingFlow();
+  const location = useLocation();
+  // Lock format when in edit mode (SO persisted) OR when deploy has started without a persisted SO
+  // (SO create is best-effort — policies may exist even if ?deploymentId= was never added to URL).
+  const isFormatDisabled =
+    new URLSearchParams(location.search).has('deploymentId') ||
+    Object.keys(detectAndReviewStep.serviceStatuses).length > 0 ||
+    Object.keys(detectAndReviewStep.policyIdsByInstance).length > 0;
 
   return (
     <div data-test-subj="onboardingStep-services">
-      <EuiTitle size="m">
-        <h2>
-          <FormattedMessage
-            id="xpack.ingestHub.servicesStep.title"
-            defaultMessage="Which AWS services do you want to monitor?"
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+        <EuiFlexItem>
+          <EuiTitle size="m">
+            <h2>
+              <FormattedMessage
+                id="xpack.ingestHub.servicesStep.title"
+                defaultMessage="Which AWS services do you want to monitor?"
+              />
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <DataFormatSelect
+            dataFormat={dataFormat}
+            onChange={setDataFormat}
+            disabled={isFormatDisabled}
           />
-        </h2>
-      </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiText color="subdued">
         <p>

@@ -64,12 +64,12 @@ const setup = ({
   locationPathName = '/',
   navLinkIds,
   isServerless = true,
-  isNextChrome = false,
+  getUiSettingsHomeRoute = () => undefined,
 }: {
   locationPathName?: string;
   navLinkIds?: Readonly<string[]>;
   isServerless?: boolean;
-  isNextChrome?: boolean;
+  getUiSettingsHomeRoute?: () => string | undefined;
 } = {}) => {
   const history = createMemoryHistory({
     initialEntries: [locationPathName],
@@ -84,10 +84,9 @@ const setup = ({
     history,
     prependBasePath: (p) => p,
     navLinks: navLinksService,
-    getUiSettingsHomeRoute: () => undefined,
+    getUiSettingsHomeRoute,
     logger,
     chromeBreadcrumbs$,
-    isNextChrome,
   });
 
   return { projectNavigation, history, chromeBreadcrumbs$, navLinksService };
@@ -1017,5 +1016,64 @@ describe('getActiveSolutionNavId$()', () => {
 
     activeId = await lastValueFrom(projectNavigation.getActiveSolutionNavId$().pipe(take(1)));
     expect(activeId).toBe('oblt');
+  });
+});
+
+describe('registerNavigationLinks', () => {
+  it('registers hover lists and rejects a second registration on the same target', async () => {
+    const { projectNavigation } = setup();
+
+    projectNavigation.registerNavigationLinks({
+      id: 'dashboardLinks',
+      target: 'dashboards',
+      lists: [{ id: 'recentlyViewed', title: 'Recently viewed', items$: of([]) }],
+    });
+
+    const afterFirst = await firstValueFrom(projectNavigation.getRegisteredNavigationLinks$());
+    expect(afterFirst).toHaveLength(1);
+
+    expect(() =>
+      projectNavigation.registerNavigationLinks({
+        id: 'otherDashboardLinks',
+        target: 'dashboards',
+        lists: [{ id: 'favorites', title: 'Favorites', items$: of([]) }],
+      })
+    ).toThrow('A second hover registration on target "dashboards" is not allowed.');
+
+    const afterSecond = await firstValueFrom(projectNavigation.getRegisteredNavigationLinks$());
+    expect(afterSecond).toHaveLength(1);
+    expect(afterSecond[0].id).toBe('dashboardLinks');
+  });
+});
+
+describe('getProjectHome$()', () => {
+  it('emits defaultRoute when set', async () => {
+    const { projectNavigation } = setup({
+      navLinkIds: ['app1'],
+      getUiSettingsHomeRoute: () => '/app/observability/landing',
+    });
+
+    const home = await firstValueFrom(projectNavigation.getProjectHome$());
+    expect(home).toBe('/app/observability/landing');
+  });
+
+  it('emits nothing when defaultRoute is undefined', async () => {
+    const { projectNavigation } = setup({ navLinkIds: ['app1'] });
+
+    projectNavigation.initNavigation<any>(
+      'oblt',
+      of({
+        body: [{ id: 'home_node', href: '/app/custom-home', title: 'Home', icon: 'home' }],
+      })
+    );
+
+    const emitted: string[] = [];
+    const sub = projectNavigation.getProjectHome$().subscribe((value) => {
+      emitted.push(value);
+    });
+
+    await Promise.resolve();
+    expect(emitted).toEqual([]);
+    sub.unsubscribe();
   });
 });

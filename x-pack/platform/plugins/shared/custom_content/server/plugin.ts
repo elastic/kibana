@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import { createCustomContentContextAttachmentType } from './attachment_types/custom_content_context';
 import { createUpdateCustomContentTool } from './tools/update_custom_content_tool';
+import { customContentEmbeddableSchema } from './embeddable/schemas';
 
 interface SetupDeps {
+  embeddable: EmbeddableSetup;
   agentBuilder?: AgentBuilderPluginSetup;
 }
 
-interface StartDeps {
-  inference: InferenceServerStart;
-  data: DataPluginStart;
-}
+export class CustomContentPlugin implements Plugin<void, void, SetupDeps> {
+  setup(_core: CoreSetup, { embeddable, agentBuilder }: SetupDeps) {
+    embeddable.registerEmbeddableServerDefinition(CUSTOM_CONTENT_EMBEDDABLE_TYPE, {
+      title: 'Custom panel',
+      getSchema: () => customContentEmbeddableSchema,
+    });
 
-export class CustomContentPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  constructor(_initializerContext: PluginInitializerContext) {}
-
-  setup(core: CoreSetup<StartDeps>, { agentBuilder }: SetupDeps) {
     if (agentBuilder) {
       agentBuilder.attachments.registerType(
         createCustomContentContextAttachmentType() as Parameters<

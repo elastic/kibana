@@ -432,51 +432,33 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
 
   // ── Duplicate service ───────────────────────────────────────────────────
 
-  test('⋮ actions menu is visible on every row and contains Duplicate service', async ({
-    browserAuth,
-    page,
-  }) => {
-    await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['cloudtrail', 'waf'],
-    });
-
-    for (const id of ['cloudtrail', 'waf']) {
-      await page.testSubj.locator(`serviceSettingsStep-actionsButton-${id}`).click();
-      await expect(
-        page.testSubj.locator(`serviceSettingsStep-duplicateAction-${id}`)
-      ).toBeVisible();
-      // Close popover before opening the next
-      await page.keyboard.press('Escape');
-    }
-  });
-
   test('duplicate modal opens with correct service name in body copy', async ({
     browserAuth,
     page,
   }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['cloudtrail'],
+      selectedServiceIds: ['elb'],
     });
 
-    await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
-    await page.testSubj.locator('serviceSettingsStep-duplicateAction-cloudtrail').click();
+    await page.testSubj.locator('serviceSettingsStep-actionsButton-elb').click();
+    await page.testSubj.locator('serviceSettingsStep-duplicateAction-elb').click();
 
     const modal = page.testSubj.locator('duplicateServiceModal');
     await expect(modal).toBeVisible();
     await expect(modal.getByText(/Add another instance of/)).toBeVisible();
-    await expect(modal.getByText('AWS CloudTrail')).toBeVisible();
+    await expect(modal.getByText('AWS ELB')).toBeVisible();
   });
 
   test('duplicate modal pre-fills name as "Service [Duplicate]"', async ({ browserAuth, page }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['cloudtrail'],
+      selectedServiceIds: ['elb'],
     });
 
-    await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
-    await page.testSubj.locator('serviceSettingsStep-duplicateAction-cloudtrail').click();
+    await page.testSubj.locator('serviceSettingsStep-actionsButton-elb').click();
+    await page.testSubj.locator('serviceSettingsStep-duplicateAction-elb').click();
 
     await expect(page.testSubj.locator('duplicateServiceModal-nameField')).toHaveValue(
-      'AWS CloudTrail [Duplicate]'
+      'AWS ELB [Duplicate]'
     );
   });
 
@@ -485,11 +467,11 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     page,
   }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['cloudtrail'],
+      selectedServiceIds: ['elb'],
     });
 
-    await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
-    await page.testSubj.locator('serviceSettingsStep-duplicateAction-cloudtrail').click();
+    await page.testSubj.locator('serviceSettingsStep-actionsButton-elb').click();
+    await page.testSubj.locator('serviceSettingsStep-duplicateAction-elb').click();
     await expect(page.testSubj.locator('duplicateServiceModal')).toBeVisible();
 
     await page.testSubj.locator('duplicateServiceModal-cancelButton').click();
@@ -654,10 +636,10 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
       ],
     });
 
-    // Original row has no Remove action
-    await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
-    await expect(page.testSubj.locator('serviceSettingsStep-removeAction-cloudtrail')).toBeHidden();
-    await page.keyboard.press('Escape');
+    // ECF-only original: no ⋮ button at all (Duplicate was removed, Remove never applies)
+    await expect(
+      page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail')
+    ).toBeHidden();
 
     // Duplicate row has a Remove action — clicking it removes the row
     await page.testSubj.locator(`serviceSettingsStep-actionsButton-${dupInstanceId}`).click();
@@ -698,22 +680,11 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     page,
   }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['cloudtrail'],
-      serviceVars: {
-        cloudtrail: {
-          enabledDataStreams: ['cloudtrail'],
-          varsByDataStream: {
-            cloudtrail: {
-              enabledInputs: ['aws-s3'],
-              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::original-bucket' } },
-            },
-          },
-        },
-      },
+      selectedServiceIds: ['elb'],
     });
 
-    await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
-    await page.testSubj.locator('serviceSettingsStep-duplicateAction-cloudtrail').click();
+    await page.testSubj.locator('serviceSettingsStep-actionsButton-elb').click();
+    await page.testSubj.locator('serviceSettingsStep-duplicateAction-elb').click();
 
     // Derive the original name from the modal's pre-filled value so the test
     // stays anchored to whatever the current manifest produces.

@@ -21,18 +21,24 @@ export type { TypedEsqlQuery } from './typed_esql_query';
 
 export {
   ALERT_EPISODE_FIELDS,
+  DURATION_LOWER_BOUND_FIELD,
   buildEpisodesBaseQuery,
   buildEpisodesQuery,
   addEpisodeAggregation,
   applyFilterState,
 } from './episodes_query';
-export type { AlertEpisodeEsqlRow, EpisodesFilterState, EpisodesSortState } from './episodes_query';
+export type {
+  AlertEpisodeEsqlRow,
+  EpisodesBaseFilterState,
+  EpisodesFilterState,
+  EpisodesSortState,
+} from './episodes_query';
 
 export { buildEpisodeQuery, buildEpisodeGroupHashQuery } from './episode_query';
 export type { EpisodeGroupHashEsqlRow } from './episode_query';
 
 export { buildEpisodeEventsQuery, ALERT_EPISODE_EVENT_FIELDS } from './episode_events_query';
-export type { EpisodeEventRow } from './episode_events_query';
+export type { EpisodeEventRow, BuildEpisodeEventsQueryOptions } from './episode_events_query';
 
 export { buildEpisodeEventDataQuery } from './episode_event_data_query';
 export type { EpisodeEventDataRow } from './episode_event_data_query';
@@ -43,6 +49,7 @@ export type { EpisodeActionRow } from './episode_actions_query';
 export { buildEpisodeActionsHistoryQuery } from './episode_actions_history_query';
 export type {
   EpisodeActionHistoryEntry,
+  RawEpisodeActionHistoryEntry,
   BuildEpisodeActionsHistoryQueryOptions,
 } from './episode_actions_history_query';
 

@@ -51,6 +51,11 @@ jest.mock('../../common/use_license');
 jest.mock('../../containers/use_get_categories');
 jest.mock('../app/use_available_owners');
 
+const mockReportTemplateAppliedOnCreate = jest.fn();
+jest.mock('../../analytics/templates/use_template_apply_ebt', () => ({
+  useTemplateAppliedOnCreateEBT: () => mockReportTemplateAppliedOnCreate,
+}));
+
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
 const usePostCaseMock = usePostCase as jest.Mock;
@@ -145,7 +150,7 @@ describe('useSubmitCase', () => {
 
       expect(result.current.isSubmitting).toEqual(true);
 
-      expect(postCase).toBeCalledWith({ request: sampleDataWithoutTags });
+      expect(postCase).toHaveBeenCalledWith({ request: sampleDataWithoutTags });
       expect(onSuccess).toHaveBeenCalled();
       expect(afterCaseCreated).toHaveBeenCalled();
     });
@@ -230,6 +235,123 @@ describe('useSubmitCase', () => {
       );
 
       expect(result.current.isSubmitting).toEqual(false);
+    });
+  });
+
+  describe('template telemetry', () => {
+    it('reports the template once when the created case carries one', async () => {
+      postCase.mockResolvedValue({
+        id: sampleId,
+        ...sampleDataWithoutTags,
+        template: { id: 'tmpl-1', version: 2 },
+      });
+
+      const { result } = renderUseSubmitCase({ attachments: [] });
+
+      await result.current.submitCase(sampleDataWithoutTags, true);
+
+      await waitFor(() => {
+        expect(mockReportTemplateAppliedOnCreate).toHaveBeenCalledWith({
+          entryPoint: 'create_form',
+        });
+      });
+
+      expect(mockReportTemplateAppliedOnCreate).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports nothing when the created case carries no template', async () => {
+      postCase.mockResolvedValue({ id: sampleId, ...sampleDataWithoutTags });
+
+      const { result } = renderUseSubmitCase({ attachments: [] });
+
+      await result.current.submitCase(sampleDataWithoutTags, true);
+
+      await waitFor(() => {
+        expect(postCase).toHaveBeenCalled();
+      });
+
+      expect(mockReportTemplateAppliedOnCreate).not.toHaveBeenCalled();
+    });
+
+    it('reports nothing when the request carried a template but the created case did not', async () => {
+      // The event describes what the server stored, so the submitted request alone must not trigger
+      // it. This is the assertion that fails if the report ever reads from `data` instead.
+      postCase.mockResolvedValue({ id: sampleId, ...sampleDataWithoutTags });
+
+      const { result } = renderUseSubmitCase({ attachments: [] });
+
+      await result.current.submitCase(
+        { ...sampleDataWithoutTags, template: { id: 'tmpl-1', version: 2 } },
+        true
+      );
+
+      await waitFor(() => {
+        expect(postCase).toHaveBeenCalled();
+      });
+
+      expect(mockReportTemplateAppliedOnCreate).not.toHaveBeenCalled();
+    });
+
+    it('reports nothing when the form is invalid, so an abandoned form is silent', async () => {
+      const { result } = renderUseSubmitCase({ attachments: [] });
+
+      await result.current.submitCase(sampleDataWithoutTags, false);
+
+      expect(postCase).not.toHaveBeenCalled();
+      expect(mockReportTemplateAppliedOnCreate).not.toHaveBeenCalled();
+    });
+
+    it('reports nothing when the create fails', async () => {
+      postCase.mockRejectedValue(new Error('Network error'));
+
+      const { result } = renderUseSubmitCase({ attachments: [] });
+
+      await expect(result.current.submitCase(sampleDataWithoutTags, true)).rejects.toThrow();
+
+      expect(mockReportTemplateAppliedOnCreate).not.toHaveBeenCalled();
+    });
+
+    it('reports the template even when the attachment write fails', async () => {
+      // The case exists with its template by then, so an unrelated attachment failure must not
+      // swallow the event. This is what fixes the report's position above the attachment block.
+      const createAttachments = jest.fn().mockRejectedValue(new Error('attachment failed'));
+      useCreateAttachmentsMock.mockImplementation(() => ({ mutateAsync: createAttachments }));
+
+      postCase.mockResolvedValue({
+        id: sampleId,
+        ...sampleDataWithoutTags,
+        owner: SECURITY_SOLUTION_OWNER,
+        template: { id: 'tmpl-1', version: 2 },
+      });
+
+      const { result } = renderUseSubmitCase({
+        getAttachments: () => [
+          {
+            type: SECURITY_ALERT_ATTACHMENT_TYPE,
+            attachmentId: 'alert-1',
+            metadata: { index: 'idx-1', rule: null },
+          },
+        ],
+      });
+
+      await expect(result.current.submitCase(sampleDataWithoutTags, true)).rejects.toThrow();
+
+      expect(createAttachments).toHaveBeenCalled();
+      expect(mockReportTemplateAppliedOnCreate).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports nothing when the create returns no case', async () => {
+      postCase.mockResolvedValue(undefined);
+
+      const { result } = renderUseSubmitCase({ attachments: [] });
+
+      await result.current.submitCase(sampleDataWithoutTags, true);
+
+      await waitFor(() => {
+        expect(postCase).toHaveBeenCalled();
+      });
+
+      expect(mockReportTemplateAppliedOnCreate).not.toHaveBeenCalled();
     });
   });
 });

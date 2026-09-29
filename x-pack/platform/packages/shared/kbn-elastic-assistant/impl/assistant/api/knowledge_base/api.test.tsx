@@ -45,9 +45,7 @@ describe('API tests', () => {
         throw new Error(error);
       });
 
-      await expect(getKnowledgeBaseStatus(knowledgeBaseArgs)).resolves.toThrowError(
-        'simulated error'
-      );
+      await expect(getKnowledgeBaseStatus(knowledgeBaseArgs)).resolves.toThrow('simulated error');
     });
   });
 
@@ -70,7 +68,7 @@ describe('API tests', () => {
         throw new Error(error);
       });
 
-      await expect(postKnowledgeBase(knowledgeBaseArgs)).rejects.toThrowError('simulated error');
+      await expect(postKnowledgeBase(knowledgeBaseArgs)).rejects.toThrow('simulated error');
     });
   });
 });

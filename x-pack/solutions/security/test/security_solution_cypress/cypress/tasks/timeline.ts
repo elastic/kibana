@@ -227,14 +227,27 @@ export const clearEqlInTimeline = () => {
   cy.get(EQL_QUERY_VALIDATION_LABEL).should('not.exist');
 };
 
-export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
+export const addFilter = (filter: TimelineFilter): void => {
   cy.get(ADD_FILTER).click();
-  cy.get(TIMELINE_FILTER_FIELD).type(`${filter.field}{downarrow}{enter}`);
-  cy.get(TIMELINE_FILTER_OPERATOR).type(`${filter.operator}{downarrow}{enter}`);
-  if (filter.operator !== 'exists') {
-    cy.get(TIMELINE_FILTER_VALUE).type(`${filter.value}{enter}`);
-  }
-  return cy.get(SAVE_FILTER_BTN).click();
+  // Field combobox sometimes re-renders and drops the selection under load (see #259682).
+  // Retry until the operator input enables, which only happens after a field is committed.
+  cy.waitUntil(() => {
+    cy.get(TIMELINE_FILTER_FIELD).should('be.enabled');
+    cy.get(TIMELINE_FILTER_FIELD).focus();
+    cy.get(TIMELINE_FILTER_FIELD).invoke('val', ''); // .clear() not working well
+    cy.get(TIMELINE_FILTER_FIELD).type(`${filter.field}{downarrow}{enter}`);
+    return cy.get(TIMELINE_FILTER_OPERATOR).then(($el) => !$el.attr('disabled'));
+  }).then(() => {
+    cy.get(TIMELINE_FILTER_OPERATOR).type(`${filter.operator}{downarrow}{enter}`);
+
+    if (filter.operator !== 'exists' && filter.value) {
+      cy.get(TIMELINE_FILTER_VALUE).type(filter.value);
+    }
+
+    cy.get(SAVE_FILTER_BTN).should('not.be.disabled');
+    cy.get(SAVE_FILTER_BTN).click();
+    cy.get(SAVE_FILTER_BTN).should('not.exist');
+  });
 };
 
 export const changeTimelineQueryLanguage = (language: 'kuery' | 'lucene') => {
@@ -352,7 +365,7 @@ export const closeTimeline = () => {
 
 export const createNewTimeline = () => {
   openCreateTimelineOptionsPopover();
-  cy.get(CREATE_NEW_TIMELINE).click();
+  cy.get(CREATE_NEW_TIMELINE).filter(':visible').click();
 };
 
 export const openCreateTimelineOptionsPopover = () => {
@@ -364,26 +377,16 @@ export const openCreateTimelineOptionsPopover = () => {
 };
 
 export const createTimelineFromBottomBar = () => {
-  recurse(
-    () => {
-      cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
-      return cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE);
-    },
-    (sub) => sub.is(':visible')
-  );
-
+  // The plus icon toggles the popover, so click it once and let `should` wait for the
+  // opening transition; re-clicking in a retry loop would close the popover again.
+  cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
+  cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE).should('be.visible');
   cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE).click();
 };
 
 export const createTimelineTemplateFromBottomBar = () => {
-  recurse(
-    () => {
-      cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
-      return cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0);
-    },
-    (sub) => sub.is(':visible')
-  );
-
+  cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
+  cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0).should('be.visible');
   cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0).click();
 };
 

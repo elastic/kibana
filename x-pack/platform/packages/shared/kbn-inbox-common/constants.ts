@@ -71,3 +71,10 @@ export type InboxActionStatus = (typeof INBOX_ACTION_STATUSES)[number];
 
 export const MAX_INBOX_ACTIONS_PER_PAGE = 100;
 export const DEFAULT_INBOX_ACTIONS_PER_PAGE = 25;
+
+/** Builds the composite source id used to identify a workflow step in the inbox. */
+export const buildWorkflowSourceId = (
+  workflowId: string,
+  executionId: string,
+  stepExecutionId: string
+): string => `${workflowId}:${executionId}:${stepExecutionId}`;

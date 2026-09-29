@@ -42,6 +42,13 @@ const findStepRecursive = (steps: WorkflowStep[], name: string): WorkflowStep | 
   return undefined;
 };
 
+const hasStepLevelIfOnEsql = (steps: WorkflowStep[]): boolean =>
+  steps.some(
+    (step) =>
+      (step.type === 'elasticsearch.esql.query' && Boolean(step.if)) ||
+      (step.steps ? hasStepLevelIfOnEsql(step.steps) : false)
+  );
+
 describe('significant events fair batch selection', () => {
   it('denormalizes the rule severity onto detection documents', () => {
     const writeDetection = getStep(DETECTION_YAML, 'foreach_rule') as WorkflowStep & {
@@ -68,7 +75,10 @@ describe('significant events fair batch selection', () => {
     expect(query).toContain('recent_detection_count < ?2');
     expect(query).toContain('suppressed_age_minutes >= ?3');
     expect(query).toContain('severity_score >= ?4');
-    expect(query).toContain('KEEP rule_uuid, _source, score, recent_detection_count');
+    expect(query).toContain(
+      'EVAL flaky_probe = recent_detection_count >= ?2 AND suppressed_age_minutes >= ?3'
+    );
+    expect(query).toContain('KEEP rule_uuid, _source, score, recent_detection_count, flaky_probe');
 
     const queryLines = query?.split('\n') ?? [];
     const suppressionLineIdx = queryLines.findIndex((l: string) =>
@@ -101,7 +111,7 @@ describe('significant events fair batch selection', () => {
     expect(backlog?.if).toBeUndefined();
     expect(JSON.stringify(backlog?.with?.filter)).toContain('written_rule_uuids');
     expect(discovery.steps.some(({ name }) => name === 'get_rule_backlog')).toBe(false);
-    expect(discovery.steps.some(({ if: stepIf }) => Boolean(stepIf))).toBe(false);
+    expect(hasStepLevelIfOnEsql(discovery.steps)).toBe(false);
   });
 
   it('keeps markers visible to the backlog dedup semijoin (rule filter is a should, not a bare terms)', () => {
