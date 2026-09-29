@@ -171,7 +171,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     fn: (client: McpClient) => Promise<T>
   ): Promise<T> {
     const key = this.getLeaseKey();
-    const promise = this.pool.lease(
+    const { promise, release } = this.pool.acquire(
       key,
       () => this.buildClient(),
       (client) => clientTypes.mcp.terminate(client)
@@ -180,11 +180,15 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     try {
       return await fn(await promise);
     } catch (err) {
+      // Release first: invalidate waits for every active use, including this one, to finish.
+      release();
       if (clientTypes.mcp.shouldInvalidateOnError?.(err)) {
         await this.pool.invalidate(key, promise);
       }
 
       this.throwClassified(operation, err);
+    } finally {
+      release();
     }
   }
 

@@ -9,6 +9,16 @@ import { LeasePool, IDLE_TIMEOUT_MS } from './lease_pool';
 
 const noopTerminate = jest.fn().mockResolvedValue(undefined);
 
+/** A terminate mock plus a promise that resolves when it has been called. */
+const makeTerminateSignal = () => {
+  let signal!: () => void;
+  const called = new Promise<void>((resolve) => {
+    signal = resolve;
+  });
+  const terminate = jest.fn(async () => signal());
+  return { terminate, called };
+};
+
 const makeFakePerf = () => {
   let perfNow = 1;
   jest.spyOn(performance, 'now').mockImplementation(() => perfNow);
@@ -259,6 +269,144 @@ describe('LeasePool', () => {
         pool.invalidate('conn:mcp:shared', promise),
         pool.invalidate('conn:mcp:shared', promise),
       ]);
+
+      expect(terminateSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('acquire(key, buildFn, terminate) + release', () => {
+    it('returns the same client promise as lease and reuses one build across acquirers', async () => {
+      const pool = new LeasePool<string>();
+      const buildFn = jest.fn(async () => 'client');
+
+      const first = pool.acquire('conn:mcp:shared', buildFn, noopTerminate);
+      const second = pool.acquire('conn:mcp:shared', buildFn, noopTerminate);
+
+      expect(await first.promise).toBe('client');
+      expect(second.promise).toBe(first.promise);
+      expect(buildFn).toHaveBeenCalledTimes(1);
+    });
+
+    it('defers invalidate termination until every other active use releases', async () => {
+      const pool = new LeasePool<string>();
+      const { terminate: terminateSpy, called: terminateCalled } = makeTerminateSignal();
+
+      const failing = pool.acquire('conn:mcp:shared', async () => 'client', terminateSpy);
+      const inFlight = pool.acquire('conn:mcp:shared', async () => 'client', terminateSpy);
+      await failing.promise;
+
+      failing.release();
+      // Resolves without waiting for the other active use.
+      await pool.invalidate('conn:mcp:shared', failing.promise);
+
+      expect(terminateSpy).not.toHaveBeenCalled();
+
+      // The entry is already gone, so a new acquirer rebuilds instead of joining the doomed client.
+      let rebuildCount = 0;
+      const rebuilt = pool.acquire(
+        'conn:mcp:shared',
+        async () => {
+          rebuildCount++;
+          return 'client-2';
+        },
+        noopTerminate
+      );
+      expect(await rebuilt.promise).toBe('client-2');
+      expect(rebuildCount).toBe(1);
+
+      inFlight.release();
+      await terminateCalled;
+
+      expect(terminateSpy).toHaveBeenCalledTimes(1);
+      expect(terminateSpy).toHaveBeenCalledWith('client');
+    });
+
+    it('evict waits for a client that was invalidated while still in use', async () => {
+      const pool = new LeasePool<string>();
+      const terminateSpy = jest.fn().mockResolvedValue(undefined);
+
+      const failing = pool.acquire('conn-a:mcp:shared', async () => 'client-a', terminateSpy);
+      const inFlight = pool.acquire('conn-a:mcp:shared', async () => 'client-a', terminateSpy);
+      await failing.promise;
+      failing.release();
+      await pool.invalidate('conn-a:mcp:shared', failing.promise);
+
+      let evicted = false;
+      const eviction = pool.evict('conn-a').then(() => {
+        evicted = true;
+      });
+      await Promise.resolve();
+
+      expect(terminateSpy).not.toHaveBeenCalled();
+      expect(evicted).toBe(false);
+
+      inFlight.release();
+      await eviction;
+
+      expect(terminateSpy).toHaveBeenCalledTimes(1);
+      expect(terminateSpy).toHaveBeenCalledWith('client-a');
+    });
+
+    it('defers evict termination until active uses release', async () => {
+      const pool = new LeasePool<string>();
+      const terminateSpy = jest.fn().mockResolvedValue(undefined);
+
+      const inFlight = pool.acquire('conn-a:mcp:shared', async () => 'client-a', terminateSpy);
+      await inFlight.promise;
+
+      const eviction = pool.evict('conn-a');
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(terminateSpy).not.toHaveBeenCalled();
+
+      inFlight.release();
+      await eviction;
+
+      expect(terminateSpy).toHaveBeenCalledWith('client-a');
+    });
+
+    it('terminates immediately when the acquirer already released', async () => {
+      const pool = new LeasePool<string>();
+      const terminateSpy = jest.fn().mockResolvedValue(undefined);
+
+      const lease = pool.acquire('conn:mcp:shared', async () => 'client', terminateSpy);
+      await lease.promise;
+      lease.release();
+
+      await pool.invalidate('conn:mcp:shared', lease.promise);
+
+      expect(terminateSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('treats a repeated release as a no-op and does not unblock a different active use', async () => {
+      const pool = new LeasePool<string>();
+      const { terminate: terminateSpy, called: terminateCalled } = makeTerminateSignal();
+
+      const first = pool.acquire('conn:mcp:shared', async () => 'client', terminateSpy);
+      const second = pool.acquire('conn:mcp:shared', async () => 'client', terminateSpy);
+      await first.promise;
+
+      first.release();
+      first.release();
+      await pool.invalidate('conn:mcp:shared', first.promise);
+
+      expect(terminateSpy).not.toHaveBeenCalled();
+
+      second.release();
+      await terminateCalled;
+
+      expect(terminateSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not count a plain lease as an active use', async () => {
+      const pool = new LeasePool<string>();
+      const terminateSpy = jest.fn().mockResolvedValue(undefined);
+
+      const promise = pool.lease('conn:mcp:shared', async () => 'client', terminateSpy);
+      await promise;
+
+      await pool.invalidate('conn:mcp:shared', promise);
 
       expect(terminateSpy).toHaveBeenCalledTimes(1);
     });

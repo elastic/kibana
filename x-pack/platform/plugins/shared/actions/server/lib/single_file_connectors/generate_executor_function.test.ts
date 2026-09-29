@@ -818,6 +818,71 @@ describe('generateExecutorFunction', () => {
       expect(callTool).toHaveBeenLastCalledWith(freshClient);
     });
 
+    it('defers termination of an invalidated client until a concurrent execution finishes', async () => {
+      const sharedClient = { id: 'shared' };
+      let signalTerminated!: () => void;
+      const terminated = new Promise<void>((resolve) => {
+        signalTerminated = resolve;
+      });
+      const terminate = jest.fn(async () => signalTerminated());
+      let finishSlow!: () => void;
+      const slowCall = new Promise<void>((resolve) => {
+        finishSlow = resolve;
+      });
+      const fakeClientType = {
+        id: 'mcp',
+        build: jest.fn().mockResolvedValue(sharedClient),
+        terminate,
+        shouldInvalidateOnError: jest.fn(() => true),
+      };
+      const pool = new LeasePool<unknown>();
+      const executor = generateExecutorFunction({
+        actions: {
+          slowAction: {
+            isTool: true,
+            scope: 'read',
+            input: {} as never,
+            handler: jest.fn(async (ctx: ActionContext) => {
+              await (ctx.getClient as unknown as GetClient)('mcp');
+              await slowCall;
+              return {};
+            }),
+          },
+          failingAction: {
+            isTool: true,
+            scope: 'read',
+            input: {} as never,
+            handler: jest.fn(async (ctx: ActionContext) => {
+              await (ctx.getClient as unknown as GetClient)('mcp');
+              throw new Error('session gone');
+            }),
+          },
+        },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => pool,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+        clientTypes: { mcp: fakeClientType },
+      });
+
+      const slow = executor(makeExecOptions({ subAction: 'slowAction', subActionParams: {} }));
+      await Promise.resolve();
+      const failed = await executor(
+        makeExecOptions({ subAction: 'failingAction', subActionParams: {} })
+      );
+
+      expect(failed).toMatchObject({ status: 'error', message: 'session gone' });
+      expect(terminate).not.toHaveBeenCalled();
+
+      finishSlow();
+      await slow;
+      await terminated;
+
+      expect(terminate).toHaveBeenCalledTimes(1);
+      expect(terminate).toHaveBeenCalledWith(sharedClient);
+    });
+
     it('surfaces a request for an unknown client type id as an error result', async () => {
       const pool = new LeasePool<unknown>();
       const handler = jest.fn(async (ctx: ActionContext) => {

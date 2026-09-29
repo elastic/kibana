@@ -423,6 +423,51 @@ describe('McpConnector', () => {
       expect(mcpClientType.build).toHaveBeenCalledTimes(2);
     });
 
+    it('does not terminate the shared client while another operation is still using it', async () => {
+      const terminalError = new Error('socket closed');
+      let finishInFlight!: (value: { content: unknown[] }) => void;
+      const inFlightResult = new Promise<{ content: unknown[] }>((resolve) => {
+        finishInFlight = resolve;
+      });
+      fakeClient.callTool
+        .mockReturnValueOnce(inFlightResult)
+        .mockRejectedValueOnce(terminalError)
+        .mockResolvedValueOnce({ content: [{ type: 'text', text: 'fresh' }] });
+      mcpClientType.shouldInvalidateOnError.mockReturnValue(true);
+      const connector = createConnector();
+
+      const inFlight = connector.callTool(
+        { name: 'slow-tool', arguments: {} },
+        connectorUsageCollector
+      );
+      await expect(
+        connector.callTool({ name: 'failing-tool', arguments: {} }, connectorUsageCollector)
+      ).rejects.toThrow('socket closed');
+
+      expect(mcpClientType.terminate).not.toHaveBeenCalled();
+
+      // The failed operation already removed the lease, so the next call gets a fresh client.
+      const freshClient = makeFakeClient();
+      mcpClientType.build.mockResolvedValueOnce(freshClient);
+      await connector.callTool({ name: 'next-tool', arguments: {} }, connectorUsageCollector);
+      expect(mcpClientType.build).toHaveBeenCalledTimes(2);
+      expect(freshClient.callTool).toHaveBeenCalledTimes(1);
+      expect(mcpClientType.terminate).not.toHaveBeenCalled();
+
+      let signalTerminated!: () => void;
+      const terminated = new Promise<void>((resolve) => {
+        signalTerminated = resolve;
+      });
+      mcpClientType.terminate.mockImplementation(async () => signalTerminated());
+
+      finishInFlight({ content: [] });
+      await inFlight;
+      await terminated;
+
+      expect(mcpClientType.terminate).toHaveBeenCalledTimes(1);
+      expect(mcpClientType.terminate).toHaveBeenCalledWith(fakeClient);
+    });
+
     it('keeps the lease when shouldInvalidateOnError is false', async () => {
       fakeClient.callTool.mockRejectedValueOnce(new Error('tool failed')).mockResolvedValueOnce({
         content: [{ type: 'text', text: 'ok' }],

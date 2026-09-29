@@ -148,7 +148,13 @@ export const generateExecutorFunction = ({
       clientType: ClientTypeSpec<unknown>;
       key: string;
       promise: Promise<unknown>;
+      release: () => void;
     }> = [];
+
+    // Release before invalidating: termination waits for every active use, including ours.
+    const releaseAcquiredClients = (): void => {
+      acquiredClients.forEach(({ release }) => release());
+    };
 
     const invalidateAcquiredClientsForError = async (error: unknown): Promise<void> => {
       await Promise.all(
@@ -206,7 +212,7 @@ export const generateExecutorFunction = ({
           profileUid,
           connectorVersion,
         });
-        const promise = pool.lease(
+        const { promise, release } = pool.acquire(
           key,
           () =>
             clientType.build({
@@ -224,7 +230,7 @@ export const generateExecutorFunction = ({
             }),
           (client) => clientType.terminate(client)
         );
-        acquiredClients.push({ clientType, key, promise });
+        acquiredClients.push({ clientType, key, promise, release });
         return await promise;
       } catch (err) {
         const isUser = isClientUserError(err, clientType);
@@ -252,6 +258,7 @@ export const generateExecutorFunction = ({
 
       return { status: 'ok', data, actionId: connectorId };
     } catch (error) {
+      releaseAcquiredClients();
       await invalidateAcquiredClientsForError(error);
       const errorSource = error instanceof Error ? getErrorSource(error) : undefined;
       if (errorSource === TaskErrorSource.FRAMEWORK) throw error;
@@ -271,5 +278,7 @@ export const generateExecutorFunction = ({
           ? { retry: false, errorSource: TaskErrorSource.USER }
           : {}),
       };
+    } finally {
+      releaseAcquiredClients();
     }
   };
