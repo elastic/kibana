@@ -58,6 +58,7 @@ const PackResultTypeFieldComponent: React.FC<PackResultTypeFieldProps> = ({
             />
           </EuiText>
         ),
+        'data-test-subj': 'result-type-option-none',
       },
       ...(RESULT_TYPE_SELECT_OPTIONS as Array<EuiSuperSelectOption<PackResultTypeOption>>),
     ],

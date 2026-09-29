@@ -150,6 +150,7 @@ enabled:
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/action_task_params/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/actions/connector_types/stack/email_recipient_allowlist/config.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_basic.ts
+  - x-pack/platform/test/cases_api_integration/security_and_spaces/config_analytics_v1.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_common.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_attachments.ts
@@ -174,6 +175,7 @@ enabled:
   - x-pack/platform/test/fleet_api_integration/config.preconfiguration_updates.ts
   - x-pack/platform/test/fleet_api_integration/config.space_awareness.ts
   - x-pack/platform/test/fleet_api_integration/config.cloud_connector.ts
+  - x-pack/platform/test/fleet_api_integration/config.iac_provisioner.ts
   - x-pack/platform/test/fleet_functional/config.ts
   - x-pack/platform/test/fleet_tasks/config.ts
   - x-pack/platform/test/ftr_apis/security_and_spaces/config.ts
@@ -215,7 +217,6 @@ enabled:
   - x-pack/platform/test/functional/apps/maps/group5/config.ts
   - x-pack/platform/test/functional/apps/maps/group6/config.ts
   - x-pack/platform/test/functional/apps/maps/group7/config.ts
-  - x-pack/platform/test/functional/apps/maps/group8/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group1/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group2/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group3/config.ts
@@ -357,5 +358,4 @@ enabled:
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.streams_ccr.stateful.config.ts
   - x-pack/platform/test/api_integration/apis/streams/streams_without_security.config.ts
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.streams_definitions.feature_flag.stateful.config.ts
-  - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.significant_events.feature_flag.stateful.config.ts
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.evals.feature_flag.stateful.config.ts

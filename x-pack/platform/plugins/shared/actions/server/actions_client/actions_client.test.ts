@@ -369,6 +369,7 @@ describe('create()', () => {
         Object {
           "actionTypeId": "my-connector-type",
           "config": Object {},
+          "hasInboundEventIdentity": false,
           "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
@@ -516,6 +517,7 @@ describe('create()', () => {
             "b": true,
             "c": true,
           },
+          "hasInboundEventIdentity": false,
           "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
@@ -2545,6 +2547,7 @@ describe('update()', () => {
         Object {
           "actionTypeId": "my-connector-type",
           "config": Object {},
+          "hasInboundEventIdentity": false,
           "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
@@ -2614,6 +2617,7 @@ describe('update()', () => {
         Object {
           "actionTypeId": "my-connector-type",
           "config": Object {},
+          "hasInboundEventIdentity": false,
           "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
@@ -2770,6 +2774,7 @@ describe('update()', () => {
             "b": true,
             "c": true,
           },
+          "hasInboundEventIdentity": false,
           "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},

@@ -18,9 +18,11 @@ import {
   EventActorType,
   TimelineEventType,
   TimelineTriggerType,
+  ZERO_MODEL_USAGE,
 } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
-import { roundsToEvents } from './rounds_to_events';
+import { BOOM } from '../../../test_utils/timeline';
+import { roundToEvents, roundsToEvents } from './rounds_to_events';
 import { eventsToRounds } from './events_to_rounds';
 
 const conversationWith = (rounds: ConversationRound[]): Conversation => ({
@@ -143,6 +145,67 @@ describe('round-trip fidelity: eventsToRounds(roundsToEvents(round)) === round',
   });
 });
 
+describe('interrupted rounds', () => {
+  const conversation = conversationWith([]);
+  const boom = BOOM;
+
+  it('serialises a failed round to execution_failed and omits ZERO_MODEL_USAGE / zero ttft', () => {
+    const round = baseRound({
+      id: 'r1',
+      status: ConversationRoundStatus.completed,
+      response: { message: '' },
+      model_usage: ZERO_MODEL_USAGE,
+      time_to_first_token: 0,
+      time_to_last_token: 5,
+      interruption: { type: 'failed', error: boom },
+    });
+    const events = roundToEvents(round, conversation);
+    const terminal = events[events.length - 1];
+    expect(terminal.id).toBe('r1::execution_failed');
+    expect(terminal.type).toBe(TimelineEventType.executionFailed);
+    expect(terminal.data).toEqual({ time_to_last_token: 5, error: boom });
+    expect(events.some((e) => e.type === TimelineEventType.executionTerminated)).toBe(false);
+  });
+
+  it('serialises an aborted round with usage and a non-zero ttft', () => {
+    const round = baseRound({
+      id: 'r1',
+      status: ConversationRoundStatus.completed,
+      response: { message: '' },
+      time_to_first_token: 12,
+      time_to_last_token: 5,
+      interruption: { type: 'aborted', aborted_by: { source: 'api' } },
+    });
+    const events = roundToEvents(round, conversation);
+    const terminal = events[events.length - 1];
+    expect(terminal.id).toBe('r1::execution_aborted');
+    expect(terminal.data).toMatchObject({
+      time_to_first_token: 12,
+      model_usage: round.model_usage,
+      aborted_by: { source: 'api' },
+    });
+  });
+
+  it.each([
+    ['zero defaults', { model_usage: ZERO_MODEL_USAGE, time_to_first_token: 0 }],
+    ['real usage, non-zero ttft', { time_to_first_token: 42 }],
+  ])(
+    'rounds → events → rounds is an identity for an interrupted round (%s)',
+    (_name, overrides) => {
+      const round = baseRound({
+        id: 'r1',
+        status: ConversationRoundStatus.completed,
+        response: { message: '' },
+        steps: [{ type: ConversationRoundStepType.reasoning, reasoning: 'x' }],
+        time_to_last_token: 5,
+        interruption: { type: 'failed', error: boom },
+        ...overrides,
+      });
+      expect(roundTrip([round])).toEqual([round]);
+    }
+  );
+});
+
 // Cases that can only be expressed as raw event input (no round produces them via roundsToEvents):
 // malformed ids and non-terminal / empty timelines.
 describe('eventsToRounds (events-input-only)', () => {
@@ -175,7 +238,7 @@ describe('eventsToRounds (events-input-only)', () => {
     expect(eventsToRounds(events)[0].id).toBe('exec-abc');
   });
 
-  it('skips an execution with no execution_terminated event (failed/aborted/still running)', () => {
+  it('folds a failed execution into a completed round carrying the interruption', () => {
     const events: TimelineEvent[] = [
       {
         id: 'um',
@@ -201,6 +264,37 @@ describe('eventsToRounds (events-input-only)', () => {
         execution_id: 'exec-1',
         trigger_event_id: 'um',
         data: { time_to_last_token: 1000, error: { message: 'boom' } as never },
+      },
+    ];
+
+    expect(eventsToRounds(events)).toMatchObject([
+      {
+        id: 'exec-1',
+        status: ConversationRoundStatus.completed,
+        response: { message: '' },
+        interruption: { type: 'failed', error: { message: 'boom' } },
+        time_to_last_token: 1000,
+      },
+    ]);
+  });
+
+  it('skips an execution that is still running (no terminal event)', () => {
+    const events: TimelineEvent[] = [
+      {
+        id: 'um',
+        type: TimelineEventType.userMessage,
+        created_at: '2026-01-01T00:00:00.000Z',
+        actor: { type: EventActorType.user, id: 'user-1' },
+        data: { message: 'hi' },
+      },
+      {
+        id: 'es',
+        type: TimelineEventType.executionStarted,
+        created_at: '2026-01-01T00:00:00.000Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: 'exec-1',
+        trigger_event_id: 'um',
+        data: { trigger_type: TimelineTriggerType.userMessage },
       },
     ];
 

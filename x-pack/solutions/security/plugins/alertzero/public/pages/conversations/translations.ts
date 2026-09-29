@@ -11,14 +11,11 @@ export const QUEUE_PAGE_INFO = Object.freeze({
   pageTitle: i18n.translate('xpack.alertzero.queue.pageTitle', {
     defaultMessage: 'AlertZero - Proposals queue',
   }),
-  loading: i18n.translate('xpack.alertzero.queue.loading', {
-    defaultMessage: 'Loading investigations...',
+  assignSuccess: i18n.translate('xpack.alertzero.queue.assignSuccess', {
+    defaultMessage: 'Assignees updated',
   }),
-  loadError: i18n.translate('xpack.alertzero.queue.loadError', {
-    defaultMessage: 'Unable to load the investigation queue.',
-  }),
-  emptyQueue: i18n.translate('xpack.alertzero.queue.emptyQueue', {
-    defaultMessage: 'No items in the queue.',
+  assignError: i18n.translate('xpack.alertzero.queue.assignError', {
+    defaultMessage: 'Could not update assignees',
   }),
 });
 
@@ -40,3 +37,18 @@ export const DECISION_ERRORS: Readonly<Record<number | 'default', string>> = Obj
     defaultMessage: 'The decision could not be submitted. Try again.',
   }),
 });
+
+export const PROPOSED_ACTIONS_EMPTY_LABEL = i18n.translate(
+  'xpack.alertzero.detailsFlyout.proposedActions.empty',
+  { defaultMessage: 'No proposed actions for this investigation.' }
+);
+
+export const PROPOSED_ACTIONS_LOAD_ERROR_LABEL = i18n.translate(
+  'xpack.alertzero.detailsFlyout.proposedActions.loadError',
+  { defaultMessage: 'Unable to load proposed actions. Try refreshing the page.' }
+);
+
+export const PROPOSED_ACTIONS_SHOW_MORE_LABEL = i18n.translate(
+  'xpack.alertzero.detailsFlyout.proposedActions.showMore',
+  { defaultMessage: 'Show more proposed actions' }
+);
