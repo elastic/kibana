@@ -82,7 +82,6 @@ const createRestrictedRole = async (roleName) => {
               searchSynonyms: ['all'],
               searchQueryRules: ['all'],
               enterpriseSearch: ['all'],
-              searchPlayground: ['all'],
               searchInferenceEndpoints: ['all'],
               enterpriseSearchApplications: ['all'],
               enterpriseSearchAnalytics: ['all'],
