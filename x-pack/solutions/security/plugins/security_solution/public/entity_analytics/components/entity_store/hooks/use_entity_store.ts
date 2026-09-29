@@ -11,29 +11,30 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { GetEntityStoreStatusResponse } from '@kbn/entity-store/common';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useEntityStoreRoutes } from '../../../api/entity_store';
-import { buildExecutionContext } from '../../../../common/utils/execution_context';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 
-const ENTITY_STORE_MANAGEMENT_PAGE = 'entity_analytics:entity_store_management';
-
 const ENTITY_STORE_STATUS_CONTEXT = buildExecutionContext(
-  ENTITY_STORE_MANAGEMENT_PAGE,
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_MANAGEMENT,
   'entity_store_status'
 );
 const ENTITY_STORE_INSTALL_CONTEXT = buildExecutionContext(
-  ENTITY_STORE_MANAGEMENT_PAGE,
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_MANAGEMENT,
   'entity_store_install'
 );
 const ENTITY_STORE_START_CONTEXT = buildExecutionContext(
-  ENTITY_STORE_MANAGEMENT_PAGE,
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_MANAGEMENT,
   'entity_store_start'
 );
 const ENTITY_STORE_STOP_CONTEXT = buildExecutionContext(
-  ENTITY_STORE_MANAGEMENT_PAGE,
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_MANAGEMENT,
   'entity_store_stop'
 );
 const ENTITY_STORE_DELETE_CONTEXT = buildExecutionContext(
-  ENTITY_STORE_MANAGEMENT_PAGE,
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_MANAGEMENT,
   'entity_store_delete'
 );
 

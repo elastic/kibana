@@ -11,7 +11,10 @@ import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/public';
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { buildExecutionContext } from '../../../../common/utils/execution_context';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 import {
   ENTITY_RESOLVED_TOAST,
   ENTITY_RESOLVED_TOAST_TEXT,
@@ -45,7 +48,10 @@ export const useLinkEntities = (options?: UseLinkEntitiesOptions) => {
         version: API_VERSIONS.public.v1,
         method: 'POST',
         body: JSON.stringify(params),
-        context: buildExecutionContext('entity_analytics:entity_resolution', 'resolution_link'),
+        context: buildExecutionContext(
+          EA_EXECUTION_CONTEXT_NAMES.ENTITY_RESOLUTION,
+          'resolution_link'
+        ),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [RESOLUTION_GROUP_QUERY_KEY] });

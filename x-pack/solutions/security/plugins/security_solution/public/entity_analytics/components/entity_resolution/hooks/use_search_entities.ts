@@ -8,10 +8,13 @@
 import { useMemo } from 'react';
 import type { EntityType } from '@kbn/entity-store/public';
 import { useEntitiesListQuery } from '../../entity_store/hooks/use_entities_list_query';
-import { buildExecutionContext } from '../../../../common/utils/execution_context';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 
 const RESOLUTION_SEARCH_CONTEXT = buildExecutionContext(
-  'entity_analytics:entity_resolution',
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_RESOLUTION,
   'resolution_search'
 );
 

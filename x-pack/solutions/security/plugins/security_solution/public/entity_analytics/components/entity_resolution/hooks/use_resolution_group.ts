@@ -11,7 +11,10 @@ import type { KibanaExecutionContext } from '@kbn/core-execution-context-common'
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/public';
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import { buildExecutionContext } from '../../../../common/utils/execution_context';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 
 export const RESOLUTION_GROUP_ROUTE = ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP;
 export const RESOLUTION_GROUP_QUERY_KEY = 'resolution-group';
@@ -43,7 +46,7 @@ export const useResolutionGroup = (entityId: string, options?: UseResolutionGrou
         query: { entity_id: entityId },
         context:
           options?.executionContext ??
-          buildExecutionContext('entity_analytics:entity_resolution', 'resolution_group'),
+          buildExecutionContext(EA_EXECUTION_CONTEXT_NAMES.ENTITY_RESOLUTION, 'resolution_group'),
       }),
     enabled: options?.enabled !== false && !!entityId,
     refetchOnWindowFocus: false,
