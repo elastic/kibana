@@ -2978,8 +2978,7 @@ describe('add_controls / remove_controls operations', () => {
       {
         type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
         identifier: 'method',
-        error:
-          'Not mapped on index "kibana_sample_data_logs". Mapped keyword fields: host, host.keyword.',
+        error: 'Not mapped on index "kibana_sample_data_logs".',
       },
     ]);
   });
@@ -3021,8 +3020,7 @@ describe('add_controls / remove_controls operations', () => {
       {
         type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
         identifier: 'status',
-        error:
-          'range_slider_control needs a numeric field on index "kibana_sample_data_logs". Mapped numeric fields: bytes.',
+        error: 'range_slider_control needs a numeric field on index "kibana_sample_data_logs".',
       },
     ]);
   });

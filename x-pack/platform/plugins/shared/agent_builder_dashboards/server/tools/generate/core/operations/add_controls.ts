@@ -18,7 +18,7 @@ import {
 import type { DashboardPinnedPanel } from '@kbn/as-code-dashboard-schema';
 import type { Logger } from '@kbn/core/server';
 import { formatEsqlIdentifier } from '@kbn/esql-utils';
-import { castEsToKbnFieldTypeName, getKbnFieldType, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { castEsToKbnFieldTypeName, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { z } from '@kbn/zod/v4';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { getErrorMessage, type OperationFailure } from '../utils';
@@ -121,39 +121,11 @@ const filterDuplicateTimeSliders = ({
 
 type DataControlInput = Exclude<ControlInput, { type: typeof TIME_SLIDER_CONTROL }>;
 
-const MAX_AVAILABLE_FIELDS = 30;
-
 const getFieldCandidates = ({ type, field_name: fieldName }: DataControlInput): string[] =>
   type === RANGE_SLIDER_CONTROL ? [fieldName] : [fieldName, `${fieldName}.keyword`];
 
 const hasKbnFieldType = (types: string[], kbnFieldType: KBN_FIELD_TYPES): boolean =>
   types.every((type) => castEsToKbnFieldTypeName(type) === kbnFieldType);
-
-const describeAvailableFields = async ({
-  loader,
-  index,
-  projectRouting,
-  controlType,
-}: {
-  loader: AggregatableFieldTypesLoader;
-  index: string;
-  projectRouting?: string;
-  controlType: DataControlInput['type'];
-}): Promise<string> => {
-  const isRangeSlider = controlType === RANGE_SLIDER_CONTROL;
-  const kbnFieldType = isRangeSlider ? KBN_FIELD_TYPES.NUMBER : KBN_FIELD_TYPES.STRING;
-  const fieldTypes = await loader
-    .loadFieldsOfTypes({ index, projectRouting, types: getKbnFieldType(kbnFieldType).esTypes })
-    .catch((): AggregatableFieldTypes => new Map());
-  const availableFields = [...fieldTypes]
-    .filter(([, types]) => hasKbnFieldType(types, kbnFieldType))
-    .map(([fieldName]) => fieldName)
-    .sort()
-    .slice(0, MAX_AVAILABLE_FIELDS);
-  return availableFields.length > 0
-    ? ` Mapped ${isRangeSlider ? 'numeric' : 'keyword'} fields: ${availableFields.join(', ')}.`
-    : '';
-};
 
 /**
  * Report an unresolved user-requested control as a failure. Controls with the
@@ -241,7 +213,7 @@ const resolveControlField = (
  * Keep controls whose field Elasticsearch can `STATS BY`, rewriting options list
  * text fields to their `.keyword` sibling. Range sliders additionally require a
  * numeric field. Other data controls are left out; user-requested ones are
- * reported as failures with the mapped fields that could back them instead.
+ * reported as failures.
  * Controls on an index whose fields cannot be loaded are kept unvalidated.
  */
 const resolveControlFields = async ({
@@ -271,7 +243,6 @@ const resolveControlFields = async ({
   });
 
   const resolvedControls: ControlInput[] = [];
-  const unresolvedRequestedControls: Array<{ control: DataControlInput; reason: string }> = [];
 
   controls.forEach((control) => {
     if (control.type === TIME_SLIDER_CONTROL) {
@@ -292,30 +263,15 @@ const resolveControlFields = async ({
     }
 
     if (control.user_requested === true) {
-      unresolvedRequestedControls.push({ control, reason: resolution.reason });
+      recordControlFailure({
+        failures,
+        fieldName: control.field_name,
+        message: resolution.reason,
+      });
       return;
     }
     logger.debug(`Left out control on "${control.field_name}": ${resolution.reason}`);
   });
-
-  const failureMessages = await Promise.all(
-    unresolvedRequestedControls.map(
-      async ({ control, reason }) =>
-        `${reason}${await describeAvailableFields({
-          loader,
-          index: control.index,
-          projectRouting,
-          controlType: control.type,
-        })}`
-    )
-  );
-  unresolvedRequestedControls.forEach(({ control }, position) =>
-    recordControlFailure({
-      failures,
-      fieldName: control.field_name,
-      message: failureMessages[position],
-    })
-  );
 
   return resolvedControls;
 };
