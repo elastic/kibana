@@ -130,7 +130,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
   it('loads linked policies with an empty tag list when the rule has none', () => {
     renderSubsection({
       ...baseRule,
-      metadata: { name: 'Untagged Rule', version: 1 },
+      metadata: { name: 'Untagged Rule' },
     });
     expect(mockUseLinkedActionPolicies).toHaveBeenCalledWith([]);
   });

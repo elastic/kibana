@@ -61,11 +61,9 @@ apiTest.describe(
       const updated2 = await apiServices.alertingV2.actionPolicies.get(p2.id);
       expect(updated1.name).toBe('bulk-update-key-1');
       expect(updated2.name).toBe('bulk-update-key-2');
-      // Rotation proof: SO was rewritten so updatedAt and version advanced.
+      // Rotation proof: SO was rewritten so updatedAt advanced.
       expect(updated1.updated_at).not.toBe(p1.created_at);
-      expect(updated1.version).not.toBe(p1.version);
       expect(updated2.updated_at).not.toBe(p2.created_at);
-      expect(updated2.version).not.toBe(p2.version);
     });
 
     apiTest(

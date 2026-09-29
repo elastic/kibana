@@ -118,8 +118,7 @@ describe('action policy form utils', () => {
 
   describe('toUpdatePayload', () => {
     it('sends explicit null values for cleared nullable fields', () => {
-      expect(toUpdatePayload(state, 'WzEsMV0=')).toEqual({
-        version: 'WzEsMV0=',
+      expect(toUpdatePayload(state)).toEqual({
         name: 'Policy',
         description: 'Description',
         grouping_mode: 'per_episode',
@@ -131,28 +130,21 @@ describe('action policy form utils', () => {
     });
 
     it('normalizes an all-null matcher object to null', () => {
-      const payload = toUpdatePayload(
-        { ...state, matcher: { tags: null, expression: null } },
-        'WzEsMV0='
-      );
+      const payload = toUpdatePayload({ ...state, matcher: { tags: null, expression: null } });
       expect(payload.matcher).toBeNull();
     });
 
     it('preserves concrete nullable values', () => {
       expect(
-        toUpdatePayload(
-          {
-            ...state,
-            matcher: { expression: 'event.severity: critical' },
-            groupingMode: 'per_field',
-            groupBy: ['host.name'],
-            throttleStrategy: 'time_interval',
-            throttleInterval: '5m',
-          },
-          'WzEsMV0='
-        )
+        toUpdatePayload({
+          ...state,
+          matcher: { expression: 'event.severity: critical' },
+          groupingMode: 'per_field',
+          groupBy: ['host.name'],
+          throttleStrategy: 'time_interval',
+          throttleInterval: '5m',
+        })
       ).toEqual({
-        version: 'WzEsMV0=',
         name: 'Policy',
         description: 'Description',
         grouping_mode: 'per_field',
@@ -169,7 +161,6 @@ describe('action policy form utils', () => {
 
     const baseResponse: ActionPolicyResponse = {
       id: 'policy-1',
-      version: 'WzEsMV0=',
       name: 'Test Policy',
       description: 'A test policy',
       enabled: true,

@@ -13,7 +13,7 @@ import type {
 
 export interface UpdateActionPolicyParams {
   data: UpdateActionPolicyData;
-  options: { id: string; version: string };
+  options: { id: string };
 }
 
 export interface CreateActionPolicyParams {

@@ -114,7 +114,6 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
       expect(replaced.body.created_at).toBe(created.created_at);
 
       expect(replaced.body.updated_at).not.toBe(created.created_at);
-      expect(replaced.body.version).not.toBe(created.version);
     }
   );
 

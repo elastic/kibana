@@ -207,7 +207,6 @@ const TEST_SUBJ = {
 
 const EXISTING_POLICY: ActionPolicyResponse = {
   id: 'policy-1',
-  version: 'WzEsMV0=',
   name: 'Critical production alerts',
   description: 'Routes critical alerts',
   enabled: true,
@@ -465,7 +464,6 @@ describe('ActionPolicyFormPage', () => {
       expect(mockUpdateMutateAsync).toHaveBeenCalledWith({
         id: 'policy-1',
         data: {
-          version: 'WzEsMV0=',
           name: 'Critical production alerts',
           description: 'Routes critical alerts',
           grouping_mode: 'per_field',

@@ -65,7 +65,6 @@ const futureIso = (): string => new Date(Date.now() + 1000 * 60 * 60).toISOStrin
 
 const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse => ({
   id: 'policy-1',
-  version: 'v1',
   name: 'Critical alerts policy',
   description: 'Routes critical alerts to the oncall workflow',
   enabled: true,

@@ -25,7 +25,7 @@ import {
 } from './rule_data_schema';
 import {
   createActionPolicyDataSchema,
-  updateActionPolicyBodySchema,
+  updateActionPolicyDataSchema,
   bulkSnoozeActionPoliciesBodySchema,
   snoozeActionPolicyBodySchema,
   actionPolicyDestinationSchema,
@@ -116,7 +116,7 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   [groupingSchema, 'alerting_rule_grouping'],
   // action policies
   [createActionPolicyDataSchema, 'alerting_new_action_policy'],
-  [updateActionPolicyBodySchema, 'alerting_update_action_policy'],
+  [updateActionPolicyDataSchema, 'alerting_update_action_policy'],
   [bulkSnoozeActionPoliciesBodySchema, 'alerting_bulk_snooze_action_policies_request'],
   [snoozeActionPolicyBodySchema, 'alerting_snooze_action_policy_request'],
   [actionPolicyDestinationSchema, 'alerting_action_policy_destination'],

@@ -15,7 +15,7 @@ import type {
   ActionPolicyResponse,
   FindActionPoliciesRequest,
   FindActionPoliciesResponse,
-  UpdateActionPolicyBody,
+  UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '@kbn/alerting-v2-constants';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
@@ -69,7 +69,7 @@ export class ActionPoliciesApi {
     });
   }
 
-  public async updateActionPolicy(id: string, data: UpdateActionPolicyBody) {
+  public async updateActionPolicy(id: string, data: UpdateActionPolicyData) {
     return this.http.patch<ActionPolicyResponse>(buildActionPolicyPath(id), {
       body: JSON.stringify(data),
     });

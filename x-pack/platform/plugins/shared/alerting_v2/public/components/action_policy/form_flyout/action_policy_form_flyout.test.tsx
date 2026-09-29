@@ -252,12 +252,11 @@ describe('ActionPolicyFormFlyout', () => {
     );
   });
 
-  it('renders edit mode and submits update payload with optional fields and version', async () => {
+  it('renders edit mode and submits update payload with optional fields', async () => {
     const user = userEvent.setup({ delay: null });
     const onUpdate = jest.fn();
     const initialValues: ActionPolicyResponse = {
       id: 'policy-1',
-      version: 'WzEsMV0=',
       name: 'Critical production alerts',
       description: 'Routes critical alerts',
       enabled: true,
