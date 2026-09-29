@@ -31,6 +31,26 @@ export const normalizeGoalScore = (raw: number): number =>
 /** A raw 1-5 goal score passes when it is at least 4, matching `goal_achieved`. */
 export const goalScorePassed = (raw: number): boolean => clampGoalScore(raw) >= GOAL_PASS_THRESHOLD;
 
+/**
+ * The truthfulness (evidence-groundedness) judge scores 1-5: how well CLEAR, concrete evidence in
+ * the investigation's own report supports its stated root cause (1 = conclusion asserted with no
+ * supporting evidence, 5 = the stated root cause is directly backed by specific evidence). Like the
+ * goal judge, the normalized feedback value is `(score - 1) / 4` so it lands in [0, 1].
+ */
+export const TRUTHFULNESS_SCORE_MIN = 1;
+export const TRUTHFULNESS_SCORE_MAX = 5;
+
+/** Clamp a raw 1-5 truthfulness score into range, rounding fractional model output. */
+export const clampTruthfulnessScore = (raw: number): number => {
+  if (!Number.isFinite(raw)) return TRUTHFULNESS_SCORE_MIN;
+  return Math.max(TRUTHFULNESS_SCORE_MIN, Math.min(TRUTHFULNESS_SCORE_MAX, Math.round(raw)));
+};
+
+/** Map a raw 1-5 truthfulness score to a normalized value in [0, 1]. */
+export const normalizeTruthfulnessScore = (raw: number): number =>
+  (clampTruthfulnessScore(raw) - TRUTHFULNESS_SCORE_MIN) /
+  (TRUTHFULNESS_SCORE_MAX - TRUTHFULNESS_SCORE_MIN);
+
 /** Clamp an already-normalized [0, 1] judge score, tolerating out-of-range model output. */
 export const clampUnitScore = (raw: number): number => {
   if (!Number.isFinite(raw)) return 0;
@@ -55,9 +75,6 @@ export const extractReferenceAnswer = (
   return undefined;
 };
 
-const truncate = (text: string, max: number): string =>
-  text.length > max ? `${text.slice(0, max)}…` : text;
-
 /**
  * Compose the candidate "final answer" text the judges score, from the persisted structured
  * report. Deductive judges read a single `final_answer` string; the investigation agent instead
@@ -75,7 +92,6 @@ export const composeAnswerText = (report: InvestigationStructuredOutput | undefi
     const rendered = hypotheses
       .slice()
       .sort((a, b) => (b.confidence ?? 0) - (a.confidence ?? 0))
-      .slice(0, 10)
       .map((hypothesis) => {
         const confidence = Math.round((hypothesis.confidence ?? 0) * 100);
         const reason = hypothesis.reason ? ` — ${hypothesis.reason}` : '';
@@ -84,7 +100,7 @@ export const composeAnswerText = (report: InvestigationStructuredOutput | undefi
       .join('\n');
     parts.push(`Hypotheses:\n${rendered}`);
   }
-  return truncate(parts.join('\n\n'), 8000);
+  return parts.join('\n\n');
 };
 
 /**
@@ -97,25 +113,15 @@ export const composeEvidenceText = (report: InvestigationStructuredOutput | unde
   const lines: string[] = [];
   for (const hypothesis of report.hypotheses ?? []) {
     for (const evidence of hypothesis.evidence ?? []) {
-      const query = evidence.esql_query ? ` [esql: ${truncate(evidence.esql_query, 200)}]` : '';
+      const query = evidence.esql_query ? ` [esql: ${evidence.esql_query}]` : '';
       lines.push(`- ${evidence.description}${query}`);
     }
   }
   for (const recommendation of report.recommendations ?? []) {
     lines.push(`- recommendation: ${recommendation.title}`);
   }
-  return truncate(lines.join('\n'), 6000);
+  return lines.join('\n');
 };
-
-/**
- * Fast rule-based leakage pre-check, ported from `rca_anti_leakage_feedback` (commit 7d0cc81).
- * Flags post-incident resolution language that must not be used as primary causal evidence at
- * investigation time; a match escalates to the LLM confirmation call.
- */
-const LEAKAGE_PATTERN =
-  /\b(incident\s+resolved|post[- ]incident|mitigation\s+completed|rollback\s+completed|rollback\s+fixed|resolution|resolved\s+at|pev[- ]\d+.*(?:resolved|mitigated|fixed))\b/i;
-
-export const hasLeakageIndicators = (text: string): boolean => LEAKAGE_PATTERN.test(text);
 
 /** Everything a judge needs about one investigation run, derived once and shared. */
 export interface JudgeInputs {

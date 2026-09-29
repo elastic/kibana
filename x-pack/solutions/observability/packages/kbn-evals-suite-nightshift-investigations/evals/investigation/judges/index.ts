@@ -17,18 +17,20 @@ import {
   AntiLeakageJudgePrompt,
   CauseCompletenessJudgePrompt,
   GoalPassJudgePrompt,
+  TruthfulnessJudgePrompt,
 } from './prompts';
 import {
   buildJudgeInputs,
   clampUnitScore,
   goalScorePassed,
-  hasLeakageIndicators,
   normalizeGoalScore,
+  normalizeTruthfulnessScore,
 } from './scoring';
 
 export const GOAL_PASS_EVALUATOR = 'goal_pass';
 export const CAUSE_COMPLETENESS_EVALUATOR = 'rca_cause_completeness';
 export const ANTI_LEAKAGE_EVALUATOR = 'rca_anti_leakage';
+export const TRUTHFULNESS_EVALUATOR = 'truthfulness';
 
 type InvestigationEvaluator = Evaluator<InvestigationExample, InvestigationTaskOutput>;
 
@@ -117,9 +119,7 @@ export const createGoalPassEvaluator = (deps: JudgeDeps): InvestigationEvaluator
       {
         question: judge.question,
         reference: judge.reference,
-        category: judge.category ?? 'investigate',
         answer: judge.answer,
-        evidence: judge.evidence,
       }
     );
     const passed = goalScorePassed(rawScore);
@@ -187,34 +187,61 @@ export const createAntiLeakageEvaluator = (deps: JudgeDeps): InvestigationEvalua
         explanation: 'Investigation produced no answer to evaluate.',
       };
     }
-    // Fast rule-based path, matching deductive: with no post-incident language anywhere, there is
-    // nothing to confirm, so score a clean pass without spending a judge call.
-    if (!hasLeakageIndicators(judge.answer) && !hasLeakageIndicators(judge.evidence)) {
-      return {
-        score: 1,
-        label: 'no_leakage',
-        explanation: 'no_leakage_detected',
-        metadata: { llm_confirmed: false },
-      };
-    }
-    const result = await invokeJudge<{ used_post_incident_evidence: boolean; reasoning: string }>(
+    const result = await invokeJudge<{ leaked_root_cause: boolean; reasoning: string }>(
       deps,
       ANTI_LEAKAGE_EVALUATOR,
       AntiLeakageJudgePrompt,
-      { answer: judge.answer, evidence: judge.evidence }
+      { question: judge.question, evidence: judge.evidence }
     );
     return {
-      score: result.used_post_incident_evidence ? 0 : 1,
-      label: result.used_post_incident_evidence ? 'leakage' : 'no_leakage',
+      score: result.leaked_root_cause ? 0 : 1,
+      label: result.leaked_root_cause ? 'leakage' : 'no_leakage',
       explanation: result.reasoning,
       metadata: { llm_confirmed: true },
     };
   },
 });
 
-/** The three ported RCA judges, in stable order for the investigation spec. */
+export const createTruthfulnessEvaluator = (deps: JudgeDeps): InvestigationEvaluator => ({
+  name: TRUTHFULNESS_EVALUATOR,
+  kind: 'LLM',
+  direction: 'maximize',
+  getModel: getModelFactory(deps.evaluationConnector),
+  evaluate: async ({ input, output, expected, metadata }) => {
+    const judge = buildJudgeInputs(input, output, expected, metadata);
+    if (judge.executionError || !judge.answer) {
+      return {
+        score: judge.executionError ? 0 : null,
+        label: judge.executionError ? 'fail' : 'n/a',
+        explanation: judge.executionError
+          ? `Execution error before truthfulness evaluation: ${judge.executionError}`
+          : 'Investigation produced no answer to evaluate.',
+        metadata: { raw_score: null },
+      };
+    }
+    const { score: rawScore, summary } = await invokeJudge<{ score: number; summary: string }>(
+      deps,
+      TRUTHFULNESS_EVALUATOR,
+      TruthfulnessJudgePrompt,
+      {
+        question: judge.question,
+        answer: judge.answer,
+        evidence: judge.evidence,
+      }
+    );
+    return {
+      score: normalizeTruthfulnessScore(rawScore),
+      label: 'truthfulness',
+      explanation: summary,
+      metadata: { raw_score: rawScore },
+    };
+  },
+});
+
+/** The ported RCA judges plus truthfulness, in stable order for the investigation spec. */
 export const createInvestigationJudges = (deps: JudgeDeps): InvestigationEvaluator[] => [
   createGoalPassEvaluator(deps),
   createCauseCompletenessEvaluator(deps),
   createAntiLeakageEvaluator(deps),
+  createTruthfulnessEvaluator(deps),
 ];

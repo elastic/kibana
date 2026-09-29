@@ -16,6 +16,7 @@ import {
   ANTI_LEAKAGE_EVALUATOR,
   CAUSE_COMPLETENESS_EVALUATOR,
   GOAL_PASS_EVALUATOR,
+  TRUTHFULNESS_EVALUATOR,
   createInvestigationJudges,
 } from './judges';
 import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
@@ -167,9 +168,14 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
           expect(persistedOutput).not.toBeNull();
           expect(persistedOutput?.case_id).toBe(output.case_id);
           expect(persistedOutput?.query).toBe(output.query);
-          // All three RCA judges scored this run, each in its own evaluation trace.
+          // All RCA judges scored this run, each in its own evaluation trace.
           expect(new Set(exampleScores.map((each) => each.evaluator.name))).toEqual(
-            new Set([GOAL_PASS_EVALUATOR, CAUSE_COMPLETENESS_EVALUATOR, ANTI_LEAKAGE_EVALUATOR])
+            new Set([
+              GOAL_PASS_EVALUATOR,
+              CAUSE_COMPLETENESS_EVALUATOR,
+              ANTI_LEAKAGE_EVALUATOR,
+              TRUTHFULNESS_EVALUATOR,
+            ])
           );
           for (const exampleScore of exampleScores) {
             expect(exampleScore.evaluator.kind).toBe('llm');

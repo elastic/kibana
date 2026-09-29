@@ -8,13 +8,14 @@
 import type { InvestigationStructuredOutput } from '@kbn/nightshift-investigations-plugin/common';
 import {
   clampGoalScore,
+  clampTruthfulnessScore,
   clampUnitScore,
   composeAnswerText,
   composeEvidenceText,
   extractReferenceAnswer,
   goalScorePassed,
-  hasLeakageIndicators,
   normalizeGoalScore,
+  normalizeTruthfulnessScore,
 } from './scoring';
 
 describe('goal score helpers', () => {
@@ -45,6 +46,26 @@ describe('goal score helpers', () => {
   });
 });
 
+describe('truthfulness score helpers', () => {
+  it.each([
+    [1, 0],
+    [2, 0.25],
+    [3, 0.5],
+    [4, 0.75],
+    [5, 1],
+  ])('normalizes raw truthfulness score %d to %d', (raw, expected) => {
+    expect(normalizeTruthfulnessScore(raw)).toBeCloseTo(expected, 5);
+  });
+
+  it('clamps and rounds out-of-range or fractional raw scores', () => {
+    expect(clampTruthfulnessScore(0)).toBe(1);
+    expect(clampTruthfulnessScore(9)).toBe(5);
+    expect(clampTruthfulnessScore(3.4)).toBe(3);
+    expect(clampTruthfulnessScore(4.6)).toBe(5);
+    expect(clampTruthfulnessScore(NaN)).toBe(1);
+  });
+});
+
 describe('clampUnitScore', () => {
   it('bounds values into [0, 1] and defaults non-finite input to 0', () => {
     expect(clampUnitScore(0.42)).toBe(0.42);
@@ -67,19 +88,6 @@ describe('extractReferenceAnswer', () => {
     expect(extractReferenceAnswer({})).toBeUndefined();
     expect(extractReferenceAnswer({ reference_answer: '   ' })).toBeUndefined();
     expect(extractReferenceAnswer({ reference_answer: 42 })).toBeUndefined();
-  });
-});
-
-describe('hasLeakageIndicators', () => {
-  it('flags post-incident resolution language', () => {
-    expect(hasLeakageIndicators('The incident resolved after rollback completed.')).toBe(true);
-    expect(hasLeakageIndicators('This was a post-incident note.')).toBe(true);
-    expect(hasLeakageIndicators('PEV-123 was later mitigated.')).toBe(true);
-  });
-
-  it('does not flag ordinary investigation prose', () => {
-    expect(hasLeakageIndicators('Error rate rose after the deploy at 18:00 UTC.')).toBe(false);
-    expect(hasLeakageIndicators('')).toBe(false);
   });
 });
 
