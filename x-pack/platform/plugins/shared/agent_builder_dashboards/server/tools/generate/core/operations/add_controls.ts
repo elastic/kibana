@@ -57,9 +57,7 @@ const userRequestedFields = {
   user_requested: z
     .boolean()
     .optional()
-    .describe(
-      'True only when the user named this specific control, filter, or field. Leave unset when you chose it, including when the user only asked for controls in general.'
-    ),
+    .describe('True only when the user asked explicitly for the controls.'),
 };
 
 const dataControlInputFields = {
