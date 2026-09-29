@@ -37,10 +37,6 @@ export interface EventLoopWatchdogConfigType {
   liveNoticeInterval: Duration;
   /** Maximum live notices emitted for a single block. */
   maxLiveNoticesPerBlock: number;
-  /** Maximum duration of one CPU-profile capture. */
-  maxProfileDuration: Duration;
-  /** Minimum interval between the starts of two CPU-profile captures. */
-  profileCooldown: Duration;
   /** Maximum number of candidate activities listed in a report. */
   maxCandidates: number;
 }
@@ -85,8 +81,6 @@ const configSchema = schema.object({
     heartbeatInterval: boundedDuration('100ms', 10, 10 * SECOND),
     liveNoticeInterval: boundedDuration('5s', 100, 5 * MINUTE),
     maxLiveNoticesPerBlock: boundedInteger(12, 1, 100),
-    maxProfileDuration: boundedDuration('10s', 100, MINUTE),
-    profileCooldown: boundedDuration('1m', 0, 60 * MINUTE),
     maxCandidates: boundedInteger(10, 1, 100),
   }),
 });

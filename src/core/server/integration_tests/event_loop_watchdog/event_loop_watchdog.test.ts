@@ -13,7 +13,6 @@ import Path from 'node:path';
 import { execSync } from 'node:child_process';
 import { pbkdf2Sync } from 'node:crypto';
 import { setTimeout as sleep } from 'node:timers/promises';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { EventLoopWatchdog } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/event_loop_watchdog';
 import { ActivityRegistry } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/activity_registry';
@@ -28,14 +27,9 @@ const baseOptions: WatchdogOptions = {
   pollIntervalMs: 10,
   liveNoticeIntervalMs: 300,
   maxLiveNoticesPerBlock: 3,
-  maxProfileDurationMs: 10_000,
-  profileCooldownMs: 0,
   maxCandidates: 2,
-  profileSamplingIntervalUs: 1_000,
-  maxFrames: 5,
 };
 
-// A named function so that it can be recognised in the profile summary.
 function deliberatelyBlockTheEventLoop(ms: number) {
   const until = Date.now() + ms;
   let counter = 0;
@@ -82,7 +76,6 @@ describe('EventLoopWatchdog (real worker)', () => {
       options: { ...baseOptions, ...options },
       registry,
       liveNoticeFormat: 'json',
-      sanitizeRoot: REPO_ROOT,
       outputFd,
     });
     const readyCalls = () =>
@@ -107,7 +100,7 @@ describe('EventLoopWatchdog (real worker)', () => {
     Fs.rmSync(outputPath, { force: true });
   });
 
-  it('writes live notices during a JS block and reports frames and candidates afterwards', async () => {
+  it('writes live notices during a JS block and reports candidates afterwards', async () => {
     // started before the watchdog was enabled: must still be a candidate
     const endEarly = registry.observe({ type: 'task manager', name: 'run test:early', id: 'a' });
     await startWatchdog();
@@ -118,7 +111,7 @@ describe('EventLoopWatchdog (real worker)', () => {
 
     deliberatelyBlockTheEventLoop(1_500);
     const blockEndedAt = Date.now();
-    // the blocking task finishes right after the block, before the profile is summarised
+    // the blocking task finishes right after the block, before the report is posted
     endEarly?.();
     endLate?.();
 
@@ -134,15 +127,6 @@ describe('EventLoopWatchdog (real worker)', () => {
 
     const report = await nextReport(1);
     expect(report.blockedMs).toBeGreaterThanOrEqual(1_300);
-    expect(report.profile.verdict).toBe('profiled');
-    expect(report.profile.startAckLatencyMs).toEqual(expect.any(Number));
-    // V8 may inline the named function into its (transpiled) caller, so assert on location
-    // and the combined frame/caller description rather than on the leaf function name alone.
-    const [top] = report.profile.frames;
-    expect(top.location).toMatch(
-      /^src\/core\/server\/integration_tests\/event_loop_watchdog\/event_loop_watchdog\.test\.ts:\d+$/
-    );
-    expect(top.selfPercent).toBeGreaterThan(80);
     expect(report.cpuRatio).toBeGreaterThan(0.5);
     expect(report.candidates).toEqual([
       expect.objectContaining({ kind: 'task', type: 'test:early', id: 'a' }),
@@ -152,18 +136,16 @@ describe('EventLoopWatchdog (real worker)', () => {
     expect(report.liveNotices).toBe(notices.length);
   });
 
-  it('reports syscall blocks as inconclusive with a low CPU ratio', async () => {
+  it('reports syscall blocks with a low CPU ratio', async () => {
     await startWatchdog();
     execSync('sleep 1.2');
 
     expect(liveNoticeLines().length).toBeGreaterThanOrEqual(1);
     const report = await nextReport(1);
-    expect(report.profile.verdict).toBe('inconclusive');
-    expect(report.profile.frames).toEqual([]);
     expect(report.cpuRatio).toBeLessThan(0.3);
   });
 
-  it('reports native CPU-bound blocks as inconclusive with a high CPU ratio', async () => {
+  it('reports native CPU-bound blocks with a high CPU ratio', async () => {
     await startWatchdog();
     const started = Date.now();
     pbkdf2Sync('password', 'salt', 6_000_000, 64, 'sha512');
@@ -171,23 +153,7 @@ describe('EventLoopWatchdog (real worker)', () => {
 
     const report = await nextReport(1);
     expect(blockedMs).toBeGreaterThan(baseOptions.thresholdMs * 2);
-    expect(report.profile.verdict).toBe('inconclusive');
     expect(report.cpuRatio).toBeGreaterThan(0.5);
-  });
-
-  it('applies the profile cooldown to subsequent blocks', async () => {
-    await startWatchdog({ profileCooldownMs: 60_000 });
-    deliberatelyBlockTheEventLoop(500);
-    expect((await nextReport(1)).profile.verdict).toBe('profiled');
-
-    deliberatelyBlockTheEventLoop(500);
-    const second = await nextReport(2);
-    expect(second.profile).toEqual(
-      expect.objectContaining({
-        verdict: 'unavailable',
-        reason: expect.stringMatching(/rate limit/),
-      })
-    );
   });
 
   it('keeps candidates of back-to-back blocks separate', async () => {

@@ -39,7 +39,6 @@ export interface EventLoopWatchdogParams {
   registry: ActivityRegistry;
   /** Format of worker-written live notices; `undefined` disables them. */
   liveNoticeFormat: LiveNoticeFormat | undefined;
-  sanitizeRoot: string;
   /** Worker entry module; overridable for tests. */
   workerEntry?: string;
   /** File descriptor for worker-written live notices; defaults to stdout. */
@@ -129,13 +128,11 @@ export class EventLoopWatchdog {
   }
 
   private spawnWorker(buffer: SharedArrayBuffer): void {
-    const { options, liveNoticeFormat, sanitizeRoot, registry, workerEntry, loggerName, outputFd } =
-      this.params;
+    const { options, liveNoticeFormat, registry, workerEntry, loggerName, outputFd } = this.params;
     const workerData: WatchdogWorkerData = {
       heartbeat: buffer,
       options,
       liveNoticeFormat,
-      sanitizeRoot,
       loggerName,
       outputFd: outputFd ?? STDOUT_FD,
     };
@@ -218,15 +215,13 @@ export class EventLoopWatchdog {
 
   private onWorkerMessage(message: WorkerToMainMessage): void {
     if (message.type === 'ready') {
-      this.logger.debug(`Event loop watchdog worker ready (profiler: ${message.profiler})`);
+      this.logger.debug('Event loop watchdog worker ready');
     } else if (message.type === 'report') {
       const { report } = message;
       this.logger.warn<WatchdogLogMeta>(formatReportMessage(report), {
         tags: ['event-loop-watchdog'],
         kibana: { event_loop_watchdog: report },
       });
-    } else if (message.type === 'worker-error') {
-      this.logger.warn(`Event loop watchdog: ${message.message}`);
     }
   }
 }

@@ -34,7 +34,6 @@ dependsOn:
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-http-server'
   - '@kbn/safer-lodash-set'
-  - '@kbn/repo-info'
   - '@kbn/core-execution-context-server-internal'
   - '@kbn/core-execution-context-common'
   - '@kbn/core-execution-context-server-mocks'

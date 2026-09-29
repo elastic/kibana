@@ -138,11 +138,4 @@ describe('toWatchdogOptions', () => {
     );
     expect(moment.isDuration(eventLoopWatchdog.threshold)).toBe(true);
   });
-
-  it('polls at least twice per profile deadline', () => {
-    const { eventLoopWatchdog } = opsConfig.schema.validate({
-      eventLoopWatchdog: { heartbeatInterval: '10s', maxProfileDuration: '100ms' },
-    });
-    expect(toWatchdogOptions({ eventLoopWatchdog }).pollIntervalMs).toBe(50);
-  });
 });

@@ -8,7 +8,6 @@
  */
 
 import { concatMap, distinctUntilChanged, firstValueFrom, type Subscription } from 'rxjs';
-import { REPO_ROOT } from '@kbn/repo-info';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
@@ -21,8 +20,6 @@ import type { LiveNoticeFormat, WatchdogOptions } from './types';
 /** Feature flag enabling the event-loop watchdog at runtime. */
 export const EVENT_LOOP_WATCHDOG_FEATURE_FLAG = 'core.eventLoopWatchdog.enabled';
 const LOGGER_CONTEXT = ['metrics', 'event_loop_watchdog'] as const;
-const PROFILE_SAMPLING_INTERVAL_US = 1_000;
-const MAX_FRAMES = 5;
 
 export interface EventLoopWatchdogSetupDeps {
   executionContext: InternalExecutionContextSetup;
@@ -92,18 +89,10 @@ export const toWatchdogOptions = ({
   return {
     thresholdMs: Math.max(config.threshold.asMilliseconds(), heartbeatIntervalMs * 2),
     heartbeatIntervalMs,
-    // the poll loop also enforces the profile deadline, so it must not be coarser than it
-    pollIntervalMs: Math.max(
-      5,
-      Math.floor(Math.min(heartbeatIntervalMs, config.maxProfileDuration.asMilliseconds()) / 2)
-    ),
+    pollIntervalMs: Math.max(5, Math.floor(heartbeatIntervalMs / 2)),
     liveNoticeIntervalMs: config.liveNoticeInterval.asMilliseconds(),
     maxLiveNoticesPerBlock: config.maxLiveNoticesPerBlock,
-    maxProfileDurationMs: config.maxProfileDuration.asMilliseconds(),
-    profileCooldownMs: config.profileCooldown.asMilliseconds(),
     maxCandidates: config.maxCandidates,
-    profileSamplingIntervalUs: PROFILE_SAMPLING_INTERVAL_US,
-    maxFrames: MAX_FRAMES,
   };
 };
 
@@ -139,7 +128,6 @@ export class EventLoopWatchdogService {
       options: toWatchdogOptions(opsConfig),
       registry: this.registry,
       liveNoticeFormat: resolveLiveNoticeFormat(loggingConfig, LOGGER_CONTEXT.join('.')),
-      sanitizeRoot: REPO_ROOT,
     });
     this.watchdog = watchdog;
 

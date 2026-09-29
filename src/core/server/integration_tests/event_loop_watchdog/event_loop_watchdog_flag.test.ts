@@ -29,7 +29,7 @@ interface LogRecord {
     event_loop_watchdog?: {
       blockedMs: number;
       candidates: Array<{ type: string; id: string }>;
-      profile: { verdict: string };
+      cpuRatio: number;
     };
   };
 }
@@ -96,7 +96,6 @@ describe('event loop watchdog feature flag (Kibana root)', () => {
               threshold: '200ms',
               heartbeatInterval: '20ms',
               liveNoticeInterval: '300ms',
-              profileCooldown: '0s',
             },
           },
           logging: {
@@ -125,7 +124,7 @@ describe('event loop watchdog feature flag (Kibana root)', () => {
 
   it('starts when the flag is enabled and attributes blocks to in-flight tasks', async () => {
     await setFlag(true);
-    await waitFor(() => countMessages(/worker ready \(profiler: true\)/) === 1);
+    await waitFor(() => countMessages(/worker ready/) === 1);
 
     await runTask('test:blocker', 'task-1', 1_000);
     await waitFor(() => reports().length === 1);
@@ -136,7 +135,7 @@ describe('event loop watchdog feature flag (Kibana root)', () => {
       expect.objectContaining({
         blockedMs: expect.any(Number),
         candidates: [expect.objectContaining({ type: 'test:blocker', id: 'task-1' })],
-        profile: expect.objectContaining({ verdict: 'profiled' }),
+        cpuRatio: expect.any(Number),
       })
     );
   });

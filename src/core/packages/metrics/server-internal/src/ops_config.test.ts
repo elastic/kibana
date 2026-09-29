@@ -16,23 +16,21 @@ describe('ops config: eventLoopWatchdog', () => {
     expect(eventLoopWatchdog.heartbeatInterval.asMilliseconds()).toBe(100);
     expect(eventLoopWatchdog.liveNoticeInterval.asMilliseconds()).toBe(5_000);
     expect(eventLoopWatchdog.maxLiveNoticesPerBlock).toBe(12);
-    expect(eventLoopWatchdog.maxProfileDuration.asMilliseconds()).toBe(10_000);
-    expect(eventLoopWatchdog.profileCooldown.asMilliseconds()).toBe(60_000);
     expect(eventLoopWatchdog.maxCandidates).toBe(10);
   });
 
   it('accepts values within bounds', () => {
     const { eventLoopWatchdog } = opsConfig.schema.validate({
-      eventLoopWatchdog: { threshold: '200ms', heartbeatInterval: '20ms', profileCooldown: '0s' },
+      eventLoopWatchdog: { threshold: '200ms', heartbeatInterval: '20ms' },
     });
     expect(eventLoopWatchdog.threshold.asMilliseconds()).toBe(200);
-    expect(eventLoopWatchdog.profileCooldown.asMilliseconds()).toBe(0);
+    expect(eventLoopWatchdog.heartbeatInterval.asMilliseconds()).toBe(20);
   });
 
   it.each([
     [{ threshold: '10ms' }, /threshold.*between 50ms and 60000ms/],
     [{ heartbeatInterval: '1m' }, /heartbeatInterval/],
-    [{ maxProfileDuration: '2m' }, /maxProfileDuration/],
+    [{ liveNoticeInterval: '10m' }, /liveNoticeInterval/],
     [{ maxCandidates: 1000 }, /maxCandidates/],
     [{ maxCandidates: 2.5 }, /maxCandidates.*integer/],
     [{ maxLiveNoticesPerBlock: 1.5 }, /maxLiveNoticesPerBlock.*integer/],

@@ -41,32 +41,26 @@ export const formatLiveNoticeMessage = ({
     omittedCandidates
   )}`;
 
-export const formatReportMessage = (report: BlockReport): string => {
-  const { blockedMs, cpuRatio, profile, candidates, omittedCandidates, suppressedBlocks } = report;
-  const cpu = cpuRatio === undefined ? '' : `, process CPU ratio ${cpuRatio}`;
-  const frames =
-    profile.frames.length > 0
-      ? ` Top frames: ${profile.frames
-          .map(
-            ({ functionName, location, selfTimeMs, selfPercent, callers }) =>
-              `${functionName}${location ? ` (${location})` : ''} ${selfTimeMs}ms ${selfPercent}%${
-                callers.length > 0 ? ` via ${callers.join(' < ')}` : ''
-              }`
-          )
-          .join('; ')}.`
-      : '';
+/** Interprets the process CPU ratio of a block; it includes other threads, hence "likely". */
+export const describeCpuRatio = (cpuRatio: number): string => {
+  if (cpuRatio >= 0.8) return 'likely CPU-bound work on the main thread';
+  if (cpuRatio <= 0.2) return 'likely waiting on a synchronous syscall or I/O';
+  return 'mixed CPU work and waiting';
+};
+
+export const formatReportMessage = ({
+  blockedMs,
+  cpuRatio,
+  candidates,
+  omittedCandidates,
+  suppressedBlocks,
+}: BlockReport): string => {
   const suppressed =
     suppressedBlocks > 0 ? ` ${suppressedBlocks} earlier block(s) were not reported.` : '';
-  const { startAckLatencyMs } = profile;
-  let startLatency = '';
-  if (startAckLatencyMs !== undefined) {
-    startLatency =
-      profile.verdict === 'profiled'
-        ? ` (starting the profiler added up to ~${startAckLatencyMs}ms to the block)`
-        : ` (profiler start acknowledged after ~${startAckLatencyMs}ms)`;
-  }
   return (
-    `Event loop was blocked for ~${blockedMs}ms${cpu}. Profile ${profile.verdict}${startLatency}: ${profile.reason}.${frames}` +
+    `Event loop was blocked for ~${blockedMs}ms (process CPU ratio ${cpuRatio}: ${describeCpuRatio(
+      cpuRatio
+    )}).` +
     ` Candidates (in flight, not necessarily the cause): ${formatCandidates(
       candidates,
       omittedCandidates

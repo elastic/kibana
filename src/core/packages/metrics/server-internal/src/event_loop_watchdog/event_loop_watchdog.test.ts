@@ -19,11 +19,7 @@ const options: WatchdogOptions = {
   pollIntervalMs: 50,
   liveNoticeIntervalMs: 1_000,
   maxLiveNoticesPerBlock: 3,
-  maxProfileDurationMs: 5_000,
-  profileCooldownMs: 60_000,
   maxCandidates: 5,
-  profileSamplingIntervalUs: 1_000,
-  maxFrames: 5,
 };
 
 describe('EventLoopWatchdog', () => {
@@ -45,7 +41,6 @@ describe('EventLoopWatchdog', () => {
       options,
       registry,
       liveNoticeFormat: 'text',
-      sanitizeRoot: '/root',
     });
   });
 
@@ -179,7 +174,7 @@ describe('EventLoopWatchdog', () => {
     expect(MockWorker.instances).toHaveLength(2);
   });
 
-  it('logs reports and worker errors', () => {
+  it('logs reports', () => {
     watchdog.start();
     const report: BlockReport = {
       blockedMs: 1200,
@@ -190,15 +185,12 @@ describe('EventLoopWatchdog', () => {
       suppressedBlocks: 0,
       candidates: [{ kind: 'task', type: 'a', id: '1', startedBeforeBlockMs: 5 }],
       omittedCandidates: 0,
-      profile: { verdict: 'unavailable', reason: 'no profile captured', frames: [] },
     };
     lastWorker().emit('message', { type: 'report', report });
-    lastWorker().emit('message', { type: 'worker-error', message: 'boom' });
 
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Event loop was blocked for ~1200ms'),
       { tags: ['event-loop-watchdog'], kibana: { event_loop_watchdog: report } }
     );
-    expect(logger.warn).toHaveBeenCalledWith('Event loop watchdog: boom');
   });
 });
