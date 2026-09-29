@@ -47,7 +47,8 @@ const renderWithProviders = (
 };
 
 const EMPTY_FALLBACK = /No description yet/;
-const ADD_ONE_HINT = /Add one to help agents understand this AI index/;
+const ADD_ONE_HINT =
+  /Add a description to shape suggested automations and help agents decide when this AI index is relevant/;
 
 describe('DescriptionPanel', () => {
   it('renders the provided description when not loading', () => {
@@ -69,8 +70,11 @@ describe('DescriptionPanel', () => {
       <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
     );
 
+    expect(screen.getByTestId('contextAiIndexDescriptionEmpty')).toBeInTheDocument();
     expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
     expect(screen.getByText(ADD_ONE_HINT)).toBeInTheDocument();
+    expect(screen.getByTestId('contextAddDescriptionButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
   });
 
   it('renders read-only empty fallback for managed AI indexes', () => {
@@ -228,7 +232,7 @@ describe('DescriptionPanel', () => {
       <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
     );
 
-    fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
+    fireEvent.click(screen.getByTestId('contextAddDescriptionButton'));
     fireEvent.change(screen.getByTestId('contextDescriptionTextArea'), {
       target: { value: 'a'.repeat(MAX_AI_INDEX_DESCRIPTION_LENGTH - 10) },
     });
@@ -242,7 +246,7 @@ describe('DescriptionPanel', () => {
       <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
     );
 
-    fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
+    fireEvent.click(screen.getByTestId('contextAddDescriptionButton'));
     fireEvent.change(screen.getByTestId('contextDescriptionTextArea'), {
       target: { value: 'a'.repeat(MAX_AI_INDEX_DESCRIPTION_LENGTH + 1) },
     });
@@ -251,7 +255,7 @@ describe('DescriptionPanel', () => {
     expect(screen.getByTestId('contextDescriptionSaveButton')).toBeDisabled();
   });
 
-  it('shows a loading state on the Save button while the PUT is in flight', async () => {
+  it('returns to read-only view while the PUT is in flight', async () => {
     const testServices = coreMock.createStart();
     testServices.http.put.mockImplementation(() => new Promise(() => {}));
 
@@ -272,7 +276,9 @@ describe('DescriptionPanel', () => {
     fireEvent.click(screen.getByTestId('contextDescriptionSaveButton'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('contextDescriptionSaveButton')).toBeDisabled();
+      expect(screen.queryByTestId('contextDescriptionTextArea')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contextDescriptionSaveButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('contextEditDescriptionButton')).toBeDisabled();
     });
   });
 });
