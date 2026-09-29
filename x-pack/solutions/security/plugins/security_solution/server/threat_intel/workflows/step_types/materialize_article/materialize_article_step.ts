@@ -25,11 +25,16 @@ export const buildMaterializeArticleStepDefinition = (deps: BuildMaterializeArti
       const stepLogger = deps.logger.get('threatIntel', 'materialize_article', 'jina');
       const output = await materializeArticle(input, context.abortSignal);
 
-      if (output.materialization.status === 'fallback') {
+      // Prefer the service-sanitized source_url so userinfo from a direct step
+      // invocation cannot land in server logs on permanent or retryable fallback.
+      if (
+        output.materialization.status === 'fallback' ||
+        output.materialization.status === 'retryable_fallback'
+      ) {
         stepLogger.warn(
-          `Jina materialization fell back to RSS for ${input.article_url || '<missing URL>'}: ${
-            output.materialization.reason
-          }`
+          `Jina materialization ${output.materialization.status} for ${
+            output.materialization.source_url || '<missing URL>'
+          }: ${output.materialization.reason}`
         );
       } else {
         stepLogger.debug(
