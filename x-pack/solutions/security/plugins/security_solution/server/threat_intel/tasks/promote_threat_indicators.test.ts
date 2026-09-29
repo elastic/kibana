@@ -1055,7 +1055,7 @@ describe('vetting gate', () => {
       expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('ctx._source.ioc_tier = params.ioc_tier');
     });
 
-    it('only raises the label, so a later uncertain citation cannot demote it', () => {
+    it('only raises the label for truncated citations that never enter sources[]', () => {
       expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('if (incomingTier > currentTier)');
     });
 
@@ -1118,9 +1118,16 @@ describe('SOURCES_REMOVE_SCRIPT_FOR_TEST', () => {
     expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain("ctx.op = 'delete'");
   });
 
-  it('recomputes best-wins tier and severity from remaining citations', () => {
-    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain('ctx._source.ioc_tier = bestTier');
-    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain('ctx._source.severity = bestSev');
+  it('keeps truncated indicators when recorded citations are empty', () => {
+    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain('sources_truncated == true');
+    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toMatch(
+      /sources_truncated == true[\s\S]*last_seen = params\.now[\s\S]*ctx\.op = 'delete'/
+    );
+  });
+
+  it('recomputes best-wins tier and severity only when every citation is ranked', () => {
+    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain('tiersComplete && bestTier != null');
+    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain('if (sevsComplete)');
     expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain('entry.ioc_tier');
     expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain('entry.severity');
   });
@@ -1153,6 +1160,11 @@ describe('sources[] citation ranks on upsert', () => {
     ]);
     expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain("'ioc_tier': params.ioc_tier");
     expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain("newEntry['severity']");
+  });
+
+  it('recomputes document ranks from sources after a citation refresh', () => {
+    expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('mutatedSources');
+    expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('tiersComplete && bestTier != null');
   });
 
   it('passes the alert-reference prefix on retract ops', () => {

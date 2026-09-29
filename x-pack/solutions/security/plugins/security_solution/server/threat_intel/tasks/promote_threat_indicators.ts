@@ -227,6 +227,64 @@ const PROMOTABLE_TIER_RANK_LITERAL = PROMOTABLE_TIERS_BY_PRECISION.map(
 const SEVERITY_RANK_LITERAL = `['low': 1, 'medium': 2, 'high': 3, 'critical': 4]`;
 
 /**
+ * Shared Painless fragment: set document `ioc_tier` / `severity` from the current
+ * `sources[]` citations. Skips the update when any remaining citation is missing
+ * the per-entry rank (pre-PR documents), so we never invent a demotion or wipe
+ * severity from incomplete provenance. When every citation is ranked, absolute
+ * best-wins applies (including demotion after a refresh or retract).
+ */
+const RECOMPUTE_RANKS_FROM_SOURCES = `
+Map tierRank = [${PROMOTABLE_TIER_RANK_LITERAL}];
+Map sevRank = ${SEVERITY_RANK_LITERAL};
+def bestTier = null;
+int bestTierRank = 0;
+def bestSev = null;
+int bestSevRank = 0;
+boolean tiersComplete = true;
+boolean sevsComplete = true;
+for (def entry : ctx._source.sources) {
+  if (entry == null) {
+    // skip
+  } else {
+    if (entry.ioc_tier != null && tierRank.containsKey(entry.ioc_tier)) {
+      int r = tierRank[entry.ioc_tier];
+      if (r > bestTierRank) {
+        bestTierRank = r;
+        bestTier = entry.ioc_tier;
+      }
+    } else {
+      tiersComplete = false;
+    }
+    if (entry.severity != null && sevRank.containsKey(entry.severity)) {
+      int r = sevRank[entry.severity];
+      if (r > bestSevRank) {
+        bestSevRank = r;
+        bestSev = entry.severity;
+      }
+    } else {
+      sevsComplete = false;
+    }
+  }
+}
+if (tiersComplete && bestTier != null) {
+  ctx._source.ioc_tier = bestTier;
+}
+if (sevsComplete) {
+  if (bestSev != null) {
+    ctx._source.severity = bestSev;
+    if (ctx._source.threat != null && ctx._source.threat.indicator != null) {
+      ctx._source.threat.indicator.confidence = bestSev;
+    }
+  } else {
+    ctx._source.remove('severity');
+    if (ctx._source.threat != null && ctx._source.threat.indicator != null) {
+      ctx._source.threat.indicator.remove('confidence');
+    }
+  }
+}
+`.trim();
+
+/**
  * Painless script that appends a sources[] entry for a citing report, deduped by
  * report_id. Also refreshes threat.indicator.last_seen and @timestamp to `now`.
  *
@@ -241,35 +299,30 @@ const SEVERITY_RANK_LITERAL = `['low': 1, 'medium': 2, 'high': 3, 'critical': 4]
  *   severity   — severity.level of the citing report, or null
  *   ioc_tier   — the extract_iocs tier this citation assigned the value
  *
- * `severity` and `ioc_tier` are both refreshed best-wins, and both have to be,
- * because the `upsert` document is ignored on an update. `ioc_tier` in particular
- * is the read-side filter on the per-space alias, so leaving it frozen at its
- * first-seen value kept a value first cited as `uncertain` out of the precision
- * alias no matter how many later reports called it `discriminating`.
+ * Each sources[] entry stores `ioc_tier` / `severity`. When a citation is added or
+ * refreshed, document ranks are recomputed from every ranked citation so a
+ * demotion on re-enrichment actually lowers the live indicator. Truncated
+ * citations that never enter `sources[]` still apply raise-only best-wins so a
+ * later high-precision report is not dropped on the floor.
  *
- * Each sources[] entry also stores `ioc_tier` / `severity` so a later retract can
- * recompute those best-wins ranks from the remaining citations.
- *
- * `source_report_id`, `source_report_url`, and `threat.indicator.reference` are
- * deliberately left at their first-seen values on upsert. They pair with
- * `first_seen`, and `sources[]` is the authoritative citation list (the mapping
- * calls them legacy single-source fields for exactly this reason), so rewriting
- * them on every citation would make the alert-to-report join point at an
- * arbitrary report rather than a stable one. Retract rebinds them when the
- * first-seen report is removed.
+ * `source_report_id`, `source_report_url`, and `threat.indicator.reference` stay
+ * at their first-seen values on upsert; retract rebinds them when that report
+ * is removed.
  */
 const SOURCES_UPSERT_SCRIPT = `
 if (ctx._source.sources == null) {
   ctx._source.sources = [];
 }
 boolean alreadyPresent = false;
+boolean mutatedSources = false;
 for (def entry : ctx._source.sources) {
   if (entry.report_id == params.report_id) {
     alreadyPresent = true;
-    // Refresh per-citation ranks so a later retract recompute stays accurate.
+    // Refresh per-citation ranks so recompute (and later retract) stay accurate.
     if (params.ioc_tier != null) { entry.ioc_tier = params.ioc_tier; }
     if (params.severity != null) { entry.severity = params.severity; }
     else { entry.remove('severity'); }
+    mutatedSources = true;
     break;
   }
 }
@@ -285,31 +338,37 @@ if (!alreadyPresent) {
     if (params.reference != null) { newEntry['reference'] = params.reference; }
     if (params.severity != null) { newEntry['severity'] = params.severity; }
     ctx._source.sources.add(newEntry);
+    mutatedSources = true;
   }
 }
 if (ctx._source.threat == null) { ctx._source.threat = ['indicator': [:]]; }
 if (ctx._source.threat.indicator == null) { ctx._source.threat.indicator = [:]; }
 ctx._source.threat.indicator.last_seen = params.now;
 ctx._source['@timestamp'] = params.now;
-if (params.severity != null) {
-  Map rank = ${SEVERITY_RANK_LITERAL};
-  int incoming = rank.containsKey(params.severity) ? rank[params.severity] : 0;
-  int current = ctx._source.severity != null && rank.containsKey(ctx._source.severity)
-    ? rank[ctx._source.severity]
-    : 0;
-  if (incoming > current) {
-    ctx._source.severity = params.severity;
-    ctx._source.threat.indicator.confidence = params.severity;
+if (mutatedSources) {
+  ${RECOMPUTE_RANKS_FROM_SOURCES}
+} else {
+  // Truncated citation: not stored in sources[], but still raise document ranks.
+  if (params.severity != null) {
+    Map rank = ${SEVERITY_RANK_LITERAL};
+    int incoming = rank.containsKey(params.severity) ? rank[params.severity] : 0;
+    int current = ctx._source.severity != null && rank.containsKey(ctx._source.severity)
+      ? rank[ctx._source.severity]
+      : 0;
+    if (incoming > current) {
+      ctx._source.severity = params.severity;
+      ctx._source.threat.indicator.confidence = params.severity;
+    }
   }
-}
-if (params.ioc_tier != null) {
-  Map tierRank = [${PROMOTABLE_TIER_RANK_LITERAL}];
-  int incomingTier = tierRank.containsKey(params.ioc_tier) ? tierRank[params.ioc_tier] : 0;
-  int currentTier = ctx._source.ioc_tier != null && tierRank.containsKey(ctx._source.ioc_tier)
-    ? tierRank[ctx._source.ioc_tier]
-    : 0;
-  if (incomingTier > currentTier) {
-    ctx._source.ioc_tier = params.ioc_tier;
+  if (params.ioc_tier != null) {
+    Map tierRank = [${PROMOTABLE_TIER_RANK_LITERAL}];
+    int incomingTier = tierRank.containsKey(params.ioc_tier) ? tierRank[params.ioc_tier] : 0;
+    int currentTier = ctx._source.ioc_tier != null && tierRank.containsKey(ctx._source.ioc_tier)
+      ? tierRank[ctx._source.ioc_tier]
+      : 0;
+    if (incomingTier > currentTier) {
+      ctx._source.ioc_tier = params.ioc_tier;
+    }
   }
 }
 `.trim();
@@ -318,6 +377,10 @@ if (params.ioc_tier != null) {
  * Drop this report's citation. When citations remain, recompute best-wins
  * `ioc_tier` / severity from the remaining `sources[]` entries and rebind
  * first-source attribution if the removed report owned it.
+ *
+ * When `sources_truncated` is set, an empty `sources[]` must not delete the
+ * indicator: later citations past the cap were never recorded, so the live row
+ * may still be contributed to by untracked reports.
  */
 const SOURCES_REMOVE_SCRIPT = `
 if (ctx._source.sources == null) {
@@ -325,54 +388,31 @@ if (ctx._source.sources == null) {
 }
 ctx._source.sources.removeIf(entry -> entry != null && entry.report_id == params.report_id);
 if (ctx._source.sources.size() == 0) {
-  ctx.op = 'delete';
+  if (ctx._source.sources_truncated == true) {
+    ctx._source['@timestamp'] = params.now;
+    if (ctx._source.threat == null) { ctx._source.threat = ['indicator': [:]]; }
+    if (ctx._source.threat.indicator == null) { ctx._source.threat.indicator = [:]; }
+    ctx._source.threat.indicator.last_seen = params.now;
+  } else {
+    ctx.op = 'delete';
+  }
 } else {
   ctx._source['@timestamp'] = params.now;
   if (ctx._source.threat == null) { ctx._source.threat = ['indicator': [:]]; }
   if (ctx._source.threat.indicator == null) { ctx._source.threat.indicator = [:]; }
   ctx._source.threat.indicator.last_seen = params.now;
 
-  Map tierRank = [${PROMOTABLE_TIER_RANK_LITERAL}];
-  Map sevRank = ${SEVERITY_RANK_LITERAL};
-  def bestTier = null;
-  int bestTierRank = 0;
-  def bestSev = null;
-  int bestSevRank = 0;
+  ${RECOMPUTE_RANKS_FROM_SOURCES}
+
   def earliest = null;
   for (def entry : ctx._source.sources) {
     if (entry == null) {
       // skip
-    } else {
-      if (earliest == null) {
-        earliest = entry;
-      } else if (entry.first_seen != null && (earliest.first_seen == null || entry.first_seen.compareTo(earliest.first_seen) < 0)) {
-        earliest = entry;
-      }
-      if (entry.ioc_tier != null && tierRank.containsKey(entry.ioc_tier)) {
-        int r = tierRank[entry.ioc_tier];
-        if (r > bestTierRank) {
-          bestTierRank = r;
-          bestTier = entry.ioc_tier;
-        }
-      }
-      if (entry.severity != null && sevRank.containsKey(entry.severity)) {
-        int r = sevRank[entry.severity];
-        if (r > bestSevRank) {
-          bestSevRank = r;
-          bestSev = entry.severity;
-        }
-      }
+    } else if (earliest == null) {
+      earliest = entry;
+    } else if (entry.first_seen != null && (earliest.first_seen == null || entry.first_seen.compareTo(earliest.first_seen) < 0)) {
+      earliest = entry;
     }
-  }
-  if (bestTier != null) {
-    ctx._source.ioc_tier = bestTier;
-  }
-  if (bestSev != null) {
-    ctx._source.severity = bestSev;
-    ctx._source.threat.indicator.confidence = bestSev;
-  } else {
-    ctx._source.remove('severity');
-    ctx._source.threat.indicator.remove('confidence');
   }
   if (earliest != null && ctx._source.source_report_id == params.report_id) {
     ctx._source.source_report_id = earliest.report_id;
