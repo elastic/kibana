@@ -529,12 +529,14 @@ export function ComposeDiscoverFlyout({
   const watchedQuery = useWatch({ control: methods.control, name: 'query' });
   const watchedRecovery = useWatch({ control: methods.control, name: 'recovery' });
   const watchedNoData = useWatch({ control: methods.control, name: 'noData' });
+  const watchedStateTransition = useWatch({ control: methods.control, name: 'stateTransition' });
   const hasCustomRecovery = watchedRecovery?.strategy === recoveryStrategy.condition;
 
   const isFormStateNonRepresentable = isNonRepresentableFormState({
     kind: isAlert ? 'alert' : 'signal',
     recovery: watchedRecovery,
     noData: watchedNoData,
+    stateTransition: watchedStateTransition,
   });
 
   const timeFieldResolutionQuery = useMemo(

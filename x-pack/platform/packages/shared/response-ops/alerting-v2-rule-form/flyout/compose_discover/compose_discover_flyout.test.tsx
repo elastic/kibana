@@ -1630,6 +1630,51 @@ describe('ComposeDiscoverFlyout', () => {
       buttons.forEach((btn) => expect(btn).not.toBeDisabled());
     });
 
+    it.each(['and', 'or'] as const)(
+      'opens in YAML mode when pending joins count and timeframe with %s',
+      (operator) => {
+        renderFlyout({
+          mode: 'edit',
+          rule: {
+            ...representableRule,
+            state_transition: { pending: { count: 3, timeframe: '5m', operator } },
+          } as any,
+        });
+
+        expect(screen.getByTestId('yamlRuleFormMock')).toBeInTheDocument();
+        expect(screen.queryByTestId('composeDiscoverFormMock')).not.toBeInTheDocument();
+      }
+    );
+
+    it.each(['and', 'or'] as const)(
+      'opens in YAML mode when recovering joins count and timeframe with %s',
+      (operator) => {
+        renderFlyout({
+          mode: 'edit',
+          rule: {
+            ...representableRule,
+            recovery: { strategy: 'no_breach' as const },
+            state_transition: { recovering: { count: 4, timeframe: '20m', operator } },
+          } as any,
+        });
+
+        expect(screen.getByTestId('yamlRuleFormMock')).toBeInTheDocument();
+      }
+    );
+
+    it('opens in form mode for a single-dimension delay', () => {
+      renderFlyout({
+        mode: 'edit',
+        rule: {
+          ...representableRule,
+          state_transition: { pending: { count: 3 } },
+        } as any,
+      });
+
+      expect(screen.getByTestId('composeDiscoverFormMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('yamlRuleFormMock')).not.toBeInTheDocument();
+    });
+
     it('shows YAML badge instead of stepper for non-representable rules', () => {
       renderFlyout({ mode: 'edit', rule: nonRepresentableRule as any });
 
@@ -1712,6 +1757,29 @@ describe('ComposeDiscoverFlyout', () => {
       expect(screen.queryByTestId('composeDiscoverYamlBadge')).not.toBeInTheDocument();
       expect(screen.getByTestId('composeDiscoverFormMock')).toBeInTheDocument();
     });
+
+    it.each(['and', 'or'] as const)(
+      'stays in YAML mode when a parsed %s operator joins pending count and timeframe',
+      (operator) => {
+        toggleToFormWith({
+          ...defaultYamlFormValues,
+          kind: 'alert',
+          recovery: { strategy: 'no_breach' },
+          stateTransition: {
+            pendingCount: 3,
+            pendingTimeframe: '5m',
+            pendingOperator: operator,
+          },
+          stateTransitionAlertDelayMode: 'duration',
+        });
+
+        expect(screen.getByTestId('composeDiscoverYamlBadge')).toBeInTheDocument();
+        const buttons = screen
+          .getByTestId('composeDiscoverEditModeToggle')
+          .querySelectorAll('button');
+        buttons.forEach((btn) => expect(btn).toBeDisabled());
+      }
+    );
 
     it('returns to Form view for an alert recovering on a condition', () => {
       toggleToFormWith({

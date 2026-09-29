@@ -113,6 +113,64 @@ describe('isNonRepresentableRule', () => {
     ).toBe(true);
   });
 
+  it.each(['and', 'or'] as const)(
+    'returns true when pending joins count and timeframe with %s',
+    (operator) => {
+      expect(
+        isNonRepresentableRule(
+          createMockRule({
+            state_transition: { pending: { count: 3, timeframe: '5m', operator } },
+          })
+        )
+      ).toBe(true);
+    }
+  );
+
+  it.each(['and', 'or'] as const)(
+    'returns true when recovering joins count and timeframe with %s and recovery is automatic',
+    (operator) => {
+      expect(
+        isNonRepresentableRule(
+          createMockRule({
+            recovery: { strategy: recoveryStrategy.no_breach },
+            state_transition: { recovering: { count: 4, timeframe: '20m', operator } },
+          })
+        )
+      ).toBe(true);
+    }
+  );
+
+  it('returns true when a phase sets both thresholds without an operator', () => {
+    expect(
+      isNonRepresentableRule(
+        createMockRule({
+          state_transition: { pending: { count: 3, timeframe: '5m' } },
+        })
+      )
+    ).toBe(true);
+  });
+
+  it('returns false for a single-dimension delay, which the form can author', () => {
+    expect(
+      isNonRepresentableRule(
+        createMockRule({
+          state_transition: { pending: { count: 3 }, recovering: { timeframe: '10m' } },
+        })
+      )
+    ).toBe(false);
+  });
+
+  it('returns false for a combined recovering phase when recovery is manual', () => {
+    expect(
+      isNonRepresentableRule(
+        createMockRule({
+          recovery: { strategy: recoveryStrategy.manual },
+          state_transition: { recovering: { count: 4, timeframe: '20m', operator: 'and' } },
+        })
+      )
+    ).toBe(false);
+  });
+
   it('returns false for a signal rule, whatever the alert-only blocks hold', () => {
     expect(
       isNonRepresentableRule({
@@ -176,6 +234,59 @@ describe('isNonRepresentableFormState', () => {
     };
 
     expect(isNonRepresentableFormState(values)).toBe(true);
+  });
+
+  it.each(['and', 'or'] as const)(
+    'returns true when pending joins count and timeframe with %s',
+    (operator) => {
+      expect(
+        isNonRepresentableFormState({
+          ...baseFormValues,
+          stateTransition: {
+            pendingCount: 3,
+            pendingTimeframe: '5m',
+            pendingOperator: operator,
+          },
+        })
+      ).toBe(true);
+    }
+  );
+
+  it('returns true when recovering joins both thresholds and recovery is automatic', () => {
+    expect(
+      isNonRepresentableFormState({
+        ...baseFormValues,
+        recovery: { strategy: recoveryStrategy.no_breach },
+        stateTransition: {
+          recoveringCount: 4,
+          recoveringTimeframe: '20m',
+          recoveringOperator: 'or',
+        },
+      })
+    ).toBe(true);
+  });
+
+  it('returns false when recovering joins both thresholds but recovery is manual', () => {
+    expect(
+      isNonRepresentableFormState({
+        ...baseFormValues,
+        recovery: { strategy: recoveryStrategy.manual },
+        stateTransition: {
+          recoveringCount: 4,
+          recoveringTimeframe: '20m',
+          recoveringOperator: 'and',
+        },
+      })
+    ).toBe(false);
+  });
+
+  it('returns false for a single-dimension delay', () => {
+    expect(
+      isNonRepresentableFormState({
+        ...baseFormValues,
+        stateTransition: { pendingCount: 3, recoveringTimeframe: '10m' },
+      })
+    ).toBe(false);
   });
 
   it('returns true for alert + a noData presence query', () => {
