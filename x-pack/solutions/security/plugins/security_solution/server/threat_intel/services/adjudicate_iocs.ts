@@ -6,6 +6,7 @@
  */
 
 import { createHash } from 'node:crypto';
+import { domainToUnicode } from 'node:url';
 import { MAX_IOC_TIER_BASIS_LENGTH } from '../../../common/threat_intel/contracts/enrichment';
 import type { ExtractedIoc, ExtractIocsResult, IocTier } from './extract_iocs';
 import { refang } from './extract_iocs';
@@ -162,44 +163,65 @@ const urlPathCandidates = (parsed: URL): string[] => {
   return candidates;
 };
 
+/**
+ * `extract_iocs` serializes IDN hosts via `new URL().toString()` (punycode), but
+ * reports usually write the Unicode spelling. Match both so adjudication windows
+ * are not empty for internationalized URLs.
+ */
+const urlHostCandidates = (parsed: URL): string[] => {
+  const hosts = [parsed.host];
+  try {
+    const unicodeHostname = domainToUnicode(parsed.hostname);
+    if (unicodeHostname && unicodeHostname !== parsed.hostname) {
+      const unicodeHost = parsed.port ? `${unicodeHostname}:${parsed.port}` : unicodeHostname;
+      hosts.push(unicodeHost);
+    }
+  } catch {
+    // domainToUnicode throws on malformed labels; keep the canonical host only.
+  }
+  return hosts;
+};
+
 const scoreUrlOccurrences = (source: string, urlValue: string): ScoredOccurrence[] => {
   const scored: ScoredOccurrence[] = [];
   try {
     const parsed = new URL(urlValue);
     const pathCandidates = urlPathCandidates(parsed);
-    // Match protocol+host case-insensitively, then require an exact path/query/hash
-    // so `/PAYLOAD` and `/payload` never share review context.
-    const hostPattern = new RegExp(
-      `${escapeRegExp(parsed.protocol)}//${escapeRegExp(parsed.host)}`,
-      'gi'
-    );
-    let hostMatch: RegExpExecArray | null;
-    while (
-      scored.length < MAX_OCCURRENCES_TO_SCORE &&
-      (hostMatch = hostPattern.exec(source)) !== null
-    ) {
-      const hostEnd = hostMatch.index + hostMatch[0].length;
-      let matchedPath: string | undefined;
-      for (const pathPart of pathCandidates) {
-        const after = hostEnd + pathPart.length;
-        if (source.slice(hostEnd, after) === pathPart && isUrlBoundaryAt(source, after)) {
-          matchedPath = pathPart;
-          break;
+    // Match protocol+host case-insensitively (punycode and Unicode), then require
+    // an exact path/query/hash so `/PAYLOAD` and `/payload` never share context.
+    for (const host of urlHostCandidates(parsed)) {
+      const hostPattern = new RegExp(
+        `${escapeRegExp(parsed.protocol)}//${escapeRegExp(host)}`,
+        'gi'
+      );
+      let hostMatch: RegExpExecArray | null;
+      while (
+        scored.length < MAX_OCCURRENCES_TO_SCORE &&
+        (hostMatch = hostPattern.exec(source)) !== null
+      ) {
+        const hostEnd = hostMatch.index + hostMatch[0].length;
+        let matchedPath: string | undefined;
+        for (const pathPart of pathCandidates) {
+          const after = hostEnd + pathPart.length;
+          if (source.slice(hostEnd, after) === pathPart && isUrlBoundaryAt(source, after)) {
+            matchedPath = pathPart;
+            break;
+          }
         }
-      }
-      if (matchedPath !== undefined) {
-        const after = hostEnd + matchedPath.length;
-        const index = hostMatch.index;
-        const window = source.slice(
-          Math.max(0, index - CONTEXT_CHARS),
-          Math.min(source.length, after + CONTEXT_CHARS)
-        );
-        scored.push({
-          source,
-          index,
-          length: after - index,
-          score: (ATTRIBUTION_CONTEXT_CUE.test(window) ? 1_000_000 : 0) + index,
-        });
+        if (matchedPath !== undefined) {
+          const after = hostEnd + matchedPath.length;
+          const index = hostMatch.index;
+          const window = source.slice(
+            Math.max(0, index - CONTEXT_CHARS),
+            Math.min(source.length, after + CONTEXT_CHARS)
+          );
+          scored.push({
+            source,
+            index,
+            length: after - index,
+            score: (ATTRIBUTION_CONTEXT_CUE.test(window) ? 1_000_000 : 0) + index,
+          });
+        }
       }
     }
   } catch {
@@ -218,12 +240,27 @@ const scoreUrlOccurrences = (source: string, urlValue: string): ScoredOccurrence
         ) {
           values.push(urlValue.slice(0, -1));
         }
+        for (const host of urlHostCandidates(parsed)) {
+          if (host !== parsed.host) {
+            const unicodeExact = `${parsed.protocol}//${host}${parsed.pathname}${parsed.search}${parsed.hash}`;
+            if (!values.includes(unicodeExact)) values.push(unicodeExact);
+            if (
+              parsed.pathname === '/' &&
+              parsed.search === '' &&
+              parsed.hash === '' &&
+              unicodeExact.endsWith('/')
+            ) {
+              const withoutSlash = unicodeExact.slice(0, -1);
+              if (!values.includes(withoutSlash)) values.push(withoutSlash);
+            }
+          }
+        }
       } catch {
         // Keep the original value when parsing fails.
       }
       try {
         const decoded = decodeURI(urlValue);
-        if (decoded !== urlValue) values.push(decoded);
+        if (decoded !== urlValue && !values.includes(decoded)) values.push(decoded);
       } catch {
         // Malformed percent-encoding; skip the decoded spelling.
       }
@@ -274,23 +311,32 @@ const scoreDomainOccurrences = (
   lowerDomain: string
 ): ScoredOccurrence[] => {
   const scored: ScoredOccurrence[] = [];
-  let from = 0;
-  while (from < lowerSource.length && scored.length < MAX_OCCURRENCES_TO_SCORE) {
-    const index = lowerSource.indexOf(lowerDomain, from);
-    if (index < 0) break;
-    const after = index + lowerDomain.length;
-    from = index + Math.max(lowerDomain.length, 1);
-    if (isDomainBoundaryAt(lowerSource, index, after)) {
-      const window = source.slice(
-        Math.max(0, index - CONTEXT_CHARS),
-        Math.min(source.length, after + CONTEXT_CHARS)
-      );
-      scored.push({
-        source,
-        index,
-        length: lowerDomain.length,
-        score: (ATTRIBUTION_CONTEXT_CUE.test(window) ? 1_000_000 : 0) + index,
-      });
+  const domainSpellings = [lowerDomain];
+  try {
+    const unicode = domainToUnicode(lowerDomain).toLowerCase();
+    if (unicode && unicode !== lowerDomain) domainSpellings.push(unicode);
+  } catch {
+    // Malformed label; keep the canonical domain only.
+  }
+  for (const spelling of domainSpellings) {
+    let from = 0;
+    while (from < lowerSource.length && scored.length < MAX_OCCURRENCES_TO_SCORE) {
+      const index = lowerSource.indexOf(spelling, from);
+      if (index < 0) break;
+      const after = index + spelling.length;
+      from = index + Math.max(spelling.length, 1);
+      if (isDomainBoundaryAt(lowerSource, index, after)) {
+        const window = source.slice(
+          Math.max(0, index - CONTEXT_CHARS),
+          Math.min(source.length, after + CONTEXT_CHARS)
+        );
+        scored.push({
+          source,
+          index,
+          length: spelling.length,
+          score: (ATTRIBUTION_CONTEXT_CUE.test(window) ? 1_000_000 : 0) + index,
+        });
+      }
     }
   }
   return scored;
@@ -470,7 +516,15 @@ const shrinkContextAroundIoc = (context: string, value: string, maxChars: number
     const start = Math.max(0, Math.floor((context.length - maxChars) / 2));
     return context.slice(start, start + maxChars);
   }
-  if (value.length >= maxChars) return context.slice(index, index + maxChars);
+  // When the value alone would fill the window, still keep attribution prose.
+  // Prefer characters before the IOC (cues usually precede the value); when the
+  // mention is near the start, the remainder of the window covers trailing prose.
+  if (value.length >= maxChars) {
+    const proseBudget = Math.max(24, Math.floor(maxChars / 3));
+    const before = Math.min(index, proseBudget);
+    const start = Math.max(0, index - before);
+    return context.slice(start, start + maxChars);
+  }
   const before = Math.floor((maxChars - value.length) / 2);
   const start = Math.max(0, Math.min(index - before, context.length - maxChars));
   return context.slice(start, start + maxChars);

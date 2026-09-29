@@ -146,6 +146,10 @@ interface SourceEntry {
   trail?: string;
   reference?: string;
   first_seen: string;
+  /** Per-citation tier so retract can recompute best-wins after a removal. */
+  ioc_tier: string;
+  /** Per-citation severity so retract can recompute best-wins after a removal. */
+  severity?: string;
 }
 
 interface IocIndicatorOp {
@@ -175,6 +179,8 @@ interface IocRetractOp {
   scriptParams: {
     report_id: string;
     now: string;
+    /** Prefixed onto the earliest remaining report_id for alert joins. */
+    reference_prefix: string;
   };
 }
 
@@ -217,6 +223,9 @@ const PROMOTABLE_TIER_RANK_LITERAL = PROMOTABLE_TIERS_BY_PRECISION.map(
   (tier, index) => `'${tier}': ${index + 1}`
 ).join(', ');
 
+/** Painless map literal for severity ranks, e.g. `'low': 1, 'medium': 2, ...`. */
+const SEVERITY_RANK_LITERAL = `['low': 1, 'medium': 2, 'high': 3, 'critical': 4]`;
+
 /**
  * Painless script that appends a sources[] entry for a citing report, deduped by
  * report_id. Also refreshes threat.indicator.last_seen and @timestamp to `now`.
@@ -238,12 +247,16 @@ const PROMOTABLE_TIER_RANK_LITERAL = PROMOTABLE_TIERS_BY_PRECISION.map(
  * first-seen value kept a value first cited as `uncertain` out of the precision
  * alias no matter how many later reports called it `discriminating`.
  *
+ * Each sources[] entry also stores `ioc_tier` / `severity` so a later retract can
+ * recompute those best-wins ranks from the remaining citations.
+ *
  * `source_report_id`, `source_report_url`, and `threat.indicator.reference` are
- * deliberately left at their first-seen values. They pair with `first_seen`, and
- * `sources[]` is the authoritative citation list (the mapping calls them legacy
- * single-source fields for exactly this reason), so rewriting them on every
- * citation would make the alert-to-report join point at an arbitrary report rather
- * than a stable one.
+ * deliberately left at their first-seen values on upsert. They pair with
+ * `first_seen`, and `sources[]` is the authoritative citation list (the mapping
+ * calls them legacy single-source fields for exactly this reason), so rewriting
+ * them on every citation would make the alert-to-report join point at an
+ * arbitrary report rather than a stable one. Retract rebinds them when the
+ * first-seen report is removed.
  */
 const SOURCES_UPSERT_SCRIPT = `
 if (ctx._source.sources == null) {
@@ -253,6 +266,10 @@ boolean alreadyPresent = false;
 for (def entry : ctx._source.sources) {
   if (entry.report_id == params.report_id) {
     alreadyPresent = true;
+    // Refresh per-citation ranks so a later retract recompute stays accurate.
+    if (params.ioc_tier != null) { entry.ioc_tier = params.ioc_tier; }
+    if (params.severity != null) { entry.severity = params.severity; }
+    else { entry.remove('severity'); }
     break;
   }
 }
@@ -263,9 +280,10 @@ if (!alreadyPresent) {
     // below still refreshes, which is the part consumers rely on.
     ctx._source.sources_truncated = true;
   } else {
-    def newEntry = ['report_id': params.report_id, 'provider': params.provider, 'first_seen': params.first_seen];
+    def newEntry = ['report_id': params.report_id, 'provider': params.provider, 'first_seen': params.first_seen, 'ioc_tier': params.ioc_tier];
     if (params.trail != null) { newEntry['trail'] = params.trail; }
     if (params.reference != null) { newEntry['reference'] = params.reference; }
+    if (params.severity != null) { newEntry['severity'] = params.severity; }
     ctx._source.sources.add(newEntry);
   }
 }
@@ -274,7 +292,7 @@ if (ctx._source.threat.indicator == null) { ctx._source.threat.indicator = [:]; 
 ctx._source.threat.indicator.last_seen = params.now;
 ctx._source['@timestamp'] = params.now;
 if (params.severity != null) {
-  Map rank = ['low': 1, 'medium': 2, 'high': 3, 'critical': 4];
+  Map rank = ${SEVERITY_RANK_LITERAL};
   int incoming = rank.containsKey(params.severity) ? rank[params.severity] : 0;
   int current = ctx._source.severity != null && rank.containsKey(ctx._source.severity)
     ? rank[ctx._source.severity]
@@ -296,7 +314,11 @@ if (params.ioc_tier != null) {
 }
 `.trim();
 
-/** Drop this report's citation; delete the indicator when no citations remain. */
+/**
+ * Drop this report's citation. When citations remain, recompute best-wins
+ * `ioc_tier` / severity from the remaining `sources[]` entries and rebind
+ * first-source attribution if the removed report owned it.
+ */
 const SOURCES_REMOVE_SCRIPT = `
 if (ctx._source.sources == null) {
   ctx._source.sources = [];
@@ -306,8 +328,64 @@ if (ctx._source.sources.size() == 0) {
   ctx.op = 'delete';
 } else {
   ctx._source['@timestamp'] = params.now;
-  if (ctx._source.threat != null && ctx._source.threat.indicator != null) {
-    ctx._source.threat.indicator.last_seen = params.now;
+  if (ctx._source.threat == null) { ctx._source.threat = ['indicator': [:]]; }
+  if (ctx._source.threat.indicator == null) { ctx._source.threat.indicator = [:]; }
+  ctx._source.threat.indicator.last_seen = params.now;
+
+  Map tierRank = [${PROMOTABLE_TIER_RANK_LITERAL}];
+  Map sevRank = ${SEVERITY_RANK_LITERAL};
+  def bestTier = null;
+  int bestTierRank = 0;
+  def bestSev = null;
+  int bestSevRank = 0;
+  def earliest = null;
+  for (def entry : ctx._source.sources) {
+    if (entry == null) {
+      // skip
+    } else {
+      if (earliest == null) {
+        earliest = entry;
+      } else if (entry.first_seen != null && (earliest.first_seen == null || entry.first_seen.compareTo(earliest.first_seen) < 0)) {
+        earliest = entry;
+      }
+      if (entry.ioc_tier != null && tierRank.containsKey(entry.ioc_tier)) {
+        int r = tierRank[entry.ioc_tier];
+        if (r > bestTierRank) {
+          bestTierRank = r;
+          bestTier = entry.ioc_tier;
+        }
+      }
+      if (entry.severity != null && sevRank.containsKey(entry.severity)) {
+        int r = sevRank[entry.severity];
+        if (r > bestSevRank) {
+          bestSevRank = r;
+          bestSev = entry.severity;
+        }
+      }
+    }
+  }
+  if (bestTier != null) {
+    ctx._source.ioc_tier = bestTier;
+  }
+  if (bestSev != null) {
+    ctx._source.severity = bestSev;
+    ctx._source.threat.indicator.confidence = bestSev;
+  } else {
+    ctx._source.remove('severity');
+    ctx._source.threat.indicator.remove('confidence');
+  }
+  if (earliest != null && ctx._source.source_report_id == params.report_id) {
+    ctx._source.source_report_id = earliest.report_id;
+    if (earliest.reference != null) {
+      ctx._source.source_report_url = earliest.reference;
+    } else {
+      ctx._source.remove('source_report_url');
+    }
+    ctx._source.threat.indicator.reference = params.reference_prefix + earliest.report_id;
+    ctx._source.threat.indicator.first_seen = earliest.first_seen;
+    if (earliest.provider != null) {
+      ctx._source.threat.indicator.provider = earliest.provider;
+    }
   }
 }
 `.trim();
@@ -465,8 +543,10 @@ const buildBulkOps = (reports: ReportHit[], now: string): PromoteBulkOp[] => {
         report_id: reportId,
         provider,
         first_seen: firstSeen,
+        ioc_tier: ioc.tier,
         ...(trailLabel !== null ? { trail: trailLabel } : {}),
         ...(reference !== null ? { reference } : {}),
+        ...(severity ? { severity } : {}),
       };
 
       ops.push({
@@ -531,7 +611,11 @@ const buildBulkOps = (reports: ReportHit[], now: string): PromoteBulkOp[] => {
               kind: 'retract',
               _index: THREAT_INTEL_INDICATORS_INDEX,
               _id: id,
-              scriptParams: { report_id: reportId, now },
+              scriptParams: {
+                report_id: reportId,
+                now,
+                reference_prefix: INDICATOR_REFERENCE_PREFIX,
+              },
             });
           }
         }

@@ -1117,4 +1117,64 @@ describe('SOURCES_REMOVE_SCRIPT_FOR_TEST', () => {
     expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain('entry.report_id == params.report_id');
     expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain("ctx.op = 'delete'");
   });
+
+  it('recomputes best-wins tier and severity from remaining citations', () => {
+    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain('ctx._source.ioc_tier = bestTier');
+    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain('ctx._source.severity = bestSev');
+    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain('entry.ioc_tier');
+    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain('entry.severity');
+  });
+
+  it('rebinds first-source attribution when the removed report owned it', () => {
+    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain(
+      'ctx._source.source_report_id == params.report_id'
+    );
+    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain(
+      'ctx._source.threat.indicator.reference = params.reference_prefix + earliest.report_id'
+    );
+  });
+});
+
+describe('sources[] citation ranks on upsert', () => {
+  it('stores ioc_tier and severity on each sources entry for later retract recompute', () => {
+    const [op] = upsertOps(
+      buildBulkOpsForTest(
+        [makeReport({ id: 'r1', iocs: [{ type: 'ip', value: '1.2.3.4', tier: 'contextual' }] })],
+        NOW
+      )
+    );
+
+    expect(op.upsert.sources).toEqual([
+      expect.objectContaining({
+        report_id: 'r1',
+        ioc_tier: 'contextual',
+        severity: 'low',
+      }),
+    ]);
+    expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain("'ioc_tier': params.ioc_tier");
+    expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain("newEntry['severity']");
+  });
+
+  it('passes the alert-reference prefix on retract ops', () => {
+    const retracts = retractOps(
+      buildBulkOpsForTest(
+        [
+          makeReport({
+            id: 'r-deferred',
+            iocs: [
+              {
+                type: 'url',
+                value: 'https://evil.example/deferred',
+                tier: 'discriminating',
+                deferred_unreviewed: true,
+              },
+            ],
+          }),
+        ],
+        NOW
+      )
+    );
+
+    expect(retracts[0].scriptParams.reference_prefix).toBe('threat-report:');
+  });
 });

@@ -227,6 +227,19 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(bounded.reviewable[0].context).toContain(url);
   });
 
+  it('keeps attribution prose when an overflow window is shorter than the URL', () => {
+    const url = `https://evil.example/${'a'.repeat(200)}`;
+    const prepared = prepareIocAdjudication({
+      text: `The attacker downloaded ${url} during exfiltration.`,
+      iocs: [candidate(url)],
+    });
+    const bounded = boundIocAdjudicationForOverflow(prepared, 1, 80);
+
+    expect(bounded.reviewable[0].context.length).toBeLessThanOrEqual(80);
+    expect(bounded.reviewable[0].context).toContain('attacker downloaded');
+    expect(bounded.reviewable[0].context).toContain('https://evil.example/');
+  });
+
   it('reviews candidates in bounded batches instead of discarding overflow as reference', () => {
     const total =
       MAX_SEMANTIC_CANDIDATES_PER_BATCH * MAX_SEMANTIC_REVIEW_BATCHES +
@@ -346,6 +359,16 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
 
     expect(prepared.reviewable[0].context).toContain('attacker staged');
     expect(prepared.reviewable[0].context).toContain('café');
+  });
+
+  it('matches punycode URL hosts against Unicode source spelling', () => {
+    const prepared = prepareIocAdjudication({
+      text: 'The attacker staged https://café.example/payload during exfiltration.',
+      iocs: [candidate('https://xn--caf-dma.example/payload')],
+    });
+
+    expect(prepared.reviewable[0].context).toContain('attacker staged');
+    expect(prepared.reviewable[0].context).toContain('café.example');
   });
 
   it('does not treat percent-encoded reserved path bytes as a different URL path', () => {

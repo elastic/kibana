@@ -473,6 +473,9 @@ const COMPANION_INDEX_TEMPLATES: Array<{
                 trail: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
                 reference: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
                 first_seen: { type: 'date' },
+                // Per-citation ranks so retract can recompute document best-wins.
+                ioc_tier: { type: 'keyword' },
+                severity: { type: 'keyword' },
               },
             },
             // Set by the promote task once sources[] reaches MAX_SOURCE_CITATIONS.
@@ -847,6 +850,9 @@ const migrateExistingIndicatorSourcesMapping = async (
     const topLevelProps = indexMappings?.mappings?.properties as
       | Record<string, unknown>
       | undefined;
+    const sourcesProps = (
+      topLevelProps?.sources as { properties?: Record<string, unknown> } | undefined
+    )?.properties;
 
     if (!topLevelProps?.sources) {
       await esClient.indices.putMapping({
@@ -860,11 +866,32 @@ const migrateExistingIndicatorSourcesMapping = async (
               trail: { type: 'keyword' },
               reference: { type: 'keyword' },
               first_seen: { type: 'date' },
+              ioc_tier: { type: 'keyword' },
+              severity: { type: 'keyword' },
             },
           },
         },
       });
       log.info(`Migrated sources[] mapping on ${THREAT_INTEL_INDICATORS_INDEX} (v19 backfill)`);
+      return;
+    }
+
+    if (!sourcesProps?.ioc_tier || !sourcesProps?.severity) {
+      await esClient.indices.putMapping({
+        index: THREAT_INTEL_INDICATORS_INDEX,
+        properties: {
+          sources: {
+            type: 'nested',
+            properties: {
+              ioc_tier: { type: 'keyword' },
+              severity: { type: 'keyword' },
+            },
+          },
+        },
+      });
+      log.info(
+        `Migrated sources[].ioc_tier/severity on ${THREAT_INTEL_INDICATORS_INDEX} (retract recompute)`
+      );
     }
   } catch (err) {
     log.error(
@@ -1389,6 +1416,8 @@ const migrateExistingIndicatorKeywordBounds = async (
             provider: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
             trail: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
             reference: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
+            ioc_tier: { type: 'keyword' },
+            severity: { type: 'keyword' },
           },
         },
       },
@@ -1544,6 +1573,9 @@ const REQUIRED_INDICATOR_FIELDS: readonly RequiredMapping[] = [
   // scripted upserts that set `report_id`/`first_seen`.
   { path: 'sources.report_id' },
   { path: 'sources.first_seen' },
+  // Per-citation ranks used by retract to recompute document best-wins.
+  { path: 'sources.ioc_tier' },
+  { path: 'sources.severity' },
   { path: 'sources_truncated' },
   { path: 'ioc_tier' },
   { path: 'threat.indicator.email', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
