@@ -212,7 +212,7 @@ export const useSourceEnvironmentLoader = (): SourceEnvironmentLoader => {
       start: { cloud },
     },
   } = useKibana();
-  const managedOtlpPrwEndpointEnabled = core.featureFlags.getBooleanValue(
+  const managedOtlpPrwEndpointEnabled = core.featureFlags.useBooleanValue(
     IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED,
     false
   );

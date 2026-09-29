@@ -78,12 +78,13 @@ Returns { id, rules: { total, success: { total, result: { full, partial, untrans
 
 Field meanings:
 - \`result.full\` = fully translated (ready to install)
-- \`result.partial\` = partially translated (review needed)
+- \`result.partial\` = partially translated (review needed) which can be because of 2 reasons:
+  1. \`missing_index\` = query has a placeholder(\`[indexPattern]\`) for a missing index pattern
+  2. \`missing resources\` = query has a macro or a lookup placeholder for splunk which means resources are missing.
 - \`result.untranslatable\` = could not be translated
 - \`installable\` = successfully translated and installable
 - \`prebuilt\` = matched an Elastic prebuilt rule
-- \`missing_index\` = query has a placeholder for a missing index pattern
-- \`failed\` = translation errored
+- \`failed\` = translation errored for some error. Error available in migration stats -> last_execution -> error
 
 A migration with zero rule items returns the same shape with all counts 0 (204 No Content normalized to a stable shape).
 
