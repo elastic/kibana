@@ -49,8 +49,14 @@ const parityTests = {
   no_unsafe_dynamic_http_path: () => require('../no_unsafe_dynamic_http_path.test.js'),
   no_viz_naming: () => require('../no_viz_naming.test.js'),
   no_wrapped_error_in_logger: () => require('../no_wrapped_error_in_logger.test.js'),
+  require_include_in_check_a11y: () => require('../require_include_in_check_a11y.test.js'),
   require_kibana_feature_privileges_naming: () =>
     require('../require_kibana_feature_privileges_naming.test.js'),
+  scout_no_at_in_test_titles: () => require('../scout_no_at_in_test_titles.test.js'),
+  scout_no_deprecated_tags: () => require('../scout_no_deprecated_tags.test.js'),
+  scout_no_describe_configure: () => require('../scout_no_describe_configure.test.js'),
+  scout_no_promise_all_with_playwright_apis: () =>
+    require('../scout_no_promise_all_with_playwright_apis.test.js'),
 };
 
 for (const [ruleName, rule] of Object.entries(oxlintPlugin.rules)) {
