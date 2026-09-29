@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+// `utils.ts` reads the spec through `import * as fs`, which Babel compiles into its own copy of
+// the module namespace, so a `jest.spyOn(fs, …)` from here would patch a different object. Mock
+// the module instead, but keep every other `fs` API real so an unrelated call still works.
 jest.mock('fs', () => ({
+  ...jest.requireActual('fs'),
   readFileSync: jest.fn(),
 }));
 
@@ -43,6 +47,20 @@ describe('isSkipped', () => {
       });
 
       describe('live second', () => {
+        it('must still run', () => {});
+      });
+    `);
+
+    expect(isSkipped(filePath)).toBe(false);
+  });
+
+  it('does not skip a live suite that wraps a skipped suite and a live test', () => {
+    const filePath = withSource(`
+      describe('live outer', () => {
+        describe.skip('skipped inner', () => {
+          it('does not run', () => {});
+        });
+
         it('must still run', () => {});
       });
     `);
@@ -134,7 +152,10 @@ describe('isSkipped', () => {
     expect(isSkipped(filePath, lbConfig)).toBe(true);
   });
 
-  it('ignores a dynamic runner when no load balancer config is given', () => {
+  // Known limitation rather than intended behaviour: without a load balancer config there is no
+  // list of dynamic runner names, so a file whose tests all come from one looks empty. Only
+  // reachable from a JOB with no entry in lb_config_registry.ts.
+  it('known limitation: drops a dynamic-runner-only file when no load balancer config is given', () => {
     const filePath = withSource(`
       describe('generated', () => {
         runTestsForEachVersion(['1.0'], () => {});
