@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import type { TimelineNonEcsData } from '@kbn/securitysolution-timeline-common';
 import { TestProviders } from '../../../mock';
 import type { StatefulAlertBulkActionsProps } from './alert_bulk_actions';
 import { AlertBulkActionsComponent } from './alert_bulk_actions';

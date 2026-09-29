@@ -8,7 +8,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { useBulkAddEventsToCaseActions } from './use_bulk_event_actions';
 import { TestProviders } from '../../../../common/mock';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import { SECURITY_EVENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { BULK_ADD_TO_CASE_ACTION_ID } from '../../../../common/constants/action_ids';
 

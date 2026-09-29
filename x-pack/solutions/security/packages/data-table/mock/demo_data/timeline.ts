@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 
 export const demoTimelineData: TimelineItem[] = [
   {

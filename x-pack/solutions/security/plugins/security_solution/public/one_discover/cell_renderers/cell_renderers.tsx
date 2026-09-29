@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import type { TimelineNonEcsData } from '@kbn/securitysolution-timeline-common';
 import type { SecuritySolutionCellRendererFeature } from '@kbn/discover-shared-plugin/public';
 import type { ColumnHeaderType } from '../../../common/types';
 import type { Maybe } from '../../../common/search_strategy';

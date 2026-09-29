@@ -8,8 +8,8 @@
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
 import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
-import type { EqlSearchResponse, Inspect, Maybe, PaginationInputPaginated } from '../../..';
-import type { TimelineEdges } from '../..';
+import type { EqlSearchResponse, Inspect, PaginationInputPaginated } from '../../..';
+import type { Maybe, TimelineEdges } from '@kbn/securitysolution-timeline-common';
 
 export type RunTimeMappings =
   | Record<string, Omit<RuntimeFieldSpec, 'type'> & { type: RuntimePrimitiveTypes }>

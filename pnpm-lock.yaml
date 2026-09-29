@@ -3448,6 +3448,9 @@ importers:
       '@kbn/securitysolution-t-grid':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-securitysolution-t-grid
+      '@kbn/securitysolution-timeline-common':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/timeline-common
       '@kbn/securitysolution-utils':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-securitysolution-utils
@@ -9763,6 +9766,8 @@ importers:
   x-pack/solutions/security/packages/storybook/config: {}
 
   x-pack/solutions/security/packages/test-api-clients: {}
+
+  x-pack/solutions/security/packages/timeline-common: {}
 
   x-pack/solutions/security/packages/upselling: {}
 

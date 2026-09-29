@@ -11,6 +11,6 @@ export type {
   BeatFields,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
-  BrowserFields,
 } from '@kbn/timelines-plugin/common';
-export { EMPTY_BROWSER_FIELDS } from '@kbn/timelines-plugin/common';
+export type { BrowserFields } from '@kbn/securitysolution-timeline-common';
+export { EMPTY_BROWSER_FIELDS } from '@kbn/securitysolution-timeline-common';

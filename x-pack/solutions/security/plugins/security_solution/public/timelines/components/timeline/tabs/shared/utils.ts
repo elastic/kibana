@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BrowserFields, ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
+import type { BrowserFields, ColumnHeaderOptions } from '@kbn/securitysolution-timeline-common';
 import memoizeOne from 'memoize-one';
 import type { SortColumnTimeline as Sort } from '../../../../../../common/types/timeline';
 import type { inputsModel } from '../../../../../common/store';

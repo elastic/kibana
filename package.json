@@ -1176,6 +1176,7 @@
     "@kbn/securitysolution-lists-common": "workspace:*",
     "@kbn/securitysolution-rules": "workspace:*",
     "@kbn/securitysolution-t-grid": "workspace:*",
+    "@kbn/securitysolution-timeline-common": "workspace:*",
     "@kbn/securitysolution-utils": "workspace:*",
     "@kbn/server-http-tools": "workspace:*",
     "@kbn/server-route-repository": "workspace:*",

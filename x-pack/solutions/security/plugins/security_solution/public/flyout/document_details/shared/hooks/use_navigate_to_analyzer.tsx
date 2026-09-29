@@ -8,7 +8,7 @@
 import { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import type { Maybe } from '@kbn/timelines-plugin/common/search_strategy/common';
+import type { Maybe } from '@kbn/securitysolution-timeline-common';
 import { LeftPanelVisualizeTab } from '../../left';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ANALYZE_GRAPH_ID } from '../../left/components/analyze_graph';

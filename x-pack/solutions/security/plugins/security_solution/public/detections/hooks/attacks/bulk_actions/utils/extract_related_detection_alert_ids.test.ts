@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import { extractRelatedDetectionAlertIds } from './extract_related_detection_alert_ids';
 
 const ALERT_ATTACK_DISCOVERY_ALERT_IDS = 'kibana.alert.attack_discovery.alert_ids';
