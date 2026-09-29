@@ -120,7 +120,7 @@ export const TemplateCard = React.memo<TemplateCardProps>(({ template, onSelect 
         css({
           background: euiTheme.colors.emptyShade,
           borderColor: euiTheme.colors.lightShade,
-          borderRadius: euiTheme.border.radius.medium,
+          borderRadius: euiTheme.border.radius.control,
           boxShadow: 'none',
           gap: euiTheme.size.l,
           minHeight: 204,

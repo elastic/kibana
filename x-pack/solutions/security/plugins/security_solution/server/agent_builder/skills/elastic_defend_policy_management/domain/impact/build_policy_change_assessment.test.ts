@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { FleetPackagePolicyGenerator } from '../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { policyFactory } from '../../../../../../common/endpoint/models/policy_config';
@@ -27,16 +28,22 @@ const capabilities = (
   endpointPolicyProtections: true,
   endpointTrustedDevices: true,
   trustedDevicesExperimental: true,
+  endpointCustomYaraSignatures: true,
+  customYaraSignaturesExperimental: true,
   endpointProtectionUpdates: true,
   endpointCustomNotification: true,
   serverless: false,
 });
 
-const createPolicy = (storedConfig: PolicyConfig) => {
+const createPolicy = (
+  storedConfig: PolicyConfig,
+  overrides: Parameters<FleetPackagePolicyGenerator['generateEndpointPackagePolicy']>[0] = {}
+) => {
   const packagePolicy = generator.generateEndpointPackagePolicy({
     id: 'policy-1',
     name: 'Endpoint Policy',
     version: 'WzEsMV0=',
+    ...overrides,
   });
   const policyEntry = packagePolicy.inputs[0]?.config?.policy;
   if (policyEntry == null) {
@@ -121,6 +128,34 @@ describe('buildPolicyChangeAssessment', () => {
     ]);
   });
 
+  it('reports the custom YARA signatures gate and marks the change ineligible while the flag is off', () => {
+    const stored = policyFactory();
+    stored.windows.memory_protection.custom_yara_signatures = false;
+
+    const assessment = buildPolicyChangeAssessment(
+      createPolicy(stored),
+      [
+        {
+          op: 'set_field',
+          path: 'windows.memory_protection.custom_yara_signatures',
+          value: true,
+        },
+      ],
+      {
+        ...capabilities(),
+        customYaraSignaturesExperimental: false,
+      }
+    );
+
+    expect(assessment.changes[0]?.registry.productFeatureGate).toBe(
+      ProductFeatureSecurityKey.endpointCustomYaraSignatures
+    );
+    expect(assessment.changes[0]?.eligibility).toEqual({
+      eligible: false,
+      reason: 'custom_yara_signatures_experimental_disabled',
+    });
+  });
+
   it('adds one generic blocker when an unrelated eligible change retains an invalid Device Control state', () => {
     const stored = policyFactory();
     stored.windows.device_control!.usb_storage = DeviceControlAccessLevel.audit;
@@ -135,5 +170,16 @@ describe('buildPolicyChangeAssessment', () => {
     expect(assessment.globalBlockers).toEqual([
       { reason: 'device_control_notification_requires_deny_all' },
     ]);
+  });
+
+  it('adds one global blocker when the source package policy is managed', () => {
+    const assessment = buildPolicyChangeAssessment(
+      createPolicy(policyFactory(), { is_managed: true }),
+      [{ op: 'set_field', path: 'windows.malware.mode', value: ProtectionModes.detect }],
+      capabilities()
+    );
+
+    expect(assessment.changes[0]?.eligibility).toEqual({ eligible: true });
+    expect(assessment.globalBlockers).toEqual([{ reason: 'managed_policy_not_writable' }]);
   });
 });

@@ -14,6 +14,7 @@ import {
   NIGHTSHIFT_API_PRIVILEGES,
   NIGHTSHIFT_FEATURE_ID,
   NIGHTSHIFT_MANAGE_ENGINES_SUB_FEATURE_ID,
+  NIGHTSHIFT_SOURCE_SO_TYPE,
   NIGHTSHIFT_UI_PRIVILEGES,
 } from '@kbn/nightshift-shared';
 
@@ -33,14 +34,14 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
         api: [NIGHTSHIFT_API_PRIVILEGES.read, NIGHTSHIFT_API_PRIVILEGES.manage],
         ui: [NIGHTSHIFT_UI_PRIVILEGES.show, NIGHTSHIFT_UI_PRIVILEGES.manage],
         aiIndex: { read: [SIGNIFICANT_EVENT_KI_TYPE] },
-        savedObject: { all: [], read: [] },
+        savedObject: { all: [NIGHTSHIFT_SOURCE_SO_TYPE], read: [] },
       },
       read: {
         app: [NIGHTSHIFT_APP_ID, SIGNIFICANT_EVENTS_APP_ID],
         api: [NIGHTSHIFT_API_PRIVILEGES.read],
         ui: [NIGHTSHIFT_UI_PRIVILEGES.show],
         aiIndex: { read: [SIGNIFICANT_EVENT_KI_TYPE] },
-        savedObject: { all: [], read: [] },
+        savedObject: { all: [], read: [NIGHTSHIFT_SOURCE_SO_TYPE] },
       },
     },
     subFeatures: [

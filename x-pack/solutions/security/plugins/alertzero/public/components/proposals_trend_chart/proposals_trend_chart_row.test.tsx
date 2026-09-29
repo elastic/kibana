@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
-import type { ProposalChartsSummaryResponse } from '@kbn/agentic-investigations-plugin/common';
+import type { ProposalChartsSummaryResponse } from '@kbn/proposals-common';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { ProposalsTrendChartRow } from './proposals_trend_chart_row';
 
@@ -42,6 +42,7 @@ jest.mock('./trend_sparkline', () => ({
 const mockUseProposalChartsSummary = useProposalChartsSummary as jest.Mock;
 
 const summary: ProposalChartsSummaryResponse = {
+  currentOpen: 10,
   buckets: [
     { timestamp: 1_700_000_000_000, counts: { respond: 1, investigate: 0, configure: 4 } },
     { timestamp: 1_700_001_800_000, counts: { respond: 5, investigate: 3, configure: 2 } },
@@ -112,7 +113,9 @@ describe('ProposalsTrendChartRow', () => {
   });
 
   it('should count a category absent from the bucket as zero rather than blank', () => {
-    setup({ data: { buckets: [{ timestamp: 1_700_000_000_000, counts: { respond: 2 } }] } });
+    setup({
+      data: { currentOpen: 2, buckets: [{ timestamp: 1_700_000_000_000, counts: { respond: 2 } }] },
+    });
 
     expect(screen.getByTestId('alertZeroProposalsTrendChartCount-configure')).toHaveTextContent(
       '0'

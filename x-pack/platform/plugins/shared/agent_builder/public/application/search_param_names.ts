@@ -12,4 +12,5 @@ export const searchParamNames = {
   toolId: 'toolId',
   pluginId: 'pluginId',
   connectorId: 'connectorId',
+  openConversationDetails: 'openConversationDetails',
 } as const;

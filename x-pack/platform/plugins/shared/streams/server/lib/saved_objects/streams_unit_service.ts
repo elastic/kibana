@@ -114,7 +114,7 @@ export class StreamsUnitService {
   }: {
     unitId: string;
     unit: StreamsUnit.Configuration;
-    ui_metadata: StreamsUnit.UiMetadata;
+    ui_metadata?: StreamsUnit.UiMetadata;
     secrets?: StreamsUnit.Secrets;
   }): Promise<void> {
     if (!this.canEncrypt) {
@@ -150,9 +150,14 @@ export class StreamsUnitService {
       throw error;
     }
 
+    const metadataToWrite =
+      uiMetadata !== undefined
+        ? uiMetadata
+        : (await this.getUiMetadataSavedObject(unitId))?.attributes.metadata ?? {};
+
     await this.writeUiMetadata({
       configurationSavedObjectId: unitId,
-      metadata: pruneStaleNodeMetadata(uiMetadata, unit),
+      metadata: pruneStaleNodeMetadata(metadataToWrite, unit),
     });
   }
 
