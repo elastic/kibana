@@ -50,6 +50,70 @@ const AKS_API_VERSION = '2024-02-01';
 const SUBSCRIPTIONS_API_VERSION = '2022-12-01';
 const RESOURCE_GROUPS_API_VERSION = '2021-04-01';
 
+/**
+ * Upper bound on pages followed by {@link getAllPages}. ARM returns at most
+ * this many `nextLink` hops before pagination is reported as truncated.
+ */
+const MAX_ARM_PAGES = 20;
+
+interface ArmCollection {
+  value?: unknown[];
+  nextLink?: string;
+}
+
+/**
+ * Fetch every page of an ARM collection, following `nextLink` until it is
+ * absent. ARM paginates list routes without any caller-supplied page size, so
+ * returning only the first page silently truncates the result — a
+ * subscription with more clusters, node pools, or resource groups than fit in
+ * one page would appear to have fewer.
+ *
+ * `nextLink` already carries api-version and an opaque skip token, so its
+ * query string is preserved and no params of our own are re-applied.
+ *
+ * The link is server-supplied data and `ctx.client` carries the ARM bearer
+ * token, so its origin is checked before it is requested. Axios strips a
+ * standard authorization header when a redirect crosses to another host, but
+ * an explicit request like this one gets no such protection, and a link
+ * naming another host would hand the token over. Pagination stops instead,
+ * reporting the result as truncated.
+ *
+ * The link is resolved against the URL axios actually requested, obtained
+ * from `getUri`: axios concatenates `baseURL` and `url` rather than resolving
+ * them the way the URL constructor does, so rebuilding that base by hand
+ * would give the wrong path for a relative link.
+ */
+async function getAllPages(
+  ctx: ActionContext,
+  url: string,
+  params: Record<string, unknown>
+): Promise<{ value: unknown[]; truncated?: true }> {
+  const first = await ctx.client.get<ArmCollection>(url, { params });
+  const value = [...(first.data?.value ?? [])];
+  let nextLink = first.data?.nextLink;
+
+  const requested = new URL(ctx.client.getUri({ url, params }));
+
+  let page = 1;
+  while (nextLink && page < MAX_ARM_PAGES) {
+    const nextUrl = new URL(nextLink, requested);
+    if (nextUrl.origin !== requested.origin) {
+      // Treat a cross-origin continuation link as the end of the collection: the
+      // pages already collected are returned, flagged as incomplete.
+      return { value, truncated: true };
+    }
+
+    const next = await ctx.client.get<ArmCollection>(nextUrl.href);
+    value.push(...(next.data?.value ?? []));
+    nextLink = next.data?.nextLink;
+    page++;
+  }
+
+  // Report truncation rather than pretending the list is complete, so an agent
+  // can narrow its query instead of acting on a partial inventory.
+  return nextLink ? { value, truncated: true } : { value };
+}
+
 /** Reads the configured subscription ID, throwing a descriptive error if absent. */
 function requireSubscriptionId(ctx: ActionContext): string {
   const subscriptionId = ctx.config?.subscriptionId as string | undefined;
@@ -224,14 +288,13 @@ export const AzureAks: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'List all Azure subscriptions accessible to the service principal. Use this first when the connector has no Subscription ID configured, or to discover which subscriptions contain AKS clusters.',
+        'List all Azure subscriptions accessible to the service principal. Use this first when the connector has no Subscription ID configured, or to discover which subscriptions contain AKS clusters. Every page of results is followed, so the list is complete unless "truncated" is true.',
       input: ListSubscriptionsInputSchema,
       handler: async (ctx) => {
         try {
-          const response = await ctx.client.get(`${ARM_BASE}/subscriptions`, {
-            params: { 'api-version': SUBSCRIPTIONS_API_VERSION },
+          return await getAllPages(ctx, `${ARM_BASE}/subscriptions`, {
+            'api-version': SUBSCRIPTIONS_API_VERSION,
           });
-          return response.data;
         } catch (error) {
           throwAzureError(error);
         }
@@ -243,16 +306,16 @@ export const AzureAks: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'List all resource groups in the configured subscription. Use this to discover which resource groups contain AKS clusters before calling listClusters with a specific group.',
+        'List all resource groups in the configured subscription. Use this to discover which resource groups contain AKS clusters before calling listClusters with a specific group. Every page of results is followed, so the list is complete unless "truncated" is true.',
       input: ListResourceGroupsInputSchema,
       handler: async (ctx) => {
         try {
           const subscriptionId = requireSubscriptionId(ctx);
-          const response = await ctx.client.get(
+          return await getAllPages(
+            ctx,
             `${ARM_BASE}/subscriptions/${subscriptionId}/resourcegroups`,
-            { params: { 'api-version': RESOURCE_GROUPS_API_VERSION } }
+            { 'api-version': RESOURCE_GROUPS_API_VERSION }
           );
-          return response.data;
         } catch (error) {
           throwAzureError(error);
         }
@@ -265,7 +328,7 @@ export const AzureAks: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'List AKS managed clusters in the subscription, optionally scoped to a resource group. Returns cluster names, resource groups, Kubernetes version, power state, and provisioning state.',
+        'List AKS managed clusters in the subscription, optionally scoped to a resource group. Returns cluster names, resource groups, Kubernetes version, power state, and provisioning state. Every page of results is followed, so the list is complete unless "truncated" is true.',
       input: ListClustersInputSchema,
       handler: async (ctx, input: ListClustersInput) => {
         try {
@@ -275,10 +338,9 @@ export const AzureAks: ConnectorSpec = {
                 input.resourceGroupName
               )}/providers/Microsoft.ContainerService/managedClusters`
             : `/subscriptions/${subscriptionId}/providers/Microsoft.ContainerService/managedClusters`;
-          const response = await ctx.client.get(`${ARM_BASE}${path}`, {
-            params: { 'api-version': AKS_API_VERSION },
+          return await getAllPages(ctx, `${ARM_BASE}${path}`, {
+            'api-version': AKS_API_VERSION,
           });
-          return response.data;
         } catch (error) {
           throwAzureError(error);
         }
@@ -315,20 +377,20 @@ export const AzureAks: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'List all node pools (agent pools) in an AKS cluster. Returns pool names, VM size, current node count, min/max autoscaler bounds, OS type, and provisioning state.',
+        'List all node pools (agent pools) in an AKS cluster. Returns pool names, VM size, current node count, min/max autoscaler bounds, OS type, and provisioning state. Every page of results is followed, so the list is complete unless "truncated" is true.',
       input: ListNodePoolsInputSchema,
       handler: async (ctx, input: GetClusterInput) => {
         try {
           const subscriptionId = requireSubscriptionId(ctx);
-          const response = await ctx.client.get(
+          return await getAllPages(
+            ctx,
             `${ARM_BASE}${clusterBasePath(
               subscriptionId,
               input.resourceGroupName,
               input.clusterName
             )}/agentPools`,
-            { params: { 'api-version': AKS_API_VERSION } }
+            { 'api-version': AKS_API_VERSION }
           );
-          return response.data;
         } catch (error) {
           throwAzureError(error);
         }
@@ -376,10 +438,17 @@ export const AzureAks: ConnectorSpec = {
             input.clusterName
           )}/agentPools/${encodeURIComponent(input.nodePoolName)}`;
 
-          // PATCH only the count; Azure merges the rest of the pool properties.
-          const response = await ctx.client.patch(
+          // The agent-pool route only supports GET/PUT/DELETE — there is no
+          // PATCH. Confirmed against a live cluster: PATCH is rejected with a
+          // misleading `InvalidAPIVersion` error regardless of API version.
+          // PUT replaces the whole resource, so the current pool is read
+          // first and only `count` is overridden in the body sent back.
+          const current = await ctx.client.get(`${ARM_BASE}${poolPath}`, {
+            params: { 'api-version': AKS_API_VERSION },
+          });
+          const response = await ctx.client.put(
             `${ARM_BASE}${poolPath}`,
-            { properties: { count: input.count } },
+            { properties: { ...current.data?.properties, count: input.count } },
             { params: { 'api-version': AKS_API_VERSION } }
           );
           // Scaling is async; return the initial response (provisioningState: "Updating").
@@ -489,9 +558,13 @@ export const AzureAks: ConnectorSpec = {
             input.clusterName
           );
 
+          // RunCommandRequest is a flat body ({ command, context, clusterToken }) —
+          // not wrapped in a `properties` object like the cluster/agent-pool
+          // resources. Confirmed against a live cluster: sending `properties`
+          // fails with `UnmarshalError: unknown field "properties"`.
           const postResp = await ctx.client.post(
             `${ARM_BASE}${basePath}/runCommand`,
-            { properties: { command: input.command, context: '' } },
+            { command: input.command },
             { params: { 'api-version': AKS_API_VERSION } }
           );
 

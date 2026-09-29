@@ -22,6 +22,7 @@ describe('AzureAks', () => {
     patch: jest.fn(),
     put: jest.fn(),
     delete: jest.fn(),
+    getUri: jest.fn(({ url }: { url: string }) => url),
   };
 
   const mockContext = {
