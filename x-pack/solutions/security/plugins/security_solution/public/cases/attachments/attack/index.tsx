@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { Suspense } from 'react';
+import React, { Suspense, type ComponentType } from 'react';
 import type {
   CaseAttachmentsWithoutOwner,
+  CommonAttachmentListViewProps,
   UnifiedReferenceAttachmentViewProps,
 } from '@kbn/cases-plugin/public';
 import { defineAttachment } from '@kbn/cases-plugin/public';
@@ -97,10 +98,17 @@ export interface AttackToAttach {
 }
 
 const AttackAttachmentChildrenLazy = React.lazy(() => import('./components/attachment_children'));
+const AttackTabContentLazy = React.lazy(() => import('./components/attack_tab_content'));
 const ShowAttackButton = React.lazy(async () => {
   const { ShowAttackButton: Component } = await import('./components/show_attack_button');
   return { default: Component };
 });
+
+const AttackTabContentWrapper: ComponentType<CommonAttachmentListViewProps> = (props) => (
+  <Suspense fallback={null}>
+    <AttackTabContentLazy {...props} />
+  </Suspense>
+);
 
 type AttackAttachmentViewProps = UnifiedReferenceAttachmentViewProps<
   AttackAttachmentPayload['metadata'],
@@ -157,6 +165,12 @@ export const getAttackAttachment = () =>
           defaultMessage="removed an attack"
         />
       ),
+    }),
+    // Exposing `children` here is what makes attacks their own section in the consolidated
+    // Attachments tab, contributes to the tab badge, and adds the type filter entry — no new
+    // tab is registered.
+    getAttachmentList: () => ({
+      children: AttackTabContentWrapper,
     }),
   });
 

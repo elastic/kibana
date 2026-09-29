@@ -40,6 +40,11 @@ interface AttacksGroupTakeActionItemsProps {
   onActionSuccess?: () => void;
   /** Whether to include the AI assistant action in the menu (default true) */
   showAiAssistantAction?: boolean;
+  /**
+   * Whether to include the investigate in timeline / explore in attacks navigation action in the
+   * menu (default true). Set to false where the surface already offers it as its own control.
+   */
+  showNavigationAction?: boolean;
   /** Telemetry source for action events (e.g. flyout vs table) */
   telemetrySource: AttacksActionTelemetrySource;
   /**
@@ -59,6 +64,7 @@ export function AttacksGroupTakeActionItems({
   closePopover,
   onActionSuccess,
   showAiAssistantAction = true,
+  showNavigationAction = true,
   telemetrySource,
   isRemoteDocument,
 }: AttacksGroupTakeActionItemsProps) {
@@ -262,7 +268,7 @@ export function AttacksGroupTakeActionItems({
       casePanels={casePanels}
       datasetItems={datasetItems}
       isRemoteDocument={isRemoteDocument}
-      navigationItems={navigationItems}
+      navigationItems={showNavigationAction || isRemoteDocument ? navigationItems : []}
       runWorkflowItems={runWorkflowItems}
       runWorkflowPanels={runWorkflowPanels}
       showAiAssistantAction={showAiAssistantAction}
