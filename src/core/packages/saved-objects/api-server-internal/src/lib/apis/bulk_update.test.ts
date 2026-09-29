@@ -42,6 +42,7 @@ import {
   createRegistry,
   createType,
   createDocumentMigrator,
+  getMockGetResponse,
   getMockMgetResponse,
   type TypeIdTuple,
   createSpySerializer,
@@ -274,6 +275,38 @@ describe('#bulkUpdate', () => {
                 [obj2.type]: {
                   title: 'Testing',
                   hello: 'dolly',
+                },
+              }),
+            ],
+          }),
+          expect.any(Object)
+        );
+      });
+
+      it('indexes a valid update and keeps unknown stored attributes', async () => {
+        const obj = {
+          type: UPDATE_SCHEMA_TYPE,
+          id: 'three',
+          attributes: { count: 2 },
+        };
+        const stored = getMockGetResponse(registry, obj);
+        stored._source![UPDATE_SCHEMA_TYPE] = { title: 'Testing', legacyFlag: true };
+        client.mget.mockResponseOnce({ docs: [stored] });
+        client.bulk.mockResponseOnce(getMockBulkUpdateResponse(registry, [obj]));
+
+        const result = await repository.bulkUpdate([obj]);
+
+        expect(result).toEqual({ saved_objects: [expectSuccess(obj)] });
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({
+            operations: [
+              getBulkIndexEntry('index', obj),
+              expect.objectContaining({
+                [UPDATE_SCHEMA_TYPE]: {
+                  title: 'Testing',
+                  count: 2,
+                  legacyFlag: true,
                 },
               }),
             ],
