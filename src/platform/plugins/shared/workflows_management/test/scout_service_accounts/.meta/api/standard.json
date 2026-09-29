@@ -61,6 +61,118 @@
       }
     },
     {
+      "id": "d9239a0daebd823-46e29f98611924c",
+      "title": "[NON-MKI] Workflow service accounts: saved delegation permissions an editor can manage ordinary workflows and execute saved delegation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_delegation_permissions.spec.ts",
+        "line": 45,
+        "column": 14
+      }
+    },
+    {
+      "id": "d9239a0daebd823-658d536a24ba7c5",
+      "title": "[NON-MKI] Workflow service accounts: saved delegation permissions an editor cannot change a bound workflow's steps",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_delegation_permissions.spec.ts",
+        "line": 79,
+        "column": 31
+      }
+    },
+    {
+      "id": "d9239a0daebd823-3cc2e1483191c61",
+      "title": "[NON-MKI] Workflow service accounts: saved delegation permissions an editor cannot change a bound workflow's unbind",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_delegation_permissions.spec.ts",
+        "line": 79,
+        "column": 31
+      }
+    },
+    {
+      "id": "d9239a0daebd823-253ec51d5cb059c",
+      "title": "[NON-MKI] Workflow service accounts: saved delegation permissions an editor cannot change a bound workflow's rebind",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_delegation_permissions.spec.ts",
+        "line": 79,
+        "column": 31
+      }
+    },
+    {
+      "id": "d9239a0daebd823-1cc0def68a64ab3",
+      "title": "[NON-MKI] Workflow service accounts: saved delegation permissions an editor cannot change a bound workflow's disable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_delegation_permissions.spec.ts",
+        "line": 79,
+        "column": 31
+      }
+    },
+    {
+      "id": "d9239a0daebd823-c3237b348dc6a46",
+      "title": "[NON-MKI] Workflow service accounts: saved delegation permissions an editor cannot change a bound workflow's metadata",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_delegation_permissions.spec.ts",
+        "line": 79,
+        "column": 31
+      }
+    },
+    {
+      "id": "d9239a0daebd823-5fd5395fdfadecb",
+      "title": "[NON-MKI] Workflow service accounts: saved delegation permissions bulk overwrite cannot remove a saved service-account binding",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_delegation_permissions.spec.ts",
+        "line": 102,
+        "column": 21
+      }
+    },
+    {
+      "id": "d9239a0daebd823-a164372d1f8169f",
+      "title": "[NON-MKI] Workflow service accounts: saved delegation permissions an unbound draft cannot inherit the saved workflow account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_delegation_permissions.spec.ts",
+        "line": 121,
+        "column": 22
+      }
+    },
+    {
       "id": "da471a0a48fcee6-5ae91a7ca96dad0",
       "title": "[NON-MKI] Workflow service accounts: deletion returns conflict when force-deleting an unbound workflow with a paused execution",
       "expectedStatus": "passed",
@@ -145,8 +257,8 @@
       }
     },
     {
-      "id": "4a2b3d75494c20d-5875365e562f516",
-      "title": "[NON-MKI] Workflow service accounts: parent/child execution permissions a read-only child cannot inherit its parent write permissions",
+      "id": "4a2b3d75494c20d-5080ad5cdfc45cc",
+      "title": "[NON-MKI] Workflow service accounts: parent/child execution permissions an unbound child retains the limited caller instead of the parent account",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
@@ -156,6 +268,20 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_nested_permissions.spec.ts",
         "line": 29,
         "column": 7
+      }
+    },
+    {
+      "id": "4a2b3d75494c20d-5875365e562f516",
+      "title": "[NON-MKI] Workflow service accounts: parent/child execution permissions a read-only child cannot inherit its parent write permissions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_nested_permissions.spec.ts",
+        "line": 86,
+        "column": 20
       }
     },
     {
@@ -338,6 +464,19 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_scheduling.spec.ts",
         "line": 42,
         "column": 25
+      }
+    },
+    {
+      "id": "a4b30b82571de5a-cd4ac6dd4a91c6c",
+      "title": "[NON-MKI] Workflow service accounts: Elasticsearch token expiry an uninterrupted execution retains read-only permissions after real expiry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_token_expiry.spec.ts",
+        "line": 30,
+        "column": 7
       }
     }
   ]
