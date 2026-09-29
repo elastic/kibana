@@ -183,13 +183,6 @@ export const getEntityRiskScoreDistribution = async (
   signal: AbortSignal,
   scoreKind: RiskScoreKind = 'base'
 ): Promise<RiskScoreDistribution> => {
-  const distribution: RiskScoreDistribution = {
-    critical: 0,
-    high: 0,
-    moderate: 0,
-    low: 0,
-    unknown: 0,
-  };
   try {
     const { level: levelField, score: scoreField } = RISK_SCORE_FIELDS[scoreKind];
     const response = await esClient.search<unknown, EntityScoreAggs>(
@@ -217,6 +210,13 @@ export const getEntityRiskScoreDistribution = async (
       { signal }
     );
 
+    const distribution: RiskScoreDistribution = {
+      critical: 0,
+      high: 0,
+      moderate: 0,
+      low: 0,
+      unknown: 0,
+    };
     for (const bucket of response?.aggregations?.bands?.buckets ?? []) {
       const level = bucket.key === undefined ? undefined : String(bucket.key);
       const band: RiskBand =
@@ -241,7 +241,7 @@ export const getEntityRiskScoreDistribution = async (
     logger.warn(
       `Failed to get entity risk score ${scoreKind} distribution telemetry for index ${index} and entity type ${entityType}: ${err}`
     );
-    return distribution;
+    return {};
   }
 };
 

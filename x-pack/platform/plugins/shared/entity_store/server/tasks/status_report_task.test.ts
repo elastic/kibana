@@ -306,7 +306,7 @@ describe('getEntityRiskScoreDistribution', () => {
     });
   });
 
-  it('returns all-zero distribution and logs a warning when the search rejects', async () => {
+  it('returns empty distribution and logs a warning when the search rejects', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.search.mockRejectedValue(new Error('es_down'));
 
@@ -318,11 +318,11 @@ describe('getEntityRiskScoreDistribution', () => {
       new AbortController().signal
     );
 
-    expect(result).toEqual({ critical: 0, high: 0, moderate: 0, low: 0, unknown: 0 });
+    expect(result).toEqual({});
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('es_down'));
   });
 
-  it('returns all-zero resolution distribution and logs a warning when the resolution search rejects', async () => {
+  it('returns empty resolution distribution and logs a warning when the resolution search rejects', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.search.mockRejectedValue(new Error('es_down'));
 
@@ -335,7 +335,7 @@ describe('getEntityRiskScoreDistribution', () => {
       'resolution'
     );
 
-    expect(result).toEqual({ critical: 0, high: 0, moderate: 0, low: 0, unknown: 0 });
+    expect(result).toEqual({});
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('es_down'));
   });
 });
@@ -1010,13 +1010,7 @@ describe('status report task — usage, resolution state & metadata telemetry', 
         eventType === ENTITY_STORE_USAGE_EVENT.eventType && payload.entityType === failingType
     );
     expect(failingUsageCall?.[1].sources).toEqual({});
-    expect(failingUsageCall?.[1].baseScoreDistribution).toEqual({
-      critical: 0,
-      high: 0,
-      moderate: 0,
-      low: 0,
-      unknown: 0,
-    });
+    expect(failingUsageCall?.[1].baseScoreDistribution).toEqual({});
 
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('source_boom'));
   });
