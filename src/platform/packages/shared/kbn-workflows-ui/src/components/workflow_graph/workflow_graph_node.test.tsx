@@ -269,6 +269,16 @@ describe('resolveNodeColors', () => {
       success: 'success-color',
       danger: 'danger-color',
     },
+    border: {
+      radius: {
+        medium: 'medium-radius',
+        small: 'small-radius',
+        inline: 'inline-radius',
+        control: 'control-radius',
+        panel: 'panel-radius',
+        frame: 'frame-radius',
+      },
+    },
   } as any;
 
   const idle = { isRunning: false, isSuccess: false, isFailed: false };

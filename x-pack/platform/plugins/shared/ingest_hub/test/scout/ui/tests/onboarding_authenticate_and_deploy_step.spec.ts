@@ -25,9 +25,15 @@ import {
 // session → reload → credentials → POST fires → success state renders.
 
 // Minimal aws manifest — must include `version` so deployGroup can resolve pkgVersion.
+// `vars` includes credential var names so buildPackageVars wires them into the PUT body,
+// making credential-stripping regressions detectable.
 const MOCK_AWS_PACKAGE_WITH_VERSION = {
   item: {
     version: '7.1.1',
+    vars: [
+      { name: 'access_key_id', type: 'text' },
+      { name: 'secret_access_key', type: 'password' },
+    ],
     policy_templates: [
       {
         name: 'elb',
@@ -90,6 +96,253 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
 
   test.beforeEach(async ({ page }) => {
     await mockAwsPackage(page, MOCK_AWS_PACKAGE_WITH_VERSION);
+  });
+
+  test('policy cleanup same-package: removing a service updates the shared policy (PUT, not DELETE) for the surviving service — cleanup-only when survivor already deployed', async ({
+    browserAuth,
+    page,
+  }) => {
+    // Simulate: two services (elb + a now-removed service) were deployed under the SAME
+    // aws-package policy 'mock-shared-policy-id'. The user deselected the removed service
+    // from Step 1 while keeping elb (already receiving). policyIdsByInstance has both mapped
+    // to the same policy ID. Because of the live-stale entry, isAlreadyDeployed returns false
+    // even though elb has 'receiving' status — cleanup must fire.
+    //
+    // Expected:
+    //   PUT /api/fleet/managed_integrations/mock-shared-policy-id fires (UPDATE for survivor elb).
+    //   DELETE must NOT fire — the policy survives because elb is still a member.
+    //   POST must NOT fire — elb is already deployed (serviceStatuses: { elb: 'receiving' }).
+    await navigateToOnboardingStep(browserAuth, page, 'authenticate-and-deploy', {
+      selectedServiceIds: ['elb'],
+      globalRegion: 'us-east-1',
+      serviceVars: {
+        elb: {
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: {
+            elb_logs: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::test-bucket' } },
+            },
+          },
+        },
+      },
+      detectAndReviewStep: {
+        // Both elb and the removed service share the same policy.
+        policyIdsByInstance: {
+          elb: 'mock-shared-policy-id',
+          'removed-svc': 'mock-shared-policy-id',
+        },
+        // elb already deployed — cleanup-only scenario. Without the isAlreadyDeployed fix this
+        // would short-circuit before cleanup, and the PUT would never fire.
+        serviceStatuses: { elb: 'receiving' },
+      },
+    });
+
+    // Intercept DELETE to detect misrouted cleanup — DELETE must NOT fire for the
+    // partial-survival case. The handler fulfills so the test doesn't hang if it does fire.
+    let deleteObserved = false;
+    let createObserved = false;
+    // Intercept the collection endpoint first so creation POSTs are caught before the item
+    // handler below (Playwright routes match in registration order).
+    await page.route(
+      (url) => /\/api\/fleet\/managed_integrations$/.test(url.pathname),
+      async (route) => {
+        if (route.request().method() === 'POST') createObserved = true;
+        await route.fulfill({ status: 200, contentType: 'application/json', body: '{"item":{}}' });
+      }
+    );
+    await page.route(
+      (url) => /\/api\/fleet\/managed_integrations\//.test(url.pathname),
+      async (route) => {
+        const method = route.request().method();
+        if (method === 'DELETE') deleteObserved = true;
+        // Return a Fleet-shaped item so sendGetAgentlessPolicy and sendUpdateAgentlessPolicy
+        // can read/write metadata without dereferencing undefined.
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            item: {
+              name: 'mock-shared-policy',
+              namespace: 'default',
+              package: { name: 'aws' },
+              cloud_connector: null,
+            },
+          }),
+        });
+      }
+    );
+
+    await expect(page.testSubj.locator('managedIntegrationsSection')).toBeVisible();
+
+    // The managed-integrations deploy button is enabled for cleanup-only scenarios (agentless path)
+    // regardless of credential state — no credentials are required because the agentless handler
+    // does not rebuild package-level vars.
+    const deployButton = page.testSubj.locator('managedIntegrationsSection-deployButton');
+    await expect(deployButton).toBeEnabled();
+
+    const updateRequestPromise = page.waitForRequest(
+      (req) =>
+        req.method() === 'PUT' &&
+        /\/api\/fleet\/managed_integrations\/mock-shared-policy-id$/.test(
+          new URL(req.url()).pathname
+        )
+    );
+    await deployButton.click();
+    await updateRequestPromise;
+    await expect(deployButton).toBeHidden();
+    expect(deleteObserved).toBe(false);
+    expect(createObserved).toBe(false);
+  });
+
+  test('agent-based cleanup: removing a service updates the shared package policy for the surviving service (PUT, not DELETE)', async ({
+    browserAuth,
+    page,
+  }) => {
+    // Simulate: two services (elb + removed-svc) were deployed to the same package policy
+    // ('shared-pkg-policy'). removed-svc was then deselected from Step 1. policyIdsByInstance
+    // still holds both entries — live-stale detection triggers cleanup on the next Next click.
+    //
+    // Before the isAlreadyDeployed fix: isAlreadyDeployed returned true (elb had a policy ID),
+    // so handleNext short-circuited without calling handleDeploy, and the PUT never fired.
+    //
+    // Expected after fix:
+    //   PUT /api/fleet/package_policies/shared-pkg-policy fires (update for surviving elb).
+    //   sendDeletePackagePolicy (POST to /package_policies/delete) must NOT fire — the policy
+    //   survives because elb is still a member.
+
+    // Register route mocks BEFORE navigation to avoid race with agent_policies fetch.
+    let deleteObserved = false;
+    let agentPolicyDeleteObserved = false;
+    // Intercept agent-policy DELETE (Fleet uses POST /api/fleet/agent_policies/delete) separately
+    // so the list mock below doesn't silently swallow that destructive call.
+    await page.route(
+      (url) => /\/api\/fleet\/agent_policies\/delete$/.test(url.pathname),
+      async (route) => {
+        agentPolicyDeleteObserved = true;
+        await route.fulfill({ status: 200, contentType: 'application/json', body: '{"id":""}' });
+      }
+    );
+    // Anchor to the collection path — Playwright runs last-registered routes first, so without $
+    // this handler would intercept POST /agent_policies/delete before the delete handler above,
+    // causing agentPolicyDeleteObserved to stay false even when the app sends the delete request.
+    await page.route(
+      (url) => /\/api\/fleet\/agent_policies$/.test(url.pathname),
+      async (route) => {
+        if (route.request().method() !== 'GET') {
+          await route.fulfill({ status: 405, contentType: 'application/json', body: '{}' });
+          return;
+        }
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          // Return the seeded policy so AgentBasedSection keeps selectedAgentPolicyIds populated.
+          body: JSON.stringify({
+            items: [
+              { id: 'mock-agent-policy-id', name: 'Mock Agent Policy', namespace: 'default' },
+            ],
+          }),
+        });
+      }
+    );
+
+    // Intercept the exact collection endpoint first to catch unexpected creation POSTs.
+    let createObserved = false;
+    await page.route(
+      (url) => /\/api\/fleet\/package_policies$/.test(url.pathname),
+      async (route) => {
+        if (route.request().method() === 'POST') createObserved = true;
+        await route.fulfill({ status: 200, contentType: 'application/json', body: '{"item":{}}' });
+      }
+    );
+
+    // sendDeletePackagePolicy sends POST to /api/fleet/package_policies/delete (not HTTP DELETE).
+    // GET and PUT return a Fleet-shaped item so Fleet's client can dereference metadata.
+    await page.route(
+      (url) => /\/api\/fleet\/package_policies\//.test(url.pathname),
+      async (route) => {
+        if (
+          route.request().method() === 'POST' &&
+          new URL(route.request().url()).pathname.endsWith('/delete')
+        ) {
+          deleteObserved = true;
+        }
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            item: {
+              name: 'shared-pkg-policy-name',
+              enabled: true,
+              namespace: 'default',
+              package: { name: 'aws', version: '7.1.1' },
+              cloud_connector_id: null,
+            },
+          }),
+        });
+      }
+    );
+
+    await navigateToOnboardingStep(browserAuth, page, 'authenticate-and-deploy', {
+      selectedServiceIds: ['elb'],
+      globalRegion: 'us-east-1',
+      instances: [{ instanceId: 'elb', serviceId: 'elb', isDuplicate: false }],
+      serviceVars: {
+        elb: {
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: {
+            elb_logs: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::test-bucket' } },
+            },
+          },
+        },
+      },
+      authenticateAndDeployStep: {
+        deploymentMethod: 'agent_based',
+        agentHostsMode: 'existing',
+        selectedAgentPolicyIds: ['mock-agent-policy-id'],
+      },
+      detectAndReviewStep: {
+        // Both elb and the removed service share the same package policy.
+        policyIdsByInstance: { 'removed-svc': 'shared-pkg-policy', elb: 'shared-pkg-policy' },
+        serviceStatuses: {},
+      },
+    });
+
+    await expect(page.testSubj.locator('agentBasedSection')).toBeVisible();
+
+    // Credentials are required even in cleanup-only scenarios — cleanupAgentBasedPolicies
+    // rebuilds the shared policy's vars, so entering credentials prevents stripping them
+    // from the surviving integration.
+    const accessKeyField = page.testSubj.locator('awsStaticKeysForm-accessKeyId');
+    const secretKeyField = page.testSubj.locator('awsStaticKeysForm-secretAccessKey');
+    await expect(accessKeyField).toBeVisible();
+    await accessKeyField.fill('AKIATEST');
+    await secretKeyField.fill('secrettest');
+
+    const updateRequestPromise = page.waitForRequest(
+      (req) =>
+        req.method() === 'PUT' &&
+        /\/api\/fleet\/package_policies\/shared-pkg-policy$/.test(new URL(req.url()).pathname)
+    );
+
+    const nextButton = page.testSubj.locator('authenticateAndDeployStep-nextButton');
+    await expect(nextButton).toBeEnabled();
+    await nextButton.click();
+
+    const updateRequest = await updateRequestPromise;
+    const putBody = updateRequest.postDataJSON() as { vars?: Record<string, string> };
+    // Credential vars must be present in the PUT — they were entered above. Their absence would
+    // indicate buildPackageVars ran without credentials and stripped them from the survivor.
+    expect(putBody.vars?.access_key_id).toBe('AKIATEST');
+    expect(putBody.vars?.secret_access_key).toBe('secrettest');
+
+    await expect(page.testSubj.locator('onboardingStep-detect-and-review')).toBeVisible();
+    expect(deleteObserved).toBe(false);
+    expect(createObserved).toBe(false);
+    // The agent policy itself must never be deleted — enrolled agents would become orphaned.
+    expect(agentPolicyDeleteObserved).toBe(false);
   });
 
   test('deploy fires POST /api/fleet/managed_integrations and shows success state', async ({

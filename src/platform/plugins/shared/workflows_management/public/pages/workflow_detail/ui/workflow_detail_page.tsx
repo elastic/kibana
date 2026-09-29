@@ -108,10 +108,10 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   useEffect(() => {
     if (!canReadWorkflowExecution) {
       if (activeTab === 'executions') {
-        setUrlTab('workflow');
+        setUrlTab('workflow', { replace: true });
       }
       if (selectedExecutionId) {
-        setSelectedExecution(null);
+        setSelectedExecution(null, { replace: true });
       }
     }
   }, [canReadWorkflowExecution, activeTab, selectedExecutionId, setUrlTab, setSelectedExecution]);
@@ -134,14 +134,21 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   }, [loadConnectors, loadWorkflows]);
 
   // Seed the editor once per create-session: tracks whether the editor was
-  // already seeded so URL-state churn (`history.replace` in
-  // `useWorkflowUrlState` drops `location.state`) and re-renders never
-  // clobber in-progress edits or re-fire telemetry.
+  // already seeded so URL-state churn and re-renders never clobber in-progress
+  // edits or re-fire telemetry.
   const seededRef = useRef(false);
   // Read at seed time only — must not be an effect dependency or Graph↔YAML
   // toggles re-run this effect and reload the workflow (skeleton flash).
   const editorViewRef = useRef(editorView);
   editorViewRef.current = editorView;
+
+  // A navigation can hand `/create` its initial content through history
+  // state (`WorkflowsCreateRouteState`) — e.g. the Template Library's
+  // "Remix with AI" passes the rendered template. The state travels on the
+  // history entry, not the URL, so plain `/create` links and shared URLs
+  // fall back to the default YAML. The effect below depends on this value, not
+  // on `location.state`, which `useWorkflowUrlState` rewrites on URL updates.
+  const { initialYaml } = location.state ?? {};
 
   // Load workflow when id changes; seed create once.
   useEffect(() => {
@@ -155,17 +162,11 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     }
     seededRef.current = true;
 
-    // A navigation can hand `/create` its initial content through history
-    // state (`WorkflowsCreateRouteState`) — e.g. the Template Library's
-    // "Remix with AI" passes the rendered template. The state travels on the
-    // history entry, not the URL, so plain `/create` links and shared URLs
-    // fall back to the default YAML.
-    const { initialYaml } = location.state ?? {};
     dispatch(seedCreateYaml(initialYaml || workflowDefaultYaml));
     telemetry.reportWorkflowCreateOpened({
       editorType: editorViewRef.current === 'graph' ? 'visual' : 'yaml',
     });
-  }, [loadWorkflow, id, dispatch, telemetry, location.state]);
+  }, [loadWorkflow, id, dispatch, telemetry, initialYaml]);
 
   // Sync activeTab from URL state to store
   useEffect(() => {
@@ -221,10 +222,12 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Both handlers also close the list, which is local state rather than URL state. They must
+  // replace, or Back restores the execution while the list stays shut.
   const onOpenExecutionList = useCallback(() => {
     if (isExecutionListOpen || selectedExecutionId) {
       setIsExecutionListOpen(false);
-      setSelectedExecution(null);
+      setSelectedExecution(null, { replace: true });
       return;
     }
     setIsExecutionListOpen(true);
@@ -232,7 +235,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
 
   const onCloseExecutionList = useCallback(() => {
     setIsExecutionListOpen(false);
-    setSelectedExecution(null);
+    setSelectedExecution(null, { replace: true });
   }, [setSelectedExecution]);
 
   const onCloseExecutionDetail = useCallback(() => {
