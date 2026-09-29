@@ -40,7 +40,7 @@ import { visorStyles } from './visor.styles';
 import { SparklesIcon } from './sparkles_icon';
 import type { ESQLEditorDeps } from '../types';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
-import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
+import { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 
 export interface QuickSearchVisorProps {
   // Current ESQL query
@@ -55,7 +55,6 @@ export interface QuickSearchVisorProps {
   onUpdateAndSubmitQuery: (query: string) => void;
   // When true, visor submit is a no-op (matches the query bar Search button)
   isDisabled?: boolean;
-  telemetryService?: ESQLEditorTelemetryService;
 }
 
 export function QuickSearchVisor({
@@ -65,15 +64,18 @@ export function QuickSearchVisor({
   onNlResult,
   onUpdateAndSubmitQuery,
   isDisabled = false,
-  telemetryService,
 }: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
-  const { kql, data } = kibana.services;
+  const { kql, data, core } = kibana.services;
   const isNlToEsqlEnabled = useNlToEsqlCheck();
   const euiThemeContext = useEuiTheme();
   const [searchValue, setSearchValue] = useState('');
   const [visorMode, setVisorMode] = useState<VisorMode>(VisorMode.KQL);
   const [adHocDataView, setAdHocDataView] = useState<DataView | null>(null);
+  const telemetryService = useMemo(
+    () => new ESQLEditorTelemetryService(core.analytics),
+    [core.analytics]
+  );
 
   const {
     nlValue,
@@ -192,21 +194,19 @@ export function QuickSearchVisor({
                       </EuiToolTip>
                     </span>
                     <EuiToolTip content={aiModeTooltip} disableScreenReaderOutput>
-                      <span css={styles.aiButtonTooltipAnchor}>
-                        <AiButton
-                          iconType={SparklesIcon as unknown as 'sparkles'}
-                          size="xs"
-                          iconSize="m"
-                          variant="outlined"
-                          aria-pressed={!isKqlMode}
-                          isSelected={!isKqlMode}
-                          onClick={() => onVisorModeChange(VisorMode.NaturalLanguage)}
-                          data-test-subj="esqlVisorAskAiButton"
-                          css={[styles.aiButtonSparkleHover, !isKqlMode && styles.aiButtonSelected]}
-                        >
-                          {aiModeLabel}
-                        </AiButton>
-                      </span>
+                      <AiButton
+                        iconType={SparklesIcon as unknown as 'sparkles'}
+                        size="xs"
+                        iconSize="m"
+                        variant="outlined"
+                        aria-pressed={!isKqlMode}
+                        isSelected={!isKqlMode}
+                        onClick={() => onVisorModeChange(VisorMode.NaturalLanguage)}
+                        data-test-subj="esqlVisorAskAiButton"
+                        css={[styles.aiButtonSparkleHover, !isKqlMode && styles.aiButtonSelected]}
+                      >
+                        {aiModeLabel}
+                      </AiButton>
                     </EuiToolTip>
                   </div>
                 </EuiFlexItem>

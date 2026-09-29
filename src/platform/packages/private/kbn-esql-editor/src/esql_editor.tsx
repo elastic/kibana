@@ -969,7 +969,6 @@ const ESQLEditorInternal = function ESQLEditor({
             onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
           }
           isDisabled={Boolean(isDisabled || disableSubmitAction)}
-          telemetryService={telemetryService}
         />
       )}
       {(isHistoryOpen || (isLanguageComponentOpen && editorIsInline)) && (

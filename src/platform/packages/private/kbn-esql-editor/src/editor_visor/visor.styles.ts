@@ -109,9 +109,6 @@ export const visorStyles = (
     kqlModeButtonActive: css`
       background-color: ${euiTheme.colors.backgroundLightText};
     `,
-    aiButtonTooltipAnchor: css`
-      display: inline-flex;
-    `,
     aiButtonSparkleHover: css`
       overflow: visible;
       box-sizing: border-box;
