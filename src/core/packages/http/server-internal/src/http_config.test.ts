@@ -249,6 +249,7 @@ describe('selfHttp', () => {
   test('defaults to automatic targeting', () => {
     expect(config.schema.validate({}).selfHttp).toEqual({
       target: 'auto',
+      maxRedirects: 0,
       ssl: { verificationMode: 'full' },
     });
   });
@@ -267,6 +268,7 @@ describe('selfHttp', () => {
       }).selfHttp
     ).toEqual({
       target: 'auto',
+      maxRedirects: 0,
       ssl: { verificationMode: 'full', certificateAuthorities: ['/path/to/ca.pem'] },
     });
   });
@@ -316,6 +318,16 @@ describe('selfHttp', () => {
       ).toBe(verificationMode);
     }
   );
+
+  test('accepts maxRedirects in range', () => {
+    expect(config.schema.validate({ selfHttp: { maxRedirects: 5 } }).selfHttp.maxRedirects).toBe(5);
+  });
+
+  test.each([-1, 21, 1.5])('rejects invalid maxRedirects %s', (maxRedirects) => {
+    expect(() => config.schema.validate({ selfHttp: { maxRedirects } })).toThrow(
+      '[selfHttp.maxRedirects]'
+    );
+  });
 
   test('rejects unsupported verification modes', () => {
     expect(() =>
@@ -963,6 +975,7 @@ describe('HttpConfig', () => {
 
     expect(httpConfig.selfHttp).toEqual({
       target: 'local',
+      maxRedirects: 0,
       ssl: { verificationMode: 'full', certificateAuthorities: undefined },
     });
   });

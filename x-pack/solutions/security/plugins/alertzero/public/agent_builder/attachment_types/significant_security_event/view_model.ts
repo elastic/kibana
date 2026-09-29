@@ -43,6 +43,8 @@ export type SignificantSecurityAlertRef = NonNullable<
   SignificantSecurityEventAttachmentData['alerts']
 >[number];
 export type HuntResult = NonNullable<SignificantSecurityEventAttachmentData['hunt_result']>;
+export type HuntResultBehavior = NonNullable<HuntResult['tier2']>['behaviors'][number];
+export type HuntResultBehaviorExecution = NonNullable<HuntResultBehavior['execution']>;
 export type MapsToProposal = NonNullable<
   SignificantSecurityEventAttachmentData['maps_to_proposal']
 >;

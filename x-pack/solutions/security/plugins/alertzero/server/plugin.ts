@@ -40,6 +40,7 @@ import { WatchesService } from './services/watches/watches_service';
 import { WorkersService } from './services/workers/workers_service';
 import { ConversationProposalsService } from './services/conversation_proposals/conversation_proposals_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
+import { ScanFailuresService } from './services/scan_failures/scan_failures_service';
 import { ActionsService } from './services/actions/actions_service';
 import type { HuntServices } from './services/watches/hunt';
 import { listActionsTool } from './agent_builder_tools/list_actions_tool';
@@ -74,6 +75,7 @@ export class AlertZeroPlugin
   private huntServices?: HuntServices;
   private reportsEsClient?: ElasticsearchClient;
   private fleetAgentClient?: AgentClient;
+  private scanFailuresService?: ScanFailuresService;
 
   constructor(context: PluginInitializerContext<AlertZeroConfig>) {
     this.logger = context.logger.get();
@@ -161,6 +163,7 @@ export class AlertZeroPlugin
       getActionsService: () => this.requireActionsService(),
       getAgentBuilderConversations: () => this.requireAgentBuilderConversations(),
       getHuntServices: () => this.requireHuntServices(),
+      getScanFailuresService: () => this.requireScanFailuresService(),
     });
 
     return { isEnabled: true };
@@ -225,6 +228,8 @@ export class AlertZeroPlugin
       agentTypes: [agentType],
     });
 
+    this.scanFailuresService = new ScanFailuresService(management, this.logger);
+
     this.huntServices = {
       getProposalsService: plugins.proposals.getProposalsService,
       getInference: () => plugins.inference,
@@ -271,6 +276,10 @@ export class AlertZeroPlugin
 
   private requireReportsEsClient(): ElasticsearchClient {
     return this.requireStarted(this.reportsEsClient, 'internal Elasticsearch client');
+  }
+
+  private requireScanFailuresService(): ScanFailuresService {
+    return this.requireStarted(this.scanFailuresService, 'Scan failures service');
   }
 
   private getSpaceId(request: KibanaRequest): string {

@@ -153,6 +153,114 @@ describe('createSignificantSecurityEventAttachmentType', () => {
 
       expect(value).toContain('truncated from 120 original entries');
     });
+
+    it('names the tier that confirmed the finding and what each behavior query found', async () => {
+      const value = await formatToText(attachmentType, formatContext, {
+        ...validPayload,
+        hunt_result: {
+          has_confirmed_hit: true,
+          // Tier 2 alone, over a report whose Tier 1 was clean: the tier statuses below
+          // cannot say which tier corroborated this finding, so the model needs the line.
+          hit_sources: ['tier2'],
+          time_range: { from: '2026-01-01T00:00:00Z', to: '2026-01-02T00:00:00Z' },
+          tier1: {
+            status: 'no_environment_hits',
+            counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
+            per_index: [],
+            resolved_iocs: [],
+          },
+          tier2: {
+            status: 'behaviors_proposed',
+            behaviors: [
+              {
+                technique_id: 'T1021',
+                tactic_ids: ['TA0008'],
+                confidence: 0.9,
+                title: 'hit',
+                execution: { executed: true, row_count: 3, hit: true },
+              },
+              {
+                technique_id: 'T1078',
+                tactic_ids: [],
+                confidence: 0.5,
+                title: 'clean',
+                execution: { executed: true, row_count: 0, hit: false },
+              },
+              {
+                technique_id: 'T1098',
+                tactic_ids: [],
+                confidence: 0.5,
+                title: 'no verdict',
+                execution: {
+                  executed: true,
+                  row_count: 4,
+                  hit: false,
+                  inconclusive_reason: 'rows_unclassifiable',
+                },
+              },
+              {
+                technique_id: 'T1110',
+                tactic_ids: [],
+                confidence: 0.5,
+                title: 'never ran',
+                execution: { executed: false, row_count: 0, hit: false },
+              },
+              {
+                technique_id: 'T1136',
+                tactic_ids: [],
+                confidence: 0.5,
+                title: 'unreported',
+              },
+            ],
+          },
+        },
+      });
+
+      expect(value).toContain('Confirmed by: tier2');
+      expect(value).toContain('hit — executed, hit (3 row(s) in required indices)');
+      expect(value).toContain('clean — executed, no rows in required indices (clean)');
+      expect(value).toContain(
+        'no verdict — executed, no verdict (rows_unclassifiable); this is not evidence the environment is clean'
+      );
+      expect(value).toContain('never ran — not executed');
+      // Absence is not a verdict: the producer reported no result, which is not "did not run".
+      expect(value).toContain('unreported — execution not reported');
+    });
+
+    it('marks lists the producer truncated, and says nothing confirmed a clean run', async () => {
+      const value = await formatToText(attachmentType, formatContext, {
+        ...validPayload,
+        hunt_result: {
+          has_confirmed_hit: false,
+          hit_sources: [],
+          time_range: { from: '2026-01-01T00:00:00Z', to: '2026-01-02T00:00:00Z' },
+          tier1: {
+            status: 'no_environment_hits',
+            counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
+            per_index: [
+              { index: 'logs-endpoint.events.process-default', hit_count: 0, required: true },
+            ],
+            resolved_iocs: [{ type: 'hash', value: 'abc123' }],
+            per_index_truncated: true,
+            resolved_iocs_truncated: true,
+          },
+          tier2: {
+            status: 'behaviors_proposed',
+            behaviors: [
+              { technique_id: 'T1021', tactic_ids: [], confidence: 0.5, title: 'proposal' },
+            ],
+            behaviors_truncated: true,
+          },
+        },
+      });
+
+      expect(value).toContain('Confirmed by: nothing (no confirmed hit)');
+      expect(value).toContain('Per index (truncated by the producer: not the complete set):');
+      expect(value).toContain('Resolved IOCs (truncated by the producer: not the complete set):');
+      expect(value).toContain(
+        'Tier 2: behaviors_proposed (truncated by the producer: not the complete set)'
+      );
+    });
   });
 
   describe('getAgentDescription', () => {
@@ -169,7 +277,7 @@ describe('createSignificantSecurityEventAttachmentType', () => {
   });
 
   describe('max-size payload', () => {
-    it('keeps the representation within maxContentLength at the schema max sizes', async () => {
+    it('keeps every section at the schema max sizes, naming what each one left out', async () => {
       const maxSizePayload = {
         ...validPayload,
         title: 't'.repeat(512),
@@ -248,7 +356,32 @@ describe('createSignificantSecurityEventAttachmentType', () => {
 
       const value = await formatToText(attachmentType, formatContext, maxSizePayload);
 
+      // Asserting on the length alone cannot fail: `getRepresentation` slices to the limit
+      // before returning. What matters is that the slice never happens — it cuts at one
+      // point, mid-entry, and silently drops every section the formatter emits after it.
+      expect(value).not.toContain('[truncated: representation exceeded');
       expect(value.length).toBeLessThanOrEqual(attachmentType.maxContentLength ?? Infinity);
+
+      // Including the sections that come last, which a single cut would take first.
+      for (const section of [
+        'Timeline:',
+        'Hunt result:',
+        'Confirmed by: tier1, tier2',
+        'Security knowledge indicators',
+        'Entities:',
+        'Alerts:',
+        'Events:',
+        'Evidence for:',
+        'Evidence against:',
+        'Maps to proposal:',
+        'Manual remediation:',
+        `Evaluation record: ${validPayload.evaluation_record_ref}`,
+      ]) {
+        expect(value).toContain(section);
+      }
+
+      // Each section that ran out of budget says so, rather than ending mid-list.
+      expect(value).toContain('more not shown (section size limit reached)');
     });
   });
 });

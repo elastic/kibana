@@ -432,6 +432,33 @@ describe('SignificantSecurityEventInlineContent', () => {
     expect(screen.getByText('e2')).toBeInTheDocument();
   });
 
+  it('reveals the evidence past the visible limit on request', async () => {
+    // The schema accepts 50 items a side, and the hidden ones are the hunt's own reasoning.
+    const user = userEvent.setup();
+    renderWithI18n(
+      <SignificantSecurityEventInlineContent
+        {...renderProps(
+          buildAttachment({
+            ...baseData,
+            evidence_for: ['e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7'],
+          })
+        )}
+      />
+    );
+
+    expect(screen.queryByText('e6')).not.toBeInTheDocument();
+    const overflow = screen.getByTestId('alertzeroSignificantSecurityEventEvidenceOverflow');
+    expect(overflow).toHaveTextContent('+2 more');
+
+    await user.click(overflow);
+    expect(screen.getByText('e6')).toBeInTheDocument();
+    expect(screen.getByText('e7')).toBeInTheDocument();
+    expect(overflow).toHaveTextContent('Show fewer');
+
+    await user.click(overflow);
+    expect(screen.queryByText('e6')).not.toBeInTheDocument();
+  });
+
   describe('hunt result', () => {
     it('renders total hits, affected hosts/users stats, and the time range', () => {
       renderWithI18n(
@@ -463,6 +490,151 @@ describe('SignificantSecurityEventInlineContent', () => {
       expect(screen.getByText('Lateral movement via RDP')).toBeInTheDocument();
       expect(screen.getByText('TA0008')).toBeInTheDocument();
       expect(screen.getAllByText('75%').length).toBeGreaterThan(0);
+    });
+
+    it('names the tier that confirmed the finding alongside the report-wide tier statuses', () => {
+      // The worst case the statuses alone cannot express: the report's Tier 1 found hits,
+      // but this finding was corroborated by Tier 2. Without the sources, "Tier 1
+      // Environment hits found" reads as this finding's confirmation.
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              hunt_result: {
+                ...huntResult,
+                hit_sources: ['tier2' as const],
+                tier2: {
+                  status: 'behaviors_proposed' as const,
+                  behaviors: [
+                    {
+                      ...huntResult.tier2.behaviors[0],
+                      execution: { executed: true, row_count: 2, hit: true },
+                    },
+                  ],
+                },
+              },
+            })
+          )}
+        />
+      );
+
+      const outcome = screen.getByTestId('alertzeroSignificantSecurityEventHuntResultOutcome');
+      expect(
+        screen.getByTestId('alertzeroSignificantSecurityEventHuntResultHitSources')
+      ).toHaveTextContent('Confirmed by Tier 2');
+      expect(outcome).toHaveTextContent('Environment hits found');
+    });
+
+    it('marks optional indices in the distribution legend', () => {
+      // Tier 1's hit bar is computed from required indices only, so an unlabeled optional
+      // segment reads as part of the corroborating total.
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(buildAttachment({ ...baseData, hunt_result: huntResult }))}
+        />
+      );
+
+      const huntSection = screen.getByTestId('alertzeroSignificantSecurityEventHuntResult');
+      expect(huntSection).toHaveTextContent('logs-endpoint.events.network-default (4) optional');
+      expect(screen.getAllByText('optional')).toHaveLength(1);
+    });
+
+    it('tells the four behavior outcomes apart, and leaves an unreported one blank', () => {
+      const behavior = {
+        technique_id: 'T1021',
+        tactic_ids: ['TA0008'],
+        confidence: 0.75,
+        title: 'Lateral movement via RDP',
+      };
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              hunt_result: {
+                ...huntResult,
+                tier2: {
+                  status: 'behaviors_proposed' as const,
+                  behaviors: [
+                    { ...behavior, execution: { executed: true, row_count: 4, hit: true } },
+                    { ...behavior, execution: { executed: true, row_count: 0, hit: false } },
+                    {
+                      ...behavior,
+                      execution: {
+                        executed: true,
+                        row_count: 4,
+                        hit: false,
+                        inconclusive_reason: 'rows_unclassifiable' as const,
+                      },
+                    },
+                    { ...behavior, execution: { executed: false, row_count: 0, hit: false } },
+                    behavior,
+                  ],
+                },
+              },
+            })
+          )}
+        />
+      );
+
+      expect(screen.getByText('Hit: 4 rows')).toBeInTheDocument();
+      expect(screen.getByText('No rows')).toBeInTheDocument();
+      expect(screen.getByText('Inconclusive')).toBeInTheDocument();
+      expect(screen.getByText('rows_unclassifiable')).toBeInTheDocument();
+      expect(screen.getByText('Not executed')).toBeInTheDocument();
+    });
+
+    it('marks the lists the producer truncated', () => {
+      const truncatedIds = [
+        'alertzeroSignificantSecurityEventHuntResultPerIndexTruncated',
+        'alertzeroSignificantSecurityEventHuntResultResolvedIocsTruncated',
+        'alertzeroSignificantSecurityEventHuntResultBehaviorsTruncated',
+      ];
+
+      const { unmount } = renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              hunt_result: {
+                ...huntResult,
+                tier1: {
+                  ...huntResult.tier1,
+                  resolved_iocs: [{ type: 'ip' as const, value: '203.0.113.5' }],
+                  per_index_truncated: true,
+                  resolved_iocs_truncated: true,
+                },
+                tier2: { ...huntResult.tier2, behaviors_truncated: true },
+              },
+            })
+          )}
+        />
+      );
+      for (const testId of truncatedIds) {
+        expect(screen.getByTestId(testId)).toBeInTheDocument();
+      }
+      unmount();
+
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              hunt_result: {
+                ...huntResult,
+                tier1: {
+                  ...huntResult.tier1,
+                  resolved_iocs: [{ type: 'ip' as const, value: '203.0.113.5' }],
+                },
+              },
+            })
+          )}
+        />
+      );
+      for (const testId of truncatedIds) {
+        expect(screen.queryByTestId(testId)).not.toBeInTheDocument();
+      }
     });
   });
 

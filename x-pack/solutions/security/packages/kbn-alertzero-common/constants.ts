@@ -66,6 +66,19 @@ export const CANDIDATES_URL = `${HUNT_INTERNAL_ROUTE_BASE}/candidates` as const;
 /** Two-tier hunt pipeline for a single report, called by the hunt child (`hunt.yaml`). */
 export const HUNT_COORDINATOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_coordinator` as const;
 
+/** Failed managed scans in the trailing 24 hours, folded onto Workers. */
+export const ALERTZERO_SCAN_FAILURES_URL = `${ALERTZERO_INTERNAL_URL}/scan-failures` as const;
+
+export interface ScanFailureWorker {
+  workerId: string;
+  watchId: string;
+}
+
+export interface ScanFailuresResponse {
+  workers: ScanFailureWorker[];
+  unknown: boolean;
+}
+
 /** Agent Builder builtin tool wrapping the action catalog API. */
 export const ALERTZERO_ACTIONS_LIST_TOOL_ID = 'security.alertzero.actions.list' as const;
 

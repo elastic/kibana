@@ -171,6 +171,7 @@ const tier1Result = (
   status: 'tier1_only',
   run_id: 'run-1',
   technologies: ['aws_iam'],
+  index_patterns: ['logs-aws.*'],
   has_confirmed_hit: true,
   completeness: 'complete',
   completed_successfully: true,
