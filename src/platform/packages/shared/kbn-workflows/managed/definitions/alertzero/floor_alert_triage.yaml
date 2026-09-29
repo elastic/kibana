@@ -569,10 +569,14 @@ steps:
             autoApprove: "${{ consts.worker_settings.autonomy == 'supervised' }}"
 
       # Fetch proposal details for outcome comment attribution (decision, decidedBy,
-      # dismissReason, rationale).
+      # dismissReason, rationale). handle_dismissed below must not derive the retag from a
+      # failed read, so retry before continue: true takes over.
       - name: get_proposal
         type: proposals.getProposal
         on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
           continue: true
         with:
           proposalId: "{{ steps.create_fp_proposal.output.proposalId }}"
@@ -637,88 +641,117 @@ steps:
         type: if
         condition: "${{ variables.proposal_outcome == 'dismissed' }}"
         steps:
-          # Map the dismiss reason to the correct re-tag:
-          #   wrong → az:true_positive (analyst contradicts the classification itself)
-          #   any other reason → az:inconclusive (analyst rejects the *action*, not the verdict)
-          # Defaults to az:inconclusive so a stale or failed read never asserts true_positive.
-          - name: map_dismiss_reason_to_tag
-            type: data.set
-            with:
-              dismissed_tag: >-
-                {% if steps.get_proposal.output.dismissReason == 'wrong' %}az:true_positive{% else %}az:inconclusive{% endif %}
-
-          # Two calls per alert: kibana.SetAlertTags rejects combining add+remove of the same
-          # tag (e.g. az:false_positive removed and re-added), so keep them separate.
-          # Per-alert foreach mirrors set_az_tags so one failing alert cannot abort the batch.
-          - name: retag_dismissed_alerts
-            type: foreach
-            foreach: "${{ variables.fp_candidate_ids }}"
-            on-failure:
-              continue: true
+          # get_proposal is allowed to fail-and-continue (retried above first). Deriving the
+          # retag from a missing dismissReason would default every candidate to
+          # az:inconclusive — including one an analyst actually contradicted as `wrong`
+          # (which maps to az:true_positive) — and then close the Investigation as if that
+          # mapped decision had been applied. Gate the whole re-tag/close on the read having
+          # actually succeeded; a failed read leaves tags and the Investigation untouched.
+          - name: guard_get_proposal_readable
+            type: if
+            condition: "${{ steps.get_proposal.error == blank }}"
             steps:
-              - name: remove_fp_tag
-                type: kibana.SetAlertTags
-                on-failure:
-                  retry:
-                    max-attempts: 3
-                    delay: 5s
+              # Map the dismiss reason to the correct re-tag:
+              #   wrong → az:true_positive (analyst contradicts the classification itself)
+              #   any other reason → az:inconclusive (analyst rejects the *action*, not the verdict)
+              - name: map_dismiss_reason_to_tag
+                type: data.set
                 with:
-                  ids:
-                    - "{{ foreach.item }}"
-                  tags:
-                    tags_to_remove:
-                      - "az:false_positive"
-                    tags_to_add: []
-              - name: add_dismissed_tag
-                type: kibana.SetAlertTags
+                  dismissed_tag: >-
+                    {% if steps.get_proposal.output.dismissReason == 'wrong' %}az:true_positive{% else %}az:inconclusive{% endif %}
+
+              # Two calls per alert: kibana.SetAlertTags rejects combining add+remove of the
+              # same tag (e.g. az:false_positive removed and re-added), so keep them separate.
+              # Per-alert foreach mirrors set_az_tags so one failing alert cannot abort the batch.
+              - name: retag_dismissed_alerts
+                type: foreach
+                foreach: "${{ variables.fp_candidate_ids }}"
                 on-failure:
-                  retry:
-                    max-attempts: 3
-                    delay: 5s
+                  continue: true
+                steps:
+                  - name: remove_fp_tag
+                    type: kibana.SetAlertTags
+                    on-failure:
+                      retry:
+                        max-attempts: 3
+                        delay: 5s
+                    with:
+                      ids:
+                        - "{{ foreach.item }}"
+                      tags:
+                        tags_to_remove:
+                          - "az:false_positive"
+                        tags_to_add: []
+                  - name: add_dismissed_tag
+                    type: kibana.SetAlertTags
+                    on-failure:
+                      retry:
+                        max-attempts: 3
+                        delay: 5s
+                    with:
+                      ids:
+                        - "{{ foreach.item }}"
+                      tags:
+                        tags_to_remove: []
+                        tags_to_add:
+                          - "{{ variables.dismissed_tag }}"
+
+              # Same failure tolerance as close_investigation_after_approval: the decision has
+              # landed, so a failed bookkeeping patch must not fail the run.
+              - name: close_investigation_after_dismissal
+                type: ai.conversation.metadata.patch
+                on-failure:
+                  continue: true
+                  fallback:
+                    - name: log_dismissed_close_failed
+                      type: console
+                      with:
+                        message: >-
+                          The proposal was dismissed, but the Investigation could not be marked
+                          closed: {{ error.message }}. Investigation
+                          {{ steps.create_investigation.output.conversation_id }} stays open.
                 with:
-                  ids:
-                    - "{{ foreach.item }}"
-                  tags:
-                    tags_to_remove: []
-                    tags_to_add:
-                      - "{{ variables.dismissed_tag }}"
+                  conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  updates:
+                    status: closed
+                    close_reason: other
 
-          # Same failure tolerance as close_investigation_after_approval: the decision has
-          # landed, so a failed bookkeeping patch must not fail the run.
-          - name: close_investigation_after_dismissal
-            type: ai.conversation.metadata.patch
-            on-failure:
-              continue: true
-              fallback:
-                - name: log_dismissed_close_failed
-                  type: console
-                  with:
-                    message: >-
-                      The proposal was dismissed, but the Investigation could not be marked
-                      closed: {{ error.message }}. Investigation
-                      {{ steps.create_investigation.output.conversation_id }} stays open.
-            with:
-              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-              updates:
-                status: closed
-                close_reason: other
-
-          - name: post_comment_outcome_dismissed
-            type: kibana.request
-            on-failure:
-              continue: true
-            with:
-              method: POST
-              path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-              headers:
-                kbn-xsrf: string
-                Content-Type: application/json
-                elastic-api-version: "2023-10-31"
-              body:
-                conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-                trigger_mode: "never"
-                input: >-
-                  Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %} (reason: {{ steps.get_proposal.output.dismissReason | default: 'not specified' }}). {{ variables.fp_candidate_count }} alert(s) re-tagged {{ variables.dismissed_tag }}.{% if steps.get_proposal.output.rationale != blank %} Rationale: "{{ steps.get_proposal.output.rationale | truncate: 500 | escape }}".{% endif %}
+              - name: post_comment_outcome_dismissed
+                type: kibana.request
+                on-failure:
+                  continue: true
+                with:
+                  method: POST
+                  path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+                  headers:
+                    kbn-xsrf: string
+                    Content-Type: application/json
+                    elastic-api-version: "2023-10-31"
+                  body:
+                    conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                    trigger_mode: "never"
+                    input: >-
+                      Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %} (reason: {{ steps.get_proposal.output.dismissReason | default: 'not specified' }}). {{ variables.fp_candidate_count }} alert(s) re-tagged {{ variables.dismissed_tag }}.{% if steps.get_proposal.output.rationale != blank %} Rationale: "{{ steps.get_proposal.output.rationale | truncate: 500 | escape }}".{% endif %}
+            else:
+              - name: post_comment_dismissed_read_failed
+                type: kibana.request
+                on-failure:
+                  continue: true
+                with:
+                  method: POST
+                  path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+                  headers:
+                    kbn-xsrf: string
+                    Content-Type: application/json
+                    elastic-api-version: "2023-10-31"
+                  body:
+                    conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                    trigger_mode: "never"
+                    input: >-
+                      ⚠️ The proposal was dismissed, but its details could not be read after
+                      retries ({{ steps.get_proposal.error.message }}). {{ variables.fp_candidate_count }}
+                      alert(s) remain tagged az:false_positive and untouched; this Investigation
+                      stays open for manual follow-up.
 
       # An unanswered deadline is not a dismissal: nobody rejected the verdict, so the alerts
       # keep their az:false_positive tag and stay open for an analyst to pick up.

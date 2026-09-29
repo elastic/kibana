@@ -112,6 +112,50 @@ describe('floor_alert_triage — dismiss mapping', () => {
   });
 });
 
+describe('floor_alert_triage — guard_get_proposal_readable', () => {
+  it('retries get_proposal before continue: true takes over', () => {
+    const getProposal = stepByName('get_proposal');
+    expect(getProposal?.type).toBe('proposals.getProposal');
+    expect(getProposal?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+    expect(getProposal?.['on-failure']?.continue).toBe(true);
+  });
+
+  it('gates the retag/close on the read having succeeded, with a preserve-and-warn else', () => {
+    const guard = stepByName('guard_get_proposal_readable');
+    expect(guard?.condition).toBe('${{ steps.get_proposal.error == blank }}');
+    expect(guard?.condition).not.toContain('|');
+
+    expect(guard?.steps?.some((s) => s.name === 'map_dismiss_reason_to_tag')).toBe(true);
+    expect(guard?.steps?.some((s) => s.name === 'retag_dismissed_alerts')).toBe(true);
+    expect(guard?.steps?.some((s) => s.name === 'close_investigation_after_dismissal')).toBe(true);
+    expect(guard?.else?.some((s) => s.name === 'post_comment_dismissed_read_failed')).toBe(true);
+  });
+
+  it('evaluates the guard true on success and false after a failed read', () => {
+    expect(
+      evalExpr('${{ steps.get_proposal.error == blank }}', { steps: { get_proposal: {} } })
+    ).toBe(true);
+    expect(
+      evalExpr('${{ steps.get_proposal.error == blank }}', {
+        steps: { get_proposal: { error: { message: 'timeout' } } },
+      })
+    ).toBe(false);
+  });
+
+  it('reports the read failure without claiming any alert was re-tagged', () => {
+    const comment = stepByName('post_comment_dismissed_read_failed');
+    const template = (comment?.with?.body as { input?: string } | undefined)?.input ?? '';
+    const rendered = renderString(template, {
+      steps: { get_proposal: { error: { message: 'timeout after 3 attempts' } } },
+      variables: { fp_candidate_count: 4 },
+    });
+
+    expect(rendered).toContain('could not be read after');
+    expect(rendered).toContain('timeout after 3 attempts');
+    expect(rendered).toContain('4 alert(s) remain tagged az:false_positive and untouched');
+  });
+});
+
 // ---------------------------------------------------------------------------
 // post_comment_outcome_dismissed — rationale truncation and escaping
 // ---------------------------------------------------------------------------
