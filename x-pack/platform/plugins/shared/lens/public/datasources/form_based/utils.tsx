@@ -682,24 +682,30 @@ export function getCustomRankLastValueSortFieldWarningMessages(
                   size="s"
                   flush="left"
                   onClick={() => {
-                    setState((prevState) =>
-                      mergeLayer({
+                    setState((prevState) => {
+                      const prevLayer = prevState.layers[layerId];
+                      const prevColumn = prevLayer?.columns[columnId];
+                      if (!prevLayer || !isCustomLastValueOrderAgg(prevColumn)) {
+                        return prevState;
+                      }
+                      const { orderAgg: prevOrderAgg } = prevColumn.params;
+                      return mergeLayer({
                         state: prevState,
                         layerId,
                         newLayer: updateDefaultLabels(
                           updateColumnParam({
-                            layer,
+                            layer: prevLayer,
                             columnId,
                             paramName: 'orderAgg',
                             value: {
-                              ...orderAgg,
-                              params: { ...orderAgg.params, sortField: defaultField },
+                              ...prevOrderAgg,
+                              params: { ...prevOrderAgg.params, sortField: defaultField },
                             },
                           }),
                           indexPattern
                         ),
-                      })
-                    );
+                      });
+                    });
                   }}
                 >
                   {i18n.translate('xpack.lens.indexPattern.terms.customRankLastValueSortByField', {
