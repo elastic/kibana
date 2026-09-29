@@ -50,9 +50,10 @@ This stream is the durable history of rule evaluation.
 | `status` | `keyword` | `breached`, `recovered`, or `no_data`. |
 | `source` | `keyword` | Origin marker. |
 | `type` | `keyword` | `signal` or `alert`. |
-| `episode.id` | `keyword` | Episode id for alert-type events. |
-| `episode.status` | `keyword` | `inactive`, `pending`, `active`, or `recovering`. |
-| `episode.status_count` | `long` | Consecutive count within the current episode status. |
+| `alert.id` | `keyword` | Alert id for alert-type events. |
+| `alert.status` | `keyword` | `inactive`, `pending`, `active`, or `recovering`. |
+| `alert.status_count` | `long` | Consecutive count within the current alert status. |
+| `episode.id`, `episode.status`, `episode.status_count` | `alias` | Aliases of the `alert.*` fields, so queries on the pre-v8 names keep working. Aliases are not stored in `_source` and cannot be written. |
 | `severity` | `keyword` | Optional. Best-effort severity extracted from the ES\|QL `severity` column on breached events. One of `info`, `low`, `medium`, `high`, `critical`. |
 
 Writers:
@@ -178,6 +179,12 @@ Disallowed changes:
 3. Bump the corresponding datastream version constant when the template change requires rollover.
 4. Update writers and readers that need to understand the new field.
 5. Update the relevant README if the field changes the architecture or contributor mental model.
+
+### Mapping changes that cannot be applied in place
+
+Elasticsearch cannot apply some mapping changes to existing backing indices, for example turning a concrete field into an `alias`. For those, set `forceReset: { version }` on the resource definition, where `version` is the last datastream version with the old mapping. On startup, `DatastreamInitializer` deletes a data stream created from that version or below and recreates it from the current template. All of its documents are lost.
+
+`.rule-events` uses `forceReset: { version: 7 }` for the `episode.*` to `alert.*` rename in v8. Keep `forceReset.version` unchanged when bumping the datastream version later.
 
 ## Example: adding a new optional alert event field
 
