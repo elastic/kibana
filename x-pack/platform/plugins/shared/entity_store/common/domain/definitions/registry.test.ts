@@ -11,6 +11,7 @@ import {
   getEntityDefinitionWithoutId,
   hasPriorityExtractionGate,
   resolveExtractionMode,
+  supportsNonPrioritySampling,
 } from './registry';
 
 /**
@@ -34,6 +35,19 @@ describe('hasPriorityExtractionGate', () => {
   it.each(TYPES_WITHOUT_PRIORITY_GATE)('%s: returns false', (type) => {
     expect(hasPriorityExtractionGate(type)).toBe(false);
   });
+});
+
+describe('supportsNonPrioritySampling', () => {
+  it('user: returns true - declared alongside its priority gate', () => {
+    expect(supportsNonPrioritySampling('user')).toBe(true);
+  });
+
+  it.each(TYPES_WITHOUT_PRIORITY_GATE)(
+    '%s: returns false - future dual-process types must opt in explicitly',
+    (type) => {
+      expect(supportsNonPrioritySampling(type)).toBe(false);
+    }
+  );
 });
 
 describe('resolveExtractionMode', () => {

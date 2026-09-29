@@ -17,17 +17,18 @@ import type {
   ProcessedRoundInput,
 } from '@kbn/agent-builder-server';
 import type { CompactionSummary } from '@kbn/agent-builder-common';
-import { formatExecutionFailedNotice, formatSubagentRosterNotice } from '../prompts/utils/notices';
+import { formatInterruptionNotice, formatSubagentRosterNotice } from '../prompts/utils/notices';
 import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedConversation } from './prepare_conversation';
 import {
   groupTimelineRounds,
   groupTimelineEntries,
-  isTimelineFailedExecution,
-  type TimelineFailedExecution,
   isAwaitingPrompt,
+  isTimelineCustomEvent,
   isTimelineRound,
+  roundInterruption,
   roundResponse,
+  type ProcessedCustomEvent,
   type ProcessedTimelineEvent,
   type TimelineRound,
 } from './context_timeline';
@@ -35,6 +36,7 @@ import type { ToolCallResultTransformer } from './tool_summarization';
 import { serializeCompactionSummary } from './compaction_serialize';
 import { renderHistorySteps } from './render_steps_to_messages';
 import { attachmentTypeInstructions } from '../prompts/utils/attachments';
+import { formatConversationEvent } from './conversation_event_presentation';
 
 export interface ConversationToLangchainOptions {
   conversation: ProcessedConversation;
@@ -120,13 +122,8 @@ export const prepareMessages = async ({
       );
       continue;
     }
-    if (isTimelineFailedExecution(entry)) {
-      messages.push(
-        ...failedExecutionToLangchain(entry, {
-          attachmentTypes: conversation.attachmentTypes,
-          attachmentTypeInstructionsProvided,
-        })
-      );
+    if (isTimelineCustomEvent(entry)) {
+      messages.push(customEventToLangchain(entry.event));
       continue;
     }
     // a standalone user message: no execution to render
@@ -185,31 +182,23 @@ export const roundToLangchain = async (
     messages.push(...(await renderHistorySteps({ steps: round.steps, resultTransformer })));
   }
 
-  // assistant response
-  messages.push(formatAssistantResponse({ response: roundResponse(round) }));
+  // assistant response, or the notice standing in for it on an interrupted round
+  const interruption = roundInterruption(round);
+  messages.push(
+    interruption
+      ? createUserMessage(formatInterruptionNotice(interruption))
+      : formatAssistantResponse({ response: roundResponse(round) })
+  );
 
   return messages;
 };
 
 /**
- * The two messages a failed initial execution contributes to the history: the user message it
- * answered nothing to, and a system notice saying the attempt failed. Its steps are not rendered.
+ * The message a custom conversation event contributes to the history: a user-role message
+ * carrying the event's LLM representation, like the other system notices.
  */
-export const failedExecutionToLangchain = (
-  entry: TimelineFailedExecution<ProcessedTimelineEvent>,
-  {
-    attachmentTypes,
-    attachmentTypeInstructionsProvided,
-  }: Pick<RoundToLangchainOptions, 'attachmentTypes' | 'attachmentTypeInstructionsProvided'> = {}
-): BaseMessage[] => [
-  formatUserInput({
-    input: entry.userMessage.data,
-    timestamp: entry.userMessage.created_at,
-    attachmentTypes,
-    attachmentTypeInstructionsProvided,
-  }),
-  createUserMessage(formatExecutionFailedNotice(entry.failed.data.error)),
-];
+export const customEventToLangchain = (event: ProcessedCustomEvent): HumanMessage =>
+  createUserMessage(formatConversationEvent(event));
 
 export const formatUserInput = ({
   input,

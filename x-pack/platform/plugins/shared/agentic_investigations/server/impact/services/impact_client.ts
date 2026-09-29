@@ -12,7 +12,8 @@ import type { ImpactService } from './impact_service';
 
 /**
  * In-process impact reads. The space and the principal both come from the
- * request, so a caller cannot supply another space or skip `read_impact`.
+ * request, so a caller cannot supply another space or skip the investigations
+ * manage privilege.
  */
 export interface ImpactReadClient {
   listByConversationIds: (conversationIds: string[]) => Promise<Impact[]>;

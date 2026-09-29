@@ -11,13 +11,15 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { AiIndexAutomation } from '../../../../common/http_api/ai_indices';
 import { ItemRow } from '../item_row';
+import { ItemRowIcon } from '../item_row_icon';
 import { WorkflowYamlPreviewFlyout } from './workflow_yaml_preview_flyout';
 
 interface AutomationRowProps {
@@ -54,7 +56,7 @@ export const AutomationRow = ({
     <>
       <ItemRow
         label={displayName}
-        icon={<EuiIcon type="tablePlay" size="l" aria-hidden={true} />}
+        icon={<ItemRowIcon iconType="tablePlay" />}
         badge={
           enabled !== undefined ? (
             <EuiBadge color={enabled ? 'success' : 'hollow'}>
@@ -77,6 +79,10 @@ export const AutomationRow = ({
                   aria-label={previewLabel}
                   onClick={() => setIsPreviewOpen(true)}
                   data-test-subj="contextPreviewWorkflowButton"
+                  {...getEbtProps({
+                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
+                    action: CONTEXT_ENGINE_UI_EBT.action.automations.PREVIEW_WORKFLOW,
+                  })}
                 />
               </EuiToolTip>
             </EuiFlexItem>
@@ -97,6 +103,10 @@ export const AutomationRow = ({
                       { defaultMessage: 'Edit workflow in editor' }
                     )}
                     data-test-subj="contextOpenWorkflowButton"
+                    {...getEbtProps({
+                      element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
+                      action: CONTEXT_ENGINE_UI_EBT.action.automations.OPEN_WORKFLOW,
+                    })}
                   >
                     {i18n.translate(
                       'xpack.contextEngine.aiIndexDetail.automations.editWorkflowButton',
@@ -113,6 +123,10 @@ export const AutomationRow = ({
                       isDisabled={isRemoveDisabled}
                       data-test-subj="contextRemoveAutomationButton"
                       aria-label={removeLabel}
+                      {...getEbtProps({
+                        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
+                        action: CONTEXT_ENGINE_UI_EBT.action.automations.REMOVE,
+                      })}
                     />
                   </EuiToolTip>
                 </EuiFlexItem>

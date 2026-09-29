@@ -8,7 +8,10 @@
 import type { RawRule } from '../../types';
 import type { CreateAPIKeyResult } from '../types';
 import type { RuleDomain } from '../../application/rule/types';
-import { MISSING_UIAM_API_KEY_TAG } from '../../application/rule/constants';
+import {
+  LEGACY_MISSING_UIAM_API_KEY_TAG,
+  MISSING_UIAM_API_KEY_TAG,
+} from '../../application/rule/constants';
 import { ApiKeyType } from '../../task_runner/types';
 
 /**
@@ -23,6 +26,7 @@ import { ApiKeyType } from '../../task_runner/types';
 export const API_KEY_ATTRIBUTES_TO_STRIP = [
   'apiKey',
   'apiKeyOwner',
+  'apiKeyOwnerProfileUid',
   'apiKeyCreatedByUser',
   'uiamApiKey',
   'uiamApiKeyExternal',
@@ -31,6 +35,7 @@ export const API_KEY_ATTRIBUTES_TO_STRIP = [
 interface ApiKeyRuleProperties {
   apiKey: string | null;
   apiKeyOwner: string | null;
+  apiKeyOwnerProfileUid: string | null;
   apiKeyCreatedByUser: boolean | null;
   uiamApiKey?: string | null;
   uiamApiKeyExternal?: boolean | null;
@@ -43,11 +48,13 @@ const encodeApiKey = (id?: string, key?: string): string | null => {
 const getApiKeyRuleProperties = (
   apiKey: CreateAPIKeyResult | null,
   username: string | null,
-  createdByUser: boolean
+  createdByUser: boolean,
+  profileUid: string | null
 ): ApiKeyRuleProperties => {
   if (!apiKey || !apiKey.apiKeysEnabled) {
     return {
       apiKeyOwner: null,
+      apiKeyOwnerProfileUid: null,
       apiKey: null,
       apiKeyCreatedByUser: null,
     };
@@ -73,6 +80,7 @@ const getApiKeyRuleProperties = (
 
   return {
     apiKeyOwner: username,
+    apiKeyOwnerProfileUid: profileUid,
     apiKey: encodedApiKey,
     apiKeyCreatedByUser: createdByUser,
     ...(encodedUiamApiKey ? { uiamApiKey: encodedUiamApiKey } : {}),
@@ -92,61 +100,68 @@ const getApiKeyRuleProperties = (
 export function apiKeyAsAlertAttributes(
   apiKey: CreateAPIKeyResult | null,
   username: string | null,
-  createdByUser: boolean
+  createdByUser: boolean,
+  profileUid: string | null
 ): Pick<
   RawRule,
-  'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey' | 'uiamApiKeyExternal'
+  | 'apiKey'
+  | 'apiKeyOwner'
+  | 'apiKeyOwnerProfileUid'
+  | 'apiKeyCreatedByUser'
+  | 'uiamApiKey'
+  | 'uiamApiKeyExternal'
 > {
-  return getApiKeyRuleProperties(apiKey, username, createdByUser);
+  return getApiKeyRuleProperties(apiKey, username, createdByUser, profileUid);
 }
 
 export function apiKeyAsRuleDomainProperties(
   apiKey: CreateAPIKeyResult | null,
   username: string | null,
-  createdByUser: boolean
+  createdByUser: boolean,
+  profileUid: string | null
 ): Pick<
   RuleDomain,
-  'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey' | 'uiamApiKeyExternal'
+  | 'apiKey'
+  | 'apiKeyOwner'
+  | 'apiKeyOwnerProfileUid'
+  | 'apiKeyCreatedByUser'
+  | 'uiamApiKey'
+  | 'uiamApiKeyExternal'
 > {
-  return getApiKeyRuleProperties(apiKey, username, createdByUser);
+  return getApiKeyRuleProperties(apiKey, username, createdByUser, profileUid);
 }
 
-/**
- * Determines if the missing UIAM API key tag should be added to a rule.
- * The tag is added when:
- * - The environment is serverless
- * - Rules use UIAM API keys in this deployment
- * - uiamApiKey is not set (null/undefined)
- *
- * The `shouldGrantUiam` and `apiKeyType` checks are the same pair the task runner uses to
- * decide if a rule runs with a UIAM key. Without them, rules would get the tag on
- * deployments that still use ES keys, where no rule has a UIAM key to begin with.
- */
-export function shouldAddMissingUiamKeyTag(
-  uiamApiKey: string | null | undefined,
-  isServerless: boolean,
-  shouldGrantUiam: boolean | undefined,
-  apiKeyType: ApiKeyType | undefined
-): boolean {
-  return isServerless && !!shouldGrantUiam && apiKeyType === ApiKeyType.UIAM && !uiamApiKey;
-}
-
-/**
- * Adds the missing UIAM API key tag to the tags array if needed.
- * Returns a new array with the tag appended if the condition is met.
- */
-export function addMissingUiamKeyTagIfNeeded(
+/** Reconciles the translated current and legacy missing UIAM API key tags. */
+export function updateMissingUiamKeyTag(
   tags: string[],
   uiamApiKey: string | null | undefined,
   isServerless: boolean,
   shouldGrantUiam: boolean | undefined,
   apiKeyType: ApiKeyType | undefined
 ): string[] {
-  if (shouldAddMissingUiamKeyTag(uiamApiKey, isServerless, shouldGrantUiam, apiKeyType)) {
-    // Avoid duplicates
-    if (!tags.includes(MISSING_UIAM_API_KEY_TAG)) {
-      return [...tags, MISSING_UIAM_API_KEY_TAG];
-    }
+  if (!isServerless || !shouldGrantUiam || apiKeyType !== ApiKeyType.UIAM) {
+    return tags;
   }
-  return tags;
+
+  if (
+    !uiamApiKey &&
+    !tags.includes(LEGACY_MISSING_UIAM_API_KEY_TAG) &&
+    tags.filter((tag) => tag === MISSING_UIAM_API_KEY_TAG).length === 1
+  ) {
+    return tags;
+  }
+
+  const tagsWithoutMissingUiamKeyTags = tags.filter(
+    (tag) => tag !== MISSING_UIAM_API_KEY_TAG && tag !== LEGACY_MISSING_UIAM_API_KEY_TAG
+  );
+
+  const updatedTags = uiamApiKey
+    ? tagsWithoutMissingUiamKeyTags
+    : [...tagsWithoutMissingUiamKeyTags, MISSING_UIAM_API_KEY_TAG];
+
+  // Preserve the original reference so the reconciler can skip an unnecessary write.
+  return updatedTags.length === tags.length &&
+    updatedTags.every((tag, index) => tag === tags[index])
+    ? tags
+    : updatedTags;
 }
