@@ -124,7 +124,7 @@ const fullyMigratedIndicatorMappings = () => ({
     space_id: {},
     ioc_tier: {},
     // Leaves the sources migration writes, checked by the guard rather than the parent.
-    sources: { properties: { report_id: {}, first_seen: {}, ioc_tier: {}, severity: {} } },
+    sources: { properties: { report_id: {}, first_seen: {} } },
     sources_truncated: {},
     source_report_url: { ignore_above: 2048 },
     threat: {
@@ -757,7 +757,7 @@ describe('index_templates — post-migration schema check', () => {
   // The sources parent survives a keyword-bounds putMapping that recreates it with only
   // provider/trail/reference, so a failed sources migration leaves these leaves unmapped
   // while the parent check passes and strict rejects the scripted upserts that set them.
-  it.each(['report_id', 'first_seen', 'ioc_tier', 'severity'])(
+  it.each(['report_id', 'first_seen'])(
     'fails when the sources leaf %s is missing',
     async (leaf) => {
       const indicatorMappings = fullyMigratedIndicatorMappings();

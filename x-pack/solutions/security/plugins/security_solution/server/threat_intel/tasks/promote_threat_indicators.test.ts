@@ -47,13 +47,9 @@ jest.mock('@kbn/task-manager-plugin/server', () => ({
   },
 }));
 
-import {
-  THREAT_INTEL_INDICATORS_INDEX,
-  THREAT_REPORTS_INDEX_PATTERN,
-} from '../../../common/threat_intel';
+import { THREAT_REPORTS_INDEX_PATTERN } from '../../../common/threat_intel';
 import {
   buildBulkOpsForTest,
-  SOURCES_REMOVE_SCRIPT_FOR_TEST,
   SOURCES_UPSERT_SCRIPT_FOR_TEST,
   PROMOTE_THREAT_INDICATORS_TASK_TYPE,
   registerPromoteThreatIndicatorsTask,
@@ -61,12 +57,6 @@ import {
 
 const NOW = '2024-06-01T00:00:00.000Z';
 const EXTRACTED_AT = '2024-05-31T12:00:00.000Z';
-
-type TestOp = ReturnType<typeof buildBulkOpsForTest>[number];
-const upsertOps = (ops: TestOp[]) =>
-  ops.filter((op): op is Extract<TestOp, { kind: 'upsert' }> => op.kind === 'upsert');
-const retractOps = (ops: TestOp[]) =>
-  ops.filter((op): op is Extract<TestOp, { kind: 'retract' }> => op.kind === 'retract');
 
 /** Minimal ReportHit factory. */
 const makeReport = ({
@@ -77,6 +67,8 @@ const makeReport = ({
   trailLabel,
   extractedAt = EXTRACTED_AT,
   spaceId = 'default',
+  isIntelligence,
+  extractionMethod,
 }: {
   id: string;
   iocs: Array<{
@@ -84,7 +76,6 @@ const makeReport = ({
     value: string;
     reference?: string;
     tier?: string;
-    tier_basis?: string;
     deferred_unreviewed?: boolean;
   }>;
   sourceName?: string;
@@ -92,6 +83,8 @@ const makeReport = ({
   trailLabel?: string;
   extractedAt?: string;
   spaceId?: string;
+  isIntelligence?: boolean;
+  extractionMethod?: string;
 }) => ({
   _id: id,
   sort: [extractedAt, 0],
@@ -103,8 +96,14 @@ const makeReport = ({
     severity: { level: 'low' },
     // Only promotable tiers reach the index, so an IOC in a fixture that is not
     // about tiering needs one. Tier-specific cases pass it explicitly.
-    extracted: { iocs: iocs.map((ioc) => ({ tier: 'discriminating', ...ioc })) },
-    lineage: { extracted_at: extractedAt },
+    extracted: {
+      iocs: iocs.map((ioc) => ({ tier: 'discriminating', ...ioc })),
+      ...(isIntelligence !== undefined ? { gate: { is_intelligence: isIntelligence } } : {}),
+    },
+    lineage: {
+      extracted_at: extractedAt,
+      ...(extractionMethod !== undefined ? { extraction_method: extractionMethod } : {}),
+    },
   },
 });
 
@@ -120,12 +119,11 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
         NOW
       );
 
-      const [op] = upsertOps(ops);
-      expect(op).toBeDefined();
-      expect(Buffer.byteLength(op._id, 'utf8')).toBeLessThanOrEqual(512);
-      expect(op._id).toMatch(/^default:url:[0-9a-f]{64}$/);
+      expect(ops).toHaveLength(1);
+      expect(Buffer.byteLength(ops[0]._id, 'utf8')).toBeLessThanOrEqual(512);
+      expect(ops[0]._id).toMatch(/^default:url:[0-9a-f]{64}$/);
       // The readable value is still queryable, it just is not the id.
-      const indicator = (op.upsert.threat as { indicator: Record<string, unknown> }).indicator;
+      const indicator = (ops[0].upsert.threat as { indicator: Record<string, unknown> }).indicator;
       expect((indicator.url as { full: string }).full).toBe(longUrl);
     });
 
@@ -202,8 +200,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
         [makeReport({ id: 'r1', iocs: [{ type: 'ip', value: '2001:db8::1' }] })],
         NOW
       );
-      const indicator = (upsertOps(ops)[0].upsert.threat as { indicator: Record<string, unknown> })
-        .indicator;
+      const indicator = (ops[0].upsert.threat as { indicator: Record<string, unknown> }).indicator;
       expect(indicator.type).toBe('ipv6-addr');
       expect(indicator.ip).toBe('2001:db8::1');
     });
@@ -216,7 +213,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
         NOW
       );
       expect(ops).toHaveLength(1);
-      const op = upsertOps(ops)[0];
+      const op = ops[0];
       // Stable, space-scoped _id
       expect(op._id).toBe('default:ip:1.2.3.4');
       expect((op.upsert as Record<string, unknown>).space_id).toBe('default');
@@ -254,10 +251,10 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
 
       // Each upsert doc's sources[] carries only that report's entry (for the
       // first-time-seen path where the doc doesn't exist yet).
-      const src0 = (upsertOps(ops)[0].upsert as Record<string, unknown>).sources as Array<
+      const src0 = (ops[0].upsert as Record<string, unknown>).sources as Array<
         Record<string, unknown>
       >;
-      const src1 = (upsertOps(ops)[1].upsert as Record<string, unknown>).sources as Array<
+      const src1 = (ops[1].upsert as Record<string, unknown>).sources as Array<
         Record<string, unknown>
       >;
       expect(src0[0].report_id).toBe('r1');
@@ -301,7 +298,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       );
 
       expect(ops).toHaveLength(1);
-      const { scriptParams } = upsertOps(ops)[0];
+      const { scriptParams } = ops[0];
       expect(scriptParams.provider).toBe('maltrail');
       expect(scriptParams.trail).toBe('cobaltstrike');
       // Per-IOC reference wins over source.url
@@ -323,29 +320,27 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
         NOW
       );
 
-      expect(upsertOps(ops)[0].scriptParams.reference).toBe(
+      expect(ops[0].scriptParams.reference).toBe(
         'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt'
       );
     });
 
     it('removes credentials from report and IOC provenance before promotion', () => {
-      const [op] = upsertOps(
-        buildBulkOpsForTest(
-          [
-            makeReport({
-              id: 'r-credentialed',
-              iocs: [
-                {
-                  type: 'ip',
-                  value: '1.2.3.4',
-                  reference: 'https://ioc-user:ioc-password@references.example.com/report',
-                },
-              ],
-              sourceUrl: 'https://feed-user:feed-password@feeds.example.com/source',
-            }),
-          ],
-          NOW
-        )
+      const [op] = buildBulkOpsForTest(
+        [
+          makeReport({
+            id: 'r-credentialed',
+            iocs: [
+              {
+                type: 'ip',
+                value: '1.2.3.4',
+                reference: 'https://ioc-user:ioc-password@references.example.com/report',
+              },
+            ],
+            sourceUrl: 'https://feed-user:feed-password@feeds.example.com/source',
+          }),
+        ],
+        NOW
       );
 
       expect(op.scriptParams.reference).toBe('https://references.example.com/report');
@@ -358,17 +353,15 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
     });
 
     it('rejects unsupported references and falls back to sanitized source provenance', () => {
-      const [op] = upsertOps(
-        buildBulkOpsForTest(
-          [
-            makeReport({
-              id: 'r-unsafe-reference',
-              iocs: [{ type: 'ip', value: '1.2.3.4', reference: 'file:///etc/passwd' }],
-              sourceUrl: 'https://feed-user:feed-password@feeds.example.com/source',
-            }),
-          ],
-          NOW
-        )
+      const [op] = buildBulkOpsForTest(
+        [
+          makeReport({
+            id: 'r-unsafe-reference',
+            iocs: [{ type: 'ip', value: '1.2.3.4', reference: 'file:///etc/passwd' }],
+            sourceUrl: 'https://feed-user:feed-password@feeds.example.com/source',
+          }),
+        ],
+        NOW
       );
 
       expect(op.scriptParams.reference).toBe('https://feeds.example.com/source');
@@ -390,7 +383,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       );
 
       expect(ops).toHaveLength(1);
-      const { scriptParams, upsert } = upsertOps(ops)[0];
+      const { scriptParams, upsert } = ops[0];
       expect(scriptParams.trail).toBeNull();
       expect(scriptParams.provider).toBe('rss-feed');
 
@@ -421,110 +414,53 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
     });
   });
 
-  describe('deferred_unreviewed promotion gate', () => {
-    it('skips URL/domain IOCs marked deferred_unreviewed', () => {
-      const reviewedHash = 'a'.repeat(64);
-      const deferredUrl = 'https://evil.example/deferred';
+  describe('deferred and rejected reports are kept out of promotion', () => {
+    it('does not upsert an IOC that semantic review deferred', () => {
       const ops = buildBulkOpsForTest(
         [
           makeReport({
             id: 'r-deferred',
             iocs: [
-              {
-                type: 'url',
-                value: deferredUrl,
-                tier: 'discriminating',
-                deferred_unreviewed: true,
-              },
-              { type: 'hash', value: reviewedHash, tier: 'discriminating' },
+              { type: 'ip', value: '1.2.3.4', deferred_unreviewed: true },
+              { type: 'ip', value: '5.6.7.8' },
             ],
           }),
         ],
         NOW
       );
 
-      const upserts = upsertOps(ops);
-      const retracts = retractOps(ops);
-      expect(upserts).toHaveLength(1);
-      expect(
-        (
-          upserts[0].upsert as {
-            threat: { indicator: { file?: { hash?: { sha256?: string } } } };
-          }
-        ).threat.indicator.file?.hash?.sha256
-      ).toBe(reviewedHash);
-      expect(retracts.map((op) => op._id)).toEqual([
-        `default:url:${new URL(deferredUrl).toString()}`,
-      ]);
+      expect(ops).toHaveLength(1);
+      expect(ops[0]._id).toBe('default:ip:5.6.7.8');
     });
 
-    it('still promotes when deferred_unreviewed is absent on older reports', () => {
+    it('produces no ops for a report the relevance gate rejected', () => {
       const ops = buildBulkOpsForTest(
         [
           makeReport({
-            id: 'r-legacy',
-            iocs: [{ type: 'url', value: 'https://evil.example/payload', tier: 'discriminating' }],
+            id: 'r-not-intel',
+            iocs: [{ type: 'ip', value: '1.2.3.4' }],
+            isIntelligence: false,
           }),
         ],
         NOW
       );
 
-      expect(upsertOps(ops)).toHaveLength(1);
+      expect(ops).toHaveLength(0);
     });
 
-    it('does not upsert IOCs from a gate-rejected report and retracts prior citations', () => {
-      const url = 'https://evil.example/payload';
-      const ops = buildBulkOpsForTest(
-        [
-          {
-            ...makeReport({
-              id: 'r-rejected',
-              iocs: [{ type: 'url', value: url, tier: 'discriminating' }],
-            }),
-            _source: {
-              ...makeReport({
-                id: 'r-rejected',
-                iocs: [{ type: 'url', value: url, tier: 'discriminating' }],
-              })._source,
-              extracted: {
-                iocs: [{ type: 'url', value: url, tier: 'discriminating' }],
-                gate: { is_intelligence: false },
-              },
-              lineage: {
-                extracted_at: EXTRACTED_AT,
-                extraction_method: 'workflow_v4_rejected',
-              },
-            },
-          },
-        ],
-        NOW
-      );
-
-      expect(upsertOps(ops)).toHaveLength(0);
-      expect(retractOps(ops)).toHaveLength(1);
-    });
-
-    it('retracts a semantically downgraded URL that is no longer promotable', () => {
-      const url = 'https://evil.example/payload';
+    it('produces no ops for a report the workflow marked rejected', () => {
       const ops = buildBulkOpsForTest(
         [
           makeReport({
-            id: 'r-downgraded',
-            iocs: [
-              {
-                type: 'url',
-                value: url,
-                tier: 'reference',
-                tier_basis: 'semantic_reference',
-              },
-            ],
+            id: 'r-workflow-rejected',
+            iocs: [{ type: 'ip', value: '1.2.3.4' }],
+            extractionMethod: 'workflow_v4_rejected',
           }),
         ],
         NOW
       );
 
-      expect(upsertOps(ops)).toHaveLength(0);
-      expect(retractOps(ops)).toHaveLength(1);
+      expect(ops).toHaveLength(0);
     });
   });
 
@@ -541,8 +477,8 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       // Same value, different spaces → two isolated _ids, so the scripted upsert
       // never merges sources[] across space boundaries.
       expect(ops.map((op) => op._id)).toEqual(['team-a:ip:9.9.9.9', 'team-b:ip:9.9.9.9']);
-      expect((upsertOps(ops)[0].upsert as Record<string, unknown>).space_id).toBe('team-a');
-      expect((upsertOps(ops)[1].upsert as Record<string, unknown>).space_id).toBe('team-b');
+      expect((ops[0].upsert as Record<string, unknown>).space_id).toBe('team-a');
+      expect((ops[1].upsert as Record<string, unknown>).space_id).toBe('team-b');
     });
 
     it('falls back to the global space when a report carries no space_id', () => {
@@ -553,7 +489,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       const ops = buildBulkOpsForTest([report], NOW);
 
       expect(ops[0]._id).toBe('*:ip:8.8.8.8');
-      expect((upsertOps(ops)[0].upsert as Record<string, unknown>).space_id).toBe('*');
+      expect((ops[0].upsert as Record<string, unknown>).space_id).toBe('*');
     });
   });
 });
@@ -569,22 +505,13 @@ describe('promote task runner', () => {
     const coreStart = coreMock.createStart();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     let call = 0;
-    (esClient.openPointInTime as jest.Mock).mockImplementation(async (req: { index?: string }) => {
-      // Prior-citation lookup opens its own PIT over the indicators index.
-      if (req.index === THREAT_INTEL_INDICATORS_INDEX) {
-        return { id: 'indicator-pit-1' };
-      }
-      return { id: 'pit-1' };
-    });
-    (esClient.search as jest.Mock).mockImplementation(async (req: { pit?: { id?: string } }) => {
-      if (req?.pit?.id === 'indicator-pit-1') {
-        return { hits: { hits: [] }, pit_id: 'indicator-pit-1' };
-      }
+    (esClient.search as jest.Mock).mockImplementation(async () => {
       const response = searchResponses[call] ?? { hits: { hits: [] } };
       call += 1;
       return response;
     });
     (esClient.bulk as jest.Mock).mockResolvedValue({ errors: false, items: [] });
+    (esClient.openPointInTime as jest.Mock).mockResolvedValue({ id: 'pit-1' });
     (esClient.closePointInTime as jest.Mock).mockResolvedValue({ succeeded: true, num_freed: 1 });
 
     const coreSetup = coreMock.createSetup();
@@ -642,74 +569,6 @@ describe('promote task runner', () => {
     const result = await runner.run();
 
     expect(esClient.bulk).toHaveBeenCalledTimes(1);
-    expect(result.state).toEqual(
-      expect.objectContaining({ lastSyncedAt: EXTRACTED_AT, totalReportsProcessed: 1 })
-    );
-  });
-
-  it('holds the cursor when prior-citation lookup fails mid-page', async () => {
-    const { definition, esClient } = setupRunner([{ hits: { hits: [reportHit('r-1')] } }]);
-    (esClient.openPointInTime as jest.Mock).mockImplementation(async (req: { index?: string }) => {
-      if (req.index === THREAT_INTEL_INDICATORS_INDEX) {
-        throw Object.assign(new Error('search_phase_execution_exception'), { statusCode: 503 });
-      }
-      return { id: 'pit-1' };
-    });
-
-    const result = await definition
-      .createTaskRunner(
-        runContext({
-          taskInstance: { state: { lastSyncedAt: 'now-30d' }, params: {} } as never,
-        })
-      )
-      .run();
-
-    expect(esClient.bulk).not.toHaveBeenCalled();
-    expect(result.state).toEqual(expect.objectContaining({ lastSyncedAt: 'now-30d' }));
-  });
-
-  it('holds the cursor when a prior-citation PIT search 404s after open', async () => {
-    // A 404 after the indicators PIT opened means the PIT was lost mid-page, not
-    // a missing index. Swallowing it would leave unretracted orphans past the
-    // last successful page.
-    const { definition, esClient } = setupRunner([{ hits: { hits: [reportHit('r-1')] } }]);
-    (esClient.search as jest.Mock).mockImplementation(async (req: { pit?: { id?: string } }) => {
-      if (req?.pit?.id === 'indicator-pit-1') {
-        throw Object.assign(new Error('pit_expired'), { statusCode: 404 });
-      }
-      return { hits: { hits: [reportHit('r-1')] }, pit_id: 'pit-1' };
-    });
-
-    const result = await definition
-      .createTaskRunner(
-        runContext({
-          taskInstance: { state: { lastSyncedAt: 'now-30d' }, params: {} } as never,
-        })
-      )
-      .run();
-
-    expect(esClient.bulk).not.toHaveBeenCalled();
-    expect(result.state).toEqual(expect.objectContaining({ lastSyncedAt: 'now-30d' }));
-  });
-
-  it('continues when the indicators index is missing on prior-citation open', async () => {
-    const { definition, esClient } = setupRunner([{ hits: { hits: [reportHit('r-1')] } }]);
-    (esClient.openPointInTime as jest.Mock).mockImplementation(async (req: { index?: string }) => {
-      if (req.index === THREAT_INTEL_INDICATORS_INDEX) {
-        throw Object.assign(new Error('index_not_found_exception'), { statusCode: 404 });
-      }
-      return { id: 'pit-1' };
-    });
-
-    const result = await definition
-      .createTaskRunner(
-        runContext({
-          taskInstance: { state: { lastSyncedAt: 'now-30d' }, params: {} } as never,
-        })
-      )
-      .run();
-
-    expect(esClient.bulk).toHaveBeenCalled();
     expect(result.state).toEqual(
       expect.objectContaining({ lastSyncedAt: EXTRACTED_AT, totalReportsProcessed: 1 })
     );
@@ -853,21 +712,7 @@ describe('promote task runner', () => {
       expect(searchArg.pit).toEqual(expect.objectContaining({ id: 'pit-1' }));
       expect(searchArg.index).toBeUndefined();
       expect(searchArg.query.bool.filter).toEqual(
-        expect.arrayContaining([
-          { range: { 'lineage.extracted_at': { gte: 'now-30d' } } },
-          expect.objectContaining({
-            bool: expect.objectContaining({
-              minimum_should_match: 1,
-              should: expect.arrayContaining([
-                expect.objectContaining({
-                  terms: {
-                    'lineage.extraction_method': ['workflow_v4', 'workflow_v4_rejected'],
-                  },
-                }),
-              ]),
-            }),
-          }),
-        ])
+        expect.arrayContaining([{ range: { 'lineage.extracted_at': { gte: 'now-30d' } } }])
       );
       // `_shard_doc` is the stable tie-breaker a PIT makes available.
       expect(searchArg.sort).toEqual([
@@ -1094,7 +939,7 @@ describe('vetting gate', () => {
     );
 
     expect(ops.map((op) => op._id)).toEqual(['default:ip:5.5.5.5']);
-    expect(upsertOps(ops)[0].upsert.ioc_tier).toBe('uncertain');
+    expect(ops[0].upsert.ioc_tier).toBe('uncertain');
   });
 
   it.each([['reference'], ['denied']])('drops %s IOCs', (tier) => {
@@ -1123,9 +968,7 @@ describe('vetting gate', () => {
       NOW
     );
 
-    expect(upsertOps(ops)[0].upsert).toEqual(
-      expect.objectContaining({ ioc_tier: 'discriminating' })
-    );
+    expect(ops[0].upsert).toEqual(expect.objectContaining({ ioc_tier: 'discriminating' }));
   });
 
   /**
@@ -1142,14 +985,14 @@ describe('vetting gate', () => {
         NOW
       );
 
-      expect(upsertOps(ops)[0].scriptParams.ioc_tier).toBe('contextual');
+      expect(ops[0].scriptParams.ioc_tier).toBe('contextual');
     });
 
     it('assigns ioc_tier in the script', () => {
       expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('ctx._source.ioc_tier = params.ioc_tier');
     });
 
-    it('only raises the label for truncated citations that never enter sources[]', () => {
+    it('only raises the label, so a later uncertain citation cannot demote it', () => {
       expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('if (incomingTier > currentTier)');
     });
 
@@ -1165,9 +1008,7 @@ describe('vetting gate', () => {
           NOW
         );
 
-        expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain(
-          `'${upsertOps(ops)[0].scriptParams.ioc_tier}': `
-        );
+        expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain(`'${ops[0].scriptParams.ioc_tier}': `);
       }
     );
   });
@@ -1182,7 +1023,7 @@ describe('buildBulkOpsForTest — severity in scriptParams', () => {
       [makeReport({ id: 'r1', iocs: [{ type: 'ip', value: '1.2.3.4' }] })],
       NOW
     );
-    expect(upsertOps(ops)[0].scriptParams.severity).toBe('low');
+    expect(ops[0].scriptParams.severity).toBe('low');
   });
 
   it('passes null when the report carries no severity', () => {
@@ -1191,7 +1032,7 @@ describe('buildBulkOpsForTest — severity in scriptParams', () => {
 
     const ops = buildBulkOpsForTest([report], NOW);
 
-    expect(upsertOps(ops)[0].scriptParams.severity).toBeNull();
+    expect(ops[0].scriptParams.severity).toBeNull();
   });
 
   // The original bug was that the script never touched confidence at all: the
@@ -1203,123 +1044,5 @@ describe('buildBulkOpsForTest — severity in scriptParams', () => {
     expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain(
       'ctx._source.threat.indicator.confidence = params.severity'
     );
-  });
-});
-
-describe('SOURCES_REMOVE_SCRIPT_FOR_TEST', () => {
-  it('removes the citing report and deletes the indicator when no citations remain', () => {
-    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain('entry.report_id == params.report_id');
-    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain("ctx.op = 'delete'");
-  });
-
-  it('keeps truncated indicators when recorded citations are empty', () => {
-    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain('sources_truncated == true');
-    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toMatch(
-      /sources_truncated == true[\s\S]*last_seen = params\.now[\s\S]*ctx\.op = 'delete'/
-    );
-  });
-
-  it('recomputes best-wins tier and severity only when every citation is ranked', () => {
-    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain('tiersComplete && bestTier != null');
-    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain('if (sevsComplete)');
-    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain('entry.ioc_tier');
-    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain('entry.severity');
-  });
-
-  it('rebinds first-source attribution when the removed report owned it', () => {
-    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain(
-      'ctx._source.source_report_id == params.report_id'
-    );
-    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain(
-      'ctx._source.threat.indicator.reference = params.reference_prefix + earliest.report_id'
-    );
-  });
-});
-
-describe('sources[] citation ranks on upsert', () => {
-  it('stores ioc_tier and severity on each sources entry for later retract recompute', () => {
-    const [op] = upsertOps(
-      buildBulkOpsForTest(
-        [makeReport({ id: 'r1', iocs: [{ type: 'ip', value: '1.2.3.4', tier: 'contextual' }] })],
-        NOW
-      )
-    );
-
-    expect(op.upsert.sources).toEqual([
-      expect.objectContaining({
-        report_id: 'r1',
-        ioc_tier: 'contextual',
-        severity: 'low',
-      }),
-    ]);
-    expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain("'ioc_tier': params.ioc_tier");
-    expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain("newEntry['severity']");
-  });
-
-  it('recomputes document ranks from sources after a citation refresh', () => {
-    expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('mutatedSources');
-    expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('tiersComplete && bestTier != null');
-  });
-
-  it('falls back to raise-only when legacy sources lack per-citation ranks', () => {
-    expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('if (!tiersComplete || !sevsComplete)');
-    expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('if (incomingTier > currentTier)');
-    // Distinct locals from RECOMPUTE's `tierRank` / `sevRank` so Painless compiles
-    // when both fragments land in the same branch.
-    expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('Map raiseTierRank');
-    expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('Map raiseSevRank');
-  });
-
-  it('skips absolute recompute while sources_truncated so unrecorded citations cannot demote', () => {
-    expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain(
-      'mutatedSources && ctx._source.sources_truncated != true'
-    );
-    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain('if (ctx._source.sources_truncated != true)');
-  });
-
-  it('retracts prior live citations whose values left extracted.iocs', () => {
-    const staleId = 'default:url:https://evil.example/old%60';
-    const ops = buildBulkOpsForTest(
-      [
-        makeReport({
-          id: 'r-renorm',
-          iocs: [
-            {
-              type: 'url',
-              value: 'https://evil.example/old',
-              tier: 'discriminating',
-            },
-          ],
-        }),
-      ],
-      NOW,
-      new Map([['r-renorm', [staleId]]])
-    );
-
-    expect(upsertOps(ops).map((op) => op._id)).toEqual(['default:url:https://evil.example/old']);
-    expect(retractOps(ops).map((op) => op._id)).toEqual([staleId]);
-  });
-
-  it('passes the alert-reference prefix on retract ops', () => {
-    const retracts = retractOps(
-      buildBulkOpsForTest(
-        [
-          makeReport({
-            id: 'r-deferred',
-            iocs: [
-              {
-                type: 'url',
-                value: 'https://evil.example/deferred',
-                tier: 'discriminating',
-                deferred_unreviewed: true,
-              },
-            ],
-          }),
-        ],
-        NOW
-      )
-    );
-
-    expect(retracts[0].scriptParams.reference_prefix).toBe('threat-report:');
   });
 });
